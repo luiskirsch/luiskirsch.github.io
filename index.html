@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>O SextoLugar — Entrada</title>
 
   <style>
@@ -16,434 +16,375 @@
       --danger:#ff4d4d;
     }
 
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
 
     body{
       margin:0;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#fff;
-      font-family: ui-serif, Georgia, "Times New Roman", serif;
+      min-height:100svh;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      padding-left:max(24px, env(safe-area-inset-left));
+      padding-right:max(24px, env(safe-area-inset-right));
+      padding-top:max(24px, env(safe-area-inset-top));
+      padding-bottom:max(24px, env(safe-area-inset-bottom));
       background:
-        radial-gradient(1200px 600px at 50% 40%, rgba(230,192,123,.08), transparent 55%),
-        radial-gradient(900px 500px at 20% 10%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(1200px 700px at 50% 20%, rgba(230,192,123,.10), transparent 55%),
+        radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 560px at 82% 75%, rgba(255,255,255,.05), transparent 62%),
         var(--bg);
+      color:#f2f2f2;
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
       overflow-x:hidden;
     }
 
-    .wrap{
-      width:min(980px, 92vw);
-      padding:48px 18px;
-      text-align:center;
+    /* “brilho oscilando” — sutil */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-20%;
+      pointer-events:none;
+      background:
+        radial-gradient(700px 360px at 50% 35%, rgba(230,192,123,.08), transparent 60%),
+        radial-gradient(900px 480px at 60% 70%, rgba(255,255,255,.05), transparent 65%);
+      filter: blur(12px);
+      opacity:.75;
+      animation: pulseGlow 4.8s ease-in-out infinite;
+    }
+    @keyframes pulseGlow{
+      0%,100%{ opacity:.60; transform:translateY(0) scale(1); }
+      50%{ opacity:.92; transform:translateY(-6px) scale(1.01); }
     }
 
-    .title{
-      font-size: clamp(38px, 5.2vw, 72px);
-      letter-spacing: .18em;
-      text-transform: uppercase;
+    .wrap{
+      width:100%;
+      max-width:980px;
+      display:grid;
+      gap:18px;
+      align-items:center;
+      justify-items:center;
+      text-align:center;
+      position:relative;
+      z-index:1;
+    }
+
+    h1{
+      margin:0;
+      letter-spacing:.18em;
+      line-height:1.05;
+      font-weight:700;
       color:var(--gold);
-      margin:0 0 12px;
-      text-shadow: 0 10px 35px rgba(0,0,0,.55);
+      text-transform:uppercase;
+      font-size:clamp(34px, 6vw, 78px);
+      text-shadow: 0 18px 60px var(--shadow);
     }
 
     .subtitle{
-      margin:0 auto 26px;
-      max-width: 820px;
-      color:rgba(255,255,255,.78);
-      font-size: clamp(14px, 1.6vw, 18px);
-      line-height:1.6;
+      margin:0;
+      max-width:72ch;
+      font-size:clamp(14px, 2.2vw, 18px);
+      opacity:.88;
+      color:#eaeaea;
     }
 
-    .panel{
-      margin: 0 auto;
-      width:min(860px, 96vw);
-      padding: 26px 22px 20px;
-      border:1px solid rgba(255,255,255,.06);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border-radius: 18px;
-      box-shadow: 0 24px 80px var(--shadow);
+    /* Frase oscilando (mantida) */
+    .whisper{
+      margin-top:4px;
+      font-size:clamp(13px, 2vw, 16px);
+      color:var(--muted);
+      opacity:.78;
+      letter-spacing:.06em;
+      animation: flicker 3.2s ease-in-out infinite;
+    }
+    @keyframes flicker{
+      0%,100%{ opacity:.55; filter: blur(.2px); }
+      50%{ opacity:.92; filter: blur(0); }
+    }
+
+    .card{
+      width:100%;
+      max-width:860px;
+      padding:clamp(18px, 3vw, 36px);
+      border-radius:20px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: 0 28px 80px rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
       position:relative;
       overflow:hidden;
-      backdrop-filter: blur(8px);
     }
 
-    .panel::before{
+    .card::after{
       content:"";
       position:absolute;
-      inset:-60px -40px auto -40px;
-      height:160px;
-      background: radial-gradient(closest-side, rgba(230,192,123,.18), transparent 70%);
-      filter: blur(10px);
-      opacity:.65;
+      inset:0;
       pointer-events:none;
+      background: radial-gradient(700px 240px at 50% 0%, rgba(230,192,123,.10), transparent 60%);
+      opacity:.8;
     }
 
-    .tagline{
-      color: rgba(230,192,123,.85);
-      letter-spacing:.28em;
-      text-transform: uppercase;
-      font-size: 12px;
-      margin: 0 0 18px;
+    .tag{
+      position:relative;
+      z-index:1;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      letter-spacing:.22em;
+      color:rgba(230,192,123,.8);
+      text-transform:uppercase;
+      margin-bottom:14px;
+    }
+    .dot{
+      width:5px; height:5px;
+      background:rgba(230,192,123,.8);
+      border-radius:50%;
+      box-shadow:0 0 16px rgba(230,192,123,.35);
     }
 
-    .ritualText{
-      margin: 0 auto 18px;
-      max-width: 760px;
-      font-size: clamp(18px, 2.2vw, 26px);
-      line-height: 1.45;
-      color: rgba(255,255,255,.92);
+    .prompt{
+      position:relative;
+      z-index:1;
+      margin:0;
+      font-size:clamp(18px, 2.8vw, 30px);
+      line-height:1.45;
+      color:#f3f3f3;
+      text-shadow: 0 18px 60px rgba(0,0,0,.55);
     }
-    .ritualText em{ color: rgba(255,255,255,.95); font-style: italic; }
 
-    .bar{
-      margin: 18px auto 12px;
-      height: 10px;
-      width: min(720px, 92%);
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.07);
+    .prompt em{
+      color:#ffffff;
+      font-style:italic;
+      opacity:.95;
     }
-    .bar > i{
-      display:block;
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, rgba(230,192,123,.20), rgba(230,192,123,.55));
-      box-shadow: 0 0 25px rgba(230,192,123,.35);
-      border-radius: 999px;
-      transition: width .35s ease;
+
+    .rule{
+      position:relative;
+      z-index:1;
+      margin:18px auto 10px;
+      height:10px;
+      width:min(720px, 92%);
+      border-radius:999px;
+      background: linear-gradient(90deg,
+        rgba(255,255,255,.06),
+        rgba(230,192,123,.18),
+        rgba(255,255,255,.06));
+      opacity:.65;
+      filter: blur(.2px);
     }
 
     .status{
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 13px;
+      position:relative;
+      z-index:1;
+      margin:10px 0 0;
+      font-size:13px;
+      color:rgba(255,255,255,.65);
       letter-spacing:.02em;
-      color: rgba(255,255,255,.55);
-      margin: 0 0 18px;
     }
 
     .actions{
+      position:relative;
+      z-index:1;
       display:flex;
+      flex-wrap:wrap;
       gap:12px;
       justify-content:center;
-      flex-wrap:wrap;
-      margin-top: 10px;
+      margin-top:18px;
     }
 
-    .btn{
-      appearance:none;
-      border:1px solid var(--line);
-      background: transparent;
-      color: var(--gold);
-      padding: 12px 18px;
-      border-radius: 12px;
-      letter-spacing:.14em;
-      text-transform: uppercase;
-      font-weight: 700;
+    button{
+      border:1px solid rgba(230,192,123,.22);
+      background: rgba(0,0,0,.25);
+      color:rgba(230,192,123,.92);
+      padding:12px 18px;
+      border-radius:14px;
       cursor:pointer;
-      min-width: 170px;
-      transition: transform .12s ease, background .12s ease, box-shadow .12s ease, opacity .12s ease;
-      box-shadow: 0 12px 30px rgba(0,0,0,.22);
+      font-family: inherit;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      min-width:180px;
+      transition: transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
     }
-    .btn:hover{ transform: translateY(-1px); background: rgba(230,192,123,.06); }
-    .btn:active{ transform: translateY(0px) scale(.99); }
-    .btn[disabled]{ opacity:.45; cursor:not-allowed; transform:none; }
+    button:hover{ transform: translateY(-1px); border-color:rgba(230,192,123,.34); }
+    button:active{ transform: translateY(0); opacity:.9; }
 
     .hint{
-      margin: 14px 0 0;
-      color: rgba(255,255,255,.45);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 12px;
+      position:relative;
+      z-index:1;
+      margin-top:10px;
+      font-size:12px;
+      color:rgba(255,255,255,.55);
     }
 
-    /* Modal Ritual */
-    .modalBackdrop{
+    /* Modal “Ritual” */
+    .modalBack{
       position:fixed;
       inset:0;
       background: rgba(0,0,0,.72);
       display:none;
       align-items:center;
       justify-content:center;
-      padding: 18px;
-      z-index: 50;
-      backdrop-filter: blur(6px);
+      padding:22px;
+      z-index:50;
     }
     .modal{
-      width:min(820px, 96vw);
-      background: rgba(18,18,18,.92);
+      width:min(860px, 100%);
+      border-radius:18px;
+      background: rgba(15,15,15,.92);
       border:1px solid rgba(255,255,255,.08);
-      border-radius: 18px;
-      box-shadow: 0 30px 120px rgba(0,0,0,.7);
-      overflow:hidden;
+      box-shadow: 0 30px 90px rgba(0,0,0,.65);
+      padding:18px;
+      text-align:left;
+      backdrop-filter: blur(10px);
     }
-    .modalHead{
-      padding: 16px 18px;
-      border-bottom:1px solid rgba(255,255,255,.08);
+    .modalHeader{
       display:flex;
-      align-items:center;
       justify-content:space-between;
-      gap:12px;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
     }
-    .modalHead h2{
+    .modalHeader h2{
       margin:0;
-      font-size: 14px;
-      letter-spacing:.22em;
-      text-transform: uppercase;
-      color: rgba(230,192,123,.9);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size:15px;
+      letter-spacing:.18em;
+      color:rgba(230,192,123,.9);
+      text-transform:uppercase;
     }
     .close{
-      border:1px solid rgba(230,192,123,.22);
-      background: transparent;
-      color: rgba(230,192,123,.9);
-      border-radius: 10px;
-      padding: 8px 12px;
+      border:none;
+      background:transparent;
+      color:rgba(255,255,255,.7);
+      font-size:20px;
       cursor:pointer;
-      text-transform: uppercase;
-      letter-spacing:.12em;
-      font-weight:700;
-      font-size: 12px;
+      padding:6px 10px;
+      border-radius:10px;
     }
-    .modalBody{
-      padding: 18px;
-      color: rgba(255,255,255,.86);
-      line-height: 1.7;
-      font-size: 15px;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .modalBody strong{ color: rgba(255,255,255,.95); }
+    .close:hover{ background: rgba(255,255,255,.06); }
 
-    /* Overlay Contagem Obrigatória */
-    .lock{
-      position:fixed;
-      inset:0;
-      background:
-        radial-gradient(1100px 700px at 50% 40%, rgba(230,192,123,.10), transparent 58%),
-        rgba(0,0,0,.88);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-      z-index: 100;
-      backdrop-filter: blur(8px);
+    .modalBody{
+      color:rgba(255,255,255,.82);
+      font-size:14px;
+      line-height:1.6;
+      padding:8px 4px 2px;
     }
-    .lockCard{
-      width:min(820px, 96vw);
-      background: rgba(12,12,12,.82);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: 22px;
-      padding: 22px 18px 18px;
-      box-shadow: 0 40px 140px rgba(0,0,0,.8);
-      text-align:center;
+    .ritualList{
+      margin:10px 0 0;
+      padding-left:18px;
     }
-    .lockSmall{
-      margin:0 0 10px;
-      color: rgba(230,192,123,.9);
-      text-transform: uppercase;
-      letter-spacing:.24em;
-      font-size: 12px;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    .ritualList li{ margin:8px 0; }
+    .warn{
+      margin-top:12px;
+      padding:10px 12px;
+      border-left:3px solid rgba(230,192,123,.5);
+      background: rgba(230,192,123,.08);
+      border-radius:12px;
+      color:rgba(255,255,255,.86);
     }
-    .lockMsg{
-      margin: 0 auto 18px;
-      max-width: 720px;
-      color: rgba(255,255,255,.85);
-      line-height: 1.7;
-      font-size: 15px;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+    /* Transição leve ao iniciar */
+    .fadeOut{
+      animation: fadeOut .8s ease forwards;
     }
-    .timer{
-      font-variant-numeric: tabular-nums;
-      font-size: clamp(44px, 6vw, 78px);
-      letter-spacing:.10em;
-      color: var(--gold);
-      margin: 8px 0 14px;
-      text-shadow: 0 12px 40px rgba(0,0,0,.7);
+    @keyframes fadeOut{
+      to{ opacity:0; transform: translateY(6px) scale(.995); filter: blur(1px); }
     }
-    .lockHint{
-      margin: 0 0 14px;
-      color: rgba(255,255,255,.55);
-      font-size: 13px;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .continueBtn{
-      margin-top: 6px;
-      min-width: 220px;
+
+    /* mobile */
+    @media (max-width: 520px){
+      button{ min-width: 150px; }
+      .card{ border-radius: 18px; }
     }
   </style>
 </head>
 
 <body>
-  <main class="wrap">
-    <h1 class="title">O SEXTOlugar</h1>
+  <main class="wrap" id="scene">
+    <h1>O SextoLugar</h1>
+
     <p class="subtitle">
       Você está prestes a atravessar a linha. Respire. Leia. E escolha com cuidado.
-      <br/>O silêncio é parte do jogo.
     </p>
 
-    <section class="panel" aria-label="Entrada do jogo">
-      <p class="tagline">• PROTOCOLO • ENTRADA •</p>
+    <div class="whisper" id="whisper">O silêncio é parte do jogo.</div>
 
-      <p class="ritualText">
-        Antes de iniciar, confirme que você está sozinho(a).<br/>
-        Se ouvir qualquer coisa atrás de você… <em>não vire</em>.
+    <section class="card" aria-label="Protocolo de entrada">
+      <div class="tag">
+        <span class="dot"></span>
+        <span>Protocolo • Entrada</span>
+        <span class="dot"></span>
+      </div>
+
+      <p class="prompt">
+        Antes de iniciar, confirme que você entendeu:
+        <br />
+        <em>as cartas são físicas</em> — e o site só guia o ritmo.
       </p>
 
-      <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+      <div class="rule"></div>
+
       <p class="status" id="status">Status: aguardando confirmação.</p>
 
       <div class="actions">
-        <button class="btn" id="btnRitual" type="button">LER O RITUAL</button>
-        <button class="btn" id="btnStart" type="button">INICIAR</button>
+        <button id="btnRitual" type="button">Ler o ritual</button>
+        <button id="btnIniciar" type="button">Iniciar</button>
       </div>
 
-      <p class="hint">Dica: se você estiver usando celular, aumente o brilho só um pouco.</p>
+      <div class="hint">Dica: se estiver no celular, aumente o brilho só um pouco.</div>
     </section>
   </main>
 
-  <!-- Modal: Ritual -->
-  <div class="modalBackdrop" id="ritualModal" role="dialog" aria-modal="true" aria-label="Ritual">
+  <!-- Modal Ritual -->
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-labelledby="ritualTitle">
     <div class="modal">
-      <div class="modalHead">
-        <h2>Ritual de Entrada</h2>
-        <button class="close" id="closeRitual" type="button">Fechar</button>
+      <div class="modalHeader">
+        <h2 id="ritualTitle">Ritual (rápido)</h2>
+        <button class="close" id="btnClose" aria-label="Fechar">✕</button>
       </div>
-      <div class="modalBody">
-        <p><strong>1)</strong> Desligue notificações. O mundo real não pode interromper a sessão.</p>
-        <p><strong>2)</strong> Se estiver acompanhado, ninguém deve falar durante a contagem.</p>
-        <p><strong>3)</strong> Não toque em espelhos até o jogo mandar.</p>
-        <p><strong>4)</strong> Se algo parecer “fora do lugar”, registre mentalmente. Não comente.</p>
-        <p><strong>5)</strong> Quando a contagem iniciar, você não pode voltar atrás.</p>
-      </div>
-    </div>
-  </div>
 
-  <!-- Overlay: Contagem obrigatória -->
-  <div class="lock" id="lock" aria-live="polite">
-    <div class="lockCard">
-      <p class="lockSmall">Preparação</p>
-      <p class="lockMsg" id="lockMsg">
-        O Sexto Lugar está sendo preparado…<br/>
-        Não fale. Não toque em ninguém. Espere.
-      </p>
-      <div class="timer" id="timer">01:00</div>
-      <p class="lockHint" id="lockHint">Status: selando a entrada.</p>
-      <button class="btn continueBtn" id="btnContinue" type="button" disabled>CONTINUAR</button>
+      <div class="modalBody">
+        <p>
+          O site não substitui as cartas. Ele só controla o tempo e o clima.
+        </p>
+        <ol class="ritualList">
+          <li>Separe o baralho físico e deixe a mesa livre.</li>
+          <li>Escolha um modo: <strong>solo</strong> ou <strong>grupo</strong> (você decide na mesa).</li>
+          <li>Quando o timer rodar, sigam as instruções da carta puxada.</li>
+          <li>Se o timer zerar, a rodada termina — mesmo que alguém queira “só mais um”.</li>
+        </ol>
+
+        <div class="warn">
+          Importante: se você for jogar em grupo, isso é <strong>normal</strong>.
+          A frase “sozinho(a)” foi removida — o jogo pode ser solo ou em grupo.
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
+    // Modal
+    const modalBack = document.getElementById("modalBack");
     const btnRitual = document.getElementById("btnRitual");
-    const ritualModal = document.getElementById("ritualModal");
-    const closeRitual = document.getElementById("closeRitual");
+    const btnClose = document.getElementById("btnClose");
 
-    const btnStart = document.getElementById("btnStart");
-    const statusEl = document.getElementById("status");
-    const barFill = document.getElementById("barFill");
+    btnRitual.addEventListener("click", () => modalBack.style.display = "flex");
+    btnClose.addEventListener("click", () => modalBack.style.display = "none");
+    modalBack.addEventListener("click", (e) => { if(e.target === modalBack) modalBack.style.display = "none"; });
 
-    const lock = document.getElementById("lock");
-    const timerEl = document.getElementById("timer");
-    const lockHint = document.getElementById("lockHint");
-    const btnContinue = document.getElementById("btnContinue");
+    // Transição leve e navegação
+    const scene = document.getElementById("scene");
+    const btnIniciar = document.getElementById("btnIniciar");
+    const status = document.getElementById("status");
 
-    let countdown = null;
-    let remaining = 60; // segundos
-    let started = false;
-
-    function openRitual(){
-      ritualModal.style.display = "flex";
-      document.body.style.overflow = "hidden";
-    }
-    function closeRitualModal(){
-      ritualModal.style.display = "none";
-      document.body.style.overflow = "";
-    }
-
-    btnRitual.addEventListener("click", openRitual);
-    closeRitual.addEventListener("click", closeRitualModal);
-    ritualModal.addEventListener("click", (e) => {
-      if(e.target === ritualModal) closeRitualModal();
-    });
-
-    function fmtTime(sec){
-      const m = Math.floor(sec / 60);
-      const s = sec % 60;
-      return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
-    }
-
-    function setProgress(secLeft){
-      const total = 60;
-      const done = total - secLeft;
-      const pct = Math.min(100, Math.max(0, (done / total) * 100));
-      barFill.style.width = pct.toFixed(0) + "%";
-    }
-
-    function lockScreen(){
-      lock.style.display = "flex";
-      document.body.style.overflow = "hidden";
-    }
-
-    function unlockToContinue(){
-      lockHint.textContent = "Status: sessão iniciada.";
-      btnContinue.disabled = false;
-      btnContinue.focus();
-    }
-
-    function startCountdown(){
-      if(started) return;
-      started = true;
-
-      statusEl.textContent = "Status: protocolo iniciado.";
-      btnStart.disabled = true;
-      btnRitual.disabled = true;
-
-      remaining = 60;
-      timerEl.textContent = fmtTime(remaining);
-      setProgress(remaining);
-      lockHint.textContent = "Status: selando a entrada.";
-
-      lockScreen();
-
-      countdown = setInterval(() => {
-        remaining -= 1;
-        if(remaining < 0) remaining = 0;
-
-        timerEl.textContent = fmtTime(remaining);
-        setProgress(remaining);
-
-        if(remaining === 30) lockHint.textContent = "Status: silêncio obrigatório.";
-        if(remaining === 10) lockHint.textContent = "Status: quase lá… não desvie os olhos.";
-        if(remaining === 0){
-          clearInterval(countdown);
-          countdown = null;
-          document.getElementById("lockMsg").innerHTML =
-            "Sessão iniciada.<br/>Pegue a primeira carta. Siga as instruções.";
-          unlockToContinue();
-        }
-      }, 1000);
-    }
-
-    btnStart.addEventListener("click", startCountdown);
-
-    btnContinue.addEventListener("click", () => {
-      // aqui você decide pra onde vai:
-      // opção 1: ir para a página do jogo
-      // window.location.href = "jogo.html";
-
-      // opção 2: só fechar o overlay e continuar a experiência na mesma página
-      lock.style.display = "none";
-      document.body.style.overflow = "";
-
-      statusEl.textContent = "Status: sessão iniciada.";
-    });
-
-    // Segurança: impedir fechar o overlay por ESC (obrigatório = sem saída)
-    window.addEventListener("keydown", (e) => {
-      if(lock.style.display === "flex" && e.key === "Escape"){
-        e.preventDefault();
-      }
+    btnIniciar.addEventListener("click", () => {
+      status.textContent = "Status: iniciando…";
+      scene.classList.add("fadeOut");
+      setTimeout(() => {
+        window.location.href = "./jogo.html";
+      }, 800);
     });
   </script>
 </body>
