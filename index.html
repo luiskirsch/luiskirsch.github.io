@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
@@ -10,624 +10,657 @@
       --bg:#050505;
       --gold:#e6c07b;
       --muted:#a7a7a7;
-      --card:rgba(255,255,255,.05);
+      --card:rgba(255,255,255,.045);
       --line:rgba(230,192,123,.22);
       --shadow:rgba(0,0,0,.55);
-      --danger:#ff4d4d;
-      --ok:#49e07a;
+      --white:rgba(255,255,255,.92);
+      --soft:rgba(255,255,255,.72);
+      --radius:22px;
+      --max: 980px;
     }
 
     *{ box-sizing:border-box; }
-    html,body{ height:100%; margin:0; padding:0; background:var(--bg); color:#fff; }
-
+    html,body{ height:100%; }
     body{
-      min-height:100svh; /* melhor que 100vh no iPhone */
+      margin:0;
+      background: radial-gradient(1200px 600px at 50% 12%, rgba(230,192,123,.10), transparent 55%),
+                  radial-gradient(900px 500px at 20% 10%, rgba(255,255,255,.06), transparent 60%),
+                  var(--bg);
+      color:var(--white);
+      font-family: Georgia, "Times New Roman", serif;
+      overflow-x:hidden;
+    }
+
+    /* Safe area (iPhone notch) */
+    .safe{
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      padding-top: max(18px, env(safe-area-inset-top));
+      padding-bottom: max(18px, env(safe-area-inset-bottom));
+      min-height:100%;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:
-        max(14px, env(safe-area-inset-top))
-        max(14px, env(safe-area-inset-right))
-        max(18px, env(safe-area-inset-bottom))
-        max(14px, env(safe-area-inset-left));
-      overflow-x:hidden;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      background:
-        radial-gradient(1200px 700px at 50% 10%, rgba(230,192,123,.10), transparent 55%),
-        radial-gradient(900px 520px at 20% 25%, rgba(255,255,255,.06), transparent 60%),
-        radial-gradient(1100px 600px at 80% 70%, rgba(230,192,123,.06), transparent 60%),
-        var(--bg);
-    }
-
-    /* “Cinema haze” */
-    .vignette{
-      position:fixed; inset:0;
-      pointer-events:none;
-      background: radial-gradient(65% 60% at 50% 35%, transparent 0%, rgba(0,0,0,.38) 55%, rgba(0,0,0,.75) 100%);
-      mix-blend-mode: normal;
     }
 
     .wrap{
-      width:min(980px, 100%);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
+      width:min(var(--max), 100%);
+      padding: 28px 18px;
       text-align:center;
-      gap: 16px;
-      transition: opacity .6s ease, transform .6s ease;
     }
 
     .title{
-      font-family: Georgia, "Times New Roman", serif;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      font-size: clamp(34px, 6.2vw, 74px);
-      color: var(--gold);
-      margin: 0;
-      text-shadow: 0 18px 40px rgba(0,0,0,.55);
-      line-height: 1.05;
-    }
-
-    .subtitle{
-      margin: 0;
-      color: rgba(255,255,255,.80);
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(16px, 2.2vw, 22px);
-      line-height: 1.35;
-      max-width: 62ch;
-    }
-
-    /* frase oscilando */
-    .silence{
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(16px, 2.3vw, 24px);
-      color: rgba(255,255,255,.70);
-      letter-spacing:.02em;
-      animation: flicker 3.6s infinite;
-    }
-    @keyframes flicker{
-      0%{ opacity:.35; filter: blur(.2px); }
-      10%{ opacity:.55; }
-      20%{ opacity:.38; }
-      35%{ opacity:.72; filter: blur(0px); }
-      48%{ opacity:.50; }
-      62%{ opacity:.78; }
-      78%{ opacity:.42; filter: blur(.3px); }
-      100%{ opacity:.60; filter: blur(0px); }
-    }
-
-    .card{
-      width:min(860px, 100%);
-      margin-top: 10px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border: 1px solid rgba(230,192,123,.18);
-      border-radius: 18px;
-      padding: clamp(18px, 3.2vw, 30px);
-      box-shadow: 0 25px 80px var(--shadow);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-
-    .protocol{
-      margin:0 0 14px 0;
-      color: rgba(230,192,123,.75);
-      letter-spacing:.28em;
-      font-size: 12px;
+      letter-spacing: .22em;
+      font-weight: 700;
       text-transform: uppercase;
-      display:flex;
-      justify-content:center;
-      gap: 10px;
-      align-items:center;
-    }
-    .dot{
-      width:5px;height:5px;border-radius:50%;
-      background: rgba(230,192,123,.85);
-      display:inline-block;
-      box-shadow: 0 0 18px rgba(230,192,123,.35);
+      margin: 0 0 10px 0;
+      font-size: clamp(34px, 5.8vw, 78px);
+      color: var(--gold);
+      text-shadow: 0 10px 35px rgba(0,0,0,.6);
     }
 
-    .prompt{
-      margin: 8px auto 0 auto;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(20px, 3.4vw, 34px);
-      line-height: 1.35;
-      max-width: 42ch;
-    }
-    .prompt em{
-      font-style: italic;
-      color: rgba(255,255,255,.92);
+    .sub{
+      margin: 0 auto;
+      max-width: 46ch;
+      font-size: clamp(16px, 2.1vw, 22px);
+      color: var(--soft);
+      line-height: 1.45;
     }
 
-    .line{
-      margin: 18px auto 14px auto;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.07);
+    /* Frase oscilando */
+    .silence{
+      margin-top: 14px;
+      font-size: clamp(15px, 1.9vw, 20px);
+      color: rgba(255,255,255,.40);
+      letter-spacing:.08em;
+      animation: silencePulse 3.6s ease-in-out infinite;
+      user-select:none;
+    }
+    @keyframes silencePulse{
+      0%,100%{ opacity:.28; filter: blur(.1px); }
+      50%{ opacity:.68; filter: blur(0px); }
+    }
+
+    /* Card */
+    .card{
+      margin: 28px auto 0 auto;
+      width: min(860px, 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: 0 30px 90px var(--shadow);
+      padding: clamp(18px, 3vw, 28px);
       position: relative;
       overflow:hidden;
-      max-width: 700px;
     }
-    .line::after{
+    .card::before{
       content:"";
-      position:absolute; inset:-40px -20px;
-      background: linear-gradient(90deg, transparent, rgba(230,192,123,.12), transparent);
-      transform: translateX(-40%);
-      animation: sweep 4.2s infinite;
+      position:absolute;
+      inset:-60px -40px auto -40px;
+      height: 220px;
+      background: radial-gradient(closest-side, rgba(230,192,123,.20), transparent 70%);
+      filter: blur(10px);
+      opacity:.9;
+      pointer-events:none;
     }
-    @keyframes sweep{
-      0%{ transform: translateX(-55%); opacity:.20; }
-      40%{ opacity:.55; }
-      100%{ transform: translateX(55%); opacity:.20; }
+
+    .chip{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 14px;
+      margin-bottom: 14px;
+      color: rgba(230,192,123,.75);
+      letter-spacing:.22em;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    .dot{
+      width:6px;height:6px;border-radius:99px;background:rgba(230,192,123,.7);
+      box-shadow: 0 0 18px rgba(230,192,123,.4);
+    }
+
+    .headline{
+      position:relative;
+      margin: 0 auto 14px auto;
+      max-width: 40ch;
+      font-size: clamp(26px, 3.6vw, 44px);
+      line-height: 1.25;
+      color: rgba(255,255,255,.92);
+      text-shadow: 0 18px 42px rgba(0,0,0,.55);
+    }
+    .headline em{
+      font-style: italic;
+      color: rgba(255,255,255,.88);
+    }
+
+    /* Barra */
+    .bar{
+      margin: 18px auto 10px auto;
+      height: 8px;
+      width: min(640px, 100%);
+      border-radius: 99px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.07);
+      overflow:hidden;
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width: 22%;
+      background: linear-gradient(90deg, rgba(230,192,123,.65), rgba(230,192,123,.12));
+      filter: blur(.0px);
+      animation: drift 4.8s ease-in-out infinite;
+      transform-origin:left;
+    }
+    @keyframes drift{
+      0%{ transform: translateX(-35%); opacity:.55; }
+      50%{ transform: translateX(15%); opacity:.95; }
+      100%{ transform: translateX(-35%); opacity:.55; }
     }
 
     .status{
-      margin: 0 0 18px 0;
-      color: rgba(255,255,255,.55);
+      margin: 10px 0 18px 0;
       font-size: 14px;
-      letter-spacing:.02em;
+      color: rgba(255,255,255,.55);
+      letter-spacing:.04em;
     }
-    .status strong{ color: rgba(255,255,255,.75); font-weight:600; }
+    .status b{ color: rgba(255,255,255,.78); font-weight:600; }
 
     .actions{
       display:flex;
-      gap: 12px;
+      gap: 14px;
       justify-content:center;
       flex-wrap: wrap;
-      margin-top: 6px;
+      margin-top: 10px;
     }
 
     .btn{
-      appearance:none;
-      border: 1px solid rgba(230,192,123,.26);
-      background: rgba(0,0,0,.18);
-      color: rgba(230,192,123,.95);
-      padding: 14px 20px;
+      border: 1px solid rgba(230,192,123,.22);
+      background: rgba(0,0,0,.25);
+      color: rgba(230,192,123,.90);
+      padding: 13px 22px;
       border-radius: 14px;
-      min-width: 170px;
-      font-weight: 650;
-      letter-spacing:.20em;
+      letter-spacing:.18em;
       text-transform: uppercase;
-      cursor:pointer;
-      transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
-      box-shadow: 0 10px 40px rgba(0,0,0,.28);
+      font-weight: 700;
+      cursor: pointer;
+      min-width: 190px;
+      transition: transform .12s ease, border-color .2s ease, background .2s ease, opacity .2s ease;
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
       -webkit-tap-highlight-color: transparent;
     }
-    .btn:hover{ transform: translateY(-1px); border-color: rgba(230,192,123,.38); }
-    .btn:active{ transform: translateY(0px); opacity:.92; }
-
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(230,192,123,.35); }
+    .btn:active{ transform: translateY(0px); }
     .btn.primary{
       background: rgba(230,192,123,.08);
-      border-color: rgba(230,192,123,.34);
+      border-color: rgba(230,192,123,.35);
+    }
+    .btn[disabled]{
+      opacity:.35;
+      cursor:not-allowed;
+      transform:none;
     }
 
     .hint{
-      margin: 16px 0 0 0;
-      color: rgba(255,255,255,.42);
+      margin-top: 12px;
       font-size: 13px;
+      color: rgba(255,255,255,.42);
       line-height: 1.35;
     }
 
-    /* Modal “Ritual” */
-    .modalBack{
-      position:fixed; inset:0;
-      display:none;
-      align-items:center; justify-content:center;
-      padding: max(14px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom)) 14px;
-      background: rgba(0,0,0,.62);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      z-index:50;
+    .confirmRow{
+      margin-top: 12px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      gap:10px;
+      text-align:left;
+      max-width: 700px;
+      margin-left:auto;
+      margin-right:auto;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
     }
+    .confirmRow input{
+      margin-top: 2px;
+      transform: scale(1.15);
+      accent-color: var(--gold);
+    }
+    .confirmRow label{
+      font-size: 14px;
+      color: rgba(255,255,255,.72);
+      line-height: 1.35;
+      cursor:pointer;
+    }
+
+    /* Telas */
+    .screen{
+      opacity:1;
+      transform: translateY(0px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .screen.hidden{
+      opacity:0;
+      transform: translateY(14px);
+      pointer-events:none;
+      position:absolute;
+      inset:0;
+    }
+
+    /* Timer screen */
+    .timerTitle{
+      letter-spacing:.22em;
+      text-transform: uppercase;
+      color: rgba(230,192,123,.85);
+      font-weight: 800;
+      margin: 0 0 18px 0;
+      font-size: clamp(18px, 2.7vw, 28px);
+    }
+
+    .phase{
+      color: rgba(255,255,255,.55);
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .clock{
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      letter-spacing:.06em;
+      margin: 10px 0 12px 0;
+      font-size: clamp(54px, 10vw, 108px);
+      color: rgba(255,255,255,.92);
+      text-shadow: 0 18px 55px rgba(0,0,0,.65);
+    }
+
+    .helper{
+      margin: 10px auto 0 auto;
+      max-width: 60ch;
+      font-size: 14px;
+      color: rgba(255,255,255,.45);
+      line-height: 1.4;
+    }
+
+    /* Modal ritual */
+    .modalBack{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      backdrop-filter: blur(6px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 20px;
+      z-index: 50;
+    }
+    .modalBack.show{ display:flex; }
     .modal{
       width:min(820px, 100%);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border: 1px solid rgba(230,192,123,.18);
+      background: rgba(10,10,10,.88);
+      border: 1px solid rgba(255,255,255,.10);
       border-radius: 18px;
-      padding: clamp(16px, 3vw, 26px);
-      box-shadow: 0 25px 80px rgba(0,0,0,.75);
+      box-shadow: 0 30px 120px rgba(0,0,0,.7);
+      padding: 18px 18px 14px 18px;
       text-align:left;
     }
-    .modal h2{
+    .modal h3{
       margin: 0 0 10px 0;
-      font-family: Georgia, "Times New Roman", serif;
       color: var(--gold);
-      letter-spacing:.12em;
+      letter-spacing:.14em;
       text-transform: uppercase;
-      font-size: clamp(18px, 2.2vw, 24px);
+      font-size: 14px;
     }
-    .modal p, .modal li{
+    .modal p{
+      margin: 0 0 10px 0;
       color: rgba(255,255,255,.80);
       line-height: 1.55;
       font-size: 15px;
     }
-    .modal ul{ padding-left: 18px; margin: 10px 0 0 0; }
-    .modal .foot{
-      margin-top: 16px;
-      color: rgba(255,255,255,.55);
-      font-size: 13px;
-    }
-    .modal .closeRow{
+    .modal .mActions{
       display:flex;
       justify-content:flex-end;
-      margin-top: 16px;
+      gap: 10px;
+      margin-top: 12px;
     }
-    .btn.small{
-      min-width:auto;
-      padding: 12px 16px;
-      border-radius: 12px;
-      letter-spacing:.14em;
-    }
-
-    /* Tela do jogo (timer) */
-    .game{
-      display:none;
-      width:min(980px, 100%);
-      gap: 16px;
-      align-items:center;
-      text-align:center;
-      transition: opacity .6s ease, transform .6s ease;
-    }
-    .gameTitle{
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      color: var(--gold);
-      font-size: clamp(18px, 2.8vw, 28px);
-      opacity:.95;
-    }
-    .timerBox{
-      width:min(860px, 100%);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border: 1px solid rgba(230,192,123,.18);
-      border-radius: 18px;
-      padding: clamp(18px, 3.2vw, 30px);
-      box-shadow: 0 25px 80px var(--shadow);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .time{
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(44px, 10vw, 86px);
-      letter-spacing:.12em;
-      color: rgba(255,255,255,.92);
-      margin: 10px 0 8px 0;
-      text-shadow: 0 20px 50px rgba(0,0,0,.55);
-    }
-    .phase{
-      margin: 0 0 14px 0;
-      color: rgba(255,255,255,.70);
-      font-size: 14px;
-      letter-spacing:.08em;
-      text-transform: uppercase;
-    }
-    .bar{
-      height: 12px;
-      border-radius: 999px;
+    .modal .mBtn{
+      border: 1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.08);
-      overflow:hidden;
-      position: relative;
-    }
-    .bar > span{
-      display:block;
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, rgba(230,192,123,.15), rgba(230,192,123,.55), rgba(230,192,123,.15));
-      filter: blur(.0px);
-      transition: width .25s linear;
-    }
-    .gameHint{
-      margin: 14px 0 0 0;
-      color: rgba(255,255,255,.45);
-      font-size: 13px;
-      line-height: 1.4;
-    }
-    .gameActions{
-      display:flex;
-      gap: 12px;
-      justify-content:center;
-      flex-wrap: wrap;
-      margin-top: 14px;
+      color: rgba(255,255,255,.8);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor:pointer;
     }
 
-    /* Transição leve pedida */
-    .fadeOut{
-      opacity:0;
-      transform: translateY(6px);
-      pointer-events:none;
-    }
-
-    /* Ajuste extra pra iPhone pequeno */
-    @media (max-width: 380px){
-      .btn{ min-width: 150px; padding: 13px 16px; }
-      .protocol{ letter-spacing:.22em; }
+    /* Mobile fine tuning */
+    @media (max-width: 420px){
+      .wrap{ padding: 22px 14px; }
+      .card{ border-radius: 18px; }
+      .btn{ min-width: 240px; }
+      .headline{ font-size: 24px; }
     }
   </style>
 </head>
 
 <body>
-  <div class="vignette"></div>
+  <div class="safe">
+    <div class="wrap">
 
-  <!-- ENTRADA -->
-  <main class="wrap" id="entry">
-    <h1 class="title">O SextoLugar</h1>
+      <!-- SCREEN: ENTRADA -->
+      <section id="screenEntrada" class="screen">
+        <h1 class="title">O SextoLugar</h1>
 
-    <p class="subtitle">
-      Você está prestes a atravessar a linha. Respire. Leia. E escolha com cuidado.
-    </p>
+        <p class="sub">
+          Você está prestes a atravessar a linha. Respire. Leia. E escolha com cuidado.
+        </p>
 
-    <p class="silence" id="silenceText">O silêncio é parte do jogo.</p>
+        <div class="silence" id="silenceText">O silêncio é parte do jogo.</div>
 
-    <section class="card" aria-label="Protocolo de Entrada">
-      <div class="protocol">
-        <span class="dot"></span>
-        <span>PROTOCOLO</span>
-        <span>•</span>
-        <span>ENTRADA</span>
-        <span class="dot"></span>
-      </div>
+        <div class="card">
+          <div class="chip">
+            <span class="dot"></span>
+            <span>PROTOCOLO • ENTRADA</span>
+            <span class="dot"></span>
+          </div>
 
-      <p class="prompt">
-        Antes de iniciar, confirme que você entendeu:
-        <br/>
-        <em>as cartas são físicas — e o site só guia o ritmo.</em>
-      </p>
+          <p class="headline">
+            Antes de iniciar, confirme que você entendeu:<br>
+            <em>as cartas são físicas — e o site só guia o ritmo.</em>
+          </p>
 
-      <div class="line" aria-hidden="true"></div>
+          <div class="bar"><i></i></div>
 
-      <p class="status" id="statusLine">
-        Status: <strong>aguardando confirmação.</strong>
-      </p>
+          <div class="status">
+            Status: <b id="audioStatus">aguardando seu primeiro toque para ativar som.</b>
+          </div>
 
-      <div class="actions">
-        <button class="btn" id="btnRitual" type="button">Ler o Ritual</button>
-        <button class="btn primary" id="btnStart" type="button">Iniciar</button>
-      </div>
+          <div class="confirmRow">
+            <input id="confirmCheck" type="checkbox" />
+            <label for="confirmCheck">
+              Confirmo que entendi que o jogo acontece com <b>cartas físicas</b> e que o site apenas conduz o tempo.
+              <span style="opacity:.85">Ao tocar em INICIAR, o som do timer será liberado (exigência do iPhone).</span>
+            </label>
+          </div>
 
-      <p class="hint">
-        Dica: se estiver no celular, aumente o brilho só um pouco.<br/>
-        Som do timer: para iPhone, o áudio ativa após seu primeiro toque.
-      </p>
-    </section>
-  </main>
+          <div class="actions">
+            <button class="btn" id="btnRitual" type="button">LER O RITUAL</button>
+            <button class="btn primary" id="btnIniciar" type="button" disabled>INICIAR</button>
+          </div>
+
+          <div class="hint">
+            Dica: se estiver no celular, aumente o brilho só um pouco.<br>
+            Som do timer: no iPhone, o áudio ativa após seu primeiro toque.
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN: TIMER -->
+      <section id="screenTimer" class="screen hidden">
+        <h2 class="timerTitle">RITMO DO JOGO</h2>
+
+        <div class="card">
+          <div class="phase">FASE: <span id="phaseName">PREPARAR</span></div>
+          <div class="clock" id="clock">00:30</div>
+
+          <div class="bar" aria-hidden="true">
+            <i id="progressFill" style="width: 0%; animation:none;"></i>
+          </div>
+
+          <div class="helper" id="helperText">
+            Pegue a próxima carta física indicada pelo seu roteiro/baralho.<br>
+            O site só mantém o compasso.
+          </div>
+
+          <div class="actions" style="margin-top:18px;">
+            <button class="btn" id="btnPausar" type="button">PAUSAR</button>
+            <button class="btn primary" id="btnReiniciar" type="button">REINICIAR</button>
+          </div>
+
+          <div class="hint" style="margin-top:14px;">
+            Se o som estiver baixo, me diga: eu ajusto (mas aqui já deixei bem mais alto).
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
 
   <!-- MODAL RITUAL -->
-  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-label="Ritual">
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
     <div class="modal">
-      <h2>Ritual</h2>
-      <p>
-        O SextoLugar é um jogo de cartas físicas. O site apenas marca o tempo e a ordem.
-      </p>
-      <ul>
-        <li>Separe o baralho (as cartas do jogo) e deixe ao alcance do grupo.</li>
-        <li>Combine uma regra simples: <strong>leiam em voz baixa</strong> e só interrompam se a carta permitir.</li>
-        <li>Quando o timer rodar, sigam o ritmo — não acelerem.</li>
-        <li>Se o silêncio aparecer, respeitem. Ele também é uma jogada.</li>
-      </ul>
-      <p class="foot">
-        Se o som estiver baixo no iPhone, não é seu erro — o sistema limita. Aqui já está com ganho aumentado.
-      </p>
-
-      <div class="closeRow">
-        <button class="btn small" id="btnCloseModal" type="button">Fechar</button>
+      <h3>RITUAL</h3>
+      <p><b>1)</b> Separe o baralho e o roteiro da partida.</p>
+      <p><b>2)</b> Deixe o celular visível apenas para o tempo. Nada mais.</p>
+      <p><b>3)</b> Quando o timer iniciar, siga as cartas físicas. Não adiante. Não volte.</p>
+      <p style="opacity:.85"><b>Observação:</b> o “tick” existe para marcar o compasso. Se ele parar, a atenção precisa voltar.</p>
+      <div class="mActions">
+        <button class="mBtn" id="btnFecharRitual" type="button">Fechar</button>
       </div>
     </div>
   </div>
 
-  <!-- JOGO (TIMER) -->
-  <section class="game" id="game">
-    <h2 class="gameTitle">Ritmo do Jogo</h2>
-
-    <div class="timerBox">
-      <div class="phase" id="phase">Fase: Preparar</div>
-      <div class="time" id="time">00:30</div>
-
-      <div class="bar" aria-label="Progresso do tempo">
-        <span id="barFill"></span>
-      </div>
-
-      <p class="gameHint" id="gameHint">
-        Pegue a próxima carta física indicada pelo seu roteiro/baralho.<br/>
-        O site só mantém o compasso.
-      </p>
-
-      <div class="gameActions">
-        <button class="btn" id="btnPause" type="button">Pausar</button>
-        <button class="btn primary" id="btnRestart" type="button">Reiniciar</button>
-      </div>
-    </div>
-  </section>
-
   <script>
-    // =========================
-    // 1) ÁUDIO DO TICK (MAIS ALTO)
-    // =========================
-    // No iPhone, o volume do <audio> sozinho costuma ficar baixo.
-    // Então usamos WebAudio + GainNode (ganho > 1.0) para reforçar.
-    const tick = new Audio("tick.mp3"); // coloque tick.mp3 na raiz do repo
-    tick.preload = "auto";
-    tick.volume = 1.0; // máximo do elemento (ainda pode ficar baixo no iOS)
-
+    /***********************
+     * 1) ÁUDIO DO TICK (WebAudio)
+     * - Não depende de arquivo .mp3 (mais confiável no GitHub Pages)
+     * - iPhone exige 1º toque para liberar som
+     ************************/
     let audioCtx = null;
-    let gainNode = null;
-    let mediaSource = null;
-    let audioReady = false;
+    let audioUnlocked = false;
 
-    function initAudio(){
-      if (audioReady) return;
+    // >>> VOLUME DO TICK (0.0 a ~1.0). AQUI ESTÁ MAIS ALTO.
+    const TICK_GAIN = 0.65;
+
+    function ensureAudio(){
+      if (!audioCtx){
+        const AC = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AC();
+      }
+      return audioCtx;
+    }
+
+    function unlockAudio(){
       try{
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        gainNode = audioCtx.createGain();
-        gainNode.gain.value = 2.6; // 🔊 MAIS ALTO (ajustável)
-        mediaSource = audioCtx.createMediaElementSource(tick);
-        mediaSource.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        audioReady = true;
+        const ctx = ensureAudio();
+        if (ctx.state === "suspended") ctx.resume();
+        // "ping" silencioso para liberar
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        g.gain.value = 0.00001;
+        o.connect(g); g.connect(ctx.destination);
+        o.start();
+        o.stop(ctx.currentTime + 0.02);
+        audioUnlocked = true;
+        setAudioStatus("som pronto.");
       }catch(e){
-        // Se der algum bloqueio, seguimos sem quebrar o jogo
-        audioReady = false;
+        setAudioStatus("não consegui ativar som (toque novamente).");
       }
     }
 
-    async function playTick(){
-      try{
-        if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
-        tick.currentTime = 0;
-        await tick.play();
-      }catch(e){
-        // iOS bloqueia até gesto do usuário; por isso chamamos initAudio no clique do INICIAR
-      }
+    function playTick(){
+      if (!audioUnlocked) return;
+      const ctx = ensureAudio();
+      const t = ctx.currentTime;
+
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+
+      // Tick seco (curto)
+      o.type = "square";
+      o.frequency.setValueAtTime(1200, t);
+
+      // Envelope
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(TICK_GAIN, t + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.055);
+
+      o.connect(g);
+      g.connect(ctx.destination);
+
+      o.start(t);
+      o.stop(t + 0.06);
     }
 
-    // =========================
-    // 2) ENTRADA / MODAL
-    // =========================
-    const entry = document.getElementById("entry");
-    const game  = document.getElementById("game");
+    function setAudioStatus(txt){
+      document.getElementById("audioStatus").textContent = txt;
+    }
 
-    const btnRitual = document.getElementById("btnRitual");
-    const btnStart  = document.getElementById("btnStart");
-    const statusLine = document.getElementById("statusLine");
+    // Captura primeiro toque/clique para liberar áudio
+    window.addEventListener("pointerdown", () => {
+      if (!audioUnlocked) unlockAudio();
+    }, { once:false });
 
-    const modalBack = document.getElementById("modalBack");
-    const btnCloseModal = document.getElementById("btnCloseModal");
+    /***********************
+     * 2) UI / Fluxo
+     ************************/
+    const screenEntrada = document.getElementById("screenEntrada");
+    const screenTimer   = document.getElementById("screenTimer");
+
+    const confirmCheck  = document.getElementById("confirmCheck");
+    const btnIniciar    = document.getElementById("btnIniciar");
+    const btnRitual     = document.getElementById("btnRitual");
+
+    const modalBack     = document.getElementById("modalBack");
+    const btnFecharRitual = document.getElementById("btnFecharRitual");
+
+    confirmCheck.addEventListener("change", () => {
+      btnIniciar.disabled = !confirmCheck.checked;
+    });
 
     btnRitual.addEventListener("click", () => {
-      modalBack.style.display = "flex";
+      modalBack.classList.add("show");
     });
-
-    btnCloseModal.addEventListener("click", () => {
-      modalBack.style.display = "none";
+    btnFecharRitual.addEventListener("click", () => {
+      modalBack.classList.remove("show");
     });
-
     modalBack.addEventListener("click", (e) => {
-      if (e.target === modalBack) modalBack.style.display = "none";
+      if (e.target === modalBack) modalBack.classList.remove("show");
     });
 
-    // =========================
-    // 3) TIMER
-    // =========================
-    const timeEl = document.getElementById("time");
-    const phaseEl = document.getElementById("phase");
-    const barFill = document.getElementById("barFill");
-    const btnPause = document.getElementById("btnPause");
-    const btnRestart = document.getElementById("btnRestart");
+    /***********************
+     * 3) TIMER
+     ************************/
+    const clockEl = document.getElementById("clock");
+    const phaseNameEl = document.getElementById("phaseName");
+    const helperText = document.getElementById("helperText");
+    const progressFill = document.getElementById("progressFill");
 
-    // Configuração simples (você depois adapta para a “sistemática profunda” do jogo)
-    const DEFAULT_SECONDS = 30; // base (você pode mudar depois por fase/carta)
-    let total = DEFAULT_SECONDS;
-    let remaining = DEFAULT_SECONDS;
+    const btnPausar = document.getElementById("btnPausar");
+    const btnReiniciar = document.getElementById("btnReiniciar");
+
+    // Fase inicial (você pode ajustar depois)
+    const PHASES = [
+      { name: "PREPARAR", seconds: 30, helper: "Pegue a próxima carta física indicada pelo seu roteiro/baralho.<br>O site só mantém o compasso." }
+    ];
+
+    let phaseIndex = 0;
+    let total = PHASES[0].seconds;
+    let remaining = total;
+
     let running = false;
     let intervalId = null;
 
-    function fmt(sec){
-      const m = Math.floor(sec/60);
-      const s = sec%60;
-      return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+    function fmt(s){
+      s = Math.max(0, Math.floor(s));
+      const m = Math.floor(s/60);
+      const r = s % 60;
+      const mm = String(m).padStart(2,"0");
+      const rr = String(r).padStart(2,"0");
+      return `${mm}:${rr}`;
     }
 
-    function updateUI(){
-      timeEl.textContent = fmt(remaining);
-      const pct = ((total - remaining) / total) * 100;
-      barFill.style.width = Math.min(100, Math.max(0, pct)) + "%";
-    }
+    function render(){
+      clockEl.textContent = fmt(remaining);
+      phaseNameEl.textContent = PHASES[phaseIndex].name;
+      helperText.innerHTML = PHASES[phaseIndex].helper;
 
-    function setPhase(text){
-      phaseEl.textContent = "Fase: " + text;
+      const pct = (1 - (remaining / total)) * 100;
+      progressFill.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+      progressFill.style.background = "linear-gradient(90deg, rgba(230,192,123,.70), rgba(230,192,123,.12))";
     }
 
     function stopTimer(){
       running = false;
-      btnPause.textContent = "Pausar";
       if (intervalId) clearInterval(intervalId);
       intervalId = null;
+      btnPausar.textContent = "PAUSAR";
     }
 
     function startTimer(){
       if (running) return;
       running = true;
-      btnPause.textContent = "Pausar";
-      intervalId = setInterval(async () => {
+      btnPausar.textContent = "PAUSAR";
+
+      // Garantia: tick sincronizado por segundo
+      let lastWhole = Math.ceil(remaining);
+
+      intervalId = setInterval(() => {
         if (!running) return;
 
-        // toca a cada segundo (pedido)
-        await playTick();
-
+        // diminui 1 segundo por segundo
         remaining -= 1;
-        if (remaining < 0) remaining = 0;
-        updateUI();
 
-        if (remaining === 0){
+        // tick a cada segundo
+        playTick();
+
+        render();
+
+        if (remaining <= 0){
+          remaining = 0;
+          render();
           stopTimer();
-          setPhase("Tempo encerrado");
-          // Aqui depois a gente conecta com a lógica das cartas físicas (próxima instrução, próxima carta etc.)
+          // aqui depois a gente pode avançar para a próxima fase / próxima carta / etc.
         }
       }, 1000);
     }
 
-    btnPause.addEventListener("click", () => {
+    function resetPhase(){
+      stopTimer();
+      phaseIndex = 0;
+      total = PHASES[phaseIndex].seconds;
+      remaining = total;
+      render();
+    }
+
+    btnPausar.addEventListener("click", () => {
       if (!running){
         startTimer();
-        btnPause.textContent = "Pausar";
+        btnPausar.textContent = "PAUSAR";
       }else{
         running = false;
-        btnPause.textContent = "Continuar";
+        btnPausar.textContent = "CONTINUAR";
       }
     });
 
-    btnRestart.addEventListener("click", () => {
-      stopTimer();
-      total = DEFAULT_SECONDS;
-      remaining = DEFAULT_SECONDS;
-      setPhase("Preparar");
-      updateUI();
+    btnReiniciar.addEventListener("click", () => {
+      resetPhase();
+      startTimer();
     });
 
-    // =========================
-    // 4) TRANSIÇÃO LEVE + INICIAR
-    // =========================
-    btnStart.addEventListener("click", async () => {
-      // garante áudio no iPhone (gesto do usuário)
-      initAudio();
-      try{
-        if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
-      }catch(e){}
+    // INICIAR: transição leve e começa o timer
+    btnIniciar.addEventListener("click", () => {
+      // garante que áudio foi desbloqueado nesse clique
+      if (!audioUnlocked) unlockAudio();
 
-      statusLine.innerHTML = 'Status: <strong style="color: var(--ok)">confirmado.</strong>';
+      // transição leve (não mexe no layout)
+      screenEntrada.classList.add("hidden");
+      screenTimer.classList.remove("hidden");
 
-      // Transição leve pedida
-      entry.classList.add("fadeOut");
-
+      // pequena espera para suavidade
       setTimeout(() => {
-        entry.style.display = "none";
-        game.style.display = "flex";
-        game.style.flexDirection = "column";
-        game.style.opacity = "0";
-        game.style.transform = "translateY(6px)";
-
-        // anima entrada do timer
-        requestAnimationFrame(() => {
-          game.style.transition = "opacity .6s ease, transform .6s ease";
-          game.style.opacity = "1";
-          game.style.transform = "translateY(0)";
-        });
-
-        // inicia estado
-        total = DEFAULT_SECONDS;
-        remaining = DEFAULT_SECONDS;
-        setPhase("Preparar");
-        updateUI();
-
-        // começa rodando automaticamente (se quiser, comente a linha abaixo)
+        resetPhase();
         startTimer();
-      }, 800); // 0.8s como você pediu
+      }, 350);
     });
 
-    // Primeira render
-    updateUI();
+    // inicial
+    render();
+    setAudioStatus("aguardando seu primeiro toque para ativar som.");
   </script>
 </body>
-</html>
+  </html>
