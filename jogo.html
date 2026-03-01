@@ -318,12 +318,28 @@
   </main>  
 
   <!-- DIREITOS AUTORAIS -->
-  <footer class="copyright" aria-label="Direitos autorais">
-    <div class="inner">
-      © <span id="year"></span> <strong>Prelúdio Jogos™</strong> • <strong>O SextoLugar™</strong> — Todos os direitos reservados •
-      <a href="https://preludiojogos.com.br" target="_blank" rel="noopener">preludiojogos.com.br</a>
-    </div>
-  </footer>
+  .footer{
+  position: fixed;
+  bottom: 12px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: rgba(255,255,255,.45);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* MOBILE: não fixo */
+@media (max-width: 520px){
+  .footer{
+    position: relative;
+    bottom: auto;
+    margin-top: 30px;
+    padding-bottom: 10px;
+  }
+}
   
   <script>  
     // ======= ÁUDIO (tick por segundo) =======  
