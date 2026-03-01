@@ -2,50 +2,387 @@ index.html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>O SextoLugar</title>
-<style>
-body{
-margin:0;
-background:#0b0b0b;
-color:#e6c07b;
-font-family: 'Georgia', serif;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-text-align:center;
-}
-.container{
-max-width:600px;
-padding:20px;
-}
-h1{
-font-size:2.5em;
-letter-spacing:3px;
-}
-button{
-margin-top:30px;
-padding:15px 40px;
-background:transparent;
-border:2px solid #e6c07b;
-color:#e6c07b;
-font-size:1em;
-cursor:pointer;
-transition:0.3s;
-}
-button:hover{
-background:#e6c07b;
-color:#000;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prelúdio Jogos — O SextoLugar</title>
+  <style>
+    :root{
+      --gold:#e6c07b;
+      --bg:#050505;
+      --muted:#a7a7a7;
+      --card:rgba(255,255,255,.04);
+      --line:rgba(230,192,123,.25);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(1200px 600px at 50% 40%, rgba(230,192,123,.08), transparent 55%),
+        radial-gradient(900px 500px at 20% 10%, rgba(255,255,255,.06), transparent 60%),
+        var(--bg);
+      color:#fff;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      letter-spacing:.2px;
+      padding:24px;
+    }
+    .wrap{
+      width:min(980px, 100%);
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border-radius:18px;
+      padding:34px 26px;
+      position:relative;
+      overflow:hidden;
+    }
+    .glow{
+      position:absolute;
+      inset:-200px;
+      background:radial-gradient(circle at 50% 30%, rgba(230,192,123,.10), transparent 55%);
+      filter:blur(20px);
+      pointer-events:none;
+    }
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      position:relative;
+      z-index:1;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .brand small{
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:2.5px;
+      font-size:12px;
+    }
+    h1{
+      margin:0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight:700;
+      letter-spacing:4px;
+      color:var(--gold);
+      font-size:40px;
+      line-height:1.1;
+      text-transform:uppercase;
+    }
+    .subtitle{
+      margin-top:10px;
+      color:var(--muted);
+      max-width:52ch;
+      font-size:15px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+      margin-top:26px;
+      position:relative;
+      z-index:1;
+    }
+    @media (max-width: 860px){
+      .grid{grid-template-columns:1fr}
+      h1{font-size:34px}
+    }
+
+    .panel{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+      background:var(--card);
+    }
+    .panel h2{
+      margin:0 0 10px 0;
+      font-size:14px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      color:var(--gold);
+      font-weight:700;
+    }
+
+    .timer{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .box{
+      flex:1;
+      min-width:110px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px 12px;
+      text-align:center;
+      background:rgba(0,0,0,.2);
+    }
+    .box b{
+      display:block;
+      font-size:32px;
+      color:#fff;
+      font-variant-numeric: tabular-nums;
+    }
+    .box span{
+      display:block;
+      margin-top:4px;
+      font-size:12px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .cta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+      align-items:center;
+    }
+    button, a.btn{
+      appearance:none;
+      border:2px solid var(--gold);
+      background:transparent;
+      color:var(--gold);
+      padding:12px 16px;
+      border-radius:12px;
+      font-weight:700;
+      letter-spacing:1px;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition:.2s;
+    }
+    button:hover, a.btn:hover{
+      background:var(--gold);
+      color:#000;
+      transform:translateY(-1px);
+    }
+    .muted{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(0,0,0,.65);
+      z-index:50;
+    }
+    .modal.open{display:flex;}
+    .card{
+      width:min(640px, 100%);
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#090909;
+      padding:18px;
+    }
+    .card header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:8px;
+    }
+    .close{
+      border:1px solid var(--line);
+      background:transparent;
+      color:#fff;
+      padding:8px 10px;
+      border-radius:10px;
+      cursor:pointer;
+    }
+    .close:hover{background:rgba(255,255,255,.06);}
+    label{
+      display:block;
+      font-size:12px;
+      letter-spacing:1.5px;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin:12px 0 6px;
+    }
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      color:#fff;
+      outline:none;
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 620px){
+      .row{grid-template-columns:1fr}
+    }
+    .foot{
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    .tiny{
+      margin-top:10px;
+      font-size:12px;
+      color:rgba(255,255,255,.55);
+      line-height:1.5;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-<h1>O SEXTOLUGAR</h1>
-<p>Você está prestes a iniciar a sessão.</p>
-<button onclick="alert('A sessão começa agora.')">INICIAR</button>
-</div>
+  <div class="wrap">
+    <div class="glow"></div>
+
+    <header>
+      <div class="brand">
+        <small>prelúdio jogos</small>
+        <h1>O SextoLugar</h1>
+        <div class="subtitle">
+          Você está prestes a iniciar a sessão.  
+          A sessão reage ao desconforto, não às palavras.
+        </div>
+      </div>
+      <div class="muted">
+        3–5 jogadores • ~60 min • +16<br/>
+        Sem vencedores. Apenas resistência.
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>Contagem regressiva</h2>
+        <div class="timer" id="timer">
+          <div class="box"><b id="d">--</b><span>dias</span></div>
+          <div class="box"><b id="h">--</b><span>horas</span></div>
+          <div class="box"><b id="m">--</b><span>min</span></div>
+          <div class="box"><b id="s">--</b><span>seg</span></div>
+        </div>
+
+        <div class="cta">
+          <button id="enterBtn">ENTRAR NA SESSÃO</button>
+          <a class="btn" href="https://www.instagram.com/" target="_blank" rel="noopener">VER NO INSTAGRAM</a>
+        </div>
+        <p class="tiny">
+          *A data do lançamento pode mudar. A sessão avisará primeiro quem estiver na lista.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>O que é</h2>
+        <p class="muted">
+          Um jogo psicológico em cartas. Sem tabuleiro.  
+          O grupo é colocado em situações simples, porém incômodas, onde a reação vale mais do que a fala.
+        </p>
+        <p class="muted">
+          <b style="color:var(--gold)">Pontos de influência</b> existem para registrar rupturas:
+          quem quebra o silêncio, quem desvia, quem acusa, quem hesita.
+        </p>
+        <p class="muted">
+          Você não “ganha”. Você <i>permanece</i>.
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="card">
+      <header>
+        <div>
+          <div style="color:var(--gold); font-weight:800; letter-spacing:2px; text-transform:uppercase;">Sessão — Lista VIP</div>
+          <div class="muted">Receba o acesso primeiro. Sem spam.</div>
+        </div>
+        <button class="close" id="closeBtn">Fechar</button>
+      </header>
+
+      <div class="row">
+        <div>
+          <label>Nome</label>
+          <input id="nome" placeholder="Seu nome"/>
+        </div>
+        <div>
+          <label>E-mail</label>
+          <input id="email" placeholder="voce@exemplo.com"/>
+        </div>
+      </div>
+
+      <label>WhatsApp (opcional)</label>
+      <input id="whats" placeholder="(DDD) 9xxxx-xxxx"/>
+
+      <div class="foot">
+        <button id="saveBtn">QUERO ENTRAR NA LISTA</button>
+      </div>
+
+      <div class="tiny" id="status"></div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Defina aqui a data do lançamento (ano, mês-1, dia, hora, min)
+    // Ex.: 2026, 2, 20, 20, 0  => 20/03/2026 20:00
+    const launchDate = new Date(2026, 2, 20, 20, 0, 0).getTime();
+
+    const el = (id)=>document.getElementById(id);
+    const pad = (n)=>String(n).padStart(2,'0');
+
+    function tick(){
+      const now = Date.now();
+      let diff = launchDate - now;
+
+      if(diff < 0) diff = 0;
+
+      const days = Math.floor(diff / (1000*60*60*24));
+      const hours = Math.floor((diff / (1000*60*60)) % 24);
+      const mins = Math.floor((diff / (1000*60)) % 60);
+      const secs = Math.floor((diff / 1000) % 60);
+
+      el('d').textContent = pad(days);
+      el('h').textContent = pad(hours);
+      el('m').textContent = pad(mins);
+      el('s').textContent = pad(secs);
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    // Modal
+    const modal = el('modal');
+    el('enterBtn').addEventListener('click', ()=> modal.classList.add('open'));
+    el('closeBtn').addEventListener('click', ()=> modal.classList.remove('open'));
+    modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.classList.remove('open'); });
+
+    // "Salvar" sem servidor: abre e-mail pronto para você receber os dados
+    // (Depois a gente troca por Google Forms/Mailchimp)
+    el('saveBtn').addEventListener('click', ()=>{
+      const nome = el('nome').value.trim();
+      const email = el('email').value.trim();
+      const whats = el('whats').value.trim();
+
+      if(!nome || !email){
+        el('status').textContent = "Preencha nome e e-mail para entrar na lista.";
+        return;
+      }
+      const subject = encodeURIComponent("Lista VIP — O SextoLugar");
+      const body = encodeURIComponent(`Nome: ${nome}\nEmail: ${email}\nWhatsApp: ${whats}\n\nQuero entrar na lista VIP do O SextoLugar.`);
+      // Troque o e-mail abaixo pelo seu:
+      window.location.href = `mailto:SEUEMAIL@EXEMPLO.COM?subject=${subject}&body=${body}`;
+    });
+  </script>
 </body>
 </html>
