@@ -21,14 +21,14 @@
 
     body{
       margin:0;
-      min-height:100svh;
+      min-height:100vh; /* fallback */
       display:grid;
       place-items:center;
       padding:24px;
       padding-left:max(24px, env(safe-area-inset-left));
       padding-right:max(24px, env(safe-area-inset-right));
-      padding-top:max(24px, env(safe-area-inset-top));
-      padding-bottom:max(24px, env(safe-area-inset-bottom));
+      padding-top:max(18px, env(safe-area-inset-top));
+      padding-bottom:max(18px, env(safe-area-inset-bottom));
       background:
         radial-gradient(1200px 700px at 50% 20%, rgba(230,192,123,.10), transparent 55%),
         radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
@@ -37,6 +37,13 @@
       color:#f2f2f2;
       font-family: ui-serif, Georgia, "Times New Roman", serif;
       overflow-x:hidden;
+      overflow-y:auto; /* importantíssimo no iPhone para não cortar */
+      -webkit-text-size-adjust: 100%;
+    }
+
+    /* Altura dinâmica real do celular (iOS/Safari) */
+    @supports (height: 100dvh){
+      body{ min-height:100dvh; }
     }
 
     /* “brilho oscilando” — sutil */
@@ -61,7 +68,7 @@
       width:100%;
       max-width:980px;
       display:grid;
-      gap:18px;
+      gap:14px;
       align-items:center;
       justify-items:center;
       text-align:center;
@@ -72,40 +79,40 @@
     h1{
       margin:0;
       letter-spacing:.18em;
-      line-height:1.05;
+      line-height:1.02;
       font-weight:700;
       color:var(--gold);
       text-transform:uppercase;
-      font-size:clamp(34px, 6vw, 78px);
+      font-size:clamp(30px, 6vw, 78px);
       text-shadow: 0 18px 60px var(--shadow);
     }
 
     .subtitle{
       margin:0;
       max-width:72ch;
-      font-size:clamp(14px, 2.2vw, 18px);
+      font-size:clamp(13px, 2.2vw, 18px);
       opacity:.88;
       color:#eaeaea;
     }
 
     /* Frase oscilando (mantida) */
     .whisper{
-      margin-top:4px;
-      font-size:clamp(13px, 2vw, 16px);
+      margin-top:2px;
+      font-size:clamp(12px, 2vw, 16px);
       color:var(--muted);
       opacity:.78;
       letter-spacing:.06em;
       animation: flicker 3.2s ease-in-out infinite;
     }
     @keyframes flicker{
-      0%,100%{ opacity:.55; filter: blur(.2px); }
+      0%,100%{ opacity:.50; filter: blur(.2px); }
       50%{ opacity:.92; filter: blur(0); }
     }
 
     .card{
       width:100%;
       max-width:860px;
-      padding:clamp(18px, 3vw, 36px);
+      padding:clamp(16px, 3vw, 34px);
       border-radius:20px;
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
       border:1px solid rgba(255,255,255,.08);
@@ -135,7 +142,7 @@
       letter-spacing:.22em;
       color:rgba(230,192,123,.8);
       text-transform:uppercase;
-      margin-bottom:14px;
+      margin-bottom:12px;
     }
     .dot{
       width:5px; height:5px;
@@ -148,12 +155,11 @@
       position:relative;
       z-index:1;
       margin:0;
-      font-size:clamp(18px, 2.8vw, 30px);
+      font-size:clamp(16px, 2.8vw, 30px);
       line-height:1.45;
       color:#f3f3f3;
       text-shadow: 0 18px 60px rgba(0,0,0,.55);
     }
-
     .prompt em{
       color:#ffffff;
       font-style:italic;
@@ -163,7 +169,7 @@
     .rule{
       position:relative;
       z-index:1;
-      margin:18px auto 10px;
+      margin:16px auto 10px;
       height:10px;
       width:min(720px, 92%);
       border-radius:999px;
@@ -191,7 +197,7 @@
       flex-wrap:wrap;
       gap:12px;
       justify-content:center;
-      margin-top:18px;
+      margin-top:16px;
     }
 
     button{
@@ -219,7 +225,7 @@
       color:rgba(255,255,255,.55);
     }
 
-    /* Modal “Ritual” */
+    /* Modal */
     .modalBack{
       position:fixed;
       inset:0;
@@ -285,18 +291,65 @@
       color:rgba(255,255,255,.86);
     }
 
-    /* Transição leve ao iniciar */
-    .fadeOut{
-      animation: fadeOut .8s ease forwards;
-    }
+    /* Transição leve */
+    .fadeOut{ animation: fadeOut .8s ease forwards; }
     @keyframes fadeOut{
       to{ opacity:0; transform: translateY(6px) scale(.995); filter: blur(1px); }
     }
 
-    /* mobile */
-    @media (max-width: 520px){
-      button{ min-width: 150px; }
-      .card{ border-radius: 18px; }
+    /* ====== AJUSTES ESPECÍFICOS PARA CELULAR (conserta seu print) ====== */
+    @media (max-width: 430px){
+      body{ padding:14px; }
+
+      .wrap{ gap:10px; }
+
+      h1{
+        font-size: clamp(26px, 9vw, 40px); /* reduz MUITO no iPhone */
+        letter-spacing:.16em;
+      }
+
+      .subtitle{
+        font-size: 13px;
+        line-height:1.35;
+        max-width: 34ch;
+      }
+
+      .whisper{
+        font-size: 12px;
+        margin-top: 0;
+      }
+
+      .card{
+        padding: 14px 14px 16px;
+        border-radius: 18px;
+      }
+
+      .tag{ margin-bottom:10px; font-size:11px; }
+
+      .prompt{
+        font-size: 18px; /* cabe sem esmagar */
+        line-height: 1.35;
+      }
+
+      .rule{
+        margin:12px auto 8px;
+        height:9px;
+      }
+
+      /* botões em coluna e mais compactos */
+      .actions{ gap:10px; margin-top:14px; }
+      button{
+        width: min(320px, 100%);
+        min-width: 0;
+        padding: 11px 14px;
+        border-radius: 14px;
+      }
+
+      .hint{
+        font-size:11px;
+        margin-top: 8px;
+        padding-bottom: 2px;
+      }
     }
   </style>
 </head>
@@ -337,7 +390,6 @@
     </section>
   </main>
 
-  <!-- Modal Ritual -->
   <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-labelledby="ritualTitle">
     <div class="modal">
       <div class="modalHeader">
@@ -346,26 +398,22 @@
       </div>
 
       <div class="modalBody">
-        <p>
-          O site não substitui as cartas. Ele só controla o tempo e o clima.
-        </p>
+        <p>O site não substitui as cartas. Ele só controla o tempo e o clima.</p>
         <ol class="ritualList">
           <li>Separe o baralho físico e deixe a mesa livre.</li>
-          <li>Escolha um modo: <strong>solo</strong> ou <strong>grupo</strong> (você decide na mesa).</li>
+          <li>Escolha um modo: <strong>solo</strong> ou <strong>grupo</strong> (decisão na mesa).</li>
           <li>Quando o timer rodar, sigam as instruções da carta puxada.</li>
           <li>Se o timer zerar, a rodada termina — mesmo que alguém queira “só mais um”.</li>
         </ol>
 
         <div class="warn">
-          Importante: se você for jogar em grupo, isso é <strong>normal</strong>.
-          A frase “sozinho(a)” foi removida — o jogo pode ser solo ou em grupo.
+          O jogo pode ser solo ou em grupo. O “silêncio” é uma regra de clima, não de solidão.
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Modal
     const modalBack = document.getElementById("modalBack");
     const btnRitual = document.getElementById("btnRitual");
     const btnClose = document.getElementById("btnClose");
@@ -374,7 +422,6 @@
     btnClose.addEventListener("click", () => modalBack.style.display = "none");
     modalBack.addEventListener("click", (e) => { if(e.target === modalBack) modalBack.style.display = "none"; });
 
-    // Transição leve e navegação
     const scene = document.getElementById("scene");
     const btnIniciar = document.getElementById("btnIniciar");
     const status = document.getElementById("status");
@@ -382,9 +429,7 @@
     btnIniciar.addEventListener("click", () => {
       status.textContent = "Status: iniciando…";
       scene.classList.add("fadeOut");
-      setTimeout(() => {
-        window.location.href = "./jogo.html";
-      }, 800);
+      setTimeout(() => window.location.href = "./jogo.html", 800);
     });
   </script>
 </body>
