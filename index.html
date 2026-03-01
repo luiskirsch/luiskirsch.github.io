@@ -291,10 +291,13 @@
       color:rgba(255,255,255,.86);
     }
 
-    /* Transição leve */
-    .fadeOut{ animation: fadeOut .8s ease forwards; }
+    /* Transição leve (OTIMIZADA: sem blur para não travar) */
+    .fadeOut{
+      will-change: opacity, transform;
+      animation: fadeOut .8s ease forwards;
+    }
     @keyframes fadeOut{
-      to{ opacity:0; transform: translateY(6px) scale(.995); filter: blur(1px); }
+      to{ opacity:0; transform: translateY(6px) scale(.995); }
     }
 
     /* ====== AJUSTES ESPECÍFICOS PARA CELULAR (conserta seu print) ====== */
@@ -429,7 +432,13 @@
     btnIniciar.addEventListener("click", () => {
       status.textContent = "Status: iniciando…";
       scene.classList.add("fadeOut");
-      setTimeout(() => window.location.href = "./jogo.html", 800);
+
+      // Navega exatamente quando a animação terminar (mais fluido)
+      const go = () => window.location.href = "./jogo.html";
+      scene.addEventListener("animationend", go, { once: true });
+
+      // fallback de segurança (se o animationend falhar por algum motivo)
+      setTimeout(go, 850);
     });
   </script>
 </body>
