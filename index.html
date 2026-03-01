@@ -4,15 +4,18 @@ index.html
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Prelúdio Jogos — O SextoLugar</title>
+  <title>O SextoLugar — Entrada</title>
+
   <style>
     :root{
-      --gold:#e6c07b;
       --bg:#050505;
+      --gold:#e6c07b;
       --muted:#a7a7a7;
       --card:rgba(255,255,255,.04);
-      --line:rgba(230,192,123,.25);
+      --line:rgba(230,192,123,.22);
+      --danger:#ff4d4d;
     }
+
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -21,367 +24,394 @@ index.html
       align-items:center;
       justify-content:center;
       background:
-        radial-gradient(1200px 600px at 50% 40%, rgba(230,192,123,.08), transparent 55%),
+        radial-gradient(1200px 600px at 50% 40%, rgba(230,192,123,.10), transparent 55%),
         radial-gradient(900px 500px at 20% 10%, rgba(255,255,255,.06), transparent 60%),
         var(--bg);
       color:#fff;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      letter-spacing:.2px;
-      padding:24px;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", sans-serif;
+      overflow-x:hidden;
     }
+
+    /* Grain */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+      opacity:.35;
+    }
+
     .wrap{
-      width:min(980px, 100%);
-      border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      width:min(920px, 92vw);
+      padding:42px 18px;
+      display:grid;
+      gap:18px;
+      place-items:center;
+      text-align:center;
+    }
+
+    .title{
+      letter-spacing:6px;
+      text-transform:uppercase;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight:700;
+      font-size: clamp(32px, 4vw, 54px);
+      color:var(--gold);
+      margin:0;
+      text-shadow:0 0 24px rgba(230,192,123,.18);
+    }
+
+    .subtitle{
+      margin:0;
+      max-width:56ch;
+      color:var(--muted);
+      line-height:1.6;
+      font-size: clamp(14px, 1.6vw, 16px);
+    }
+
+    .card{
+      width:min(720px, 94vw);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(230,192,123,.18);
+      box-shadow: 0 12px 60px rgba(0,0,0,.55);
       border-radius:18px;
-      padding:34px 26px;
+      padding:22px;
       position:relative;
       overflow:hidden;
     }
-    .glow{
+
+    .card::after{
+      content:"";
       position:absolute;
-      inset:-200px;
-      background:radial-gradient(circle at 50% 30%, rgba(230,192,123,.10), transparent 55%);
-      filter:blur(20px);
+      inset:-2px;
+      border-radius:18px;
+      background: radial-gradient(600px 200px at 50% 0%, rgba(230,192,123,.18), transparent 55%);
       pointer-events:none;
-    }
-    header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      flex-wrap:wrap;
-      position:relative;
-      z-index:1;
-    }
-    .brand{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .brand small{
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:2.5px;
-      font-size:12px;
-    }
-    h1{
-      margin:0;
-      font-family: Georgia, "Times New Roman", serif;
-      font-weight:700;
-      letter-spacing:4px;
-      color:var(--gold);
-      font-size:40px;
-      line-height:1.1;
-      text-transform:uppercase;
-    }
-    .subtitle{
-      margin-top:10px;
-      color:var(--muted);
-      max-width:52ch;
-      font-size:15px;
+      opacity:.55;
     }
 
-    .grid{
+    .row{
       display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap:18px;
-      margin-top:26px;
+      gap:14px;
       position:relative;
       z-index:1;
     }
-    @media (max-width: 860px){
-      .grid{grid-template-columns:1fr}
-      h1{font-size:34px}
-    }
 
-    .panel{
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:18px;
-      background:var(--card);
-    }
-    .panel h2{
-      margin:0 0 10px 0;
-      font-size:14px;
-      letter-spacing:2px;
-      text-transform:uppercase;
-      color:var(--gold);
-      font-weight:700;
-    }
-
-    .timer{
+    .seal{
       display:flex;
       gap:10px;
-      flex-wrap:wrap;
-    }
-    .box{
-      flex:1;
-      min-width:110px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px 12px;
-      text-align:center;
-      background:rgba(0,0,0,.2);
-    }
-    .box b{
-      display:block;
-      font-size:32px;
-      color:#fff;
-      font-variant-numeric: tabular-nums;
-    }
-    .box span{
-      display:block;
-      margin-top:4px;
-      font-size:12px;
-      letter-spacing:2px;
-      text-transform:uppercase;
-      color:var(--muted);
-    }
-
-    .cta{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:14px;
-      align-items:center;
-    }
-    button, a.btn{
-      appearance:none;
-      border:2px solid var(--gold);
-      background:transparent;
-      color:var(--gold);
-      padding:12px 16px;
-      border-radius:12px;
-      font-weight:700;
-      letter-spacing:1px;
-      cursor:pointer;
-      text-decoration:none;
-      display:inline-flex;
       align-items:center;
       justify-content:center;
-      transition:.2s;
+      color:rgba(230,192,123,.95);
+      font-size:12px;
+      letter-spacing:3px;
+      text-transform:uppercase;
+      opacity:.9;
     }
-    button:hover, a.btn:hover{
-      background:var(--gold);
-      color:#000;
-      transform:translateY(-1px);
-    }
-    .muted{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.5;
+    .dot{
+      width:6px;height:6px;border-radius:999px;background:var(--gold);
+      box-shadow:0 0 14px rgba(230,192,123,.35);
     }
 
-    .modal{
+    .divider{
+      height:1px;
+      width:100%;
+      background:linear-gradient(90deg, transparent, var(--line), transparent);
+      margin:6px 0;
+    }
+
+    .ritualText{
+      font-family: Georgia, "Times New Roman", serif;
+      color:#fff;
+      font-size:18px;
+      line-height:1.65;
+      margin:0;
+    }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+      align-items:center;
+      margin-top:6px;
+    }
+
+    .btn{
+      border:1px solid rgba(230,192,123,.45);
+      background:transparent;
+      color:var(--gold);
+      padding:12px 18px;
+      border-radius:12px;
+      cursor:pointer;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      font-weight:700;
+      transition:.25s ease;
+      user-select:none;
+    }
+    .btn:hover{ background:rgba(230,192,123,.10) }
+    .btn:active{ transform:translateY(1px) }
+
+    .btn.primary{
+      background:rgba(230,192,123,.12);
+      border-color:rgba(230,192,123,.65);
+    }
+
+    .small{
+      color:rgba(255,255,255,.55);
+      font-size:12px;
+      margin:0;
+    }
+
+    .meter{
+      width:min(520px, 92%);
+      height:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(230,192,123,.14);
+      overflow:hidden;
+      margin:6px auto 0;
+    }
+    .meter > div{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(230,192,123,.25), rgba(230,192,123,.75));
+      box-shadow:0 0 18px rgba(230,192,123,.25);
+      transition:width .25s ease;
+    }
+
+    .overlay{
       position:fixed;
       inset:0;
+      background:rgba(0,0,0,.88);
       display:none;
       align-items:center;
       justify-content:center;
       padding:18px;
-      background:rgba(0,0,0,.65);
-      z-index:50;
+      z-index:999;
     }
-    .modal.open{display:flex;}
-    .card{
-      width:min(640px, 100%);
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:#090909;
-      padding:18px;
+    .modal{
+      width:min(720px, 94vw);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(230,192,123,.22);
+      border-radius:18px;
+      padding:22px;
+      box-shadow:0 20px 90px rgba(0,0,0,.7);
+      position:relative;
     }
-    .card header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-bottom:8px;
-    }
-    .close{
-      border:1px solid var(--line);
-      background:transparent;
-      color:#fff;
-      padding:8px 10px;
-      border-radius:10px;
-      cursor:pointer;
-    }
-    .close:hover{background:rgba(255,255,255,.06);}
-    label{
-      display:block;
-      font-size:12px;
-      letter-spacing:1.5px;
+    .modal h2{
+      margin:0 0 8px;
+      color:var(--gold);
+      font-family:Georgia, "Times New Roman", serif;
+      letter-spacing:2px;
       text-transform:uppercase;
-      color:var(--muted);
-      margin:12px 0 6px;
     }
-    input{
-      width:100%;
-      padding:12px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.04);
-      color:#fff;
-      outline:none;
-    }
-    .row{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-    @media (max-width: 620px){
-      .row{grid-template-columns:1fr}
-    }
-    .foot{
+    .modal p{ margin:0; color:rgba(255,255,255,.78); line-height:1.65 }
+
+    .codeLine{
       margin-top:14px;
       display:flex;
       gap:10px;
-      justify-content:flex-end;
       flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
     }
-    .tiny{
+    input{
+      width:min(360px, 86vw);
+      padding:12px 14px;
+      border-radius:12px;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(230,192,123,.22);
+      color:#fff;
+      outline:none;
+    }
+    input:focus{
+      border-color:rgba(230,192,123,.55);
+      box-shadow:0 0 0 3px rgba(230,192,123,.10);
+    }
+
+    .warn{
       margin-top:10px;
+      color:rgba(255,255,255,.70);
       font-size:12px;
-      color:rgba(255,255,255,.55);
-      line-height:1.5;
+    }
+
+    .shake{ animation:shake .35s ease }
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-6px)}
+      40%{transform:translateX(6px)}
+      60%{transform:translateX(-4px)}
+      80%{transform:translateX(4px)}
+    }
+
+    .blink{
+      animation:blink 1.1s infinite ease-in-out;
+    }
+    @keyframes blink{
+      0%,100%{opacity:.65}
+      50%{opacity:1}
     }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="glow"></div>
+  <main class="wrap">
+    <h1 class="title">O SEXTOLUGAR</h1>
+    <p class="subtitle">
+      Você está prestes a atravessar a linha. Respire. Leia. E escolha com cuidado.
+      <span class="blink">O silêncio é parte do jogo.</span>
+    </p>
 
-    <header>
-      <div class="brand">
-        <small>prelúdio jogos</small>
-        <h1>O SextoLugar</h1>
-        <div class="subtitle">
-          Você está prestes a iniciar a sessão.  
-          A sessão reage ao desconforto, não às palavras.
-        </div>
-      </div>
-      <div class="muted">
-        3–5 jogadores • ~60 min • +16<br/>
-        Sem vencedores. Apenas resistência.
-      </div>
-    </header>
-
-    <div class="grid">
-      <section class="panel">
-        <h2>Contagem regressiva</h2>
-        <div class="timer" id="timer">
-          <div class="box"><b id="d">--</b><span>dias</span></div>
-          <div class="box"><b id="h">--</b><span>horas</span></div>
-          <div class="box"><b id="m">--</b><span>min</span></div>
-          <div class="box"><b id="s">--</b><span>seg</span></div>
-        </div>
-
-        <div class="cta">
-          <button id="enterBtn">ENTRAR NA SESSÃO</button>
-          <a class="btn" href="https://www.instagram.com/" target="_blank" rel="noopener">VER NO INSTAGRAM</a>
-        </div>
-        <p class="tiny">
-          *A data do lançamento pode mudar. A sessão avisará primeiro quem estiver na lista.
-        </p>
-      </section>
-
-      <section class="panel">
-        <h2>O que é</h2>
-        <p class="muted">
-          Um jogo psicológico em cartas. Sem tabuleiro.  
-          O grupo é colocado em situações simples, porém incômodas, onde a reação vale mais do que a fala.
-        </p>
-        <p class="muted">
-          <b style="color:var(--gold)">Pontos de influência</b> existem para registrar rupturas:
-          quem quebra o silêncio, quem desvia, quem acusa, quem hesita.
-        </p>
-        <p class="muted">
-          Você não “ganha”. Você <i>permanece</i>.
-        </p>
-      </section>
-    </div>
-  </div>
-
-  <div class="modal" id="modal">
-    <div class="card">
-      <header>
-        <div>
-          <div style="color:var(--gold); font-weight:800; letter-spacing:2px; text-transform:uppercase;">Sessão — Lista VIP</div>
-          <div class="muted">Receba o acesso primeiro. Sem spam.</div>
-        </div>
-        <button class="close" id="closeBtn">Fechar</button>
-      </header>
-
+    <section class="card">
       <div class="row">
-        <div>
-          <label>Nome</label>
-          <input id="nome" placeholder="Seu nome"/>
+        <div class="seal">
+          <span class="dot"></span>
+          <span>PROTOCOLO • ENTRADA</span>
+          <span class="dot"></span>
         </div>
-        <div>
-          <label>E-mail</label>
-          <input id="email" placeholder="voce@exemplo.com"/>
+
+        <div class="divider"></div>
+
+        <p class="ritualText" id="ritualText">
+          Antes de iniciar, confirme que você está sozinho(a).<br/>
+          Se ouvir qualquer coisa atrás de você… <em>não vire.</em>
+        </p>
+
+        <div class="meter" aria-label="nível de preparação">
+          <div id="meterFill"></div>
         </div>
+        <p class="small" id="statusLine">Status: aguardando confirmação.</p>
+
+        <div class="controls">
+          <button class="btn" id="btnRitual">Ler o ritual</button>
+          <button class="btn primary" id="btnIniciar">Iniciar</button>
+        </div>
+
+        <p class="small">
+          Dica: se você estiver usando celular, aumente o brilho só um pouco.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal" id="modal">
+      <h2>Confirmar Entrada</h2>
+      <p>
+        Digite a palavra de acesso para desbloquear o primeiro arquivo.
+        (Você poderá trocar isso depois.)
+      </p>
+
+      <div class="codeLine">
+        <input id="senha" placeholder="palavra de acesso" autocomplete="off" />
+        <button class="btn primary" id="btnConfirmar">Desbloquear</button>
+        <button class="btn" id="btnFechar">Cancelar</button>
       </div>
 
-      <label>WhatsApp (opcional)</label>
-      <input id="whats" placeholder="(DDD) 9xxxx-xxxx"/>
-
-      <div class="foot">
-        <button id="saveBtn">QUERO ENTRAR NA LISTA</button>
-      </div>
-
-      <div class="tiny" id="status"></div>
+      <p class="warn" id="warn">
+        Padrão: <b>SEXTOLUGAR</b> (sem espaço).<br/>
+        Se errar, a tela vai “reagir”.
+      </p>
     </div>
   </div>
 
   <script>
-    // ✅ Defina aqui a data do lançamento (ano, mês-1, dia, hora, min)
-    // Ex.: 2026, 2, 20, 20, 0  => 20/03/2026 20:00
-    const launchDate = new Date(2026, 2, 20, 20, 0, 0).getTime();
+    // Ajuste rápido:
+    const SENHA_PADRAO = "SEXTOLUGAR"; // depois a gente muda para a sua senha real
 
-    const el = (id)=>document.getElementById(id);
-    const pad = (n)=>String(n).padStart(2,'0');
+    const ritualText = document.getElementById("ritualText");
+    const statusLine = document.getElementById("statusLine");
+    const meterFill = document.getElementById("meterFill");
 
-    function tick(){
-      const now = Date.now();
-      let diff = launchDate - now;
+    const overlay = document.getElementById("overlay");
+    const modal = document.getElementById("modal");
+    const senha = document.getElementById("senha");
 
-      if(diff < 0) diff = 0;
+    const btnRitual = document.getElementById("btnRitual");
+    const btnIniciar = document.getElementById("btnIniciar");
+    const btnConfirmar = document.getElementById("btnConfirmar");
+    const btnFechar = document.getElementById("btnFechar");
 
-      const days = Math.floor(diff / (1000*60*60*24));
-      const hours = Math.floor((diff / (1000*60*60)) % 24);
-      const mins = Math.floor((diff / (1000*60)) % 60);
-      const secs = Math.floor((diff / 1000) % 60);
-
-      el('d').textContent = pad(days);
-      el('h').textContent = pad(hours);
-      el('m').textContent = pad(mins);
-      el('s').textContent = pad(secs);
+    let progress = 0;
+    function setProgress(p){
+      progress = Math.max(0, Math.min(100, p));
+      meterFill.style.width = progress + "%";
     }
-    tick();
-    setInterval(tick, 1000);
 
-    // Modal
-    const modal = el('modal');
-    el('enterBtn').addEventListener('click', ()=> modal.classList.add('open'));
-    el('closeBtn').addEventListener('click', ()=> modal.classList.remove('open'));
-    modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.classList.remove('open'); });
+    const linhasRitual = [
+      "1) Desative notificações. O mundo não pode entrar aqui.",
+      "2) Use fones, se tiver. O som é parte do caminho.",
+      "3) Não avance se você estiver com pressa.",
+      "4) Se algo parecer real demais… é porque foi feito para parecer.",
+      "5) Quando estiver pronto(a), toque em INICIAR."
+    ];
 
-    // "Salvar" sem servidor: abre e-mail pronto para você receber os dados
-    // (Depois a gente troca por Google Forms/Mailchimp)
-    el('saveBtn').addEventListener('click', ()=>{
-      const nome = el('nome').value.trim();
-      const email = el('email').value.trim();
-      const whats = el('whats').value.trim();
+    btnRitual.addEventListener("click", () => {
+      ritualText.innerHTML = linhasRitual.map(l => "• " + l).join("<br/>");
+      statusLine.textContent = "Status: ritual carregado. Preparação em andamento…";
+      setProgress(45);
+    });
 
-      if(!nome || !email){
-        el('status').textContent = "Preencha nome e e-mail para entrar na lista.";
-        return;
+    btnIniciar.addEventListener("click", () => {
+      overlay.style.display = "flex";
+      setTimeout(() => senha.focus(), 80);
+      statusLine.textContent = "Status: aguardando autenticação.";
+      setProgress(70);
+    });
+
+    function fechar(){
+      overlay.style.display = "none";
+      senha.value = "";
+      setProgress(45);
+      statusLine.textContent = "Status: autenticação cancelada.";
+    }
+
+    btnFechar.addEventListener("click", fechar);
+    overlay.addEventListener("click", (e) => {
+      if(e.target === overlay) fechar();
+    });
+
+    function erro(){
+      modal.classList.remove("shake");
+      void modal.offsetWidth; // reset anim
+      modal.classList.add("shake");
+      statusLine.textContent = "Status: acesso negado. Algo observou você.";
+      setProgress(55);
+    }
+
+    function sucesso(){
+      setProgress(100);
+      statusLine.textContent = "Status: acesso concedido. Abrindo arquivo…";
+      overlay.style.display = "none";
+
+      // Próximo passo: aqui você escolhe para onde vai depois de "Iniciar"
+      // Exemplo: redirect para uma página "arquivo1.html"
+      // window.location.href = "arquivo1.html";
+
+      ritualText.innerHTML =
+        "Entrada confirmada.<br/>" +
+        "Você atravessou a linha. Agora não tem mais como desfazer.<br/>" +
+        "<span style='color:rgba(230,192,123,.95)'>Próximo: Arquivo 01</span>";
+    }
+
+    function confirmar(){
+      const val = (senha.value || "").trim().toUpperCase();
+      if(val === SENHA_PADRAO){
+        sucesso();
+      } else {
+        erro();
       }
-      const subject = encodeURIComponent("Lista VIP — O SextoLugar");
-      const body = encodeURIComponent(`Nome: ${nome}\nEmail: ${email}\nWhatsApp: ${whats}\n\nQuero entrar na lista VIP do O SextoLugar.`);
-      // Troque o e-mail abaixo pelo seu:
-      window.location.href = `mailto:SEUEMAIL@EXEMPLO.COM?subject=${subject}&body=${body}`;
+    }
+
+    btnConfirmar.addEventListener("click", confirmar);
+    senha.addEventListener("keydown", (e) => {
+      if(e.key === "Enter") confirmar();
+      if(e.key === "Escape") fechar();
     });
   </script>
 </body>
