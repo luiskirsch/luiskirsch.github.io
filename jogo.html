@@ -1,711 +1,161 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>O SextoLugar — Sessão</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O SextoLugar – Entrada</title>
 
-  <style>
-    :root{
-      --bg:#050505;
-      --gold:#e6c07b;
-      --muted:#a7a7a7;
-      --card:rgba(255,255,255,.045);
-      --line:rgba(230,192,123,.22);
-      --shadow:rgba(0,0,0,.55);
-      --danger:#ff4d4d;
-      --ok:#7be6b2;
-    }
+<style>
+:root{
+    --bg:#050505;
+    --gold:#e6c07b;
+    --muted:#a7a7a7;
+    --card:rgba(255,255,255,0.045);
+    --line:rgba(230,192,123,.22);
+}
 
-    *{box-sizing:border-box}
-    html, body{height:100%}
+*{box-sizing:border-box;margin:0;padding:0}
 
-    body{
-      margin:0;
-      color:#fff;
-      font-family: ui-serif, Georgia, "Times New Roman", serif;
-      background:
-        radial-gradient(1200px 700px at 50% 38%, rgba(230,192,123,.09), transparent 58%),
-        radial-gradient(900px 560px at 18% 10%, rgba(255,255,255,.06), transparent 60%),
-        var(--bg);
-      overflow-x:hidden;
-    }
+body{
+    background: radial-gradient(circle at center, #101010 0%, #050505 60%);
+    font-family: "Georgia", serif;
+    color:white;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    overflow:hidden;
+}
 
-    /* brilho oscilando (silêncio) */
-    .breath{
-      position:fixed;
-      inset:-60px;
-      pointer-events:none;
-      background: radial-gradient(closest-side, rgba(230,192,123,.08), transparent 70%);
-      filter: blur(22px);
-      opacity:.55;
-      animation: breathe 7.5s ease-in-out infinite;
-      mix-blend-mode: screen;
-    }
-    @keyframes breathe{
-      0%,100%{ transform: scale(1) translateY(0); opacity:.40;}
-      50%{ transform: scale(1.08) translateY(-6px); opacity:.62;}
-    }
+.container{
+    max-width:750px;
+    padding:40px;
+}
 
-    .wrap{
-      width:min(1100px, 92vw);
-      margin:0 auto;
-      padding: 34px 16px 60px;
-    }
+h1{
+    font-size:48px;
+    letter-spacing:8px;
+    color:var(--gold);
+    margin-bottom:20px;
+}
 
-    header{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:16px;
-      flex-wrap:wrap;
-      margin-bottom:18px;
-    }
+.sub{
+    color:var(--muted);
+    font-size:16px;
+    margin-bottom:40px;
+}
 
-    .title{
-      margin:0;
-      color:var(--gold);
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      font-size: clamp(22px, 3.2vw, 34px);
-      text-shadow: 0 12px 40px rgba(0,0,0,.65);
-    }
-    .sub{
-      margin:6px 0 0;
-      color: rgba(255,255,255,.65);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 13px;
-      letter-spacing:.02em;
-      line-height:1.6;
-      max-width: 740px;
-    }
+.card{
+    background:var(--card);
+    padding:40px;
+    border-radius:16px;
+    border:1px solid var(--line);
+    backdrop-filter: blur(10px);
+}
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap:16px;
-      align-items:start;
-    }
-    @media (max-width: 900px){
-      .grid{ grid-template-columns: 1fr; }
-    }
+.card h2{
+    font-size:14px;
+    letter-spacing:4px;
+    color:var(--gold);
+    margin-bottom:30px;
+}
 
-    .card{
-      border:1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border-radius: 18px;
-      box-shadow: 0 24px 90px var(--shadow);
-      overflow:hidden;
-      backdrop-filter: blur(8px);
-      position:relative;
-    }
-    .card::before{
-      content:"";
-      position:absolute;
-      inset:-80px -60px auto -60px;
-      height:180px;
-      background: radial-gradient(closest-side, rgba(230,192,123,.14), transparent 70%);
-      filter: blur(12px);
-      opacity:.55;
-      pointer-events:none;
-    }
+.card p{
+    font-size:18px;
+    line-height:1.6;
+    margin-bottom:25px;
+}
 
-    .cardHead{
-      padding: 16px 16px 10px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-    }
-    .cardHead h2{
-      margin:0;
-      font-size: 12px;
-      letter-spacing:.26em;
-      text-transform:uppercase;
-      color: rgba(230,192,123,.9);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .pill{
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 12px;
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(230,192,123,.22);
-      color: rgba(230,192,123,.9);
-      background: rgba(230,192,123,.06);
-    }
+.silencio{
+    animation: pulsar 3s infinite ease-in-out;
+    color:var(--muted);
+    font-size:14px;
+    margin-top:20px;
+}
 
-    .cardBody{ padding: 16px; }
+@keyframes pulsar{
+    0%{opacity:.4}
+    50%{opacity:1}
+    100%{opacity:.4}
+}
 
-    .row{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-bottom: 14px;
-    }
-    label{
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 12px;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color: rgba(255,255,255,.55);
-    }
-    select, input{
-      background: rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.9);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      outline:none;
-    }
+.botoes{
+    margin-top:30px;
+}
 
-    .btn{
-      appearance:none;
-      border:1px solid var(--line);
-      background: transparent;
-      color: var(--gold);
-      padding: 12px 16px;
-      border-radius: 12px;
-      letter-spacing:.14em;
-      text-transform: uppercase;
-      font-weight: 800;
-      cursor:pointer;
-      transition: transform .12s ease, background .12s ease, opacity .12s ease;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      box-shadow: 0 12px 30px rgba(0,0,0,.22);
-    }
-    .btn:hover{ transform: translateY(-1px); background: rgba(230,192,123,.06); }
-    .btn:active{ transform: translateY(0) scale(.99); }
-    .btn[disabled]{ opacity:.45; cursor:not-allowed; transform:none; }
+.botao{
+    background:transparent;
+    border:1px solid var(--gold);
+    color:var(--gold);
+    padding:12px 28px;
+    margin:0 10px;
+    border-radius:30px;
+    cursor:pointer;
+    font-size:14px;
+    letter-spacing:2px;
+    transition:.3s;
+}
 
-    .btnDanger{
-      border-color: rgba(255,77,77,.35);
-      color: rgba(255,77,77,.95);
-    }
-    .btnOk{
-      border-color: rgba(123,230,178,.30);
-      color: rgba(123,230,178,.95);
-    }
+.botao:hover{
+    background:var(--gold);
+    color:black;
+}
 
-    .bigText{
-      margin: 6px 0 0;
-      font-size: clamp(18px, 2.2vw, 22px);
-      line-height:1.55;
-      color: rgba(255,255,255,.9);
-    }
-    .bigText em{ color: rgba(255,255,255,.95); font-style: italic; }
-
-    .steps{
-      margin: 14px 0 0;
-      padding: 0;
-      list-style:none;
-      display:grid;
-      gap:10px;
-    }
-    .step{
-      border:1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.22);
-      border-radius: 14px;
-      padding: 12px 12px;
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .num{
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border:1px solid rgba(230,192,123,.22);
-      color: rgba(230,192,123,.9);
-      font-weight: 900;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      flex:0 0 auto;
-    }
-    .step p{
-      margin:0;
-      color: rgba(255,255,255,.78);
-      font-size: 13.5px;
-      line-height:1.6;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .step p strong{ color: rgba(255,255,255,.92); }
-
-    .timerBox{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:12px;
-      border-top:1px solid rgba(255,255,255,.08);
-      padding-top: 14px;
-      margin-top: 14px;
-    }
-    .clock{
-      font-variant-numeric: tabular-nums;
-      letter-spacing:.10em;
-      color: var(--gold);
-      font-size: clamp(30px, 4vw, 46px);
-      text-shadow: 0 12px 40px rgba(0,0,0,.7);
-      margin:0;
-    }
-    .clockSub{
-      margin: 6px 0 0;
-      color: rgba(255,255,255,.55);
-      font-size: 12px;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-
-    .asideNote{
-      margin: 0;
-      color: rgba(255,255,255,.70);
-      font-size: 13px;
-      line-height:1.65;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-
-    /* Overlay de silêncio obrigatório */
-    .silence{
-      position:fixed;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-      background:
-        radial-gradient(1100px 700px at 50% 42%, rgba(230,192,123,.10), transparent 58%),
-        rgba(0,0,0,.88);
-      backdrop-filter: blur(10px);
-      z-index: 200;
-    }
-    .silenceCard{
-      width:min(820px, 96vw);
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(12,12,12,.82);
-      border-radius: 22px;
-      padding: 22px 18px 18px;
-      box-shadow: 0 40px 140px rgba(0,0,0,.8);
-      text-align:center;
-    }
-    .silenceSmall{
-      margin:0 0 10px;
-      color: rgba(230,192,123,.9);
-      text-transform: uppercase;
-      letter-spacing:.24em;
-      font-size: 12px;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .silenceMsg{
-      margin: 0 auto 10px;
-      max-width: 740px;
-      color: rgba(255,255,255,.85);
-      line-height: 1.7;
-      font-size: 15px;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .silenceTime{
-      font-variant-numeric: tabular-nums;
-      font-size: clamp(44px, 6vw, 70px);
-      letter-spacing:.10em;
-      color: var(--gold);
-      margin: 6px 0 10px;
-      text-shadow: 0 12px 40px rgba(0,0,0,.7);
-    }
-  </style>
+#fade{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#050505;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .8s ease;
+    z-index:9999;
+}
+</style>
 </head>
 
 <body>
-  <div class="breath" aria-hidden="true"></div>
 
-  <div class="wrap">
-    <header>
-      <div>
-        <h1 class="title">Sessão — O SextoLugar</h1>
-        <p class="sub">
-          Esta página <strong>não substitui as cartas</strong>. Ela só conduz o ritual e marca o tempo.
-          O jogo acontece nas suas mãos.
+<div class="container">
+    <h1>O SEXTO LUGAR</h1>
+    <div class="sub">
+        Você está prestes a atravessar a linha.  
+        Respire. Leia. E escolha com cuidado.
+    </div>
+
+    <div class="card">
+        <h2>• PROTOCOLO • ENTRADA •</h2>
+
+        <p>
+        Antes de iniciar, confirme que você está sozinho(a).  
+        Se ouvir qualquer coisa atrás de você… <i>não vire</i>.
         </p>
-      </div>
-      <div class="pill" id="sessionPill">aguardando início</div>
-    </header>
 
-    <div class="grid">
-      <!-- Centro: condução -->
-      <section class="card" aria-label="Condução da sessão">
-        <div class="cardHead">
-          <h2>Condução</h2>
-          <span class="pill" id="modePill">modo: solo</span>
+        <div class="botoes">
+            <button class="botao">LER O RITUAL</button>
+            <button onclick="iniciarJogo()" class="botao">INICIAR</button>
         </div>
 
-        <div class="cardBody">
-          <div class="row">
-            <div>
-              <label for="mode">Modo</label><br/>
-              <select id="mode">
-                <option value="solo" selected>Solo (1 pessoa)</option>
-                <option value="grupo">Grupo (2+ pessoas)</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="duration">Duração</label><br/>
-              <select id="duration">
-                <option value="30">30 min</option>
-                <option value="45">45 min</option>
-                <option value="60" selected>60 min</option>
-                <option value="75">75 min</option>
-                <option value="90">90 min</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="silenceEvery">Silêncio obrigatório</label><br/>
-              <select id="silenceEvery">
-                <option value="0">Desligado</option>
-                <option value="8">A cada 8 min</option>
-                <option value="10" selected>A cada 10 min</option>
-                <option value="12">A cada 12 min</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="silenceSeconds">Tempo de silêncio</label><br/>
-              <select id="silenceSeconds">
-                <option value="15">15s</option>
-                <option value="25" selected>25s</option>
-                <option value="35">35s</option>
-                <option value="45">45s</option>
-              </select>
-            </div>
-          </div>
-
-          <p class="bigText" id="lead">
-            Pegue o baralho físico. Embaralhe sem falar.<br/>
-            Quando estiver pronto, clique em <em>INICIAR SESSÃO</em>.
-          </p>
-
-          <div class="actions" style="margin-top:14px">
-            <button class="btn btnOk" id="btnBegin">INICIAR SESSÃO</button>
-            <button class="btn" id="btnNext" disabled>PRÓXIMA INSTRUÇÃO</button>
-            <button class="btn btnDanger" id="btnEnd" disabled>ENCERRAR</button>
-          </div>
-
-          <ul class="steps" id="steps">
-            <!-- preenchido via JS -->
-          </ul>
-
-          <div class="timerBox">
-            <div>
-              <p class="clock" id="clock">00:00</p>
-              <p class="clockSub" id="clockSub">tempo de sessão</p>
-            </div>
-            <div style="text-align:right">
-              <p class="clock" id="phaseClock">—</p>
-              <p class="clockSub" id="phaseSub">próximo silêncio</p>
-            </div>
-          </div>
+        <div class="silencio">
+            O silêncio é parte do jogo.
         </div>
-      </section>
-
-      <!-- Lado: regras rápidas -->
-      <aside class="card" aria-label="Regras rápidas">
-        <div class="cardHead">
-          <h2>Regras rápidas</h2>
-          <span class="pill" id="rulePill">físico</span>
-        </div>
-        <div class="cardBody">
-          <p class="asideNote">
-            <strong>Cartas são físicas.</strong> Esta tela só dá comandos, tempo e clima.
-          </p>
-
-          <ul class="steps" style="margin-top:12px">
-            <li class="step">
-              <div class="num">1</div>
-              <p><strong>Não descreva</strong> em voz alta o que leu. No máximo, responda com “sim” ou “não”.</p>
-            </li>
-            <li class="step">
-              <div class="num">2</div>
-              <p>Quando o silêncio for ativado, <strong>não toque nas cartas</strong> e não olhe para trás.</p>
-            </li>
-            <li class="step">
-              <div class="num">3</div>
-              <p>Se o jogo mandar “pausar”, pare. Se mandar “virar”, vire. <strong>Sem improviso.</strong></p>
-            </li>
-            <li class="step">
-              <div class="num">4</div>
-              <p>Grupo: escolham um <strong>condutor</strong> (só ele mexe no site). Os outros só executam.</p>
-            </li>
-          </ul>
-
-          <div class="actions" style="justify-content:flex-start; margin-top:14px">
-            <button class="btn" id="btnSilenceTest" type="button">TESTAR SILÊNCIO</button>
-          </div>
-
-          <p class="asideNote" style="margin-top:12px; color:rgba(255,255,255,.55)">
-            Dica: use em tela cheia e brilho médio. O jogo “respira” melhor.
-          </p>
-        </div>
-      </aside>
     </div>
-  </div>
+</div>
 
-  <!-- overlay silêncio -->
-  <div class="silence" id="silence">
-    <div class="silenceCard">
-      <p class="silenceSmall">Silêncio obrigatório</p>
-      <p class="silenceMsg" id="silenceMsg">
-        Agora, não fale. Não mexa nas cartas. Respire.
-      </p>
-      <div class="silenceTime" id="silenceTime">00:25</div>
-      <p class="silenceMsg" style="color:rgba(255,255,255,.60)">
-        Se você ouvir algo… <em>não reaja</em>.
-      </p>
-    </div>
-  </div>
+<div id="fade"></div>
 
-  <script>
-    const mode = document.getElementById("mode");
-    const duration = document.getElementById("duration");
-    const silenceEvery = document.getElementById("silenceEvery");
-    const silenceSeconds = document.getElementById("silenceSeconds");
+<script>
+function iniciarJogo(){
+    const fade = document.getElementById("fade");
+    fade.style.opacity = "1";
+    setTimeout(()=>{
+        window.location.href = "jogo.html";
+    },800);
+}
+</script>
 
-    const sessionPill = document.getElementById("sessionPill");
-    const modePill = document.getElementById("modePill");
-
-    const btnBegin = document.getElementById("btnBegin");
-    const btnNext = document.getElementById("btnNext");
-    const btnEnd = document.getElementById("btnEnd");
-    const btnSilenceTest = document.getElementById("btnSilenceTest");
-
-    const stepsEl = document.getElementById("steps");
-    const lead = document.getElementById("lead");
-
-    const clock = document.getElementById("clock");
-    const clockSub = document.getElementById("clockSub");
-    const phaseClock = document.getElementById("phaseClock");
-    const phaseSub = document.getElementById("phaseSub");
-
-    const silenceOverlay = document.getElementById("silence");
-    const silenceTime = document.getElementById("silenceTime");
-
-    let started = false;
-    let stepIndex = 0;
-    let sessionTimer = null;
-    let phaseTimer = null;
-
-    let elapsed = 0;              // segundos desde início
-    let total = 60 * 60;          // segundos totais
-    let nextSilenceAt = null;     // segundos
-    let silenceLock = false;
-
-    const scriptSteps = [
-      "Embaralhe o baralho físico <strong>7 vezes</strong>. Sem falar.",
-      "Separe o baralho em <strong>3 montes</strong>. Escolha o do meio.",
-      "Pegue a <strong>Carta 1</strong> do topo. Leia em silêncio. Execute apenas o que ela manda.",
-      "Quando terminar a Carta 1, coloque-a em uma pilha ao lado, virada para baixo.",
-      "Pegue a <strong>próxima carta</strong>. Se surgir dúvida, a regra é: <strong>não repita</strong> a leitura.",
-      "Se a carta mandar escolher, escolha rápido. <strong>Demora também é escolha.</strong>",
-      "Continue até o jogo indicar pausa, final — ou até o tempo encerrar."
-    ];
-
-    function fmt(sec){
-      const m = Math.floor(sec / 60);
-      const s = sec % 60;
-      return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
-    }
-
-    function renderSteps(){
-      stepsEl.innerHTML = "";
-      for(let i=0;i<=Math.min(stepIndex, scriptSteps.length-1);i++){
-        const li = document.createElement("li");
-        li.className = "step";
-        li.innerHTML = `<div class="num">${i+1}</div><p>${scriptSteps[i]}</p>`;
-        stepsEl.appendChild(li);
-      }
-    }
-
-    function applyMode(){
-      modePill.textContent = `modo: ${mode.value}`;
-    }
-    mode.addEventListener("change", applyMode);
-    applyMode();
-
-    function scheduleNextSilence(){
-      const everyMin = Number(silenceEvery.value);
-      if(everyMin <= 0){
-        nextSilenceAt = null;
-        phaseClock.textContent = "—";
-        phaseSub.textContent = "silêncio desligado";
-        return;
-      }
-      // próximo silêncio no próximo múltiplo de everyMin
-      const everySec = everyMin * 60;
-      const next = Math.ceil((elapsed + 1) / everySec) * everySec;
-      nextSilenceAt = next;
-      phaseSub.textContent = "próximo silêncio";
-    }
-
-    function updateClocks(){
-      clock.textContent = fmt(elapsed);
-      clockSub.textContent = `tempo decorrido / ${fmt(total)}`;
-
-      if(nextSilenceAt === null){
-        phaseClock.textContent = "—";
-        return;
-      }
-      const left = Math.max(0, nextSilenceAt - elapsed);
-      phaseClock.textContent = fmt(left);
-    }
-
-    function startSession(){
-      if(started) return;
-      started = true;
-
-      // trava configurações durante o jogo
-      mode.disabled = true;
-      duration.disabled = true;
-      silenceEvery.disabled = true;
-      silenceSeconds.disabled = true;
-
-      btnBegin.disabled = true;
-      btnNext.disabled = false;
-      btnEnd.disabled = false;
-
-      sessionPill.textContent = "sessão em andamento";
-      lead.innerHTML = "A sessão começou. <em>O baralho é real.</em> A tela só conduz. Siga as instruções.";
-
-      elapsed = 0;
-      total = Number(duration.value) * 60;
-
-      stepIndex = 0;
-      renderSteps();
-
-      scheduleNextSilence();
-      updateClocks();
-
-      sessionTimer = setInterval(() => {
-        if(silenceLock) return; // durante silêncio, o relógio do jogo continua? aqui fica pausado pra aumentar tensão.
-        elapsed += 1;
-
-        // fim por tempo
-        if(elapsed >= total){
-          endSession(true);
-          return;
-        }
-
-        // silêncio programado
-        if(nextSilenceAt !== null && elapsed === nextSilenceAt){
-          triggerSilence(Number(silenceSeconds.value));
-          // agenda o próximo
-          scheduleNextSilence();
-        }
-
-        updateClocks();
-      }, 1000);
-    }
-
-    function triggerSilence(sec){
-      silenceLock = true;
-      document.body.style.overflow = "hidden";
-      silenceOverlay.style.display = "flex";
-
-      let remain = sec;
-      silenceTime.textContent = fmt(remain);
-
-      // trava o avanço durante o silêncio
-      btnNext.disabled = true;
-      btnEnd.disabled = true;
-
-      // impede ESC fechar
-      const escBlock = (e) => {
-        if(e.key === "Escape"){
-          e.preventDefault();
-        }
-      };
-      window.addEventListener("keydown", escBlock, { passive:false });
-
-      phaseTimer = setInterval(() => {
-        remain -= 1;
-        if(remain < 0) remain = 0;
-        silenceTime.textContent = fmt(remain);
-
-        if(remain === 0){
-          clearInterval(phaseTimer);
-          phaseTimer = null;
-
-          silenceOverlay.style.display = "none";
-          document.body.style.overflow = "";
-
-          btnNext.disabled = false;
-          btnEnd.disabled = false;
-
-          silenceLock = false;
-          window.removeEventListener("keydown", escBlock);
-        }
-      }, 1000);
-    }
-
-    function nextStep(){
-      if(!started) return;
-      if(stepIndex < scriptSteps.length - 1){
-        stepIndex += 1;
-        renderSteps();
-        // pequenas mensagens de clima, sem virar “jogo digital”
-        if(stepIndex === 2) sessionPill.textContent = "Carta 1";
-        if(stepIndex === 3) sessionPill.textContent = "Carta 2+";
-        if(stepIndex === 5) sessionPill.textContent = "decisão";
-      }else{
-        // depois da última, ele continua livre — sem forçar “fim”
-        sessionPill.textContent = "em progresso";
-      }
-    }
-
-    function endSession(byTime=false){
-      if(sessionTimer) clearInterval(sessionTimer);
-      sessionTimer = null;
-      if(phaseTimer) clearInterval(phaseTimer);
-      phaseTimer = null;
-
-      silenceOverlay.style.display = "none";
-      document.body.style.overflow = "";
-
-      btnNext.disabled = true;
-      btnEnd.disabled = true;
-
-      sessionPill.textContent = byTime ? "tempo encerrado" : "encerrado";
-      lead.innerHTML = byTime
-        ? "O tempo acabou. <em>Coloque as cartas de volta na caixa</em>. Sem comentários por 1 minuto."
-        : "Sessão encerrada. <em>Guarde as cartas</em>. Não discuta o que aconteceu agora.";
-
-      phaseClock.textContent = "—";
-      phaseSub.textContent = "sessão finalizada";
-
-      // reabilitar configs para uma próxima sessão
-      mode.disabled = false;
-      duration.disabled = false;
-      silenceEvery.disabled = false;
-      silenceSeconds.disabled = false;
-    }
-
-    btnBegin.addEventListener("click", startSession);
-    btnNext.addEventListener("click", nextStep);
-    btnEnd.addEventListener("click", () => endSession(false));
-
-    btnSilenceTest.addEventListener("click", () => {
-      if(silenceLock) return;
-      triggerSilence(10);
-    });
-
-    // iniciar visual
-    renderSteps();
-    updateClocks();
-    scheduleNextSilence();
-  </script>
 </body>
-  </html>
+</html>
