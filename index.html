@@ -4,9 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>O SextoLugar — Entrada</title>
-<link rel="icon" type="image/png" sizes="512x512" href="./favicon.png">
-<link rel="apple-touch-icon" href="./favicon.png">
-<meta name="theme-color" content="#050505">
+
+  <!-- FAVICON / ÍCONE DA ABA -->
+  <link rel="icon" type="image/png" sizes="512x512" href="./favicon.png">
+  <link rel="apple-touch-icon" href="./favicon.png">
+  <meta name="theme-color" content="#050505">
+
   <style>
     :root{
       --bg:#050505;
@@ -293,13 +296,10 @@
       color:rgba(255,255,255,.86);
     }
 
-    /* Transição leve (OTIMIZADA: sem blur para não travar) */
-    .fadeOut{
-      will-change: opacity, transform;
-      animation: fadeOut .8s ease forwards;
-    }
+    /* Transição leve (fluida) */
+    .fadeOut{ animation: fadeOut .55s ease forwards; }
     @keyframes fadeOut{
-      to{ opacity:0; transform: translateY(6px) scale(.995); }
+      to{ opacity:0; transform: translateY(6px) scale(.995); filter: blur(1px); }
     }
 
     /* ====== AJUSTES ESPECÍFICOS PARA CELULAR (conserta seu print) ====== */
@@ -357,74 +357,28 @@
       }
     }
 
-    /* ====== DIREITOS AUTORAIS — NÍVEL 3 (marca forte e imponente) ====== */
-    .copyright{
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 10px;
-      z-index: 2;
-      display: flex;
-      justify-content: center;
-      padding: 0 14px;
-      pointer-events: none; /* não atrapalha cliques do site */
+    /* ===== Direitos Autorais (sem atrapalhar no celular) ===== */
+    .footer{
+      width:100%;
+      max-width:980px;
+      margin:14px auto 0;
+      text-align:center;
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.42);
+      pointer-events:none;
+      padding: 0 10px;
+    }
+    .footer .brand{
+      color:rgba(230,192,123,.85);
+      font-weight:700;
     }
 
-    .copyright .inner{
-      width: min(980px, 100%);
-      text-align: center;
-      font-size: 11px;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.40);
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.06);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 10px 40px rgba(0,0,0,.35);
-      position: relative;
-    }
-
-    .copyright .inner::before{
-      content:"";
-      position:absolute;
-      left: 10px;
-      right: 10px;
-      top: 6px;
-      height: 2px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, transparent, rgba(230,192,123,.55), transparent);
-      opacity: .55;
-    }
-
-    .copyright strong{
-      color: rgba(230,192,123,.85);
-      font-weight: 700;
-    }
-
-    .copyright a{
-      pointer-events: auto; /* link clicável */
-      color: rgba(230,192,123,.75);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(230,192,123,.22);
-      padding-bottom: 1px;
-    }
-    .copyright a:hover{
-      color: rgba(230,192,123,.92);
-      border-bottom-color: rgba(230,192,123,.45);
-    }
-
-    @media (max-width: 430px){
-      .copyright{ bottom: 8px; }
-      .copyright .inner{
-        font-size: 9.8px;
-        letter-spacing: .14em;
-        padding: 9px 10px;
-      }
-      .copyright .inner::before{
-        left: 8px;
-        right: 8px;
+    /* no desktop fica “mais colado” embaixo */
+    @media (min-width: 700px){
+      .footer{
+        margin-top: 16px;
       }
     }
   </style>
@@ -464,6 +418,11 @@
 
       <div class="hint">Dica: se estiver no celular, aumente o brilho só um pouco.</div>
     </section>
+
+    <!-- Direitos autorais -->
+    <footer class="footer" aria-label="Direitos autorais">
+      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+    </footer>
   </main>
 
   <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-labelledby="ritualTitle">
@@ -489,14 +448,6 @@
     </div>
   </div>
 
-  <!-- DIREITOS AUTORAIS -->
-  <footer class="copyright" aria-label="Direitos autorais">
-    <div class="inner">
-      © <span id="year"></span> <strong>Prelúdio Jogos™</strong> • <strong>O SextoLugar™</strong> — Todos os direitos reservados •
-      <a href="https://preludiojogos.com.br" target="_blank" rel="noopener">preludiojogos.com.br</a>
-    </div>
-  </footer>
-
   <script>
     const modalBack = document.getElementById("modalBack");
     const btnRitual = document.getElementById("btnRitual");
@@ -513,17 +464,8 @@
     btnIniciar.addEventListener("click", () => {
       status.textContent = "Status: iniciando…";
       scene.classList.add("fadeOut");
-
-      // Navega exatamente quando a animação terminar (mais fluido)
-      const go = () => window.location.href = "./jogo.html";
-      scene.addEventListener("animationend", go, { once: true });
-
-      // fallback de segurança (se o animationend falhar por algum motivo)
-      setTimeout(go, 850);
+      setTimeout(() => window.location.href = "./jogo.html", 560);
     });
-
-    // ano automático no rodapé
-    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
