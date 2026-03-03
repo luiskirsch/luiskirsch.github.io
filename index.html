@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Prelúdio Jogos — Boas-vindas</title>
 
+  <!-- Favicons (deixe favicon.png na mesma pasta do index.html) -->
   <link rel="icon" type="image/png" href="./favicon.png">
 
+  <!-- ajuda contra cache agressivo em alguns ambientes -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -36,6 +38,9 @@
       overscroll-behavior: none;
     }
 
+    /* =========================
+       ✅ FALLBACK UNIVERSAL
+       ========================= */
     body{
       margin:0;
       min-height:100vh;
@@ -54,7 +59,6 @@
       font-family: ui-serif, Georgia, "Times New Roman", serif;
 
       background-color:#000006;
-
       background:
         radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.06), transparent 62%),
         radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.035), transparent 72%),
@@ -71,6 +75,7 @@
       body{ min-height:100dvh; }
     }
 
+    /* ✅ estrelas em CSS (fallback se canvas falhar) */
     body::before{
       content:"";
       position:fixed;
@@ -92,6 +97,7 @@
       filter: blur(.15px);
     }
 
+    /* ✅ névoa universal */
     body::after{
       content:"";
       position:fixed;
@@ -114,6 +120,7 @@
       50%{ transform: translate3d(10px,-10px,0) scale(1.02); opacity:.46; }
     }
 
+    /* Canvas (enhancement) */
     #stars{
       position:fixed;
       inset:0;
@@ -131,6 +138,7 @@
       padding: 22px 0 28px;
     }
 
+    /* ✅ logo central maior, sem círculo */
     .topbar{
       display:flex;
       align-items:center;
@@ -157,6 +165,8 @@
 
     .card{
       border-radius:26px;
+      background: rgba(255,255,255,.05);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.035));
       background: linear-gradient(180deg, var(--cardA), var(--cardB));
       border:1px solid rgba(255,255,255,.10);
       box-shadow: 0 30px 90px rgba(0,0,0,.62);
@@ -203,6 +213,7 @@
       flex:0 0 auto;
     }
 
+    /* ✅ título com fallback universal */
     .title{
       margin:0;
       line-height: .92;
@@ -210,6 +221,7 @@
       text-transform:uppercase;
       font-weight: 700;
       font-size: clamp(48px, 6.2vw, 110px);
+      color:#e6c07b;
       color: var(--gold);
       text-shadow: 0 20px 70px rgba(0,0,0,.55);
       animation: titlePulse 4.2s ease-in-out infinite;
@@ -462,10 +474,11 @@
       .miniGrid{ grid-template-columns: 1fr; }
       button{ width: 100%; min-width: 0; }
       .logoOnly{ width:110px; height:110px; }
-      .countdownGrid{ grid-template-columns: repeat(2, minmax(90px,1fr)); }
     }
 
-    /* ✅ Painel de som fixo + some ao rolar */
+    /* =========================
+       ✅ PAINEL DE SOM (fixo topo) + some ao rolar
+       ========================= */
     .soundPanel{
       position:fixed;
       right:max(14px, env(safe-area-inset-right));
@@ -479,15 +492,12 @@
       padding:10px;
       box-shadow: 0 18px 60px rgba(0,0,0,.45);
       min-width: 220px;
-
-      transform: translate3d(0,0,0);
-      opacity: 1;
-      transition: transform .26s ease, opacity .22s ease;
-      will-change: transform, opacity;
+      transform: translateZ(0);
+      transition: transform .22s ease, opacity .22s ease;
     }
     .soundPanel.isHidden{
-      transform: translate3d(0,-14px,0);
-      opacity: 0;
+      opacity:0;
+      transform: translate3d(0,-10px,0);
       pointer-events:none;
     }
 
@@ -502,6 +512,7 @@
       text-transform:uppercase;
       cursor:pointer;
       user-select:none;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
       text-align:center;
     }
     .soundBtn strong{ color: #e6c07b; color: var(--gold); }
@@ -529,103 +540,20 @@
       }
     }
 
-    .launchCountdown{ margin-top: 18px; }
-    .countdownCard{
-      border-radius:22px;
-      border: 1px solid rgba(230,192,123,.20);
-      background: linear-gradient(180deg, rgba(230,192,123,.08), rgba(255,255,255,.02));
-      padding: 18px;
-      box-shadow: inset 0 0 40px rgba(0,0,0,.24), 0 24px 70px rgba(0,0,0,.42);
-    }
-    .countdownTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    .countdownTitle{
-      margin:0;
-      font-size:14px;
-      letter-spacing:.24em;
-      text-transform:uppercase;
-      color: rgba(230,192,123,.90);
-    }
-    .countdownDate{
-      font-size:12px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color: rgba(255,255,255,.62);
-    }
-    .countdownLead{
-      margin:10px 0 0;
-      font-size: clamp(18px, 2.2vw, 30px);
-      color: rgba(255,255,255,.92);
-      line-height:1.35;
-    }
-    .countdownGrid{
-      margin-top: 14px;
-      display:grid;
-      grid-template-columns: repeat(4, minmax(92px,1fr));
-      gap:10px;
-    }
-    .countdownItem{
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.25);
-      padding:12px 10px;
-      text-align:center;
-    }
-    .countdownValue{
-      margin:0;
-      font-size: clamp(28px, 3vw, 42px);
-      font-weight:700;
-      color: rgba(230,192,123,.95);
-      line-height:1;
-      text-shadow: 0 10px 30px rgba(0,0,0,.45);
-      font-variant-numeric: tabular-nums;
-    }
-    .countdownLabel{
-      margin-top:6px;
-      font-size:11px;
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      color: rgba(255,255,255,.66);
-    }
-    .countdownTrack{
-      margin-top:12px;
-      height:8px;
-      border-radius:999px;
-      overflow:hidden;
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .countdownBar{
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, rgba(230,192,123,.35), rgba(230,192,123,.92), rgba(255,255,255,.92));
-      box-shadow: 0 0 18px rgba(230,192,123,.35);
-      transition: width .6s ease;
-    }
-    .countdownStatus{
-      margin-top:10px;
-      font-size:12px;
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      color: rgba(255,255,255,.66);
-    }
-
     @media (prefers-reduced-motion: reduce){
       body::after, .whisper, .title{ animation:none !important; }
       #stars{ display:none; }
-      .soundPanel{ transition:none !important; }
     }
+
+    /* (opcional) melhorar clique em mobile */
+    .soundBtn, button { touch-action: manipulation; }
   </style>
 </head>
 
 <body>
   <canvas id="stars" aria-hidden="true"></canvas>
 
+  <!-- ✅ Painel fixo (não atrapalha cards) + pode desaparecer ao rolar -->
   <div class="soundPanel" id="soundPanel" aria-label="Painel de som ambiente">
     <div class="soundBtn" id="soundBtn" role="button" aria-label="Ativar ou desativar som">
       SOM: <strong>OFF</strong>
@@ -722,43 +650,6 @@
       </aside>
     </section>
 
-    <section class="launchCountdown" aria-label="Contagem regressiva de lançamento">
-      <article class="countdownCard">
-        <div class="countdownTop">
-          <h2 class="countdownTitle">Lançamento em contagem regressiva</h2>
-          <div class="countdownDate" id="launchDateText">Previsão de lançamento</div>
-        </div>
-
-        <p class="countdownLead" id="countdownLeadText">
-          Faltam poucos ciclos para a primeira tiragem de <strong style="color:rgba(230,192,123,.95);">O SextoLugar</strong>.
-        </p>
-
-        <div class="countdownGrid" id="countdownGrid" role="timer" aria-live="polite" aria-atomic="true">
-          <div class="countdownItem">
-            <p class="countdownValue" id="cdDays">00</p>
-            <div class="countdownLabel">Dias</div>
-          </div>
-          <div class="countdownItem">
-            <p class="countdownValue" id="cdHours">00</p>
-            <div class="countdownLabel">Horas</div>
-          </div>
-          <div class="countdownItem">
-            <p class="countdownValue" id="cdMinutes">00</p>
-            <div class="countdownLabel">Minutos</div>
-          </div>
-          <div class="countdownItem">
-            <p class="countdownValue" id="cdSeconds">00</p>
-            <div class="countdownLabel">Segundos</div>
-          </div>
-        </div>
-
-        <div class="countdownTrack" aria-hidden="true">
-          <div class="countdownBar" id="countdownBar"></div>
-        </div>
-        <div class="countdownStatus" id="countdownStatus">Preparando cronômetro de lançamento…</div>
-      </article>
-    </section>
-
     <section class="below">
       <article class="card">
         <div class="inner">
@@ -781,7 +672,7 @@
 
   <script>
     /* =========================================================
-       ✅ 1) Estrelas + meteoros (ES5)
+       ✅ 1) Estrelas + meteoros (ES5) — se falhar, fallback CSS continua
        ========================================================= */
     (function(){
       try{
@@ -837,7 +728,7 @@
           var startY = rand(-h*0.25, -h*0.06);
 
           var speed = rand(10.5, 14.5);
-          var angle = rand(0.85, 1.05);
+          var angle = rand(0.85, 1.05); // cima->baixo, diagonal esquerda->direita
           var vx = Math.cos(angle) * speed;
           var vy = Math.sin(angle) * speed;
 
@@ -928,80 +819,14 @@
 
         window.addEventListener("resize", start);
         start();
-      } catch(e){}
+
+      } catch(e){
+        // fallback CSS mantém visual
+      }
     })();
 
     /* =========================================================
-       ✅ 2) Contagem regressiva (3 meses)
-       ========================================================= */
-    (function(){
-      try{
-        var dayEl = document.getElementById("cdDays");
-        var hourEl = document.getElementById("cdHours");
-        var minEl = document.getElementById("cdMinutes");
-        var secEl = document.getElementById("cdSeconds");
-        var statusEl = document.getElementById("countdownStatus");
-        var barEl = document.getElementById("countdownBar");
-        var dateTextEl = document.getElementById("launchDateText");
-        var leadTextEl = document.getElementById("countdownLeadText");
-        if (!dayEl || !hourEl || !minEl || !secEl || !statusEl || !barEl || !dateTextEl || !leadTextEl) return;
-
-        var MS = { sec: 1000, min: 60000, hour: 3600000, day: 86400000 };
-        var start = new Date();
-        var target = new Date(start.getTime());
-        target.setMonth(target.getMonth() + 3);
-
-        function pad(n){ return (n < 10 ? "0" : "") + n; }
-        function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
-
-        function update(){
-          var now = new Date();
-          var diff = target.getTime() - now.getTime();
-
-          if (diff <= 0){
-            dayEl.textContent = "00";
-            hourEl.textContent = "00";
-            minEl.textContent = "00";
-            secEl.textContent = "00";
-            barEl.style.width = "100%";
-            statusEl.textContent = "É hoje. O SextoLugar foi lançado.";
-            leadTextEl.textContent = "O ritual começou. Obrigado por estar desde o prelúdio.";
-            return;
-          }
-
-          var days = Math.floor(diff / MS.day); diff -= days * MS.day;
-          var hours = Math.floor(diff / MS.hour); diff -= hours * MS.hour;
-          var mins = Math.floor(diff / MS.min); diff -= mins * MS.min;
-          var secs = Math.floor(diff / MS.sec);
-
-          dayEl.textContent = pad(days);
-          hourEl.textContent = pad(hours);
-          minEl.textContent = pad(mins);
-          secEl.textContent = pad(secs);
-
-          var total = target.getTime() - start.getTime();
-          var elapsed = now.getTime() - start.getTime();
-          var pct = clamp((elapsed / total) * 100, 0, 100);
-          barEl.style.width = pct.toFixed(2) + "%";
-
-          statusEl.textContent = "Contagem ativa • " + days + " dia(s) restantes para o lançamento.";
-        }
-
-        var fmt = (window.Intl && Intl.DateTimeFormat)
-          ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" })
-          : null;
-
-        dateTextEl.textContent = fmt
-          ? ("Lançamento previsto: " + fmt.format(target))
-          : ("Lançamento previsto: " + target.toLocaleDateString());
-
-        update();
-        setInterval(update, 1000);
-      }catch(e){}
-    })();
-
-    /* =========================================================
-       ✅ 3) Leads
+       ✅ 2) Leads (estático)
        ========================================================= */
     (function(){
       try{
@@ -1096,7 +921,10 @@
     })();
 
     /* =========================================================
-       ✅ 4) Som (botão + slider)
+       ✅ 3) Som “Nível Netflix” (WebAudio) — estilo espaço VR
+       - Sem arquivos externos
+       - Sem “chiado de mal contato” (sem clipping/sem DC)
+       - Liga com gesto (clique/tap) por regra do iOS/Chrome
        ========================================================= */
     (function(){
       var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
@@ -1109,31 +937,11 @@
 
       var audioCtx = null;
       var started = false;
-      var master = null;
-      var targets = null;
+
+      var nodes = null;     // referências para ramp de volume
       var STORAGE_KEY = "preludio_sound_volume";
 
-      function clamp(v, min, max){
-        return Math.min(max, Math.max(min, v));
-      }
-
-      function getVolume(){
-        var raw = Number(soundVolume.value || 62) / 100;
-        return clamp(raw, 0, 1);
-      }
-
-      function getScaledTargets(){
-        var base = getVolume();
-        return {
-          drone: 0.44 * base,
-          air: 0.085 * base,
-          master: 0.55 * (0.30 + (base * 0.70))
-        };
-      }
-
-      function saveVolume(){
-        try{ localStorage.setItem(STORAGE_KEY, String(soundVolume.value || "62")); }catch(e){}
-      }
+      function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
 
       function loadVolume(){
         try{
@@ -1145,12 +953,22 @@
         }catch(e){}
       }
 
+      function saveVolume(){
+        try{ localStorage.setItem(STORAGE_KEY, String(soundVolume.value || "62")); }catch(e){}
+      }
+
+      function getVolume(){
+        var raw = Number(soundVolume.value || 62) / 100;
+        return clamp(raw, 0, 1);
+      }
+
       function setBtn(on){
         btn.innerHTML = on ? 'SOM: <strong>ON</strong>' : 'SOM: <strong>OFF</strong>';
       }
       setBtn(false);
 
       function ramp(param, value, time){
+        if (!audioCtx || !param) return;
         var now = audioCtx.currentTime;
         try{
           param.cancelScheduledValues(now);
@@ -1159,20 +977,47 @@
         }catch(e){}
       }
 
-      function createBrownNoise(ctx){
-        var bufferSize = 2 * ctx.sampleRate;
-        var noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        var output = noiseBuffer.getChannelData(0);
-        var lastOut = 0.0;
-        for (var i = 0; i < bufferSize; i++) {
+      /* ====== Ruído “air” (suave) sem estalos ====== */
+      function createSoftNoise(ctx){
+        var size = 2 * ctx.sampleRate;
+        var buf = ctx.createBuffer(1, size, ctx.sampleRate);
+        var data = buf.getChannelData(0);
+
+        // noise “brown-ish” bem contido (sem DC)
+        var last = 0.0;
+        for (var i=0;i<size;i++){
           var white = Math.random() * 2 - 1;
-          lastOut = (lastOut + (0.02 * white)) / 1.02;
-          output[i] = lastOut * 0.32;
+          last = (last + (0.018 * white)) / 1.018;
+          data[i] = last * 0.25;
         }
+
+        // remove DC offset (média)
+        var sum = 0.0;
+        for (var j=0;j<size;j++) sum += data[j];
+        var mean = sum / size;
+        for (var k=0;k<size;k++) data[k] -= mean;
+
         var src = ctx.createBufferSource();
-        src.buffer = noiseBuffer;
+        src.buffer = buf;
         src.loop = true;
         return src;
+      }
+
+      /* ====== Reverb interno (convolver) ====== */
+      function makeImpulse(ctx, seconds, decay){
+        var rate = ctx.sampleRate;
+        var length = Math.max(1, Math.floor(rate * seconds));
+        var impulse = ctx.createBuffer(2, length, rate);
+
+        for (var ch=0; ch<2; ch++){
+          var data = impulse.getChannelData(ch);
+          for (var i=0; i<length; i++){
+            var t = i / length;
+            // ruído decaindo + leve variação (evita “areia”)
+            data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, decay);
+          }
+        }
+        return impulse;
       }
 
       function startAudio(){
@@ -1184,101 +1029,215 @@
 
           audioCtx = new Ctx();
 
-          master = audioCtx.createGain();
+          // MASTER
+          var master = audioCtx.createGain();
           master.gain.value = 0.00001;
 
+          // Segurança: compressor leve (sem bombar)
           var comp = audioCtx.createDynamicsCompressor();
-          comp.threshold.value = -28;
+          comp.threshold.value = -26;
           comp.knee.value = 24;
-          comp.ratio.value = 1.8;
+          comp.ratio.value = 1.6;
           comp.attack.value = 0.02;
           comp.release.value = 0.25;
 
-          var lp = audioCtx.createBiquadFilter();
-          lp.type = "lowpass";
-          lp.frequency.value = 1200;
-          lp.Q.value = 0.7;
-
+          // EQ: corta sub e agudos agressivos
           var hp = audioCtx.createBiquadFilter();
           hp.type = "highpass";
-          hp.frequency.value = 35;
+          hp.frequency.value = 28;
           hp.Q.value = 0.7;
+
+          var lp = audioCtx.createBiquadFilter();
+          lp.type = "lowpass";
+          lp.frequency.value = 1600;
+          lp.Q.value = 0.7;
 
           master.connect(comp);
           comp.connect(lp);
           lp.connect(hp);
           hp.connect(audioCtx.destination);
 
-          var gDrone = audioCtx.createGain();
-          gDrone.gain.value = 0.0;
-          gDrone.connect(master);
+          // BUSES
+          var busDry = audioCtx.createGain(); busDry.gain.value = 1.0;
+          var busWet = audioCtx.createGain(); busWet.gain.value = 0.55;
 
-          var o1 = audioCtx.createOscillator(); o1.type = "sine";     o1.frequency.value = 55;
-          var o2 = audioCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 110;
-          var o3 = audioCtx.createOscillator(); o3.type = "sine";     o3.frequency.value = 82.41;
+          busDry.connect(master);
+          busWet.connect(master);
 
-          var g1 = audioCtx.createGain(); g1.gain.value = 0.12;
+          // REVERB
+          var convolver = audioCtx.createConvolver();
+          convolver.buffer = makeImpulse(audioCtx, 2.6, 2.8);
+
+          var revHP = audioCtx.createBiquadFilter();
+          revHP.type = "highpass";
+          revHP.frequency.value = 180;
+          revHP.Q.value = 0.7;
+
+          var revLP = audioCtx.createBiquadFilter();
+          revLP.type = "lowpass";
+          revLP.frequency.value = 2200;
+          revLP.Q.value = 0.7;
+
+          convolver.connect(revHP);
+          revHP.connect(revLP);
+          revLP.connect(busWet);
+
+          // MIXER DRONE
+          var droneGain = audioCtx.createGain();
+          droneGain.gain.value = 0.0;
+          droneGain.connect(busDry);
+          droneGain.connect(convolver); // manda parte pro reverb
+
+          // “Espaço” (fundação): 3 osciladores muito estáveis
+          var o1 = audioCtx.createOscillator(); o1.type = "sine";     o1.frequency.value = 43.65;  // F1
+          var o2 = audioCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 65.41;  // C2
+          var o3 = audioCtx.createOscillator(); o3.type = "sine";     o3.frequency.value = 98.00;  // G2
+
+          var g1 = audioCtx.createGain(); g1.gain.value = 0.10;
           var g2 = audioCtx.createGain(); g2.gain.value = 0.06;
-          var g3 = audioCtx.createGain(); g3.gain.value = 0.08;
+          var g3 = audioCtx.createGain(); g3.gain.value = 0.07;
 
-          o1.connect(g1); g1.connect(gDrone);
-          o2.connect(g2); g2.connect(gDrone);
-          o3.connect(g3); g3.connect(gDrone);
-
-          var lfo = audioCtx.createOscillator();
-          lfo.type = "sine";
-          lfo.frequency.value = 0.03;
-
-          var lfoGain = audioCtx.createGain();
-          lfoGain.gain.value = 0.10;
-
+          // leve “swell” (lfo) no drone
+          var lfo = audioCtx.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 0.028;
+          var lfoGain = audioCtx.createGain(); lfoGain.gain.value = 0.10; // profundidade
           lfo.connect(lfoGain);
-          lfoGain.connect(gDrone.gain);
+          lfoGain.connect(droneGain.gain);
 
-          var air = createBrownNoise(audioCtx);
-          var airGain = audioCtx.createGain();
-          airGain.gain.value = 0.0;
+          o1.connect(g1); g1.connect(droneGain);
+          o2.connect(g2); g2.connect(droneGain);
+          o3.connect(g3); g3.connect(droneGain);
+
+          // “AIR” (ruído suave filtrado) + reverb
+          var air = createSoftNoise(audioCtx);
+          var airGain = audioCtx.createGain(); airGain.gain.value = 0.0;
 
           var airLP = audioCtx.createBiquadFilter();
           airLP.type = "lowpass";
-          airLP.frequency.value = 420;
-          airLP.Q.value = 0.6;
+          airLP.frequency.value = 520;
+          airLP.Q.value = 0.55;
+
+          var airHP = audioCtx.createBiquadFilter();
+          airHP.type = "highpass";
+          airHP.frequency.value = 55;
+          airHP.Q.value = 0.7;
 
           air.connect(airLP);
-          airLP.connect(airGain);
-          airGain.connect(master);
+          airLP.connect(airHP);
+          airHP.connect(airGain);
+          airGain.connect(busDry);
+          airGain.connect(convolver);
 
-          var delay = audioCtx.createDelay(0.5);
-          delay.delayTime.value = 0.22;
+          // “PINGS” distantes (como radar/nave) — bem baixo e espaçado
+          var pingBus = audioCtx.createGain();
+          pingBus.gain.value = 0.0;
+          pingBus.connect(convolver);
 
-          var dGain = audioCtx.createGain();
-          dGain.gain.value = 0.10;
+          function schedulePing(){
+            if (!audioCtx || !started) return;
 
-          gDrone.connect(delay);
-          delay.connect(dGain);
-          dGain.connect(master);
+            var t0 = audioCtx.currentTime + (0.30 + Math.random() * 0.90);
+            var osc = audioCtx.createOscillator();
+            osc.type = "sine";
+            osc.frequency.value = 440 + Math.random() * 180;
 
+            var g = audioCtx.createGain();
+            g.gain.setValueAtTime(0.00001, t0);
+            g.gain.exponentialRampToValueAtTime(0.06, t0 + 0.01);
+            g.gain.exponentialRampToValueAtTime(0.00001, t0 + 0.35);
+
+            // um pouco mais “místico”: filtro banda leve
+            var bp = audioCtx.createBiquadFilter();
+            bp.type = "bandpass";
+            bp.frequency.value = 800 + Math.random() * 300;
+            bp.Q.value = 2.2;
+
+            osc.connect(bp);
+            bp.connect(g);
+            g.connect(pingBus);
+
+            osc.start(t0);
+            osc.stop(t0 + 0.40);
+
+            setTimeout(schedulePing, 1800 + Math.floor(Math.random() * 2400));
+          }
+
+          // “SWOOSH” ocasional (como vento cósmico passando)
+          var swooshGain = audioCtx.createGain(); swooshGain.gain.value = 0.0;
+          swooshGain.connect(convolver);
+
+          function scheduleSwoosh(){
+            if (!audioCtx || !started) return;
+
+            var t0 = audioCtx.currentTime + (0.6 + Math.random() * 1.2);
+
+            var n = createSoftNoise(audioCtx);
+            var g = audioCtx.createGain();
+            g.gain.setValueAtTime(0.00001, t0);
+            g.gain.exponentialRampToValueAtTime(0.08, t0 + 0.18);
+            g.gain.exponentialRampToValueAtTime(0.00001, t0 + 1.20);
+
+            var bp = audioCtx.createBiquadFilter();
+            bp.type = "bandpass";
+            bp.frequency.setValueAtTime(220, t0);
+            bp.frequency.linearRampToValueAtTime(900, t0 + 0.55);
+            bp.frequency.linearRampToValueAtTime(260, t0 + 1.15);
+            bp.Q.value = 0.9;
+
+            n.connect(bp);
+            bp.connect(g);
+            g.connect(swooshGain);
+
+            n.start(t0);
+            n.stop(t0 + 1.25);
+
+            setTimeout(scheduleSwoosh, 5200 + Math.floor(Math.random() * 6400));
+          }
+
+          // start sources
           o1.start(); o2.start(); o3.start();
           lfo.start();
           air.start();
 
+          // em alguns browsers precisa (principalmente iOS/alguns desktop)
           if (audioCtx.state === "suspended"){
             try{ audioCtx.resume(); }catch(e){}
           }
 
-          targets = {
-            gDrone: gDrone.gain,
+          // targets “Netflix”: mais cheio, mas SEM clipar
+          nodes = {
+            master: master.gain,
+            drone: droneGain.gain,
             air: airGain.gain,
-            master: master.gain
+            ping: pingBus.gain,
+            swoosh: swooshGain.gain
           };
 
-          var levels = getScaledTargets();
-          ramp(gDrone.gain, levels.drone, 1.6);
-          ramp(airGain.gain, levels.air, 1.8);
-          ramp(master.gain, levels.master, 1.8);
+          function applyLevels(smooth){
+            var base = getVolume();
 
+            // mix final: controlado e “cinema”
+            var lvlMaster = 0.62 * (0.25 + (base * 0.75));
+            var lvlDrone  = 0.55 * base;
+            var lvlAir    = 0.14 * base;
+            var lvlPing   = 0.10 * base;
+            var lvlSwoosh = 0.09 * base;
+
+            var t = smooth ? 0.35 : 1.8;
+            ramp(nodes.master, lvlMaster, t);
+            ramp(nodes.drone,  lvlDrone,  t);
+            ramp(nodes.air,    lvlAir,    t);
+            ramp(nodes.ping,   lvlPing,   t);
+            ramp(nodes.swoosh, lvlSwoosh, t);
+          }
+
+          applyLevels(false);
+
+          // começa eventos “cinema”
           started = true;
           setBtn(true);
+          schedulePing();
+          scheduleSwoosh();
+
           return true;
 
         }catch(e){
@@ -1295,18 +1254,20 @@
         }catch(e){}
         audioCtx = null;
         started = false;
-        master = null;
-        targets = null;
+        nodes = null;
         setBtn(false);
       }
 
       function onVolumeChange(){
         saveVolume();
-        if (!started || !audioCtx || !targets) return;
-        var levels = getScaledTargets();
-        ramp(targets.gDrone, levels.drone, 0.25);
-        ramp(targets.air, levels.air, 0.25);
-        ramp(targets.master, levels.master, 0.25);
+        if (!started || !audioCtx || !nodes) return;
+
+        var base = getVolume();
+        ramp(nodes.master, 0.62 * (0.25 + (base * 0.75)), 0.25);
+        ramp(nodes.drone,  0.55 * base, 0.25);
+        ramp(nodes.air,    0.14 * base, 0.25);
+        ramp(nodes.ping,   0.10 * base, 0.25);
+        ramp(nodes.swoosh, 0.09 * base, 0.25);
       }
 
       loadVolume();
@@ -1324,9 +1285,9 @@
     })();
 
     /* =========================================================
-       ✅ 5) SUMIR AO ROLAR (não atrapalha os cards)
-       - desce: some
-       - sobe: volta
+       ✅ 4) Painel de som: fixo + some ao rolar (não atrapalha cards)
+       - some quando você rola pra baixo
+       - reaparece quando rola pra cima ou volta pro topo
        ========================================================= */
     (function(){
       try{
@@ -1336,42 +1297,30 @@
         var lastY = window.pageYOffset || 0;
         var ticking = false;
 
-        function apply(){
-          ticking = false;
-          var y = window.pageYOffset || 0;
-          var delta = y - lastY;
-
-          // perto do topo: sempre mostra
-          if (y < 18){
-            panel.classList.remove("isHidden");
-            lastY = y;
-            return;
-          }
-
-          // rolando pra baixo: esconde
-          if (delta > 6){
-            panel.classList.add("isHidden");
-          }
-          // rolando pra cima: mostra
-          else if (delta < -6){
-            panel.classList.remove("isHidden");
-          }
-
-          lastY = y;
-        }
-
         function onScroll(){
           if (ticking) return;
           ticking = true;
-          if (window.requestAnimationFrame){
-            requestAnimationFrame(apply);
-          } else {
-            setTimeout(apply, 16);
-          }
+
+          window.requestAnimationFrame(function(){
+            var y = window.pageYOffset || 0;
+            var goingDown = y > lastY;
+            var nearTop = y < 40;
+
+            if (nearTop){
+              panel.classList.remove("isHidden");
+            } else if (goingDown){
+              panel.classList.add("isHidden");
+            } else {
+              panel.classList.remove("isHidden");
+            }
+
+            lastY = y;
+            ticking = false;
+          });
         }
 
         window.addEventListener("scroll", onScroll, { passive:true });
-      } catch(e){}
+      }catch(e){}
     })();
   </script>
 </body>
