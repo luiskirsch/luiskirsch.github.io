@@ -25,7 +25,6 @@
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
 
-    /* Evita “faixa escura”/overscroll feio e vibração */
     html{
       background: var(--bg);
       overscroll-behavior: none;
@@ -34,7 +33,7 @@
     body{
       margin:0;
       min-height:100vh;
-      background: #050505; /* fallback */
+      background: #050505;
       overflow-x:hidden;
       overflow-y:auto;
       -webkit-text-size-adjust: 100%;
@@ -54,7 +53,7 @@
       body{ min-height:100dvh; }
     }
 
-    /* Camada fixa de fundo (garante PC + todos navegadores) */
+    /* Fundo fixo */
     .bg{
       position:fixed;
       inset:0;
@@ -68,7 +67,6 @@
       filter: saturate(1.05) contrast(1.02);
     }
 
-    /* Canvas de estrelas por cima */
     #stars{
       position:fixed;
       inset:0;
@@ -78,7 +76,6 @@
       transform: translateZ(0);
     }
 
-    /* névoa / brilho atmosférico */
     .glow{
       position:fixed;
       inset:-22%;
@@ -97,7 +94,6 @@
       50%{ opacity:.78; transform:translateY(-8px) scale(1.01); }
     }
 
-    /* Conteúdo acima de tudo */
     .wrap{
       position:relative;
       z-index:5;
@@ -106,7 +102,6 @@
       padding: 22px 0 28px;
     }
 
-    /* Topo com logo oficial dentro da página */
     .topbar{
       display:flex;
       align-items:center;
@@ -126,7 +121,6 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
-
     .badge img{
       width:72px;
       height:72px;
@@ -142,7 +136,6 @@
       white-space:nowrap;
     }
 
-    /* Grid principal */
     .grid{
       display:grid;
       grid-template-columns: 1.15fr 0.85fr;
@@ -194,7 +187,6 @@
       flex:0 0 auto;
     }
 
-    /* Título com “reflexo dentro das letras” */
     .title{
       margin:0;
       line-height: .92;
@@ -203,7 +195,7 @@
       font-weight: 700;
       font-size: clamp(48px, 6.2vw, 110px);
       text-shadow: 0 20px 70px rgba(0,0,0,.55);
-      color: var(--gold); /* fallback */
+      color: var(--gold);
     }
     @supports ((-webkit-background-clip:text) or (background-clip:text)){
       .title{
@@ -237,7 +229,6 @@
     }
     .subtitle strong{ color: rgba(230,192,123,.95); font-weight:700; }
 
-    /* Frase “enfraquecendo e voltando” */
     .whisper{
       margin: 14px 0 0;
       letter-spacing:.18em;
@@ -291,7 +282,6 @@
       color: rgba(255,255,255,.80);
     }
 
-    /* Card Leads */
     .leadTitle{
       margin: 10px 0 0;
       font-size: clamp(18px, 2.1vw, 30px);
@@ -348,6 +338,7 @@
       margin-top: 2px;
       accent-color: rgba(230,192,123,.9);
     }
+
     .status{
       text-align:center;
       font-size: 13px;
@@ -399,7 +390,26 @@
       user-select:none;
     }
 
-    /* Bloco abaixo (sobre o jogo) */
+    /* Toggle do som ambiente (discreto) */
+    .pillRow{
+      display:flex;
+      justify-content:center;
+      margin-top: 12px;
+    }
+    .pill{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      padding: 8px 12px;
+      border-radius:999px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size: 11px;
+      color: rgba(255,255,255,.70);
+      cursor:pointer;
+      user-select:none;
+    }
+    .pill strong{ color: rgba(230,192,123,.92); }
+
     .below{
       margin-top: 22px;
       display:grid;
@@ -422,7 +432,6 @@
     }
     .aboutText strong{ color: rgba(230,192,123,.95); }
 
-    /* Direitos autorais */
     .footer{
       width:100%;
       margin: 18px auto 0;
@@ -436,7 +445,6 @@
     }
     .footer .brand{ color: rgba(230,192,123,.82); font-weight:700; }
 
-    /* Responsivo */
     @media (max-width: 980px){
       .grid{ grid-template-columns: 1fr; }
       .title{ font-size: clamp(44px, 9vw, 78px); }
@@ -452,13 +460,10 @@
       .row2{ grid-template-columns: 1fr; }
       .miniGrid{ grid-template-columns: 1fr; }
       button{ width: 100%; min-width: 0; }
-
-      /* logo ainda grande no celular, mas sem estourar */
       .badge img{ width:64px; height:64px; }
       .badge span{ font-size:11px; }
     }
 
-    /* Reduz movimento se o usuário pedir */
     @media (prefers-reduced-motion: reduce){
       .glow, .title, .whisper{ animation:none !important; }
       #stars{ display:none; }
@@ -549,6 +554,10 @@
               <button type="button" id="btnEntrada">Acessar a entrada</button>
             </div>
 
+            <div class="pillRow">
+              <div class="pill" id="ambientToggle">AMBIENTE: <strong>ON</strong></div>
+            </div>
+
             <div class="chips" aria-label="Destaques">
               <div class="chip">Cartas físicas</div>
               <div class="chip">Timer + clima</div>
@@ -582,7 +591,7 @@
 
   <script>
     /* =========================
-       ESTRELAS (Canvas) — cross-browser + ESTRELAS CADENTES
+       ESTRELAS (Canvas) — cross-browser
        ========================= */
     (function(){
       const canvas = document.getElementById("stars");
@@ -592,29 +601,21 @@
       let stars = [];
       let raf = null;
 
-      // ✅ estrelas cadentes
-      let meteors = [];
-      let nextMeteorAt = 0;
-
       const isReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      // viewport confiável no Android
-      function getViewport(){
-        const vv = window.visualViewport;
-        return {
-          vw: Math.floor((vv && vv.width) ? vv.width : window.innerWidth),
-          vh: Math.floor((vv && vv.height) ? vv.height : window.innerHeight)
-        };
-      }
+      function resize(){
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        w = Math.floor(window.innerWidth);
+        h = Math.floor(window.innerHeight);
+        canvas.width  = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+        ctx.setTransform(dpr,0,0,dpr,0,0);
 
-      let lastVW = 0;
-      let lastVH = 0;
-      let lastW = 0;
-      let lastH = 0;
-
-      function buildStars(){
         const density = Math.floor((w*h) / 11500);
-        const target = Math.max(120, Math.min(280, density));
+        const target = Math.max(110, Math.min(260, density));
+
         stars = new Array(target).fill(0).map(() => ({
           x: Math.random()*w,
           y: Math.random()*h,
@@ -625,142 +626,17 @@
         }));
       }
 
-      function resizeHard(){
-        const vp = getViewport();
-        lastVW = vp.vw;
-        lastVH = vp.vh;
-
-        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-        w = vp.vw;
-        h = vp.vh;
-
-        canvas.width  = Math.floor(w * dpr);
-        canvas.height = Math.floor(h * dpr);
-        canvas.style.width = w + "px";
-        canvas.style.height = h + "px";
-        ctx.setTransform(dpr,0,0,dpr,0,0);
-
-        lastW = w;
-        lastH = h;
-
-        buildStars();
-
-        // limpa meteors ao recriar (ex: rotação)
-        meteors = [];
-        scheduleNextMeteor(performance.now());
-      }
-
-      // ✅ evita reset: só recria tudo se largura mudar
-      function maybeResize(){
-        const vp = getViewport();
-
-        // largura mudou: recria
-        if (vp.vw !== lastVW){
-          resizeHard();
-          return;
-        }
-
-        // só altura mudou: apenas ajusta canvas e mantém estrelas
-        const newH = Math.floor(vp.vh);
-        const dh = Math.abs(newH - lastVH);
-
-        if (dh < 2){
-          if (!lastW) resizeHard();
-          return;
-        }
-
-        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-        h = newH;
-
-        canvas.width  = Math.floor(w * dpr);
-        canvas.height = Math.floor(h * dpr);
-        canvas.style.width  = w + "px";
-        canvas.style.height = h + "px";
-        ctx.setTransform(dpr,0,0,dpr,0,0);
-
-        for (let i=0;i<stars.length;i++){
-          if (stars[i].y > h + 10) stars[i].y = Math.random() * h;
-        }
-
-        lastVH = vp.vh;
-      }
-
-      // ========= Estrelas cadentes =========
-      function scheduleNextMeteor(now){
-        // de vez em quando (random): 3.5s a 9.5s
-        nextMeteorAt = now + (3500 + Math.random()*6000);
-      }
-
-      function spawnMeteor(){
-        // nasce fora da tela e cruza em diagonal (↘)
-        const fromLeft = Math.random() < 0.45; // às vezes vem da esquerda, às vezes do topo
-        const x = fromLeft ? -60 : (Math.random() * w);
-        const y = fromLeft ? (Math.random() * (h*0.55)) : -60;
-
-        const speed = 14 + Math.random()*10;     // velocidade
-        const angle = (Math.PI * (25 + Math.random()*18)) / 180; // 25° a 43° (diagonal bonita)
-        const vx = Math.cos(angle) * speed;
-        const vy = Math.sin(angle) * speed;
-
-        meteors.push({
-          x, y,
-          vx, vy,
-          life: 0,
-          maxLife: 40 + Math.floor(Math.random()*28), // dura ~1s
-          len: 180 + Math.random()*180,               // rastro
-          width: 2.0 + Math.random()*1.8,
-          a: 0.9 + Math.random()*0.1
-        });
-      }
-
-      function drawMeteor(m){
-        // cabeça
-        const hx = m.x;
-        const hy = m.y;
-
-        // cauda (rastro)
-        const tx = hx - (m.vx / Math.hypot(m.vx,m.vy)) * m.len;
-        const ty = hy - (m.vy / Math.hypot(m.vx,m.vy)) * m.len;
-
-        const fade = 1 - (m.life / m.maxLife);
-        const alpha = Math.max(0, Math.min(1, m.a * fade));
-
-        const grad = ctx.createLinearGradient(hx, hy, tx, ty);
-        grad.addColorStop(0, `rgba(255,255,255,${alpha.toFixed(3)})`);
-        grad.addColorStop(0.25, `rgba(255,255,255,${(alpha*0.55).toFixed(3)})`);
-        grad.addColorStop(1, `rgba(255,255,255,0)`);
-
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = m.width;
-        ctx.lineCap = "round";
-
-        ctx.beginPath();
-        ctx.moveTo(hx, hy);
-        ctx.lineTo(tx, ty);
-        ctx.stroke();
-
-        // brilho na cabeça
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(255,255,255,${Math.min(1, alpha*0.95).toFixed(3)})`;
-        ctx.arc(hx, hy, Math.max(1.2, m.width*1.05), 0, Math.PI*2);
-        ctx.fill();
-      }
-
-      // ========= render =========
       let t = 0;
-      function draw(now){
+      function draw(){
         if (isReduced) return;
-
-        maybeResize();
-
         t += 1;
+
         ctx.clearRect(0,0,w,h);
 
         const vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.80);
         vignette.addColorStop(0, "rgba(0,0,0,0)");
         vignette.addColorStop(1, "rgba(0,0,0,0.40)");
 
-        // estrelas normais
         for (let i=0;i<stars.length;i++){
           const s = stars[i];
           s.y += s.v;
@@ -775,26 +651,6 @@
           ctx.fill();
         }
 
-        // estrelas cadentes (de vez em quando)
-        if (now >= nextMeteorAt && meteors.length < 2){
-          spawnMeteor();
-          scheduleNextMeteor(now);
-        }
-
-        for (let i = meteors.length - 1; i >= 0; i--){
-          const m = meteors[i];
-          m.x += m.vx;
-          m.y += m.vy;
-          m.life++;
-
-          drawMeteor(m);
-
-          // remove se saiu muito ou acabou a vida
-          if (m.life > m.maxLife || m.x > w + 260 || m.y > h + 260){
-            meteors.splice(i, 1);
-          }
-        }
-
         ctx.fillStyle = vignette;
         ctx.fillRect(0,0,w,h);
 
@@ -803,17 +659,181 @@
 
       function start(){
         cancelAnimationFrame(raf);
-        resizeHard();
-        draw(performance.now());
+        resize();
+        draw();
       }
 
-      // resize: passivo + não agressivo
-      window.addEventListener("resize", () => {
-        // só agenda, o draw vai chamar maybeResize e decidir
-        // (evita reflow/rebuild agressivo no Android)
-      }, { passive:true });
-
+      window.addEventListener("resize", start, { passive:true });
       start();
+    })();
+
+    /* =========================
+       SOM AMBIENTE ESPACIAL (SEM “TOQUE FORTE”)
+       - só começa após primeiro toque/clique
+       - volume mais alto (ajuste em AMBIENT_VOLUME)
+       ========================= */
+    (function(){
+      const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // ✅ AQUI você controla o volume (0.10 a 0.35 é o ideal)
+      let AMBIENT_VOLUME = 0.22;
+
+      let audioCtx = null;
+      let master = null;
+      let ambientOn = true;
+
+      let noiseSrc = null;
+      let noiseGain = null;
+      let noiseFilter = null;
+
+      let drone1 = null, drone2 = null;
+      let droneGain = null;
+
+      let shimmer = null;
+      let shimmerGain = null;
+
+      const toggle = document.getElementById("ambientToggle");
+
+      function ensureAudio(){
+        if (prefersReduced) return;
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+
+        if (!master){
+          master = audioCtx.createGain();
+          master.gain.value = 0.00001; // começa quase zero, depois sobe suave
+          master.connect(audioCtx.destination);
+
+          buildAmbient();
+          fadeTo(AMBIENT_VOLUME, 900);
+        }
+      }
+
+      function fadeTo(target, ms){
+        if (!master || !audioCtx) return;
+        const now = audioCtx.currentTime;
+        const t = Math.max(0.05, ms/1000);
+
+        master.gain.cancelScheduledValues(now);
+        master.gain.setValueAtTime(Math.max(0.00001, master.gain.value), now);
+        master.gain.linearRampToValueAtTime(Math.max(0.00001, target), now + t);
+      }
+
+      function buildAmbient(){
+        // ===== Ruído espacial (sopro) =====
+        const bufferSize = 2 * audioCtx.sampleRate;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++){
+          output[i] = (Math.random() * 2 - 1);
+        }
+
+        noiseSrc = audioCtx.createBufferSource();
+        noiseSrc.buffer = noiseBuffer;
+        noiseSrc.loop = true;
+
+        noiseFilter = audioCtx.createBiquadFilter();
+        noiseFilter.type = "lowpass";
+        noiseFilter.frequency.value = 420;   // “escuro”
+        noiseFilter.Q.value = 0.6;
+
+        noiseGain = audioCtx.createGain();
+        noiseGain.gain.value = 0.18;         // presença do “ar”
+
+        noiseSrc.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(master);
+        noiseSrc.start();
+
+        // ===== Drone profundo (grave macio) =====
+        droneGain = audioCtx.createGain();
+        droneGain.gain.value = 0.22;
+
+        drone1 = audioCtx.createOscillator();
+        drone1.type = "sine";
+        drone1.frequency.value = 42;
+
+        drone2 = audioCtx.createOscillator();
+        drone2.type = "sine";
+        drone2.frequency.value = 56;
+
+        const droneFilter = audioCtx.createBiquadFilter();
+        droneFilter.type = "lowpass";
+        droneFilter.frequency.value = 220;
+        droneFilter.Q.value = 0.7;
+
+        drone1.connect(droneFilter);
+        drone2.connect(droneFilter);
+        droneFilter.connect(droneGain);
+        droneGain.connect(master);
+
+        drone1.start();
+        drone2.start();
+
+        // ===== Shimmer etéreo (bem suave) =====
+        shimmerGain = audioCtx.createGain();
+        shimmerGain.gain.value = 0.06;
+
+        shimmer = audioCtx.createOscillator();
+        shimmer.type = "sine";
+        shimmer.frequency.value = 210;
+
+        const shimmerFilter = audioCtx.createBiquadFilter();
+        shimmerFilter.type = "bandpass";
+        shimmerFilter.frequency.value = 520;
+        shimmerFilter.Q.value = 2.2;
+
+        shimmer.connect(shimmerFilter);
+        shimmerFilter.connect(shimmerGain);
+        shimmerGain.connect(master);
+        shimmer.start();
+
+        // Modulação lenta (vida)
+        const lfo = audioCtx.createOscillator();
+        lfo.type = "sine";
+        lfo.frequency.value = 0.06;
+
+        const lfoGain = audioCtx.createGain();
+        lfoGain.gain.value = 28;
+
+        lfo.connect(lfoGain);
+        lfoGain.connect(noiseFilter.frequency);
+        lfo.start();
+
+        // drift leve no shimmer
+        const lfo2 = audioCtx.createOscillator();
+        lfo2.type = "sine";
+        lfo2.frequency.value = 0.03;
+
+        const lfo2Gain = audioCtx.createGain();
+        lfo2Gain.gain.value = 16;
+
+        lfo2.connect(lfo2Gain);
+        lfo2Gain.connect(shimmerFilter.frequency);
+        lfo2.start();
+      }
+
+      function setToggleUI(){
+        toggle.innerHTML = ambientOn ? "AMBIENTE: <strong>ON</strong>" : "AMBIENTE: <strong>OFF</strong>";
+      }
+
+      toggle.addEventListener("click", () => {
+        ensureAudio();
+        ambientOn = !ambientOn;
+
+        if (master){
+          if (ambientOn) fadeTo(AMBIENT_VOLUME, 650);
+          else fadeTo(0.00001, 450);
+        }
+
+        setToggleUI();
+      });
+
+      // ✅ Importante: SEM toque forte. Só desbloqueia o áudio e faz fade in suave.
+      document.addEventListener("pointerdown", ensureAudio, { once:true, passive:true });
+      document.addEventListener("click", ensureAudio, { once:true, passive:true });
+
+      setToggleUI();
     })();
 
     /* =========================
@@ -901,95 +921,6 @@
         statusEl.textContent = "Status: lista ativa. (" + leads.length + " registrado(s) neste navegador)";
       }
     })();
-    /* =========================
-   SOM AMBIENTE ATMOSFÉRICO
-   - inicia após primeiro clique/toque
-   - ultra sutil
-   - loop infinito
-========================= */
-
-(function(){
-
-  let audioCtx = null;
-  let masterGain = null;
-  let started = false;
-
-  function initAudio(){
-    if (started) return;
-    started = true;
-
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.18; // volume geral (ajustável)
-    masterGain.connect(audioCtx.destination);
-
-    // === DRONE GRAVE SUAVE ===
-    const drone = audioCtx.createOscillator();
-    drone.type = "sine";
-    drone.frequency.value = 38; // frequência baixa profunda
-
-    const droneGain = audioCtx.createGain();
-    droneGain.gain.value = 0.06;
-
-    drone.connect(droneGain);
-    droneGain.connect(masterGain);
-    drone.start();
-
-    // === RUIDO ESPACIAL FILTRADO ===
-    const bufferSize = 2 * audioCtx.sampleRate;
-    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = noiseBuffer.getChannelData(0);
-
-    for (let i = 0; i < bufferSize; i++){
-      data[i] = (Math.random() * 2 - 1) * 0.15;
-    }
-
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = noiseBuffer;
-    noise.loop = true;
-
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 400;
-
-    const noiseGain = audioCtx.createGain();
-    noiseGain.gain.value = 0.05;
-
-    noise.connect(filter);
-    filter.connect(noiseGain);
-    noiseGain.connect(masterGain);
-
-    noise.start();
-
-    // === BRILHO AGUDO SUAVE EVENTUAL ===
-    setInterval(() => {
-      if (!audioCtx) return;
-
-      const shimmer = audioCtx.createOscillator();
-      shimmer.type = "triangle";
-      shimmer.frequency.value = 900 + Math.random() * 300;
-
-      const shimmerGain = audioCtx.createGain();
-      shimmerGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-      shimmerGain.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 0.05);
-      shimmerGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
-
-      shimmer.connect(shimmerGain);
-      shimmerGain.connect(masterGain);
-
-      shimmer.start();
-      shimmer.stop(audioCtx.currentTime + 1.3);
-
-    }, 9000 + Math.random() * 7000);
-
-  }
-
-  // inicia no primeiro clique/toque
-  document.addEventListener("click", initAudio, { once: true });
-  document.addEventListener("touchstart", initAudio, { once: true });
-
-})();
   </script>
 </body>
 </html>
