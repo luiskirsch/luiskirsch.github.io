@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Prelúdio Jogos — O SextoLugar</title>
 
-  <!-- FAVICON / ÍCONE DA ABA (use o mesmo arquivo favicon.png na raiz) -->
-  <link rel="icon" type="image/png" sizes="512x512" href="./favicon.png?v=3">
-  <link rel="apple-touch-icon" href="./favicon.png?v=3">
+  <!-- FAVICON -->
+  <link rel="icon" type="image/png" sizes="512x512" href="./favicon.png?v=4">
+  <link rel="apple-touch-icon" href="./favicon.png?v=4">
   <meta name="theme-color" content="#050505">
 
   <style>
@@ -15,21 +15,12 @@
       --bg:#050505;
       --gold:#e6c07b;
       --muted:#a7a7a7;
-      --card:rgba(255,255,255,.055);
-      --line:rgba(230,192,123,.22);
       --shadow:rgba(0,0,0,.55);
-      --glass: rgba(18,18,18,.58);
-      --glass2: rgba(10,10,10,.35);
       --stroke: rgba(255,255,255,.10);
-      --stroke2: rgba(230,192,123,.18);
-      --ok:#9be37a;
-      --danger:#ff4d4d;
-
-      --radius: 22px;
-      --radius2: 18px;
 
       --maxW: 1180px;
-      --pad: 24px;
+      --pad: 20px;
+      --radius: 22px;
     }
 
     *{ box-sizing:border-box; }
@@ -46,7 +37,7 @@
       -webkit-text-size-adjust: 100%;
     }
 
-    /* Fundo vivo */
+    /* Fundo */
     .bg{
       position:fixed;
       inset:0;
@@ -75,7 +66,6 @@
       50%{ opacity:.92; transform:translateY(-7px) scale(1.015); }
     }
 
-    /* Canvas partículas */
     canvas#stars{
       position:fixed;
       inset:0;
@@ -84,7 +74,6 @@
       opacity:.55;
     }
 
-    /* Layout geral */
     .container{
       width:100%;
       max-width: var(--maxW);
@@ -92,8 +81,8 @@
       padding: var(--pad);
       padding-left: max(var(--pad), env(safe-area-inset-left));
       padding-right:max(var(--pad), env(safe-area-inset-right));
-      padding-top: max(18px, env(safe-area-inset-top));
-      padding-bottom:max(18px, env(safe-area-inset-bottom));
+      padding-top: max(16px, env(safe-area-inset-top));
+      padding-bottom:max(16px, env(safe-area-inset-bottom));
     }
 
     /* HERO */
@@ -108,8 +97,8 @@
       align-items:center;
       justify-content:center;
       gap:10px;
-      margin-bottom: 10px;
-      opacity:.95;
+      margin-bottom: 8px;
+      opacity:.98;
     }
     .badge{
       display:inline-flex;
@@ -135,7 +124,7 @@
       white-space:nowrap;
     }
 
-    /* Título com REFLEXO dentro das letras */
+    /* Título com reflexo dentro das letras (corrigido pra ir até o final) */
     .title{
       margin:0;
       text-align:center;
@@ -145,65 +134,72 @@
       font-size: clamp(34px, 6.6vw, 92px);
       line-height: 1.02;
       text-shadow: 0 26px 90px rgba(0,0,0,.55);
-      color: rgba(230,192,123,.80);
       position:relative;
       isolation:isolate;
     }
     .title .shine{
       display:inline-block;
       position:relative;
+
+      /* gradient mais longo e varrendo além do texto */
       background: linear-gradient(110deg,
         rgba(230,192,123,.55) 0%,
-        rgba(255,236,200,.95) 18%,
-        rgba(230,192,123,.65) 34%,
+        rgba(255,236,200,.98) 18%,
+        rgba(230,192,123,.70) 36%,
         rgba(230,192,123,.55) 100%);
-      background-size: 250% 100%;
+      background-size: 320% 100%;
+      background-position: -60% 50%;
+
       -webkit-background-clip:text;
       background-clip:text;
       color: transparent;
+
       filter: drop-shadow(0 12px 40px rgba(0,0,0,.55));
       animation: shineMove 4.2s ease-in-out infinite;
+      will-change: background-position;
     }
-    /* “reflexo” real: um highlight mais concentrado varrendo só dentro das letras */
     .title .shine::after{
       content:"";
       position:absolute;
-      inset:-10%;
+      inset:-14%;
+
+      /* highlight mais “largo” pra não morrer antes do fim */
       background:
-        radial-gradient(160px 70px at 0% 50%,
+        radial-gradient(220px 82px at 0% 50%,
           rgba(255,255,255,.55),
-          rgba(255,255,255,.20) 35%,
-          transparent 70%);
-      transform: translateX(-30%);
-      opacity:.0;
+          rgba(255,255,255,.18) 38%,
+          transparent 72%);
+      transform: translateX(-60%);
+      opacity:0;
       mix-blend-mode: screen;
       animation: highlight 4.2s ease-in-out infinite;
       pointer-events:none;
+      will-change: transform, opacity;
     }
     @keyframes shineMove{
-      0%{ background-position: 0% 50%; }
-      50%{ background-position: 100% 50%; }
-      100%{ background-position: 0% 50%; }
+      0%{ background-position: -60% 50%; }
+      50%{ background-position: 160% 50%; }
+      100%{ background-position: -60% 50%; }
     }
     @keyframes highlight{
-      0%{ transform: translateX(-40%); opacity:0; }
-      18%{ opacity:.35; }
-      45%{ transform: translateX(55%); opacity:.14; }
-      70%{ opacity:0; }
-      100%{ transform: translateX(120%); opacity:0; }
+      0%{ transform: translateX(-70%); opacity:0; }
+      18%{ opacity:.33; }
+      52%{ transform: translateX(140%); opacity:.12; }
+      76%{ opacity:0; }
+      100%{ transform: translateX(200%); opacity:0; }
     }
 
     .subtitle{
-      margin:12px auto 0;
+      margin:10px auto 0;
       text-align:center;
       max-width: 78ch;
       color: rgba(255,255,255,.86);
       opacity:.92;
       font-size: clamp(14px, 2.2vw, 18px);
-      line-height:1.6;
+      line-height:1.55;
     }
     .whisper{
-      margin: 10px auto 0;
+      margin: 8px auto 0;
       text-align:center;
       color: rgba(255,255,255,.55);
       letter-spacing:.06em;
@@ -216,33 +212,31 @@
       50%{ opacity:.92; filter: blur(0); }
     }
 
-    /* Seção com “card sticky” e conteúdo na direita */
+    /* Stage mais “junto” */
     .stage{
       position:relative;
-      margin-top: 22px;
-      padding-bottom: 90px;
+      margin-top: 16px;
+      padding-bottom: 28px;
     }
 
     .grid{
       display:grid;
       grid-template-columns: 1.05fr .95fr;
-      gap: 22px;
+      gap: 18px;
       align-items:start;
     }
 
-    /* Card de leads (vira mini e desliza) */
+    /* Card leads */
     .leadCard{
       position: sticky;
-      top: 22px;
+      top: 18px;
       align-self:start;
-
       border-radius: var(--radius);
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
       border: 1px solid rgba(255,255,255,.09);
       box-shadow: 0 35px 110px rgba(0,0,0,.55);
       backdrop-filter: blur(12px);
       overflow:hidden;
-
       transform-origin: top left;
       will-change: transform, filter, opacity;
       transition: transform 520ms cubic-bezier(.2,.9,.1,1), filter 520ms ease, opacity 520ms ease;
@@ -254,13 +248,11 @@
       pointer-events:none;
       background: radial-gradient(780px 260px at 50% 0%, rgba(230,192,123,.14), transparent 60%);
       opacity:.85;
-      filter: blur(.2px);
     }
-
     .leadInner{
       position:relative;
       z-index:1;
-      padding: 22px;
+      padding: 20px;
     }
 
     .tag{
@@ -272,7 +264,7 @@
       text-transform:uppercase;
       font-size:12px;
       color: rgba(230,192,123,.88);
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .dot{
       width:5px; height:5px; border-radius:50%;
@@ -283,14 +275,14 @@
     .leadTitle{
       margin:0;
       text-align:center;
-      font-size: clamp(18px, 2.7vw, 30px);
-      line-height:1.38;
+      font-size: clamp(18px, 2.6vw, 28px);
+      line-height:1.36;
       color:#f4f4f4;
       text-shadow: 0 18px 60px rgba(0,0,0,.55);
     }
 
     .rule{
-      margin:16px auto 14px;
+      margin:14px auto 12px;
       height:10px;
       width:min(720px, 94%);
       border-radius:999px;
@@ -304,7 +296,7 @@
     .form{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 12px;
       align-items:end;
     }
 
@@ -392,13 +384,12 @@
     }
     .btnGhost:hover{ border-color: rgba(255,255,255,.20); }
 
-    /* Conteúdo da direita */
+    /* direita */
     .side{
       display:grid;
-      gap: 14px;
+      gap: 12px;
       align-content:start;
     }
-
     .panel{
       border-radius: var(--radius);
       background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
@@ -419,9 +410,8 @@
     .panelInner{
       position:relative;
       z-index:1;
-      padding: 18px 18px 16px;
+      padding: 16px 16px 14px;
     }
-
     .panel h3{
       margin:0 0 8px;
       font-size: 13px;
@@ -433,14 +423,13 @@
       margin:0;
       color: rgba(255,255,255,.80);
       font-size: 14px;
-      line-height:1.65;
+      line-height:1.62;
     }
-
     .chips{
       display:flex;
       flex-wrap:wrap;
       gap:10px;
-      margin-top: 12px;
+      margin-top: 10px;
     }
     .chip{
       padding:10px 12px;
@@ -454,17 +443,16 @@
       box-shadow: 0 12px 32px rgba(0,0,0,.35);
       user-select:none;
     }
-
     .steps{
       margin: 10px 0 0;
       padding-left: 18px;
       color: rgba(255,255,255,.80);
-      line-height:1.7;
+      line-height:1.65;
     }
     .steps li{ margin: 8px 0; }
 
     .goldLine{
-      margin-top: 12px;
+      margin-top: 10px;
       padding: 10px 12px;
       border-left: 3px solid rgba(230,192,123,.55);
       background: rgba(230,192,123,.08);
@@ -472,53 +460,51 @@
       color: rgba(255,255,255,.86);
     }
 
-    /* Footer */
     .footer{
       width:100%;
       max-width: var(--maxW);
-      margin: 26px auto 0;
+      margin: 18px auto 0;
       text-align:center;
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
       color:rgba(255,255,255,.40);
       pointer-events:none;
-      padding: 0 10px 18px;
+      padding: 0 10px 10px;
     }
     .footer .brand{
       color:rgba(230,192,123,.85);
       font-weight:700;
     }
 
-    /* Estado “mini-card” enquanto rola */
+    /* Compact */
     body.compact .leadCard{
       transform: translate3d(0,0,0) scale(.84);
       filter: saturate(.95);
     }
-    /* Em desktop, ele “desliza” sutilmente pro canto */
     @media (min-width: 980px){
       body.compact .leadCard{
         transform: translate3d(-6px, -4px, 0) scale(.80);
       }
     }
 
-    /* Mobile: evitar travar/bug — vira coluna e SEM sticky */
+    /* ======= ANTI-BUG EM TOUCH/TABLET (corrige vibração/volta pra cima) =======
+       Em telas grandes com toque (tablet), sticky + transform pode causar jitter.
+       Aqui desativamos o "sticky + compact transform" em pointer:coarse. */
+    @media (pointer: coarse){
+      .leadCard{ position: relative; top:auto; }
+      body.compact .leadCard{ transform:none; }
+    }
+
+    /* Mobile coluna */
     @media (max-width: 920px){
-      .grid{
-        grid-template-columns: 1fr;
-      }
-      .leadCard{
-        position: relative;
-        top:auto;
-      }
-      body.compact .leadCard{
-        transform: none;
-      }
+      .grid{ grid-template-columns: 1fr; }
+      .leadCard{ position: relative; top:auto; }
+      body.compact .leadCard{ transform:none; }
       button{ min-width: 0; width: min(360px, 100%); }
       .form{ grid-template-columns: 1fr; }
     }
 
-    /* Ajustes bem pequenos */
     @media (max-width: 430px){
       .container{ padding: 14px; }
       .leadInner{ padding: 16px; }
@@ -527,7 +513,7 @@
       .rule{ height: 9px; }
     }
 
-    /* micro animações “premium” */
+    /* Reveal */
     .reveal{
       opacity:0;
       transform: translateY(10px);
@@ -551,7 +537,8 @@
     <div class="container">
       <div class="topMark">
         <div class="badge">
-          <img src="./favicon.png?v=3" alt="Prelúdio Jogos">
+          <!-- SUA LOGO ORIGINAL AQUI -->
+          <img src="./logo.png?v=1" alt="Prelúdio Jogos">
           <span>Prelúdio Jogos</span>
         </div>
       </div>
@@ -567,7 +554,6 @@
 
       <div class="stage">
         <div class="grid">
-          <!-- LEADS -->
           <section class="leadCard reveal on" id="leadCard" aria-label="Boas-vindas e acesso">
             <div class="leadInner">
               <div class="tag">
@@ -611,7 +597,6 @@
             </div>
           </section>
 
-          <!-- CONTEÚDO DIREITA -->
           <aside class="side">
             <div class="panel reveal" id="panel1">
               <div class="panelInner">
@@ -665,9 +650,7 @@
   </section>
 
   <script>
-    /* =========================
-       1) Partículas (leve)
-    ========================== */
+    /* Partículas leves */
     (function(){
       const c = document.getElementById("stars");
       const ctx = c.getContext("2d", { alpha: true });
@@ -683,7 +666,6 @@
         c.style.width = "100%";
         c.style.height = "100%";
       }
-
       function rand(min,max){ return Math.random()*(max-min)+min; }
 
       function init(){
@@ -702,11 +684,9 @@
 
       function step(){
         ctx.clearRect(0,0,w,h);
-        // “poeira” suave
         for(const p of dots){
           p.x += p.vx;
           p.y += p.vy;
-
           if(p.y > h + 20) { p.y = -20; p.x = rand(0,w); }
           if(p.x < -20) p.x = w + 20;
           if(p.x > w + 20) p.x = -20;
@@ -725,9 +705,7 @@
       window.addEventListener("resize", () => { resize(); init(); }, { passive:true });
     })();
 
-    /* =========================
-       2) Reveal (premium)
-    ========================== */
+    /* Reveal */
     (function(){
       const items = document.querySelectorAll(".reveal");
       const io = new IntersectionObserver((entries)=>{
@@ -741,14 +719,10 @@
       items.forEach(el => io.observe(el));
     })();
 
-    /* =========================
-       3) Compact / slide suave
-       (sem travar scroll no mobile)
-    ========================== */
+    /* Compact suave */
     (function(){
       let ticking = false;
-      const trigger = 140; // px após começar a rolar vira compacto
-
+      const trigger = 120;
       function onScroll(){
         if(ticking) return;
         ticking = true;
@@ -762,12 +736,7 @@
       onScroll();
     })();
 
-    /* =========================
-       4) Leads funcionando
-       - salva em localStorage
-       - abre mailto para te enviar (o jeito "real" em site estático)
-       - sem botão exportar pro usuário (só admin)
-    ========================== */
+    /* Leads funcionando (site estático) */
     (function(){
       const form = document.getElementById("leadForm");
       const nome = document.getElementById("nome");
@@ -814,64 +783,27 @@
           return;
         }
 
-        const lead = {
-          nome: n,
-          email: m,
-          consent: true,
-          createdAt: new Date().toISOString()
-        };
+        const lead = { nome: n, email: m, consent: true, createdAt: new Date().toISOString() };
 
-        // salva local
         const leads = loadLeads();
         const exists = leads.some(x => x.email === m);
         if(!exists) leads.unshift(lead);
         saveLeads(leads);
 
-        // dispara e-mail pronto (o único jeito “real” sem backend)
         const subject = encodeURIComponent("[Lead] Prelúdio Jogos — Lista");
         const body = encodeURIComponent(
-          `Novo lead cadastrado:\n\nNome: ${n || "(não informado)"}\nE-mail: ${m}\nConsentimento: SIM\nData: ${new Date().toLocaleString()}\n\n(Armazenado também no navegador do usuário via localStorage.)`
+          `Novo lead cadastrado:\n\nNome: ${n || "(não informado)"}\nE-mail: ${m}\nConsentimento: SIM\nData: ${new Date().toLocaleString()}\n`
         );
-        const mailto = `mailto:${OWNER_EMAIL}?subject=${subject}&body=${body}`;
 
         setStatus("Status: lead salvo. Abrindo envio para você…", true);
+        setTimeout(()=> window.open(`mailto:${OWNER_EMAIL}?subject=${subject}&body=${body}`, "_blank"), 200);
 
-        // abre em nova aba/janela (sem travar o scroll)
-        setTimeout(()=> window.open(mailto, "_blank"), 250);
-
-        // feedback visual
         form.reset();
       });
 
-      // Acessar entrada (sua página do ritual)
       btnAcessar.addEventListener("click", ()=>{
-        // aqui é onde o usuário entra no jogo
         window.location.href = "./entrada.html";
       });
-
-      // Admin export (oculto para usuários)
-      const params = new URLSearchParams(location.search);
-      if(params.get("admin") === "1"){
-        const adminBtn = document.createElement("button");
-        adminBtn.type = "button";
-        adminBtn.className = "btnGhost";
-        adminBtn.textContent = "Exportar leads (admin)";
-        adminBtn.style.marginTop = "8px";
-        adminBtn.addEventListener("click", ()=>{
-          const leads = loadLeads();
-          const header = ["nome","email","consent","createdAt"];
-          const rows = leads.map(l => header.map(k => `"${String(l[k] ?? "").replace(/"/g,'""')}"`).join(","));
-          const csv = [header.join(","), ...rows].join("\n");
-          const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "preludio-leads.csv";
-          a.click();
-          setTimeout(()=> URL.revokeObjectURL(url), 800);
-        });
-        document.querySelector(".actions").appendChild(adminBtn);
-      }
     })();
   </script>
 </body>
