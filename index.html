@@ -10,11 +10,8 @@
 
   <style>
     :root{
-      /* ✅ FUNDO MAIS “UNIVERSO” (mais escuro, mais profundo) */
-      --bg:#01010a;     /* base universo */
-      --bg2:#000007;    /* topo mais denso */
-      --bg3:#020214;    /* variação fria */
-
+      --bg:#050505;
+      --bg2:#020202;
       --gold:#e6c07b;
       --muted:#a7a7a7;
       --cardA:rgba(255,255,255,.070);
@@ -37,10 +34,7 @@
     body{
       margin:0;
       min-height:100vh;
-
-      /* fallback sólido mais escuro (PC e todos navegadores) */
-      background: var(--bg);
-
+      background: #050505; /* fallback */
       overflow-x:hidden;
       overflow-y:auto;
       -webkit-text-size-adjust: 100%;
@@ -66,69 +60,12 @@
       inset:0;
       z-index:0;
       pointer-events:none;
-
-      /* ✅ Fundo mais escuro “universo”, com leve cor fria e profundidade */
       background:
-        radial-gradient(1400px 820px at 50% 18%, rgba(230,192,123,.085), transparent 60%),
-        radial-gradient(1100px 700px at 18% 18%, rgba(255,255,255,.045), transparent 62%),
-        radial-gradient(1000px 700px at 82% 78%, rgba(255,255,255,.040), transparent 64%),
-        radial-gradient(900px 700px at 55% 75%, rgba(120,160,255,.035), transparent 62%),
+        radial-gradient(1200px 700px at 50% 20%, rgba(230,192,123,.10), transparent 55%),
+        radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 560px at 82% 75%, rgba(255,255,255,.05), transparent 62%),
         linear-gradient(180deg, var(--bg2), var(--bg));
-      filter: saturate(1.02) contrast(1.05);
-      transform: translateZ(0);
-    }
-
-    /* ✅ NÉVOA COM PROFUNDIDADE (camadas) */
-    .nebula{
-      position:fixed;
-      inset:-22%;
-      z-index:0;             /* fica junto do fundo, abaixo das estrelas e do conteúdo */
-      pointer-events:none;
-      filter: blur(18px);
-      opacity:.55;
-      transform: translateZ(0);
-      mix-blend-mode: screen; /* realça sutilmente as estrelas sem “leite” */
-      background:
-        radial-gradient(900px 520px at 20% 30%, rgba(80,120,255,.10), transparent 62%),
-        radial-gradient(780px 460px at 68% 36%, rgba(230,192,123,.10), transparent 62%),
-        radial-gradient(880px 520px at 52% 78%, rgba(160,90,255,.08), transparent 64%),
-        radial-gradient(740px 420px at 86% 78%, rgba(255,255,255,.045), transparent 66%);
-      animation: nebulaDrift 16s ease-in-out infinite;
-    }
-    .nebula.n2{
-      inset:-28%;
-      opacity:.42;
-      filter: blur(26px);
-      mix-blend-mode: screen;
-      background:
-        radial-gradient(980px 560px at 30% 40%, rgba(230,192,123,.08), transparent 64%),
-        radial-gradient(900px 520px at 72% 52%, rgba(90,160,255,.08), transparent 66%),
-        radial-gradient(980px 580px at 55% 82%, rgba(255,255,255,.030), transparent 70%);
-      animation: nebulaDrift2 22s ease-in-out infinite;
-    }
-    .nebula.n3{
-      inset:-34%;
-      opacity:.28;
-      filter: blur(34px);
-      mix-blend-mode: screen;
-      background:
-        radial-gradient(1200px 740px at 50% 55%, rgba(110,150,255,.06), transparent 70%),
-        radial-gradient(1100px 680px at 60% 35%, rgba(230,192,123,.06), transparent 70%),
-        radial-gradient(900px 560px at 25% 75%, rgba(160,90,255,.05), transparent 72%);
-      animation: nebulaDrift3 30s ease-in-out infinite;
-    }
-
-    @keyframes nebulaDrift{
-      0%,100%{ transform: translate3d(0,0,0) scale(1); }
-      50%{ transform: translate3d(14px,-10px,0) scale(1.02); }
-    }
-    @keyframes nebulaDrift2{
-      0%,100%{ transform: translate3d(0,0,0) scale(1); }
-      50%{ transform: translate3d(-16px,12px,0) scale(1.03); }
-    }
-    @keyframes nebulaDrift3{
-      0%,100%{ transform: translate3d(0,0,0) scale(1); }
-      50%{ transform: translate3d(10px,16px,0) scale(1.02); }
+      filter: saturate(1.05) contrast(1.02);
     }
 
     /* Canvas de estrelas por cima */
@@ -141,7 +78,7 @@
       transform: translateZ(0);
     }
 
-    /* brilho atmosférico */
+    /* névoa / brilho atmosférico */
     .glow{
       position:fixed;
       inset:-22%;
@@ -190,7 +127,6 @@
       -webkit-backdrop-filter: blur(10px);
     }
 
-    /* LOGO MAIOR */
     .badge img{
       width:72px;
       height:72px;
@@ -524,7 +460,7 @@
 
     /* Reduz movimento se o usuário pedir */
     @media (prefers-reduced-motion: reduce){
-      .glow, .title, .whisper, .nebula{ animation:none !important; }
+      .glow, .title, .whisper{ animation:none !important; }
       #stars{ display:none; }
     }
   </style>
@@ -532,12 +468,6 @@
 
 <body>
   <div class="bg" aria-hidden="true"></div>
-
-  <!-- ✅ névoa em camadas (profundidade) -->
-  <div class="nebula n3" aria-hidden="true"></div>
-  <div class="nebula n2" aria-hidden="true"></div>
-  <div class="nebula" aria-hidden="true"></div>
-
   <canvas id="stars" aria-hidden="true"></canvas>
   <div class="glow" aria-hidden="true"></div>
 
@@ -651,240 +581,326 @@
   </div>
 
   <script>
-  /* =========================
-     ESTRELAS (Canvas) — independente do scroll (iOS/Android/PC)
-     - evita “reinício” quando a barra do navegador aparece/some
-     ========================= */
-  (function(){
-    const canvas = document.getElementById("stars");
-    const ctx = canvas.getContext("2d", { alpha: true });
+    /* =========================
+       ESTRELAS (Canvas) — cross-browser + ESTRELAS CADENTES
+       ========================= */
+    (function(){
+      const canvas = document.getElementById("stars");
+      const ctx = canvas.getContext("2d", { alpha: true });
 
-    let w = 0, h = 0, dpr = 1;
-    let stars = [];
-    let raf = null;
+      let w=0,h=0,dpr=1;
+      let stars = [];
+      let raf = null;
 
-    const isReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // ✅ estrelas cadentes
+      let meteors = [];
+      let nextMeteorAt = 0;
 
-    // Guardas para evitar restart por "resize" falso no scroll (Safari/iOS)
-    let lastVW = 0;
-    let lastVH = 0;
-    let lastW  = 0;
+      const isReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // tamanho visual real (melhor em mobile)
-    function getViewport(){
-      const vv = window.visualViewport;
-      const vw = Math.floor(vv ? vv.width  : window.innerWidth);
-      const vh = Math.floor(vv ? vv.height : window.innerHeight);
-      return { vw, vh };
-    }
-
-    function buildStars(target){
-      stars = new Array(target).fill(0).map(() => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: Math.random() * 1.35 + 0.15,
-        a: Math.random() * 0.62 + 0.18,
-        v: (Math.random() * 0.20 + 0.06),
-        tw: Math.random() * 0.02 + 0.006
-      }));
-    }
-
-    function resizeHard(){
-      const vp = getViewport();
-
-      dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-      w = Math.floor(vp.vw);
-      h = Math.floor(vp.vh);
-
-      canvas.width  = Math.floor(w * dpr);
-      canvas.height = Math.floor(h * dpr);
-      canvas.style.width  = w + "px";
-      canvas.style.height = h + "px";
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-
-      const density = Math.floor((w * h) / 11500);
-      const target = Math.max(110, Math.min(260, density));
-
-      buildStars(target);
-
-      lastVW = vp.vw;
-      lastVH = vp.vh;
-      lastW  = w;
-    }
-
-    function maybeResize(){
-      const vp = getViewport();
-
-      // 1) Se a largura mudou, é orientação/viewport real -> recria
-      if (vp.vw !== lastVW){
-        resizeHard();
-        return;
+      // viewport confiável no Android
+      function getViewport(){
+        const vv = window.visualViewport;
+        return {
+          vw: Math.floor((vv && vv.width) ? vv.width : window.innerWidth),
+          vh: Math.floor((vv && vv.height) ? vv.height : window.innerHeight)
+        };
       }
 
-      // 2) Se só a altura mudou pouco (barra do navegador), IGNORA
-      //    (isso evita o "reset" durante scroll)
-      const dh = Math.abs(vp.vh - lastVH);
+      let lastVW = 0;
+      let lastVH = 0;
+      let lastW = 0;
+      let lastH = 0;
 
-      // limiar: pequenos ajustes de barra/scroll (<= 120px) não devem reiniciar
-      if (dh <= 120){
-        // atualiza apenas o canvas se ainda não tiver tamanho
-        if (!lastW) resizeHard();
-        return;
+      function buildStars(){
+        const density = Math.floor((w*h) / 11500);
+        const target = Math.max(120, Math.min(280, density));
+        stars = new Array(target).fill(0).map(() => ({
+          x: Math.random()*w,
+          y: Math.random()*h,
+          r: Math.random()*1.35 + 0.15,
+          a: Math.random()*0.62 + 0.18,
+          v: (Math.random()*0.20 + 0.06),
+          tw: Math.random()*0.02 + 0.006
+        }));
       }
 
-      // 3) Mudança grande de altura (rotacionou ou split-screen) -> recria
-      resizeHard();
-    }
+      function resizeHard(){
+        const vp = getViewport();
+        lastVW = vp.vw;
+        lastVH = vp.vh;
 
-    let t = 0;
-    function draw(){
-      if (isReduced) return;
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        w = vp.vw;
+        h = vp.vh;
 
-      t += 1;
-      ctx.clearRect(0,0,w,h);
+        canvas.width  = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+        ctx.setTransform(dpr,0,0,dpr,0,0);
 
-      const vignette = ctx.createRadialGradient(
-        w * 0.5, h * 0.35, 0,
-        w * 0.5, h * 0.5, Math.max(w,h) * 0.80
-      );
-      vignette.addColorStop(0, "rgba(0,0,0,0)");
-      vignette.addColorStop(1, "rgba(0,0,0,0.40)");
+        lastW = w;
+        lastH = h;
 
-      for (let i = 0; i < stars.length; i++){
-        const s = stars[i];
+        buildStars();
 
-        s.y += s.v;
-        if (s.y > h + 10){
-          s.y = -10;
-          s.x = Math.random() * w;
+        // limpa meteors ao recriar (ex: rotação)
+        meteors = [];
+        scheduleNextMeteor(performance.now());
+      }
+
+      // ✅ evita reset: só recria tudo se largura mudar
+      function maybeResize(){
+        const vp = getViewport();
+
+        // largura mudou: recria
+        if (vp.vw !== lastVW){
+          resizeHard();
+          return;
         }
 
-        const tw = (Math.sin((t * 0.02) + i) * 0.5 + 0.5) * s.tw;
-        const alpha = Math.max(0, Math.min(1, s.a + tw));
+        // só altura mudou: apenas ajusta canvas e mantém estrelas
+        const newH = Math.floor(vp.vh);
+        const dh = Math.abs(newH - lastVH);
+
+        if (dh < 2){
+          if (!lastW) resizeHard();
+          return;
+        }
+
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        h = newH;
+
+        canvas.width  = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width  = w + "px";
+        canvas.style.height = h + "px";
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+
+        for (let i=0;i<stars.length;i++){
+          if (stars[i].y > h + 10) stars[i].y = Math.random() * h;
+        }
+
+        lastVH = vp.vh;
+      }
+
+      // ========= Estrelas cadentes =========
+      function scheduleNextMeteor(now){
+        // de vez em quando (random): 3.5s a 9.5s
+        nextMeteorAt = now + (3500 + Math.random()*6000);
+      }
+
+      function spawnMeteor(){
+        // nasce fora da tela e cruza em diagonal (↘)
+        const fromLeft = Math.random() < 0.45; // às vezes vem da esquerda, às vezes do topo
+        const x = fromLeft ? -60 : (Math.random() * w);
+        const y = fromLeft ? (Math.random() * (h*0.55)) : -60;
+
+        const speed = 14 + Math.random()*10;     // velocidade
+        const angle = (Math.PI * (25 + Math.random()*18)) / 180; // 25° a 43° (diagonal bonita)
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+
+        meteors.push({
+          x, y,
+          vx, vy,
+          life: 0,
+          maxLife: 40 + Math.floor(Math.random()*28), // dura ~1s
+          len: 180 + Math.random()*180,               // rastro
+          width: 2.0 + Math.random()*1.8,
+          a: 0.9 + Math.random()*0.1
+        });
+      }
+
+      function drawMeteor(m){
+        // cabeça
+        const hx = m.x;
+        const hy = m.y;
+
+        // cauda (rastro)
+        const tx = hx - (m.vx / Math.hypot(m.vx,m.vy)) * m.len;
+        const ty = hy - (m.vy / Math.hypot(m.vx,m.vy)) * m.len;
+
+        const fade = 1 - (m.life / m.maxLife);
+        const alpha = Math.max(0, Math.min(1, m.a * fade));
+
+        const grad = ctx.createLinearGradient(hx, hy, tx, ty);
+        grad.addColorStop(0, `rgba(255,255,255,${alpha.toFixed(3)})`);
+        grad.addColorStop(0.25, `rgba(255,255,255,${(alpha*0.55).toFixed(3)})`);
+        grad.addColorStop(1, `rgba(255,255,255,0)`);
+
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = m.width;
+        ctx.lineCap = "round";
 
         ctx.beginPath();
-        ctx.fillStyle = "rgba(255,255,255," + alpha.toFixed(3) + ")";
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.moveTo(hx, hy);
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
+
+        // brilho na cabeça
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255,255,255,${Math.min(1, alpha*0.95).toFixed(3)})`;
+        ctx.arc(hx, hy, Math.max(1.2, m.width*1.05), 0, Math.PI*2);
         ctx.fill();
       }
 
-      ctx.fillStyle = vignette;
-      ctx.fillRect(0,0,w,h);
+      // ========= render =========
+      let t = 0;
+      function draw(now){
+        if (isReduced) return;
 
-      raf = requestAnimationFrame(draw);
-    }
+        maybeResize();
 
-    function start(){
-      cancelAnimationFrame(raf);
-      resizeHard();
-      draw();
-    }
+        t += 1;
+        ctx.clearRect(0,0,w,h);
 
-    // ✅ Em vez de reiniciar SEMPRE no resize, usamos "maybeResize"
-    let resizeTimer = null;
-    function onResize(){
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(maybeResize, 120);
-    }
+        const vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.80);
+        vignette.addColorStop(0, "rgba(0,0,0,0)");
+        vignette.addColorStop(1, "rgba(0,0,0,0.40)");
 
-    window.addEventListener("resize", onResize, { passive:true });
+        // estrelas normais
+        for (let i=0;i<stars.length;i++){
+          const s = stars[i];
+          s.y += s.v;
+          if (s.y > h + 10) { s.y = -10; s.x = Math.random()*w; }
 
-    // visualViewport dispara mudanças por zoom/barra; tratamos igual (sem reset no scroll pequeno)
-    if (window.visualViewport){
-      window.visualViewport.addEventListener("resize", onResize, { passive:true });
-      window.visualViewport.addEventListener("scroll", () => {
-        // não reinicia; apenas garante que já foi inicializado
-        if (!lastW) start();
+          const tw = (Math.sin((t*0.02) + i) * 0.5 + 0.5) * s.tw;
+          const alpha = Math.max(0, Math.min(1, s.a + tw));
+
+          ctx.beginPath();
+          ctx.fillStyle = "rgba(255,255,255," + alpha.toFixed(3) + ")";
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+          ctx.fill();
+        }
+
+        // estrelas cadentes (de vez em quando)
+        if (now >= nextMeteorAt && meteors.length < 2){
+          spawnMeteor();
+          scheduleNextMeteor(now);
+        }
+
+        for (let i = meteors.length - 1; i >= 0; i--){
+          const m = meteors[i];
+          m.x += m.vx;
+          m.y += m.vy;
+          m.life++;
+
+          drawMeteor(m);
+
+          // remove se saiu muito ou acabou a vida
+          if (m.life > m.maxLife || m.x > w + 260 || m.y > h + 260){
+            meteors.splice(i, 1);
+          }
+        }
+
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0,0,w,h);
+
+        raf = requestAnimationFrame(draw);
+      }
+
+      function start(){
+        cancelAnimationFrame(raf);
+        resizeHard();
+        draw(performance.now());
+      }
+
+      // resize: passivo + não agressivo
+      window.addEventListener("resize", () => {
+        // só agenda, o draw vai chamar maybeResize e decidir
+        // (evita reflow/rebuild agressivo no Android)
       }, { passive:true });
+
+      start();
+    })();
+
+    /* =========================
+       LEADS (site estático)
+       - salva no localStorage
+       - envia via mailto para seu e-mail
+       ========================= */
+    const LEAD_EMAIL_DESTINO = "luiskirsch22@hotmail.com";
+    const ENTRADA_URL = "./entrada.html";
+
+    const leadForm = document.getElementById("leadForm");
+    const statusEl = document.getElementById("status");
+    const btnEntrada = document.getElementById("btnEntrada");
+
+    btnEntrada.addEventListener("click", () => {
+      window.location.href = ENTRADA_URL;
+    });
+
+    function loadLeads(){
+      try{ return JSON.parse(localStorage.getItem("preludio_leads") || "[]"); }
+      catch(e){ return []; }
+    }
+    function saveLeads(leads){
+      localStorage.setItem("preludio_leads", JSON.stringify(leads));
+    }
+    function validEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
-    start();
-  })();
+    leadForm.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-  /* =========================
-     LEADS (site estático)
-     - salva no localStorage
-     - envia via mailto para seu e-mail
-     ========================= */
-  const LEAD_EMAIL_DESTINO = "luiskirsch22@hotmail.com";
-  const ENTRADA_URL = "./entrada.html";
+      const nome = (document.getElementById("nome").value || "").trim();
+      const email = (document.getElementById("email").value || "").trim();
+      const consent = document.getElementById("consent").checked;
 
-  const leadForm = document.getElementById("leadForm");
-  const statusEl = document.getElementById("status");
-  const btnEntrada = document.getElementById("btnEntrada");
+      if (!email){
+        statusEl.textContent = "Status: preencha seu e-mail.";
+        statusEl.style.color = "rgba(255,255,255,.70)";
+        return;
+      }
+      if (!validEmail(email)){
+        statusEl.textContent = "Status: e-mail inválido.";
+        statusEl.style.color = "rgba(255,77,77,.90)";
+        return;
+      }
+      if (!consent){
+        statusEl.textContent = "Status: marque a autorização para entrar na lista.";
+        statusEl.style.color = "rgba(255,77,77,.90)";
+        return;
+      }
 
-  btnEntrada.addEventListener("click", () => {
-    window.location.href = ENTRADA_URL;
-  });
+      const leads = loadLeads();
+      const now = new Date();
+      const lead = { nome, email, consent:true, at: now.toISOString() };
 
-  function loadLeads(){
-    try{ return JSON.parse(localStorage.getItem("preludio_leads") || "[]"); }
-    catch(e){ return []; }
-  }
-  function saveLeads(leads){
-    localStorage.setItem("preludio_leads", JSON.stringify(leads));
-  }
-  function validEmail(email){
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
+      const jaExiste = leads.some(l => (l.email || "").toLowerCase() === email.toLowerCase());
+      if (!jaExiste){
+        leads.push(lead);
+        saveLeads(leads);
+      }
 
-  leadForm.addEventListener("submit", (e) => {
-    e.preventDefault();
+      statusEl.textContent = jaExiste
+        ? "Status: você já está na lista. Obrigado."
+        : "Status: salvo! Abrindo envio…";
+      statusEl.style.color = "rgba(155,227,122,.92)";
 
-    const nome = (document.getElementById("nome").value || "").trim();
-    const email = (document.getElementById("email").value || "").trim();
-    const consent = document.getElementById("consent").checked;
+      const subject = encodeURIComponent("Novo lead — Prelúdio Jogos");
+      const body = encodeURIComponent(
+        "Novo lead cadastrado:\n\n" +
+        "Nome: " + (nome || "(não informado)") + "\n" +
+        "E-mail: " + email + "\n" +
+        "Consentimento: SIM\n" +
+        "Data: " + now.toLocaleString() + "\n"
+      );
 
-    if (!email){
-      statusEl.textContent = "Status: preencha seu e-mail.";
-      statusEl.style.color = "rgba(255,255,255,.70)";
-      return;
-    }
-    if (!validEmail(email)){
-      statusEl.textContent = "Status: e-mail inválido.";
-      statusEl.style.color = "rgba(255,77,77,.90)";
-      return;
-    }
-    if (!consent){
-      statusEl.textContent = "Status: marque a autorização para entrar na lista.";
-      statusEl.style.color = "rgba(255,77,77,.90)";
-      return;
-    }
+      setTimeout(() => {
+        window.location.href = "mailto:" + LEAD_EMAIL_DESTINO + "?subject=" + subject + "&body=" + body;
+      }, 250);
+    });
 
-    const leads = loadLeads();
-    const now = new Date();
-    const lead = { nome, email, consent:true, at: now.toISOString() };
-
-    const jaExiste = leads.some(l => (l.email || "").toLowerCase() === email.toLowerCase());
-    if (!jaExiste){
-      leads.push(lead);
-      saveLeads(leads);
-    }
-
-    statusEl.textContent = jaExiste
-      ? "Status: você já está na lista. Obrigado."
-      : "Status: salvo! Abrindo envio…";
-    statusEl.style.color = "rgba(155,227,122,.92)";
-
-    const subject = encodeURIComponent("Novo lead — Prelúdio Jogos");
-    const body = encodeURIComponent(
-      "Novo lead cadastrado:\n\n" +
-      "Nome: " + (nome || "(não informado)") + "\n" +
-      "E-mail: " + email + "\n" +
-      "Consentimento: SIM\n" +
-      "Data: " + now.toLocaleString() + "\n"
-    );
-
-    setTimeout(() => {
-      window.location.href = "mailto:" + LEAD_EMAIL_DESTINO + "?subject=" + subject + "&body=" + body;
-    }, 250);
-  });
-
-  (function(){
-    const leads = loadLeads();
-    if (leads.length > 0){
-      statusEl.textContent = "Status: lista ativa. (" + leads.length + " registrado(s) neste navegador)";
-    }
-  })();
-</script>
-       
+    (function(){
+      const leads = loadLeads();
+      if (leads.length > 0){
+        statusEl.textContent = "Status: lista ativa. (" + leads.length + " registrado(s) neste navegador)";
+      }
+    })();
+  </script>
+</body>
+</html>
