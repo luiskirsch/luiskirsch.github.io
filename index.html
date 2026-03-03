@@ -901,6 +901,95 @@
         statusEl.textContent = "Status: lista ativa. (" + leads.length + " registrado(s) neste navegador)";
       }
     })();
+    /* =========================
+   SOM AMBIENTE ATMOSFÉRICO
+   - inicia após primeiro clique/toque
+   - ultra sutil
+   - loop infinito
+========================= */
+
+(function(){
+
+  let audioCtx = null;
+  let masterGain = null;
+  let started = false;
+
+  function initAudio(){
+    if (started) return;
+    started = true;
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.18; // volume geral (ajustável)
+    masterGain.connect(audioCtx.destination);
+
+    // === DRONE GRAVE SUAVE ===
+    const drone = audioCtx.createOscillator();
+    drone.type = "sine";
+    drone.frequency.value = 38; // frequência baixa profunda
+
+    const droneGain = audioCtx.createGain();
+    droneGain.gain.value = 0.06;
+
+    drone.connect(droneGain);
+    droneGain.connect(masterGain);
+    drone.start();
+
+    // === RUIDO ESPACIAL FILTRADO ===
+    const bufferSize = 2 * audioCtx.sampleRate;
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++){
+      data[i] = (Math.random() * 2 - 1) * 0.15;
+    }
+
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = noiseBuffer;
+    noise.loop = true;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 400;
+
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.value = 0.05;
+
+    noise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+
+    noise.start();
+
+    // === BRILHO AGUDO SUAVE EVENTUAL ===
+    setInterval(() => {
+      if (!audioCtx) return;
+
+      const shimmer = audioCtx.createOscillator();
+      shimmer.type = "triangle";
+      shimmer.frequency.value = 900 + Math.random() * 300;
+
+      const shimmerGain = audioCtx.createGain();
+      shimmerGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      shimmerGain.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 0.05);
+      shimmerGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
+
+      shimmer.connect(shimmerGain);
+      shimmerGain.connect(masterGain);
+
+      shimmer.start();
+      shimmer.stop(audioCtx.currentTime + 1.3);
+
+    }, 9000 + Math.random() * 7000);
+
+  }
+
+  // inicia no primeiro clique/toque
+  document.addEventListener("click", initAudio, { once: true });
+  document.addEventListener("touchstart", initAudio, { once: true });
+
+})();
   </script>
 </body>
 </html>
