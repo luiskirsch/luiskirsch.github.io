@@ -477,33 +477,152 @@
       .miniGrid{ grid-template-columns: 1fr; }
       button{ width: 100%; min-width: 0; }
       .logoOnly{ width:110px; height:110px; }
+      .countdownGrid{ grid-template-columns: repeat(2, minmax(90px,1fr)); }
     }
 
-    /* ✅ Botão de som sem "notificação" */
-    .soundBtn{
+    /* ✅ Painel de som (corrigido) */
+    .soundPanel{
       position:fixed;
       right:max(14px, env(safe-area-inset-right));
       top:max(14px, env(safe-area-inset-top));
       z-index:30;
+      display:grid;
+      gap:8px;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.30);
+      background: rgba(0,0,0,.34);
+      border-radius:16px;
+      padding:10px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      min-width: 220px;
+    }
+
+    .soundBtn{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.36);
       color: rgba(255,255,255,.78);
       padding:10px 14px;
-      border-radius:999px;
+      border-radius:12px;
       font-size:12px;
       letter-spacing:.10em;
       text-transform:uppercase;
       cursor:pointer;
       user-select:none;
-      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      text-align:center;
     }
     .soundBtn strong{ color: #e6c07b; color: var(--gold); }
 
+    .soundControls{
+      display:grid;
+      gap:6px;
+      color: rgba(255,255,255,.72);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+    .soundControls input[type="range"]{
+      width:100%;
+      padding:0;
+      accent-color: rgba(230,192,123,.9);
+      box-shadow:none;
+      background: transparent;
+    }
+
     @supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))){
-      .soundBtn{
+      .soundPanel{
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
       }
+    }
+
+    /* =========================
+       ✅ CONTAGEM REGRESSIVA (card)
+       ========================= */
+    .launchCountdown{
+      margin-top: 18px;
+    }
+    .countdownCard{
+      border-radius:22px;
+      border: 1px solid rgba(230,192,123,.20);
+      background: linear-gradient(180deg, rgba(230,192,123,.08), rgba(255,255,255,.02));
+      padding: 18px;
+      box-shadow: inset 0 0 40px rgba(0,0,0,.24), 0 24px 70px rgba(0,0,0,.42);
+    }
+    .countdownTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .countdownTitle{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      color: rgba(230,192,123,.90);
+    }
+    .countdownDate{
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.62);
+    }
+    .countdownLead{
+      margin:10px 0 0;
+      font-size: clamp(18px, 2.2vw, 30px);
+      color: rgba(255,255,255,.92);
+      line-height:1.35;
+    }
+    .countdownGrid{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(92px,1fr));
+      gap:10px;
+    }
+    .countdownItem{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      padding:12px 10px;
+      text-align:center;
+    }
+    .countdownValue{
+      margin:0;
+      font-size: clamp(28px, 3vw, 42px);
+      font-weight:700;
+      color: rgba(230,192,123,.95);
+      line-height:1;
+      text-shadow: 0 10px 30px rgba(0,0,0,.45);
+      font-variant-numeric: tabular-nums;
+    }
+    .countdownLabel{
+      margin-top:6px;
+      font-size:11px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.66);
+    }
+    .countdownTrack{
+      margin-top:12px;
+      height:8px;
+      border-radius:999px;
+      overflow:hidden;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .countdownBar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(230,192,123,.35), rgba(230,192,123,.92), rgba(255,255,255,.92));
+      box-shadow: 0 0 18px rgba(230,192,123,.35);
+      transition: width .6s ease;
+    }
+    .countdownStatus{
+      margin-top:10px;
+      font-size:12px;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.66);
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -516,9 +635,15 @@
 <body>
   <canvas id="stars" aria-hidden="true"></canvas>
 
-  <!-- ✅ Sem aviso. Som só liga tocando aqui. -->
-  <div class="soundBtn" id="soundBtn" role="button" aria-label="Ativar ou desativar som">
-    SOM: <strong>OFF</strong>
+  <!-- ✅ Painel de som (sem aviso; iOS exige gesto e isso resolve) -->
+  <div class="soundPanel" aria-label="Painel de som ambiente">
+    <div class="soundBtn" id="soundBtn" role="button" aria-label="Ativar ou desativar som">
+      SOM: <strong>OFF</strong>
+    </div>
+    <label class="soundControls" for="soundVolume">
+      Volume ambiente
+      <input id="soundVolume" type="range" min="0" max="100" step="1" value="62" aria-label="Controle de volume do som ambiente" />
+    </label>
   </div>
 
   <div class="wrap">
@@ -607,6 +732,44 @@
       </aside>
     </section>
 
+    <!-- ✅ Card de contagem regressiva inserido aqui -->
+    <section class="launchCountdown" aria-label="Contagem regressiva de lançamento">
+      <article class="countdownCard">
+        <div class="countdownTop">
+          <h2 class="countdownTitle">Lançamento em contagem regressiva</h2>
+          <div class="countdownDate" id="launchDateText">Previsão de lançamento</div>
+        </div>
+
+        <p class="countdownLead" id="countdownLeadText">
+          Faltam poucos ciclos para a primeira tiragem de <strong style="color:rgba(230,192,123,.95);">O SextoLugar</strong>.
+        </p>
+
+        <div class="countdownGrid" id="countdownGrid" role="timer" aria-live="polite" aria-atomic="true">
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdDays">00</p>
+            <div class="countdownLabel">Dias</div>
+          </div>
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdHours">00</p>
+            <div class="countdownLabel">Horas</div>
+          </div>
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdMinutes">00</p>
+            <div class="countdownLabel">Minutos</div>
+          </div>
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdSeconds">00</p>
+            <div class="countdownLabel">Segundos</div>
+          </div>
+        </div>
+
+        <div class="countdownTrack" aria-hidden="true">
+          <div class="countdownBar" id="countdownBar"></div>
+        </div>
+        <div class="countdownStatus" id="countdownStatus">Preparando cronômetro de lançamento…</div>
+      </article>
+    </section>
+
     <section class="below">
       <article class="card">
         <div class="inner">
@@ -685,7 +848,7 @@
           var startY = rand(-h*0.25, -h*0.06);
 
           var speed = rand(10.5, 14.5);
-          var angle = rand(0.85, 1.05); // ✅ cima->baixo, diagonal esquerda->direita
+          var angle = rand(0.85, 1.05); // cima->baixo, diagonal esquerda->direita
           var vx = Math.cos(angle) * speed;
           var vy = Math.sin(angle) * speed;
 
@@ -784,7 +947,84 @@
     })();
 
     /* =========================================================
-       ✅ 2) Leads (estático)
+       ✅ 2) Contagem regressiva de lançamento (3 meses a partir de hoje)
+       ========================================================= */
+    (function(){
+      try{
+        var dayEl = document.getElementById("cdDays");
+        var hourEl = document.getElementById("cdHours");
+        var minEl = document.getElementById("cdMinutes");
+        var secEl = document.getElementById("cdSeconds");
+        var statusEl = document.getElementById("countdownStatus");
+        var barEl = document.getElementById("countdownBar");
+        var dateTextEl = document.getElementById("launchDateText");
+        var leadTextEl = document.getElementById("countdownLeadText");
+        if (!dayEl || !hourEl || !minEl || !secEl || !statusEl || !barEl || !dateTextEl || !leadTextEl) return;
+
+        var MS = { sec: 1000, min: 60000, hour: 3600000, day: 86400000 };
+        var start = new Date();
+        var target = new Date(start.getTime());
+        target.setMonth(target.getMonth() + 3);
+
+        function pad(n){
+          return (n < 10 ? "0" : "") + n;
+        }
+
+        function clamp(v, min, max){
+          return Math.min(max, Math.max(min, v));
+        }
+
+        function update(){
+          var now = new Date();
+          var diff = target.getTime() - now.getTime();
+
+          if (diff <= 0){
+            dayEl.textContent = "00";
+            hourEl.textContent = "00";
+            minEl.textContent = "00";
+            secEl.textContent = "00";
+            barEl.style.width = "100%";
+            statusEl.textContent = "É hoje. O SextoLugar foi lançado.";
+            leadTextEl.textContent = "O ritual começou. Obrigado por estar desde o prelúdio.";
+            return;
+          }
+
+          var days = Math.floor(diff / MS.day);
+          diff -= days * MS.day;
+          var hours = Math.floor(diff / MS.hour);
+          diff -= hours * MS.hour;
+          var mins = Math.floor(diff / MS.min);
+          diff -= mins * MS.min;
+          var secs = Math.floor(diff / MS.sec);
+
+          dayEl.textContent = pad(days);
+          hourEl.textContent = pad(hours);
+          minEl.textContent = pad(mins);
+          secEl.textContent = pad(secs);
+
+          var total = target.getTime() - start.getTime();
+          var elapsed = now.getTime() - start.getTime();
+          var pct = clamp((elapsed / total) * 100, 0, 100);
+          barEl.style.width = pct.toFixed(2) + "%";
+
+          statusEl.textContent = "Contagem ativa • " + days + " dia(s) restantes para o lançamento.";
+        }
+
+        var fmt = (window.Intl && Intl.DateTimeFormat)
+          ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" })
+          : null;
+
+        dateTextEl.textContent = fmt
+          ? ("Lançamento previsto: " + fmt.format(target))
+          : ("Lançamento previsto: " + target.toLocaleDateString());
+
+        update();
+        setInterval(update, 1000);
+      }catch(e){}
+    })();
+
+    /* =========================================================
+       ✅ 3) Leads (estático)
        ========================================================= */
     (function(){
       try{
@@ -879,8 +1119,8 @@
     })();
 
     /* =========================================================
-       ✅ 3) Som (sem notificação; só liga tocando no botão)
-       - iOS: exige gesto -> perfeito
+       ✅ 4) Som (sem notificação; só liga tocando no botão)
+       - iOS: exige gesto -> ok
        - Windows/Linux: funciona também
        ========================================================= */
     (function(){
@@ -889,11 +1129,46 @@
       if (reduced) return;
 
       var btn = document.getElementById("soundBtn");
-      if (!btn) return;
+      var soundVolume = document.getElementById("soundVolume");
+      if (!btn || !soundVolume) return;
 
       var audioCtx = null;
       var started = false;
       var master = null;
+      var targets = null;
+      var STORAGE_KEY = "preludio_sound_volume";
+
+      function clamp(v, min, max){
+        return Math.min(max, Math.max(min, v));
+      }
+
+      function getVolume(){
+        var raw = Number(soundVolume.value || 62) / 100;
+        return clamp(raw, 0, 1);
+      }
+
+      function getScaledTargets(){
+        var base = getVolume();
+        return {
+          drone: 0.44 * base,
+          air: 0.085 * base,
+          master: 0.55 * (0.30 + (base * 0.70))
+        };
+      }
+
+      function saveVolume(){
+        try{ localStorage.setItem(STORAGE_KEY, String(soundVolume.value || "62")); }catch(e){}
+      }
+
+      function loadVolume(){
+        try{
+          var stored = localStorage.getItem(STORAGE_KEY);
+          if (stored != null){
+            var n = parseInt(stored, 10);
+            if (!isNaN(n)) soundVolume.value = String(clamp(n, 0, 100));
+          }
+        }catch(e){}
+      }
 
       function setBtn(on){
         btn.innerHTML = on ? 'SOM: <strong>ON</strong>' : 'SOM: <strong>OFF</strong>';
@@ -1012,14 +1287,20 @@
           lfo.start();
           air.start();
 
-          // em alguns browsers precisa
           if (audioCtx.state === "suspended"){
             try{ audioCtx.resume(); }catch(e){}
           }
 
-          ramp(gDrone.gain, 0.44, 1.6);
-          ramp(airGain.gain, 0.085, 1.8);
-          ramp(master.gain, 0.55, 1.8);
+          targets = {
+            gDrone: gDrone.gain,
+            air: airGain.gain,
+            master: master.gain
+          };
+
+          var levels = getScaledTargets();
+          ramp(gDrone.gain, levels.drone, 1.6);
+          ramp(airGain.gain, levels.air, 1.8);
+          ramp(master.gain, levels.master, 1.8);
 
           started = true;
           setBtn(true);
@@ -1040,8 +1321,22 @@
         audioCtx = null;
         started = false;
         master = null;
+        targets = null;
         setBtn(false);
       }
+
+      function onVolumeChange(){
+        saveVolume();
+        if (!started || !audioCtx || !targets) return;
+        var levels = getScaledTargets();
+        ramp(targets.gDrone, levels.drone, 0.25);
+        ramp(targets.air, levels.air, 0.25);
+        ramp(targets.master, levels.master, 0.25);
+      }
+
+      loadVolume();
+      soundVolume.addEventListener("input", onVolumeChange);
+      soundVolume.addEventListener("change", onVolumeChange);
 
       btn.addEventListener("click", function(){
         if (!started){
@@ -1051,7 +1346,6 @@
           stopAudio();
         }
       });
-
     })();
   </script>
 </body>
