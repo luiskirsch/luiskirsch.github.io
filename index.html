@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Prelúdio Jogos — Boas-vindas</title>
 
-  <!-- FAVICON -->
-  <link rel="icon" href="./favicon.png">
+  <!-- Favicons (deixe favicon.png na mesma pasta do index.html) -->
+  <link rel="icon" type="image/png" href="./favicon.png">
+
+  <!-- ajuda contra cache agressivo em alguns ambientes -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 
   <style>
     :root{
@@ -28,14 +33,13 @@
     html,body{ height:100%; }
 
     html{
+      background:#000006;
       background: var(--bg);
       overscroll-behavior: none;
     }
 
     /* =========================
-       ✅ FALLBACK UNIVERSAL (SEM JS)
-       - Fundo “universo” + estrelas em CSS
-       - Funciona em Windows/Linux/iOS/Android
+       ✅ FALLBACK UNIVERSAL (mesmo sem JS/CSS vars)
        ========================= */
     body{
       margin:0;
@@ -54,11 +58,19 @@
       color:#f2f2f2;
       font-family: ui-serif, Georgia, "Times New Roman", serif;
 
-      /* ✅ fundo sempre visível */
+      /* ✅ fallback puro (caso var() falhe) */
+      background-color:#000006;
+
+      /* ✅ versão completa (caso var() funcione) */
       background:
-        radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.08), transparent 60%),
-        radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.045), transparent 68%),
-        radial-gradient(1400px 900px at 86% 80%, rgba(255,255,255,.040), transparent 70%),
+        radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.06), transparent 62%),
+        radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.035), transparent 72%),
+        radial-gradient(1400px 900px at 86% 80%, rgba(255,255,255,.030), transparent 74%),
+        linear-gradient(180deg, #000002, #000006);
+      background:
+        radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.06), transparent 62%),
+        radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.035), transparent 72%),
+        radial-gradient(1400px 900px at 86% 80%, rgba(255,255,255,.030), transparent 74%),
         linear-gradient(180deg, var(--bg2), var(--bg));
     }
 
@@ -74,63 +86,48 @@
       pointer-events:none;
       z-index:0;
       opacity:.95;
-
-      /* várias “poeiras” de estrelas */
       background:
-        radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.70), transparent 60%),
-        radial-gradient(1px 1px at 28% 32%, rgba(255,255,255,.55), transparent 60%),
-        radial-gradient(1px 1px at 44% 22%, rgba(255,255,255,.60), transparent 60%),
-        radial-gradient(1px 1px at 62% 40%, rgba(255,255,255,.50), transparent 60%),
-        radial-gradient(1px 1px at 78% 20%, rgba(255,255,255,.68), transparent 60%),
-        radial-gradient(1px 1px at 86% 62%, rgba(255,255,255,.52), transparent 60%),
-        radial-gradient(1px 1px at 18% 76%, rgba(255,255,255,.50), transparent 60%),
-        radial-gradient(1px 1px at 52% 84%, rgba(255,255,255,.60), transparent 60%),
-        radial-gradient(1px 1px at 72% 74%, rgba(255,255,255,.55), transparent 60%),
-        radial-gradient(1px 1px at 90% 88%, rgba(255,255,255,.45), transparent 60%);
+        radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.65), transparent 60%),
+        radial-gradient(1px 1px at 28% 32%, rgba(255,255,255,.50), transparent 60%),
+        radial-gradient(1px 1px at 44% 22%, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(1px 1px at 62% 40%, rgba(255,255,255,.45), transparent 60%),
+        radial-gradient(1px 1px at 78% 20%, rgba(255,255,255,.60), transparent 60%),
+        radial-gradient(1px 1px at 86% 62%, rgba(255,255,255,.46), transparent 60%),
+        radial-gradient(1px 1px at 18% 76%, rgba(255,255,255,.44), transparent 60%),
+        radial-gradient(1px 1px at 52% 84%, rgba(255,255,255,.52), transparent 60%),
+        radial-gradient(1px 1px at 72% 74%, rgba(255,255,255,.48), transparent 60%),
+        radial-gradient(1px 1px at 90% 88%, rgba(255,255,255,.40), transparent 60%);
       filter: blur(.15px);
     }
 
-    /* ✅ névoa/glow universal */
+    /* ✅ névoa universal */
     body::after{
       content:"";
       position:fixed;
       inset:-22%;
       pointer-events:none;
       z-index:1;
-
       background:
-        radial-gradient(900px 520px at 28% 30%, rgba(255,255,255,.030), transparent 68%),
-        radial-gradient(1100px 620px at 70% 70%, rgba(230,192,123,.045), transparent 72%),
-        radial-gradient(800px 480px at 55% 18%, rgba(120,150,255,.020), transparent 65%),
-        radial-gradient(700px 360px at 50% 24%, rgba(230,192,123,.070), transparent 64%);
-
+        radial-gradient(1000px 560px at 28% 30%, rgba(255,255,255,.024), transparent 70%),
+        radial-gradient(1200px 680px at 70% 70%, rgba(230,192,123,.038), transparent 76%),
+        radial-gradient(900px 520px at 52% 18%, rgba(120,150,255,.016), transparent 70%),
+        radial-gradient(760px 420px at 50% 24%, rgba(230,192,123,.055), transparent 70%);
       filter: blur(18px);
-      opacity:.42;
+      opacity:.38;
       transform: translateZ(0);
       animation: fogMove 10.5s ease-in-out infinite;
     }
 
     @keyframes fogMove{
-      0%,100%{ transform: translate3d(0,0,0) scale(1); opacity:.34; }
-      50%{ transform: translate3d(10px,-10px,0) scale(1.02); opacity:.52; }
+      0%,100%{ transform: translate3d(0,0,0) scale(1); opacity:.30; }
+      50%{ transform: translate3d(10px,-10px,0) scale(1.02); opacity:.46; }
     }
 
-    /* =========================
-       CANVAS ENHANCEMENT
-       ========================= */
-    .bgLayer{
-      position:fixed;
-      inset:0;
-      z-index:0;
-      pointer-events:none;
-      /* (mantém redundância com body background) */
-      background: transparent;
-    }
-
+    /* Canvas (enhancement) */
     #stars{
       position:fixed;
       inset:0;
-      z-index:2; /* acima do fallback */
+      z-index:2;
       pointer-events:none;
       opacity:.95;
       transform: translateZ(0);
@@ -144,7 +141,7 @@
       padding: 22px 0 28px;
     }
 
-    /* ✅ Logo central, maior, sem círculo */
+    /* ✅ logo central maior, sem círculo */
     .topbar{
       display:flex;
       align-items:center;
@@ -152,18 +149,15 @@
       margin: 12px auto 18px;
     }
     .logoOnly{
-      width:118px;
-      height:118px;
+      width:128px;
+      height:128px;
       object-fit:contain;
       display:block;
-      filter: drop-shadow(0 16px 34px rgba(0,0,0,.78));
+      filter: drop-shadow(0 18px 38px rgba(0,0,0,.82));
       user-select:none;
       -webkit-user-drag:none;
     }
 
-    /* =========================
-       Cards / Layout
-       ========================= */
     .grid{
       display:grid;
       grid-template-columns: 1.15fr 0.85fr;
@@ -174,6 +168,8 @@
 
     .card{
       border-radius:26px;
+      background: rgba(255,255,255,.05);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.035));
       background: linear-gradient(180deg, var(--cardA), var(--cardB));
       border:1px solid rgba(255,255,255,.10);
       box-shadow: 0 30px 90px rgba(0,0,0,.62);
@@ -181,7 +177,6 @@
       overflow:hidden;
     }
 
-    /* ✅ blur como enhancement, mas sem depender disso */
     @supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))){
       .card{
         backdrop-filter: blur(12px);
@@ -194,7 +189,7 @@
       position:absolute;
       inset:0;
       pointer-events:none;
-      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.10), transparent 62%);
+      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.09), transparent 64%);
       opacity:.85;
     }
 
@@ -221,10 +216,7 @@
       flex:0 0 auto;
     }
 
-    /* =========================
-       ✅ Título com brilho universal
-       - Se clip-text não funcionar, mantém ouro + “pulse”
-       ========================= */
+    /* ✅ título com fallback universal */
     .title{
       margin:0;
       line-height: .92;
@@ -232,6 +224,7 @@
       text-transform:uppercase;
       font-weight: 700;
       font-size: clamp(48px, 6.2vw, 110px);
+      color:#e6c07b;
       color: var(--gold);
       text-shadow: 0 20px 70px rgba(0,0,0,.55);
       animation: titlePulse 4.2s ease-in-out infinite;
@@ -241,23 +234,21 @@
       50%{ text-shadow: 0 26px 90px rgba(0,0,0,.70); filter: brightness(1.08); }
     }
 
-    /* Enhancement: brilho “metal” no texto (Chrome/Edge/Safari) */
     @supports ((-webkit-background-clip:text) or (background-clip:text)){
       .title{
         animation: shineText 6.8s ease-in-out infinite;
         color: transparent;
         background-image:
           linear-gradient(90deg,
-            rgba(230,192,123,.65) 0%,
+            rgba(230,192,123,.60) 0%,
             rgba(230,192,123,.92) 28%,
             rgba(255,255,255,.92) 48%,
             rgba(230,192,123,.92) 58%,
-            rgba(230,192,123,.65) 100%);
+            rgba(230,192,123,.60) 100%);
         background-size: 260% 100%;
         background-position: 0% 50%;
         -webkit-background-clip:text;
         background-clip:text;
-        text-shadow: 0 20px 70px rgba(0,0,0,.55);
       }
     }
     @keyframes shineText{
@@ -485,62 +476,35 @@
       .row2{ grid-template-columns: 1fr; }
       .miniGrid{ grid-template-columns: 1fr; }
       button{ width: 100%; min-width: 0; }
-      .logoOnly{ width:98px; height:98px; }
+      .logoOnly{ width:110px; height:110px; }
     }
 
-    /* =========================
-       Som: UI mínima universal
-       - iOS precisa TAP
-       ========================= */
-    .soundPill{
+    /* ✅ Botão de som sem "notificação" */
+    .soundBtn{
       position:fixed;
       right:max(14px, env(safe-area-inset-right));
       top:max(14px, env(safe-area-inset-top));
-      z-index:20;
+      z-index:30;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.28);
+      background: rgba(0,0,0,.30);
       color: rgba(255,255,255,.78);
-      padding:8px 12px;
+      padding:10px 14px;
       border-radius:999px;
       font-size:12px;
       letter-spacing:.10em;
       text-transform:uppercase;
-      pointer-events:none;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .soundPill strong{ color: var(--gold); }
-
-    .soundGate{
-      position:fixed;
-      left:50%;
-      bottom:max(14px, env(safe-area-inset-bottom));
-      transform:translateX(-50%);
-      z-index:25;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.36);
-      color: rgba(255,255,255,.78);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      cursor:pointer;
+      user-select:none;
       box-shadow: 0 18px 60px rgba(0,0,0,.45);
     }
-    .soundGate span{
-      font-size:12px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
+    .soundBtn strong{ color: #e6c07b; color: var(--gold); }
+
+    @supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))){
+      .soundBtn{
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
     }
-    .soundGate button{
-      min-width:auto;
-      padding:10px 12px;
-      border-radius:999px;
-      letter-spacing:.10em;
-    }
-    .soundGate[hidden]{ display:none; }
 
     @media (prefers-reduced-motion: reduce){
       body::after, .whisper, .title{ animation:none !important; }
@@ -550,15 +514,11 @@
 </head>
 
 <body>
-  <div class="bgLayer" aria-hidden="true"></div>
   <canvas id="stars" aria-hidden="true"></canvas>
 
-  <div class="soundPill" id="soundPill">SOM: <strong>OFF</strong></div>
-
-  <!-- ✅ Gate universal (aparece quando necessário, especialmente iOS) -->
-  <div class="soundGate" id="soundGate" hidden>
-    <span>Toque para ativar som</span>
-    <button type="button" id="btnSound">Ativar</button>
+  <!-- ✅ Sem aviso. Som só liga tocando aqui. -->
+  <div class="soundBtn" id="soundBtn" role="button" aria-label="Ativar ou desativar som">
+    SOM: <strong>OFF</strong>
   </div>
 
   <div class="wrap">
@@ -669,31 +629,31 @@
 
   <script>
     /* =========================================================
-       ✅ BLOCO 1: ESTRELAS (NUNCA TRAVA O SITE)
-       - Se der erro, fallback CSS continua
+       ✅ 1) Estrelas + meteoros (ES5) — se falhar, fallback CSS continua
        ========================================================= */
     (function(){
       try{
-        const canvas = document.getElementById("stars");
-        if (!canvas) return;
+        var canvas = document.getElementById("stars");
+        if (!canvas || !canvas.getContext) return;
 
-        const ctx = canvas.getContext && canvas.getContext("2d", { alpha:true });
+        var ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+        var reduced = mm ? mm.matches : false;
         if (reduced) return;
 
-        let w=0,h=0,dpr=1;
-        let stars = [];
-        let meteors = [];
-        let raf = 0;
-        let t = 0;
-        let nextMeteorAt = 0;
+        var w=0, h=0, dpr=1;
+        var stars = [];
+        var meteors = [];
+        var raf = 0;
+        var t = 0;
+        var nextMeteorAt = 0;
 
         function rand(min,max){ return min + Math.random()*(max-min); }
 
         function resize(){
-          dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+          dpr = Math.max(1, Math.min(2, (window.devicePixelRatio || 1)));
           w = Math.floor(window.innerWidth);
           h = Math.floor(window.innerHeight);
 
@@ -703,33 +663,35 @@
           canvas.style.height = h + "px";
           ctx.setTransform(dpr,0,0,dpr,0,0);
 
-          const density = Math.floor((w*h) / 11000);
-          const target = Math.max(140, Math.min(340, density));
+          var density = Math.floor((w*h) / 11000);
+          var target = Math.max(140, Math.min(340, density));
 
-          stars = new Array(target).fill(0).map(() => ({
-            x: Math.random()*w,
-            y: Math.random()*h,
-            r: Math.random()*1.45 + 0.15,
-            a: Math.random()*0.68 + 0.18,
-            v: (Math.random()*0.18 + 0.05),
-            tw: Math.random()*0.02 + 0.006
-          }));
-
+          stars = [];
+          for (var i=0;i<target;i++){
+            stars.push({
+              x: Math.random()*w,
+              y: Math.random()*h,
+              r: Math.random()*1.45 + 0.15,
+              a: Math.random()*0.68 + 0.18,
+              v: (Math.random()*0.18 + 0.05),
+              tw: Math.random()*0.02 + 0.006
+            });
+          }
           meteors = [];
         }
 
         function spawnMeteor(){
-          const startX = rand(-w*0.10, w*0.35);
-          const startY = rand(-h*0.25, -h*0.06);
+          var startX = rand(-w*0.10, w*0.35);
+          var startY = rand(-h*0.25, -h*0.06);
 
-          const speed = rand(10.5, 14.5);
-          const angle = rand(0.85, 1.05); // cima->baixo diagonal p/ direita
-          const vx = Math.cos(angle) * speed;
-          const vy = Math.sin(angle) * speed;
+          var speed = rand(10.5, 14.5);
+          var angle = rand(0.85, 1.05); // ✅ cima->baixo, diagonal esquerda->direita
+          var vx = Math.cos(angle) * speed;
+          var vy = Math.sin(angle) * speed;
 
           meteors.push({
             x: startX, y: startY,
-            vx, vy,
+            vx: vx, vy: vy,
             life: 0,
             maxLife: rand(38, 55),
             len: rand(120, 190),
@@ -741,13 +703,16 @@
           t += 1;
           ctx.clearRect(0,0,w,h);
 
-          for (let i=0;i<stars.length;i++){
-            const s = stars[i];
+          for (var i=0;i<stars.length;i++){
+            var s = stars[i];
             s.y += s.v;
-            if (s.y > h + 10){ s.y = -10; s.x = Math.random()*w; }
+            if (s.y > h + 10){
+              s.y = -10;
+              s.x = Math.random()*w;
+            }
 
-            const tw = (Math.sin((t*0.02) + i) * 0.5 + 0.5) * s.tw;
-            const alpha = Math.max(0, Math.min(1, s.a + tw));
+            var tw = (Math.sin((t*0.02) + i) * 0.5 + 0.5) * s.tw;
+            var alpha = Math.max(0, Math.min(1, s.a + tw));
 
             ctx.beginPath();
             ctx.fillStyle = "rgba(255,255,255," + alpha.toFixed(3) + ")";
@@ -760,19 +725,21 @@
             nextMeteorAt = t + Math.floor(rand(220, 420));
           }
 
-          for (let i=meteors.length-1;i>=0;i--){
-            const m = meteors[i];
-            m.x += m.vx; m.y += m.vy; m.life++;
+          for (var j=meteors.length-1;j>=0;j--){
+            var m = meteors[j];
+            m.x += m.vx;
+            m.y += m.vy;
+            m.life++;
 
-            const k = Math.min(1, m.life / 10);
-            const alpha = m.a * k * (1 - (m.life / m.maxLife));
+            var k = Math.min(1, m.life / 10);
+            var a = m.a * k * (1 - (m.life / m.maxLife));
 
-            const norm = Math.hypot(m.vx, m.vy) || 1;
-            const tx = m.x - (m.vx / norm) * m.len;
-            const ty = m.y - (m.vy / norm) * m.len;
+            var norm = Math.sqrt(m.vx*m.vx + m.vy*m.vy) || 1;
+            var tx = m.x - (m.vx / norm) * m.len;
+            var ty = m.y - (m.vy / norm) * m.len;
 
-            const grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
-            grad.addColorStop(0, "rgba(255,255,255," + (alpha).toFixed(3) + ")");
+            var grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
+            grad.addColorStop(0, "rgba(255,255,255," + (a).toFixed(3) + ")");
             grad.addColorStop(1, "rgba(255,255,255,0)");
 
             ctx.strokeStyle = grad;
@@ -782,53 +749,56 @@
             ctx.lineTo(tx, ty);
             ctx.stroke();
 
-            ctx.fillStyle = "rgba(255,255,255," + (Math.min(1, alpha + 0.15)).toFixed(3) + ")";
+            ctx.fillStyle = "rgba(255,255,255," + (Math.min(1, a + 0.15)).toFixed(3) + ")";
             ctx.beginPath();
             ctx.arc(m.x, m.y, 1.8, 0, Math.PI*2);
             ctx.fill();
 
             if (m.life > m.maxLife || m.x > w + m.len || m.y > h + m.len){
-              meteors.splice(i,1);
+              meteors.splice(j,1);
             }
           }
 
-          const vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.95);
+          // vinheta
+          var vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.95);
           vignette.addColorStop(0, "rgba(0,0,0,0)");
-          vignette.addColorStop(1, "rgba(0,0,0,0.55)");
+          vignette.addColorStop(1, "rgba(0,0,0,0.62)");
           ctx.fillStyle = vignette;
           ctx.fillRect(0,0,w,h);
 
-          raf = requestAnimationFrame(draw);
+          raf = window.requestAnimationFrame(draw);
         }
 
         function start(){
-          if (raf) cancelAnimationFrame(raf);
+          if (raf) window.cancelAnimationFrame(raf);
           resize();
           draw();
         }
 
-        window.addEventListener("resize", start, { passive:true });
+        window.addEventListener("resize", start);
         start();
 
       } catch(e){
-        // fallback CSS já garante visual
+        // fallback CSS mantém visual
       }
     })();
 
     /* =========================================================
-       ✅ BLOCO 2: LEADS (NUNCA TRAVA O SITE)
+       ✅ 2) Leads (estático)
        ========================================================= */
     (function(){
       try{
-        const LEAD_EMAIL_DESTINO = "luiskirsch22@hotmail.com";
-        const ENTRADA_URL = "./entrada.html";
+        var LEAD_EMAIL_DESTINO = "luiskirsch22@hotmail.com";
+        var ENTRADA_URL = "./entrada.html";
 
-        const leadForm = document.getElementById("leadForm");
-        const statusEl = document.getElementById("status");
-        const btnEntrada = document.getElementById("btnEntrada");
+        var leadForm = document.getElementById("leadForm");
+        var statusEl = document.getElementById("status");
+        var btnEntrada = document.getElementById("btnEntrada");
 
         if (btnEntrada){
-          btnEntrada.addEventListener("click", () => window.location.href = ENTRADA_URL);
+          btnEntrada.addEventListener("click", function(){
+            window.location.href = ENTRADA_URL;
+          });
         }
 
         function loadLeads(){
@@ -843,12 +813,12 @@
         }
 
         if (leadForm){
-          leadForm.addEventListener("submit", (e) => {
+          leadForm.addEventListener("submit", function(e){
             e.preventDefault();
 
-            const nome = (document.getElementById("nome").value || "").trim();
-            const email = (document.getElementById("email").value || "").trim();
-            const consent = document.getElementById("consent").checked;
+            var nome = (document.getElementById("nome").value || "").trim();
+            var email = (document.getElementById("email").value || "").trim();
+            var consent = document.getElementById("consent").checked;
 
             if (!email){
               statusEl.textContent = "Status: preencha seu e-mail.";
@@ -866,11 +836,16 @@
               return;
             }
 
-            const leads = loadLeads();
-            const now = new Date();
-            const lead = { nome, email, consent:true, at: now.toISOString() };
+            var leads = loadLeads();
+            var now = new Date();
+            var lead = { nome:nome, email:email, consent:true, at: now.toISOString() };
 
-            const jaExiste = leads.some(l => (l.email || "").toLowerCase() === email.toLowerCase());
+            var jaExiste = false;
+            for (var i=0;i<leads.length;i++){
+              if ((leads[i].email || "").toLowerCase() === email.toLowerCase()){
+                jaExiste = true; break;
+              }
+            }
             if (!jaExiste){
               leads.push(lead);
               saveLeads(leads);
@@ -881,8 +856,8 @@
               : "Status: salvo! Abrindo envio…";
             statusEl.style.color = "rgba(155,227,122,.92)";
 
-            const subject = encodeURIComponent("Novo lead — Prelúdio Jogos");
-            const body = encodeURIComponent(
+            var subject = encodeURIComponent("Novo lead — Prelúdio Jogos");
+            var body = encodeURIComponent(
               "Novo lead cadastrado:\n\n" +
               "Nome: " + (nome || "(não informado)") + "\n" +
               "E-mail: " + email + "\n" +
@@ -890,94 +865,91 @@
               "Data: " + now.toLocaleString() + "\n"
             );
 
-            setTimeout(() => {
+            setTimeout(function(){
               window.location.href = "mailto:" + LEAD_EMAIL_DESTINO + "?subject=" + subject + "&body=" + body;
             }, 250);
           });
         }
 
-        // status de leads
-        const leads = (function(){ try{ return JSON.parse(localStorage.getItem("preludio_leads") || "[]"); }catch(e){ return []; }})();
-        if (statusEl && leads.length > 0){
-          statusEl.textContent = "Status: lista ativa. (" + leads.length + " registrado(s) neste navegador)";
+        var leadsNow = loadLeads();
+        if (statusEl && leadsNow.length > 0){
+          statusEl.textContent = "Status: lista ativa. (" + leadsNow.length + " registrado(s) neste navegador)";
         }
       } catch(e){}
     })();
 
     /* =========================================================
-       ✅ BLOCO 3: SOM (CROSS-PLATFORM)
-       - iOS: exige TAP (mostra botão se necessário)
-       - Windows/Linux: inicia no primeiro gesto (scroll/click/tecla)
-       - Se falhar, não afeta estrelas/efeitos
+       ✅ 3) Som (sem notificação; só liga tocando no botão)
+       - iOS: exige gesto -> perfeito
+       - Windows/Linux: funciona também
        ========================================================= */
     (function(){
-      const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+      var reduced = mm ? mm.matches : false;
       if (reduced) return;
 
-      const pill = document.getElementById("soundPill");
-      const gate = document.getElementById("soundGate");
-      const btn = document.getElementById("btnSound");
+      var btn = document.getElementById("soundBtn");
+      if (!btn) return;
 
-      function setPill(on){
-        if (!pill) return;
-        pill.innerHTML = on ? 'SOM: <strong>ON</strong>' : 'SOM: <strong>OFF</strong>';
+      var audioCtx = null;
+      var started = false;
+      var master = null;
+
+      function setBtn(on){
+        btn.innerHTML = on ? 'SOM: <strong>ON</strong>' : 'SOM: <strong>OFF</strong>';
       }
-      setPill(false);
+      setBtn(false);
 
-      const ua = navigator.userAgent || "";
-      const isiOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-      let audioCtx = null;
-      let master = null;
-      let started = false;
-
-      const MASTER_TARGET = 0.55;
-
-      function ramp(param, value, time=0.8){
-        const now = audioCtx.currentTime;
-        param.cancelScheduledValues(now);
-        param.setValueAtTime(param.value, now);
-        param.linearRampToValueAtTime(value, now + time);
+      function ramp(param, value, time){
+        var now = audioCtx.currentTime;
+        try{
+          param.cancelScheduledValues(now);
+          param.setValueAtTime(param.value, now);
+          param.linearRampToValueAtTime(value, now + time);
+        }catch(e){}
       }
 
       function createBrownNoise(ctx){
-        const bufferSize = 2 * ctx.sampleRate;
-        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        let lastOut = 0.0;
-        for (let i = 0; i < bufferSize; i++) {
-          const white = Math.random() * 2 - 1;
+        var bufferSize = 2 * ctx.sampleRate;
+        var noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        var output = noiseBuffer.getChannelData(0);
+        var lastOut = 0.0;
+        for (var i = 0; i < bufferSize; i++) {
+          var white = Math.random() * 2 - 1;
           lastOut = (lastOut + (0.02 * white)) / 1.02;
           output[i] = lastOut * 0.32;
         }
-        const src = ctx.createBufferSource();
+        var src = ctx.createBufferSource();
         src.buffer = noiseBuffer;
         src.loop = true;
         return src;
       }
 
-      async function startAudio(){
+      function startAudio(){
         if (started) return true;
 
         try{
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          var Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return false;
+
+          audioCtx = new Ctx();
 
           master = audioCtx.createGain();
           master.gain.value = 0.00001;
 
-          const comp = audioCtx.createDynamicsCompressor();
+          var comp = audioCtx.createDynamicsCompressor();
           comp.threshold.value = -28;
           comp.knee.value = 24;
           comp.ratio.value = 1.8;
           comp.attack.value = 0.02;
           comp.release.value = 0.25;
 
-          const lp = audioCtx.createBiquadFilter();
+          var lp = audioCtx.createBiquadFilter();
           lp.type = "lowpass";
           lp.frequency.value = 1200;
           lp.Q.value = 0.7;
 
-          const hp = audioCtx.createBiquadFilter();
+          var hp = audioCtx.createBiquadFilter();
           hp.type = "highpass";
           hp.frequency.value = 35;
           hp.Q.value = 0.7;
@@ -987,35 +959,37 @@
           lp.connect(hp);
           hp.connect(audioCtx.destination);
 
-          const gDrone = audioCtx.createGain();
+          var gDrone = audioCtx.createGain();
           gDrone.gain.value = 0.0;
           gDrone.connect(master);
 
-          const o1 = audioCtx.createOscillator(); o1.type = "sine";     o1.frequency.value = 55;
-          const o2 = audioCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 110;
-          const o3 = audioCtx.createOscillator(); o3.type = "sine";     o3.frequency.value = 82.41;
+          var o1 = audioCtx.createOscillator(); o1.type = "sine";     o1.frequency.value = 55;
+          var o2 = audioCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 110;
+          var o3 = audioCtx.createOscillator(); o3.type = "sine";     o3.frequency.value = 82.41;
 
-          const g1 = audioCtx.createGain(); g1.gain.value = 0.12;
-          const g2 = audioCtx.createGain(); g2.gain.value = 0.06;
-          const g3 = audioCtx.createGain(); g3.gain.value = 0.08;
+          var g1 = audioCtx.createGain(); g1.gain.value = 0.12;
+          var g2 = audioCtx.createGain(); g2.gain.value = 0.06;
+          var g3 = audioCtx.createGain(); g3.gain.value = 0.08;
 
           o1.connect(g1); g1.connect(gDrone);
           o2.connect(g2); g2.connect(gDrone);
           o3.connect(g3); g3.connect(gDrone);
 
-          const lfo = audioCtx.createOscillator();
+          var lfo = audioCtx.createOscillator();
           lfo.type = "sine";
           lfo.frequency.value = 0.03;
-          const lfoGain = audioCtx.createGain();
+
+          var lfoGain = audioCtx.createGain();
           lfoGain.gain.value = 0.10;
+
           lfo.connect(lfoGain);
           lfoGain.connect(gDrone.gain);
 
-          const air = createBrownNoise(audioCtx);
-          const airGain = audioCtx.createGain();
+          var air = createBrownNoise(audioCtx);
+          var airGain = audioCtx.createGain();
           airGain.gain.value = 0.0;
 
-          const airLP = audioCtx.createBiquadFilter();
+          var airLP = audioCtx.createBiquadFilter();
           airLP.type = "lowpass";
           airLP.frequency.value = 420;
           airLP.Q.value = 0.6;
@@ -1024,10 +998,10 @@
           airLP.connect(airGain);
           airGain.connect(master);
 
-          const delay = audioCtx.createDelay(0.5);
+          var delay = audioCtx.createDelay(0.5);
           delay.delayTime.value = 0.22;
 
-          const dGain = audioCtx.createGain();
+          var dGain = audioCtx.createGain();
           dGain.gain.value = 0.10;
 
           gDrone.connect(delay);
@@ -1038,46 +1012,45 @@
           lfo.start();
           air.start();
 
-          if (audioCtx.state === "suspended") await audioCtx.resume();
+          // em alguns browsers precisa
+          if (audioCtx.state === "suspended"){
+            try{ audioCtx.resume(); }catch(e){}
+          }
 
           ramp(gDrone.gain, 0.44, 1.6);
           ramp(airGain.gain, 0.085, 1.8);
-          ramp(master.gain, MASTER_TARGET, 1.8);
+          ramp(master.gain, 0.55, 1.8);
 
           started = true;
-          setPill(true);
-          if (gate) gate.hidden = true;
+          setBtn(true);
           return true;
-        } catch(e){
-          setPill(false);
-          if (gate && isiOS) gate.hidden = false; // iOS: pede toque
+
+        }catch(e){
+          setBtn(false);
           return false;
         }
       }
 
-      // ✅ iOS: mostra gate sempre (mais confiável)
-      if (gate && isiOS){
-        gate.hidden = false;
+      function stopAudio(){
+        try{
+          if (audioCtx){
+            try{ audioCtx.close(); }catch(e){}
+          }
+        }catch(e){}
+        audioCtx = null;
+        started = false;
+        master = null;
+        setBtn(false);
       }
 
-      if (btn){
-        btn.addEventListener("click", async () => { await startAudio(); }, { passive:true });
-      }
-
-      // ✅ Desktop/Windows/Linux: qualquer gesto
-      const tryStart = async () => { await startAudio(); };
-
-      window.addEventListener("pointerdown", tryStart, { passive:true, once:true });
-      window.addEventListener("click", tryStart, { passive:true, once:true });
-      window.addEventListener("wheel", tryStart, { passive:true, once:true });
-      window.addEventListener("scroll", tryStart, { passive:true, once:true });
-      window.addEventListener("touchstart", tryStart, { passive:true, once:true });
-
-      window.addEventListener("keydown", async (e) => {
-        const keys = ["ArrowDown","ArrowUp","PageDown","PageUp"," "];
-        if (!keys.includes(e.key)) return;
-        await startAudio();
-      }, { passive:true, once:true });
+      btn.addEventListener("click", function(){
+        if (!started){
+          var ok = startAudio();
+          if (!ok) setBtn(false);
+        } else {
+          stopAudio();
+        }
+      });
 
     })();
   </script>
