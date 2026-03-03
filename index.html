@@ -7,23 +7,22 @@
 
   <!-- FAVICON (apenas aba do navegador) -->
   <link rel="icon" href="./favicon.png" />
-  <meta name="theme-color" content="#050505" />
+  <meta name="theme-color" content="#040405" />
 
   <style>
     :root{
-      --bg:#050505;
-      --bg2:#070707;
+      --bg:#040405;
+      --bg2:#050507;
+
       --gold:#e6c07b;
-      --gold2:#ffd79a;
       --muted:#a7a7a7;
       --text:#f3f3f3;
 
-      --glassA:rgba(255,255,255,.06);
+      --glassA:rgba(255,255,255,.07);
       --glassB:rgba(255,255,255,.03);
       --stroke:rgba(255,255,255,.09);
-      --strokeGold:rgba(230,192,123,.22);
 
-      --shadow:rgba(0,0,0,.70);
+      --shadow:rgba(0,0,0,.72);
       --shadow2:rgba(0,0,0,.55);
 
       --radius:22px;
@@ -36,73 +35,35 @@
     }
 
     *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+
+    html,body{
+      height:100%;
+      background:var(--bg);
+    }
+
+    /* IMPORTANTE:
+       - body não rola (evita “barra escura”/bounce em alguns dispositivos)
+       - o scroll fica no #scroll (e aí não mostra aquela faixa no fundo)
+    */
     body{
       margin:0;
-      background: var(--bg);
       color:var(--text);
       font-family: ui-serif, Georgia, "Times New Roman", serif;
-      overflow-x:hidden;
-      overflow-y:auto;
+      overflow:hidden; /* scroll fica no container */
       -webkit-text-size-adjust:100%;
-      overscroll-behavior-y: none; /* evita “vibração”/bounce agressivo em alguns aparelhos */
+      overscroll-behavior: none; /* elimina bounce */
+      touch-action: pan-y;
     }
 
-    /* Fundo cinematográfico em camadas */
-    .bg{
-      position:fixed;
-      inset:0;
-      z-index:-5;
-      background:
-        radial-gradient(1200px 720px at 50% 18%, rgba(230,192,123,.12), transparent 60%),
-        radial-gradient(900px 520px at 18% 18%, rgba(255,255,255,.06), transparent 60%),
-        radial-gradient(1000px 720px at 82% 78%, rgba(255,255,255,.05), transparent 62%),
-        radial-gradient(1400px 900px at 50% 110%, rgba(230,192,123,.08), transparent 55%),
-        linear-gradient(180deg, var(--bg), var(--bg2));
-    }
-
-    /* Glow oscilando sutil */
-    .bg::before{
-      content:"";
-      position:absolute;
-      inset:-20%;
-      background:
-        radial-gradient(760px 360px at 50% 32%, rgba(230,192,123,.12), transparent 64%),
-        radial-gradient(980px 520px at 60% 72%, rgba(255,255,255,.05), transparent 70%);
-      filter: blur(14px);
-      opacity:.78;
-      animation: pulseGlow 5.4s ease-in-out infinite;
-    }
-    @keyframes pulseGlow{
-      0%,100%{ opacity:.58; transform:translateY(0) scale(1); }
-      50%{ opacity:.92; transform:translateY(-6px) scale(1.01); }
-    }
-
-    /* Grão (film grain) */
-    .grain{
-      position:fixed;
-      inset:0;
-      z-index:-4;
-      pointer-events:none;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
-      opacity:.10;
-      mix-blend-mode: overlay;
-      filter: contrast(110%) brightness(110%);
-    }
-
-    /* Canvas partículas (muito leve) */
-    canvas#stars{
-      position:fixed;
-      inset:0;
-      z-index:-3;
-      pointer-events:none;
-      opacity:.55;
-    }
-
-    /* Layout principal */
-    .wrap{
-      width:min(var(--max), 100%);
-      margin:0 auto;
+    /* Container rolável */
+    #scroll{
+      height:100vh;
+      height:100dvh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: none;
+      background: transparent;
       padding:
         max(18px, env(safe-area-inset-top))
         max(18px, env(safe-area-inset-right))
@@ -110,12 +71,68 @@
         max(18px, env(safe-area-inset-left));
     }
 
+    /* Fundo cinematográfico mais escuro */
+    .bg{
+      position:fixed;
+      inset:0;
+      z-index:-10;
+      background:
+        radial-gradient(1200px 720px at 50% 18%, rgba(230,192,123,.09), transparent 62%),
+        radial-gradient(900px 520px at 18% 18%, rgba(255,255,255,.04), transparent 64%),
+        radial-gradient(1000px 720px at 82% 78%, rgba(255,255,255,.035), transparent 66%),
+        radial-gradient(1400px 900px at 50% 110%, rgba(230,192,123,.06), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+    }
+
+    /* Glow oscilando (ainda mais sutil) */
+    .bg::before{
+      content:"";
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(800px 400px at 52% 30%, rgba(230,192,123,.09), transparent 66%),
+        radial-gradient(980px 560px at 62% 72%, rgba(255,255,255,.035), transparent 72%);
+      filter: blur(16px);
+      opacity:.62;
+      animation: pulseGlow 6.6s ease-in-out infinite;
+    }
+    @keyframes pulseGlow{
+      0%,100%{ opacity:.46; transform:translateY(0) scale(1); }
+      50%{ opacity:.78; transform:translateY(-6px) scale(1.01); }
+    }
+
+    /* Grão */
+    .grain{
+      position:fixed;
+      inset:0;
+      z-index:-9;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
+      opacity:.08;
+      mix-blend-mode: overlay;
+      filter: contrast(110%) brightness(108%);
+    }
+
+    /* Canvas estrelas: mais realista (camadas) */
+    canvas#stars{
+      position:fixed;
+      inset:0;
+      z-index:-8;
+      pointer-events:none;
+      opacity:.92;
+    }
+
+    .wrap{
+      width:min(var(--max), 100%);
+      margin:0 auto;
+    }
+
     /* Top micro header com logo */
     .top{
       display:flex;
       justify-content:center;
       align-items:center;
-      padding: 10px 0 14px;
+      padding: 8px 0 14px;
     }
     .brandPill{
       display:flex;
@@ -124,7 +141,7 @@
       padding:10px 14px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.22);
+      background: rgba(0,0,0,.20);
       backdrop-filter: blur(10px);
       box-shadow: 0 18px 60px rgba(0,0,0,.35);
       transform: translateZ(0);
@@ -135,7 +152,7 @@
       object-fit:contain;
       filter:
         drop-shadow(0 0 18px rgba(255,255,255,.10))
-        drop-shadow(0 0 44px rgba(230,192,123,.20));
+        drop-shadow(0 0 44px rgba(230,192,123,.18));
     }
     .brandPill span{
       font-size:12px;
@@ -145,7 +162,7 @@
       white-space:nowrap;
     }
 
-    /* Grid: hero + conteúdo */
+    /* Grid */
     .grid{
       display:grid;
       gap:18px;
@@ -159,7 +176,7 @@
       }
     }
 
-    /* HERO premium */
+    /* HERO */
     .hero{
       position:relative;
       border-radius: var(--radius);
@@ -175,8 +192,8 @@
       position:absolute;
       inset:0;
       pointer-events:none;
-      background: radial-gradient(900px 280px at 50% 0%, rgba(230,192,123,.12), transparent 62%);
-      opacity:.95;
+      background: radial-gradient(900px 280px at 50% 0%, rgba(230,192,123,.10), transparent 64%);
+      opacity:.92;
     }
 
     .heroInner{
@@ -201,7 +218,7 @@
       box-shadow: 0 0 16px rgba(230,192,123,.35);
     }
 
-    /* Título com reflexo DENTRO das letras (sem “segunda passada”) */
+    /* Título com reflexo dentro das letras */
     .title{
       margin:14px 0 6px;
       font-weight:700;
@@ -213,25 +230,25 @@
 
       color:transparent;
       background-image:
-        linear-gradient(180deg, rgba(230,192,123,.95), rgba(230,192,123,.76)),
+        linear-gradient(180deg, rgba(230,192,123,.95), rgba(230,192,123,.72)),
         linear-gradient(120deg,
           rgba(255,255,255,0) 0%,
-          rgba(255,255,255,0) 38%,
+          rgba(255,255,255,0) 42%,
           rgba(255,255,255,.86) 50%,
-          rgba(255,255,255,0) 62%,
+          rgba(255,255,255,0) 58%,
           rgba(255,255,255,0) 100%);
-      background-size: 100% 100%, 220% 100%;
-      background-position: 0 0, -140% 0;
+      background-size: 100% 100%, 240% 100%;
+      background-position: 0 0, -160% 0;
       background-repeat:no-repeat;
       -webkit-background-clip:text;
       background-clip:text;
 
-      animation: shineOnceLoop 7.2s var(--ease) infinite;
+      animation: shineOnceLoop 7.4s var(--ease) infinite;
     }
     @keyframes shineOnceLoop{
-      0%   { background-position: 0 0, -140% 0; }
-      55%  { background-position: 0 0, 140% 0; }
-      100% { background-position: 0 0, 140% 0; } /* fica parado, sem “segunda passada” */
+      0%   { background-position: 0 0, -160% 0; }
+      54%  { background-position: 0 0, 160% 0; }
+      100% { background-position: 0 0, 160% 0; }
     }
 
     .subtitle{
@@ -242,21 +259,27 @@
       line-height:1.65;
     }
 
+    /* FRASE que enfraquece e volta (o que você pediu) */
     .whisper{
-      margin-top:10px;
-      color: rgba(255,255,255,.60);
-      letter-spacing:.08em;
+      margin-top:12px;
+      color: rgba(255,255,255,.58);
+      letter-spacing:.12em;
       font-size: 12px;
       text-transform:uppercase;
       display:flex;
       align-items:center;
       gap:10px;
-      opacity:.85;
+      opacity:.86;
+      animation: whisperPulse 3.4s ease-in-out infinite;
+    }
+    @keyframes whisperPulse{
+      0%,100%{ opacity:.46; filter: blur(.15px); transform: translateY(0); }
+      50%{ opacity:.92; filter: blur(0); transform: translateY(-1px); }
     }
     .whisper .line{
       flex:1;
       height:1px;
-      background: linear-gradient(90deg, transparent, rgba(230,192,123,.26), transparent);
+      background: linear-gradient(90deg, transparent, rgba(230,192,123,.22), transparent);
       opacity:.9;
     }
 
@@ -284,7 +307,7 @@
       position:absolute;
       inset:0;
       pointer-events:none;
-      background: radial-gradient(520px 170px at 50% 0%, rgba(230,192,123,.10), transparent 60%);
+      background: radial-gradient(520px 170px at 50% 0%, rgba(230,192,123,.09), transparent 62%);
       opacity:.85;
     }
     .mini h3{
@@ -305,7 +328,6 @@
       line-height:1.7;
     }
 
-    /* Painel direito: lead + infos */
     .side{
       display:grid;
       gap:18px;
@@ -326,7 +348,7 @@
       position:absolute;
       inset:0;
       pointer-events:none;
-      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.11), transparent 62%);
+      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.10), transparent 64%);
       opacity:.92;
     }
     .panelInner{
@@ -369,13 +391,12 @@
       border-radius:999px;
       background: linear-gradient(90deg,
         rgba(255,255,255,.06),
-        rgba(230,192,123,.18),
+        rgba(230,192,123,.16),
         rgba(255,255,255,.06));
-      opacity:.65;
+      opacity:.62;
       filter: blur(.2px);
     }
 
-    /* Form */
     form{ margin-top:12px; }
     .fields{
       display:grid;
@@ -470,7 +491,6 @@
       background: rgba(255,255,255,.04);
     }
 
-    /* Chips */
     .chips{
       display:flex;
       flex-wrap:wrap;
@@ -489,7 +509,6 @@
       color:rgba(230,192,123,.86);
     }
 
-    /* Bloco extra de info (cinematográfico) */
     .info{
       display:grid;
       gap:12px;
@@ -517,14 +536,13 @@
       font-size:14px;
     }
 
-    /* Rodapé */
     .footer{
       width:100%;
       text-align:center;
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
-      color:rgba(255,255,255,.36);
+      color:rgba(255,255,255,.34);
       pointer-events:none;
       padding: 18px 10px 22px;
       margin-top: 6px;
@@ -534,7 +552,7 @@
       font-weight:700;
     }
 
-    /* Sticky hero só no desktop (sem bug / sem “encolher pro canto”) */
+    /* Sticky hero desktop */
     @media (min-width: 980px){
       .hero{
         position: sticky;
@@ -544,7 +562,7 @@
       }
     }
 
-    /* Mobile refinado */
+    /* Mobile */
     @media (max-width: 520px){
       .brandPill img{ width:36px; height:36px; }
       .brandPill span{ font-size:11px; }
@@ -553,7 +571,7 @@
       .subtitle{ line-height:1.55; }
     }
 
-    /* Revelo suave nos cards */
+    /* Reveal */
     .reveal{
       opacity:0;
       transform: translateY(12px);
@@ -568,6 +586,7 @@
     @media (prefers-reduced-motion: reduce){
       .bg::before{ animation:none !important; }
       .title{ animation:none !important; }
+      .whisper{ animation:none !important; }
       .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
       button{ transition:none !important; }
       canvas#stars{ display:none !important; }
@@ -580,145 +599,143 @@
   <div class="grain" aria-hidden="true"></div>
   <canvas id="stars" aria-hidden="true"></canvas>
 
-  <div class="wrap">
-    <header class="top" aria-label="Topo">
-      <!-- Logo oficial dentro da página (não é o favicon) -->
-      <div class="brandPill">
-        <img src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" />
-        <span>Prelúdio Jogos</span>
-      </div>
-    </header>
-
-    <main class="grid" aria-label="Página inicial">
-      <!-- HERO (impacto ao abrir) -->
-      <section class="hero reveal" aria-label="Apresentação">
-        <div class="heroInner">
-          <div class="kicker">
-            <span class="dot"></span>
-            <span>Uma experiência psicológica em cartas físicas</span>
-          </div>
-
-          <h1 class="title">PRELÚDIO JOGOS</h1>
-
-          <p class="subtitle">
-            O site é a trilha: <strong style="color:rgba(230,192,123,.92); font-weight:700;">tempo</strong>,
-            <strong style="color:rgba(230,192,123,.92); font-weight:700;">clima</strong> e
-            <strong style="color:rgba(230,192,123,.92); font-weight:700;">silêncio</strong>.
-            As cartas são o corpo — o digital só mantém a tensão viva.
-          </p>
-
-          <div class="whisper">
-            <span class="line"></span>
-            <span>Entre primeiro. Depois, não tem volta.</span>
-            <span class="line"></span>
-          </div>
-
-          <div class="heroCards">
-            <div class="mini">
-              <h3>Como funciona</h3>
-              <p>
-                Você puxa a carta física e segue. O site só cronometra e sustenta o ritmo —
-                sem “atalhos”, sem pressa, sem fuga.
-              </p>
-            </div>
-            <div class="mini">
-              <h3>Regra de ouro</h3>
-              <p>
-                Silêncio é clima. Clima é medo controlado.
-                Quando o tempo zera, termina — mesmo que alguém peça “só mais uma”.
-              </p>
-            </div>
-          </div>
+  <div id="scroll">
+    <div class="wrap">
+      <header class="top" aria-label="Topo">
+        <div class="brandPill">
+          <img src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" />
+          <span>Prelúdio Jogos</span>
         </div>
-      </section>
+      </header>
 
-      <!-- LADO DIREITO -->
-      <section class="side" aria-label="Acesso e informações">
-        <!-- LEADS -->
-        <section class="panel reveal" aria-label="Lista de novidades">
-          <div class="panelInner">
-            <div class="tag">
+      <main class="grid" aria-label="Página inicial">
+        <section class="hero reveal" aria-label="Apresentação">
+          <div class="heroInner">
+            <div class="kicker">
               <span class="dot"></span>
-              <span>Boas-vindas • Acesso</span>
-              <span class="dot"></span>
+              <span>Uma experiência psicológica em cartas físicas</span>
             </div>
 
-            <p class="panelTitle">
-              Quer receber novidades, descontos e a fase 2 assim que abrir?
-              <br />Deixe seu contato e entre para a lista.
+            <h1 class="title">PRELÚDIO JOGOS</h1>
+
+            <p class="subtitle">
+              O site é a trilha: <strong style="color:rgba(230,192,123,.92); font-weight:700;">tempo</strong>,
+              <strong style="color:rgba(230,192,123,.92); font-weight:700;">clima</strong> e
+              <strong style="color:rgba(230,192,123,.92); font-weight:700;">silêncio</strong>.
+              As cartas são o corpo — o digital só mantém a tensão viva.
             </p>
 
-            <div class="rule"></div>
+            <div class="whisper" aria-label="Frase de clima">
+              <span class="line"></span>
+              <span>Entre primeiro. Depois, não tem volta.</span>
+              <span class="line"></span>
+            </div>
 
-            <form id="leadForm" autocomplete="on" novalidate>
-              <div class="fields">
-                <div>
-                  <label for="nome">Nome</label>
-                  <input id="nome" name="nome" type="text" placeholder="Seu nome" inputmode="text" />
-                </div>
-                <div>
-                  <label for="email">E-mail</label>
-                  <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" inputmode="email" />
-                </div>
+            <div class="heroCards">
+              <div class="mini">
+                <h3>Como funciona</h3>
+                <p>
+                  Você puxa a carta física e segue. O site só cronometra e sustenta o ritmo —
+                  sem “atalhos”, sem pressa, sem fuga.
+                </p>
               </div>
-
-              <div class="consent">
-                <input id="consent" type="checkbox" />
-                <div>
-                  Autorizo receber comunicações da <b>Prelúdio Jogos</b> sobre lançamentos e descontos.
-                </div>
+              <div class="mini">
+                <h3>Regra de ouro</h3>
+                <p>
+                  Silêncio é clima. Clima é medo controlado.
+                  Quando o tempo zera, termina — mesmo que alguém peça “só mais uma”.
+                </p>
               </div>
-
-              <p class="status" id="status">Status: aguardando seu e-mail.</p>
-
-              <div class="actions">
-                <button type="submit" id="btnLista">Entrar na lista</button>
-                <button type="button" class="secondary" id="btnEntrada">Acessar a entrada</button>
-              </div>
-
-              <div class="chips" aria-label="Características">
-                <div class="chip">Cartas físicas</div>
-                <div class="chip">Timer + clima</div>
-                <div class="chip">Ritmo de mesa</div>
-                <div class="chip">Sem atalhos</div>
-              </div>
-            </form>
+            </div>
           </div>
         </section>
 
-        <!-- INFO DO JOGO -->
-        <section class="panel reveal" aria-label="Sobre o jogo">
-          <div class="panelInner info">
-            <h3>O SextoLugar</h3>
-            <p>
-              Um jogo físico, psicológico e imersivo. Você não “joga” no celular —
-              você joga na mesa. O site é a trilha, não o atalho.
-            </p>
+        <section class="side" aria-label="Acesso e informações">
+          <section class="panel reveal" aria-label="Lista de novidades">
+            <div class="panelInner">
+              <div class="tag">
+                <span class="dot"></span>
+                <span>Boas-vindas • Acesso</span>
+                <span class="dot"></span>
+              </div>
 
-            <ul class="bullets">
-              <li>Recomendado para 3 a 5 pessoas (ou solo).</li>
-              <li>Leia a entrada e o ritual antes da primeira rodada.</li>
-              <li>Puxe uma carta. Siga. Sem pausas “convenientes”.</li>
-              <li>Quando o tempo zerar, termina. Mesmo que alguém peça “só mais uma”.</li>
-            </ul>
+              <p class="panelTitle">
+                Quer receber novidades, descontos e a fase 2 assim que abrir?
+                <br />Deixe seu contato e entre para a lista.
+              </p>
 
-            <p style="margin-top:10px;">
-              <span style="color:rgba(230,192,123,.92); font-weight:700;">Se você tenta apressar, perde o efeito.</span>
-              É por isso que o timer importa.
-            </p>
-          </div>
+              <div class="rule"></div>
+
+              <form id="leadForm" autocomplete="on" novalidate>
+                <div class="fields">
+                  <div>
+                    <label for="nome">Nome</label>
+                    <input id="nome" name="nome" type="text" placeholder="Seu nome" inputmode="text" />
+                  </div>
+                  <div>
+                    <label for="email">E-mail</label>
+                    <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" inputmode="email" />
+                  </div>
+                </div>
+
+                <div class="consent">
+                  <input id="consent" type="checkbox" />
+                  <div>
+                    Autorizo receber comunicações da <b>Prelúdio Jogos</b> sobre lançamentos e descontos.
+                  </div>
+                </div>
+
+                <p class="status" id="status">Status: aguardando seu e-mail.</p>
+
+                <div class="actions">
+                  <button type="submit" id="btnLista">Entrar na lista</button>
+                  <button type="button" class="secondary" id="btnEntrada">Acessar a entrada</button>
+                </div>
+
+                <div class="chips" aria-label="Características">
+                  <div class="chip">Cartas físicas</div>
+                  <div class="chip">Timer + clima</div>
+                  <div class="chip">Ritmo de mesa</div>
+                  <div class="chip">Sem atalhos</div>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <section class="panel reveal" aria-label="Sobre o jogo">
+            <div class="panelInner info">
+              <h3>O SextoLugar</h3>
+              <p>
+                Um jogo físico, psicológico e imersivo. Você não “joga” no celular —
+                você joga na mesa. O site é a trilha, não o atalho.
+              </p>
+
+              <ul class="bullets">
+                <li>Recomendado para 3 a 5 pessoas (ou solo).</li>
+                <li>Leia a entrada e o ritual antes da primeira rodada.</li>
+                <li>Puxe uma carta. Siga. Sem pausas “convenientes”.</li>
+                <li>Quando o tempo zerar, termina. Mesmo que alguém peça “só mais uma”.</li>
+              </ul>
+
+              <p style="margin-top:10px;">
+                <span style="color:rgba(230,192,123,.92); font-weight:700;">Se você tenta apressar, perde o efeito.</span>
+                É por isso que o timer importa.
+              </p>
+            </div>
+          </section>
         </section>
-      </section>
-    </main>
+      </main>
 
-    <footer class="footer" aria-label="Direitos autorais">
-      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
-    </footer>
+      <footer class="footer" aria-label="Direitos autorais">
+        © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span>
+        — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+      </footer>
+    </div>
   </div>
 
   <script>
     // ==========================
-    // REVEAL SUAVE (sem travar)
+    // REVEAL (leve e sem travar)
     // ==========================
     (function(){
       const items = document.querySelectorAll(".reveal");
@@ -734,7 +751,7 @@
     })();
 
     // ==========================
-    // LEADS (funciona offline via localStorage)
+    // LEADS (localStorage)
     // ==========================
     const leadForm = document.getElementById("leadForm");
     const nomeEl = document.getElementById("nome");
@@ -801,13 +818,12 @@
       );
     });
 
-    // Entrada (sua página antiga)
     btnEntrada.addEventListener("click", () => {
       window.location.href = "./entrada.html";
     });
 
     // ==========================
-    // STARS (canvas leve premium)
+    // ESTRELAS REALISTAS (camadas + movimento)
     // ==========================
     (function(){
       const canvas = document.getElementById("stars");
@@ -817,7 +833,7 @@
       if(prefersReduce) return;
 
       let w, h, dpr;
-      let stars = [];
+      let layers = [];
       let raf = null;
 
       function resize(){
@@ -829,18 +845,33 @@
         build();
       }
 
+      function makeStar(layer){
+        // layer: 0 (distante), 1 (médio), 2 (próximo)
+        const depth = [0.25, 0.55, 1.0][layer];
+        return {
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: (Math.random() * (layer === 0 ? 1.0 : layer === 1 ? 1.4 : 1.8) + 0.35) * dpr,
+          a: Math.random() * (layer === 0 ? 0.35 : layer === 1 ? 0.45 : 0.55) + 0.06,
+          tw: Math.random() * 0.020 + 0.006,
+          sp: (Math.random() * (layer === 0 ? 0.08 : layer === 1 ? 0.14 : 0.22) + 0.04) * depth,
+          dx: (Math.random() * 0.06 - 0.03) * depth,
+          layer,
+          depth
+        };
+      }
+
       function build(){
-        const count = Math.floor((window.innerWidth * window.innerHeight) / 16000); // leve
-        stars = [];
-        for(let i=0;i<count;i++){
-          stars.push({
-            x: Math.random() * w,
-            y: Math.random() * h,
-            r: (Math.random() * 1.4 + 0.4) * dpr,
-            a: Math.random() * 0.55 + 0.10,
-            tw: Math.random() * 0.018 + 0.006,
-            sp: Math.random() * 0.10 + 0.03,
-          });
+        // Densidade realista, mas leve
+        const area = window.innerWidth * window.innerHeight;
+        const baseCount = Math.floor(area / 12000);
+        const counts = [Math.floor(baseCount * 0.9), Math.floor(baseCount * 0.7), Math.floor(baseCount * 0.45)];
+
+        layers = [[],[],[]];
+        for(let L=0; L<3; L++){
+          for(let i=0;i<counts[L];i++){
+            layers[L].push(makeStar(L));
+          }
         }
       }
 
@@ -849,26 +880,42 @@
         t += 1;
         ctx.clearRect(0,0,w,h);
 
-        // brilho suave base
-        const g = ctx.createRadialGradient(w*0.5, h*0.2, 0, w*0.5, h*0.2, Math.max(w,h)*0.7);
-        g.addColorStop(0, "rgba(230,192,123,0.07)");
-        g.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = g;
+        // “névoa” muito leve, mais escura
+        const haze = ctx.createRadialGradient(w*0.52, h*0.18, 0, w*0.52, h*0.18, Math.max(w,h)*0.85);
+        haze.addColorStop(0, "rgba(230,192,123,0.05)");
+        haze.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = haze;
         ctx.fillRect(0,0,w,h);
 
-        for(const s of stars){
-          // “twinkle” leve
-          s.a += (Math.sin((t*s.tw) + s.x*0.001) * 0.002);
-          const alpha = Math.max(0.05, Math.min(0.60, s.a));
+        for(let L=0; L<3; L++){
+          for(const s of layers[L]){
+            // twinkle
+            const tw = Math.sin((t*s.tw) + s.x*0.001) * 0.04;
+            const alpha = Math.max(0.03, Math.min(0.70, s.a + tw));
 
-          // drift mínimo
-          s.y += s.sp * dpr * 0.25;
-          if(s.y > h + 10) s.y = -10;
+            // drift (mais movimento, porém suave)
+            s.y += s.sp * dpr * 0.34;
+            s.x += s.dx * dpr * 0.25;
 
-          ctx.beginPath();
-          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-          ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-          ctx.fill();
+            if(s.y > h + 20) s.y = -20;
+            if(s.x > w + 20) s.x = -20;
+            if(s.x < -20) s.x = w + 20;
+
+            // brilho de estrela (soft)
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+            ctx.fill();
+
+            // halo sutil nas “mais próximas”
+            if(L === 2 && alpha > 0.22){
+              const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r*6.2);
+              grd.addColorStop(0, `rgba(255,255,255,${alpha*0.20})`);
+              grd.addColorStop(1, "rgba(255,255,255,0)");
+              ctx.fillStyle = grd;
+              ctx.fillRect(s.x - s.r*7, s.y - s.r*7, s.r*14, s.r*14);
+            }
+          }
         }
 
         raf = requestAnimationFrame(draw);
