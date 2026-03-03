@@ -27,7 +27,6 @@
 
     html{
       background: var(--bg);
-      /* Permite puxar para baixo e “carregar” (refresh) sem travar */
       overscroll-behavior-y: auto;
       overscroll-behavior-x: none;
     }
@@ -613,19 +612,11 @@
         const len = 170 + Math.random()*220;
         const speed = 12 + Math.random()*10;
 
-        const angle = (Math.PI * (35 + Math.random()*20)) / 180; // descendo pra direita
+        const angle = (Math.PI * (35 + Math.random()*20)) / 180;
         const vx = Math.cos(angle) * speed;
         const vy = Math.sin(angle) * speed;
 
-        meteors.push({
-          x: startX,
-          y: startY,
-          vx, vy,
-          len,
-          life: 0,
-          maxLife: 38 + Math.floor(Math.random()*24),
-          alpha: 0.0
-        });
+        meteors.push({ x:startX, y:startY, vx, vy, len, life:0, maxLife:38 + Math.floor(Math.random()*24), alpha:0 });
       }
 
       let t = 0;
@@ -649,8 +640,7 @@
           ctx.fill();
         }
 
-        const chance = 0.0075;
-        if (Math.random() < chance){
+        if (Math.random() < 0.0075){
           if (meteors.length < 2) spawnMeteor();
         }
 
@@ -706,7 +696,6 @@
 
     /* =========================
        PUXAR PARA BAIXO = RECARREGAR
-       (simples e confiável no Android)
        ========================= */
     (function(){
       let startY = 0;
@@ -735,226 +724,220 @@
     })();
 
     /* =========================
-       SOM AMBIENTE (mais universo / místico)
-       - ativa APENAS no primeiro SCROLL
-       - sem “mal contato” (evita zipper noise)
+       SOM AMBIENTE (SAMPLE LOOP INTERNO, 100% LIMPO)
+       - ativa no PRIMEIRO gesto de rolagem:
+         wheel (PC), touchmove (tablet), scroll (fallback)
        ========================= */
     (function(){
-      const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (prefersReduced) return;
+      const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduced) return;
 
-      // volume final
-      const MASTER_TARGET = 0.28;
-
+      const MASTER_TARGET = 0.38; // mais alto, sem distorção
       let audioCtx = null;
       let master = null;
       let started = false;
 
-      function smoothParam(param, value, time=0.20){
+      function smooth(param, value, time=0.25){
         const now = audioCtx.currentTime;
         param.cancelScheduledValues(now);
-        // evita “saltos” que geram ruído
-        const current = Math.max(0.000001, param.value || 0.000001);
-        param.setValueAtTime(current, now);
+        const cur = Math.max(0.000001, param.value || 0.000001);
+        param.setValueAtTime(cur, now);
         param.linearRampToValueAtTime(value, now + time);
       }
 
-      function createNoiseBuffer(){
-        const len = audioCtx.sampleRate * 2;
-        const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
-        const d = buf.getChannelData(0);
-        for (let i=0;i<len;i++){
-          // white noise
-          d[i] = (Math.random()*2 - 1);
+      function makeSampleLoop(ctx, seconds=6){
+        const sr = ctx.sampleRate;
+        const len = Math.floor(seconds * sr);
+        const buf = ctx.createBuffer(2, len, sr);
+
+        const L = buf.getChannelData(0);
+        const R = buf.getChannelData(1);
+
+        // “Universo místico” sem noise:
+        // som = soma de sines com fases aleatórias + shimmer suave + batimento lento
+        const partials = [
+          { f: 32.0,  a: 0.50 },
+          { f: 44.0,  a: 0.34 },
+          { f: 55.0,  a: 0.22 },
+          { f: 66.0,  a: 0.18 },
+          { f: 96.0,  a: 0.10 },
+          { f: 128.0, a: 0.08 },
+          { f: 192.0, a: 0.06 }
+        ];
+
+        const phasesL = partials.map(() => Math.random()*Math.PI*2);
+        const phasesR = partials.map(() => Math.random()*Math.PI*2);
+
+        // shimmer “etéreo” (bem suave)
+        const shimmerF = 420 + Math.random()*60;
+        const shimmerPhaseL = Math.random()*Math.PI*2;
+        const shimmerPhaseR = Math.random()*Math.PI*2;
+
+        for (let i=0; i<len; i++){
+          const t = i / sr;
+
+          // envelopes lentos (nada brusco = sem chiado)
+          const breath1 = 0.62 + 0.38 * Math.sin(2*Math.PI*0.035*t);
+          const breath2 = 0.70 + 0.30 * Math.sin(2*Math.PI*0.021*t + 1.2);
+
+          // leve “movimento” estéreo
+          const pan = 0.5 + 0.5 * Math.sin(2*Math.PI*0.017*t + 0.6);
+          const lPan = 0.60 + 0.40*(1-pan);
+          const rPan = 0.60 + 0.40*(pan);
+
+          let sL = 0, sR = 0;
+
+          for (let p=0; p<partials.length; p++){
+            const f = partials[p].f;
+            const a = partials[p].a;
+
+            // micro batimento místico (bem leve)
+            const det = 1.0 + 0.0022*Math.sin(2*Math.PI*(0.011 + p*0.002)*t);
+            const w = 2*Math.PI*f*det;
+
+            sL += a * Math.sin(w*t + phasesL[p]);
+            sR += a * Math.sin(w*t + phasesR[p]);
+          }
+
+          // shimmer: só dá “brilho”, não vira apito
+          const shimmerEnv = 0.50 + 0.50*Math.sin(2*Math.PI*0.07*t);
+          sL += 0.08 * shimmerEnv * Math.sin(2*Math.PI*shimmerF*t + shimmerPhaseL);
+          sR += 0.08 * shimmerEnv * Math.sin(2*Math.PI*(shimmerF*0.997)*t + shimmerPhaseR);
+
+          // aplica respiração global
+          sL *= (0.55*breath1 + 0.45*breath2);
+          sR *= (0.55*breath1 + 0.45*breath2);
+
+          // fade suave nas bordas do loop (remove “click” no ponto de repetição)
+          const fade = 0.06; // 6%
+          const x = i / (len - 1);
+          let edge = 1.0;
+          if (x < fade) edge = x / fade;
+          else if (x > 1 - fade) edge = (1 - x) / fade;
+
+          // leve saturação segura (clamp)
+          const outL = Math.max(-1, Math.min(1, sL * 0.22)) * edge * lPan;
+          const outR = Math.max(-1, Math.min(1, sR * 0.22)) * edge * rPan;
+
+          L[i] = outL;
+          R[i] = outR;
         }
+
         return buf;
-      }
-
-      function createPinkishNoise(){
-        // leve “pink-ish” via filtros, bem baixo
-        const src = audioCtx.createBufferSource();
-        src.buffer = createNoiseBuffer();
-        src.loop = true;
-
-        const hp = audioCtx.createBiquadFilter();
-        hp.type = "highpass";
-        hp.frequency.value = 140;
-
-        const lp = audioCtx.createBiquadFilter();
-        lp.type = "lowpass";
-        lp.frequency.value = 1100;
-        lp.Q.value = 0.55;
-
-        const shelf = audioCtx.createBiquadFilter();
-        shelf.type = "lowshelf";
-        shelf.frequency.value = 260;
-        shelf.gain.value = 4.2;
-
-        const g = audioCtx.createGain();
-        g.gain.value = 0.030; // MUITO baixo (sem chiado)
-
-        src.connect(hp);
-        hp.connect(shelf);
-        shelf.connect(lp);
-        lp.connect(g);
-
-        return { src, out: g };
-      }
-
-      function buildUniverse(){
-        // Master chain: master -> (leve compressor) -> destination
-        master = audioCtx.createGain();
-        master.gain.value = 0.00001;
-
-        const comp = audioCtx.createDynamicsCompressor();
-        comp.threshold.value = -22;
-        comp.knee.value = 25;
-        comp.ratio.value = 2.2;
-        comp.attack.value = 0.015;
-        comp.release.value = 0.25;
-
-        master.connect(comp);
-        comp.connect(audioCtx.destination);
-
-        // 1) DRONE profundo (sem batida)
-        const droneBus = audioCtx.createGain();
-        droneBus.gain.value = 0.24;
-
-        const sub = audioCtx.createOscillator();
-        sub.type = "sine";
-        sub.frequency.value = 32;
-
-        const body = audioCtx.createOscillator();
-        body.type = "triangle";
-        body.frequency.value = 44;
-
-        const fifth = audioCtx.createOscillator();
-        fifth.type = "sine";
-        fifth.frequency.value = 66;
-
-        const droneLP = audioCtx.createBiquadFilter();
-        droneLP.type = "lowpass";
-        droneLP.frequency.value = 230;
-        droneLP.Q.value = 0.75;
-
-        sub.connect(droneLP);
-        body.connect(droneLP);
-        fifth.connect(droneLP);
-        droneLP.connect(droneBus);
-        droneBus.connect(master);
-
-        sub.start(); body.start(); fifth.start();
-
-        // 2) “Cosmic air” (noise filtrado e controlado)
-        const air = createPinkishNoise();
-        air.out.connect(master);
-        air.src.start();
-
-        // 3) Shimmer místico (bem suave, sem irritar)
-        const shimmer = audioCtx.createOscillator();
-        shimmer.type = "sine";
-        shimmer.frequency.value = 192;
-
-        const shimmerBP = audioCtx.createBiquadFilter();
-        shimmerBP.type = "bandpass";
-        shimmerBP.frequency.value = 520;
-        shimmerBP.Q.value = 2.8;
-
-        const shimmerGain = audioCtx.createGain();
-        shimmerGain.gain.value = 0.055;
-
-        shimmer.connect(shimmerBP);
-        shimmerBP.connect(shimmerGain);
-        shimmerGain.connect(master);
-        shimmer.start();
-
-        // 4) “Halo” distante (dois parciais muito baixos)
-        const h1 = audioCtx.createOscillator();
-        h1.type = "sine";
-        h1.frequency.value = 96;
-
-        const h2 = audioCtx.createOscillator();
-        h2.type = "sine";
-        h2.frequency.value = 128;
-
-        const haloLP = audioCtx.createBiquadFilter();
-        haloLP.type = "lowpass";
-        haloLP.frequency.value = 320;
-        haloLP.Q.value = 0.8;
-
-        const haloGain = audioCtx.createGain();
-        haloGain.gain.value = 0.026;
-
-        h1.connect(haloLP);
-        h2.connect(haloLP);
-        haloLP.connect(haloGain);
-        haloGain.connect(master);
-        h1.start(); h2.start();
-
-        // Modulações ultra-lentas (evita ruído e dá vida)
-        const lfoA = audioCtx.createOscillator();
-        lfoA.type = "sine";
-        lfoA.frequency.value = 0.018;
-
-        const lfoAG = audioCtx.createGain();
-        lfoAG.gain.value = 0.06; // respira o drone bus
-
-        lfoA.connect(lfoAG);
-        lfoAG.connect(droneBus.gain);
-        lfoA.start();
-
-        const lfoB = audioCtx.createOscillator();
-        lfoB.type = "sine";
-        lfoB.frequency.value = 0.035;
-
-        const lfoBG = audioCtx.createGain();
-        lfoBG.gain.value = 26; // mexe no shimmerBP freq (místico)
-
-        lfoB.connect(lfoBG);
-        lfoBG.connect(shimmerBP.frequency);
-        lfoB.start();
-
-        const lfoC = audioCtx.createOscillator();
-        lfoC.type = "sine";
-        lfoC.frequency.value = 0.028;
-
-        const lfoCG = audioCtx.createGain();
-        lfoCG.gain.value = 0.040; // respira shimmerGain
-
-        lfoC.connect(lfoCG);
-        lfoCG.connect(shimmerGain.gain);
-        lfoC.start();
       }
 
       async function startAudio(){
         if (started) return true;
         try{
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          buildUniverse();
+
+          master = audioCtx.createGain();
+          master.gain.value = 0.00001;
+
+          // compressão leve só pra segurar picos
+          const comp = audioCtx.createDynamicsCompressor();
+          comp.threshold.value = -24;
+          comp.knee.value = 24;
+          comp.ratio.value = 2.0;
+          comp.attack.value = 0.015;
+          comp.release.value = 0.22;
+
+          // filtro final (tira “aresta” de caixa/alto-falante)
+          const lp = audioCtx.createBiquadFilter();
+          lp.type = "lowpass";
+          lp.frequency.value = 2200;
+          lp.Q.value = 0.55;
+
+          master.connect(comp);
+          comp.connect(lp);
+          lp.connect(audioCtx.destination);
+
+          // cria loop interno
+          const loopBuf = makeSampleLoop(audioCtx, 7);
+          const src = audioCtx.createBufferSource();
+          src.buffer = loopBuf;
+          src.loop = true;
+
+          // “profundidade”: delay bem sutil (não é reverb pesado)
+          const delay = audioCtx.createDelay(0.25);
+          delay.delayTime.value = 0.18;
+
+          const fb = audioCtx.createGain();
+          fb.gain.value = 0.22;
+
+          const hp = audioCtx.createBiquadFilter();
+          hp.type = "highpass";
+          hp.frequency.value = 90;
+          hp.Q.value = 0.7;
+
+          // cadeia:
+          // src -> hp -> master
+          // src -> delay -> fb -> delay (feedback) -> master
+          src.connect(hp);
+          hp.connect(master);
+
+          src.connect(delay);
+          delay.connect(fb);
+          fb.connect(delay);
+          delay.connect(master);
 
           if (audioCtx.state === "suspended"){
             await audioCtx.resume();
           }
 
+          src.start();
           started = true;
 
-          // fade-in suave e longo (sem “zipper”)
-          smoothParam(master.gain, MASTER_TARGET, 1.25);
+          // fade-in bem suave (sem ruído/estalo)
+          smooth(master.gain, MASTER_TARGET, 1.2);
           return true;
-        } catch (e){
+        } catch(e){
           return false;
         }
       }
 
-      // ✅ ativa APENAS ao rolar
+      // ✅ ativa “ao rolar” de verdade: wheel / touchmove / scroll
       let armed = true;
-      function onFirstScroll(){
-        if (!armed) return;
+
+      function armOff(){
         armed = false;
-        startAudio();
-        window.removeEventListener("scroll", onFirstScroll, { passive:true });
+        window.removeEventListener("wheel", onWheel, { passive:true });
+        window.removeEventListener("scroll", onScroll, { passive:true });
+        window.removeEventListener("touchmove", onTouchMove, { passive:true });
       }
-      window.addEventListener("scroll", onFirstScroll, { passive:true });
+
+      function onWheel(){
+        if (!armed) return;
+        armOff();
+        startAudio();
+      }
+
+      function onScroll(){
+        if (!armed) return;
+        // em alguns casos scroll dispara sem gesto real; por isso usamos também wheel/touchmove.
+        armOff();
+        startAudio();
+      }
+
+      let touchStartY = 0;
+      function onTouchMove(e){
+        if (!armed) return;
+        const y = e.touches && e.touches[0] ? e.touches[0].clientY : 0;
+        const dy = Math.abs(y - touchStartY);
+        // só considera “rolagem” se mexer um mínimo
+        if (dy < 10) return;
+        armOff();
+        startAudio();
+      }
+
+      window.addEventListener("wheel", onWheel, { passive:true });
+      window.addEventListener("scroll", onScroll, { passive:true });
+
+      window.addEventListener("touchstart", (e) => {
+        touchStartY = e.touches && e.touches[0] ? e.touches[0].clientY : 0;
+      }, { passive:true });
+
+      window.addEventListener("touchmove", onTouchMove, { passive:true });
     })();
 
     /* =========================
