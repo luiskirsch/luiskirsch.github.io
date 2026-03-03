@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Prelúdio Jogos — Boas-vindas</title>
 
-  <!-- Favicons (deixe favicon.png na mesma pasta do index.html) -->
   <link rel="icon" type="image/png" href="./favicon.png">
 
-  <!-- ajuda contra cache agressivo em alguns ambientes -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -38,9 +36,6 @@
       overscroll-behavior: none;
     }
 
-    /* =========================
-       ✅ FALLBACK UNIVERSAL (mesmo sem JS/CSS vars)
-       ========================= */
     body{
       margin:0;
       min-height:100vh;
@@ -58,10 +53,8 @@
       color:#f2f2f2;
       font-family: ui-serif, Georgia, "Times New Roman", serif;
 
-      /* ✅ fallback puro (caso var() falhe) */
       background-color:#000006;
 
-      /* ✅ versão completa (caso var() funcione) */
       background:
         radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.06), transparent 62%),
         radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.035), transparent 72%),
@@ -78,7 +71,6 @@
       body{ min-height:100dvh; }
     }
 
-    /* ✅ estrelas em CSS (fallback se canvas falhar) */
     body::before{
       content:"";
       position:fixed;
@@ -100,7 +92,6 @@
       filter: blur(.15px);
     }
 
-    /* ✅ névoa universal */
     body::after{
       content:"";
       position:fixed;
@@ -123,7 +114,6 @@
       50%{ transform: translate3d(10px,-10px,0) scale(1.02); opacity:.46; }
     }
 
-    /* Canvas (enhancement) */
     #stars{
       position:fixed;
       inset:0;
@@ -141,7 +131,6 @@
       padding: 22px 0 28px;
     }
 
-    /* ✅ logo central maior, sem círculo */
     .topbar{
       display:flex;
       align-items:center;
@@ -168,8 +157,6 @@
 
     .card{
       border-radius:26px;
-      background: rgba(255,255,255,.05);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.035));
       background: linear-gradient(180deg, var(--cardA), var(--cardB));
       border:1px solid rgba(255,255,255,.10);
       box-shadow: 0 30px 90px rgba(0,0,0,.62);
@@ -216,7 +203,6 @@
       flex:0 0 auto;
     }
 
-    /* ✅ título com fallback universal */
     .title{
       margin:0;
       line-height: .92;
@@ -224,7 +210,6 @@
       text-transform:uppercase;
       font-weight: 700;
       font-size: clamp(48px, 6.2vw, 110px);
-      color:#e6c07b;
       color: var(--gold);
       text-shadow: 0 20px 70px rgba(0,0,0,.55);
       animation: titlePulse 4.2s ease-in-out infinite;
@@ -480,7 +465,7 @@
       .countdownGrid{ grid-template-columns: repeat(2, minmax(90px,1fr)); }
     }
 
-    /* ✅ Painel de som (corrigido) */
+    /* ✅ Painel de som fixo + some ao rolar */
     .soundPanel{
       position:fixed;
       right:max(14px, env(safe-area-inset-right));
@@ -494,6 +479,16 @@
       padding:10px;
       box-shadow: 0 18px 60px rgba(0,0,0,.45);
       min-width: 220px;
+
+      transform: translate3d(0,0,0);
+      opacity: 1;
+      transition: transform .26s ease, opacity .22s ease;
+      will-change: transform, opacity;
+    }
+    .soundPanel.isHidden{
+      transform: translate3d(0,-14px,0);
+      opacity: 0;
+      pointer-events:none;
     }
 
     .soundBtn{
@@ -534,12 +529,7 @@
       }
     }
 
-    /* =========================
-       ✅ CONTAGEM REGRESSIVA (card)
-       ========================= */
-    .launchCountdown{
-      margin-top: 18px;
-    }
+    .launchCountdown{ margin-top: 18px; }
     .countdownCard{
       border-radius:22px;
       border: 1px solid rgba(230,192,123,.20);
@@ -628,6 +618,7 @@
     @media (prefers-reduced-motion: reduce){
       body::after, .whisper, .title{ animation:none !important; }
       #stars{ display:none; }
+      .soundPanel{ transition:none !important; }
     }
   </style>
 </head>
@@ -635,8 +626,7 @@
 <body>
   <canvas id="stars" aria-hidden="true"></canvas>
 
-  <!-- ✅ Painel de som (sem aviso; iOS exige gesto e isso resolve) -->
-  <div class="soundPanel" aria-label="Painel de som ambiente">
+  <div class="soundPanel" id="soundPanel" aria-label="Painel de som ambiente">
     <div class="soundBtn" id="soundBtn" role="button" aria-label="Ativar ou desativar som">
       SOM: <strong>OFF</strong>
     </div>
@@ -732,7 +722,6 @@
       </aside>
     </section>
 
-    <!-- ✅ Card de contagem regressiva inserido aqui -->
     <section class="launchCountdown" aria-label="Contagem regressiva de lançamento">
       <article class="countdownCard">
         <div class="countdownTop">
@@ -792,7 +781,7 @@
 
   <script>
     /* =========================================================
-       ✅ 1) Estrelas + meteoros (ES5) — se falhar, fallback CSS continua
+       ✅ 1) Estrelas + meteoros (ES5)
        ========================================================= */
     (function(){
       try{
@@ -848,7 +837,7 @@
           var startY = rand(-h*0.25, -h*0.06);
 
           var speed = rand(10.5, 14.5);
-          var angle = rand(0.85, 1.05); // cima->baixo, diagonal esquerda->direita
+          var angle = rand(0.85, 1.05);
           var vx = Math.cos(angle) * speed;
           var vy = Math.sin(angle) * speed;
 
@@ -922,7 +911,6 @@
             }
           }
 
-          // vinheta
           var vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.95);
           vignette.addColorStop(0, "rgba(0,0,0,0)");
           vignette.addColorStop(1, "rgba(0,0,0,0.62)");
@@ -940,14 +928,11 @@
 
         window.addEventListener("resize", start);
         start();
-
-      } catch(e){
-        // fallback CSS mantém visual
-      }
+      } catch(e){}
     })();
 
     /* =========================================================
-       ✅ 2) Contagem regressiva de lançamento (3 meses a partir de hoje)
+       ✅ 2) Contagem regressiva (3 meses)
        ========================================================= */
     (function(){
       try{
@@ -966,13 +951,8 @@
         var target = new Date(start.getTime());
         target.setMonth(target.getMonth() + 3);
 
-        function pad(n){
-          return (n < 10 ? "0" : "") + n;
-        }
-
-        function clamp(v, min, max){
-          return Math.min(max, Math.max(min, v));
-        }
+        function pad(n){ return (n < 10 ? "0" : "") + n; }
+        function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
 
         function update(){
           var now = new Date();
@@ -989,12 +969,9 @@
             return;
           }
 
-          var days = Math.floor(diff / MS.day);
-          diff -= days * MS.day;
-          var hours = Math.floor(diff / MS.hour);
-          diff -= hours * MS.hour;
-          var mins = Math.floor(diff / MS.min);
-          diff -= mins * MS.min;
+          var days = Math.floor(diff / MS.day); diff -= days * MS.day;
+          var hours = Math.floor(diff / MS.hour); diff -= hours * MS.hour;
+          var mins = Math.floor(diff / MS.min); diff -= mins * MS.min;
           var secs = Math.floor(diff / MS.sec);
 
           dayEl.textContent = pad(days);
@@ -1024,7 +1001,7 @@
     })();
 
     /* =========================================================
-       ✅ 3) Leads (estático)
+       ✅ 3) Leads
        ========================================================= */
     (function(){
       try{
@@ -1119,9 +1096,7 @@
     })();
 
     /* =========================================================
-       ✅ 4) Som (sem notificação; só liga tocando no botão)
-       - iOS: exige gesto -> ok
-       - Windows/Linux: funciona também
+       ✅ 4) Som (botão + slider)
        ========================================================= */
     (function(){
       var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
@@ -1346,6 +1321,57 @@
           stopAudio();
         }
       });
+    })();
+
+    /* =========================================================
+       ✅ 5) SUMIR AO ROLAR (não atrapalha os cards)
+       - desce: some
+       - sobe: volta
+       ========================================================= */
+    (function(){
+      try{
+        var panel = document.getElementById("soundPanel");
+        if (!panel) return;
+
+        var lastY = window.pageYOffset || 0;
+        var ticking = false;
+
+        function apply(){
+          ticking = false;
+          var y = window.pageYOffset || 0;
+          var delta = y - lastY;
+
+          // perto do topo: sempre mostra
+          if (y < 18){
+            panel.classList.remove("isHidden");
+            lastY = y;
+            return;
+          }
+
+          // rolando pra baixo: esconde
+          if (delta > 6){
+            panel.classList.add("isHidden");
+          }
+          // rolando pra cima: mostra
+          else if (delta < -6){
+            panel.classList.remove("isHidden");
+          }
+
+          lastY = y;
+        }
+
+        function onScroll(){
+          if (ticking) return;
+          ticking = true;
+          if (window.requestAnimationFrame){
+            requestAnimationFrame(apply);
+          } else {
+            setTimeout(apply, 16);
+          }
+        }
+
+        window.addEventListener("scroll", onScroll, { passive:true });
+      } catch(e){}
     })();
   </script>
 </body>
