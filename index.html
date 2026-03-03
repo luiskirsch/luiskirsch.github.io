@@ -5,856 +5,744 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Prelúdio Jogos — Boas-vindas</title>
 
-  <!-- FAVICON (aba do navegador) -->
-  <link rel="icon" href="./favicon.png" />
-  <meta name="theme-color" content="#040405" />
+  <!-- FAVICON DA ABA -->
+  <link rel="icon" href="./favicon.png">
 
   <style>
     :root{
-      --bg:#040405;
-      --bg2:#050507;
-
+      --bg:#050505;
+      --bg2:#020202;
       --gold:#e6c07b;
       --muted:#a7a7a7;
-      --text:#f3f3f3;
-
-      --shadow:rgba(0,0,0,.72);
-
-      --radius:22px;
-      --radius2:18px;
-
-      --ease:cubic-bezier(.16,.98,.16,1);
-      --ease2:cubic-bezier(.22,.86,.16,1);
-
-      --max:1200px;
+      --cardA:rgba(255,255,255,.070);
+      --cardB:rgba(255,255,255,.035);
+      --line:rgba(230,192,123,.22);
+      --shadow:rgba(0,0,0,.60);
+      --ok:#9be37a;
+      --danger:#ff4d4d;
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
 
-    /* ✅ EVITA O “BRANCO” DO OVERSCROLL: fundo real no html/body */
-    html{ background: var(--bg); }
-    body{
-      margin:0;
-      color:var(--text);
-      font-family: ui-serif, Georgia, "Times New Roman", serif;
-
-      background: var(--bg);         /* ✅ nunca fica branco */
-      overflow:hidden;
-      -webkit-text-size-adjust:100%;
-
+    /* Evita “faixa escura”/overscroll feio e vibração */
+    html{
+      background: var(--bg);
       overscroll-behavior: none;
-      touch-action: pan-y;
     }
 
-    /* =========================
-       BACKGROUND LAYER STACK
-       ========================= */
-    .bgWrap{
+    body{
+      margin:0;
+      min-height:100vh;
+      background: #050505; /* fallback */
+      overflow-x:hidden;
+      overflow-y:auto;
+      -webkit-text-size-adjust: 100%;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: none;
+
+      padding-left:max(18px, env(safe-area-inset-left));
+      padding-right:max(18px, env(safe-area-inset-right));
+      padding-top:max(18px, env(safe-area-inset-top));
+      padding-bottom:max(18px, env(safe-area-inset-bottom));
+
+      color:#f2f2f2;
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
+    }
+
+    @supports (height: 100dvh){
+      body{ min-height:100dvh; }
+    }
+
+    /* Camada fixa de fundo (garante PC + todos navegadores) */
+    .bg{
       position:fixed;
       inset:0;
       z-index:0;
       pointer-events:none;
+      background:
+        radial-gradient(1200px 700px at 50% 20%, rgba(230,192,123,.10), transparent 55%),
+        radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 560px at 82% 75%, rgba(255,255,255,.05), transparent 62%),
+        linear-gradient(180deg, var(--bg2), var(--bg));
+      filter: saturate(1.05) contrast(1.02);
     }
 
-    .bg{
-      position:absolute;
+    /* Canvas de estrelas por cima */
+    #stars{
+      position:fixed;
       inset:0;
-      background:
-        radial-gradient(1200px 720px at 50% 18%, rgba(230,192,123,.09), transparent 62%),
-        radial-gradient(900px 520px at 18% 18%, rgba(255,255,255,.04), transparent 64%),
-        radial-gradient(1000px 720px at 82% 78%, rgba(255,255,255,.035), transparent 66%),
-        radial-gradient(1400px 900px at 50% 110%, rgba(230,192,123,.06), transparent 60%),
-        linear-gradient(180deg, var(--bg), var(--bg2));
+      z-index:1;
+      pointer-events:none;
+      opacity:.88;
+      transform: translateZ(0);
     }
 
-    .bg::before{
-      content:"";
-      position:absolute;
-      inset:-20%;
+    /* brilho atmosférico */
+    .glow{
+      position:fixed;
+      inset:-22%;
+      z-index:2;
+      pointer-events:none;
       background:
-        radial-gradient(800px 400px at 52% 30%, rgba(230,192,123,.09), transparent 66%),
-        radial-gradient(980px 560px at 62% 72%, rgba(255,255,255,.035), transparent 72%);
-      filter: blur(16px);
+        radial-gradient(700px 360px at 50% 22%, rgba(230,192,123,.11), transparent 62%),
+        radial-gradient(900px 480px at 60% 78%, rgba(255,255,255,.05), transparent 68%);
+      filter: blur(14px);
       opacity:.62;
-      animation: pulseGlow 6.6s ease-in-out infinite;
+      animation: pulseGlow 6.2s ease-in-out infinite;
+      transform: translateZ(0);
     }
     @keyframes pulseGlow{
-      0%,100%{ opacity:.46; transform:translateY(0) scale(1); }
-      50%{ opacity:.78; transform:translateY(-6px) scale(1.01); }
+      0%,100%{ opacity:.48; transform:translateY(0) scale(1); }
+      50%{ opacity:.78; transform:translateY(-8px) scale(1.01); }
     }
 
-    canvas#stars{
-      position:absolute;
-      inset:0;
-      z-index:1;
-      opacity:.92;
-    }
-
-    .grain{
-      position:absolute;
-      inset:0;
-      z-index:2;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
-      opacity:.08;
-      mix-blend-mode: overlay;
-      filter: contrast(110%) brightness(108%);
-    }
-
-    /* =========================
-       SCROLL (conteúdo acima do fundo)
-       ========================= */
-    #scroll{
+    /* Conteúdo acima de tudo */
+    .wrap{
       position:relative;
-      z-index:10;
-
-      height:100svh;          /* ✅ melhor no mobile */
-      height:100dvh;
-      overflow-y:auto;
-      overflow-x:hidden;
-
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: none;  /* ✅ segura bounce */
-
-      background: transparent;
-
-      padding:
-        max(18px, env(safe-area-inset-top))
-        max(18px, env(safe-area-inset-right))
-        max(18px, env(safe-area-inset-bottom))
-        max(18px, env(safe-area-inset-left));
+      z-index:5;
+      width:min(1200px, 100%);
+      margin:0 auto;
+      padding: 22px 0 28px;
     }
 
-    .wrap{ width:min(var(--max), 100%); margin:0 auto; }
-
-    .top{ display:flex; justify-content:center; align-items:center; padding: 8px 0 14px; }
-    .brandPill{
-      display:flex; align-items:center; gap:10px;
-      padding:10px 14px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.20);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 18px 60px rgba(0,0,0,.35);
-      transform: translateZ(0);
-    }
-    .brandPill img{
-      width:38px; height:38px;
-      display:block; object-fit:contain;
-      filter:
-        drop-shadow(0 0 18px rgba(255,255,255,.10))
-        drop-shadow(0 0 44px rgba(230,192,123,.18));
-    }
-    .brandPill span{
-      font-size:12px;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      color:rgba(230,192,123,.86);
-      white-space:nowrap;
-    }
-
-    .grid{ display:grid; gap:18px; align-items:start; padding-bottom: 10px; }
-    @media (min-width: 980px){
-      .grid{ grid-template-columns: 1.12fr .88fr; gap:22px; }
-    }
-
-    .hero{
-      position:relative;
-      border-radius: var(--radius);
-      border:1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-      box-shadow: 0 34px 110px rgba(0,0,0,.62);
-      backdrop-filter: blur(10px);
-      overflow:hidden;
-      transform: translateZ(0);
-    }
-    .hero::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background: radial-gradient(900px 280px at 50% 0%, rgba(230,192,123,.10), transparent 64%);
-      opacity:.92;
-    }
-    .heroInner{
-      position:relative;
-      z-index:1;
-      padding: clamp(18px, 2.8vw, 28px);
-      text-align:left;
-    }
-
-    .kicker{
-      display:flex; align-items:center; gap:10px;
-      font-size:12px; letter-spacing:.22em; text-transform:uppercase;
-      color:rgba(230,192,123,.82);
-    }
-    .kicker .dot{
-      width:6px; height:6px; border-radius:50%;
-      background: rgba(230,192,123,.85);
-      box-shadow: 0 0 16px rgba(230,192,123,.35);
-    }
-
-    .title{
-      margin:14px 0 6px;
-      font-weight:700;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      line-height:1.02;
-      font-size: clamp(34px, 5.8vw, 86px);
-      text-shadow: 0 26px 90px rgba(0,0,0,.62);
-
-      color:transparent;
-      background-image:
-        linear-gradient(180deg, rgba(230,192,123,.95), rgba(230,192,123,.72)),
-        linear-gradient(120deg,
-          rgba(255,255,255,0) 0%,
-          rgba(255,255,255,0) 42%,
-          rgba(255,255,255,.86) 50%,
-          rgba(255,255,255,0) 58%,
-          rgba(255,255,255,0) 100%);
-      background-size: 100% 100%, 240% 100%;
-      background-position: 0 0, -160% 0;
-      background-repeat:no-repeat;
-      -webkit-background-clip:text;
-      background-clip:text;
-
-      animation: shineOnceLoop 7.4s var(--ease) infinite;
-    }
-    @keyframes shineOnceLoop{
-      0%   { background-position: 0 0, -160% 0; }
-      54%  { background-position: 0 0, 160% 0; }
-      100% { background-position: 0 0, 160% 0; }
-    }
-
-    .subtitle{
-      margin:0;
-      max-width: 62ch;
-      font-size: clamp(14px, 2.0vw, 18px);
-      color: rgba(255,255,255,.86);
-      line-height:1.65;
-    }
-
-    .whisper{
-      margin-top:12px;
-      color: rgba(255,255,255,.58);
-      letter-spacing:.12em;
-      font-size: 12px;
-      text-transform:uppercase;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      opacity:.86;
-      animation: whisperPulse 3.4s ease-in-out infinite;
-    }
-    @keyframes whisperPulse{
-      0%,100%{ opacity:.46; filter: blur(.15px); transform: translateY(0); }
-      50%{ opacity:.92; filter: blur(0); transform: translateY(-1px); }
-    }
-    .whisper .line{
-      flex:1;
-      height:1px;
-      background: linear-gradient(90deg, transparent, rgba(230,192,123,.22), transparent);
-      opacity:.9;
-    }
-
-    .heroCards{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-      margin-top:16px;
-    }
-    @media (min-width: 620px){
-      .heroCards{ grid-template-columns: 1fr 1fr; }
-    }
-
-    .mini{
-      border-radius: var(--radius2);
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.22);
-      box-shadow: 0 18px 70px rgba(0,0,0,.38);
-      padding: 14px 14px 12px;
-      position:relative;
-      overflow:hidden;
-    }
-    .mini::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background: radial-gradient(520px 170px at 50% 0%, rgba(230,192,123,.09), transparent 62%);
-      opacity:.85;
-    }
-    .mini h3{
-      position:relative;
-      z-index:1;
-      margin:0 0 6px;
-      font-size:12px;
-      letter-spacing:.24em;
-      text-transform:uppercase;
-      color:rgba(230,192,123,.86);
-    }
-    .mini p{
-      position:relative;
-      z-index:1;
-      margin:0;
-      font-size:14px;
-      color:rgba(255,255,255,.76);
-      line-height:1.7;
-    }
-
-    .side{ display:grid; gap:18px; }
-
-    .panel{
-      border-radius: var(--radius);
-      border:1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-      box-shadow: 0 34px 110px rgba(0,0,0,.62);
-      backdrop-filter: blur(10px);
-      overflow:hidden;
-      transform: translateZ(0);
-      position:relative;
-    }
-    .panel::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.10), transparent 64%);
-      opacity:.92;
-    }
-    .panelInner{
-      position:relative;
-      z-index:1;
-      padding: clamp(18px, 2.6vw, 26px);
-    }
-
-    .tag{
+    /* Topo com logo oficial dentro da página */
+    .topbar{
       display:flex;
       align-items:center;
       justify-content:center;
-      gap:10px;
-      font-size:12px;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      color:rgba(230,192,123,.82);
-      margin-bottom:12px;
+      margin: 8px auto 18px;
+      opacity:.98;
     }
-    .tag .dot{
-      width:6px; height:6px;
-      border-radius:50%;
-      background:rgba(230,192,123,.85);
-      box-shadow: 0 0 16px rgba(230,192,123,.35);
+    .badge{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:12px 18px;
+      border-radius:999px;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
-    .panelTitle{
+    /* ✅ LOGO MAIOR (o ajuste que você pediu) */
+    .badge img{
+      width:72px;
+      height:72px;
+      object-fit:contain;
+      display:block;
+      filter: drop-shadow(0 12px 26px rgba(0,0,0,.62));
+    }
+    .badge span{
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      font-size:12px;
+      color: rgba(230,192,123,.88);
+      white-space:nowrap;
+    }
+
+    /* Grid principal */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap:22px;
+      align-items:stretch;
+      margin-top: 8px;
+    }
+
+    .card{
+      border-radius:26px;
+      background: linear-gradient(180deg, var(--cardA), var(--cardB));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 30px 90px rgba(0,0,0,.62);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position:relative;
+      overflow:hidden;
+      transform: translateZ(0);
+    }
+    .card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.12), transparent 60%);
+      opacity:.9;
+    }
+    .inner{
+      position:relative;
+      z-index:1;
+      padding: 22px 22px 20px;
+    }
+
+    .kicker{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      font-size:12px;
+      color:rgba(230,192,123,.82);
+      margin: 2px 0 14px;
+      justify-content:flex-start;
+    }
+    .dot{
+      width:5px;height:5px;border-radius:50%;
+      background:rgba(230,192,123,.85);
+      box-shadow: 0 0 18px rgba(230,192,123,.40);
+      flex:0 0 auto;
+    }
+
+    /* Título com “reflexo dentro das letras” */
+    .title{
       margin:0;
-      font-size: clamp(18px, 2.4vw, 28px);
-      line-height:1.35;
-      color:#f3f3f3;
-      text-shadow: 0 18px 60px rgba(0,0,0,.55);
-      text-align:center;
+      line-height: .92;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-weight: 700;
+      font-size: clamp(48px, 6.2vw, 110px);
+      text-shadow: 0 20px 70px rgba(0,0,0,.55);
+      color: var(--gold); /* fallback */
+    }
+    @supports ((-webkit-background-clip:text) or (background-clip:text)){
+      .title{
+        color: transparent;
+        background-image:
+          linear-gradient(90deg,
+            rgba(230,192,123,.70) 0%,
+            rgba(230,192,123,.92) 28%,
+            rgba(255,255,255,.92) 48%,
+            rgba(230,192,123,.92) 58%,
+            rgba(230,192,123,.70) 100%);
+        background-size: 260% 100%;
+        background-position: 0% 50%;
+        -webkit-background-clip:text;
+        background-clip:text;
+        animation: shineText 6.8s ease-in-out infinite;
+      }
+    }
+    @keyframes shineText{
+      0%   { background-position:   0% 50%; }
+      60%  { background-position: 100% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .subtitle{
+      margin: 12px 0 0;
+      max-width: 70ch;
+      font-size: clamp(15px, 1.6vw, 20px);
+      color: rgba(255,255,255,.86);
+      line-height:1.55;
+    }
+    .subtitle strong{ color: rgba(230,192,123,.95); font-weight:700; }
+
+    /* Frase “enfraquecendo e voltando” */
+    .whisper{
+      margin: 14px 0 0;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size: 12px;
+      color: rgba(255,255,255,.52);
+      opacity:.72;
+      animation: breathe 3.2s ease-in-out infinite;
+    }
+    @keyframes breathe{
+      0%,100%{ opacity:.38; filter: blur(.35px); transform: translateY(0); }
+      50%{ opacity:.82; filter: blur(0); transform: translateY(-2px); }
     }
 
     .rule{
-      margin:14px auto 10px;
+      margin: 16px 0 14px;
       height:10px;
-      width:min(720px, 92%);
+      width: min(760px, 100%);
       border-radius:999px;
       background: linear-gradient(90deg,
         rgba(255,255,255,.06),
-        rgba(230,192,123,.16),
+        rgba(230,192,123,.20),
         rgba(255,255,255,.06));
-      opacity:.62;
-      filter: blur(.2px);
+      opacity:.70;
     }
 
-    form{ margin-top:12px; }
-    .fields{ display:grid; gap:12px; }
-    @media (min-width: 680px){ .fields{ grid-template-columns: 1fr 1fr; } }
-
-    label{
-      display:block;
-      font-size:11px;
+    .miniGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top: 14px;
+    }
+    .mini{
+      border-radius:18px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.22);
+      padding: 14px 14px 12px;
+      box-shadow: inset 0 0 30px rgba(0,0,0,.25);
+    }
+    .mini h3{
+      margin:0 0 8px;
+      font-size:12px;
       letter-spacing:.22em;
       text-transform:uppercase;
-      color:rgba(255,255,255,.58);
-      margin:0 0 8px 6px;
+      color: rgba(230,192,123,.88);
     }
-    input[type="text"], input[type="email"]{
+    .mini p{
+      margin:0;
+      font-size:16px;
+      line-height:1.5;
+      color: rgba(255,255,255,.80);
+    }
+
+    /* Card Leads */
+    .leadTitle{
+      margin: 10px 0 0;
+      font-size: clamp(18px, 2.1vw, 30px);
+      line-height:1.35;
+      color: rgba(255,255,255,.92);
+      text-align:center;
+    }
+
+    .form{
+      margin-top: 18px;
+      display:grid;
+      gap:12px;
+    }
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    label{
+      display:block;
+      font-size:12px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.55);
+      margin: 0 0 8px;
+    }
+    input{
       width:100%;
       border-radius:14px;
-      padding:12px 14px;
-      background: rgba(0,0,0,.30);
-      border:1px solid rgba(255,255,255,.10);
-      color:rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,255,255,.90);
+      padding: 12px 14px;
       outline:none;
-      box-shadow: inset 0 0 30px rgba(0,0,0,.35);
-      transition: border-color .18s ease, transform .18s var(--ease2);
+      box-shadow: inset 0 0 30px rgba(0,0,0,.26);
+      font-family: inherit;
+      font-size: 16px;
     }
-    input:focus{
-      border-color: rgba(230,192,123,.30);
-      transform: translateY(-1px);
-    }
+    input::placeholder{ color: rgba(255,255,255,.38); }
 
     .consent{
       display:flex;
       gap:10px;
       align-items:flex-start;
-      margin-top:10px;
-      color:rgba(255,255,255,.70);
-      font-size:13px;
+      color: rgba(255,255,255,.75);
+      font-size: 13px;
       line-height:1.35;
+      margin-top: 2px;
+      user-select:none;
     }
-    .consent input{ margin-top:3px; accent-color: var(--gold); }
-    .consent b{ color:rgba(230,192,123,.92); }
-
+    .consent input{
+      width:18px;
+      height:18px;
+      margin-top: 2px;
+      accent-color: rgba(230,192,123,.9);
+    }
     .status{
-      margin:10px 0 0;
-      font-size:13px;
-      color:rgba(255,255,255,.65);
       text-align:center;
+      font-size: 13px;
+      color: rgba(255,255,255,.62);
+      margin-top: 6px;
+      min-height: 18px;
     }
-    .status.ok{ color: rgba(155,227,122,.90); }
-    .status.bad{ color: rgba(255,77,77,.90); }
 
     .actions{
-      margin-top:14px;
       display:flex;
       flex-wrap:wrap;
       gap:12px;
       justify-content:center;
+      margin-top: 12px;
     }
     button{
-      border:1px solid rgba(230,192,123,.22);
+      border:1px solid rgba(230,192,123,.24);
       background: rgba(0,0,0,.25);
-      color:rgba(230,192,123,.92);
-      padding:12px 18px;
-      border-radius:14px;
+      color: rgba(230,192,123,.92);
+      padding: 12px 18px;
+      border-radius: 14px;
       cursor:pointer;
       font-family: inherit;
       letter-spacing:.12em;
       text-transform:uppercase;
-      min-width:200px;
-      transition: transform .12s ease, border-color .18s ease, opacity .18s ease, box-shadow .18s ease;
-      box-shadow: 0 14px 40px rgba(0,0,0,.35);
-      position:relative;
-      overflow:hidden;
+      min-width: 190px;
+      transition: transform .12s ease, border-color .18s ease, background .18s ease, opacity .18s ease;
+      box-shadow: 0 14px 44px rgba(0,0,0,.35);
     }
-    button:hover{
-      transform: translateY(-1px);
-      border-color: rgba(230,192,123,.36);
-      box-shadow: 0 18px 55px rgba(0,0,0,.40);
-    }
+    button:hover{ transform: translateY(-1px); border-color: rgba(230,192,123,.38); }
     button:active{ transform: translateY(0); opacity:.92; }
-    button.secondary{
-      border-color: rgba(255,255,255,.10);
-      color: rgba(255,255,255,.80);
-      background: rgba(255,255,255,.04);
-    }
 
     .chips{
       display:flex;
       flex-wrap:wrap;
       gap:10px;
-      margin-top:14px;
       justify-content:center;
+      margin-top: 14px;
     }
     .chip{
-      border:1px solid rgba(230,192,123,.18);
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.22);
-      border-radius:999px;
-      padding:9px 12px;
-      font-size:11px;
-      letter-spacing:.16em;
+      padding: 8px 12px;
+      letter-spacing:.18em;
       text-transform:uppercase;
-      color:rgba(230,192,123,.86);
+      font-size: 11px;
+      color: rgba(230,192,123,.80);
+      user-select:none;
     }
 
-    .info{ display:grid; gap:12px; }
-    .info h3{
+    /* Bloco abaixo (sobre o jogo) */
+    .below{
+      margin-top: 22px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:18px;
+    }
+    .aboutTitle{
       margin:0;
-      font-size:12px;
-      letter-spacing:.24em;
+      font-size: 14px;
+      letter-spacing:.22em;
       text-transform:uppercase;
-      color:rgba(230,192,123,.86);
-      text-align:center;
+      color: rgba(230,192,123,.88);
     }
-    .info p{
-      margin:0;
-      color:rgba(255,255,255,.78);
-      font-size:14px;
-      line-height:1.75;
-      text-align:center;
+    .aboutText{
+      margin: 10px 0 0;
+      font-size: 18px;
+      line-height: 1.6;
+      color: rgba(255,255,255,.82);
+      max-width: 90ch;
     }
-    .bullets{
-      margin:8px 0 0;
-      padding-left:18px;
-      color:rgba(255,255,255,.78);
-      line-height:1.75;
-      font-size:14px;
-    }
+    .aboutText strong{ color: rgba(230,192,123,.95); }
 
+    /* Direitos autorais */
     .footer{
       width:100%;
+      margin: 18px auto 0;
       text-align:center;
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
-      color:rgba(255,255,255,.34);
+      color: rgba(255,255,255,.40);
+      padding: 0 10px 18px;
       pointer-events:none;
-      padding: 18px 10px 22px;
-      margin-top: 6px;
     }
-    .footer .brand{
-      color:rgba(230,192,123,.85);
-      font-weight:700;
+    .footer .brand{ color: rgba(230,192,123,.82); font-weight:700; }
+
+    /* Responsivo */
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+      .title{ font-size: clamp(44px, 9vw, 78px); }
+      .miniGrid{ grid-template-columns: 1fr 1fr; }
     }
 
-    @media (min-width: 980px){
-      .hero{
-        position: sticky;
-        top: 18px;
-        align-self: start;
-        will-change: transform;
+    @media (max-width: 560px){
+      body{
+        padding-left:max(14px, env(safe-area-inset-left));
+        padding-right:max(14px, env(safe-area-inset-right));
       }
+      .inner{ padding: 18px 16px 16px; }
+      .row2{ grid-template-columns: 1fr; }
+      .miniGrid{ grid-template-columns: 1fr; }
+      button{ width: 100%; min-width: 0; }
+
+      /* logo ainda grande no celular, mas sem estourar */
+      .badge img{ width:64px; height:64px; }
+      .badge span{ font-size:11px; }
     }
 
-    @media (max-width: 520px){
-      .brandPill img{ width:36px; height:36px; }
-      .brandPill span{ font-size:11px; }
-      button{ min-width:0; width:min(360px, 100%); }
-      .title{ letter-spacing:.18em; }
-      .subtitle{ line-height:1.55; }
-    }
-
-    .reveal{
-      opacity:0;
-      transform: translateY(12px);
-      transition: opacity .7s var(--ease), transform .7s var(--ease);
-    }
-    .reveal.on{
-      opacity:1;
-      transform: translateY(0);
-    }
-
+    /* Reduz movimento se o usuário pedir */
     @media (prefers-reduced-motion: reduce){
-      .bg::before{ animation:none !important; }
-      .title{ animation:none !important; }
-      .whisper{ animation:none !important; }
-      .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
-      button{ transition:none !important; }
-      canvas#stars{ display:none !important; }
+      .glow, .title, .whisper{ animation:none !important; }
+      #stars{ display:none; }
     }
   </style>
 </head>
 
 <body>
-  <div class="bgWrap" aria-hidden="true">
-    <div class="bg"></div>
-    <canvas id="stars"></canvas>
-    <div class="grain"></div>
-  </div>
+  <div class="bg" aria-hidden="true"></div>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <div class="glow" aria-hidden="true"></div>
 
-  <div id="scroll">
-    <div class="wrap">
-      <header class="top" aria-label="Topo">
-        <div class="brandPill">
-          <img src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" />
-          <span>Prelúdio Jogos</span>
-        </div>
-      </header>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="badge" aria-label="Prelúdio Jogos (logo oficial)">
+        <img src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" />
+        <span>Prelúdio Jogos</span>
+      </div>
+    </div>
 
-      <main class="grid" aria-label="Página inicial">
-        <section class="hero reveal" aria-label="Apresentação">
-          <div class="heroInner">
-            <div class="kicker">
-              <span class="dot"></span>
-              <span>Uma experiência psicológica em cartas físicas</span>
+    <section class="grid">
+      <article class="card">
+        <div class="inner">
+          <div class="kicker">
+            <span class="dot"></span>
+            <span>Uma experiência psicológica em cartas físicas</span>
+          </div>
+
+          <h1 class="title">Prelúdio<br/>Jogos</h1>
+
+          <p class="subtitle">
+            O site é a trilha: <strong>tempo</strong>, <strong>clima</strong> e <strong>silêncio</strong>.
+            As cartas são o corpo — o digital só mantém a tensão viva.
+          </p>
+
+          <div class="whisper">ENTRE PRIMEIRO. DEPOIS, NÃO TEM VOLTA.</div>
+          <div class="rule"></div>
+
+          <div class="miniGrid">
+            <div class="mini">
+              <h3>Como funciona</h3>
+              <p>Você puxa a carta física e segue. O site só cronometra e sustenta o ritmo — sem “atalhos”, sem pressa, sem fuga.</p>
             </div>
-
-            <h1 class="title">PRELÚDIO JOGOS</h1>
-
-            <p class="subtitle">
-              O site é a trilha: <strong style="color:rgba(230,192,123,.92); font-weight:700;">tempo</strong>,
-              <strong style="color:rgba(230,192,123,.92); font-weight:700;">clima</strong> e
-              <strong style="color:rgba(230,192,123,.92); font-weight:700;">silêncio</strong>.
-              As cartas são o corpo — o digital só mantém a tensão viva.
-            </p>
-
-            <div class="whisper" aria-label="Frase de clima">
-              <span class="line"></span>
-              <span>Entre primeiro. Depois, não tem volta.</span>
-              <span class="line"></span>
-            </div>
-
-            <div class="heroCards">
-              <div class="mini">
-                <h3>Como funciona</h3>
-                <p>
-                  Você puxa a carta física e segue. O site só cronometra e sustenta o ritmo —
-                  sem “atalhos”, sem pressa, sem fuga.
-                </p>
-              </div>
-              <div class="mini">
-                <h3>Regra de ouro</h3>
-                <p>
-                  Silêncio é clima. Clima é medo controlado.
-                  Quando o tempo zera, termina — mesmo que alguém peça “só mais uma”.
-                </p>
-              </div>
+            <div class="mini">
+              <h3>Regra de ouro</h3>
+              <p>Silêncio é clima. Clima é medo controlado. Quando o tempo zera, termina — mesmo que alguém peça “só mais uma”.</p>
             </div>
           </div>
-        </section>
+        </div>
+      </article>
 
-        <section class="side" aria-label="Acesso e informações">
-          <section class="panel reveal" aria-label="Lista de novidades">
-            <div class="panelInner">
-              <div class="tag">
-                <span class="dot"></span>
-                <span>Boas-vindas • Acesso</span>
-                <span class="dot"></span>
+      <aside class="card">
+        <div class="inner">
+          <div class="kicker" style="justify-content:center;">
+            <span class="dot"></span>
+            <span>Boas-vindas • Acesso</span>
+            <span class="dot"></span>
+          </div>
+
+          <p class="leadTitle">
+            Quer receber novidades, descontos e a fase 2 assim que abrir?
+            <br/>Deixe seu contato e entre para a lista.
+          </p>
+
+          <div class="rule" style="margin-left:auto;margin-right:auto;max-width:720px;"></div>
+
+          <form class="form" id="leadForm" autocomplete="on" novalidate>
+            <div class="row2">
+              <div>
+                <label for="nome">Nome</label>
+                <input id="nome" name="nome" type="text" placeholder="Seu nome" inputmode="text" autocomplete="name" />
               </div>
-
-              <p class="panelTitle">
-                Quer receber novidades, descontos e a fase 2 assim que abrir?
-                <br />Deixe seu contato e entre para a lista.
-              </p>
-
-              <div class="rule"></div>
-
-              <form id="leadForm" autocomplete="on" novalidate>
-                <div class="fields">
-                  <div>
-                    <label for="nome">Nome</label>
-                    <input id="nome" name="nome" type="text" placeholder="Seu nome" inputmode="text" />
-                  </div>
-                  <div>
-                    <label for="email">E-mail</label>
-                    <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" inputmode="email" />
-                  </div>
-                </div>
-
-                <div class="consent">
-                  <input id="consent" type="checkbox" />
-                  <div>
-                    Autorizo receber comunicações da <b>Prelúdio Jogos</b> sobre lançamentos e descontos.
-                  </div>
-                </div>
-
-                <p class="status" id="status">Status: aguardando seu e-mail.</p>
-
-                <div class="actions">
-                  <button type="submit" id="btnLista">Entrar na lista</button>
-                  <button type="button" class="secondary" id="btnEntrada">Acessar a entrada</button>
-                </div>
-
-                <div class="chips" aria-label="Características">
-                  <div class="chip">Cartas físicas</div>
-                  <div class="chip">Timer + clima</div>
-                  <div class="chip">Ritmo de mesa</div>
-                  <div class="chip">Sem atalhos</div>
-                </div>
-              </form>
+              <div>
+                <label for="email">E-mail</label>
+                <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" inputmode="email" autocomplete="email" />
+              </div>
             </div>
-          </section>
 
-          <section class="panel reveal" aria-label="Sobre o jogo">
-            <div class="panelInner info">
-              <h3>O SextoLugar</h3>
-              <p>
-                Um jogo físico, psicológico e imersivo. Você não “joga” no celular —
-                você joga na mesa. O site é a trilha, não o atalho.
-              </p>
+            <label class="consent" for="consent">
+              <input id="consent" type="checkbox" />
+              <span>Autorizo receber comunicações da <strong style="color:rgba(230,192,123,.95);">Prelúdio Jogos</strong> sobre lançamentos e descontos.</span>
+            </label>
 
-              <ul class="bullets">
-                <li>Recomendado para 3 a 5 pessoas (ou solo).</li>
-                <li>Leia a entrada e o ritual antes da primeira rodada.</li>
-                <li>Puxe uma carta. Siga. Sem pausas “convenientes”.</li>
-                <li>Quando o tempo zerar, termina. Mesmo que alguém peça “só mais uma”.</li>
-              </ul>
+            <div class="status" id="status">Status: aguardando seu e-mail.</div>
 
-              <p style="margin-top:10px;">
-                <span style="color:rgba(230,192,123,.92); font-weight:700;">Se você tenta apressar, perde o efeito.</span>
-                É por isso que o timer importa.
-              </p>
+            <div class="actions">
+              <button type="submit" id="btnLead">Entrar na lista</button>
+              <button type="button" id="btnEntrada">Acessar a entrada</button>
             </div>
-          </section>
-        </section>
-      </main>
 
-      <footer class="footer" aria-label="Direitos autorais">
-        © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span>
-        — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
-      </footer>
-    </div>
+            <div class="chips" aria-label="Destaques">
+              <div class="chip">Cartas físicas</div>
+              <div class="chip">Timer + clima</div>
+              <div class="chip">Ritmo de mesa</div>
+              <div class="chip">Sem atalhos</div>
+            </div>
+          </form>
+        </div>
+      </aside>
+    </section>
+
+    <section class="below">
+      <article class="card">
+        <div class="inner">
+          <h2 class="aboutTitle">O SextoLugar</h2>
+          <p class="aboutText">
+            Um jogo físico, psicológico e imersivo. Você não “joga” no celular — você joga na mesa.
+            O site é a trilha: ele segura o clima, cronometra a tensão e impede “atalhos”.
+            <br/><br/>
+            Recomendado para <strong>3 a 5 pessoas</strong> (ou solo). Abra a entrada, leia o ritual e comece a primeira rodada.
+            Quando o tempo zerar, termina. <strong>Mesmo que alguém peça “só mais uma”.</strong>
+          </p>
+        </div>
+      </article>
+    </section>
+
+    <footer class="footer" aria-label="Direitos autorais">
+      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+    </footer>
   </div>
 
   <script>
-    // Reveal suave
+    /* =========================
+       ESTRELAS (Canvas) — cross-browser
+       ========================= */
     (function(){
-      const items = document.querySelectorAll(".reveal");
-      const io = new IntersectionObserver((entries)=>{
-        for(const e of entries){
-          if(e.isIntersecting){
-            e.target.classList.add("on");
-            io.unobserve(e.target);
-          }
+      const canvas = document.getElementById("stars");
+      const ctx = canvas.getContext("2d", { alpha: true });
+
+      let w=0,h=0,dpr=1;
+      let stars = [];
+      let raf = null;
+
+      const isReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function resize(){
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        w = Math.floor(window.innerWidth);
+        h = Math.floor(window.innerHeight);
+        canvas.width  = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+
+        const density = Math.floor((w*h) / 11500);
+        const target = Math.max(110, Math.min(260, density));
+
+        stars = new Array(target).fill(0).map(() => ({
+          x: Math.random()*w,
+          y: Math.random()*h,
+          r: Math.random()*1.35 + 0.15,
+          a: Math.random()*0.62 + 0.18,
+          v: (Math.random()*0.20 + 0.06),
+          tw: Math.random()*0.02 + 0.006
+        }));
+      }
+
+      let t = 0;
+      function draw(){
+        if (isReduced) return;
+        t += 1;
+
+        ctx.clearRect(0,0,w,h);
+
+        const vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.80);
+        vignette.addColorStop(0, "rgba(0,0,0,0)");
+        vignette.addColorStop(1, "rgba(0,0,0,0.40)");
+
+        for (let i=0;i<stars.length;i++){
+          const s = stars[i];
+          s.y += s.v;
+          if (s.y > h + 10) { s.y = -10; s.x = Math.random()*w; }
+
+          const tw = (Math.sin((t*0.02) + i) * 0.5 + 0.5) * s.tw;
+          const alpha = Math.max(0, Math.min(1, s.a + tw));
+
+          ctx.beginPath();
+          ctx.fillStyle = "rgba(255,255,255," + alpha.toFixed(3) + ")";
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+          ctx.fill();
         }
-      }, { threshold: 0.10 });
-      items.forEach(el => io.observe(el));
+
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0,0,w,h);
+
+        raf = requestAnimationFrame(draw);
+      }
+
+      function start(){
+        cancelAnimationFrame(raf);
+        resize();
+        draw();
+      }
+
+      window.addEventListener("resize", start, { passive:true });
+      start();
     })();
 
-    // Leads (localStorage)
+    /* =========================
+       LEADS (site estático)
+       - salva no localStorage
+       - envia via mailto para seu e-mail
+       ========================= */
+    const LEAD_EMAIL_DESTINO = "luiskirsch22@hotmail.com";
+    const ENTRADA_URL = "./entrada.html";
+
     const leadForm = document.getElementById("leadForm");
-    const nomeEl = document.getElementById("nome");
-    const emailEl = document.getElementById("email");
-    const consentEl = document.getElementById("consent");
     const statusEl = document.getElementById("status");
     const btnEntrada = document.getElementById("btnEntrada");
 
-    function setStatus(msg, type){
-      statusEl.textContent = msg;
-      statusEl.classList.remove("ok","bad");
-      if(type) statusEl.classList.add(type);
-    }
-    function validEmail(email){
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-    }
-    function getLeads(){
+    btnEntrada.addEventListener("click", () => {
+      window.location.href = ENTRADA_URL;
+    });
+
+    function loadLeads(){
       try{ return JSON.parse(localStorage.getItem("preludio_leads") || "[]"); }
       catch(e){ return []; }
     }
-    function saveLead(lead){
-      const leads = getLeads();
-      const exists = leads.some(l => (l.email || "").toLowerCase() === lead.email.toLowerCase());
-      if(!exists) leads.unshift(lead);
+    function saveLeads(leads){
       localStorage.setItem("preludio_leads", JSON.stringify(leads));
-      return !exists;
+    }
+    function validEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
     leadForm.addEventListener("submit", (e) => {
       e.preventDefault();
 
-      const nome = (nomeEl.value || "").trim();
-      const email = (emailEl.value || "").trim();
+      const nome = (document.getElementById("nome").value || "").trim();
+      const email = (document.getElementById("email").value || "").trim();
+      const consent = document.getElementById("consent").checked;
 
-      if(!email){
-        setStatus("Status: informe seu e-mail.", "bad");
-        emailEl.focus();
+      if (!email){
+        statusEl.textContent = "Status: preencha seu e-mail.";
+        statusEl.style.color = "rgba(255,255,255,.70)";
         return;
       }
-      if(!validEmail(email)){
-        setStatus("Status: e-mail inválido. Confira e tente novamente.", "bad");
-        emailEl.focus();
+      if (!validEmail(email)){
+        statusEl.textContent = "Status: e-mail inválido.";
+        statusEl.style.color = "rgba(255,77,77,.90)";
         return;
       }
-      if(!consentEl.checked){
-        setStatus("Status: marque a autorização para entrar na lista.", "bad");
-        consentEl.focus();
+      if (!consent){
+        statusEl.textContent = "Status: marque a autorização para entrar na lista.";
+        statusEl.style.color = "rgba(255,77,77,.90)";
         return;
       }
 
-      const lead = {
-        nome: nome || "—",
-        email,
-        consent: true,
-        createdAt: new Date().toISOString()
-      };
+      const leads = loadLeads();
+      const now = new Date();
+      const lead = { nome, email, consent:true, at: now.toISOString() };
 
-      const inserted = saveLead(lead);
-      setStatus(inserted ? "Status: você entrou na lista. Bem-vindo." : "Status: este e-mail já está na lista.", "ok");
+      const jaExiste = leads.some(l => (l.email || "").toLowerCase() === email.toLowerCase());
+      if (!jaExiste){
+        leads.push(lead);
+        saveLeads(leads);
+      }
+
+      statusEl.textContent = jaExiste
+        ? "Status: você já está na lista. Obrigado."
+        : "Status: salvo! Abrindo envio…";
+      statusEl.style.color = "rgba(155,227,122,.92)";
+
+      const subject = encodeURIComponent("Novo lead — Prelúdio Jogos");
+      const body = encodeURIComponent(
+        "Novo lead cadastrado:\n\n" +
+        "Nome: " + (nome || "(não informado)") + "\n" +
+        "E-mail: " + email + "\n" +
+        "Consentimento: SIM\n" +
+        "Data: " + now.toLocaleString() + "\n"
+      );
+
+      setTimeout(() => {
+        window.location.href = "mailto:" + LEAD_EMAIL_DESTINO + "?subject=" + subject + "&body=" + body;
+      }, 250);
     });
 
-    btnEntrada.addEventListener("click", () => {
-      window.location.href = "./entrada.html";
-    });
-
-    // Estrelas realistas (movimento leve)
     (function(){
-      const canvas = document.getElementById("stars");
-      const ctx = canvas.getContext("2d", { alpha: true });
-
-      const prefersReduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if(prefersReduce) return;
-
-      let w, h, dpr;
-      let layers = [];
-      let raf = null;
-
-      function resize(){
-        dpr = Math.min(2, window.devicePixelRatio || 1);
-        w = canvas.width  = Math.floor(window.innerWidth * dpr);
-        h = canvas.height = Math.floor(window.innerHeight * dpr);
-        canvas.style.width = window.innerWidth + "px";
-        canvas.style.height = window.innerHeight + "px";
-        build();
+      const leads = loadLeads();
+      if (leads.length > 0){
+        statusEl.textContent = "Status: lista ativa. (" + leads.length + " registrado(s) neste navegador)";
       }
-
-      function makeStar(layer){
-        const depth = [0.25, 0.55, 1.0][layer];
-        return {
-          x: Math.random() * w,
-          y: Math.random() * h,
-          r: (Math.random() * (layer === 0 ? 1.0 : layer === 1 ? 1.4 : 1.8) + 0.35) * dpr,
-          a: Math.random() * (layer === 0 ? 0.35 : layer === 1 ? 0.45 : 0.55) + 0.06,
-          tw: Math.random() * 0.020 + 0.006,
-          sp: (Math.random() * (layer === 0 ? 0.08 : layer === 1 ? 0.14 : 0.22) + 0.04) * depth,
-          dx: (Math.random() * 0.06 - 0.03) * depth,
-          layer,
-          depth
-        };
-      }
-
-      function build(){
-        const area = window.innerWidth * window.innerHeight;
-        const baseCount = Math.floor(area / 12000);
-        const counts = [
-          Math.floor(baseCount * 0.9),
-          Math.floor(baseCount * 0.7),
-          Math.floor(baseCount * 0.45)
-        ];
-
-        layers = [[],[],[]];
-        for(let L=0; L<3; L++){
-          for(let i=0;i<counts[L];i++) layers[L].push(makeStar(L));
-        }
-      }
-
-      let t = 0;
-      function draw(){
-        t += 1;
-        ctx.clearRect(0,0,w,h);
-
-        for(let L=0; L<3; L++){
-          for(const s of layers[L]){
-            const tw = Math.sin((t*s.tw) + s.x*0.001) * 0.04;
-            const alpha = Math.max(0.03, Math.min(0.70, s.a + tw));
-
-            s.y += s.sp * dpr * 0.34;
-            s.x += s.dx * dpr * 0.25;
-
-            if(s.y > h + 20) s.y = -20;
-            if(s.x > w + 20) s.x = -20;
-            if(s.x < -20) s.x = w + 20;
-
-            ctx.beginPath();
-            ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-            ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-            ctx.fill();
-          }
-        }
-
-        raf = requestAnimationFrame(draw);
-      }
-
-      window.addEventListener("resize", () => {
-        cancelAnimationFrame(raf);
-        resize();
-        draw();
-      }, { passive:true });
-
-      resize();
-      draw();
     })();
   </script>
 </body>
