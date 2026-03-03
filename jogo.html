@@ -6,10 +6,8 @@
   <title>O SextoLugar — Jogo</title>  
 
   <!-- FAVICON / ÍCONE DA ABA -->
-  <link rel="icon" type="image/png" sizes="512x512" href="./favicon.png">
-  <link rel="apple-touch-icon" href="./favicon.png">
-  <meta name="theme-color" content="#050505">
-
+  <link rel="icon" href="./favicon.png">
+  
   <style>  
     :root{  
       --bg:#050505;  
@@ -213,7 +211,6 @@
       .card{ border-radius:18px; }  
     }  
 
-    /* ===== Direitos Autorais ===== */
     .footer{
       width:100%;
       max-width:980px;
@@ -242,7 +239,7 @@
       <div class="row">  
         <p class="timer" id="timerText">05:00</p>  
   
-        <div class="progressWrap" aria-label="Progresso do tempo">  
+        <div class="progressWrap">  
           <div class="progress" id="progressBar"></div>  
         </div>  
   
@@ -266,15 +263,13 @@
       </div>  
     </section>  
 
-    <!-- Direitos autorais -->
-    <footer class="footer" aria-label="Direitos autorais">
+    <footer class="footer">
       © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
     </footer>
 
   </main>  
   
   <script>  
-    // ======= ÁUDIO (tick por segundo) =======  
     let audioCtx = null;  
     let soundEnabled = true;  
   
@@ -284,31 +279,22 @@
     }  
   
     function tickSound() {  
-      if (!soundEnabled) return;  
-      if (!audioCtx) return;  
-  
+      if (!soundEnabled || !audioCtx) return;  
       const o = audioCtx.createOscillator();  
       const g = audioCtx.createGain();  
-  
-      // tick curto, discreto  
       o.type = "square";  
       o.frequency.value = 1200;  
-  
       g.gain.setValueAtTime(0.0001, audioCtx.currentTime);  
       g.gain.exponentialRampToValueAtTime(0.03, audioCtx.currentTime + 0.005);  
       g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.03);  
-  
       o.connect(g);  
       g.connect(audioCtx.destination);  
-  
       o.start();  
       o.stop(audioCtx.currentTime + 0.035);  
     }  
   
-    // destrava áudio no primeiro toque (regras de mobile)  
     document.addEventListener("click", () => ensureAudio(), { once: true });  
   
-    // ======= TIMER =======  
     const timerText = document.getElementById("timerText");  
     const statusEl = document.getElementById("status");  
     const progressBar = document.getElementById("progressBar");  
@@ -321,7 +307,7 @@
     const soundToggle = document.getElementById("soundToggle");  
     const modeToggle = document.getElementById("modeToggle");  
   
-    let mode = "rodada"; // "rodada" ou "longo"  
+    let mode = "rodada";  
     let totalSeconds = 5 * 60;  
     let remaining = totalSeconds;  
     let interval = null;  
@@ -335,7 +321,7 @@
   
     function setUI(){  
       timerText.textContent = fmt(remaining);  
-      const pct = totalSeconds === 0 ? 0 : ((totalSeconds - remaining) / totalSeconds) * 100;  
+      const pct = ((totalSeconds - remaining) / totalSeconds) * 100;  
       progressBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;  
     }  
   
@@ -344,7 +330,6 @@
       if (!paused) return;  
       paused = false;  
       statusEl.textContent = "Status: rodando…";  
-  
       clearInterval(interval);  
       interval = setInterval(() => {  
         if (remaining <= 0){  
@@ -355,9 +340,8 @@
           statusEl.textContent = "Status: tempo esgotado.";  
           return;  
         }  
-  
         remaining--;  
-        tickSound();  // tick a cada segundo  
+        tickSound();  
         setUI();  
       }, 1000);  
     }  
@@ -377,21 +361,18 @@
     }  
   
     function applyMode(){  
-      // Você pode trocar esses tempos depois:  
-      if (mode === "rodada") totalSeconds = 5 * 60;      // 5 min  
-      if (mode === "longo")  totalSeconds = 20 * 60;     // 20 min  
+      if (mode === "rodada") totalSeconds = 5 * 60;  
+      if (mode === "longo")  totalSeconds = 20 * 60;  
       remaining = totalSeconds;  
       setUI();  
       statusEl.textContent = "Status: pronto.";  
     }  
   
-    // Botões  
     btnStart.addEventListener("click", start);  
     btnPause.addEventListener("click", pause);  
     btnReset.addEventListener("click", reset);  
-    btnVoltar.addEventListener("click", () => window.location.href = "./index.html");  
+    btnVoltar.addEventListener("click", () => window.location.href = "./entrada.html");  
   
-    // Toggles  
     soundToggle.addEventListener("click", () => {  
       ensureAudio();  
       soundEnabled = !soundEnabled;  
@@ -404,7 +385,6 @@
       applyMode();  
     });  
   
-    // init  
     setUI();  
   </script>  
 </body>  
