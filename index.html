@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Prelúdio Jogos — Boas-vindas</title>
 
-  <!-- FAVICON (apenas aba do navegador) -->
+  <!-- FAVICON (aba do navegador) -->
   <link rel="icon" href="./favicon.png" />
   <meta name="theme-color" content="#040405" />
 
@@ -20,10 +20,8 @@
 
       --glassA:rgba(255,255,255,.07);
       --glassB:rgba(255,255,255,.03);
-      --stroke:rgba(255,255,255,.09);
 
       --shadow:rgba(0,0,0,.72);
-      --shadow2:rgba(0,0,0,.55);
 
       --radius:22px;
       --radius2:18px;
@@ -36,46 +34,34 @@
 
     *{ box-sizing:border-box; }
 
-    html,body{
-      height:100%;
-      background:var(--bg);
-    }
+    html,body{ height:100%; }
 
-    /* IMPORTANTE:
-       - body não rola (evita “barra escura”/bounce em alguns dispositivos)
-       - o scroll fica no #scroll (e aí não mostra aquela faixa no fundo)
-    */
+    /* Corpo SEM fundo sólido pra não “tampar” o background fixo */
     body{
       margin:0;
       color:var(--text);
       font-family: ui-serif, Georgia, "Times New Roman", serif;
-      overflow:hidden; /* scroll fica no container */
+      background: transparent;
+      overflow:hidden;
       -webkit-text-size-adjust:100%;
-      overscroll-behavior: none; /* elimina bounce */
+      overscroll-behavior: none;
       touch-action: pan-y;
     }
 
-    /* Container rolável */
-    #scroll{
-      height:100vh;
-      height:100dvh;
-      overflow-y:auto;
-      overflow-x:hidden;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: none;
-      background: transparent;
-      padding:
-        max(18px, env(safe-area-inset-top))
-        max(18px, env(safe-area-inset-right))
-        max(18px, env(safe-area-inset-bottom))
-        max(18px, env(safe-area-inset-left));
-    }
-
-    /* Fundo cinematográfico mais escuro */
-    .bg{
+    /* =========================
+       BACKGROUND LAYER STACK
+       (SEM z-index negativo)
+       ========================= */
+    .bgWrap{
       position:fixed;
       inset:0;
-      z-index:-10;
+      z-index:0;           /* fundo fica em 0 */
+      pointer-events:none;
+    }
+
+    .bg{
+      position:absolute;
+      inset:0;
       background:
         radial-gradient(1200px 720px at 50% 18%, rgba(230,192,123,.09), transparent 62%),
         radial-gradient(900px 520px at 18% 18%, rgba(255,255,255,.04), transparent 64%),
@@ -84,7 +70,6 @@
         linear-gradient(180deg, var(--bg), var(--bg2));
     }
 
-    /* Glow oscilando (ainda mais sutil) */
     .bg::before{
       content:"";
       position:absolute;
@@ -101,25 +86,44 @@
       50%{ opacity:.78; transform:translateY(-6px) scale(1.01); }
     }
 
-    /* Grão */
-    .grain{
-      position:fixed;
+    /* estrelas (canvas) em camada acima do gradiente */
+    canvas#stars{
+      position:absolute;
       inset:0;
-      z-index:-9;
-      pointer-events:none;
+      z-index:1;
+      opacity:.92;
+    }
+
+    /* grão acima das estrelas, mas bem leve */
+    .grain{
+      position:absolute;
+      inset:0;
+      z-index:2;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
       opacity:.08;
       mix-blend-mode: overlay;
       filter: contrast(110%) brightness(108%);
     }
 
-    /* Canvas estrelas: mais realista (camadas) */
-    canvas#stars{
-      position:fixed;
-      inset:0;
-      z-index:-8;
-      pointer-events:none;
-      opacity:.92;
+    /* =========================
+       SCROLL (conteúdo acima do fundo)
+       ========================= */
+    #scroll{
+      position:relative;
+      z-index:10; /* conteúdo sempre acima */
+      height:100vh;
+      height:100dvh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: none;
+      background: transparent;
+
+      padding:
+        max(18px, env(safe-area-inset-top))
+        max(18px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(18px, env(safe-area-inset-left));
     }
 
     .wrap{
@@ -162,7 +166,6 @@
       white-space:nowrap;
     }
 
-    /* Grid */
     .grid{
       display:grid;
       gap:18px;
@@ -176,7 +179,6 @@
       }
     }
 
-    /* HERO */
     .hero{
       position:relative;
       border-radius: var(--radius);
@@ -195,7 +197,6 @@
       background: radial-gradient(900px 280px at 50% 0%, rgba(230,192,123,.10), transparent 64%);
       opacity:.92;
     }
-
     .heroInner{
       position:relative;
       z-index:1;
@@ -218,7 +219,7 @@
       box-shadow: 0 0 16px rgba(230,192,123,.35);
     }
 
-    /* Título com reflexo dentro das letras */
+    /* Reflexo dentro das letras */
     .title{
       margin:14px 0 6px;
       font-weight:700;
@@ -259,7 +260,6 @@
       line-height:1.65;
     }
 
-    /* FRASE que enfraquece e volta (o que você pediu) */
     .whisper{
       margin-top:12px;
       color: rgba(255,255,255,.58);
@@ -328,10 +328,7 @@
       line-height:1.7;
     }
 
-    .side{
-      display:grid;
-      gap:18px;
-    }
+    .side{ display:grid; gap:18px; }
 
     .panel{
       border-radius: var(--radius);
@@ -398,13 +395,8 @@
     }
 
     form{ margin-top:12px; }
-    .fields{
-      display:grid;
-      gap:12px;
-    }
-    @media (min-width: 680px){
-      .fields{ grid-template-columns: 1fr 1fr; }
-    }
+    .fields{ display:grid; gap:12px; }
+    @media (min-width: 680px){ .fields{ grid-template-columns: 1fr 1fr; } }
 
     label{
       display:block;
@@ -414,7 +406,6 @@
       color:rgba(255,255,255,.58);
       margin:0 0 8px 6px;
     }
-
     input[type="text"], input[type="email"]{
       width:100%;
       border-radius:14px;
@@ -440,10 +431,7 @@
       font-size:13px;
       line-height:1.35;
     }
-    .consent input{
-      margin-top:3px;
-      accent-color: var(--gold);
-    }
+    .consent input{ margin-top:3px; accent-color: var(--gold); }
     .consent b{ color:rgba(230,192,123,.92); }
 
     .status{
@@ -484,7 +472,6 @@
       box-shadow: 0 18px 55px rgba(0,0,0,.40);
     }
     button:active{ transform: translateY(0); opacity:.92; }
-
     button.secondary{
       border-color: rgba(255,255,255,.10);
       color: rgba(255,255,255,.80);
@@ -509,10 +496,7 @@
       color:rgba(230,192,123,.86);
     }
 
-    .info{
-      display:grid;
-      gap:12px;
-    }
+    .info{ display:grid; gap:12px; }
     .info h3{
       margin:0;
       font-size:12px;
@@ -552,7 +536,6 @@
       font-weight:700;
     }
 
-    /* Sticky hero desktop */
     @media (min-width: 980px){
       .hero{
         position: sticky;
@@ -562,7 +545,6 @@
       }
     }
 
-    /* Mobile */
     @media (max-width: 520px){
       .brandPill img{ width:36px; height:36px; }
       .brandPill span{ font-size:11px; }
@@ -571,7 +553,6 @@
       .subtitle{ line-height:1.55; }
     }
 
-    /* Reveal */
     .reveal{
       opacity:0;
       transform: translateY(12px);
@@ -582,7 +563,6 @@
       transform: translateY(0);
     }
 
-    /* Acessibilidade */
     @media (prefers-reduced-motion: reduce){
       .bg::before{ animation:none !important; }
       .title{ animation:none !important; }
@@ -595,9 +575,12 @@
 </head>
 
 <body>
-  <div class="bg" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
-  <canvas id="stars" aria-hidden="true"></canvas>
+  <!-- Fundo em camadas (corrigido) -->
+  <div class="bgWrap" aria-hidden="true">
+    <div class="bg"></div>
+    <canvas id="stars"></canvas>
+    <div class="grain"></div>
+  </div>
 
   <div id="scroll">
     <div class="wrap">
@@ -734,9 +717,7 @@
   </div>
 
   <script>
-    // ==========================
-    // REVEAL (leve e sem travar)
-    // ==========================
+    // Reveal suave
     (function(){
       const items = document.querySelectorAll(".reveal");
       const io = new IntersectionObserver((entries)=>{
@@ -750,9 +731,7 @@
       items.forEach(el => io.observe(el));
     })();
 
-    // ==========================
-    // LEADS (localStorage)
-    // ==========================
+    // Leads (localStorage)
     const leadForm = document.getElementById("leadForm");
     const nomeEl = document.getElementById("nome");
     const emailEl = document.getElementById("email");
@@ -822,9 +801,7 @@
       window.location.href = "./entrada.html";
     });
 
-    // ==========================
-    // ESTRELAS REALISTAS (camadas + movimento)
-    // ==========================
+    // Estrelas realistas (camadas + movimento leve)
     (function(){
       const canvas = document.getElementById("stars");
       const ctx = canvas.getContext("2d", { alpha: true });
@@ -846,7 +823,6 @@
       }
 
       function makeStar(layer){
-        // layer: 0 (distante), 1 (médio), 2 (próximo)
         const depth = [0.25, 0.55, 1.0][layer];
         return {
           x: Math.random() * w,
@@ -862,16 +838,17 @@
       }
 
       function build(){
-        // Densidade realista, mas leve
         const area = window.innerWidth * window.innerHeight;
         const baseCount = Math.floor(area / 12000);
-        const counts = [Math.floor(baseCount * 0.9), Math.floor(baseCount * 0.7), Math.floor(baseCount * 0.45)];
+        const counts = [
+          Math.floor(baseCount * 0.9),
+          Math.floor(baseCount * 0.7),
+          Math.floor(baseCount * 0.45)
+        ];
 
         layers = [[],[],[]];
         for(let L=0; L<3; L++){
-          for(let i=0;i<counts[L];i++){
-            layers[L].push(makeStar(L));
-          }
+          for(let i=0;i<counts[L];i++) layers[L].push(makeStar(L));
         }
       }
 
@@ -880,7 +857,6 @@
         t += 1;
         ctx.clearRect(0,0,w,h);
 
-        // “névoa” muito leve, mais escura
         const haze = ctx.createRadialGradient(w*0.52, h*0.18, 0, w*0.52, h*0.18, Math.max(w,h)*0.85);
         haze.addColorStop(0, "rgba(230,192,123,0.05)");
         haze.addColorStop(1, "rgba(0,0,0,0)");
@@ -889,11 +865,9 @@
 
         for(let L=0; L<3; L++){
           for(const s of layers[L]){
-            // twinkle
             const tw = Math.sin((t*s.tw) + s.x*0.001) * 0.04;
             const alpha = Math.max(0.03, Math.min(0.70, s.a + tw));
 
-            // drift (mais movimento, porém suave)
             s.y += s.sp * dpr * 0.34;
             s.x += s.dx * dpr * 0.25;
 
@@ -901,13 +875,11 @@
             if(s.x > w + 20) s.x = -20;
             if(s.x < -20) s.x = w + 20;
 
-            // brilho de estrela (soft)
             ctx.beginPath();
             ctx.fillStyle = `rgba(255,255,255,${alpha})`;
             ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
             ctx.fill();
 
-            // halo sutil nas “mais próximas”
             if(L === 2 && alpha > 0.22){
               const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r*6.2);
               grd.addColorStop(0, `rgba(255,255,255,${alpha*0.20})`);
