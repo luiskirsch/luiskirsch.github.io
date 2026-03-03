@@ -5,97 +5,119 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Prelúdio Jogos — Boas-vindas</title>
 
-  <!-- FAVICON (separado da logo) -->
-  <link rel="icon" href="./favicon.png">
-
+  <!-- FAVICON (apenas aba do navegador) -->
+  <link rel="icon" href="./favicon.png" />
   <meta name="theme-color" content="#050505" />
 
   <style>
     :root{
       --bg:#050505;
+      --bg2:#070707;
       --gold:#e6c07b;
+      --gold2:#ffd79a;
       --muted:#a7a7a7;
-      --text:#f2f2f2;
+      --text:#f3f3f3;
 
-      --cardA:rgba(255,255,255,.06);
-      --cardB:rgba(255,255,255,.03);
-      --line:rgba(230,192,123,.22);
-      --shadow:rgba(0,0,0,.62);
+      --glassA:rgba(255,255,255,.06);
+      --glassB:rgba(255,255,255,.03);
+      --stroke:rgba(255,255,255,.09);
+      --strokeGold:rgba(230,192,123,.22);
 
-      --ok:#9be37a;
-      --danger:#ff4d4d;
+      --shadow:rgba(0,0,0,.70);
+      --shadow2:rgba(0,0,0,.55);
 
       --radius:22px;
-      --ease:cubic-bezier(.18,.92,.12,1);
+      --radius2:18px;
+
+      --ease:cubic-bezier(.16,.98,.16,1);
+      --ease2:cubic-bezier(.22,.86,.16,1);
+
+      --max:1200px;
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
-
     body{
       margin:0;
+      background: var(--bg);
       color:var(--text);
       font-family: ui-serif, Georgia, "Times New Roman", serif;
-      background:
-        radial-gradient(1200px 700px at 50% 18%, rgba(230,192,123,.11), transparent 58%),
-        radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
-        radial-gradient(1000px 680px at 82% 75%, rgba(255,255,255,.05), transparent 62%),
-        var(--bg);
       overflow-x:hidden;
       overflow-y:auto;
       -webkit-text-size-adjust:100%;
+      overscroll-behavior-y: none; /* evita “vibração”/bounce agressivo em alguns aparelhos */
     }
 
-    /* glow sutil */
-    body::before{
-      content:"";
+    /* Fundo cinematográfico em camadas */
+    .bg{
       position:fixed;
-      inset:-20%;
-      pointer-events:none;
+      inset:0;
+      z-index:-5;
       background:
-        radial-gradient(760px 360px at 50% 32%, rgba(230,192,123,.10), transparent 62%),
-        radial-gradient(980px 520px at 60% 72%, rgba(255,255,255,.05), transparent 68%);
-      filter: blur(12px);
+        radial-gradient(1200px 720px at 50% 18%, rgba(230,192,123,.12), transparent 60%),
+        radial-gradient(900px 520px at 18% 18%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(1000px 720px at 82% 78%, rgba(255,255,255,.05), transparent 62%),
+        radial-gradient(1400px 900px at 50% 110%, rgba(230,192,123,.08), transparent 55%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+    }
+
+    /* Glow oscilando sutil */
+    .bg::before{
+      content:"";
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(760px 360px at 50% 32%, rgba(230,192,123,.12), transparent 64%),
+        radial-gradient(980px 520px at 60% 72%, rgba(255,255,255,.05), transparent 70%);
+      filter: blur(14px);
       opacity:.78;
-      animation: pulseGlow 5.2s ease-in-out infinite;
-      z-index:0;
+      animation: pulseGlow 5.4s ease-in-out infinite;
     }
     @keyframes pulseGlow{
-      0%,100%{ opacity:.60; transform:translateY(0) scale(1); }
+      0%,100%{ opacity:.58; transform:translateY(0) scale(1); }
       50%{ opacity:.92; transform:translateY(-6px) scale(1.01); }
     }
 
-    /* grão cinematográfico sutil */
-    body::after{
-      content:"";
+    /* Grão (film grain) */
+    .grain{
       position:fixed;
       inset:0;
+      z-index:-4;
       pointer-events:none;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
       opacity:.10;
-      mix-blend-mode:overlay;
-      filter:contrast(110%) brightness(110%);
-      z-index:0;
+      mix-blend-mode: overlay;
+      filter: contrast(110%) brightness(110%);
     }
 
-    .page{
-      position:relative;
-      z-index:1;
-      width:min(1180px, 100%);
+    /* Canvas partículas (muito leve) */
+    canvas#stars{
+      position:fixed;
+      inset:0;
+      z-index:-3;
+      pointer-events:none;
+      opacity:.55;
+    }
+
+    /* Layout principal */
+    .wrap{
+      width:min(var(--max), 100%);
       margin:0 auto;
-      padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
-      padding-left:max(18px, env(safe-area-inset-left));
-      padding-right:max(18px, env(safe-area-inset-right));
+      padding:
+        max(18px, env(safe-area-inset-top))
+        max(18px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(18px, env(safe-area-inset-left));
     }
 
-    /* top badge com logo oficial */
-    .topbar{
+    /* Top micro header com logo */
+    .top{
       display:flex;
-      align-items:center;
       justify-content:center;
-      padding:16px 0 10px;
+      align-items:center;
+      padding: 10px 0 14px;
     }
-    .mark{
+    .brandPill{
       display:flex;
       align-items:center;
       gap:10px;
@@ -105,150 +127,239 @@
       background: rgba(0,0,0,.22);
       backdrop-filter: blur(10px);
       box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      transform: translateZ(0);
     }
-    .mark img{
-      width:38px;
-      height:38px;
-      object-fit:contain;
+    .brandPill img{
+      width:38px; height:38px;
       display:block;
+      object-fit:contain;
       filter:
         drop-shadow(0 0 18px rgba(255,255,255,.10))
-        drop-shadow(0 0 40px rgba(230,192,123,.18));
+        drop-shadow(0 0 44px rgba(230,192,123,.20));
     }
-    .mark span{
+    .brandPill span{
       font-size:12px;
-      letter-spacing:.20em;
+      letter-spacing:.22em;
       text-transform:uppercase;
       color:rgba(230,192,123,.86);
       white-space:nowrap;
     }
 
-    /* HERO */
-    .hero{
-      text-align:center;
-      display:grid;
-      gap:10px;
-      place-items:center;
-      padding: 6px 0 18px;
-    }
-
-    /* Título com reflexo DENTRO das letras */
-    .title{
-      margin:0;
-      font-weight:700;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      line-height:1.02;
-      font-size:clamp(34px, 6.8vw, 92px);
-      text-shadow: 0 22px 70px rgba(0,0,0,.60);
-
-      color:transparent;
-      background-image:
-        linear-gradient(180deg, rgba(230,192,123,.94), rgba(230,192,123,.78)),
-        linear-gradient(120deg,
-          transparent 0%,
-          rgba(255,255,255,.00) 36%,
-          rgba(255,255,255,.85) 50%,
-          rgba(255,255,255,.00) 64%,
-          transparent 100%);
-      background-size: 100% 100%, 220% 100%;
-      background-position: 0 0, -140% 0;
-      background-repeat:no-repeat;
-
-      -webkit-background-clip:text;
-      background-clip:text;
-
-      animation: shineInLetters 7.6s var(--ease) infinite;
-    }
-    @keyframes shineInLetters{
-      0%   { background-position: 0 0, -140% 0; }
-      55%  { background-position: 0 0, 140% 0; }
-      100% { background-position: 0 0, 140% 0; }
-    }
-
-    .sub{
-      margin:0;
-      max-width: 72ch;
-      font-size:clamp(14px, 2.2vw, 18px);
-      color:rgba(255,255,255,.86);
-    }
-    .whisper{
-      margin:4px 0 0;
-      font-size:clamp(12px, 2vw, 16px);
-      color:var(--muted);
-      opacity:.78;
-      letter-spacing:.06em;
-      animation: flicker 3.4s ease-in-out infinite;
-    }
-    @keyframes flicker{
-      0%,100%{ opacity:.50; filter: blur(.2px); }
-      50%{ opacity:.92; filter: blur(0); }
-    }
-
-    /* GRID */
+    /* Grid: hero + conteúdo */
     .grid{
       display:grid;
       gap:18px;
       align-items:start;
-      margin-top: 10px;
-      padding-bottom: 12px;
+      padding-bottom: 10px;
     }
     @media (min-width: 980px){
       .grid{
-        grid-template-columns: 1.1fr .9fr;
+        grid-template-columns: 1.12fr .88fr;
         gap:22px;
       }
     }
 
-    .panel{
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, var(--cardA), var(--cardB));
-      border:1px solid rgba(255,255,255,.08);
-      box-shadow: 0 32px 90px rgba(0,0,0,.60);
-      backdrop-filter: blur(10px);
+    /* HERO premium */
+    .hero{
       position:relative;
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      box-shadow: 0 34px 110px rgba(0,0,0,.62);
+      backdrop-filter: blur(10px);
       overflow:hidden;
       transform: translateZ(0);
+    }
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background: radial-gradient(900px 280px at 50% 0%, rgba(230,192,123,.12), transparent 62%);
+      opacity:.95;
+    }
+
+    .heroInner{
+      position:relative;
+      z-index:1;
+      padding: clamp(18px, 2.8vw, 28px);
+      text-align:left;
+    }
+
+    .kicker{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:12px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:rgba(230,192,123,.82);
+    }
+    .kicker .dot{
+      width:6px; height:6px; border-radius:50%;
+      background: rgba(230,192,123,.85);
+      box-shadow: 0 0 16px rgba(230,192,123,.35);
+    }
+
+    /* Título com reflexo DENTRO das letras (sem “segunda passada”) */
+    .title{
+      margin:14px 0 6px;
+      font-weight:700;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      line-height:1.02;
+      font-size: clamp(34px, 5.8vw, 86px);
+      text-shadow: 0 26px 90px rgba(0,0,0,.62);
+
+      color:transparent;
+      background-image:
+        linear-gradient(180deg, rgba(230,192,123,.95), rgba(230,192,123,.76)),
+        linear-gradient(120deg,
+          rgba(255,255,255,0) 0%,
+          rgba(255,255,255,0) 38%,
+          rgba(255,255,255,.86) 50%,
+          rgba(255,255,255,0) 62%,
+          rgba(255,255,255,0) 100%);
+      background-size: 100% 100%, 220% 100%;
+      background-position: 0 0, -140% 0;
+      background-repeat:no-repeat;
+      -webkit-background-clip:text;
+      background-clip:text;
+
+      animation: shineOnceLoop 7.2s var(--ease) infinite;
+    }
+    @keyframes shineOnceLoop{
+      0%   { background-position: 0 0, -140% 0; }
+      55%  { background-position: 0 0, 140% 0; }
+      100% { background-position: 0 0, 140% 0; } /* fica parado, sem “segunda passada” */
+    }
+
+    .subtitle{
+      margin:0;
+      max-width: 62ch;
+      font-size: clamp(14px, 2.0vw, 18px);
+      color: rgba(255,255,255,.86);
+      line-height:1.65;
+    }
+
+    .whisper{
+      margin-top:10px;
+      color: rgba(255,255,255,.60);
+      letter-spacing:.08em;
+      font-size: 12px;
+      text-transform:uppercase;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      opacity:.85;
+    }
+    .whisper .line{
+      flex:1;
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(230,192,123,.26), transparent);
+      opacity:.9;
+    }
+
+    .heroCards{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+      margin-top:16px;
+    }
+    @media (min-width: 620px){
+      .heroCards{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .mini{
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.22);
+      box-shadow: 0 18px 70px rgba(0,0,0,.38);
+      padding: 14px 14px 12px;
+      position:relative;
+      overflow:hidden;
+    }
+    .mini::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background: radial-gradient(520px 170px at 50% 0%, rgba(230,192,123,.10), transparent 60%);
+      opacity:.85;
+    }
+    .mini h3{
+      position:relative;
+      z-index:1;
+      margin:0 0 6px;
+      font-size:12px;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      color:rgba(230,192,123,.86);
+    }
+    .mini p{
+      position:relative;
+      z-index:1;
+      margin:0;
+      font-size:14px;
+      color:rgba(255,255,255,.76);
+      line-height:1.7;
+    }
+
+    /* Painel direito: lead + infos */
+    .side{
+      display:grid;
+      gap:18px;
+    }
+
+    .panel{
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      box-shadow: 0 34px 110px rgba(0,0,0,.62);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+      transform: translateZ(0);
+      position:relative;
     }
     .panel::after{
       content:"";
       position:absolute;
       inset:0;
       pointer-events:none;
-      background: radial-gradient(820px 260px at 50% 0%, rgba(230,192,123,.10), transparent 62%);
-      opacity:.9;
+      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.11), transparent 62%);
+      opacity:.92;
     }
-
     .panelInner{
       position:relative;
       z-index:1;
-      padding: clamp(16px, 2.8vw, 26px);
+      padding: clamp(18px, 2.6vw, 26px);
     }
 
     .tag{
       display:flex;
-      gap:10px;
       align-items:center;
       justify-content:center;
+      gap:10px;
       font-size:12px;
       letter-spacing:.22em;
-      color:rgba(230,192,123,.82);
       text-transform:uppercase;
+      color:rgba(230,192,123,.82);
       margin-bottom:12px;
     }
-    .dot{
-      width:5px; height:5px;
-      background:rgba(230,192,123,.82);
+    .tag .dot{
+      width:6px; height:6px;
       border-radius:50%;
-      box-shadow:0 0 16px rgba(230,192,123,.35);
+      background:rgba(230,192,123,.85);
+      box-shadow: 0 0 16px rgba(230,192,123,.35);
     }
 
     .panelTitle{
       margin:0;
-      font-size:clamp(18px, 2.7vw, 30px);
+      font-size: clamp(18px, 2.4vw, 28px);
       line-height:1.35;
       color:#f3f3f3;
       text-shadow: 0 18px 60px rgba(0,0,0,.55);
+      text-align:center;
     }
 
     .rule{
@@ -270,33 +381,33 @@
       display:grid;
       gap:12px;
     }
-    @media (min-width: 720px){
-      .fields{
-        grid-template-columns: 1fr 1fr;
-        align-items:end;
-      }
+    @media (min-width: 680px){
+      .fields{ grid-template-columns: 1fr 1fr; }
     }
+
     label{
       display:block;
       font-size:11px;
       letter-spacing:.22em;
-      color:rgba(255,255,255,.58);
       text-transform:uppercase;
+      color:rgba(255,255,255,.58);
       margin:0 0 8px 6px;
     }
+
     input[type="text"], input[type="email"]{
       width:100%;
       border-radius:14px;
       padding:12px 14px;
       background: rgba(0,0,0,.30);
       border:1px solid rgba(255,255,255,.10);
-      color:rgba(255,255,255,.90);
+      color:rgba(255,255,255,.92);
       outline:none;
       box-shadow: inset 0 0 30px rgba(0,0,0,.35);
-      transition: border-color .18s ease;
+      transition: border-color .18s ease, transform .18s var(--ease2);
     }
-    input[type="text"]:focus, input[type="email"]:focus{
-      border-color: rgba(230,192,123,.28);
+    input:focus{
+      border-color: rgba(230,192,123,.30);
+      transform: translateY(-1px);
     }
 
     .consent{
@@ -312,15 +423,16 @@
       margin-top:3px;
       accent-color: var(--gold);
     }
-    .consent b{ color:rgba(230,192,123,.90); }
+    .consent b{ color:rgba(230,192,123,.92); }
 
     .status{
       margin:10px 0 0;
       font-size:13px;
       color:rgba(255,255,255,.65);
+      text-align:center;
     }
-    .status.ok{ color: rgba(155,227,122,.88); }
-    .status.bad{ color: rgba(255,77,77,.88); }
+    .status.ok{ color: rgba(155,227,122,.90); }
+    .status.bad{ color: rgba(255,77,77,.90); }
 
     .actions{
       margin-top:14px;
@@ -329,7 +441,6 @@
       gap:12px;
       justify-content:center;
     }
-
     button{
       border:1px solid rgba(230,192,123,.22);
       background: rgba(0,0,0,.25);
@@ -341,47 +452,31 @@
       letter-spacing:.12em;
       text-transform:uppercase;
       min-width:200px;
-      transition: transform .12s ease, border-color .18s ease, opacity .18s ease;
+      transition: transform .12s ease, border-color .18s ease, opacity .18s ease, box-shadow .18s ease;
       box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      position:relative;
+      overflow:hidden;
     }
-    button:hover{ transform: translateY(-1px); border-color:rgba(230,192,123,.34); }
+    button:hover{
+      transform: translateY(-1px);
+      border-color: rgba(230,192,123,.36);
+      box-shadow: 0 18px 55px rgba(0,0,0,.40);
+    }
     button:active{ transform: translateY(0); opacity:.92; }
+
     button.secondary{
       border-color: rgba(255,255,255,.10);
-      color: rgba(255,255,255,.78);
+      color: rgba(255,255,255,.80);
       background: rgba(255,255,255,.04);
     }
 
-    /* SOBRE */
-    .about{
-      display:grid;
-      gap:14px;
-    }
-    .about h3{
-      margin:0;
-      font-size:14px;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      color:rgba(230,192,123,.86);
-    }
-    .about p{
-      margin:0;
-      color:rgba(255,255,255,.78);
-      line-height:1.7;
-      font-size:14px;
-    }
-    .bullets{
-      margin:8px 0 0;
-      padding-left:18px;
-      color:rgba(255,255,255,.78);
-      line-height:1.7;
-      font-size:14px;
-    }
+    /* Chips */
     .chips{
       display:flex;
       flex-wrap:wrap;
       gap:10px;
-      margin-top:10px;
+      margin-top:14px;
+      justify-content:center;
     }
     .chip{
       border:1px solid rgba(230,192,123,.18);
@@ -394,7 +489,35 @@
       color:rgba(230,192,123,.86);
     }
 
-    /* FOOTER */
+    /* Bloco extra de info (cinematográfico) */
+    .info{
+      display:grid;
+      gap:12px;
+    }
+    .info h3{
+      margin:0;
+      font-size:12px;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      color:rgba(230,192,123,.86);
+      text-align:center;
+    }
+    .info p{
+      margin:0;
+      color:rgba(255,255,255,.78);
+      font-size:14px;
+      line-height:1.75;
+      text-align:center;
+    }
+    .bullets{
+      margin:8px 0 0;
+      padding-left:18px;
+      color:rgba(255,255,255,.78);
+      line-height:1.75;
+      font-size:14px;
+    }
+
+    /* Rodapé */
     .footer{
       width:100%;
       text-align:center;
@@ -411,115 +534,182 @@
       font-weight:700;
     }
 
-    /* Mobile */
+    /* Sticky hero só no desktop (sem bug / sem “encolher pro canto”) */
+    @media (min-width: 980px){
+      .hero{
+        position: sticky;
+        top: 18px;
+        align-self: start;
+        will-change: transform;
+      }
+    }
+
+    /* Mobile refinado */
     @media (max-width: 520px){
-      .mark img{ width:36px; height:36px; }
-      .mark span{ font-size:11px; }
-      button{ min-width: 0; width: min(360px, 100%); }
-      .panelInner{ padding: 16px 14px 18px; }
-      .rule{ height:9px; margin:12px auto 8px; }
+      .brandPill img{ width:36px; height:36px; }
+      .brandPill span{ font-size:11px; }
+      button{ min-width:0; width:min(360px, 100%); }
+      .title{ letter-spacing:.18em; }
+      .subtitle{ line-height:1.55; }
+    }
+
+    /* Revelo suave nos cards */
+    .reveal{
+      opacity:0;
+      transform: translateY(12px);
+      transition: opacity .7s var(--ease), transform .7s var(--ease);
+    }
+    .reveal.on{
+      opacity:1;
+      transform: translateY(0);
     }
 
     /* Acessibilidade */
     @media (prefers-reduced-motion: reduce){
-      body::before, .title, .whisper { animation:none !important; }
-      button{ transition:none; }
+      .bg::before{ animation:none !important; }
+      .title{ animation:none !important; }
+      .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
+      button{ transition:none !important; }
+      canvas#stars{ display:none !important; }
     }
   </style>
 </head>
 
 <body>
-  <div class="page">
-    <header class="topbar" aria-label="Topo">
-      <div class="mark" aria-label="Marca">
-        <!-- LOGO OFICIAL (dentro da página) -->
+  <div class="bg" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <div class="wrap">
+    <header class="top" aria-label="Topo">
+      <!-- Logo oficial dentro da página (não é o favicon) -->
+      <div class="brandPill">
         <img src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" />
         <span>Prelúdio Jogos</span>
       </div>
     </header>
 
-    <section class="hero" aria-label="Apresentação">
-      <h1 class="title">PRELÚDIO JOGOS</h1>
-      <p class="sub">Uma experiência psicológica em cartas físicas. O site é a trilha: tempo, clima e silêncio.</p>
-      <div class="whisper">Entre primeiro. Depois, não tem volta.</div>
-    </section>
-
-    <section class="grid" aria-label="Conteúdo principal">
-      <!-- LEADS -->
-      <div class="panel" aria-label="Boas-vindas e acesso">
-        <div class="panelInner">
-          <div class="tag">
+    <main class="grid" aria-label="Página inicial">
+      <!-- HERO (impacto ao abrir) -->
+      <section class="hero reveal" aria-label="Apresentação">
+        <div class="heroInner">
+          <div class="kicker">
             <span class="dot"></span>
-            <span>Boas-vindas • Acesso</span>
-            <span class="dot"></span>
+            <span>Uma experiência psicológica em cartas físicas</span>
           </div>
 
-          <p class="panelTitle">
-            Quer receber novidades, descontos e a fase 2 assim que abrir?
-            Deixe seu contato e entre para a lista.
+          <h1 class="title">PRELÚDIO JOGOS</h1>
+
+          <p class="subtitle">
+            O site é a trilha: <strong style="color:rgba(230,192,123,.92); font-weight:700;">tempo</strong>,
+            <strong style="color:rgba(230,192,123,.92); font-weight:700;">clima</strong> e
+            <strong style="color:rgba(230,192,123,.92); font-weight:700;">silêncio</strong>.
+            As cartas são o corpo — o digital só mantém a tensão viva.
           </p>
 
-          <div class="rule"></div>
-
-          <form id="leadForm" autocomplete="on" novalidate>
-            <div class="fields">
-              <div>
-                <label for="nome">Nome</label>
-                <input id="nome" name="nome" type="text" placeholder="Seu nome" inputmode="text" />
-              </div>
-              <div>
-                <label for="email">E-mail</label>
-                <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" inputmode="email" />
-              </div>
-            </div>
-
-            <div class="consent">
-              <input id="consent" type="checkbox" />
-              <div>
-                Autorizo receber comunicações da <b>Prelúdio Jogos</b> sobre lançamentos e descontos.
-              </div>
-            </div>
-
-            <p class="status" id="status">Status: aguardando seu e-mail.</p>
-
-            <div class="actions">
-              <button type="submit" id="btnLista">Entrar na lista</button>
-              <button type="button" class="secondary" id="btnEntrada">Acessar a entrada</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- SOBRE -->
-      <div class="panel" aria-label="Sobre o jogo">
-        <div class="panelInner about">
-          <h3>O SextoLugar</h3>
-          <p>
-            Um jogo físico, psicológico e imersivo. As cartas são o corpo.
-            O site é o ritmo — segura o clima, cronometra a tensão e impede “atalhos”.
-          </p>
-
-          <ul class="bullets">
-            <li>Recomendado para 3 a 5 pessoas (ou solo).</li>
-            <li>Leia a entrada e o ritual antes da primeira rodada.</li>
-            <li>Puxe uma carta. Siga. Sem pausas “convenientes”.</li>
-            <li>Quando o tempo zerar, termina. Mesmo que alguém peça “só mais uma”.</li>
-          </ul>
-
-          <div class="chips" aria-label="Características">
-            <div class="chip">Cartas físicas</div>
-            <div class="chip">Timer + clima</div>
-            <div class="chip">Ritmo de mesa</div>
-            <div class="chip">Sem atalhos</div>
+          <div class="whisper">
+            <span class="line"></span>
+            <span>Entre primeiro. Depois, não tem volta.</span>
+            <span class="line"></span>
           </div>
 
-          <p style="margin-top:10px; color:rgba(255,255,255,.72);">
-            Regra de ouro: <span style="color:rgba(230,192,123,.90); font-weight:700;">silêncio é clima</span>.
-            Clima é medo controlado.
-          </p>
+          <div class="heroCards">
+            <div class="mini">
+              <h3>Como funciona</h3>
+              <p>
+                Você puxa a carta física e segue. O site só cronometra e sustenta o ritmo —
+                sem “atalhos”, sem pressa, sem fuga.
+              </p>
+            </div>
+            <div class="mini">
+              <h3>Regra de ouro</h3>
+              <p>
+                Silêncio é clima. Clima é medo controlado.
+                Quando o tempo zera, termina — mesmo que alguém peça “só mais uma”.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <!-- LADO DIREITO -->
+      <section class="side" aria-label="Acesso e informações">
+        <!-- LEADS -->
+        <section class="panel reveal" aria-label="Lista de novidades">
+          <div class="panelInner">
+            <div class="tag">
+              <span class="dot"></span>
+              <span>Boas-vindas • Acesso</span>
+              <span class="dot"></span>
+            </div>
+
+            <p class="panelTitle">
+              Quer receber novidades, descontos e a fase 2 assim que abrir?
+              <br />Deixe seu contato e entre para a lista.
+            </p>
+
+            <div class="rule"></div>
+
+            <form id="leadForm" autocomplete="on" novalidate>
+              <div class="fields">
+                <div>
+                  <label for="nome">Nome</label>
+                  <input id="nome" name="nome" type="text" placeholder="Seu nome" inputmode="text" />
+                </div>
+                <div>
+                  <label for="email">E-mail</label>
+                  <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" inputmode="email" />
+                </div>
+              </div>
+
+              <div class="consent">
+                <input id="consent" type="checkbox" />
+                <div>
+                  Autorizo receber comunicações da <b>Prelúdio Jogos</b> sobre lançamentos e descontos.
+                </div>
+              </div>
+
+              <p class="status" id="status">Status: aguardando seu e-mail.</p>
+
+              <div class="actions">
+                <button type="submit" id="btnLista">Entrar na lista</button>
+                <button type="button" class="secondary" id="btnEntrada">Acessar a entrada</button>
+              </div>
+
+              <div class="chips" aria-label="Características">
+                <div class="chip">Cartas físicas</div>
+                <div class="chip">Timer + clima</div>
+                <div class="chip">Ritmo de mesa</div>
+                <div class="chip">Sem atalhos</div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- INFO DO JOGO -->
+        <section class="panel reveal" aria-label="Sobre o jogo">
+          <div class="panelInner info">
+            <h3>O SextoLugar</h3>
+            <p>
+              Um jogo físico, psicológico e imersivo. Você não “joga” no celular —
+              você joga na mesa. O site é a trilha, não o atalho.
+            </p>
+
+            <ul class="bullets">
+              <li>Recomendado para 3 a 5 pessoas (ou solo).</li>
+              <li>Leia a entrada e o ritual antes da primeira rodada.</li>
+              <li>Puxe uma carta. Siga. Sem pausas “convenientes”.</li>
+              <li>Quando o tempo zerar, termina. Mesmo que alguém peça “só mais uma”.</li>
+            </ul>
+
+            <p style="margin-top:10px;">
+              <span style="color:rgba(230,192,123,.92); font-weight:700;">Se você tenta apressar, perde o efeito.</span>
+              É por isso que o timer importa.
+            </p>
+          </div>
+        </section>
+      </section>
+    </main>
 
     <footer class="footer" aria-label="Direitos autorais">
       © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
@@ -528,7 +718,23 @@
 
   <script>
     // ==========================
-    // LEADS (salva no navegador)
+    // REVEAL SUAVE (sem travar)
+    // ==========================
+    (function(){
+      const items = document.querySelectorAll(".reveal");
+      const io = new IntersectionObserver((entries)=>{
+        for(const e of entries){
+          if(e.isIntersecting){
+            e.target.classList.add("on");
+            io.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.10 });
+      items.forEach(el => io.observe(el));
+    })();
+
+    // ==========================
+    // LEADS (funciona offline via localStorage)
     // ==========================
     const leadForm = document.getElementById("leadForm");
     const nomeEl = document.getElementById("nome");
@@ -542,16 +748,13 @@
       statusEl.classList.remove("ok","bad");
       if(type) statusEl.classList.add(type);
     }
-
     function validEmail(email){
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
     }
-
     function getLeads(){
       try{ return JSON.parse(localStorage.getItem("preludio_leads") || "[]"); }
       catch(e){ return []; }
     }
-
     function saveLead(lead){
       const leads = getLeads();
       const exists = leads.some(l => (l.email || "").toLowerCase() === lead.email.toLowerCase());
@@ -594,17 +797,92 @@
 
       leadForm.animate(
         [{ transform:"translateY(0)" }, { transform:"translateY(-2px)" }, { transform:"translateY(0)" }],
-        { duration: 260, easing: "cubic-bezier(.18,.92,.12,1)" }
+        { duration: 260, easing: "cubic-bezier(.16,.98,.16,1)" }
       );
     });
 
-    // ==========================
-    // ENTRADA
-    // ==========================
+    // Entrada (sua página antiga)
     btnEntrada.addEventListener("click", () => {
-      // Sua página “Entrada” precisa estar como entrada.html
       window.location.href = "./entrada.html";
     });
+
+    // ==========================
+    // STARS (canvas leve premium)
+    // ==========================
+    (function(){
+      const canvas = document.getElementById("stars");
+      const ctx = canvas.getContext("2d", { alpha: true });
+
+      const prefersReduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if(prefersReduce) return;
+
+      let w, h, dpr;
+      let stars = [];
+      let raf = null;
+
+      function resize(){
+        dpr = Math.min(2, window.devicePixelRatio || 1);
+        w = canvas.width  = Math.floor(window.innerWidth * dpr);
+        h = canvas.height = Math.floor(window.innerHeight * dpr);
+        canvas.style.width = window.innerWidth + "px";
+        canvas.style.height = window.innerHeight + "px";
+        build();
+      }
+
+      function build(){
+        const count = Math.floor((window.innerWidth * window.innerHeight) / 16000); // leve
+        stars = [];
+        for(let i=0;i<count;i++){
+          stars.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            r: (Math.random() * 1.4 + 0.4) * dpr,
+            a: Math.random() * 0.55 + 0.10,
+            tw: Math.random() * 0.018 + 0.006,
+            sp: Math.random() * 0.10 + 0.03,
+          });
+        }
+      }
+
+      let t = 0;
+      function draw(){
+        t += 1;
+        ctx.clearRect(0,0,w,h);
+
+        // brilho suave base
+        const g = ctx.createRadialGradient(w*0.5, h*0.2, 0, w*0.5, h*0.2, Math.max(w,h)*0.7);
+        g.addColorStop(0, "rgba(230,192,123,0.07)");
+        g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0,0,w,h);
+
+        for(const s of stars){
+          // “twinkle” leve
+          s.a += (Math.sin((t*s.tw) + s.x*0.001) * 0.002);
+          const alpha = Math.max(0.05, Math.min(0.60, s.a));
+
+          // drift mínimo
+          s.y += s.sp * dpr * 0.25;
+          if(s.y > h + 10) s.y = -10;
+
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+          ctx.fill();
+        }
+
+        raf = requestAnimationFrame(draw);
+      }
+
+      window.addEventListener("resize", () => {
+        cancelAnimationFrame(raf);
+        resize();
+        draw();
+      }, { passive:true });
+
+      resize();
+      draw();
+    })();
   </script>
 </body>
 </html>
