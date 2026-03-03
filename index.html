@@ -53,7 +53,6 @@
       body{ min-height:100dvh; }
     }
 
-    /* Fundo fixo */
     .bg{
       position:fixed;
       inset:0;
@@ -390,7 +389,6 @@
       user-select:none;
     }
 
-    /* Toggle do som ambiente (discreto) */
     .pillRow{
       display:flex;
       justify-content:center;
@@ -410,7 +408,6 @@
     }
     .pill strong{ color: rgba(230,192,123,.92); }
 
-    /* Aviso discreto (aparece só se autoplay for bloqueado) */
     .audioHint{
       position: fixed;
       left: 12px;
@@ -520,7 +517,6 @@
   <canvas id="stars" aria-hidden="true"></canvas>
   <div class="glow" aria-hidden="true"></div>
 
-  <!-- hint só se o autoplay for bloqueado -->
   <div class="audioHint" id="audioHint" aria-hidden="true">
     <div class="box">
       <span><b>Som bloqueado</b> · toque para ativar o ambiente</span>
@@ -643,7 +639,9 @@
 
   <script>
     /* =========================
-       ESTRELAS + METEOROS (Canvas) — cross-browser
+       ESTRELAS + METEOROS (Canvas)
+       - estrelas descendo levemente (como seu efeito original)
+       - meteoro: cima -> baixo em diagonal esquerda -> direita
        ========================= */
     (function(){
       const canvas = document.getElementById("stars");
@@ -682,14 +680,14 @@
       }
 
       function spawnMeteor(){
-        // nasce fora da tela, vindo em diagonal
-        // (de cima/direita para baixo/esquerda)
-        const startX = w + (Math.random()*w*0.25);
-        const startY = (Math.random()*h*0.45) - 40;
-        const len = 160 + Math.random()*180;
+        // COMEÇA ACIMA (fora) e vai pra BAIXO em diagonal ESQUERDA->DIREITA
+        const startX = (Math.random()*w*0.55) - 120;   // um pouco fora à esquerda
+        const startY = -80 - Math.random()*120;        // fora acima
+        const len = 170 + Math.random()*220;
         const speed = 12 + Math.random()*10;
 
-        const angle = (Math.PI * (205 + Math.random()*18)) / 180; // ~205° a 223° (diagonal)
+        // Ângulo ~ 35° a 55° (descendo para direita)
+        const angle = (Math.PI * (35 + Math.random()*20)) / 180;
         const vx = Math.cos(angle) * speed;
         const vy = Math.sin(angle) * speed;
 
@@ -699,7 +697,7 @@
           vx, vy,
           len,
           life: 0,
-          maxLife: 40 + Math.floor(Math.random()*22),
+          maxLife: 38 + Math.floor(Math.random()*24),
           alpha: 0.0
         });
       }
@@ -711,7 +709,7 @@
 
         ctx.clearRect(0,0,w,h);
 
-        // estrelas
+        // estrelas “descendo” suave
         for (let i=0;i<stars.length;i++){
           const s = stars[i];
           s.y += s.v;
@@ -726,43 +724,40 @@
           ctx.fill();
         }
 
-        // meteoro: chance “de vez em quando”
-        // (aprox 1 a cada 5~12s dependendo do FPS)
-        const chance = 0.0065; // aumenta se quiser MAIS meteoro
+        // meteoro: “de vez em quando”
+        const chance = 0.0075; // um pouquinho mais frequente
         if (Math.random() < chance){
-          // evita lotar
           if (meteors.length < 2) spawnMeteor();
         }
 
-        // desenha meteoro
         for (let i = meteors.length - 1; i >= 0; i--){
           const m = meteors[i];
           m.life++;
           m.x += m.vx;
           m.y += m.vy;
 
-          // fade in/out
           const half = m.maxLife * 0.35;
           if (m.life < half) m.alpha = Math.min(1, m.life / half);
           else m.alpha = Math.max(0, 1 - ((m.life - half) / (m.maxLife - half)));
 
-          const x2 = m.x - (m.vx * (m.len / Math.max(1, Math.abs(m.vx) + Math.abs(m.vy))));
-          const y2 = m.y - (m.vy * (m.len / Math.max(1, Math.abs(m.vx) + Math.abs(m.vy))));
+          // cauda
+          const norm = Math.max(1, Math.abs(m.vx) + Math.abs(m.vy));
+          const x2 = m.x - (m.vx * (m.len / norm));
+          const y2 = m.y - (m.vy * (m.len / norm));
 
           const grad = ctx.createLinearGradient(m.x, m.y, x2, y2);
-          grad.addColorStop(0, "rgba(255,255,255," + (0.85*m.alpha).toFixed(3) + ")");
-          grad.addColorStop(0.35, "rgba(230,192,123," + (0.55*m.alpha).toFixed(3) + ")");
+          grad.addColorStop(0, "rgba(255,255,255," + (0.90*m.alpha).toFixed(3) + ")");
+          grad.addColorStop(0.32, "rgba(230,192,123," + (0.55*m.alpha).toFixed(3) + ")");
           grad.addColorStop(1, "rgba(255,255,255,0)");
 
-          ctx.lineWidth = 2.2;
+          ctx.lineWidth = 2.3;
           ctx.strokeStyle = grad;
           ctx.beginPath();
           ctx.moveTo(m.x, m.y);
           ctx.lineTo(x2, y2);
           ctx.stroke();
 
-          // remove
-          if (m.life >= m.maxLife || m.x < -300 || m.y > h + 300){
+          if (m.life >= m.maxLife || m.x > w + 400 || m.y > h + 400){
             meteors.splice(i,1);
           }
         }
@@ -770,7 +765,7 @@
         // vinheta
         const vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.80);
         vignette.addColorStop(0, "rgba(0,0,0,0)");
-        vignette.addColorStop(1, "rgba(0,0,0,0.40)");
+        vignette.addColorStop(1, "rgba(0,0,0,0.42)");
         ctx.fillStyle = vignette;
         ctx.fillRect(0,0,w,h);
 
@@ -788,15 +783,15 @@
     })();
 
     /* =========================
-       SOM AMBIENTE — tenta autoplay no load + fallback
+       SOM AMBIENTE — mais MÍSTICO (sem toque forte)
+       - camadas suaves: drone + shimmer + "air"
+       - sem batidas, sem hits
        ========================= */
     (function(){
       const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (prefersReduced) return;
 
-      // volume (mais alto). Se quiser ainda mais: 0.28 / 0.32
-      const AMBIENT_VOLUME = 0.26;
-
+      const AMBIENT_VOLUME = 0.26; // ajuste geral
       let audioCtx = null;
       let master = null;
       let ambientOn = true;
@@ -819,93 +814,139 @@
         master.gain.linearRampToValueAtTime(Math.max(0.00001, target), now + t);
       }
 
-      function buildAmbient(){
-        // Ruído
+      function createNoiseBuffer(){
         const bufferSize = 2 * audioCtx.sampleRate;
-        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) output[i] = (Math.random() * 2 - 1);
+        const b = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = b.getChannelData(0);
+        for (let i=0;i<bufferSize;i++) data[i] = Math.random()*2 - 1;
+        return b;
+      }
 
+      function buildMystic(){
+        // "AIR" (ruído filtrado MUITO suave)
         const noiseSrc = audioCtx.createBufferSource();
-        noiseSrc.buffer = noiseBuffer;
+        noiseSrc.buffer = createNoiseBuffer();
         noiseSrc.loop = true;
 
-        const noiseFilter = audioCtx.createBiquadFilter();
-        noiseFilter.type = "lowpass";
-        noiseFilter.frequency.value = 420;
-        noiseFilter.Q.value = 0.6;
+        const airHP = audioCtx.createBiquadFilter();
+        airHP.type = "highpass";
+        airHP.frequency.value = 180;
 
-        const noiseGain = audioCtx.createGain();
-        noiseGain.gain.value = 0.18;
+        const airLP = audioCtx.createBiquadFilter();
+        airLP.type = "lowpass";
+        airLP.frequency.value = 1200;
+        airLP.Q.value = 0.5;
 
-        noiseSrc.connect(noiseFilter);
-        noiseFilter.connect(noiseGain);
-        noiseGain.connect(master);
+        const airGain = audioCtx.createGain();
+        airGain.gain.value = 0.055; // bem leve
+
+        noiseSrc.connect(airHP);
+        airHP.connect(airLP);
+        airLP.connect(airGain);
+        airGain.connect(master);
         noiseSrc.start();
 
-        // Drone
-        const droneGain = audioCtx.createGain();
-        droneGain.gain.value = 0.22;
+        // DRONE (sub + corpo)
+        const droneBus = audioCtx.createGain();
+        droneBus.gain.value = 0.22;
 
-        const drone1 = audioCtx.createOscillator();
-        drone1.type = "sine";
-        drone1.frequency.value = 42;
+        const sub = audioCtx.createOscillator();
+        sub.type = "sine";
+        sub.frequency.value = 36;
 
-        const drone2 = audioCtx.createOscillator();
-        drone2.type = "sine";
-        drone2.frequency.value = 56;
+        const body = audioCtx.createOscillator();
+        body.type = "triangle";
+        body.frequency.value = 48;
 
-        const droneFilter = audioCtx.createBiquadFilter();
-        droneFilter.type = "lowpass";
-        droneFilter.frequency.value = 220;
-        droneFilter.Q.value = 0.7;
+        const body2 = audioCtx.createOscillator();
+        body2.type = "sine";
+        body2.frequency.value = 72;
 
-        drone1.connect(droneFilter);
-        drone2.connect(droneFilter);
-        droneFilter.connect(droneGain);
-        droneGain.connect(master);
+        const droneLP = audioCtx.createBiquadFilter();
+        droneLP.type = "lowpass";
+        droneLP.frequency.value = 220;
+        droneLP.Q.value = 0.7;
 
-        drone1.start();
-        drone2.start();
+        sub.connect(droneLP);
+        body.connect(droneLP);
+        body2.connect(droneLP);
+        droneLP.connect(droneBus);
+        droneBus.connect(master);
 
-        // Shimmer
-        const shimmerGain = audioCtx.createGain();
-        shimmerGain.gain.value = 0.06;
+        sub.start(); body.start(); body2.start();
 
+        // SHIMMER "MÍSTICO" (camada etérea)
         const shimmer = audioCtx.createOscillator();
         shimmer.type = "sine";
         shimmer.frequency.value = 210;
 
-        const shimmerFilter = audioCtx.createBiquadFilter();
-        shimmerFilter.type = "bandpass";
-        shimmerFilter.frequency.value = 520;
-        shimmerFilter.Q.value = 2.2;
+        const shimmerBP = audioCtx.createBiquadFilter();
+        shimmerBP.type = "bandpass";
+        shimmerBP.frequency.value = 520;
+        shimmerBP.Q.value = 2.6;
 
-        shimmer.connect(shimmerFilter);
-        shimmerFilter.connect(shimmerGain);
+        const shimmerGain = audioCtx.createGain();
+        shimmerGain.gain.value = 0.065;
+
+        shimmer.connect(shimmerBP);
+        shimmerBP.connect(shimmerGain);
         shimmerGain.connect(master);
         shimmer.start();
 
-        // Modulações lentas
-        const lfo = audioCtx.createOscillator();
-        lfo.type = "sine";
-        lfo.frequency.value = 0.06;
+        // HARMONICS (duas “notas” discretas, tipo canto distante)
+        const a1 = audioCtx.createOscillator();
+        a1.type = "sine";
+        a1.frequency.value = 96;
 
-        const lfoGain = audioCtx.createGain();
-        lfoGain.gain.value = 28;
-        lfo.connect(lfoGain);
-        lfoGain.connect(noiseFilter.frequency);
-        lfo.start();
+        const a2 = audioCtx.createOscillator();
+        a2.type = "sine";
+        a2.frequency.value = 128;
+
+        const harmGain = audioCtx.createGain();
+        harmGain.gain.value = 0.032;
+
+        const harmLP = audioCtx.createBiquadFilter();
+        harmLP.type = "lowpass";
+        harmLP.frequency.value = 340;
+        harmLP.Q.value = 0.8;
+
+        a1.connect(harmLP);
+        a2.connect(harmLP);
+        harmLP.connect(harmGain);
+        harmGain.connect(master);
+
+        a1.start(); a2.start();
+
+        // Modulações LENTAS (respiração, sem batida)
+        const lfo1 = audioCtx.createOscillator();
+        lfo1.type = "sine";
+        lfo1.frequency.value = 0.05;
+
+        const lfo1Gain = audioCtx.createGain();
+        lfo1Gain.gain.value = 22;
+        lfo1.connect(lfo1Gain);
+        lfo1Gain.connect(shimmerBP.frequency);
+        lfo1.start();
 
         const lfo2 = audioCtx.createOscillator();
         lfo2.type = "sine";
         lfo2.frequency.value = 0.03;
 
         const lfo2Gain = audioCtx.createGain();
-        lfo2Gain.gain.value = 16;
+        lfo2Gain.gain.value = 0.055; // mexe no volume do shimmer suavemente
         lfo2.connect(lfo2Gain);
-        lfo2Gain.connect(shimmerFilter.frequency);
+        lfo2Gain.connect(shimmerGain.gain);
         lfo2.start();
+
+        const lfo3 = audioCtx.createOscillator();
+        lfo3.type = "sine";
+        lfo3.frequency.value = 0.018;
+
+        const lfo3Gain = audioCtx.createGain();
+        lfo3Gain.gain.value = 0.06; // “respira” o drone
+        lfo3.connect(lfo3Gain);
+        lfo3Gain.connect(droneBus.gain);
+        lfo3.start();
       }
 
       async function ensureAudio(){
@@ -917,9 +958,8 @@
           master.gain.value = 0.00001;
           master.connect(audioCtx.destination);
 
-          buildAmbient();
+          buildMystic();
 
-          // tenta resumir
           if (audioCtx.state === "suspended"){
             await audioCtx.resume();
           }
@@ -937,16 +977,12 @@
       }
 
       async function tryAutoplay(){
-        // tentativa automática no load
         const ok = await ensureAudio();
-
-        // se bloqueou, mostra hint pedindo toque
         if (!ok || (audioCtx && audioCtx.state === "suspended")){
           hint.style.display = "flex";
         }
       }
 
-      // toggle manual
       toggle.addEventListener("click", async () => {
         const ok = await ensureAudio();
         if (!ok) return;
@@ -958,13 +994,11 @@
         else fadeTo(0.00001, 450);
       });
 
-      // botão do hint
       btnEnable.addEventListener("click", async () => {
         const ok = await ensureAudio();
         if (ok) hint.style.display = "none";
       });
 
-      // primeiro toque em qualquer lugar desbloqueia se precisar
       const unlock = async () => {
         const ok = await ensureAudio();
         if (ok) hint.style.display = "none";
@@ -976,9 +1010,7 @@
       window.addEventListener("touchstart", unlock, true);
       window.addEventListener("click", unlock, true);
 
-      // tenta autoplay quando carrega
       window.addEventListener("load", tryAutoplay);
-
       setToggleUI();
     })();
 
