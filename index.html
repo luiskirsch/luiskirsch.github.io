@@ -165,8 +165,6 @@
 
     .card{
       border-radius:26px;
-      background: rgba(255,255,255,.05);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.035));
       background: linear-gradient(180deg, var(--cardA), var(--cardB));
       border:1px solid rgba(255,255,255,.10);
       box-shadow: 0 30px 90px rgba(0,0,0,.62);
@@ -221,7 +219,6 @@
       text-transform:uppercase;
       font-weight: 700;
       font-size: clamp(48px, 6.2vw, 110px);
-      color:#e6c07b;
       color: var(--gold);
       text-shadow: 0 20px 70px rgba(0,0,0,.55);
       animation: titlePulse 4.2s ease-in-out infinite;
@@ -423,6 +420,97 @@
       user-select:none;
     }
 
+    /* =========================
+       ✅ CONTAGEM REGRESSIVA (como estava)
+       ========================= */
+    .launchCountdown{
+      margin-top: 18px;
+    }
+    .countdownCard{
+      border-radius:22px;
+      border: 1px solid rgba(230,192,123,.20);
+      background: linear-gradient(180deg, rgba(230,192,123,.08), rgba(255,255,255,.02));
+      padding: 18px;
+      box-shadow: inset 0 0 40px rgba(0,0,0,.24), 0 24px 70px rgba(0,0,0,.42);
+    }
+    .countdownTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .countdownTitle{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      color: rgba(230,192,123,.90);
+    }
+    .countdownDate{
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.62);
+    }
+    .countdownLead{
+      margin:10px 0 0;
+      font-size: clamp(18px, 2.2vw, 30px);
+      color: rgba(255,255,255,.92);
+      line-height:1.35;
+    }
+    .countdownGrid{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(92px,1fr));
+      gap:10px;
+    }
+    .countdownItem{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      padding:12px 10px;
+      text-align:center;
+    }
+    .countdownValue{
+      margin:0;
+      font-size: clamp(28px, 3vw, 42px);
+      font-weight:700;
+      color: rgba(230,192,123,.95);
+      line-height:1;
+      text-shadow: 0 10px 30px rgba(0,0,0,.45);
+      font-variant-numeric: tabular-nums;
+    }
+    .countdownLabel{
+      margin-top:6px;
+      font-size:11px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.66);
+    }
+    .countdownTrack{
+      margin-top:12px;
+      height:8px;
+      border-radius:999px;
+      overflow:hidden;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .countdownBar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(230,192,123,.35), rgba(230,192,123,.92), rgba(255,255,255,.92));
+      box-shadow: 0 0 18px rgba(230,192,123,.35);
+      transition: width .6s ease;
+    }
+    .countdownStatus{
+      margin-top:10px;
+      font-size:12px;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.66);
+    }
+
     .below{
       margin-top: 22px;
       display:grid;
@@ -474,6 +562,7 @@
       .miniGrid{ grid-template-columns: 1fr; }
       button{ width: 100%; min-width: 0; }
       .logoOnly{ width:110px; height:110px; }
+      .countdownGrid{ grid-template-columns: repeat(2, minmax(90px,1fr)); }
     }
 
     /* =========================
@@ -545,7 +634,6 @@
       #stars{ display:none; }
     }
 
-    /* (opcional) melhorar clique em mobile */
     .soundBtn, button { touch-action: manipulation; }
   </style>
 </head>
@@ -648,6 +736,44 @@
           </form>
         </div>
       </aside>
+    </section>
+
+    <!-- ✅ CONTAGEM REGRESSIVA (recolocada exatamente no fluxo) -->
+    <section class="launchCountdown" aria-label="Contagem regressiva de lançamento">
+      <article class="countdownCard">
+        <div class="countdownTop">
+          <h2 class="countdownTitle">Lançamento em contagem regressiva</h2>
+          <div class="countdownDate" id="launchDateText">Previsão de lançamento</div>
+        </div>
+
+        <p class="countdownLead" id="countdownLeadText">
+          Faltam poucos ciclos para a primeira tiragem de <strong style="color:rgba(230,192,123,.95);">O SextoLugar</strong>.
+        </p>
+
+        <div class="countdownGrid" id="countdownGrid" role="timer" aria-live="polite" aria-atomic="true">
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdDays">00</p>
+            <div class="countdownLabel">Dias</div>
+          </div>
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdHours">00</p>
+            <div class="countdownLabel">Horas</div>
+          </div>
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdMinutes">00</p>
+            <div class="countdownLabel">Minutos</div>
+          </div>
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdSeconds">00</p>
+            <div class="countdownLabel">Segundos</div>
+          </div>
+        </div>
+
+        <div class="countdownTrack" aria-hidden="true">
+          <div class="countdownBar" id="countdownBar"></div>
+        </div>
+        <div class="countdownStatus" id="countdownStatus">Preparando cronômetro de lançamento…</div>
+      </article>
     </section>
 
     <section class="below">
@@ -826,7 +952,191 @@
     })();
 
     /* =========================================================
-       ✅ 2) Leads (estático)
+       ✅ 2) Tick do contador (sempre ativo, independente do som do site)
+       IMPORTANTe:
+       - Browsers (iOS/Chrome) só liberam áudio depois de 1 gesto (tap/scroll).
+       - Depois do primeiro gesto, o tick fica sempre tocando a cada troca.
+       ========================================================= */
+    (function(){
+      var tickCtx = null;
+      var tickReady = false;
+
+      function getCtx(){
+        if (tickCtx) return tickCtx;
+        var Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
+        tickCtx = new Ctx();
+        return tickCtx;
+      }
+
+      function unlock(){
+        if (tickReady) return;
+        var ctx = getCtx();
+        if (!ctx) return;
+
+        // tentativa de resume (iOS/desktop)
+        try{
+          if (ctx.state === "suspended") ctx.resume();
+        }catch(e){}
+
+        // dispara um “silêncio” curtíssimo para liberar
+        try{
+          var osc = ctx.createOscillator();
+          var g = ctx.createGain();
+          g.gain.value = 0.00001;
+          osc.connect(g);
+          g.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.01);
+        }catch(e){}
+
+        tickReady = true;
+      }
+
+      // desbloqueia ao primeiro gesto (tap/scroll/tecla)
+      window.addEventListener("pointerdown", unlock, { passive:true, once:true });
+      window.addEventListener("touchstart", unlock, { passive:true, once:true });
+      window.addEventListener("keydown", unlock, { passive:true, once:true });
+      window.addEventListener("scroll", unlock, { passive:true, once:true });
+
+      // tick limpo (sem chiado): click curto com filtro
+      window.__preludioPlayTick = function(){
+        try{
+          if (!tickReady) return;
+
+          var ctx = getCtx();
+          if (!ctx) return;
+
+          // se suspenso por alguma razão, tenta voltar
+          if (ctx.state === "suspended"){
+            try{ ctx.resume(); }catch(e){}
+          }
+
+          var t0 = ctx.currentTime;
+
+          // “click” principal
+          var osc1 = ctx.createOscillator();
+          osc1.type = "sine";
+          osc1.frequency.setValueAtTime(1900, t0);
+
+          var g1 = ctx.createGain();
+          g1.gain.setValueAtTime(0.00001, t0);
+          g1.gain.exponentialRampToValueAtTime(0.035, t0 + 0.006);
+          g1.gain.exponentialRampToValueAtTime(0.00001, t0 + 0.045);
+
+          var lp = ctx.createBiquadFilter();
+          lp.type = "lowpass";
+          lp.frequency.setValueAtTime(2600, t0);
+          lp.Q.value = 0.9;
+
+          // “micro tail” pra dar sensação mecânica
+          var osc2 = ctx.createOscillator();
+          osc2.type = "triangle";
+          osc2.frequency.setValueAtTime(980, t0 + 0.004);
+
+          var g2 = ctx.createGain();
+          g2.gain.setValueAtTime(0.00001, t0);
+          g2.gain.exponentialRampToValueAtTime(0.018, t0 + 0.010);
+          g2.gain.exponentialRampToValueAtTime(0.00001, t0 + 0.060);
+
+          osc1.connect(lp);
+          lp.connect(g1);
+          g1.connect(ctx.destination);
+
+          osc2.connect(g2);
+          g2.connect(ctx.destination);
+
+          osc1.start(t0);
+          osc1.stop(t0 + 0.06);
+          osc2.start(t0);
+          osc2.stop(t0 + 0.07);
+        }catch(e){}
+      };
+    })();
+
+    /* =========================================================
+       ✅ 3) Contagem regressiva de lançamento (3 meses a partir de hoje)
+       + tick a cada troca de número (independente do som do site)
+       ========================================================= */
+    (function(){
+      try{
+        var dayEl = document.getElementById("cdDays");
+        var hourEl = document.getElementById("cdHours");
+        var minEl = document.getElementById("cdMinutes");
+        var secEl = document.getElementById("cdSeconds");
+        var statusEl = document.getElementById("countdownStatus");
+        var barEl = document.getElementById("countdownBar");
+        var dateTextEl = document.getElementById("launchDateText");
+        var leadTextEl = document.getElementById("countdownLeadText");
+        if (!dayEl || !hourEl || !minEl || !secEl || !statusEl || !barEl || !dateTextEl || !leadTextEl) return;
+
+        var MS = { sec: 1000, min: 60000, hour: 3600000, day: 86400000 };
+        var start = new Date();
+        var target = new Date(start.getTime());
+        target.setMonth(target.getMonth() + 3);
+
+        function pad(n){ return (n < 10 ? "0" : "") + n; }
+        function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+
+        var lastStamp = "";
+
+        function update(){
+          var now = new Date();
+          var diff = target.getTime() - now.getTime();
+
+          if (diff <= 0){
+            dayEl.textContent = "00";
+            hourEl.textContent = "00";
+            minEl.textContent = "00";
+            secEl.textContent = "00";
+            barEl.style.width = "100%";
+            statusEl.textContent = "É hoje. O SextoLugar foi lançado.";
+            leadTextEl.textContent = "O ritual começou. Obrigado por estar desde o prelúdio.";
+            return;
+          }
+
+          var days = Math.floor(diff / MS.day);
+          diff -= days * MS.day;
+          var hours = Math.floor(diff / MS.hour);
+          diff -= hours * MS.hour;
+          var mins = Math.floor(diff / MS.min);
+          diff -= mins * MS.min;
+          var secs = Math.floor(diff / MS.sec);
+
+          var stamp = days + "|" + hours + "|" + mins + "|" + secs;
+
+          // Atualiza DOM
+          dayEl.textContent = pad(days);
+          hourEl.textContent = pad(hours);
+          minEl.textContent = pad(mins);
+          secEl.textContent = pad(secs);
+
+          var total = target.getTime() - start.getTime();
+          var elapsed = now.getTime() - start.getTime();
+          var pct = clamp((elapsed / total) * 100, 0, 100);
+          barEl.style.width = pct.toFixed(2) + "%";
+
+          statusEl.textContent = "Contagem ativa • " + days + " dia(s) restantes para o lançamento.";
+
+          // ✅ TICK sempre que muda (normalmente 1x por segundo)
+          if (stamp !== lastStamp){
+            lastStamp = stamp;
+            if (typeof window.__preludioPlayTick === "function"){
+              window.__preludioPlayTick();
+            }
+          }
+        }
+
+        var fmt = new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" });
+        dateTextEl.textContent = "Lançamento previsto: " + fmt.format(target);
+
+        update();
+        setInterval(update, 1000);
+      }catch(e){}
+    })();
+
+    /* =========================================================
+       ✅ 4) Leads (estático)
        ========================================================= */
     (function(){
       try{
@@ -921,10 +1231,7 @@
     })();
 
     /* =========================================================
-       ✅ 3) Som “Nível Netflix” (WebAudio) — estilo espaço VR
-       - Sem arquivos externos
-       - Sem “chiado de mal contato” (sem clipping/sem DC)
-       - Liga com gesto (clique/tap) por regra do iOS/Chrome
+       ✅ 5) Som “Nível Netflix” (WebAudio) — ambiente (controlado pelo painel)
        ========================================================= */
     (function(){
       var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
@@ -937,8 +1244,7 @@
 
       var audioCtx = null;
       var started = false;
-
-      var nodes = null;     // referências para ramp de volume
+      var nodes = null;
       var STORAGE_KEY = "preludio_sound_volume";
 
       function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
@@ -977,13 +1283,11 @@
         }catch(e){}
       }
 
-      /* ====== Ruído “air” (suave) sem estalos ====== */
       function createSoftNoise(ctx){
         var size = 2 * ctx.sampleRate;
         var buf = ctx.createBuffer(1, size, ctx.sampleRate);
         var data = buf.getChannelData(0);
 
-        // noise “brown-ish” bem contido (sem DC)
         var last = 0.0;
         for (var i=0;i<size;i++){
           var white = Math.random() * 2 - 1;
@@ -991,7 +1295,6 @@
           data[i] = last * 0.25;
         }
 
-        // remove DC offset (média)
         var sum = 0.0;
         for (var j=0;j<size;j++) sum += data[j];
         var mean = sum / size;
@@ -1003,7 +1306,6 @@
         return src;
       }
 
-      /* ====== Reverb interno (convolver) ====== */
       function makeImpulse(ctx, seconds, decay){
         var rate = ctx.sampleRate;
         var length = Math.max(1, Math.floor(rate * seconds));
@@ -1013,7 +1315,6 @@
           var data = impulse.getChannelData(ch);
           for (var i=0; i<length; i++){
             var t = i / length;
-            // ruído decaindo + leve variação (evita “areia”)
             data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, decay);
           }
         }
@@ -1029,11 +1330,9 @@
 
           audioCtx = new Ctx();
 
-          // MASTER
           var master = audioCtx.createGain();
           master.gain.value = 0.00001;
 
-          // Segurança: compressor leve (sem bombar)
           var comp = audioCtx.createDynamicsCompressor();
           comp.threshold.value = -26;
           comp.knee.value = 24;
@@ -1041,7 +1340,6 @@
           comp.attack.value = 0.02;
           comp.release.value = 0.25;
 
-          // EQ: corta sub e agudos agressivos
           var hp = audioCtx.createBiquadFilter();
           hp.type = "highpass";
           hp.frequency.value = 28;
@@ -1057,14 +1355,12 @@
           lp.connect(hp);
           hp.connect(audioCtx.destination);
 
-          // BUSES
           var busDry = audioCtx.createGain(); busDry.gain.value = 1.0;
           var busWet = audioCtx.createGain(); busWet.gain.value = 0.55;
 
           busDry.connect(master);
           busWet.connect(master);
 
-          // REVERB
           var convolver = audioCtx.createConvolver();
           convolver.buffer = makeImpulse(audioCtx, 2.6, 2.8);
 
@@ -1082,24 +1378,21 @@
           revHP.connect(revLP);
           revLP.connect(busWet);
 
-          // MIXER DRONE
           var droneGain = audioCtx.createGain();
           droneGain.gain.value = 0.0;
           droneGain.connect(busDry);
-          droneGain.connect(convolver); // manda parte pro reverb
+          droneGain.connect(convolver);
 
-          // “Espaço” (fundação): 3 osciladores muito estáveis
-          var o1 = audioCtx.createOscillator(); o1.type = "sine";     o1.frequency.value = 43.65;  // F1
-          var o2 = audioCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 65.41;  // C2
-          var o3 = audioCtx.createOscillator(); o3.type = "sine";     o3.frequency.value = 98.00;  // G2
+          var o1 = audioCtx.createOscillator(); o1.type = "sine";     o1.frequency.value = 43.65;
+          var o2 = audioCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 65.41;
+          var o3 = audioCtx.createOscillator(); o3.type = "sine";     o3.frequency.value = 98.00;
 
           var g1 = audioCtx.createGain(); g1.gain.value = 0.10;
           var g2 = audioCtx.createGain(); g2.gain.value = 0.06;
           var g3 = audioCtx.createGain(); g3.gain.value = 0.07;
 
-          // leve “swell” (lfo) no drone
           var lfo = audioCtx.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 0.028;
-          var lfoGain = audioCtx.createGain(); lfoGain.gain.value = 0.10; // profundidade
+          var lfoGain = audioCtx.createGain(); lfoGain.gain.value = 0.10;
           lfo.connect(lfoGain);
           lfoGain.connect(droneGain.gain);
 
@@ -1107,7 +1400,6 @@
           o2.connect(g2); g2.connect(droneGain);
           o3.connect(g3); g3.connect(droneGain);
 
-          // “AIR” (ruído suave filtrado) + reverb
           var air = createSoftNoise(audioCtx);
           var airGain = audioCtx.createGain(); airGain.gain.value = 0.0;
 
@@ -1127,7 +1419,6 @@
           airGain.connect(busDry);
           airGain.connect(convolver);
 
-          // “PINGS” distantes (como radar/nave) — bem baixo e espaçado
           var pingBus = audioCtx.createGain();
           pingBus.gain.value = 0.0;
           pingBus.connect(convolver);
@@ -1145,7 +1436,6 @@
             g.gain.exponentialRampToValueAtTime(0.06, t0 + 0.01);
             g.gain.exponentialRampToValueAtTime(0.00001, t0 + 0.35);
 
-            // um pouco mais “místico”: filtro banda leve
             var bp = audioCtx.createBiquadFilter();
             bp.type = "bandpass";
             bp.frequency.value = 800 + Math.random() * 300;
@@ -1161,7 +1451,6 @@
             setTimeout(schedulePing, 1800 + Math.floor(Math.random() * 2400));
           }
 
-          // “SWOOSH” ocasional (como vento cósmico passando)
           var swooshGain = audioCtx.createGain(); swooshGain.gain.value = 0.0;
           swooshGain.connect(convolver);
 
@@ -1193,17 +1482,14 @@
             setTimeout(scheduleSwoosh, 5200 + Math.floor(Math.random() * 6400));
           }
 
-          // start sources
           o1.start(); o2.start(); o3.start();
           lfo.start();
           air.start();
 
-          // em alguns browsers precisa (principalmente iOS/alguns desktop)
           if (audioCtx.state === "suspended"){
             try{ audioCtx.resume(); }catch(e){}
           }
 
-          // targets “Netflix”: mais cheio, mas SEM clipar
           nodes = {
             master: master.gain,
             drone: droneGain.gain,
@@ -1214,8 +1500,6 @@
 
           function applyLevels(smooth){
             var base = getVolume();
-
-            // mix final: controlado e “cinema”
             var lvlMaster = 0.62 * (0.25 + (base * 0.75));
             var lvlDrone  = 0.55 * base;
             var lvlAir    = 0.14 * base;
@@ -1232,7 +1516,6 @@
 
           applyLevels(false);
 
-          // começa eventos “cinema”
           started = true;
           setBtn(true);
           schedulePing();
@@ -1285,9 +1568,7 @@
     })();
 
     /* =========================================================
-       ✅ 4) Painel de som: fixo + some ao rolar (não atrapalha cards)
-       - some quando você rola pra baixo
-       - reaparece quando rola pra cima ou volta pro topo
+       ✅ 6) Painel de som: some ao rolar
        ========================================================= */
     (function(){
       try{
