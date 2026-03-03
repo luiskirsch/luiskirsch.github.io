@@ -477,6 +477,7 @@
       .miniGrid{ grid-template-columns: 1fr; }
       button{ width: 100%; min-width: 0; }
       .logoOnly{ width:110px; height:110px; }
+      .countdownGrid{ grid-template-columns: repeat(2, minmax(90px,1fr)); }
     }
 
     .soundPanel{
@@ -530,6 +531,96 @@
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
       }
+    }
+
+
+
+    .launchCountdown{
+      margin-top: 18px;
+    }
+    .countdownCard{
+      border-radius:22px;
+      border: 1px solid rgba(230,192,123,.20);
+      background: linear-gradient(180deg, rgba(230,192,123,.08), rgba(255,255,255,.02));
+      padding: 18px;
+      box-shadow: inset 0 0 40px rgba(0,0,0,.24), 0 24px 70px rgba(0,0,0,.42);
+    }
+    .countdownTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .countdownTitle{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      color: rgba(230,192,123,.90);
+    }
+    .countdownDate{
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.62);
+    }
+    .countdownLead{
+      margin:10px 0 0;
+      font-size: clamp(18px, 2.2vw, 30px);
+      color: rgba(255,255,255,.92);
+      line-height:1.35;
+    }
+    .countdownGrid{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(92px,1fr));
+      gap:10px;
+    }
+    .countdownItem{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      padding:12px 10px;
+      text-align:center;
+    }
+    .countdownValue{
+      margin:0;
+      font-size: clamp(28px, 3vw, 42px);
+      font-weight:700;
+      color: rgba(230,192,123,.95);
+      line-height:1;
+      text-shadow: 0 10px 30px rgba(0,0,0,.45);
+      font-variant-numeric: tabular-nums;
+    }
+    .countdownLabel{
+      margin-top:6px;
+      font-size:11px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.66);
+    }
+    .countdownTrack{
+      margin-top:12px;
+      height:8px;
+      border-radius:999px;
+      overflow:hidden;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .countdownBar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(230,192,123,.35), rgba(230,192,123,.92), rgba(255,255,255,.92));
+      box-shadow: 0 0 18px rgba(230,192,123,.35);
+      transition: width .6s ease;
+    }
+    .countdownStatus{
+      margin-top:10px;
+      font-size:12px;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.66);
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -637,6 +728,44 @@
           </form>
         </div>
       </aside>
+    </section>
+
+
+    <section class="launchCountdown" aria-label="Contagem regressiva de lançamento">
+      <article class="countdownCard">
+        <div class="countdownTop">
+          <h2 class="countdownTitle">Lançamento em contagem regressiva</h2>
+          <div class="countdownDate" id="launchDateText">Previsão de lançamento</div>
+        </div>
+
+        <p class="countdownLead" id="countdownLeadText">
+          Faltam poucos ciclos para a primeira tiragem de <strong style="color:rgba(230,192,123,.95);">O SextoLugar</strong>.
+        </p>
+
+        <div class="countdownGrid" id="countdownGrid" role="timer" aria-live="polite" aria-atomic="true">
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdDays">00</p>
+            <div class="countdownLabel">Dias</div>
+          </div>
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdHours">00</p>
+            <div class="countdownLabel">Horas</div>
+          </div>
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdMinutes">00</p>
+            <div class="countdownLabel">Minutos</div>
+          </div>
+          <div class="countdownItem">
+            <p class="countdownValue" id="cdSeconds">00</p>
+            <div class="countdownLabel">Segundos</div>
+          </div>
+        </div>
+
+        <div class="countdownTrack" aria-hidden="true">
+          <div class="countdownBar" id="countdownBar"></div>
+        </div>
+        <div class="countdownStatus" id="countdownStatus">Preparando cronômetro de lançamento…</div>
+      </article>
     </section>
 
     <section class="below">
@@ -815,8 +944,82 @@
       }
     })();
 
+
+
     /* =========================================================
-       ✅ 2) Leads (estático)
+       ✅ 2) Contagem regressiva de lançamento (3 meses a partir de hoje)
+       ========================================================= */
+    (function(){
+      try{
+        var dayEl = document.getElementById("cdDays");
+        var hourEl = document.getElementById("cdHours");
+        var minEl = document.getElementById("cdMinutes");
+        var secEl = document.getElementById("cdSeconds");
+        var statusEl = document.getElementById("countdownStatus");
+        var barEl = document.getElementById("countdownBar");
+        var dateTextEl = document.getElementById("launchDateText");
+        var leadTextEl = document.getElementById("countdownLeadText");
+        if (!dayEl || !hourEl || !minEl || !secEl || !statusEl || !barEl || !dateTextEl || !leadTextEl) return;
+
+        var MS = { sec: 1000, min: 60000, hour: 3600000, day: 86400000 };
+        var start = new Date();
+        var target = new Date(start.getTime());
+        target.setMonth(target.getMonth() + 3);
+
+        function pad(n){
+          return (n < 10 ? "0" : "") + n;
+        }
+
+        function clamp(v, min, max){
+          return Math.min(max, Math.max(min, v));
+        }
+
+        function update(){
+          var now = new Date();
+          var diff = target.getTime() - now.getTime();
+
+          if (diff <= 0){
+            dayEl.textContent = "00";
+            hourEl.textContent = "00";
+            minEl.textContent = "00";
+            secEl.textContent = "00";
+            barEl.style.width = "100%";
+            statusEl.textContent = "É hoje. O SextoLugar foi lançado.";
+            leadTextEl.textContent = "O ritual começou. Obrigado por estar desde o prelúdio.";
+            return;
+          }
+
+          var days = Math.floor(diff / MS.day);
+          diff -= days * MS.day;
+          var hours = Math.floor(diff / MS.hour);
+          diff -= hours * MS.hour;
+          var mins = Math.floor(diff / MS.min);
+          diff -= mins * MS.min;
+          var secs = Math.floor(diff / MS.sec);
+
+          dayEl.textContent = pad(days);
+          hourEl.textContent = pad(hours);
+          minEl.textContent = pad(mins);
+          secEl.textContent = pad(secs);
+
+          var total = target.getTime() - start.getTime();
+          var elapsed = now.getTime() - start.getTime();
+          var pct = clamp((elapsed / total) * 100, 0, 100);
+          barEl.style.width = pct.toFixed(2) + "%";
+
+          statusEl.textContent = "Contagem ativa • " + days + " dia(s) restantes para o lançamento.";
+        }
+
+        var fmt = new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" });
+        dateTextEl.textContent = "Lançamento previsto: " + fmt.format(target);
+
+        update();
+        setInterval(update, 1000);
+      }catch(e){}
+    })();
+
+    /* =========================================================
+       ✅ 3) Leads (estático)
        ========================================================= */
     (function(){
       try{
@@ -911,7 +1114,7 @@
     })();
 
     /* =========================================================
-       ✅ 3) Som (sem notificação; só liga tocando no botão)
+       ✅ 4) Som (sem notificação; só liga tocando no botão)
        - iOS: exige gesto -> perfeito
        - Windows/Linux: funciona também
        ========================================================= */
