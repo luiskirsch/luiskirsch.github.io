@@ -28,10 +28,13 @@
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
 
-    /* Scroll snap (nível vídeo) */
+    /* Scroll snap (desliga quando o card fixa) */
     html{
       scroll-behavior:smooth;
       scroll-snap-type:y proximity;
+    }
+    html.snapOff{
+      scroll-snap-type: none;
     }
 
     body{
@@ -59,8 +62,6 @@
         radial-gradient(900px 480px at 65% 55%, rgba(230,192,123,.10), transparent 64%),
         var(--bg);
     }
-
-    /* grão */
     .bg::after{
       content:"";
       position:absolute;
@@ -71,7 +72,6 @@
       transform: rotate(1.5deg);
     }
 
-    /* brilho que respira */
     .glow{
       position:absolute;
       inset:-20%;
@@ -88,7 +88,6 @@
       50%{ opacity:.98; transform:translateY(-10px) scale(1.02); }
     }
 
-    /* partículas */
     #fx{
       position:absolute;
       inset:0;
@@ -121,7 +120,6 @@
       text-align:center;
     }
 
-    /* seção principal com snap */
     .hero{
       width:100%;
       scroll-snap-align:start;
@@ -129,7 +127,6 @@
       padding-top: 6px;
     }
 
-    /* topo pequeno */
     .brandTop{
       display:flex;
       align-items:center;
@@ -138,6 +135,7 @@
       opacity:0;
       transform: translateY(10px);
       animation: inUp .9s var(--ease2) .06s forwards;
+      will-change: transform;
     }
 
     .mark{
@@ -177,7 +175,6 @@
       will-change: transform;
     }
 
-    /* Base do texto (ouro) */
     h1{
       margin:0;
       letter-spacing:.20em;
@@ -190,7 +187,6 @@
       position:relative;
     }
 
-    /* Letras animadas (JS vai transformar em spans) */
     .titleLetters{
       display:inline-block;
       white-space:nowrap;
@@ -212,11 +208,9 @@
       position:absolute;
       inset:0;
       pointer-events:none;
-      /* a mágica: texto clipado */
       -webkit-background-clip:text;
       background-clip:text;
       color:transparent;
-      /* gradiente “metálico” que se mexe DENTRO */
       background-image:
         linear-gradient(110deg,
           rgba(255,255,255,0) 0%,
@@ -452,7 +446,6 @@
       border-color: rgba(255,255,255,.12);
     }
 
-    /* ripple */
     .btn .r{
       position:absolute;
       border-radius:50%;
@@ -465,7 +458,7 @@
       to{ transform: scale(12); opacity:0; }
     }
 
-    /* ===== Seção de conteúdo (direita/abaixo) ===== */
+    /* ===== Conteúdo da direita/abaixo ===== */
     .details{
       width:100%;
       max-width:1140px;
@@ -480,6 +473,7 @@
       transform: translateY(12px);
       animation: inUp 1.0s var(--ease2) .66s forwards;
       will-change: transform;
+      transition: padding-left .65s var(--ease);
     }
 
     .panel{
@@ -490,6 +484,10 @@
       backdrop-filter: blur(10px);
       overflow:hidden;
       position:relative;
+      transform: translateY(0);
+      opacity: 1;
+      transition: transform .70s var(--ease2), opacity .70s var(--ease2);
+      will-change: transform, opacity;
     }
     .panel::before{
       content:"";
@@ -544,6 +542,20 @@
       border-radius: 999px;
     }
 
+    /* ===== Stagger (entra em sequência quando o card fixa) ===== */
+    .details.stagger .panel{
+      opacity:0;
+      transform: translateX(26px) translateY(8px);
+    }
+    .details.stagger.in .panel{
+      opacity:1;
+      transform: translateX(0) translateY(0);
+    }
+    .details.stagger.in .panel:nth-child(1){ transition-delay: .06s; }
+    .details.stagger.in .panel:nth-child(2){ transition-delay: .16s; }
+    .details.stagger.in .panel:nth-child(3){ transition-delay: .26s; }
+    .details.stagger.in .panel:nth-child(4){ transition-delay: .36s; }
+
     /* Footer */
     .footer{
       width:100%;
@@ -561,33 +573,34 @@
       transform: translateY(10px);
       animation: inUp .9s var(--ease2) .78s forwards;
       will-change: transform;
+      transition: padding-left .65s var(--ease);
     }
     .footer .brand{
       color:rgba(230,192,123,.85);
       font-weight:700;
     }
 
-    /* ===== Card desliza pro canto ao rolar (ELEGANTE) ===== */
-    .scrolled .card{
+    /* ===== Card desliza pro canto ao rolar (sem tremer) ===== */
+    body.scrolled .card{
       position: fixed;
       top: 18px;
       left: 18px;
       max-width: 420px;
       width: 420px;
-      transform: translateX(0) translateY(0) scale(.98);
+      transform: translateX(0) translateY(0) scale(.985);
       border-radius: 18px;
       box-shadow: 0 28px 95px rgba(0,0,0,.74);
       z-index: 20;
     }
-    .scrolled .details{
+    body.scrolled .details{
       padding-left: 460px;
       margin-top: 0;
     }
-    .scrolled .footer{
+    body.scrolled .footer{
       padding-left: 460px;
     }
 
-    /* ===== Parallax e “inteligência” ===== */
+    /* ===== Parallax ===== */
     .parallax{
       will-change: transform;
     }
@@ -625,14 +638,15 @@
     /* ===== Responsivo ===== */
     @media (max-width: 900px){
       .details{ grid-template-columns: 1fr; }
-      .scrolled .details{ padding-left: 0; margin-top: 10px; }
-      .scrolled .footer{ padding-left: 0; }
-      .scrolled .card{
+      body.scrolled .details{ padding-left: 0; margin-top: 10px; }
+      body.scrolled .footer{ padding-left: 0; }
+      body.scrolled .card{
         left: 14px;
         right: 14px;
         width: calc(100% - 28px);
         max-width: 680px;
       }
+      .details.stagger .panel{ transform: translateY(10px); }
     }
 
     @media (max-width: 720px){
@@ -646,16 +660,16 @@
       h1{ font-size: clamp(30px, 10vw, 44px); letter-spacing:.17em; }
       .sub{ max-width: 34ch; }
       .card{ padding: 14px 14px 16px; }
-      .scrolled .card{ top: 12px; }
+      body.scrolled .card{ top: 12px; }
     }
 
-    /* Acessibilidade */
     @media (prefers-reduced-motion: reduce){
-      html{ scroll-behavior:auto; }
+      html{ scroll-behavior:auto; scroll-snap-type:none; }
       .glow, .whisper{ animation: none !important; }
       .brandTop, .titleWrap, .sub, .card, .details, .footer{ animation:none !important; opacity:1 !important; transform:none !important; }
       .shine{ animation:none !important; opacity:.55 !important; }
       .card{ transition:none !important; }
+      .panel{ transition:none !important; }
     }
   </style>
 </head>
@@ -680,7 +694,6 @@
       <div class="titleWrap parallax" id="pTitle">
         <h1 aria-label="Prelúdio Jogos">
           <span class="titleLetters" id="titleLetters">PRELÚDIO JOGOS</span>
-          <!-- reflexo só dentro do texto -->
           <span class="shine" aria-hidden="true" id="titleShine">PRELÚDIO JOGOS</span>
         </h1>
       </div>
@@ -787,13 +800,10 @@
       const s = document.getElementById('titleShine');
       const text = t.textContent;
 
-      // mantém o shine com o mesmo texto
       s.textContent = text;
 
-      // cria spans animados
       t.innerHTML = '';
       const frag = document.createDocumentFragment();
-
       [...text].forEach((ch, i) => {
         const span = document.createElement('span');
         span.className = 'ch';
@@ -801,7 +811,6 @@
         span.style.animationDelay = (0.14 + i * 0.028) + 's';
         frag.appendChild(span);
       });
-
       t.appendChild(frag);
     })();
 
@@ -821,7 +830,7 @@
       }, { passive:true });
     });
 
-    // ========= Partículas (leve, premium) =========
+    // ========= Partículas =========
     (function(){
       const prefersReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const c = document.getElementById('fx');
@@ -990,22 +999,55 @@
       setTimeout(()=> window.location.href = './entrada.html', 560);
     });
 
-    // ========= Card desliza pro canto ao rolar =========
+    // ========= Fix definitivo do "travando" (histerese + desliga snap + trava parallax do card) =========
+    const htmlEl = document.documentElement;
+    const detailsEl = document.getElementById('details');
+
+    let isPinned = false;
+
+    function pinOn(){
+      if(isPinned) return;
+      isPinned = true;
+      document.body.classList.add('scrolled');
+      htmlEl.classList.add('snapOff');
+
+      // STAGGER: reinicia e entra
+      detailsEl.classList.add('stagger');
+      // força reflow pra aplicar a transição corretamente
+      void detailsEl.offsetWidth;
+      detailsEl.classList.add('in');
+    }
+
+    function pinOff(){
+      if(!isPinned) return;
+      isPinned = false;
+      document.body.classList.remove('scrolled');
+      htmlEl.classList.remove('snapOff');
+
+      // remove stagger (pra não ficar piscando)
+      detailsEl.classList.remove('in');
+      detailsEl.classList.remove('stagger');
+    }
+
+    // Histerese: evita liga/desliga sem parar
+    const PIN_AT = 170;   // passa disso: fixa
+    const UNPIN_AT = 110; // volta disso: solta
+
     let ticking = false;
     function onScroll(){
       if(ticking) return;
       ticking = true;
       requestAnimationFrame(()=>{
-        const y = window.scrollY || document.documentElement.scrollTop || 0;
-        if(y > 140) document.body.classList.add('scrolled');
-        else document.body.classList.remove('scrolled');
+        const y = window.scrollY || 0;
+        if(!isPinned && y > PIN_AT) pinOn();
+        else if(isPinned && y < UNPIN_AT) pinOff();
         ticking = false;
       });
     }
     window.addEventListener('scroll', onScroll, { passive:true });
     onScroll();
 
-    // ========= Parallax inteligente (scroll + mouse) =========
+    // ========= Parallax inteligente (com trava do card quando fixo) =========
     const pBrand = document.getElementById('pBrand');
     const pTitle = document.getElementById('pTitle');
     const pSub = document.getElementById('pSub');
@@ -1016,32 +1058,33 @@
     window.addEventListener('pointermove', (e)=>{
       const cx = window.innerWidth / 2;
       const cy = window.innerHeight / 2;
-      mx = (e.clientX - cx) / cx; // -1 a 1
+      mx = (e.clientX - cx) / cx;
       my = (e.clientY - cy) / cy;
     }, { passive:true });
 
     function parallaxLoop(){
       const y = window.scrollY || 0;
 
-      // scroll parallax (suave)
       const t1 = Math.min(18, y * 0.05);
       const t2 = Math.min(14, y * 0.035);
       const t3 = Math.min(10, y * 0.025);
 
-      // mouse parallax (muito sutil, premium)
       const m1x = mx * 6,  m1y = my * 4;
       const m2x = mx * 8,  m2y = my * 6;
       const m3x = mx * 10, m3y = my * 7;
 
-      if(pBrand)  pBrand.style.transform  = `translate3d(${m1x}px, ${m1y - t3}px, 0)`;
-      if(pTitle)  pTitle.style.transform  = `translate3d(${m2x}px, ${m2y - t1}px, 0)`;
-      if(pSub)    pSub.style.transform    = `translate3d(${m1x}px, ${m1y - t2}px, 0)`;
-      if(pWhisper)pWhisper.style.transform= `translate3d(${m1x}px, ${m1y - (t2+2)}px, 0)`;
+      if(pBrand)  pBrand.style.transform   = `translate3d(${m1x}px, ${m1y - t3}px, 0)`;
+      if(pTitle)  pTitle.style.transform   = `translate3d(${m2x}px, ${m2y - t1}px, 0)`;
+      if(pSub)    pSub.style.transform     = `translate3d(${m1x}px, ${m1y - t2}px, 0)`;
+      if(pWhisper)pWhisper.style.transform = `translate3d(${m1x}px, ${m1y - (t2+2)}px, 0)`;
 
-      // card ganha “peso” no scroll (antes de fixar)
-      if(leadCard && !document.body.classList.contains('scrolled')){
+      // IMPORTANTÍSSIMO: quando fixo, NÃO mexe no card (isso eliminou o jitter)
+      if(leadCard && !isPinned){
         const s = Math.max(0.98, 1 - (y * 0.00015));
         leadCard.style.transform = `translate3d(${m3x}px, ${m3y + Math.min(10, y*0.02)}px, 0) scale(${s})`;
+      } else if(leadCard && isPinned){
+        // limpa transform inline para deixar o CSS fixed mandar (evita briga)
+        leadCard.style.transform = '';
       }
 
       requestAnimationFrame(parallaxLoop);
