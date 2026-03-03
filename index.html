@@ -651,168 +651,240 @@
   </div>
 
   <script>
-    /* =========================
-       ESTRELAS (Canvas) — cross-browser
-       ========================= */
-    (function(){
-      const canvas = document.getElementById("stars");
-      const ctx = canvas.getContext("2d", { alpha: true });
+  /* =========================
+     ESTRELAS (Canvas) — independente do scroll (iOS/Android/PC)
+     - evita “reinício” quando a barra do navegador aparece/some
+     ========================= */
+  (function(){
+    const canvas = document.getElementById("stars");
+    const ctx = canvas.getContext("2d", { alpha: true });
 
-      let w=0,h=0,dpr=1;
-      let stars = [];
-      let raf = null;
+    let w = 0, h = 0, dpr = 1;
+    let stars = [];
+    let raf = null;
 
-      const isReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      function resize(){
-        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-        w = Math.floor(window.innerWidth);
-        h = Math.floor(window.innerHeight);
-        canvas.width  = Math.floor(w * dpr);
-        canvas.height = Math.floor(h * dpr);
-        canvas.style.width = w + "px";
-        canvas.style.height = h + "px";
-        ctx.setTransform(dpr,0,0,dpr,0,0);
+    // Guardas para evitar restart por "resize" falso no scroll (Safari/iOS)
+    let lastVW = 0;
+    let lastVH = 0;
+    let lastW  = 0;
 
-        const density = Math.floor((w*h) / 11500);
-        const target = Math.max(110, Math.min(260, density));
+    // tamanho visual real (melhor em mobile)
+    function getViewport(){
+      const vv = window.visualViewport;
+      const vw = Math.floor(vv ? vv.width  : window.innerWidth);
+      const vh = Math.floor(vv ? vv.height : window.innerHeight);
+      return { vw, vh };
+    }
 
-        stars = new Array(target).fill(0).map(() => ({
-          x: Math.random()*w,
-          y: Math.random()*h,
-          r: Math.random()*1.35 + 0.15,
-          a: Math.random()*0.62 + 0.18,
-          v: (Math.random()*0.20 + 0.06),
-          tw: Math.random()*0.02 + 0.006
-        }));
+    function buildStars(target){
+      stars = new Array(target).fill(0).map(() => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 1.35 + 0.15,
+        a: Math.random() * 0.62 + 0.18,
+        v: (Math.random() * 0.20 + 0.06),
+        tw: Math.random() * 0.02 + 0.006
+      }));
+    }
+
+    function resizeHard(){
+      const vp = getViewport();
+
+      dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      w = Math.floor(vp.vw);
+      h = Math.floor(vp.vh);
+
+      canvas.width  = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width  = w + "px";
+      canvas.style.height = h + "px";
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+
+      const density = Math.floor((w * h) / 11500);
+      const target = Math.max(110, Math.min(260, density));
+
+      buildStars(target);
+
+      lastVW = vp.vw;
+      lastVH = vp.vh;
+      lastW  = w;
+    }
+
+    function maybeResize(){
+      const vp = getViewport();
+
+      // 1) Se a largura mudou, é orientação/viewport real -> recria
+      if (vp.vw !== lastVW){
+        resizeHard();
+        return;
       }
 
-      let t = 0;
-      function draw(){
-        if (isReduced) return;
-        t += 1;
+      // 2) Se só a altura mudou pouco (barra do navegador), IGNORA
+      //    (isso evita o "reset" durante scroll)
+      const dh = Math.abs(vp.vh - lastVH);
 
-        ctx.clearRect(0,0,w,h);
+      // limiar: pequenos ajustes de barra/scroll (<= 120px) não devem reiniciar
+      if (dh <= 120){
+        // atualiza apenas o canvas se ainda não tiver tamanho
+        if (!lastW) resizeHard();
+        return;
+      }
 
-        const vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.80);
-        vignette.addColorStop(0, "rgba(0,0,0,0)");
-        vignette.addColorStop(1, "rgba(0,0,0,0.40)");
+      // 3) Mudança grande de altura (rotacionou ou split-screen) -> recria
+      resizeHard();
+    }
 
-        for (let i=0;i<stars.length;i++){
-          const s = stars[i];
-          s.y += s.v;
-          if (s.y > h + 10) { s.y = -10; s.x = Math.random()*w; }
+    let t = 0;
+    function draw(){
+      if (isReduced) return;
 
-          const tw = (Math.sin((t*0.02) + i) * 0.5 + 0.5) * s.tw;
-          const alpha = Math.max(0, Math.min(1, s.a + tw));
+      t += 1;
+      ctx.clearRect(0,0,w,h);
 
-          ctx.beginPath();
-          ctx.fillStyle = "rgba(255,255,255," + alpha.toFixed(3) + ")";
-          ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-          ctx.fill();
+      const vignette = ctx.createRadialGradient(
+        w * 0.5, h * 0.35, 0,
+        w * 0.5, h * 0.5, Math.max(w,h) * 0.80
+      );
+      vignette.addColorStop(0, "rgba(0,0,0,0)");
+      vignette.addColorStop(1, "rgba(0,0,0,0.40)");
+
+      for (let i = 0; i < stars.length; i++){
+        const s = stars[i];
+
+        s.y += s.v;
+        if (s.y > h + 10){
+          s.y = -10;
+          s.x = Math.random() * w;
         }
 
-        ctx.fillStyle = vignette;
-        ctx.fillRect(0,0,w,h);
+        const tw = (Math.sin((t * 0.02) + i) * 0.5 + 0.5) * s.tw;
+        const alpha = Math.max(0, Math.min(1, s.a + tw));
 
-        raf = requestAnimationFrame(draw);
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,255,255," + alpha.toFixed(3) + ")";
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      function start(){
-        cancelAnimationFrame(raf);
-        resize();
-        draw();
-      }
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0,0,w,h);
 
-      window.addEventListener("resize", start, { passive:true });
-      start();
-    })();
-
-    /* =========================
-       LEADS (site estático)
-       - salva no localStorage
-       - envia via mailto para seu e-mail
-       ========================= */
-    const LEAD_EMAIL_DESTINO = "luiskirsch22@hotmail.com";
-    const ENTRADA_URL = "./entrada.html";
-
-    const leadForm = document.getElementById("leadForm");
-    const statusEl = document.getElementById("status");
-    const btnEntrada = document.getElementById("btnEntrada");
-
-    btnEntrada.addEventListener("click", () => {
-      window.location.href = ENTRADA_URL;
-    });
-
-    function loadLeads(){
-      try{ return JSON.parse(localStorage.getItem("preludio_leads") || "[]"); }
-      catch(e){ return []; }
-    }
-    function saveLeads(leads){
-      localStorage.setItem("preludio_leads", JSON.stringify(leads));
-    }
-    function validEmail(email){
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      raf = requestAnimationFrame(draw);
     }
 
-    leadForm.addEventListener("submit", (e) => {
-      e.preventDefault();
+    function start(){
+      cancelAnimationFrame(raf);
+      resizeHard();
+      draw();
+    }
 
-      const nome = (document.getElementById("nome").value || "").trim();
-      const email = (document.getElementById("email").value || "").trim();
-      const consent = document.getElementById("consent").checked;
+    // ✅ Em vez de reiniciar SEMPRE no resize, usamos "maybeResize"
+    let resizeTimer = null;
+    function onResize(){
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(maybeResize, 120);
+    }
 
-      if (!email){
-        statusEl.textContent = "Status: preencha seu e-mail.";
-        statusEl.style.color = "rgba(255,255,255,.70)";
-        return;
-      }
-      if (!validEmail(email)){
-        statusEl.textContent = "Status: e-mail inválido.";
-        statusEl.style.color = "rgba(255,77,77,.90)";
-        return;
-      }
-      if (!consent){
-        statusEl.textContent = "Status: marque a autorização para entrar na lista.";
-        statusEl.style.color = "rgba(255,77,77,.90)";
-        return;
-      }
+    window.addEventListener("resize", onResize, { passive:true });
 
-      const leads = loadLeads();
-      const now = new Date();
-      const lead = { nome, email, consent:true, at: now.toISOString() };
+    // visualViewport dispara mudanças por zoom/barra; tratamos igual (sem reset no scroll pequeno)
+    if (window.visualViewport){
+      window.visualViewport.addEventListener("resize", onResize, { passive:true });
+      window.visualViewport.addEventListener("scroll", () => {
+        // não reinicia; apenas garante que já foi inicializado
+        if (!lastW) start();
+      }, { passive:true });
+    }
 
-      const jaExiste = leads.some(l => (l.email || "").toLowerCase() === email.toLowerCase());
-      if (!jaExiste){
-        leads.push(lead);
-        saveLeads(leads);
-      }
+    start();
+  })();
 
-      statusEl.textContent = jaExiste
-        ? "Status: você já está na lista. Obrigado."
-        : "Status: salvo! Abrindo envio…";
-      statusEl.style.color = "rgba(155,227,122,.92)";
+  /* =========================
+     LEADS (site estático)
+     - salva no localStorage
+     - envia via mailto para seu e-mail
+     ========================= */
+  const LEAD_EMAIL_DESTINO = "luiskirsch22@hotmail.com";
+  const ENTRADA_URL = "./entrada.html";
 
-      const subject = encodeURIComponent("Novo lead — Prelúdio Jogos");
-      const body = encodeURIComponent(
-        "Novo lead cadastrado:\n\n" +
-        "Nome: " + (nome || "(não informado)") + "\n" +
-        "E-mail: " + email + "\n" +
-        "Consentimento: SIM\n" +
-        "Data: " + now.toLocaleString() + "\n"
-      );
+  const leadForm = document.getElementById("leadForm");
+  const statusEl = document.getElementById("status");
+  const btnEntrada = document.getElementById("btnEntrada");
 
-      setTimeout(() => {
-        window.location.href = "mailto:" + LEAD_EMAIL_DESTINO + "?subject=" + subject + "&body=" + body;
-      }, 250);
-    });
+  btnEntrada.addEventListener("click", () => {
+    window.location.href = ENTRADA_URL;
+  });
 
-    (function(){
-      const leads = loadLeads();
-      if (leads.length > 0){
-        statusEl.textContent = "Status: lista ativa. (" + leads.length + " registrado(s) neste navegador)";
-      }
-    })();
-  </script>
-</body>
-</html>
+  function loadLeads(){
+    try{ return JSON.parse(localStorage.getItem("preludio_leads") || "[]"); }
+    catch(e){ return []; }
+  }
+  function saveLeads(leads){
+    localStorage.setItem("preludio_leads", JSON.stringify(leads));
+  }
+  function validEmail(email){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  leadForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const nome = (document.getElementById("nome").value || "").trim();
+    const email = (document.getElementById("email").value || "").trim();
+    const consent = document.getElementById("consent").checked;
+
+    if (!email){
+      statusEl.textContent = "Status: preencha seu e-mail.";
+      statusEl.style.color = "rgba(255,255,255,.70)";
+      return;
+    }
+    if (!validEmail(email)){
+      statusEl.textContent = "Status: e-mail inválido.";
+      statusEl.style.color = "rgba(255,77,77,.90)";
+      return;
+    }
+    if (!consent){
+      statusEl.textContent = "Status: marque a autorização para entrar na lista.";
+      statusEl.style.color = "rgba(255,77,77,.90)";
+      return;
+    }
+
+    const leads = loadLeads();
+    const now = new Date();
+    const lead = { nome, email, consent:true, at: now.toISOString() };
+
+    const jaExiste = leads.some(l => (l.email || "").toLowerCase() === email.toLowerCase());
+    if (!jaExiste){
+      leads.push(lead);
+      saveLeads(leads);
+    }
+
+    statusEl.textContent = jaExiste
+      ? "Status: você já está na lista. Obrigado."
+      : "Status: salvo! Abrindo envio…";
+    statusEl.style.color = "rgba(155,227,122,.92)";
+
+    const subject = encodeURIComponent("Novo lead — Prelúdio Jogos");
+    const body = encodeURIComponent(
+      "Novo lead cadastrado:\n\n" +
+      "Nome: " + (nome || "(não informado)") + "\n" +
+      "E-mail: " + email + "\n" +
+      "Consentimento: SIM\n" +
+      "Data: " + now.toLocaleString() + "\n"
+    );
+
+    setTimeout(() => {
+      window.location.href = "mailto:" + LEAD_EMAIL_DESTINO + "?subject=" + subject + "&body=" + body;
+    }, 250);
+  });
+
+  (function(){
+    const leads = loadLeads();
+    if (leads.length > 0){
+      statusEl.textContent = "Status: lista ativa. (" + leads.length + " registrado(s) neste navegador)";
+    }
+  })();
+</script>
+       
