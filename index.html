@@ -6,8 +6,8 @@
   <title>Prelúdio Jogos — O SextoLugar</title>
 
   <!-- FAVICON -->
-  <link rel="icon" type="image/png" sizes="512x512" href="./favicon.png?v=7">
-  <link rel="apple-touch-icon" href="./favicon.png?v=7">
+  <link rel="icon" type="image/png" sizes="512x512" href="./favicon.png?v=9">
+  <link rel="apple-touch-icon" href="./favicon.png?v=9">
   <meta name="theme-color" content="#050505">
 
   <style>
@@ -15,12 +15,9 @@
       --bg:#050505;
       --gold:#e6c07b;
       --shadow:rgba(0,0,0,.55);
-      --stroke: rgba(255,255,255,.10);
       --maxW: 1180px;
       --pad: 20px;
       --radius: 22px;
-
-      /* Cinemático */
       --ease: cubic-bezier(.18,.92,.12,1);
     }
 
@@ -88,7 +85,6 @@
       padding-bottom:max(16px, env(safe-area-inset-bottom));
     }
 
-    /* HERO */
     .hero{
       min-height: 100dvh;
       display:grid;
@@ -127,7 +123,7 @@
       white-space:nowrap;
     }
 
-    /* Título com reflexo DENTRO das letras — 1 PASSADA (sem segundo brilho) */
+    /* ===== TÍTULO: reflexo só DENTRO das letras (sem brilho extra por cima) ===== */
     .title{
       margin:0;
       text-align:center;
@@ -141,64 +137,51 @@
       isolation:isolate;
     }
 
-    .title .shine{
+    /* Base dourada (fixa) */
+    .title .base{
+      color: var(--gold);
       display:inline-block;
       position:relative;
-
-      background: linear-gradient(110deg,
-        rgba(230,192,123,.62) 0%,
-        rgba(255,244,214,.98) 18%,
-        rgba(230,192,123,.74) 36%,
-        rgba(230,192,123,.62) 100%);
-
-      background-size: 340% 100%;
-
-      /* Pausa + varredura + pausa (pra não “piscar” no reset) */
-      animation: shineMove 5.4s var(--ease) infinite;
-      will-change: background-position;
-
-      -webkit-background-clip:text;
-      background-clip:text;
-      color: transparent;
-
       filter: drop-shadow(0 12px 40px rgba(0,0,0,.55));
     }
 
-    /* Reflexo “real” e suave dentro das letras, sem flash extra */
-    .title .shine::after{
-      content:"";
+    /* Reflexo: UM só, dentro das letras, e some antes do reset */
+    .title .base::after{
+      content: attr(data-text);
       position:absolute;
-      inset:-16%;
+      inset:0;
+      color: transparent;
 
-      /* bem sutil, sem “bolota” forte */
-      background:
-        radial-gradient(240px 90px at 0% 50%,
-          rgba(255,255,255,.30),
-          rgba(255,255,255,.12) 42%,
-          transparent 74%);
+      /* reflexo “dentro” */
+      background: linear-gradient(110deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0) 40%,
+        rgba(255,255,255,.70) 50%,
+        rgba(255,255,255,0) 60%,
+        rgba(255,255,255,0) 100%);
+      background-size: 260% 100%;
+      background-position: -80% 50%;
 
-      mix-blend-mode: screen;
-      opacity:0;
-      transform: translateX(-80%);
-      will-change: transform, opacity;
-      animation: highlight 5.4s var(--ease) infinite;
+      -webkit-background-clip: text;
+      background-clip: text;
+
+      opacity: 0;
+      will-change: background-position, opacity;
+      animation: oneShine 5.2s var(--ease) infinite;
       pointer-events:none;
     }
 
-    @keyframes shineMove{
-      0%   { background-position: -80% 50%; }
-      14%  { background-position: -80% 50%; } /* pausa inicial */
-      58%  { background-position: 180% 50%; } /* varre tudo */
-      100% { background-position: 180% 50%; } /* pausa final (reset invisível) */
-    }
-
-    @keyframes highlight{
-      0%   { transform: translateX(-90%); opacity:0; }
-      14%  { transform: translateX(-90%); opacity:0; } /* pausa inicial */
-      22%  { opacity:.22; }
-      58%  { transform: translateX(185%); opacity:.08; }
-      70%  { opacity:0; }
-      100% { transform: translateX(220%); opacity:0; } /* pausa final */
+    /* AQUI está o segredo:
+       - começa invisível
+       - aparece, varre e some
+       - fica invisível durante o reset (sem “segundo brilho”) */
+    @keyframes oneShine{
+      0%   { opacity:0; background-position:-80% 50%; }
+      18%  { opacity:0; background-position:-80% 50%; }
+      24%  { opacity:.55; }
+      56%  { opacity:.28; background-position:180% 50%; }
+      62%  { opacity:0;  background-position:180% 50%; }
+      100% { opacity:0;  background-position:180% 50%; }
     }
 
     .subtitle{
@@ -224,7 +207,6 @@
       50%{ opacity:.92; filter: blur(0); }
     }
 
-    /* Stage */
     .stage{
       position:relative;
       margin-top: 16px;
@@ -238,7 +220,6 @@
       align-items:start;
     }
 
-    /* Card leads */
     .leadCard{
       position: sticky;
       top: 18px;
@@ -250,12 +231,9 @@
       backdrop-filter: blur(12px);
       overflow:hidden;
 
-      transform-origin: top left;
-      will-change: transform, filter, opacity;
-      transition:
-        transform 640ms var(--ease),
-        filter 640ms var(--ease),
-        opacity 640ms var(--ease);
+      transform-origin: center;
+      will-change: transform, filter;
+      transition: transform 720ms var(--ease), filter 720ms var(--ease);
     }
     .leadCard::before{
       content:"";
@@ -285,7 +263,7 @@
     .dot{
       width:5px; height:5px; border-radius:50%;
       background: rgba(230,192,123,.9);
-      box-shadow: 0 0 16px rgba(230,192,123,.35);
+      box-shadow:0 0 16px rgba(230,192,123,.35);
     }
 
     .leadTitle{
@@ -341,7 +319,6 @@
       border-color: rgba(230,192,123,.35);
       transform: translateY(-1px);
     }
-    input::placeholder{ color: rgba(255,255,255,.35); }
 
     .consentRow{
       grid-column: 1 / -1;
@@ -388,7 +365,7 @@
       letter-spacing:.12em;
       text-transform:uppercase;
       min-width:200px;
-      transition: transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+      transition: transform .12s ease, border-color .18s ease, opacity .18s ease;
       box-shadow: 0 14px 40px rgba(0,0,0,.35);
     }
     button:hover{ transform: translateY(-1px); border-color:rgba(230,192,123,.34); }
@@ -398,9 +375,7 @@
       border-color: rgba(255,255,255,.12);
       color: rgba(255,255,255,.78);
     }
-    .btnGhost:hover{ border-color: rgba(255,255,255,.20); }
 
-    /* direita */
     .side{
       display:grid;
       gap: 12px;
@@ -414,8 +389,6 @@
       backdrop-filter: blur(10px);
       overflow:hidden;
       position:relative;
-      will-change: transform, opacity;
-      transition: transform 640ms var(--ease), opacity 640ms var(--ease);
     }
     .panel::before{
       content:"";
@@ -477,29 +450,20 @@
       color: rgba(255,255,255,.86);
     }
 
-    /* Cinemático no scroll: o card desliza pro canto e “abre espaço” */
+    /* ===== CINEMÁTICO NO SCROLL (sem encolher no canto) =====
+       Agora é só um "assentar" sutil: leve redução e leve subida,
+       mantendo tudo central e bonito. */
     body.compact .leadCard{
-      transform: translate3d(-18px, -10px, 0) scale(.78) rotate(-.35deg);
-      filter: saturate(.95) contrast(1.02);
-    }
-    body.compact .panel{
-      transform: translate3d(0, -6px, 0);
-      opacity: .98;
-    }
-    /* Um toque extra no desktop grande */
-    @media (min-width: 1100px){
-      body.compact .leadCard{
-        transform: translate3d(-34px, -14px, 0) scale(.76) rotate(-.4deg);
-      }
+      transform: translate3d(0, -8px, 0) scale(.94);
+      filter: contrast(1.03) saturate(.98);
     }
 
-    /* Anti-jitter em touch/tablet (corrige vibração/volta pra cima) */
+    /* Anti-jitter em touch/tablet */
     @media (pointer: coarse){
       .leadCard{ position: relative; top:auto; }
       body.compact .leadCard{ transform:none; }
     }
 
-    /* Mobile coluna */
     @media (max-width: 920px){
       .grid{ grid-template-columns: 1fr; }
       .leadCard{ position: relative; top:auto; }
@@ -532,7 +496,6 @@
       font-weight:700;
     }
 
-    /* Reveal */
     .reveal{
       opacity:0;
       transform: translateY(10px);
@@ -556,14 +519,14 @@
     <div class="container">
       <div class="topMark">
         <div class="badge">
-          <!-- SUA LOGO ORIGINAL AQUI: coloque "logo.png" na raiz -->
+          <!-- SUA LOGO ORIGINAL: coloque "logo.png" na raiz -->
           <img src="./logo.png?v=1" alt="Prelúdio Jogos">
           <span>Prelúdio Jogos</span>
         </div>
       </div>
 
       <h1 class="title">
-        <span class="shine">PRELÚDIO JOGOS</span>
+        <span class="base" data-text="PRELÚDIO JOGOS">PRELÚDIO JOGOS</span>
       </h1>
 
       <p class="subtitle">
@@ -573,7 +536,7 @@
 
       <div class="stage">
         <div class="grid">
-          <section class="leadCard reveal on" id="leadCard" aria-label="Boas-vindas e acesso">
+          <section class="leadCard reveal on" aria-label="Boas-vindas e acesso">
             <div class="leadInner">
               <div class="tag">
                 <span class="dot"></span>
@@ -609,7 +572,7 @@
                 <p class="status" id="status">Status: aguardando seu e-mail.</p>
 
                 <div class="actions">
-                  <button type="submit" id="btnEntrar">Entrar na lista</button>
+                  <button type="submit">Entrar na lista</button>
                   <button type="button" class="btnGhost" id="btnAcessar">Acessar a entrada</button>
                 </div>
               </form>
@@ -738,11 +701,10 @@
       items.forEach(el => io.observe(el));
     })();
 
-    /* Compact suave (cinematográfico) */
+    /* Compact suave (sem jogar tudo pro canto) */
     (function(){
       let ticking = false;
-      const trigger = 120;
-
+      const trigger = 140;
       function onScroll(){
         if(ticking) return;
         ticking = true;
