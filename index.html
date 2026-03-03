@@ -6,21 +6,22 @@
   <title>Prelúdio Jogos — O SextoLugar</title>
 
   <!-- FAVICON -->
-  <link rel="icon" type="image/png" sizes="512x512" href="./favicon.png?v=4">
-  <link rel="apple-touch-icon" href="./favicon.png?v=4">
+  <link rel="icon" type="image/png" sizes="512x512" href="./favicon.png?v=7">
+  <link rel="apple-touch-icon" href="./favicon.png?v=7">
   <meta name="theme-color" content="#050505">
 
   <style>
     :root{
       --bg:#050505;
       --gold:#e6c07b;
-      --muted:#a7a7a7;
       --shadow:rgba(0,0,0,.55);
       --stroke: rgba(255,255,255,.10);
-
       --maxW: 1180px;
       --pad: 20px;
       --radius: 22px;
+
+      /* Cinemático */
+      --ease: cubic-bezier(.18,.92,.12,1);
     }
 
     *{ box-sizing:border-box; }
@@ -42,24 +43,26 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      z-index:-2;
+      z-index:-3;
       background:
         radial-gradient(1200px 700px at 50% 18%, rgba(230,192,123,.12), transparent 55%),
         radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
         radial-gradient(900px 560px at 82% 75%, rgba(255,255,255,.05), transparent 62%),
-        linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.25));
+        linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.28));
     }
     .glow{
       position:fixed;
       inset:-20%;
       pointer-events:none;
-      z-index:-1;
+      z-index:-2;
       background:
         radial-gradient(700px 360px at 50% 35%, rgba(230,192,123,.10), transparent 62%),
         radial-gradient(900px 480px at 62% 70%, rgba(255,255,255,.06), transparent 68%);
       filter: blur(14px);
       opacity:.70;
       animation: pulseGlow 5s ease-in-out infinite;
+      transform: translate3d(0,0,0);
+      will-change: transform, opacity;
     }
     @keyframes pulseGlow{
       0%,100%{ opacity:.55; transform:translateY(0) scale(1); }
@@ -124,7 +127,7 @@
       white-space:nowrap;
     }
 
-    /* Título com reflexo dentro das letras (corrigido pra ir até o final) */
+    /* Título com reflexo DENTRO das letras — 1 PASSADA (sem segundo brilho) */
     .title{
       margin:0;
       text-align:center;
@@ -137,56 +140,65 @@
       position:relative;
       isolation:isolate;
     }
+
     .title .shine{
       display:inline-block;
       position:relative;
 
-      /* gradient mais longo e varrendo além do texto */
       background: linear-gradient(110deg,
-        rgba(230,192,123,.55) 0%,
-        rgba(255,236,200,.98) 18%,
-        rgba(230,192,123,.70) 36%,
-        rgba(230,192,123,.55) 100%);
-      background-size: 320% 100%;
-      background-position: -60% 50%;
+        rgba(230,192,123,.62) 0%,
+        rgba(255,244,214,.98) 18%,
+        rgba(230,192,123,.74) 36%,
+        rgba(230,192,123,.62) 100%);
+
+      background-size: 340% 100%;
+
+      /* Pausa + varredura + pausa (pra não “piscar” no reset) */
+      animation: shineMove 5.4s var(--ease) infinite;
+      will-change: background-position;
 
       -webkit-background-clip:text;
       background-clip:text;
       color: transparent;
 
       filter: drop-shadow(0 12px 40px rgba(0,0,0,.55));
-      animation: shineMove 4.2s ease-in-out infinite;
-      will-change: background-position;
     }
+
+    /* Reflexo “real” e suave dentro das letras, sem flash extra */
     .title .shine::after{
       content:"";
       position:absolute;
-      inset:-14%;
+      inset:-16%;
 
-      /* highlight mais “largo” pra não morrer antes do fim */
+      /* bem sutil, sem “bolota” forte */
       background:
-        radial-gradient(220px 82px at 0% 50%,
-          rgba(255,255,255,.55),
-          rgba(255,255,255,.18) 38%,
-          transparent 72%);
-      transform: translateX(-60%);
-      opacity:0;
+        radial-gradient(240px 90px at 0% 50%,
+          rgba(255,255,255,.30),
+          rgba(255,255,255,.12) 42%,
+          transparent 74%);
+
       mix-blend-mode: screen;
-      animation: highlight 4.2s ease-in-out infinite;
-      pointer-events:none;
+      opacity:0;
+      transform: translateX(-80%);
       will-change: transform, opacity;
+      animation: highlight 5.4s var(--ease) infinite;
+      pointer-events:none;
     }
+
     @keyframes shineMove{
-      0%{ background-position: -60% 50%; }
-      50%{ background-position: 160% 50%; }
-      100%{ background-position: -60% 50%; }
+      0%   { background-position: -80% 50%; }
+      14%  { background-position: -80% 50%; } /* pausa inicial */
+      58%  { background-position: 180% 50%; } /* varre tudo */
+      100% { background-position: 180% 50%; } /* pausa final (reset invisível) */
     }
+
     @keyframes highlight{
-      0%{ transform: translateX(-70%); opacity:0; }
-      18%{ opacity:.33; }
-      52%{ transform: translateX(140%); opacity:.12; }
-      76%{ opacity:0; }
-      100%{ transform: translateX(200%); opacity:0; }
+      0%   { transform: translateX(-90%); opacity:0; }
+      14%  { transform: translateX(-90%); opacity:0; } /* pausa inicial */
+      22%  { opacity:.22; }
+      58%  { transform: translateX(185%); opacity:.08; }
+      70%  { opacity:0; }
+      100% { transform: translateX(220%); opacity:0; } /* pausa final */
     }
 
     .subtitle{
@@ -212,7 +224,7 @@
       50%{ opacity:.92; filter: blur(0); }
     }
 
-    /* Stage mais “junto” */
+    /* Stage */
     .stage{
       position:relative;
       margin-top: 16px;
@@ -237,9 +249,13 @@
       box-shadow: 0 35px 110px rgba(0,0,0,.55);
       backdrop-filter: blur(12px);
       overflow:hidden;
+
       transform-origin: top left;
       will-change: transform, filter, opacity;
-      transition: transform 520ms cubic-bezier(.2,.9,.1,1), filter 520ms ease, opacity 520ms ease;
+      transition:
+        transform 640ms var(--ease),
+        filter 640ms var(--ease),
+        opacity 640ms var(--ease);
     }
     .leadCard::before{
       content:"";
@@ -398,6 +414,8 @@
       backdrop-filter: blur(10px);
       overflow:hidden;
       position:relative;
+      will-change: transform, opacity;
+      transition: transform 640ms var(--ease), opacity 640ms var(--ease);
     }
     .panel::before{
       content:"";
@@ -450,7 +468,6 @@
       line-height:1.65;
     }
     .steps li{ margin: 8px 0; }
-
     .goldLine{
       margin-top: 10px;
       padding: 10px 12px;
@@ -458,6 +475,44 @@
       background: rgba(230,192,123,.08);
       border-radius: 14px;
       color: rgba(255,255,255,.86);
+    }
+
+    /* Cinemático no scroll: o card desliza pro canto e “abre espaço” */
+    body.compact .leadCard{
+      transform: translate3d(-18px, -10px, 0) scale(.78) rotate(-.35deg);
+      filter: saturate(.95) contrast(1.02);
+    }
+    body.compact .panel{
+      transform: translate3d(0, -6px, 0);
+      opacity: .98;
+    }
+    /* Um toque extra no desktop grande */
+    @media (min-width: 1100px){
+      body.compact .leadCard{
+        transform: translate3d(-34px, -14px, 0) scale(.76) rotate(-.4deg);
+      }
+    }
+
+    /* Anti-jitter em touch/tablet (corrige vibração/volta pra cima) */
+    @media (pointer: coarse){
+      .leadCard{ position: relative; top:auto; }
+      body.compact .leadCard{ transform:none; }
+    }
+
+    /* Mobile coluna */
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+      .leadCard{ position: relative; top:auto; }
+      body.compact .leadCard{ transform:none; }
+      button{ min-width: 0; width: min(360px, 100%); }
+      .form{ grid-template-columns: 1fr; }
+    }
+    @media (max-width: 430px){
+      .container{ padding: 14px; }
+      .leadInner{ padding: 16px; }
+      .tag{ font-size:11px; }
+      input{ height: 44px; }
+      .rule{ height: 9px; }
     }
 
     .footer{
@@ -477,48 +532,12 @@
       font-weight:700;
     }
 
-    /* Compact */
-    body.compact .leadCard{
-      transform: translate3d(0,0,0) scale(.84);
-      filter: saturate(.95);
-    }
-    @media (min-width: 980px){
-      body.compact .leadCard{
-        transform: translate3d(-6px, -4px, 0) scale(.80);
-      }
-    }
-
-    /* ======= ANTI-BUG EM TOUCH/TABLET (corrige vibração/volta pra cima) =======
-       Em telas grandes com toque (tablet), sticky + transform pode causar jitter.
-       Aqui desativamos o "sticky + compact transform" em pointer:coarse. */
-    @media (pointer: coarse){
-      .leadCard{ position: relative; top:auto; }
-      body.compact .leadCard{ transform:none; }
-    }
-
-    /* Mobile coluna */
-    @media (max-width: 920px){
-      .grid{ grid-template-columns: 1fr; }
-      .leadCard{ position: relative; top:auto; }
-      body.compact .leadCard{ transform:none; }
-      button{ min-width: 0; width: min(360px, 100%); }
-      .form{ grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 430px){
-      .container{ padding: 14px; }
-      .leadInner{ padding: 16px; }
-      .tag{ font-size:11px; }
-      input{ height: 44px; }
-      .rule{ height: 9px; }
-    }
-
     /* Reveal */
     .reveal{
       opacity:0;
       transform: translateY(10px);
       filter: blur(.4px);
-      transition: opacity 700ms ease, transform 700ms ease, filter 700ms ease;
+      transition: opacity 700ms var(--ease), transform 700ms var(--ease), filter 700ms var(--ease);
     }
     .reveal.on{
       opacity:1;
@@ -537,7 +556,7 @@
     <div class="container">
       <div class="topMark">
         <div class="badge">
-          <!-- SUA LOGO ORIGINAL AQUI -->
+          <!-- SUA LOGO ORIGINAL AQUI: coloque "logo.png" na raiz -->
           <img src="./logo.png?v=1" alt="Prelúdio Jogos">
           <span>Prelúdio Jogos</span>
         </div>
@@ -719,10 +738,11 @@
       items.forEach(el => io.observe(el));
     })();
 
-    /* Compact suave */
+    /* Compact suave (cinematográfico) */
     (function(){
       let ticking = false;
       const trigger = 120;
+
       function onScroll(){
         if(ticking) return;
         ticking = true;
@@ -773,12 +793,12 @@
         const c = consent.checked;
 
         if(!m || !m.includes("@") || m.length < 6){
-          setStatus("Status: e-mail inválido.", false);
+          setStatus("Status: e-mail inválido.");
           email.focus();
           return;
         }
         if(!c){
-          setStatus("Status: marque a autorização para entrar na lista.", false);
+          setStatus("Status: marque a autorização para entrar na lista.");
           consent.focus();
           return;
         }
@@ -796,7 +816,7 @@
         );
 
         setStatus("Status: lead salvo. Abrindo envio para você…", true);
-        setTimeout(()=> window.open(`mailto:${OWNER_EMAIL}?subject=${subject}&body=${body}`, "_blank"), 200);
+        setTimeout(()=> window.open(`mailto:${OWNER_EMAIL}?subject=${subject}&body=${body}`, "_blank"), 180);
 
         form.reset();
       });
