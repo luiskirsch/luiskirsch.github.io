@@ -1,173 +1,771 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Prelúdio Jogos — O SextoLugar</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Prelúdio Jogos — O SextoLugar</title>
 
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-<link rel="shortcut icon" href="/favicon.png">
-<link rel="apple-touch-icon" href="/favicon.png">
+  <!-- FAVICON / ÍCONE DA ABA -->
+  <link rel="icon" type="image/png" href="./favicon.png">
+  <link rel="apple-touch-icon" href="./favicon.png">
+  <meta name="theme-color" content="#050505">
 
-<style>
-:root{
---bg:#050505;
---gold:#e6c07b;
---muted:#a7a7a7;
---shadow:rgba(0,0,0,.55);
---ok:#9be37a;
-}
+  <style>
+    :root{
+      --bg:#050505;
+      --gold:#e6c07b;
+      --muted:#a7a7a7;
+      --card:rgba(255,255,255,.055);
+      --line:rgba(230,192,123,.22);
+      --shadow:rgba(0,0,0,.55);
+      --ok:#9be37a;
+      --danger:#ff4d4d;
+      --glass: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+    }
 
-*{box-sizing:border-box;}
-body{
-margin:0;
-min-height:100vh;
-display:grid;
-place-items:center;
-padding:24px;
-background:
-radial-gradient(1200px 700px at 50% 20%, rgba(230,192,123,.10), transparent 55%),
-radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
-var(--bg);
-color:#f2f2f2;
-font-family:Georgia,serif;
-}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
 
-.wrap{max-width:980px;width:100%;text-align:center;}
+    body{
+      margin:0;
+      min-height:100vh; /* fallback */
+      background: var(--bg);
+      color:#f2f2f2;
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
+      overflow-x:hidden;
+      overflow-y:auto;
+      -webkit-text-size-adjust: 100%;
+    }
+    @supports (height: 100dvh){
+      body{ min-height:100dvh; }
+    }
 
-h1{
-margin:0;
-letter-spacing:.20em;
-text-transform:uppercase;
-color:var(--gold);
-font-size:clamp(30px,6vw,78px);
-text-shadow:0 18px 60px var(--shadow);
-}
+    /* Fundo atmosférico */
+    .bg{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      overflow:hidden;
+      background:
+        radial-gradient(1200px 700px at 50% 10%, rgba(230,192,123,.14), transparent 55%),
+        radial-gradient(1000px 640px at 15% 25%, rgba(255,255,255,.07), transparent 60%),
+        radial-gradient(1000px 680px at 85% 75%, rgba(255,255,255,.06), transparent 62%),
+        radial-gradient(800px 420px at 65% 55%, rgba(230,192,123,.08), transparent 62%),
+        var(--bg);
+    }
 
-.subtitle{
-margin-top:10px;
-opacity:.9;
-}
+    /* ruído */
+    .bg::after{
+      content:"";
+      position:absolute;
+      inset:-20%;
+      pointer-events:none;
+      opacity:.12;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      transform: rotate(2deg);
+    }
 
-.card{
-margin-top:30px;
-padding:28px;
-border-radius:20px;
-background:rgba(255,255,255,.05);
-border:1px solid rgba(255,255,255,.08);
-backdrop-filter:blur(10px);
-}
+    /* glow que “respira” */
+    .glow{
+      position:absolute;
+      inset:-20%;
+      pointer-events:none;
+      filter: blur(14px);
+      opacity:.75;
+      background:
+        radial-gradient(720px 380px at 50% 35%, rgba(230,192,123,.12), transparent 62%),
+        radial-gradient(980px 520px at 58% 75%, rgba(255,255,255,.06), transparent 68%);
+      animation: pulseGlow 4.8s ease-in-out infinite;
+    }
+    @keyframes pulseGlow{
+      0%,100%{ opacity:.55; transform:translateY(0) scale(1); }
+      50%{ opacity:.95; transform:translateY(-8px) scale(1.02); }
+    }
 
-input{
-width:100%;
-padding:12px;
-margin-top:6px;
-border-radius:14px;
-border:1px solid rgba(255,255,255,.1);
-background:rgba(0,0,0,.25);
-color:white;
-}
+    /* Canvas das partículas */
+    #fx{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      opacity:.9;
+    }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-}
+    /* Wrapper */
+    .wrap{
+      position:relative;
+      z-index:1;
+      width:100%;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      padding-left:max(24px, env(safe-area-inset-left));
+      padding-right:max(24px, env(safe-area-inset-right));
+      padding-top:max(22px, env(safe-area-inset-top));
+      padding-bottom:max(22px, env(safe-area-inset-bottom));
+    }
 
-button{
-margin-top:15px;
-padding:12px 18px;
-border-radius:14px;
-border:1px solid rgba(230,192,123,.3);
-background:rgba(0,0,0,.3);
-color:var(--gold);
-cursor:pointer;
-letter-spacing:.1em;
-text-transform:uppercase;
-}
+    .container{
+      width:100%;
+      max-width:1020px;
+      display:grid;
+      gap:16px;
+      justify-items:center;
+      text-align:center;
+    }
 
-.secondary{
-border-color:rgba(255,255,255,.15);
-color:#ddd;
-}
+    /* topo */
+    .brandTop{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      opacity:0;
+      transform: translateY(10px);
+      animation: inUp .8s ease .08s forwards;
+    }
+    .mark{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      border:1px solid rgba(230,192,123,.22);
+      background: rgba(0,0,0,.25);
+      display:grid;
+      place-items:center;
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      overflow:hidden;
+    }
+    .mark img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transform: scale(1.05);
+    }
+    .brandName{
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(230,192,123,.95);
+      font-weight:700;
+      font-size:12px;
+    }
 
-.status{
-margin-top:10px;
-font-size:13px;
-opacity:.7;
-}
+    h1{
+      margin:0;
+      letter-spacing:.20em;
+      line-height:1.03;
+      font-weight:700;
+      color:var(--gold);
+      text-transform:uppercase;
+      font-size:clamp(34px, 6.2vw, 84px);
+      text-shadow: 0 18px 60px rgba(0,0,0,.55);
+      opacity:0;
+      transform: translateY(12px);
+      animation: inUp 1s ease .18s forwards;
+      position:relative;
+    }
 
-.status.ok{color:var(--ok);}
+    /* brilho “passando” no título */
+    h1::after{
+      content:"";
+      position:absolute;
+      inset:-10px -40px;
+      pointer-events:none;
+      background: linear-gradient(110deg,
+        transparent 0%,
+        rgba(255,255,255,.10) 35%,
+        rgba(230,192,123,.22) 50%,
+        rgba(255,255,255,.08) 60%,
+        transparent 100%);
+      transform: translateX(-120%);
+      animation: sweep 3.8s ease-in-out 1.2s infinite;
+      filter: blur(0.6px);
+      opacity:.55;
+      mix-blend-mode: screen;
+    }
+    @keyframes sweep{
+      0%,55%{ transform: translateX(-120%); }
+      75%,100%{ transform: translateX(120%); }
+    }
 
-.footer{
-margin-top:30px;
-font-size:11px;
-opacity:.5;
-letter-spacing:.12em;
-text-transform:uppercase;
-}
+    .sub{
+      margin:0;
+      max-width:70ch;
+      font-size:clamp(14px, 2.2vw, 18px);
+      opacity:.90;
+      color:#eaeaea;
+      line-height:1.55;
+      text-shadow: 0 18px 60px rgba(0,0,0,.55);
+      opacity:0;
+      transform: translateY(10px);
+      animation: inUp .9s ease .28s forwards;
+    }
 
-@media(max-width:600px){
-.grid{grid-template-columns:1fr;}
-button{width:100%;}
-}
-</style>
+    .whisper{
+      margin-top:2px;
+      font-size:clamp(12px, 2vw, 16px);
+      color:var(--muted);
+      opacity:.78;
+      letter-spacing:.06em;
+      animation: flicker 3.2s ease-in-out infinite;
+      opacity:0;
+      transform: translateY(10px);
+      animation:
+        inUp .9s ease .36s forwards,
+        flicker 3.2s ease-in-out 1.0s infinite;
+    }
+    @keyframes flicker{
+      0%,100%{ opacity:.50; filter: blur(.2px); }
+      50%{ opacity:.92; filter: blur(0); }
+    }
+
+    @keyframes inUp{
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* Card */
+    .card{
+      width:100%;
+      max-width:920px;
+      padding:clamp(16px, 3vw, 30px);
+      border-radius:22px;
+      background: var(--glass);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 30px 90px rgba(0,0,0,.62);
+      backdrop-filter: blur(12px);
+      position:relative;
+      overflow:hidden;
+      text-align:left;
+      opacity:0;
+      transform: translateY(14px);
+      animation: inUp 1s ease .44s forwards;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background: radial-gradient(780px 260px at 50% 0%, rgba(230,192,123,.13), transparent 62%);
+      opacity:.85;
+    }
+
+    .cardInner{
+      position:relative;
+      z-index:1;
+      display:grid;
+      gap:14px;
+    }
+
+    .tag{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      letter-spacing:.22em;
+      color:rgba(230,192,123,.82);
+      text-transform:uppercase;
+      margin-bottom:2px;
+      text-align:center;
+    }
+    .dot{
+      width:5px; height:5px;
+      background:rgba(230,192,123,.85);
+      border-radius:50%;
+      box-shadow:0 0 16px rgba(230,192,123,.35);
+    }
+
+    .leadTitle{
+      margin:0;
+      font-size:clamp(18px, 2.6vw, 28px);
+      line-height:1.35;
+      color:#f3f3f3;
+      text-shadow: 0 18px 60px rgba(0,0,0,.55);
+      text-align:center;
+    }
+
+    .rule{
+      height:10px;
+      width:min(760px, 92%);
+      border-radius:999px;
+      background: linear-gradient(90deg,
+        rgba(255,255,255,.06),
+        rgba(230,192,123,.18),
+        rgba(255,255,255,.06));
+      opacity:.65;
+      filter: blur(.2px);
+      margin: 2px auto 0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:8px;
+    }
+
+    label{
+      display:block;
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.70);
+      margin:0 0 8px 2px;
+    }
+
+    .input{
+      width:100%;
+      border-radius:14px;
+      padding:12px 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      color:#f2f2f2;
+      outline:none;
+      font-family: inherit;
+      font-size:15px;
+      box-shadow: inset 0 0 26px rgba(0,0,0,.35);
+      transition: border-color .18s ease, transform .12s ease, box-shadow .18s ease;
+    }
+    .input:focus{
+      border-color: rgba(230,192,123,.30);
+      box-shadow: inset 0 0 26px rgba(0,0,0,.35), 0 0 0 3px rgba(230,192,123,.10);
+      transform: translateY(-1px);
+    }
+    .input::placeholder{ color: rgba(255,255,255,.35); }
+
+    .consent{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      margin-top:2px;
+      color:rgba(255,255,255,.72);
+      font-size:13px;
+      line-height:1.35;
+      user-select:none;
+    }
+    .consent input{
+      margin-top:3px;
+      width:16px; height:16px;
+      accent-color: var(--gold);
+    }
+
+    .status{
+      margin:0;
+      font-size:13px;
+      color:rgba(255,255,255,.65);
+      letter-spacing:.02em;
+      text-align:center;
+      min-height: 18px;
+    }
+    .status.ok{ color: rgba(155,227,122,.92); }
+    .status.bad{ color: rgba(255,77,77,.92); }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top:4px;
+    }
+
+    .btn{
+      border:1px solid rgba(230,192,123,.22);
+      background: rgba(0,0,0,.25);
+      color:rgba(230,192,123,.92);
+      padding:12px 18px;
+      border-radius:14px;
+      cursor:pointer;
+      font-family: inherit;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      min-width:210px;
+      transition: transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease, box-shadow .18s ease;
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      position:relative;
+      overflow:hidden;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color:rgba(230,192,123,.34);
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+    }
+    .btn:active{ transform: translateY(0); opacity:.92; }
+
+    .btn.secondary{
+      color: rgba(255,255,255,.75);
+      border-color: rgba(255,255,255,.12);
+    }
+
+    /* ripple */
+    .btn .r{
+      position:absolute;
+      border-radius:50%;
+      transform: scale(0);
+      animation: ripple .55s ease-out;
+      background: rgba(230,192,123,.22);
+      pointer-events:none;
+    }
+    @keyframes ripple{
+      to{ transform: scale(12); opacity:0; }
+    }
+
+    /* Footer */
+    .footer{
+      width:100%;
+      max-width:980px;
+      margin:14px auto 0;
+      text-align:center;
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.40);
+      pointer-events:none;
+      padding: 0 10px;
+      opacity:0;
+      transform: translateY(10px);
+      animation: inUp .9s ease .62s forwards;
+    }
+    .footer .brand{
+      color:rgba(230,192,123,.85);
+      font-weight:700;
+    }
+
+    /* Transição de página */
+    .fadeOut{
+      animation: fadeOut .55s ease forwards;
+    }
+    @keyframes fadeOut{
+      to{ opacity:0; transform: translateY(6px) scale(.995); filter: blur(1px); }
+    }
+
+    /* Mobile */
+    @media (max-width: 720px){
+      .grid{ grid-template-columns: 1fr; }
+      .btn{ min-width: 0; width: min(420px, 100%); }
+      .card{ border-radius:20px; }
+      .leadTitle{ text-align:left; }
+      .tag{ justify-content:flex-start; }
+      .rule{ width:100%; }
+    }
+
+    @media (max-width: 430px){
+      .wrap{ padding:16px; }
+      h1{ font-size: clamp(30px, 10vw, 44px); letter-spacing:.17em; }
+      .sub{ max-width: 34ch; }
+      .card{ padding: 14px 14px 16px; }
+    }
+
+    /* Acessibilidade: reduzir motion */
+    @media (prefers-reduced-motion: reduce){
+      .glow, h1::after, .whisper{ animation: none !important; }
+      .brandTop, h1, .sub, .card, .footer{ animation: none !important; opacity:1 !important; transform:none !important; }
+    }
+  </style>
 </head>
 
 <body>
-<main class="wrap">
+  <div class="bg" aria-hidden="true">
+    <canvas id="fx"></canvas>
+    <div class="glow"></div>
+  </div>
 
-<h1>PRELÚDIO JOGOS</h1>
-<p class="subtitle">Uma experiência psicológica em cartas físicas.</p>
+  <main class="wrap" id="scene">
+    <div class="container">
+      <div class="brandTop">
+        <div class="mark" aria-label="Prelúdio Jogos">
+          <img src="./favicon.png" alt="">
+        </div>
+        <div class="brandName">Prelúdio Jogos</div>
+      </div>
 
-<section class="card">
+      <h1>Prelúdio Jogos</h1>
 
-<form id="leadForm" action="https://formsubmit.co/luiskirsch22@hotmail.com" method="POST">
+      <p class="sub">
+        Uma experiência psicológica em cartas físicas. O site é a trilha: tempo, clima e silêncio.
+      </p>
+      <div class="whisper">Entre primeiro. Depois, não tem volta.</div>
 
-<input type="hidden" name="_subject" value="Novo lead — Prelúdio Jogos">
-<input type="hidden" name="_template" value="table">
-<input type="hidden" name="_captcha" value="false">
-<input type="hidden" name="_next" value="./index.html?ok=1">
+      <section class="card" aria-label="Boas-vindas e lista">
+        <div class="cardInner">
+          <div class="tag">
+            <span class="dot"></span>
+            <span>Boas-vindas • Acesso</span>
+            <span class="dot"></span>
+          </div>
 
-<div class="grid">
-<div>
-<label>Nome</label>
-<input type="text" name="Nome" required>
-</div>
+          <p class="leadTitle">
+            Quer receber novidades, descontos e a fase 2 assim que abrir?
+            Deixe seu contato e entre para a lista.
+          </p>
 
-<div>
-<label>E-mail</label>
-<input type="email" name="Email" required>
-</div>
-</div>
+          <div class="rule"></div>
 
-<p class="status" id="statusLead">Status: aguardando seu e-mail.</p>
+          <form id="leadForm" autocomplete="on" novalidate>
+            <div class="grid">
+              <div>
+                <label for="nome">Nome</label>
+                <input class="input" id="nome" name="nome" type="text" placeholder="Seu nome" maxlength="60" />
+              </div>
 
-<button type="submit">Entrar na lista</button>
-<button type="button" id="btnEntrada" class="secondary">Acessar a entrada</button>
+              <div>
+                <label for="email">E-mail</label>
+                <input class="input" id="email" name="email" type="email" placeholder="seuemail@exemplo.com" maxlength="80" inputmode="email" />
+              </div>
+            </div>
 
-</form>
-</section>
+            <div class="consent">
+              <input id="consent" type="checkbox" />
+              <label for="consent" style="margin:0; letter-spacing:0; text-transform:none; color:rgba(255,255,255,.72); font-size:13px;">
+                Autorizo receber comunicações da <strong style="color:rgba(230,192,123,.9)">Prelúdio Jogos</strong> sobre lançamentos e descontos.
+              </label>
+            </div>
 
-<footer class="footer">
-© 2026 PRELÚDIO JOGOS™ · O SEXTOLUGAR™
-</footer>
+            <p class="status" id="status">Status: aguardando seu e-mail.</p>
 
-</main>
+            <div class="actions">
+              <button class="btn" id="btnLista" type="submit">Entrar na lista</button>
+              <button class="btn secondary" id="btnEntrada" type="button">Acessar a entrada</button>
+            </div>
 
-<script>
-document.getElementById("btnEntrada").addEventListener("click",()=>{
-window.location.href="./entrada.html";
-});
+            <!-- opção extra: baixar CSV das leads -->
+            <div class="actions" style="margin-top:10px;">
+              <button class="btn secondary" id="btnExport" type="button" style="min-width:210px;">Exportar leads (CSV)</button>
+            </div>
+          </form>
+        </div>
+      </section>
 
-const params=new URLSearchParams(window.location.search);
-if(params.get("ok")==="1"){
-const status=document.getElementById("statusLead");
-status.textContent="Status: você entrou na lista. Bem-vindo.";
-status.classList.add("ok");
-history.replaceState({},document.title,"./index.html");
-}
-</script>
+      <footer class="footer" aria-label="Direitos autorais">
+        © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+      </footer>
+    </div>
+  </main>
 
+  <script>
+    // ========= Partículas (leve) =========
+    (function(){
+      const prefersReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const c = document.getElementById('fx');
+      const ctx = c.getContext('2d', { alpha: true });
+
+      let W=0, H=0, DPR=1;
+      function resize(){
+        DPR = Math.min(2, window.devicePixelRatio || 1);
+        W = c.clientWidth = window.innerWidth;
+        H = c.clientHeight = window.innerHeight;
+        c.width = Math.floor(W * DPR);
+        c.height = Math.floor(H * DPR);
+        ctx.setTransform(DPR,0,0,DPR,0,0);
+      }
+      window.addEventListener('resize', resize, { passive:true });
+      resize();
+
+      if(prefersReduce) return;
+
+      const N = Math.max(28, Math.min(70, Math.floor((W*H)/26000)));
+      const pts = [];
+      for(let i=0;i<N;i++){
+        pts.push({
+          x: Math.random()*W,
+          y: Math.random()*H,
+          r: 0.6 + Math.random()*1.8,
+          vx: (-0.18 + Math.random()*0.36),
+          vy: (-0.12 + Math.random()*0.24),
+          a: 0.12 + Math.random()*0.22
+        });
+      }
+
+      let mx = W/2, my = H/2;
+      window.addEventListener('pointermove', (e)=>{
+        mx = e.clientX; my = e.clientY;
+      }, { passive:true });
+
+      function loop(){
+        ctx.clearRect(0,0,W,H);
+
+        // glow no cursor (bem sutil)
+        const g = ctx.createRadialGradient(mx,my,0,mx,my,240);
+        g.addColorStop(0,'rgba(230,192,123,0.08)');
+        g.addColorStop(1,'rgba(230,192,123,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0,0,W,H);
+
+        // pontos + conexões
+        for(const p of pts){
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if(p.x < -20) p.x = W+20;
+          if(p.x > W+20) p.x = -20;
+          if(p.y < -20) p.y = H+20;
+          if(p.y > H+20) p.y = -20;
+
+          ctx.beginPath();
+          ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+          ctx.fillStyle = `rgba(255,255,255,${p.a})`;
+          ctx.fill();
+        }
+
+        // linhas (limitadas)
+        for(let i=0;i<pts.length;i++){
+          for(let j=i+1;j<pts.length;j++){
+            const a = pts[i], b = pts[j];
+            const dx = a.x-b.x, dy = a.y-b.y;
+            const d2 = dx*dx + dy*dy;
+            if(d2 < 140*140){
+              const t = 1 - (Math.sqrt(d2)/140);
+              ctx.strokeStyle = `rgba(230,192,123,${0.08*t})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(a.x,a.y);
+              ctx.lineTo(b.x,b.y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(loop);
+      }
+      loop();
+    })();
+
+    // ========= Ripple nos botões =========
+    document.querySelectorAll('.btn').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const r = document.createElement('span');
+        r.className = 'r';
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        r.style.left = x + 'px';
+        r.style.top  = y + 'px';
+        r.style.width = r.style.height = '18px';
+        btn.appendChild(r);
+        setTimeout(()=>r.remove(), 650);
+      }, { passive:true });
+    });
+
+    // ========= Leads (localStorage) =========
+    const leadForm = document.getElementById('leadForm');
+    const statusEl = document.getElementById('status');
+    const nomeEl = document.getElementById('nome');
+    const emailEl = document.getElementById('email');
+    const consentEl = document.getElementById('consent');
+
+    const btnEntrada = document.getElementById('btnEntrada');
+    const btnExport = document.getElementById('btnExport');
+    const scene = document.getElementById('scene');
+
+    function setStatus(msg, type){
+      statusEl.classList.remove('ok','bad');
+      if(type) statusEl.classList.add(type);
+      statusEl.textContent = msg;
+    }
+
+    function isValidEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email.trim());
+    }
+
+    function getLeads(){
+      try{
+        return JSON.parse(localStorage.getItem('preludio_leads') || '[]');
+      }catch(e){
+        return [];
+      }
+    }
+    function saveLead(lead){
+      const leads = getLeads();
+      leads.push(lead);
+      localStorage.setItem('preludio_leads', JSON.stringify(leads));
+    }
+
+    leadForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+
+      const nome = (nomeEl.value || '').trim();
+      const email = (emailEl.value || '').trim();
+
+      if(!isValidEmail(email)){
+        setStatus('Status: e-mail inválido.', 'bad');
+        emailEl.focus();
+        return;
+      }
+      if(!consentEl.checked){
+        setStatus('Status: marque a autorização para entrar na lista.', 'bad');
+        consentEl.focus();
+        return;
+      }
+
+      // evita duplicado pelo e-mail
+      const leads = getLeads();
+      const exists = leads.some(l => (l.email||'').toLowerCase() === email.toLowerCase());
+      if(exists){
+        setStatus('Status: este e-mail já está na lista.', 'ok');
+        return;
+      }
+
+      // loading visual
+      const btn = document.getElementById('btnLista');
+      const old = btn.textContent;
+      btn.textContent = 'Salvando…';
+      btn.disabled = true;
+      setStatus('Status: registrando…', '');
+
+      // salva local
+      saveLead({
+        nome,
+        email,
+        consent: true,
+        createdAt: new Date().toISOString(),
+        page: 'index'
+      });
+
+      await new Promise(r=>setTimeout(r, 450));
+
+      btn.textContent = old;
+      btn.disabled = false;
+
+      setStatus('Status: você entrou na lista. Bem-vindo.', 'ok');
+      leadForm.reset();
+    });
+
+    // Exportar CSV
+    btnExport.addEventListener('click', ()=>{
+      const leads = getLeads();
+      if(!leads.length){
+        setStatus('Status: nenhuma lead salva ainda.', 'bad');
+        return;
+      }
+
+      const header = ['nome','email','createdAt'];
+      const rows = [header.join(',')].concat(
+        leads.map(l => [
+          `"${(l.nome||'').replaceAll('"','""')}"`,
+          `"${(l.email||'').replaceAll('"','""')}"`,
+          `"${(l.createdAt||'')}"`,
+        ].join(','))
+      );
+
+      const blob = new Blob([rows.join('\n')], { type:'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'preludio-leads.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      setStatus('Status: CSV gerado.', 'ok');
+    });
+
+    // Ir para a Entrada (entrada.html) com transição
+    btnEntrada.addEventListener('click', ()=>{
+      setStatus('Status: acessando…', '');
+      scene.classList.add('fadeOut');
+      setTimeout(()=> window.location.href = './entrada.html', 560);
+    });
+  </script>
 </body>
 </html>
