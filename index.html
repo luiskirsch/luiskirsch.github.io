@@ -3,355 +3,335 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Prelúdio Jogos — O SextoLugar</title>
+  <title>Prelúdio Jogos — Boas-vindas</title>
 
-  <!-- FAVICON -->
-  <link rel="icon" type="image/png" sizes="512x512" href="./favicon.png?v=9">
-  <link rel="apple-touch-icon" href="./favicon.png?v=9">
-  <meta name="theme-color" content="#050505">
+  <!-- FAVICON (NÃO é a logo oficial) -->
+  <link rel="icon" href="./favicon.png">
+
+  <meta name="theme-color" content="#050505" />
 
   <style>
     :root{
       --bg:#050505;
+      --bg2:#070707;
       --gold:#e6c07b;
-      --shadow:rgba(0,0,0,.55);
-      --maxW: 1180px;
-      --pad: 20px;
-      --radius: 22px;
-      --ease: cubic-bezier(.18,.92,.12,1);
+      --muted:#a7a7a7;
+      --text:#f2f2f2;
+      --cardA:rgba(255,255,255,.07);
+      --cardB:rgba(255,255,255,.03);
+      --line:rgba(230,192,123,.22);
+      --shadow:rgba(0,0,0,.65);
+      --ok:#9be37a;
+      --danger:#ff4d4d;
+
+      --radius:22px;
+      --ease:cubic-bezier(.18,.92,.12,1);
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
-    html{ scroll-behavior:smooth; }
 
     body{
       margin:0;
-      background: var(--bg);
-      color:#f2f2f2;
+      color:var(--text);
       font-family: ui-serif, Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(1100px 700px at 50% 16%, rgba(230,192,123,.11), transparent 58%),
+        radial-gradient(900px 560px at 12% 12%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(1000px 680px at 84% 82%, rgba(255,255,255,.05), transparent 62%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
       overflow-x:hidden;
       overflow-y:auto;
-      -webkit-text-size-adjust: 100%;
+      -webkit-text-size-adjust:100%;
     }
 
-    /* Fundo */
-    .bg{
+    /* “grão” sutil cinematográfico */
+    body::after{
+      content:"";
       position:fixed;
       inset:0;
       pointer-events:none;
-      z-index:-3;
-      background:
-        radial-gradient(1200px 700px at 50% 18%, rgba(230,192,123,.12), transparent 55%),
-        radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
-        radial-gradient(900px 560px at 82% 75%, rgba(255,255,255,.05), transparent 62%),
-        linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.28));
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
+      opacity:.12;
+      mix-blend-mode:overlay;
+      filter:contrast(110%) brightness(110%);
+      z-index:0;
     }
+
+    /* brilhos atmosféricos */
     .glow{
       position:fixed;
       inset:-20%;
       pointer-events:none;
-      z-index:-2;
       background:
-        radial-gradient(700px 360px at 50% 35%, rgba(230,192,123,.10), transparent 62%),
-        radial-gradient(900px 480px at 62% 70%, rgba(255,255,255,.06), transparent 68%);
-      filter: blur(14px);
-      opacity:.70;
-      animation: pulseGlow 5s ease-in-out infinite;
-      transform: translate3d(0,0,0);
-      will-change: transform, opacity;
+        radial-gradient(780px 360px at 50% 30%, rgba(230,192,123,.10), transparent 62%),
+        radial-gradient(980px 520px at 60% 72%, rgba(255,255,255,.05), transparent 68%);
+      filter: blur(12px);
+      opacity:.76;
+      animation: pulseGlow 5.2s ease-in-out infinite;
+      z-index:0;
     }
     @keyframes pulseGlow{
-      0%,100%{ opacity:.55; transform:translateY(0) scale(1); }
-      50%{ opacity:.92; transform:translateY(-7px) scale(1.015); }
+      0%,100%{ opacity:.60; transform:translateY(0) scale(1); }
+      50%{ opacity:.92; transform:translateY(-6px) scale(1.01); }
     }
 
-    canvas#stars{
-      position:fixed;
-      inset:0;
-      z-index:-1;
-      pointer-events:none;
-      opacity:.55;
-    }
-
-    .container{
-      width:100%;
-      max-width: var(--maxW);
+    .page{
+      position:relative;
+      z-index:1;
+      width:min(1180px, 100%);
       margin:0 auto;
-      padding: var(--pad);
-      padding-left: max(var(--pad), env(safe-area-inset-left));
-      padding-right:max(var(--pad), env(safe-area-inset-right));
-      padding-top: max(16px, env(safe-area-inset-top));
-      padding-bottom:max(16px, env(safe-area-inset-bottom));
+      padding:
+        max(18px, env(safe-area-inset-top))
+        max(18px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(18px, env(safe-area-inset-left));
+      padding-left:max(18px, env(safe-area-inset-left));
+      padding-right:max(18px, env(safe-area-inset-right));
     }
 
-    .hero{
-      min-height: 100dvh;
-      display:grid;
-      align-items:center;
-    }
-
-    .topMark{
+    /* Topo */
+    .topbar{
       display:flex;
       align-items:center;
       justify-content:center;
       gap:10px;
-      margin-bottom: 8px;
-      opacity:.98;
+      padding:16px 0 8px;
     }
-    .badge{
-      display:inline-flex;
+    .mark{
+      display:flex;
       align-items:center;
       gap:10px;
       padding:10px 14px;
       border-radius:999px;
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 18px 60px rgba(0,0,0,.40);
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.22);
       backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
     }
-    .badge img{
-      width:18px; height:18px;
-      border-radius:6px;
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
+    .mark img{
+      width:44px;
+      height:auto;
+      display:block;
+      filter:
+        drop-shadow(0 0 18px rgba(255,255,255,.10))
+        drop-shadow(0 0 40px rgba(230,192,123,.16));
+      transform: translateZ(0);
     }
-    .badge span{
+    .mark span{
       font-size:12px;
-      letter-spacing:.22em;
+      letter-spacing:.20em;
       text-transform:uppercase;
-      color: rgba(230,192,123,.92);
+      color:rgba(230,192,123,.86);
       white-space:nowrap;
     }
 
-    /* ===== TÍTULO: reflexo só DENTRO das letras (sem brilho extra por cima) ===== */
+    /* Hero */
+    .hero{
+      padding: 6px 0 18px;
+      text-align:center;
+      display:grid;
+      gap:10px;
+      place-items:center;
+    }
+
+    /* Título com “reflexo dentro das letras” */
     .title{
       margin:0;
-      text-align:center;
-      font-weight:800;
-      letter-spacing:.18em;
+      font-weight:700;
+      letter-spacing:.22em;
       text-transform:uppercase;
-      font-size: clamp(34px, 6.6vw, 92px);
-      line-height: 1.02;
-      text-shadow: 0 26px 90px rgba(0,0,0,.55);
-      position:relative;
-      isolation:isolate;
+      line-height:1.02;
+      font-size:clamp(34px, 6.8vw, 92px);
+      text-shadow: 0 22px 70px rgba(0,0,0,.60);
+
+      /* base dourada */
+      color:transparent;
+      background-image:
+        linear-gradient(180deg, rgba(230,192,123,.94), rgba(230,192,123,.78)),
+        linear-gradient(120deg, transparent 0%, rgba(255,255,255,.0) 38%, rgba(255,255,255,.0) 50%, rgba(255,255,255,.0) 62%, transparent 100%);
+      background-size: 100% 100%, 220% 100%;
+      background-position: 0 0, -140% 0;
+      background-repeat:no-repeat;
+
+      -webkit-background-clip:text;
+      background-clip:text;
+
+      /* reflexo (um só) */
+      animation: shineInLetters 7.6s var(--ease) infinite;
     }
 
-    /* Base dourada (fixa) */
-    .title .base{
-      color: var(--gold);
-      display:inline-block;
-      position:relative;
-      filter: drop-shadow(0 12px 40px rgba(0,0,0,.55));
+    @keyframes shineInLetters{
+      0%   { background-position: 0 0, -140% 0; }
+      55%  { background-position: 0 0, 140% 0; }
+      100% { background-position: 0 0, 140% 0; }
     }
 
-    /* Reflexo: UM só, dentro das letras, e some antes do reset */
-    .title .base::after{
-      content: attr(data-text);
-      position:absolute;
-      inset:0;
-      color: transparent;
-
-      /* reflexo “dentro” */
-      background: linear-gradient(110deg,
-        rgba(255,255,255,0) 0%,
-        rgba(255,255,255,0) 40%,
-        rgba(255,255,255,.70) 50%,
-        rgba(255,255,255,0) 60%,
-        rgba(255,255,255,0) 100%);
-      background-size: 260% 100%;
-      background-position: -80% 50%;
-
-      -webkit-background-clip: text;
-      background-clip: text;
-
-      opacity: 0;
-      will-change: background-position, opacity;
-      animation: oneShine 5.2s var(--ease) infinite;
-      pointer-events:none;
-    }
-
-    /* AQUI está o segredo:
-       - começa invisível
-       - aparece, varre e some
-       - fica invisível durante o reset (sem “segundo brilho”) */
-    @keyframes oneShine{
-      0%   { opacity:0; background-position:-80% 50%; }
-      18%  { opacity:0; background-position:-80% 50%; }
-      24%  { opacity:.55; }
-      56%  { opacity:.28; background-position:180% 50%; }
-      62%  { opacity:0;  background-position:180% 50%; }
-      100% { opacity:0;  background-position:180% 50%; }
-    }
-
-    .subtitle{
-      margin:10px auto 0;
-      text-align:center;
-      max-width: 78ch;
-      color: rgba(255,255,255,.86);
-      opacity:.92;
-      font-size: clamp(14px, 2.2vw, 18px);
-      line-height:1.55;
+    .sub{
+      margin:0;
+      max-width: 72ch;
+      font-size:clamp(14px, 2.2vw, 18px);
+      color:rgba(255,255,255,.86);
     }
     .whisper{
-      margin: 8px auto 0;
-      text-align:center;
-      color: rgba(255,255,255,.55);
+      margin:4px 0 0;
+      font-size:clamp(12px, 2vw, 16px);
+      color:var(--muted);
+      opacity:.78;
       letter-spacing:.06em;
-      font-size: clamp(12px, 2vw, 16px);
-      opacity:.72;
-      animation: flicker 3.2s ease-in-out infinite;
+      animation: flicker 3.4s ease-in-out infinite;
     }
     @keyframes flicker{
-      0%,100%{ opacity:.48; filter: blur(.2px); }
+      0%,100%{ opacity:.50; filter: blur(.2px); }
       50%{ opacity:.92; filter: blur(0); }
     }
 
-    .stage{
-      position:relative;
-      margin-top: 16px;
-      padding-bottom: 28px;
-    }
-
+    /* Layout “premium” com scroll fluido:
+       No desktop vira 2 colunas; no mobile fica 1 coluna. */
     .grid{
       display:grid;
-      grid-template-columns: 1.05fr .95fr;
-      gap: 18px;
+      gap:18px;
       align-items:start;
+      margin-top: 10px;
+      padding-bottom: 12px;
+    }
+    @media (min-width: 980px){
+      .grid{
+        grid-template-columns: 1.1fr .9fr;
+        gap:22px;
+      }
     }
 
-    .leadCard{
-      position: sticky;
-      top: 18px;
-      align-self:start;
+    .panel{
       border-radius: var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,255,255,.09);
-      box-shadow: 0 35px 110px rgba(0,0,0,.55);
-      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, var(--cardA), var(--cardB));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: 0 32px 90px rgba(0,0,0,.60);
+      backdrop-filter: blur(10px);
+      position:relative;
       overflow:hidden;
-
-      transform-origin: center;
-      will-change: transform, filter;
-      transition: transform 720ms var(--ease), filter 720ms var(--ease);
+      transform: translateZ(0);
     }
-    .leadCard::before{
+    .panel::after{
       content:"";
       position:absolute;
-      inset:-1px;
+      inset:0;
       pointer-events:none;
-      background: radial-gradient(780px 260px at 50% 0%, rgba(230,192,123,.14), transparent 60%);
-      opacity:.85;
+      background: radial-gradient(820px 260px at 50% 0%, rgba(230,192,123,.10), transparent 62%);
+      opacity:.9;
     }
-    .leadInner{
+
+    .panelInner{
       position:relative;
       z-index:1;
-      padding: 20px;
+      padding: clamp(16px, 2.8vw, 26px);
     }
 
     .tag{
       display:flex;
+      gap:10px;
       align-items:center;
       justify-content:center;
-      gap:10px;
-      letter-spacing:.22em;
-      text-transform:uppercase;
       font-size:12px;
-      color: rgba(230,192,123,.88);
-      margin-bottom: 12px;
+      letter-spacing:.22em;
+      color:rgba(230,192,123,.82);
+      text-transform:uppercase;
+      margin-bottom:12px;
     }
     .dot{
-      width:5px; height:5px; border-radius:50%;
-      background: rgba(230,192,123,.9);
+      width:5px; height:5px;
+      background:rgba(230,192,123,.82);
+      border-radius:50%;
       box-shadow:0 0 16px rgba(230,192,123,.35);
     }
 
-    .leadTitle{
+    .panelTitle{
       margin:0;
-      text-align:center;
-      font-size: clamp(18px, 2.6vw, 28px);
-      line-height:1.36;
-      color:#f4f4f4;
+      font-size:clamp(18px, 2.7vw, 30px);
+      line-height:1.35;
+      color:#f3f3f3;
       text-shadow: 0 18px 60px rgba(0,0,0,.55);
     }
 
     .rule{
-      margin:14px auto 12px;
+      margin:14px auto 10px;
       height:10px;
-      width:min(720px, 94%);
+      width:min(720px, 92%);
       border-radius:999px;
       background: linear-gradient(90deg,
         rgba(255,255,255,.06),
         rgba(230,192,123,.18),
         rgba(255,255,255,.06));
       opacity:.65;
+      filter: blur(.2px);
     }
 
-    .form{
+    /* Form */
+    form{ margin-top:12px; }
+    .fields{
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      align-items:end;
+      gap:12px;
     }
-
+    @media (min-width: 720px){
+      .fields{
+        grid-template-columns: 1fr 1fr;
+        align-items:end;
+      }
+    }
     label{
       display:block;
       font-size:11px;
       letter-spacing:.22em;
+      color:rgba(255,255,255,.58);
       text-transform:uppercase;
-      color: rgba(255,255,255,.62);
-      margin: 0 0 8px 2px;
+      margin:0 0 8px 6px;
     }
-    input{
+    input[type="text"], input[type="email"]{
       width:100%;
-      height: 46px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.25);
-      color: rgba(255,255,255,.90);
-      padding: 0 14px;
+      border-radius:14px;
+      padding:12px 14px;
+      background: rgba(0,0,0,.30);
+      border:1px solid rgba(255,255,255,.10);
+      color:rgba(255,255,255,.90);
       outline:none;
-      font-family: inherit;
       box-shadow: inset 0 0 30px rgba(0,0,0,.35);
       transition: border-color .18s ease, transform .12s ease;
     }
-    input:focus{
-      border-color: rgba(230,192,123,.35);
-      transform: translateY(-1px);
+    input[type="text"]:focus, input[type="email"]:focus{
+      border-color: rgba(230,192,123,.28);
     }
 
-    .consentRow{
-      grid-column: 1 / -1;
+    .consent{
       display:flex;
       gap:10px;
       align-items:flex-start;
-      margin-top: 2px;
-      color: rgba(255,255,255,.70);
-      font-size: 12px;
+      margin-top:10px;
+      color:rgba(255,255,255,.70);
+      font-size:13px;
       line-height:1.35;
     }
-    .consentRow input{
-      width:auto; height:auto;
-      margin-top: 2px;
-      box-shadow:none;
-      transform:none;
+    .consent input{
+      margin-top:3px;
+      accent-color: var(--gold);
     }
-    .consentRow b{ color: rgba(230,192,123,.95); font-weight:700; }
+    .consent b{
+      color:rgba(230,192,123,.90);
+    }
 
     .status{
-      grid-column: 1 / -1;
-      margin: 6px 0 0;
-      font-size: 13px;
-      color: rgba(255,255,255,.62);
+      margin:10px 0 0;
+      font-size:13px;
+      color:rgba(255,255,255,.65);
     }
+    .status.ok{ color: rgba(155,227,122,.88); }
+    .status.bad{ color: rgba(255,77,77,.88); }
 
     .actions{
-      grid-column: 1 / -1;
+      margin-top:14px;
       display:flex;
+      flex-wrap:wrap;
       gap:12px;
       justify-content:center;
-      flex-wrap:wrap;
-      margin-top: 10px;
     }
 
     button{
@@ -365,428 +345,285 @@
       letter-spacing:.12em;
       text-transform:uppercase;
       min-width:200px;
-      transition: transform .12s ease, border-color .18s ease, opacity .18s ease;
+      transition: transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
       box-shadow: 0 14px 40px rgba(0,0,0,.35);
     }
     button:hover{ transform: translateY(-1px); border-color:rgba(230,192,123,.34); }
-    button:active{ transform: translateY(0); opacity:.9; }
-
-    .btnGhost{
-      border-color: rgba(255,255,255,.12);
+    button:active{ transform: translateY(0); opacity:.92; }
+    button.secondary{
+      border-color: rgba(255,255,255,.10);
       color: rgba(255,255,255,.78);
+      background: rgba(255,255,255,.04);
     }
 
-    .side{
+    /* Sobre / Conteúdo */
+    .about{
       display:grid;
-      gap: 12px;
-      align-content:start;
+      gap:14px;
     }
-    .panel{
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: 0 26px 85px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-      overflow:hidden;
-      position:relative;
-    }
-    .panel::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background: radial-gradient(700px 220px at 30% 0%, rgba(230,192,123,.12), transparent 60%);
-      opacity:.75;
-    }
-    .panelInner{
-      position:relative;
-      z-index:1;
-      padding: 16px 16px 14px;
-    }
-    .panel h3{
-      margin:0 0 8px;
-      font-size: 13px;
+    .about h3{
+      margin:0;
+      font-size:14px;
       letter-spacing:.22em;
       text-transform:uppercase;
-      color: rgba(230,192,123,.92);
+      color:rgba(230,192,123,.86);
     }
-    .panel p{
+    .about p{
       margin:0;
-      color: rgba(255,255,255,.80);
-      font-size: 14px;
-      line-height:1.62;
+      color:rgba(255,255,255,.78);
+      line-height:1.7;
+      font-size:14px;
+    }
+    .bullets{
+      margin:8px 0 0;
+      padding-left:18px;
+      color:rgba(255,255,255,.78);
+      line-height:1.7;
+      font-size:14px;
     }
     .chips{
       display:flex;
       flex-wrap:wrap;
       gap:10px;
-      margin-top: 10px;
+      margin-top:10px;
     }
     .chip{
-      padding:10px 12px;
+      border:1px solid rgba(230,192,123,.18);
+      background: rgba(0,0,0,.22);
       border-radius:999px;
-      background: rgba(0,0,0,.25);
-      border: 1px solid rgba(255,255,255,.10);
-      color: rgba(230,192,123,.85);
-      font-size: 12px;
-      letter-spacing:.14em;
+      padding:9px 12px;
+      font-size:11px;
+      letter-spacing:.16em;
       text-transform:uppercase;
-      box-shadow: 0 12px 32px rgba(0,0,0,.35);
-      user-select:none;
-    }
-    .steps{
-      margin: 10px 0 0;
-      padding-left: 18px;
-      color: rgba(255,255,255,.80);
-      line-height:1.65;
-    }
-    .steps li{ margin: 8px 0; }
-    .goldLine{
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-left: 3px solid rgba(230,192,123,.55);
-      background: rgba(230,192,123,.08);
-      border-radius: 14px;
-      color: rgba(255,255,255,.86);
+      color:rgba(230,192,123,.86);
     }
 
-    /* ===== CINEMÁTICO NO SCROLL (sem encolher no canto) =====
-       Agora é só um "assentar" sutil: leve redução e leve subida,
-       mantendo tudo central e bonito. */
-    body.compact .leadCard{
-      transform: translate3d(0, -8px, 0) scale(.94);
-      filter: contrast(1.03) saturate(.98);
-    }
-
-    /* Anti-jitter em touch/tablet */
-    @media (pointer: coarse){
-      .leadCard{ position: relative; top:auto; }
-      body.compact .leadCard{ transform:none; }
-    }
-
-    @media (max-width: 920px){
-      .grid{ grid-template-columns: 1fr; }
-      .leadCard{ position: relative; top:auto; }
-      body.compact .leadCard{ transform:none; }
-      button{ min-width: 0; width: min(360px, 100%); }
-      .form{ grid-template-columns: 1fr; }
-    }
-    @media (max-width: 430px){
-      .container{ padding: 14px; }
-      .leadInner{ padding: 16px; }
-      .tag{ font-size:11px; }
-      input{ height: 44px; }
-      .rule{ height: 9px; }
-    }
-
+    /* Footer */
     .footer{
       width:100%;
-      max-width: var(--maxW);
-      margin: 18px auto 0;
       text-align:center;
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
-      color:rgba(255,255,255,.40);
+      color:rgba(255,255,255,.36);
       pointer-events:none;
-      padding: 0 10px 10px;
+      padding: 18px 10px 22px;
+      margin-top: 6px;
     }
     .footer .brand{
       color:rgba(230,192,123,.85);
       font-weight:700;
     }
 
-    .reveal{
-      opacity:0;
-      transform: translateY(10px);
-      filter: blur(.4px);
-      transition: opacity 700ms var(--ease), transform 700ms var(--ease), filter 700ms var(--ease);
+    /* Mobile refinado */
+    @media (max-width: 520px){
+      .mark img{ width:40px; }
+      .mark span{ font-size:11px; }
+      button{ min-width: 0; width: min(360px, 100%); }
+      .panelInner{ padding: 16px 14px 18px; }
+      .rule{ height:9px; margin:12px auto 8px; }
     }
-    .reveal.on{
-      opacity:1;
-      transform: translateY(0);
-      filter: blur(0);
+
+    /* Acessibilidade: reduz animações */
+    @media (prefers-reduced-motion: reduce){
+      .glow, .title, .whisper { animation:none !important; }
+      button{ transition:none; }
     }
   </style>
 </head>
 
 <body>
-  <div class="bg"></div>
   <div class="glow"></div>
-  <canvas id="stars" aria-hidden="true"></canvas>
 
-  <section class="hero">
-    <div class="container">
-      <div class="topMark">
-        <div class="badge">
-          <!-- SUA LOGO ORIGINAL: coloque "logo.png" na raiz -->
-          <img src="./logo.png?v=1" alt="Prelúdio Jogos">
-          <span>Prelúdio Jogos</span>
-        </div>
+  <div class="page">
+    <header class="topbar" aria-label="Topo">
+      <div class="mark" aria-label="Marca">
+        <!-- Logo oficial SÓ dentro da página -->
+        <img src="./logo_oficial.png" alt="Prelúdio Jogos (logo oficial)" />
+        <span>Prelúdio Jogos</span>
       </div>
+    </header>
 
-      <h1 class="title">
-        <span class="base" data-text="PRELÚDIO JOGOS">PRELÚDIO JOGOS</span>
-      </h1>
-
-      <p class="subtitle">
-        Uma experiência psicológica em cartas físicas. O site é a trilha: tempo, clima e silêncio.
-      </p>
+    <section class="hero" aria-label="Apresentação">
+      <h1 class="title">PRELÚDIO JOGOS</h1>
+      <p class="sub">Uma experiência psicológica em cartas físicas. O site é a trilha: tempo, clima e silêncio.</p>
       <div class="whisper">Entre primeiro. Depois, não tem volta.</div>
+    </section>
 
-      <div class="stage">
-        <div class="grid">
-          <section class="leadCard reveal on" aria-label="Boas-vindas e acesso">
-            <div class="leadInner">
-              <div class="tag">
-                <span class="dot"></span>
-                <span>Boas-vindas • Acesso</span>
-                <span class="dot"></span>
+    <section class="grid" aria-label="Conteúdo principal">
+      <!-- Leads -->
+      <div class="panel" aria-label="Boas-vindas e acesso">
+        <div class="panelInner">
+          <div class="tag">
+            <span class="dot"></span>
+            <span>Boas-vindas • Acesso</span>
+            <span class="dot"></span>
+          </div>
+
+          <p class="panelTitle">
+            Quer receber novidades, descontos e a fase 2 assim que abrir?
+            Deixe seu contato e entre para a lista.
+          </p>
+
+          <div class="rule"></div>
+
+          <form id="leadForm" autocomplete="on" novalidate>
+            <div class="fields">
+              <div>
+                <label for="nome">Nome</label>
+                <input id="nome" name="nome" type="text" placeholder="Seu nome" inputmode="text" />
               </div>
-
-              <h2 class="leadTitle">
-                Quer receber novidades, descontos e a fase 2 assim que abrir?
-                Deixe seu contato e entre para a lista.
-              </h2>
-
-              <div class="rule"></div>
-
-              <form class="form" id="leadForm" autocomplete="on">
-                <div>
-                  <label for="nome">Nome</label>
-                  <input id="nome" name="nome" placeholder="Seu nome" />
-                </div>
-
-                <div>
-                  <label for="email">E-mail</label>
-                  <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" required />
-                </div>
-
-                <div class="consentRow">
-                  <input id="consent" type="checkbox" />
-                  <div>
-                    Autorizo receber comunicações da <b>Prelúdio Jogos</b> sobre lançamentos e descontos.
-                  </div>
-                </div>
-
-                <p class="status" id="status">Status: aguardando seu e-mail.</p>
-
-                <div class="actions">
-                  <button type="submit">Entrar na lista</button>
-                  <button type="button" class="btnGhost" id="btnAcessar">Acessar a entrada</button>
-                </div>
-              </form>
-            </div>
-          </section>
-
-          <aside class="side">
-            <div class="panel reveal" id="panel1">
-              <div class="panelInner">
-                <h3>O que é</h3>
-                <p>
-                  <b>O SextoLugar</b> é um jogo psicológico em cartas físicas.
-                  O site não joga por você — ele controla o tempo e segura o ritmo da mesa,
-                  criando tensão real, silêncio e escolhas.
-                </p>
-                <div class="chips">
-                  <div class="chip">Cartas físicas</div>
-                  <div class="chip">Timer + clima</div>
-                  <div class="chip">Ritmo de mesa</div>
-                </div>
+              <div>
+                <label for="email">E-mail</label>
+                <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" inputmode="email" />
               </div>
             </div>
 
-            <div class="panel reveal" id="panel2">
-              <div class="panelInner">
-                <h3>Como funciona</h3>
-                <ol class="steps">
-                  <li>Entre na “Entrada” e leia o ritual (rápido).</li>
-                  <li>Defina: solo ou grupo (recomendado 3 a 5).</li>
-                  <li>Inicie a rodada: puxe uma carta e siga sem atalhos.</li>
-                  <li>Quando o tempo zerar, termina. Mesmo que alguém peça “só mais uma”.</li>
-                </ol>
-                <div class="goldLine">
-                  Regra de ouro: silêncio é clima. Clima é medo controlado.
-                </div>
+            <div class="consent">
+              <input id="consent" type="checkbox" />
+              <div>
+                Autorizo receber comunicações da <b>Prelúdio Jogos</b> sobre lançamentos e descontos.
               </div>
             </div>
 
-            <div class="panel reveal" id="panel3">
-              <div class="panelInner">
-                <h3>Por que entrar na lista</h3>
-                <p>
-                  Você recebe primeiro: <b>descontos</b>, <b>novas fases</b> e
-                  acesso antecipado a conteúdos do universo do jogo.
-                  Sem spam — só o que importa.
-                </p>
-              </div>
+            <p class="status" id="status">Status: aguardando seu e-mail.</p>
+
+            <div class="actions">
+              <button type="submit" id="btnLista">Entrar na lista</button>
+              <button type="button" class="secondary" id="btnEntrada">Acessar a entrada</button>
             </div>
-          </aside>
+          </form>
         </div>
-
-        <footer class="footer">
-          © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
-        </footer>
       </div>
-    </div>
-  </section>
+
+      <!-- Sobre -->
+      <div class="panel" aria-label="Sobre o jogo">
+        <div class="panelInner about">
+          <h3>O SextoLugar</h3>
+          <p>
+            Um jogo físico, psicológico e imersivo. As cartas são o corpo.
+            O site é o ritmo — segura o clima, cronometra a tensão e impede “atalhos”.
+          </p>
+
+          <ul class="bullets">
+            <li>Recomendado para 3 a 5 pessoas (ou solo).</li>
+            <li>Leia a entrada e o ritual antes da primeira rodada.</li>
+            <li>Puxe uma carta. Siga. Sem pausas “convenientes”.</li>
+            <li>Quando o tempo zerar, termina. Mesmo que alguém peça “só mais uma”.</li>
+          </ul>
+
+          <div class="chips" aria-label="Características">
+            <div class="chip">Cartas físicas</div>
+            <div class="chip">Timer + clima</div>
+            <div class="chip">Ritmo de mesa</div>
+            <div class="chip">Sem atalhos</div>
+          </div>
+
+          <p style="margin-top:10px; color:rgba(255,255,255,.72);">
+            Regra de ouro: <span style="color:rgba(230,192,123,.90); font-weight:700;">silêncio é clima</span>.
+            Clima é medo controlado.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer" aria-label="Direitos autorais">
+      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+    </footer>
+  </div>
 
   <script>
-    /* Partículas leves */
-    (function(){
-      const c = document.getElementById("stars");
-      const ctx = c.getContext("2d", { alpha: true });
-      let w=0,h=0, dpr=1;
-      const dots = [];
-      const DOTS = 90;
+    // ==========================
+    // LEADS (localStorage)
+    // ==========================
+    const leadForm = document.getElementById("leadForm");
+    const nomeEl = document.getElementById("nome");
+    const emailEl = document.getElementById("email");
+    const consentEl = document.getElementById("consent");
+    const statusEl = document.getElementById("status");
 
-      function resize(){
-        dpr = Math.min(2, window.devicePixelRatio || 1);
-        w = Math.floor(window.innerWidth * dpr);
-        h = Math.floor(window.innerHeight * dpr);
-        c.width = w; c.height = h;
-        c.style.width = "100%";
-        c.style.height = "100%";
+    const btnEntrada = document.getElementById("btnEntrada");
+
+    function setStatus(msg, type){
+      statusEl.textContent = msg;
+      statusEl.classList.remove("ok","bad");
+      if(type) statusEl.classList.add(type);
+    }
+
+    function validEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    }
+
+    function getLeads(){
+      try{
+        return JSON.parse(localStorage.getItem("preludio_leads") || "[]");
+      }catch(e){
+        return [];
       }
-      function rand(min,max){ return Math.random()*(max-min)+min; }
+    }
 
-      function init(){
-        dots.length=0;
-        for(let i=0;i<DOTS;i++){
-          dots.push({
-            x: rand(0,w),
-            y: rand(0,h),
-            r: rand(0.8, 2.2)*dpr,
-            a: rand(0.08, 0.22),
-            vx: rand(-0.12, 0.12)*dpr,
-            vy: rand(0.05, 0.22)*dpr,
-          });
-        }
+    function saveLead(lead){
+      const leads = getLeads();
+      // evita duplicado por e-mail
+      const exists = leads.some(l => (l.email || "").toLowerCase() === lead.email.toLowerCase());
+      if(!exists) leads.unshift(lead);
+      localStorage.setItem("preludio_leads", JSON.stringify(leads));
+      return !exists;
+    }
+
+    leadForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const nome = (nomeEl.value || "").trim();
+      const email = (emailEl.value || "").trim();
+
+      if(!email){
+        setStatus("Status: informe seu e-mail.", "bad");
+        emailEl.focus();
+        return;
       }
-
-      function step(){
-        ctx.clearRect(0,0,w,h);
-        for(const p of dots){
-          p.x += p.vx;
-          p.y += p.vy;
-          if(p.y > h + 20) { p.y = -20; p.x = rand(0,w); }
-          if(p.x < -20) p.x = w + 20;
-          if(p.x > w + 20) p.x = -20;
-
-          ctx.globalAlpha = p.a;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-          ctx.fillStyle = "white";
-          ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-        requestAnimationFrame(step);
+      if(!validEmail(email)){
+        setStatus("Status: e-mail inválido. Confira e tente novamente.", "bad");
+        emailEl.focus();
+        return;
       }
-
-      resize(); init(); step();
-      window.addEventListener("resize", () => { resize(); init(); }, { passive:true });
-    })();
-
-    /* Reveal */
-    (function(){
-      const items = document.querySelectorAll(".reveal");
-      const io = new IntersectionObserver((entries)=>{
-        for(const e of entries){
-          if(e.isIntersecting){
-            e.target.classList.add("on");
-            io.unobserve(e.target);
-          }
-        }
-      }, { threshold: 0.12 });
-      items.forEach(el => io.observe(el));
-    })();
-
-    /* Compact suave (sem jogar tudo pro canto) */
-    (function(){
-      let ticking = false;
-      const trigger = 140;
-      function onScroll(){
-        if(ticking) return;
-        ticking = true;
-        requestAnimationFrame(()=>{
-          const y = window.scrollY || document.documentElement.scrollTop || 0;
-          document.body.classList.toggle("compact", y > trigger);
-          ticking = false;
-        });
-      }
-      window.addEventListener("scroll", onScroll, { passive:true });
-      onScroll();
-    })();
-
-    /* Leads funcionando (site estático) */
-    (function(){
-      const form = document.getElementById("leadForm");
-      const nome = document.getElementById("nome");
-      const email = document.getElementById("email");
-      const consent = document.getElementById("consent");
-      const status = document.getElementById("status");
-      const btnAcessar = document.getElementById("btnAcessar");
-
-      const OWNER_EMAIL = "luiskirsch22@hotmail.com";
-
-      function loadLeads(){
-        try{ return JSON.parse(localStorage.getItem("preludio_leads") || "[]"); }
-        catch(e){ return []; }
-      }
-      function saveLeads(list){
-        localStorage.setItem("preludio_leads", JSON.stringify(list));
+      if(!consentEl.checked){
+        setStatus("Status: marque a autorização para entrar na lista.", "bad");
+        consentEl.focus();
+        return;
       }
 
-      function setStatus(msg, ok=false){
-        status.textContent = msg;
-        status.style.color = ok ? "rgba(155,227,122,.85)" : "rgba(255,255,255,.62)";
+      const now = new Date();
+      const lead = {
+        nome: nome || "—",
+        email,
+        consent: true,
+        createdAt: now.toISOString()
+      };
+
+      const inserted = saveLead(lead);
+
+      if(inserted){
+        setStatus("Status: você entrou na lista. Bem-vindo.", "ok");
+      }else{
+        setStatus("Status: este e-mail já está na lista.", "ok");
       }
 
-      email.addEventListener("input", ()=>{
-        if(email.value.trim().length > 4) setStatus("Status: pronto para entrar na lista.");
-        else setStatus("Status: aguardando seu e-mail.");
-      });
+      // feedback sutil
+      leadForm.animate(
+        [{ transform: "translateY(0)" }, { transform: "translateY(-2px)" }, { transform: "translateY(0)" }],
+        { duration: 260, easing: "cubic-bezier(.18,.92,.12,1)" }
+      );
+    });
 
-      form.addEventListener("submit", (e)=>{
-        e.preventDefault();
-
-        const n = (nome.value || "").trim();
-        const m = (email.value || "").trim().toLowerCase();
-        const c = consent.checked;
-
-        if(!m || !m.includes("@") || m.length < 6){
-          setStatus("Status: e-mail inválido.");
-          email.focus();
-          return;
-        }
-        if(!c){
-          setStatus("Status: marque a autorização para entrar na lista.");
-          consent.focus();
-          return;
-        }
-
-        const lead = { nome: n, email: m, consent: true, createdAt: new Date().toISOString() };
-
-        const leads = loadLeads();
-        const exists = leads.some(x => x.email === m);
-        if(!exists) leads.unshift(lead);
-        saveLeads(leads);
-
-        const subject = encodeURIComponent("[Lead] Prelúdio Jogos — Lista");
-        const body = encodeURIComponent(
-          `Novo lead cadastrado:\n\nNome: ${n || "(não informado)"}\nE-mail: ${m}\nConsentimento: SIM\nData: ${new Date().toLocaleString()}\n`
-        );
-
-        setStatus("Status: lead salvo. Abrindo envio para você…", true);
-        setTimeout(()=> window.open(`mailto:${OWNER_EMAIL}?subject=${subject}&body=${body}`, "_blank"), 180);
-
-        form.reset();
-      });
-
-      btnAcessar.addEventListener("click", ()=>{
-        window.location.href = "./entrada.html";
-      });
-    })();
+    // ==========================
+    // ENTRADA
+    // ==========================
+    btnEntrada.addEventListener("click", () => {
+      // IMPORTANTÍSSIMO:
+      // Renomeie sua antiga página de Entrada para "entrada.html"
+      window.location.href = "./entrada.html";
+    });
   </script>
 </body>
 </html>
