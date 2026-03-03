@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Prelúdio Jogos — Boas-vindas</title>
 
-  <!-- FAVICON DA ABA -->
-  <link rel="icon" href="./favicon.png">
+  <!-- FAVICON (cross-browser + cache-busting) -->
+  <link rel="icon" href="./favicon.png?v=1" type="image/png">
+  <link rel="shortcut icon" href="./favicon.png?v=1" type="image/png">
+  <link rel="apple-touch-icon" href="./favicon.png?v=1">
+  <meta name="theme-color" content="#050505">
 
   <style>
     :root{
@@ -34,13 +37,13 @@
     body{
       margin:0;
       min-height:100vh;
-      background: #050505;
+      background:#050505;
       overflow-x:hidden;
       overflow-y:auto;
-      -webkit-text-size-adjust: 100%;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: auto;
-      overscroll-behavior-x: none;
+      -webkit-text-size-adjust:100%;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior-y:auto;
+      overscroll-behavior-x:none;
 
       padding-left:max(18px, env(safe-area-inset-left));
       padding-right:max(18px, env(safe-area-inset-right));
@@ -51,44 +54,34 @@
       font-family: ui-serif, Georgia, "Times New Roman", serif;
     }
 
-    @supports (height: 100dvh){
+    @supports (height:100dvh){
       body{ min-height:100dvh; }
     }
 
     .bg{
-      position:fixed;
-      inset:0;
-      z-index:0;
-      pointer-events:none;
+      position:fixed; inset:0; z-index:0; pointer-events:none;
       background:
         radial-gradient(1200px 700px at 50% 20%, rgba(230,192,123,.10), transparent 55%),
         radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
         radial-gradient(900px 560px at 82% 75%, rgba(255,255,255,.05), transparent 62%),
         linear-gradient(180deg, var(--bg2), var(--bg));
-      filter: saturate(1.05) contrast(1.02);
+      filter:saturate(1.05) contrast(1.02);
     }
 
     #stars{
-      position:fixed;
-      inset:0;
-      z-index:1;
-      pointer-events:none;
-      opacity:.90;
-      transform: translateZ(0);
+      position:fixed; inset:0; z-index:1; pointer-events:none;
+      opacity:.90; transform:translateZ(0);
     }
 
     .glow{
-      position:fixed;
-      inset:-22%;
-      z-index:2;
-      pointer-events:none;
+      position:fixed; inset:-22%; z-index:2; pointer-events:none;
       background:
         radial-gradient(700px 360px at 50% 22%, rgba(230,192,123,.11), transparent 62%),
         radial-gradient(900px 480px at 60% 78%, rgba(255,255,255,.05), transparent 68%);
-      filter: blur(14px);
+      filter:blur(14px);
       opacity:.62;
-      animation: pulseGlow 6.2s ease-in-out infinite;
-      transform: translateZ(0);
+      animation:pulseGlow 6.2s ease-in-out infinite;
+      transform:translateZ(0);
     }
     @keyframes pulseGlow{
       0%,100%{ opacity:.48; transform:translateY(0) scale(1); }
@@ -96,160 +89,166 @@
     }
 
     .wrap{
-      position:relative;
-      z-index:5;
+      position:relative; z-index:5;
       width:min(1200px, 100%);
       margin:0 auto;
-      padding: 22px 0 28px;
+      padding:22px 0 28px;
     }
 
     .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin: 8px auto 18px;
-      opacity:.98;
+      display:flex; align-items:center; justify-content:center;
+      margin:8px auto 14px;
+      gap:10px;
     }
+
     .badge{
-      display:flex;
-      align-items:center;
-      gap:14px;
+      display:flex; align-items:center; gap:14px;
       padding:12px 18px;
       border-radius:999px;
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: 0 18px 60px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background:rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 18px 60px rgba(0,0,0,.45);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
     }
+
     .badge img{
-      width:72px;
-      height:72px;
-      object-fit:contain;
-      display:block;
-      filter: drop-shadow(0 12px 26px rgba(0,0,0,.62));
+      width:72px; height:72px;
+      object-fit:contain; display:block;
+      filter:drop-shadow(0 12px 26px rgba(0,0,0,.62));
     }
+
     .badge span{
       letter-spacing:.22em;
       text-transform:uppercase;
       font-size:12px;
-      color: rgba(230,192,123,.88);
+      color:rgba(230,192,123,.88);
       white-space:nowrap;
     }
 
+    /* Indicador discreto do som */
+    .soundPill{
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      padding:10px 14px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-size:11px;
+      color:rgba(255,255,255,.70);
+      user-select:none;
+      box-shadow:0 16px 50px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .soundPill strong{ color:rgba(230,192,123,.95); }
+
     .grid{
       display:grid;
-      grid-template-columns: 1.15fr 0.85fr;
+      grid-template-columns:1.15fr 0.85fr;
       gap:22px;
       align-items:stretch;
-      margin-top: 8px;
+      margin-top:8px;
     }
 
     .card{
       border-radius:26px;
-      background: linear-gradient(180deg, var(--cardA), var(--cardB));
+      background:linear-gradient(180deg, var(--cardA), var(--cardB));
       border:1px solid rgba(255,255,255,.10);
-      box-shadow: 0 30px 90px rgba(0,0,0,.62);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      box-shadow:0 30px 90px rgba(0,0,0,.62);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
       position:relative;
       overflow:hidden;
-      transform: translateZ(0);
+      transform:translateZ(0);
     }
     .card::after{
       content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.12), transparent 60%);
+      position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.12), transparent 60%);
       opacity:.9;
     }
-    .inner{
-      position:relative;
-      z-index:1;
-      padding: 22px 22px 20px;
-    }
+
+    .inner{ position:relative; z-index:1; padding:22px 22px 20px; }
 
     .kicker{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      letter-spacing:.22em;
-      text-transform:uppercase;
+      display:flex; gap:10px; align-items:center;
+      letter-spacing:.22em; text-transform:uppercase;
       font-size:12px;
       color:rgba(230,192,123,.82);
-      margin: 2px 0 14px;
+      margin:2px 0 14px;
       justify-content:flex-start;
     }
+
     .dot{
-      width:5px;height:5px;border-radius:50%;
+      width:5px; height:5px; border-radius:50%;
       background:rgba(230,192,123,.85);
-      box-shadow: 0 0 18px rgba(230,192,123,.40);
+      box-shadow:0 0 18px rgba(230,192,123,.40);
       flex:0 0 auto;
     }
 
     .title{
       margin:0;
-      line-height: .92;
+      line-height:.92;
       letter-spacing:.16em;
       text-transform:uppercase;
-      font-weight: 700;
-      font-size: clamp(48px, 6.2vw, 110px);
-      text-shadow: 0 20px 70px rgba(0,0,0,.55);
-      color: var(--gold);
+      font-weight:700;
+      font-size:clamp(48px, 6.2vw, 110px);
+      text-shadow:0 20px 70px rgba(0,0,0,.55);
+      color:var(--gold);
     }
+
     @supports ((-webkit-background-clip:text) or (background-clip:text)){
       .title{
-        color: transparent;
-        background-image:
-          linear-gradient(90deg,
-            rgba(230,192,123,.70) 0%,
-            rgba(230,192,123,.92) 28%,
-            rgba(255,255,255,.92) 48%,
-            rgba(230,192,123,.92) 58%,
-            rgba(230,192,123,.70) 100%);
-        background-size: 260% 100%;
-        background-position: 0% 50%;
+        color:transparent;
+        background-image:linear-gradient(90deg,
+          rgba(230,192,123,.70) 0%,
+          rgba(230,192,123,.92) 28%,
+          rgba(255,255,255,.92) 48%,
+          rgba(230,192,123,.92) 58%,
+          rgba(230,192,123,.70) 100%);
+        background-size:260% 100%;
+        background-position:0% 50%;
         -webkit-background-clip:text;
         background-clip:text;
-        animation: shineText 6.8s ease-in-out infinite;
+        animation:shineText 6.8s ease-in-out infinite;
       }
     }
     @keyframes shineText{
-      0%   { background-position:   0% 50%; }
-      60%  { background-position: 100% 50%; }
-      100% { background-position: 100% 50%; }
+      0%   { background-position:0% 50%; }
+      60%  { background-position:100% 50%; }
+      100% { background-position:100% 50%; }
     }
 
     .subtitle{
-      margin: 12px 0 0;
-      max-width: 70ch;
-      font-size: clamp(15px, 1.6vw, 20px);
-      color: rgba(255,255,255,.86);
+      margin:12px 0 0;
+      max-width:70ch;
+      font-size:clamp(15px, 1.6vw, 20px);
+      color:rgba(255,255,255,.86);
       line-height:1.55;
     }
-    .subtitle strong{ color: rgba(230,192,123,.95); font-weight:700; }
+    .subtitle strong{ color:rgba(230,192,123,.95); font-weight:700; }
 
     .whisper{
-      margin: 14px 0 0;
+      margin:14px 0 0;
       letter-spacing:.18em;
       text-transform:uppercase;
-      font-size: 12px;
-      color: rgba(255,255,255,.52);
+      font-size:12px;
+      color:rgba(255,255,255,.52);
       opacity:.72;
-      animation: breathe 3.2s ease-in-out infinite;
+      animation:breathe 3.2s ease-in-out infinite;
     }
     @keyframes breathe{
-      0%,100%{ opacity:.38; filter: blur(.35px); transform: translateY(0); }
-      50%{ opacity:.82; filter: blur(0); transform: translateY(-2px); }
+      0%,100%{ opacity:.38; filter:blur(.35px); transform:translateY(0); }
+      50%{ opacity:.82; filter:blur(0); transform:translateY(-2px); }
     }
 
     .rule{
-      margin: 16px 0 14px;
+      margin:16px 0 14px;
       height:10px;
-      width: min(760px, 100%);
+      width:min(760px, 100%);
       border-radius:999px;
-      background: linear-gradient(90deg,
+      background:linear-gradient(90deg,
         rgba(255,255,255,.06),
         rgba(230,192,123,.20),
         rgba(255,255,255,.06));
@@ -258,189 +257,179 @@
 
     .miniGrid{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns:1fr 1fr;
       gap:12px;
-      margin-top: 14px;
+      margin-top:14px;
     }
     .mini{
       border-radius:18px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.22);
-      padding: 14px 14px 12px;
-      box-shadow: inset 0 0 30px rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.22);
+      padding:14px 14px 12px;
+      box-shadow:inset 0 0 30px rgba(0,0,0,.25);
     }
     .mini h3{
       margin:0 0 8px;
       font-size:12px;
       letter-spacing:.22em;
       text-transform:uppercase;
-      color: rgba(230,192,123,.88);
+      color:rgba(230,192,123,.88);
     }
     .mini p{
       margin:0;
       font-size:16px;
       line-height:1.5;
-      color: rgba(255,255,255,.80);
+      color:rgba(255,255,255,.80);
     }
 
     .leadTitle{
-      margin: 10px 0 0;
-      font-size: clamp(18px, 2.1vw, 30px);
+      margin:10px 0 0;
+      font-size:clamp(18px, 2.1vw, 30px);
       line-height:1.35;
-      color: rgba(255,255,255,.92);
+      color:rgba(255,255,255,.92);
       text-align:center;
     }
 
-    .form{
-      margin-top: 18px;
-      display:grid;
-      gap:12px;
-    }
+    .form{ margin-top:18px; display:grid; gap:12px; }
+
     .row2{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns:1fr 1fr;
       gap:12px;
     }
+
     label{
       display:block;
       font-size:12px;
       letter-spacing:.22em;
       text-transform:uppercase;
-      color: rgba(255,255,255,.55);
-      margin: 0 0 8px;
+      color:rgba(255,255,255,.55);
+      margin:0 0 8px;
     }
+
     input{
       width:100%;
       border-radius:14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      color: rgba(255,255,255,.90);
-      padding: 12px 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      color:rgba(255,255,255,.90);
+      padding:12px 14px;
       outline:none;
-      box-shadow: inset 0 0 30px rgba(0,0,0,.26);
-      font-family: inherit;
-      font-size: 16px;
+      box-shadow:inset 0 0 30px rgba(0,0,0,.26);
+      font-family:inherit;
+      font-size:16px;
     }
-    input::placeholder{ color: rgba(255,255,255,.38); }
+    input::placeholder{ color:rgba(255,255,255,.38); }
 
     .consent{
       display:flex;
       gap:10px;
       align-items:flex-start;
-      color: rgba(255,255,255,.75);
-      font-size: 13px;
+      color:rgba(255,255,255,.75);
+      font-size:13px;
       line-height:1.35;
-      margin-top: 2px;
+      margin-top:2px;
       user-select:none;
     }
     .consent input{
-      width:18px;
-      height:18px;
-      margin-top: 2px;
-      accent-color: rgba(230,192,123,.9);
+      width:18px; height:18px; margin-top:2px;
+      accent-color:rgba(230,192,123,.9);
     }
 
     .status{
       text-align:center;
-      font-size: 13px;
-      color: rgba(255,255,255,.62);
-      margin-top: 6px;
-      min-height: 18px;
+      font-size:13px;
+      color:rgba(255,255,255,.62);
+      margin-top:6px;
+      min-height:18px;
     }
 
     .actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
+      display:flex; flex-wrap:wrap; gap:12px;
       justify-content:center;
-      margin-top: 12px;
+      margin-top:12px;
     }
     button{
       border:1px solid rgba(230,192,123,.24);
-      background: rgba(0,0,0,.25);
-      color: rgba(230,192,123,.92);
-      padding: 12px 18px;
-      border-radius: 14px;
+      background:rgba(0,0,0,.25);
+      color:rgba(230,192,123,.92);
+      padding:12px 18px;
+      border-radius:14px;
       cursor:pointer;
-      font-family: inherit;
+      font-family:inherit;
       letter-spacing:.12em;
       text-transform:uppercase;
-      min-width: 190px;
-      transition: transform .12s ease, border-color .18s ease, background .18s ease, opacity .18s ease;
-      box-shadow: 0 14px 44px rgba(0,0,0,.35);
+      min-width:190px;
+      transition:transform .12s ease, border-color .18s ease, background .18s ease, opacity .18s ease;
+      box-shadow:0 14px 44px rgba(0,0,0,.35);
     }
-    button:hover{ transform: translateY(-1px); border-color: rgba(230,192,123,.38); }
-    button:active{ transform: translateY(0); opacity:.92; }
+    button:hover{ transform:translateY(-1px); border-color:rgba(230,192,123,.38); }
+    button:active{ transform:translateY(0); opacity:.92; }
 
     .chips{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
+      display:flex; flex-wrap:wrap; gap:10px;
       justify-content:center;
-      margin-top: 14px;
+      margin-top:14px;
     }
     .chip{
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      padding: 8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      padding:8px 12px;
       letter-spacing:.18em;
       text-transform:uppercase;
-      font-size: 11px;
-      color: rgba(230,192,123,.80);
+      font-size:11px;
+      color:rgba(230,192,123,.80);
       user-select:none;
     }
 
-    .below{
-      margin-top: 22px;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:18px;
-    }
+    .below{ margin-top:22px; display:grid; grid-template-columns:1fr; gap:18px; }
+
     .aboutTitle{
       margin:0;
-      font-size: 14px;
+      font-size:14px;
       letter-spacing:.22em;
       text-transform:uppercase;
-      color: rgba(230,192,123,.88);
+      color:rgba(230,192,123,.88);
     }
+
     .aboutText{
-      margin: 10px 0 0;
-      font-size: 18px;
-      line-height: 1.6;
-      color: rgba(255,255,255,.82);
-      max-width: 90ch;
+      margin:10px 0 0;
+      font-size:18px;
+      line-height:1.6;
+      color:rgba(255,255,255,.82);
+      max-width:90ch;
     }
-    .aboutText strong{ color: rgba(230,192,123,.95); }
+    .aboutText strong{ color:rgba(230,192,123,.95); }
 
     .footer{
       width:100%;
-      margin: 18px auto 0;
+      margin:18px auto 0;
       text-align:center;
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
-      color: rgba(255,255,255,.40);
-      padding: 0 10px 18px;
+      color:rgba(255,255,255,.40);
+      padding:0 10px 18px;
       pointer-events:none;
     }
-    .footer .brand{ color: rgba(230,192,123,.82); font-weight:700; }
+    .footer .brand{ color:rgba(230,192,123,.82); font-weight:700; }
 
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-      .title{ font-size: clamp(44px, 9vw, 78px); }
-      .miniGrid{ grid-template-columns: 1fr 1fr; }
+    @media (max-width:980px){
+      .grid{ grid-template-columns:1fr; }
+      .title{ font-size:clamp(44px, 9vw, 78px); }
+      .miniGrid{ grid-template-columns:1fr 1fr; }
     }
 
-    @media (max-width: 560px){
+    @media (max-width:560px){
       body{
         padding-left:max(14px, env(safe-area-inset-left));
         padding-right:max(14px, env(safe-area-inset-right));
       }
-      .inner{ padding: 18px 16px 16px; }
-      .row2{ grid-template-columns: 1fr; }
-      .miniGrid{ grid-template-columns: 1fr; }
-      button{ width: 100%; min-width: 0; }
+      .inner{ padding:18px 16px 16px; }
+      .row2{ grid-template-columns:1fr; }
+      .miniGrid{ grid-template-columns:1fr; }
+      button{ width:100%; min-width:0; }
       .badge img{ width:64px; height:64px; }
       .badge span{ font-size:11px; }
     }
@@ -463,6 +452,8 @@
         <img src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" />
         <span>Prelúdio Jogos</span>
       </div>
+
+      <div class="soundPill" id="soundPill">SOM: <strong>OFF</strong></div>
     </div>
 
     <section class="grid">
@@ -695,47 +686,25 @@
     })();
 
     /* =========================
-       PUXAR PARA BAIXO = RECARREGAR
+       SOM AMBIENTE (sample loop interno)
+       - ativa no primeiro gesto de "rolar" real (Android):
+         touchmove / pointermove / wheel
        ========================= */
     (function(){
-      let startY = 0;
-      let tracking = false;
-      const THRESH = 85;
-
-      window.addEventListener("touchstart", (e) => {
-        if (window.scrollY <= 0){
-          tracking = true;
-          startY = e.touches[0].clientY;
-        }
-      }, { passive:true });
-
-      window.addEventListener("touchmove", (e) => {
-        if (!tracking) return;
-        const y = e.touches[0].clientY;
-        const dy = y - startY;
-        if (dy > THRESH){
-          tracking = false;
-          location.reload();
-        }
-      }, { passive:true });
-
-      window.addEventListener("touchend", () => tracking = false, { passive:true });
-      window.addEventListener("touchcancel", () => tracking = false, { passive:true });
-    })();
-
-    /* =========================
-       SOM AMBIENTE (SAMPLE LOOP INTERNO, 100% LIMPO)
-       - ativa no PRIMEIRO gesto de rolagem:
-         wheel (PC), touchmove (tablet), scroll (fallback)
-       ========================= */
-    (function(){
+      const soundPill = document.getElementById("soundPill");
       const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduced) return;
 
-      const MASTER_TARGET = 0.38; // mais alto, sem distorção
+      const MASTER_TARGET = 0.38; // volume final
       let audioCtx = null;
       let master = null;
       let started = false;
+      let armed = true;
+
+      function setPill(on){
+        soundPill.innerHTML = on ? 'SOM: <strong>ON</strong>' : 'SOM: <strong>OFF</strong>';
+      }
+      setPill(false);
 
       function smooth(param, value, time=0.25){
         const now = audioCtx.currentTime;
@@ -745,16 +714,13 @@
         param.linearRampToValueAtTime(value, now + time);
       }
 
-      function makeSampleLoop(ctx, seconds=6){
+      function makeSampleLoop(ctx, seconds=7){
         const sr = ctx.sampleRate;
         const len = Math.floor(seconds * sr);
         const buf = ctx.createBuffer(2, len, sr);
-
         const L = buf.getChannelData(0);
         const R = buf.getChannelData(1);
 
-        // “Universo místico” sem noise:
-        // som = soma de sines com fases aleatórias + shimmer suave + batimento lento
         const partials = [
           { f: 32.0,  a: 0.50 },
           { f: 44.0,  a: 0.34 },
@@ -768,7 +734,6 @@
         const phasesL = partials.map(() => Math.random()*Math.PI*2);
         const phasesR = partials.map(() => Math.random()*Math.PI*2);
 
-        // shimmer “etéreo” (bem suave)
         const shimmerF = 420 + Math.random()*60;
         const shimmerPhaseL = Math.random()*Math.PI*2;
         const shimmerPhaseR = Math.random()*Math.PI*2;
@@ -776,11 +741,9 @@
         for (let i=0; i<len; i++){
           const t = i / sr;
 
-          // envelopes lentos (nada brusco = sem chiado)
           const breath1 = 0.62 + 0.38 * Math.sin(2*Math.PI*0.035*t);
           const breath2 = 0.70 + 0.30 * Math.sin(2*Math.PI*0.021*t + 1.2);
 
-          // leve “movimento” estéreo
           const pan = 0.5 + 0.5 * Math.sin(2*Math.PI*0.017*t + 0.6);
           const lPan = 0.60 + 0.40*(1-pan);
           const rPan = 0.60 + 0.40*(pan);
@@ -790,8 +753,6 @@
           for (let p=0; p<partials.length; p++){
             const f = partials[p].f;
             const a = partials[p].a;
-
-            // micro batimento místico (bem leve)
             const det = 1.0 + 0.0022*Math.sin(2*Math.PI*(0.011 + p*0.002)*t);
             const w = 2*Math.PI*f*det;
 
@@ -799,23 +760,19 @@
             sR += a * Math.sin(w*t + phasesR[p]);
           }
 
-          // shimmer: só dá “brilho”, não vira apito
           const shimmerEnv = 0.50 + 0.50*Math.sin(2*Math.PI*0.07*t);
           sL += 0.08 * shimmerEnv * Math.sin(2*Math.PI*shimmerF*t + shimmerPhaseL);
           sR += 0.08 * shimmerEnv * Math.sin(2*Math.PI*(shimmerF*0.997)*t + shimmerPhaseR);
 
-          // aplica respiração global
           sL *= (0.55*breath1 + 0.45*breath2);
           sR *= (0.55*breath1 + 0.45*breath2);
 
-          // fade suave nas bordas do loop (remove “click” no ponto de repetição)
-          const fade = 0.06; // 6%
+          const fade = 0.06;
           const x = i / (len - 1);
           let edge = 1.0;
           if (x < fade) edge = x / fade;
           else if (x > 1 - fade) edge = (1 - x) / fade;
 
-          // leve saturação segura (clamp)
           const outL = Math.max(-1, Math.min(1, sL * 0.22)) * edge * lPan;
           const outR = Math.max(-1, Math.min(1, sR * 0.22)) * edge * rPan;
 
@@ -830,11 +787,9 @@
         if (started) return true;
         try{
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
           master = audioCtx.createGain();
           master.gain.value = 0.00001;
 
-          // compressão leve só pra segurar picos
           const comp = audioCtx.createDynamicsCompressor();
           comp.threshold.value = -24;
           comp.knee.value = 24;
@@ -842,7 +797,6 @@
           comp.attack.value = 0.015;
           comp.release.value = 0.22;
 
-          // filtro final (tira “aresta” de caixa/alto-falante)
           const lp = audioCtx.createBiquadFilter();
           lp.type = "lowpass";
           lp.frequency.value = 2200;
@@ -852,16 +806,13 @@
           comp.connect(lp);
           lp.connect(audioCtx.destination);
 
-          // cria loop interno
           const loopBuf = makeSampleLoop(audioCtx, 7);
           const src = audioCtx.createBufferSource();
           src.buffer = loopBuf;
           src.loop = true;
 
-          // “profundidade”: delay bem sutil (não é reverb pesado)
           const delay = audioCtx.createDelay(0.25);
           delay.delayTime.value = 0.18;
-
           const fb = audioCtx.createGain();
           fb.gain.value = 0.22;
 
@@ -870,9 +821,6 @@
           hp.frequency.value = 90;
           hp.Q.value = 0.7;
 
-          // cadeia:
-          // src -> hp -> master
-          // src -> delay -> fb -> delay (feedback) -> master
           src.connect(hp);
           hp.connect(master);
 
@@ -887,35 +835,26 @@
 
           src.start();
           started = true;
-
-          // fade-in bem suave (sem ruído/estalo)
           smooth(master.gain, MASTER_TARGET, 1.2);
+          setPill(true);
           return true;
         } catch(e){
+          // se falhar, mantém OFF
+          setPill(false);
           return false;
         }
       }
 
-      // ✅ ativa “ao rolar” de verdade: wheel / touchmove / scroll
-      let armed = true;
-
-      function armOff(){
+      function disarm(){
         armed = false;
         window.removeEventListener("wheel", onWheel, { passive:true });
-        window.removeEventListener("scroll", onScroll, { passive:true });
         window.removeEventListener("touchmove", onTouchMove, { passive:true });
+        window.removeEventListener("pointermove", onPointerMove, { passive:true });
       }
 
       function onWheel(){
         if (!armed) return;
-        armOff();
-        startAudio();
-      }
-
-      function onScroll(){
-        if (!armed) return;
-        // em alguns casos scroll dispara sem gesto real; por isso usamos também wheel/touchmove.
-        armOff();
+        disarm();
         startAudio();
       }
 
@@ -924,20 +863,29 @@
         if (!armed) return;
         const y = e.touches && e.touches[0] ? e.touches[0].clientY : 0;
         const dy = Math.abs(y - touchStartY);
-        // só considera “rolagem” se mexer um mínimo
         if (dy < 10) return;
-        armOff();
+        disarm();
+        startAudio();
+      }
+
+      let pStartY = 0;
+      function onPointerMove(e){
+        if (!armed) return;
+        const dy = Math.abs((e.clientY || 0) - pStartY);
+        if (dy < 10) return;
+        disarm();
         startAudio();
       }
 
       window.addEventListener("wheel", onWheel, { passive:true });
-      window.addEventListener("scroll", onScroll, { passive:true });
 
       window.addEventListener("touchstart", (e) => {
         touchStartY = e.touches && e.touches[0] ? e.touches[0].clientY : 0;
       }, { passive:true });
-
       window.addEventListener("touchmove", onTouchMove, { passive:true });
+
+      window.addEventListener("pointerdown", (e) => { pStartY = e.clientY || 0; }, { passive:true });
+      window.addEventListener("pointermove", onPointerMove, { passive:true });
     })();
 
     /* =========================
