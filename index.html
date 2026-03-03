@@ -10,8 +10,10 @@
 
   <style>
     :root{
-      --bg:#01010a;     /* ✅ mais “universo” */
-      --bg2:#000007;    /* ✅ mais profundo */
+      /* ✅ mais escuro “espaço sideral” */
+      --bg:#000006;
+      --bg2:#000003;
+
       --gold:#e6c07b;
       --muted:#a7a7a7;
       --cardA:rgba(255,255,255,.070);
@@ -25,7 +27,6 @@
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
 
-    /* Evita “faixa escura”/overscroll feio e vibração */
     html{
       background: var(--bg);
       overscroll-behavior: none;
@@ -54,70 +55,68 @@
       body{ min-height:100dvh; }
     }
 
-    /* Camada fixa de fundo (garante PC + todos navegadores) */
+    /* ✅ Fundo mais profundo e escuro */
     .bg{
       position:fixed;
       inset:0;
       z-index:0;
       pointer-events:none;
       background:
-        radial-gradient(1400px 900px at 50% 18%, rgba(230,192,123,.10), transparent 58%),
-        radial-gradient(1100px 700px at 20% 18%, rgba(255,255,255,.06), transparent 62%),
-        radial-gradient(1100px 700px at 84% 78%, rgba(255,255,255,.05), transparent 66%),
+        radial-gradient(1600px 900px at 50% 16%, rgba(230,192,123,.08), transparent 60%),
+        radial-gradient(1200px 760px at 22% 18%, rgba(255,255,255,.045), transparent 68%),
+        radial-gradient(1200px 760px at 84% 78%, rgba(255,255,255,.040), transparent 70%),
         linear-gradient(180deg, var(--bg2), var(--bg));
-      filter: saturate(1.02) contrast(1.05);
+      filter: saturate(1.0) contrast(1.08);
     }
 
-    /* Canvas de estrelas por cima */
     #stars{
       position:fixed;
       inset:0;
       z-index:1;
       pointer-events:none;
-      opacity:.92;
+      opacity:.95;
       transform: translateZ(0);
     }
 
-    /* Névoa / profundidade (camada atmosférica) */
+    /* ✅ névoa mais sutil (pra realçar estrelas) */
     .fog{
       position:fixed;
       inset:-25%;
       z-index:2;
       pointer-events:none;
       background:
-        radial-gradient(900px 520px at 30% 30%, rgba(255,255,255,.04), transparent 65%),
-        radial-gradient(1100px 620px at 70% 70%, rgba(230,192,123,.06), transparent 68%),
-        radial-gradient(900px 520px at 55% 15%, rgba(120,150,255,.03), transparent 60%);
-      filter: blur(16px);
-      opacity:.55;
+        radial-gradient(900px 520px at 30% 30%, rgba(255,255,255,.030), transparent 68%),
+        radial-gradient(1100px 620px at 70% 70%, rgba(230,192,123,.045), transparent 72%),
+        radial-gradient(900px 520px at 55% 15%, rgba(120,150,255,.020), transparent 65%);
+      filter: blur(18px);
+      opacity:.45;
       animation: fogMove 10.5s ease-in-out infinite;
       transform: translateZ(0);
     }
     @keyframes fogMove{
-      0%,100%{ transform: translate3d(0,0,0) scale(1); opacity:.48; }
-      50%{ transform: translate3d(10px,-10px,0) scale(1.02); opacity:.68; }
+      0%,100%{ transform: translate3d(0,0,0) scale(1); opacity:.34; }
+      50%{ transform: translate3d(10px,-10px,0) scale(1.02); opacity:.52; }
     }
 
-    /* brilho atmosférico */
+    /* ✅ brilho atmosférico mais discreto */
     .glow{
       position:fixed;
       inset:-22%;
       z-index:3;
       pointer-events:none;
       background:
-        radial-gradient(700px 360px at 50% 22%, rgba(230,192,123,.10), transparent 62%),
-        radial-gradient(900px 480px at 60% 78%, rgba(255,255,255,.05), transparent 68%);
-      filter: blur(14px);
-      opacity:.62;
+        radial-gradient(700px 360px at 50% 22%, rgba(230,192,123,.070), transparent 64%),
+        radial-gradient(900px 480px at 60% 78%, rgba(255,255,255,.035), transparent 70%);
+      filter: blur(16px);
+      opacity:.45;
       animation: pulseGlow 6.2s ease-in-out infinite;
       transform: translateZ(0);
     }
     @keyframes pulseGlow{
-      0%,100%{ opacity:.46; transform:translateY(0) scale(1); }
-      50%{ opacity:.75; transform:translateY(-8px) scale(1.01); }
+      0%,100%{ opacity:.34; transform:translateY(0) scale(1); }
+      50%{ opacity:.55; transform:translateY(-8px) scale(1.01); }
     }
 
-    /* Conteúdo acima de tudo */
     .wrap{
       position:relative;
       z-index:6;
@@ -126,31 +125,21 @@
       padding: 22px 0 28px;
     }
 
-    /* ✅ Topo com logo oficial CENTRAL e MAIOR (sem texto) */
+    /* ✅ LOGO: sem círculo/sem badge. Só a imagem grande e central */
     .topbar{
       display:flex;
       align-items:center;
       justify-content:center;
-      margin: 10px auto 18px;
+      margin: 12px auto 18px;
     }
-    .badge{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:14px 18px;
-      border-radius:999px;
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: 0 18px 60px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .badge img{
-      width:96px;   /* ✅ maior */
-      height:96px;  /* ✅ maior */
-      object-fit:contain;
+    .logoOnly{
       display:block;
-      filter: drop-shadow(0 14px 30px rgba(0,0,0,.70));
+      width:112px;   /* desktop/tablet */
+      height:112px;
+      object-fit:contain;
+      filter: drop-shadow(0 16px 34px rgba(0,0,0,.75));
+      user-select:none;
+      -webkit-user-drag:none;
     }
 
     /* Indicador do som (discreto) */
@@ -160,7 +149,7 @@
       top:max(14px, env(safe-area-inset-top));
       z-index:10;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.26);
+      background: rgba(0,0,0,.28);
       color: rgba(255,255,255,.78);
       padding:8px 12px;
       border-radius:999px;
@@ -173,7 +162,6 @@
     }
     .soundPill strong{ color: var(--gold); }
 
-    /* Grid principal */
     .grid{
       display:grid;
       grid-template-columns: 1.15fr 0.85fr;
@@ -198,8 +186,8 @@
       position:absolute;
       inset:0;
       pointer-events:none;
-      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.12), transparent 60%);
-      opacity:.9;
+      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.10), transparent 62%);
+      opacity:.85;
     }
     .inner{
       position:relative;
@@ -225,7 +213,6 @@
       flex:0 0 auto;
     }
 
-    /* Título com “reflexo dentro das letras” */
     .title{
       margin:0;
       line-height: .92;
@@ -234,18 +221,18 @@
       font-weight: 700;
       font-size: clamp(48px, 6.2vw, 110px);
       text-shadow: 0 20px 70px rgba(0,0,0,.55);
-      color: var(--gold); /* fallback */
+      color: var(--gold);
     }
     @supports ((-webkit-background-clip:text) or (background-clip:text)){
       .title{
         color: transparent;
         background-image:
           linear-gradient(90deg,
-            rgba(230,192,123,.70) 0%,
+            rgba(230,192,123,.65) 0%,
             rgba(230,192,123,.92) 28%,
             rgba(255,255,255,.92) 48%,
             rgba(230,192,123,.92) 58%,
-            rgba(230,192,123,.70) 100%);
+            rgba(230,192,123,.65) 100%);
         background-size: 260% 100%;
         background-position: 0% 50%;
         -webkit-background-clip:text;
@@ -268,7 +255,6 @@
     }
     .subtitle strong{ color: rgba(230,192,123,.95); font-weight:700; }
 
-    /* Frase “enfraquecendo e voltando” */
     .whisper{
       margin: 14px 0 0;
       letter-spacing:.18em;
@@ -322,7 +308,6 @@
       color: rgba(255,255,255,.80);
     }
 
-    /* Card Leads */
     .leadTitle{
       margin: 10px 0 0;
       font-size: clamp(18px, 2.1vw, 30px);
@@ -430,7 +415,6 @@
       user-select:none;
     }
 
-    /* Bloco abaixo (sobre o jogo) */
     .below{
       margin-top: 22px;
       display:grid;
@@ -453,7 +437,6 @@
     }
     .aboutText strong{ color: rgba(230,192,123,.95); }
 
-    /* Direitos autorais */
     .footer{
       width:100%;
       margin: 18px auto 0;
@@ -467,7 +450,6 @@
     }
     .footer .brand{ color: rgba(230,192,123,.82); font-weight:700; }
 
-    /* Responsivo */
     @media (max-width: 980px){
       .grid{ grid-template-columns: 1fr; }
       .title{ font-size: clamp(44px, 9vw, 78px); }
@@ -484,11 +466,10 @@
       .miniGrid{ grid-template-columns: 1fr; }
       button{ width: 100%; min-width: 0; }
 
-      /* ✅ logo maior no celular, sem estourar */
-      .badge img{ width:78px; height:78px; }
+      /* ✅ logo grande no Android/tablet sem “badge” */
+      .logoOnly{ width:92px; height:92px; }
     }
 
-    /* Reduz movimento se o usuário pedir */
     @media (prefers-reduced-motion: reduce){
       .glow, .fog, .title, .whisper{ animation:none !important; }
       #stars{ display:none; }
@@ -502,14 +483,12 @@
   <div class="fog" aria-hidden="true"></div>
   <div class="glow" aria-hidden="true"></div>
 
-  <!-- Indicador discreto do som -->
   <div class="soundPill" id="soundPill" aria-label="Status do som">SOM: <strong>OFF</strong></div>
 
   <div class="wrap">
     <div class="topbar">
-      <div class="badge" aria-label="Logo oficial Prelúdio Jogos">
-        <img src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" />
-      </div>
+      <!-- ✅ só a logo, sem círculo/sem fundo -->
+      <img class="logoOnly" src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" />
     </div>
 
     <section class="grid">
@@ -642,14 +621,14 @@
         ctx.setTransform(dpr,0,0,dpr,0,0);
 
         const density = Math.floor((w*h) / 11500);
-        const target = Math.max(120, Math.min(280, density));
+        const target = Math.max(130, Math.min(300, density));
 
         stars = new Array(target).fill(0).map(() => ({
           x: Math.random()*w,
           y: Math.random()*h,
-          r: Math.random()*1.35 + 0.15,
-          a: Math.random()*0.62 + 0.18,
-          v: (Math.random()*0.20 + 0.06),
+          r: Math.random()*1.45 + 0.15,
+          a: Math.random()*0.68 + 0.18,
+          v: (Math.random()*0.18 + 0.05),
           tw: Math.random()*0.02 + 0.006
         }));
 
@@ -657,12 +636,11 @@
       }
 
       function spawnMeteor(){
-        // nasce no topo (um pouco para fora), vai em diagonal para baixo/direita
-        const startX = rand(-w*0.10, w*0.40);
-        const startY = rand(-h*0.25, -h*0.05);
+        const startX = rand(-w*0.10, w*0.35);
+        const startY = rand(-h*0.25, -h*0.06);
 
-        const speed = rand(10.0, 14.0);
-        const angle = rand(0.85, 1.05); // ~ 49°–60° (diagonal descendo)
+        const speed = rand(10.5, 14.5);
+        const angle = rand(0.85, 1.05); // diagonal descendo p/ direita
         const vx = Math.cos(angle) * speed;
         const vy = Math.sin(angle) * speed;
 
@@ -672,7 +650,7 @@
           vx, vy,
           life: 0,
           maxLife: rand(38, 55),
-          len: rand(110, 170),
+          len: rand(120, 190),
           a: rand(0.55, 0.85)
         });
       }
@@ -686,7 +664,6 @@
 
         ctx.clearRect(0,0,w,h);
 
-        // estrelas “caindo” bem lento + twinkle
         for (let i=0;i<stars.length;i++){
           const s = stars[i];
           s.y += s.v;
@@ -701,13 +678,11 @@
           ctx.fill();
         }
 
-        // meteor timing
         if (t > nextMeteorAt){
           spawnMeteor();
-          nextMeteorAt = t + Math.floor(rand(220, 420)); // “de vez em quando”
+          nextMeteorAt = t + Math.floor(rand(220, 420));
         }
 
-        // meteors
         for (let i=meteors.length-1;i>=0;i--){
           const m = meteors[i];
           m.x += m.vx;
@@ -717,9 +692,9 @@
           const k = Math.min(1, m.life / 10);
           const alpha = m.a * k * (1 - (m.life / m.maxLife));
 
-          // cauda
-          const tx = m.x - (m.vx / Math.hypot(m.vx, m.vy)) * m.len;
-          const ty = m.y - (m.vy / Math.hypot(m.vx, m.vy)) * m.len;
+          const norm = Math.hypot(m.vx, m.vy) || 1;
+          const tx = m.x - (m.vx / norm) * m.len;
+          const ty = m.y - (m.vy / norm) * m.len;
 
           const grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
           grad.addColorStop(0, "rgba(255,255,255," + (alpha).toFixed(3) + ")");
@@ -732,7 +707,6 @@
           ctx.lineTo(tx, ty);
           ctx.stroke();
 
-          // ponto principal
           ctx.fillStyle = "rgba(255,255,255," + (Math.min(1, alpha + 0.15)).toFixed(3) + ")";
           ctx.beginPath();
           ctx.arc(m.x, m.y, 1.8, 0, Math.PI*2);
@@ -743,10 +717,9 @@
           }
         }
 
-        // vinheta (profundidade)
-        const vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.90);
+        const vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.95);
         vignette.addColorStop(0, "rgba(0,0,0,0)");
-        vignette.addColorStop(1, "rgba(0,0,0,0.45)");
+        vignette.addColorStop(1, "rgba(0,0,0,0.55)");
         ctx.fillStyle = vignette;
         ctx.fillRect(0,0,w,h);
 
@@ -765,8 +738,6 @@
 
     /* =========================
        LEADS (site estático)
-       - salva no localStorage
-       - envia via mailto para seu e-mail
        ========================= */
     const LEAD_EMAIL_DESTINO = "luiskirsch22@hotmail.com";
     const ENTRADA_URL = "./entrada.html";
@@ -850,19 +821,21 @@
     })();
 
     /* =========================
-       SOM AMBIENTE (místico/universo) — SEM CHIADO
-       - ativa no primeiro gesto de rolar (wheel/touchmove/pointermove)
+       SOM AMBIENTE — Android/Samsung FIX
+       ✅ ativa no primeiro scroll real (window scroll)
+       ✅ fallback: touchstart + primeiro scroll (pra garantir)
        ========================= */
     (function(){
       const soundPill = document.getElementById("soundPill");
       const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduced) return;
 
-      const MASTER_TARGET = 0.50; // volume final (ajuste aqui se quiser mais/menos)
+      const MASTER_TARGET = 0.55; // ✅ volume final (mais alto)
       let audioCtx = null;
       let master = null;
       let started = false;
-      let armed = true;
+      let waitingForScroll = true;
+      let gotTouch = false;
 
       function setPill(on){
         if (!soundPill) return;
@@ -870,14 +843,13 @@
       }
       setPill(false);
 
-      function ramp(param, value, time=0.5){
+      function ramp(param, value, time=0.6){
         const now = audioCtx.currentTime;
         param.cancelScheduledValues(now);
         param.setValueAtTime(param.value, now);
         param.linearRampToValueAtTime(value, now + time);
       }
 
-      // ruído marrom (bem mais macio que branco) -> menos “fritura”
       function createBrownNoise(ctx){
         const bufferSize = 2 * ctx.sampleRate;
         const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -887,7 +859,7 @@
         for (let i = 0; i < bufferSize; i++) {
           const white = Math.random() * 2 - 1;
           lastOut = (lastOut + (0.02 * white)) / 1.02;
-          output[i] = lastOut * 0.35; // bem baixo
+          output[i] = lastOut * 0.32;
         }
 
         const src = ctx.createBufferSource();
@@ -905,7 +877,6 @@
           master = audioCtx.createGain();
           master.gain.value = 0.00001;
 
-          // cadeia final (suaviza agudos e “cola” o som)
           const comp = audioCtx.createDynamicsCompressor();
           comp.threshold.value = -28;
           comp.knee.value = 24;
@@ -915,12 +886,12 @@
 
           const lp = audioCtx.createBiquadFilter();
           lp.type = "lowpass";
-          lp.frequency.value = 1100; // corta bem agudos (remove chiado)
+          lp.frequency.value = 1200; // corta agudos (sem chiado)
           lp.Q.value = 0.7;
 
           const hp = audioCtx.createBiquadFilter();
           hp.type = "highpass";
-          hp.frequency.value = 35;  // remove “rumble” feio
+          hp.frequency.value = 35;  // remove grave sujo
           hp.Q.value = 0.7;
 
           master.connect(comp);
@@ -928,26 +899,22 @@
           lp.connect(hp);
           hp.connect(audioCtx.destination);
 
-          // ========== DRONES (sem hiss) ==========
           const gDrone = audioCtx.createGain();
           gDrone.gain.value = 0.0;
           gDrone.connect(master);
 
-          // drone base (A)
           const o1 = audioCtx.createOscillator();
           o1.type = "sine";
-          o1.frequency.value = 55; // A1
+          o1.frequency.value = 55;
 
           const o2 = audioCtx.createOscillator();
           o2.type = "triangle";
-          o2.frequency.value = 110; // A2
+          o2.frequency.value = 110;
 
-          // “harmonia mística” (quinta)
           const o3 = audioCtx.createOscillator();
           o3.type = "sine";
-          o3.frequency.value = 82.41; // E2
+          o3.frequency.value = 82.41;
 
-          // ganho individual
           const g1 = audioCtx.createGain(); g1.gain.value = 0.12;
           const g2 = audioCtx.createGain(); g2.gain.value = 0.06;
           const g3 = audioCtx.createGain(); g3.gain.value = 0.08;
@@ -956,7 +923,6 @@
           o2.connect(g2); g2.connect(gDrone);
           o3.connect(g3); g3.connect(gDrone);
 
-          // LFO lento para “respirar”
           const lfo = audioCtx.createOscillator();
           lfo.type = "sine";
           lfo.frequency.value = 0.03;
@@ -965,21 +931,19 @@
           lfo.connect(lfoGain);
           lfoGain.connect(gDrone.gain);
 
-          // ========== “AR” (brown noise filtrado) ==========
           const air = createBrownNoise(audioCtx);
           const airGain = audioCtx.createGain();
           airGain.gain.value = 0.0;
 
           const airLP = audioCtx.createBiquadFilter();
           airLP.type = "lowpass";
-          airLP.frequency.value = 420; // sem hiss
+          airLP.frequency.value = 420;
           airLP.Q.value = 0.6;
 
           air.connect(airLP);
           airLP.connect(airGain);
           airGain.connect(master);
 
-          // ========== ECO SUAVE (sem feedback) ==========
           const delay = audioCtx.createDelay(0.5);
           delay.delayTime.value = 0.22;
 
@@ -990,18 +954,14 @@
           delay.connect(dGain);
           dGain.connect(master);
 
-          // inicia tudo
-          o1.start();
-          o2.start();
-          o3.start();
+          o1.start(); o2.start(); o3.start();
           lfo.start();
           air.start();
 
           if (audioCtx.state === "suspended") await audioCtx.resume();
 
-          // fade-in suave
-          ramp(gDrone.gain, 0.42, 1.6);
-          ramp(airGain.gain, 0.08, 1.8);
+          ramp(gDrone.gain, 0.44, 1.6);
+          ramp(airGain.gain, 0.085, 1.8);
           ramp(master.gain, MASTER_TARGET, 1.8);
 
           started = true;
@@ -1014,46 +974,43 @@
         }
       }
 
-      function disarm(){
-        armed = false;
-        window.removeEventListener("wheel", onWheel, { passive:true });
-        window.removeEventListener("touchmove", onTouchMove, { passive:true });
-        window.removeEventListener("pointermove", onPointerMove, { passive:true });
+      function armStartByScroll(){
+        if (!waitingForScroll) return;
+        waitingForScroll = false;
+
+        window.addEventListener("scroll", async () => {
+          // Só inicia se já houve algum toque (Android costuma exigir gesto)
+          // e se realmente rolou (não só repaint).
+          if (started) return;
+          if (!gotTouch) return;
+
+          await startAudio();
+        }, { passive:true });
       }
 
-      function onWheel(){
-        if (!armed) return;
-        disarm();
-        startAudio();
-      }
+      // ✅ O Android precisa de gesto: registramos touchstart
+      window.addEventListener("touchstart", () => {
+        gotTouch = true;
+        armStartByScroll();
+      }, { passive:true, once:false });
 
-      let touchStartY = 0;
-      function onTouchMove(e){
-        if (!armed) return;
-        const y = e.touches && e.touches[0] ? e.touches[0].clientY : 0;
-        const dy = Math.abs(y - touchStartY);
-        if (dy < 10) return;
-        disarm();
-        startAudio();
-      }
+      // ✅ Fallback pra mouse/trackpad (desktop)
+      window.addEventListener("wheel", async () => {
+        gotTouch = true; // libera
+        await startAudio();
+      }, { passive:true, once:true });
 
-      let pStartY = 0;
-      function onPointerMove(e){
-        if (!armed) return;
-        const dy = Math.abs((e.clientY || 0) - pStartY);
-        if (dy < 10) return;
-        disarm();
-        startAudio();
-      }
-
-      window.addEventListener("wheel", onWheel, { passive:true });
-      window.addEventListener("touchstart", (e) => {
-        touchStartY = e.touches && e.touches[0] ? e.touches[0].clientY : 0;
+      // Caso o usuário role via barra/teclado em desktop
+      window.addEventListener("keydown", async (e) => {
+        if (started) return;
+        const keys = ["ArrowDown","ArrowUp","PageDown","PageUp"," "];
+        if (!keys.includes(e.key)) return;
+        gotTouch = true;
+        await startAudio();
       }, { passive:true });
-      window.addEventListener("touchmove", onTouchMove, { passive:true });
 
-      window.addEventListener("pointerdown", (e) => { pStartY = e.clientY || 0; }, { passive:true });
-      window.addEventListener("pointermove", onPointerMove, { passive:true });
+      // Armado desde o começo
+      armStartByScroll();
     })();
   </script>
 </body>
