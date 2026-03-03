@@ -18,9 +18,6 @@
       --muted:#a7a7a7;
       --text:#f3f3f3;
 
-      --glassA:rgba(255,255,255,.07);
-      --glassB:rgba(255,255,255,.03);
-
       --shadow:rgba(0,0,0,.72);
 
       --radius:22px;
@@ -33,29 +30,30 @@
     }
 
     *{ box-sizing:border-box; }
-
     html,body{ height:100%; }
 
-    /* Corpo SEM fundo sólido pra não “tampar” o background fixo */
+    /* ✅ EVITA O “BRANCO” DO OVERSCROLL: fundo real no html/body */
+    html{ background: var(--bg); }
     body{
       margin:0;
       color:var(--text);
       font-family: ui-serif, Georgia, "Times New Roman", serif;
-      background: transparent;
+
+      background: var(--bg);         /* ✅ nunca fica branco */
       overflow:hidden;
       -webkit-text-size-adjust:100%;
+
       overscroll-behavior: none;
       touch-action: pan-y;
     }
 
     /* =========================
        BACKGROUND LAYER STACK
-       (SEM z-index negativo)
        ========================= */
     .bgWrap{
       position:fixed;
       inset:0;
-      z-index:0;           /* fundo fica em 0 */
+      z-index:0;
       pointer-events:none;
     }
 
@@ -86,7 +84,6 @@
       50%{ opacity:.78; transform:translateY(-6px) scale(1.01); }
     }
 
-    /* estrelas (canvas) em camada acima do gradiente */
     canvas#stars{
       position:absolute;
       inset:0;
@@ -94,7 +91,6 @@
       opacity:.92;
     }
 
-    /* grão acima das estrelas, mas bem leve */
     .grain{
       position:absolute;
       inset:0;
@@ -110,13 +106,16 @@
        ========================= */
     #scroll{
       position:relative;
-      z-index:10; /* conteúdo sempre acima */
-      height:100vh;
+      z-index:10;
+
+      height:100svh;          /* ✅ melhor no mobile */
       height:100dvh;
       overflow-y:auto;
       overflow-x:hidden;
+
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior: none;
+      overscroll-behavior: none;  /* ✅ segura bounce */
+
       background: transparent;
 
       padding:
@@ -126,22 +125,11 @@
         max(18px, env(safe-area-inset-left));
     }
 
-    .wrap{
-      width:min(var(--max), 100%);
-      margin:0 auto;
-    }
+    .wrap{ width:min(var(--max), 100%); margin:0 auto; }
 
-    /* Top micro header com logo */
-    .top{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding: 8px 0 14px;
-    }
+    .top{ display:flex; justify-content:center; align-items:center; padding: 8px 0 14px; }
     .brandPill{
-      display:flex;
-      align-items:center;
-      gap:10px;
+      display:flex; align-items:center; gap:10px;
       padding:10px 14px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.08);
@@ -152,8 +140,7 @@
     }
     .brandPill img{
       width:38px; height:38px;
-      display:block;
-      object-fit:contain;
+      display:block; object-fit:contain;
       filter:
         drop-shadow(0 0 18px rgba(255,255,255,.10))
         drop-shadow(0 0 44px rgba(230,192,123,.18));
@@ -166,17 +153,9 @@
       white-space:nowrap;
     }
 
-    .grid{
-      display:grid;
-      gap:18px;
-      align-items:start;
-      padding-bottom: 10px;
-    }
+    .grid{ display:grid; gap:18px; align-items:start; padding-bottom: 10px; }
     @media (min-width: 980px){
-      .grid{
-        grid-template-columns: 1.12fr .88fr;
-        gap:22px;
-      }
+      .grid{ grid-template-columns: 1.12fr .88fr; gap:22px; }
     }
 
     .hero{
@@ -205,12 +184,8 @@
     }
 
     .kicker{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-size:12px;
-      letter-spacing:.22em;
-      text-transform:uppercase;
+      display:flex; align-items:center; gap:10px;
+      font-size:12px; letter-spacing:.22em; text-transform:uppercase;
       color:rgba(230,192,123,.82);
     }
     .kicker .dot{
@@ -219,7 +194,6 @@
       box-shadow: 0 0 16px rgba(230,192,123,.35);
     }
 
-    /* Reflexo dentro das letras */
     .title{
       margin:14px 0 6px;
       font-weight:700;
@@ -575,7 +549,6 @@
 </head>
 
 <body>
-  <!-- Fundo em camadas (corrigido) -->
   <div class="bgWrap" aria-hidden="true">
     <div class="bg"></div>
     <canvas id="stars"></canvas>
@@ -790,18 +763,13 @@
 
       const inserted = saveLead(lead);
       setStatus(inserted ? "Status: você entrou na lista. Bem-vindo." : "Status: este e-mail já está na lista.", "ok");
-
-      leadForm.animate(
-        [{ transform:"translateY(0)" }, { transform:"translateY(-2px)" }, { transform:"translateY(0)" }],
-        { duration: 260, easing: "cubic-bezier(.16,.98,.16,1)" }
-      );
     });
 
     btnEntrada.addEventListener("click", () => {
       window.location.href = "./entrada.html";
     });
 
-    // Estrelas realistas (camadas + movimento leve)
+    // Estrelas realistas (movimento leve)
     (function(){
       const canvas = document.getElementById("stars");
       const ctx = canvas.getContext("2d", { alpha: true });
@@ -857,12 +825,6 @@
         t += 1;
         ctx.clearRect(0,0,w,h);
 
-        const haze = ctx.createRadialGradient(w*0.52, h*0.18, 0, w*0.52, h*0.18, Math.max(w,h)*0.85);
-        haze.addColorStop(0, "rgba(230,192,123,0.05)");
-        haze.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = haze;
-        ctx.fillRect(0,0,w,h);
-
         for(let L=0; L<3; L++){
           for(const s of layers[L]){
             const tw = Math.sin((t*s.tw) + s.x*0.001) * 0.04;
@@ -879,14 +841,6 @@
             ctx.fillStyle = `rgba(255,255,255,${alpha})`;
             ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
             ctx.fill();
-
-            if(L === 2 && alpha > 0.22){
-              const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r*6.2);
-              grd.addColorStop(0, `rgba(255,255,255,${alpha*0.20})`);
-              grd.addColorStop(1, "rgba(255,255,255,0)");
-              ctx.fillStyle = grd;
-              ctx.fillRect(s.x - s.r*7, s.y - s.r*7, s.r*14, s.r*14);
-            }
           }
         }
 
