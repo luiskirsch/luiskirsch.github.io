@@ -1229,7 +1229,142 @@ for (var j=0;j<rockCount;j++){
             ctx.fill();
           }
         }
+        function makeRock(size){
+  var spikes = Math.floor(rand(8, 13));
+  var pts = [];
+  for (var k=0;k<spikes;k++){
+    var a = (Math.PI*2) * (k/spikes);
+    var rr = size * rand(0.72, 1.18);
+    pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
+  }
 
+  var ang = rand(0, Math.PI * 2);
+  var spd = rand(0.08, 0.28);
+
+  return {
+    x: rand(-w*0.2, w*1.2),
+    y: rand(-h*0.2, h*1.2),
+    r: size,
+    pts: pts,
+    spikes: spikes,
+
+    // ✅ agora é OPACO (não atravessa)
+    a: 1,
+
+    vx: Math.cos(ang) * spd,
+    vy: Math.sin(ang) * spd,
+
+    rot: rand(0, Math.PI*2),
+    rv: rand(-0.010, 0.010),
+
+    // luz/sombra
+    shade: rand(0.18, 0.40),
+    hi: rand(0.20, 0.42),
+
+    wob: rand(0.0006, 0.0018),
+    ph: rand(0, Math.PI*2),
+
+    // massa ~ área (para colisão)
+    m: Math.max(1, size*size)
+  };
+}
+
+function shatterRock(idx, impact){
+  // quebra só se for grande o bastante
+  var r = rocks[idx];
+  if (!r || r.r < 10) return false;
+
+  // chance baseada no impacto (impact ~ velocidade relativa)
+  if (impact < 0.75) return false;
+  if (Math.random() > 0.12) return false;
+
+  var pieces = Math.floor(rand(3, 7));
+  var base = r.r;
+
+  // remove a rocha “mãe”
+  rocks.splice(idx, 1);
+
+  for (var i=0;i<pieces;i++){
+    var sz = rand(base*0.30, base*0.52);
+    var p = makeRock(sz);
+
+    p.x = r.x + rand(-base*0.20, base*0.20);
+    p.y = r.y + rand(-base*0.20, base*0.20);
+
+    // explode para direções diferentes
+    var a = rand(0, Math.PI*2);
+    var kick = rand(0.35, 1.10) * impact;
+    p.vx = r.vx * 0.55 + Math.cos(a) * kick;
+    p.vy = r.vy * 0.55 + Math.sin(a) * kick;
+
+    p.rv *= rand(1.2, 1.8);
+    p.m = Math.max(1, p.r*p.r);
+
+    rocks.push(p);
+  }
+
+  return true;
+}
+
+function resolveRockCollisions(){
+  // elasticidade + atrito leve
+  var REST = 0.92;   // 1 = elástico total
+  var FRICTION = 0.985;
+
+  for (var i=0;i<rocks.length;i++){
+    for (var j=i+1;j<rocks.length;j++){
+      var a = rocks[i], b = rocks[j];
+
+      var dx = b.x - a.x;
+      var dy = b.y - a.y;
+      var dist2 = dx*dx + dy*dy;
+
+      var minDist = a.r + b.r;
+      if (dist2 >= minDist*minDist) continue;
+
+      var dist = Math.sqrt(dist2) || 0.0001;
+      var nx = dx / dist;
+      var ny = dy / dist;
+
+      // separar para não “grudar”
+      var overlap = (minDist - dist);
+      var totalM = a.m + b.m;
+      a.x -= nx * (overlap * (b.m/totalM));
+      a.y -= ny * (overlap * (b.m/totalM));
+      b.x += nx * (overlap * (a.m/totalM));
+      b.y += ny * (overlap * (a.m/totalM));
+
+      // velocidade relativa no eixo normal
+      var rvx = b.vx - a.vx;
+      var rvy = b.vy - a.vy;
+      var relN = rvx*nx + rvy*ny;
+
+      // se já estão se afastando, ignora
+      if (relN > 0) continue;
+
+      // impulso (colisão elástica)
+      var impulse = (-(1 + REST) * relN) / (1/a.m + 1/b.m);
+      var ix = impulse * nx;
+      var iy = impulse * ny;
+
+      a.vx -= ix / a.m;
+      a.vy -= iy / a.m;
+      b.vx += ix / b.m;
+      b.vy += iy / b.m;
+
+      // atrito leve
+      a.vx *= FRICTION; a.vy *= FRICTION;
+      b.vx *= FRICTION; b.vy *= FRICTION;
+
+      // impacto = magnitude da velocidade relativa
+      var impact = Math.min(2.0, Math.sqrt(rvx*rvx + rvy*rvy));
+
+      // ✅ opção de quebrar (tenta quebrar uma das duas)
+      // cuidado com índices: se quebrar, para o loop pra evitar confusão
+      if (shatterRock(j, impact) || shatterRock(i, impact)) return;
+    }
+  }
+}
         // ✅ SOMENTE UMA versão do drawRocks (a sua nova)
         function drawRocks(px, py){
   // 1) atualizar movimento
