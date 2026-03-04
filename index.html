@@ -1097,21 +1097,31 @@
           }
 
           rocks = [];
-          var rockCount = clamp(Math.floor(area/180000), 4, 12);
-          for (var j=0;j<rockCount;j++){
-            var size = rand(3.5, 8.5);
-            rocks.push({
-              x: rand(-w*0.2, w*1.2),
-              y: rand(-h*0.2, h*1.2),
-              r: size,
-              a: rand(0.06, 0.14),
-              vx: rand(0.10, 0.28),
-              vy: rand(0.02, 0.14),
-              rot: rand(0, Math.PI*2),
-              rv: rand(-0.010, 0.010),
-              shade: rand(0.15, 0.35)
-            });
-          }
+var rockCount = clamp(Math.floor(area/150000), 6, 18);
+
+for (var j=0;j<rockCount;j++){
+  var size = rand(3.5, 10.5);
+
+  var ang = rand(0, Math.PI * 2);
+  var spd = rand(0.10, 0.34);
+
+  var vx = Math.cos(ang) * spd;
+  var vy = Math.sin(ang) * spd;
+
+  rocks.push({
+    x: rand(-w*0.2, w*1.2),
+    y: rand(-h*0.2, h*1.2),
+    r: size,
+    a: rand(0.06, 0.15),
+    vx: vx,
+    vy: vy,
+    rot: rand(0, Math.PI*2),
+    rv: rand(-0.012, 0.012),
+    shade: rand(0.15, 0.38),
+    wob: rand(0.0008, 0.0022),
+    ph: rand(0, Math.PI*2)
+  });
+}
 
           meteors = [];
           nextMeteorAt = Math.floor(rand(260, 520));
