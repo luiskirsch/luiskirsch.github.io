@@ -1705,20 +1705,20 @@ window.preludioTick = function(){
         applyVolume();
       });
 
-      var lastY = window.scrollY || 0;
-      window.addEventListener("scroll", function(){
-        var y = window.scrollY || 0;
-        var down = y > lastY;
-        lastY = y;
+      var panel = document.querySelector(".sound-card");
 
-        if (y > 120 && down){
-          panel.classList.add("isHidden");
-        }else if (!down){
-          panel.classList.remove("isHidden");
-        }else if (y <= 120){
-          panel.classList.remove("isHidden");
-        }
-      }, { passive:true });
+window.addEventListener("scroll", function(){
+
+  var y = window.scrollY || 0;
+
+  // aparece somente no topo
+  if(y <= 10){
+    panel.classList.remove("isHidden");
+  }else{
+    panel.classList.add("isHidden");
+  }
+
+}, { passive:true });
 
     })();
   </script>
