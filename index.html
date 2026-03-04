@@ -936,7 +936,7 @@
 
           var g = ctx.createGain();
           g.gain.setValueAtTime(0.00001, t);
-          g.gain.exponentialRampToValueAtTime(0.10, t + 0.005);
+          g.gain.exponentialRampToValueAtTime(0.05, t + 0.005);
           g.gain.exponentialRampToValueAtTime(0.00001, t + 0.055);
 
           o.connect(g);
@@ -1591,7 +1591,7 @@
           delay.delayTime.value = 0.22;
 
           var dGain = audioCtx.createGain();
-          dGain.gain.value = 0.01;
+          dGain.gain.value = 0.10;
 
           gDrone.connect(delay);
           delay.connect(dGain);
