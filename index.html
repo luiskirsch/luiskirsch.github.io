@@ -1209,18 +1209,55 @@ for (var j=0;j<rockCount;j++){
         }
 
         function drawRocks(px, py){
-          for (var i=0;i<rocks.length;i++){
-            var r = rocks[i];
-            r.x += r.vx;
-            r.y += r.vy;
-            r.rot += r.rv;
+  for (var i=0;i<rocks.length;i++){
+    var r = rocks[i];
 
-            if (r.x > w + 120 || r.y > h + 120){
-              if (Math.random() < 0.55){
-                r.x = rand(-140, -40);
-                r.y = rand(-h*0.1, h*1.1);
-              }
-            }
+    // drift + micro oscilação
+    r.ph += r.wob;
+    var wobX = Math.cos(r.ph) * 0.10;
+    var wobY = Math.sin(r.ph) * 0.10;
+
+    r.x += (r.vx + wobX);
+    r.y += (r.vy + wobY);
+    r.rot += r.rv;
+
+    // wrap: se sair por qualquer lado, reaparece do lado oposto
+    if (r.x < -160) r.x = w + 160;
+    if (r.x > w + 160) r.x = -160;
+    if (r.y < -160) r.y = h + 160;
+    if (r.y > h + 160) r.y = -160;
+
+    // parallax (rocha = mais “perto”)
+    var x = r.x + (px * 18);
+    var y = r.y + (py * 18);
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(r.rot);
+
+    // polígono irregular
+    ctx.beginPath();
+    var spikes = 7;
+    for (var k=0;k<spikes;k++){
+      var ang = (Math.PI*2) * (k/spikes);
+      var rr = r.r * rand(0.70, 1.22);
+      var xx = Math.cos(ang) * rr;
+      var yy = Math.sin(ang) * rr;
+      if (k === 0) ctx.moveTo(xx, yy);
+      else ctx.lineTo(xx, yy);
+    }
+    ctx.closePath();
+
+    ctx.fillStyle = "rgba(255,255,255," + (r.a * 0.42).toFixed(3) + ")";
+    ctx.fill();
+
+    ctx.strokeStyle = "rgba(0,0,0," + (r.shade).toFixed(3) + ")";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+}
 
             var x = r.x + (px * 16);
             var y = r.y + (py * 16);
