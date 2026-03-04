@@ -1232,10 +1232,10 @@ for (var j=0;j<rockCount;j++){
 
         // ✅ SOMENTE UMA versão do drawRocks (a sua nova)
         function drawRocks(px, py){
+  // 1) atualizar movimento
   for (var i=0;i<rocks.length;i++){
     var r = rocks[i];
 
-    // drift + micro oscilação
     r.ph += r.wob;
     var wobX = Math.cos(r.ph) * 0.08;
     var wobY = Math.sin(r.ph) * 0.08;
@@ -1244,13 +1244,20 @@ for (var j=0;j<rockCount;j++){
     r.y += (r.vy + wobY);
     r.rot += r.rv;
 
-    // wrap: se sair por qualquer lado, reaparece do lado oposto
-    if (r.x < -200) r.x = w + 200;
-    if (r.x > w + 200) r.x = -200;
-    if (r.y < -200) r.y = h + 200;
-    if (r.y > h + 200) r.y = -200;
+    // wrap
+    if (r.x < -220) r.x = w + 220;
+    if (r.x > w + 220) r.x = -220;
+    if (r.y < -220) r.y = h + 220;
+    if (r.y > h + 220) r.y = -220;
+  }
 
-    // parallax (rocha = bem “perto”)
+  // 2) colisões (muda rota / pode quebrar)
+  resolveRockCollisions();
+
+  // 3) desenhar (OPACO)
+  for (var i=0;i<rocks.length;i++){
+    var r = rocks[i];
+
     var x = r.x + (px * 22);
     var y = r.y + (py * 22);
 
@@ -1258,43 +1265,40 @@ for (var j=0;j<rockCount;j++){
     ctx.translate(x, y);
     ctx.rotate(r.rot);
 
-    // ===== forma fixa (não usa rand aqui)
+    // forma fixa
     ctx.beginPath();
     var pts = r.pts;
     ctx.moveTo(pts[0].x, pts[0].y);
-    for (var k=1;k<pts.length;k++){
-      ctx.lineTo(pts[k].x, pts[k].y);
-    }
+    for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
     ctx.closePath();
 
-    // ===== preenchimento “pedra” (escuro com leve luz)
-    var grad = ctx.createRadialGradient(-r.r*0.25, -r.r*0.35, r.r*0.10, 0, 0, r.r*1.25);
-    grad.addColorStop(0, "rgba(255,255,255," + (r.a * r.hi).toFixed(3) + ")");
-    grad.addColorStop(0.45, "rgba(255,255,255," + (r.a * 0.10).toFixed(3) + ")");
-    grad.addColorStop(1, "rgba(0,0,0," + (0.62 + r.shade*0.45).toFixed(3) + ")");
+    // ✅ “pedra” sólida (sem transparência)
+    var grad = ctx.createRadialGradient(-r.r*0.28, -r.r*0.35, r.r*0.10, 0, 0, r.r*1.35);
+    grad.addColorStop(0, "rgba(70,70,78,1)");                         // brilho
+    grad.addColorStop(0.45, "rgba(34,34,40,1)");                      // meio
+    grad.addColorStop(1, "rgba(10,10,14,1)");                         // sombra
+
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // ===== contorno definido (faz “parecer pedra”)
-    ctx.lineWidth = 1.25;
-    ctx.strokeStyle = "rgba(0,0,0," + (0.55 + r.shade*0.35).toFixed(3) + ")";
+    // contorno definido
+    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = "rgba(0,0,0,1)";
     ctx.stroke();
 
-    // ===== highlight de borda (bem sutil, dá volume)
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(255,255,255," + (r.a * 0.16).toFixed(3) + ")";
+    // highlight de borda (mínimo, ainda opaco)
+    ctx.lineWidth = 1.0;
+    ctx.strokeStyle = "rgba(120,120,130,1)";
     ctx.stroke();
 
-    // ===== detalhe interno (rachadura simples)
-    ctx.globalAlpha = Math.min(0.55, r.a);
-    ctx.strokeStyle = "rgba(0,0,0," + (0.35 + r.shade*0.25).toFixed(3) + ")";
-    ctx.lineWidth = 0.9;
+    // rachadura (opaca)
+    ctx.strokeStyle = "rgba(0,0,0,1)";
+    ctx.lineWidth = 1.0;
     ctx.beginPath();
-    ctx.moveTo(-r.r*0.15, -r.r*0.10);
-    ctx.lineTo(r.r*0.40, r.r*0.12);
-    ctx.lineTo(r.r*0.10, r.r*0.38);
+    ctx.moveTo(-r.r*0.18, -r.r*0.08);
+    ctx.lineTo(r.r*0.42, r.r*0.10);
+    ctx.lineTo(r.r*0.12, r.r*0.40);
     ctx.stroke();
-    ctx.globalAlpha = 1;
 
     ctx.restore();
   }
