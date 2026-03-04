@@ -629,8 +629,7 @@
 
   <script>
     /* =========================================================
-       ✅ 1) Estrelas + meteoros + (NOVO) pedras + poeira (ES5)
-       - Pedras/poeira: bem raras (cinematográfico)
+       ✅ 1) Estrelas + meteoros (ES5) — se falhar, fallback CSS continua
        ========================================================= */
     (function(){
       try{
@@ -647,18 +646,11 @@
         var w=0, h=0, dpr=1;
         var stars = [];
         var meteors = [];
-        var rocks = [];     // ✅ pedras espaciais
-        var dustBursts = []; // ✅ poeira espacial (rajadas)
         var raf = 0;
         var t = 0;
         var nextMeteorAt = 0;
 
-        // 🔥 raridade A (bem rara)
-        var nextRockAt = 0;
-        var nextDustAt = 0;
-
         function rand(min,max){ return min + Math.random()*(max-min); }
-        function clamp(v,min,max){ return Math.min(max, Math.max(min, v)); }
 
         function resize(){
           dpr = Math.max(1, Math.min(2, (window.devicePixelRatio || 1)));
@@ -685,15 +677,7 @@
               tw: Math.random()*0.02 + 0.006
             });
           }
-
           meteors = [];
-          rocks = [];
-          dustBursts = [];
-
-          // agenda raridade (A)
-          nextMeteorAt = 0;
-          nextRockAt = Math.floor(rand(900, 1500));
-          nextDustAt = Math.floor(rand(700, 1200));
         }
 
         function spawnMeteor(){
@@ -715,72 +699,10 @@
           });
         }
 
-        // ✅ NOVO: pedra espacial pequena (bem discreta)
-        function spawnRock(){
-          // nasce levemente fora da tela (topo/esquerda) e cruza em diagonal
-          var fromTop = Math.random() < 0.55;
-          var x = fromTop ? rand(0, w * 0.85) : rand(-w * 0.18, -w * 0.04);
-          var y = fromTop ? rand(-h * 0.18, -h * 0.05) : rand(0, h * 0.65);
-
-          var size = rand(6, 18); // nada grande
-          var speed = rand(0.45, 0.85); // lento (cinema)
-          var angle = rand(0.70, 0.98); // diagonal para baixo/direita
-          var vx = Math.cos(angle) * speed;
-          var vy = Math.sin(angle) * speed;
-
-          // polígono irregular
-          var pts = [];
-          var n = Math.floor(rand(5, 8));
-          for (var i=0;i<n;i++){
-            var a = (Math.PI*2) * (i/n);
-            var jitter = rand(0.65, 1.15);
-            pts.push({ a:a, r:size * jitter });
-          }
-
-          rocks.push({
-            x:x, y:y,
-            vx:vx, vy:vy,
-            rot: rand(0, Math.PI*2),
-            vr: rand(-0.006, 0.006),
-            pts: pts,
-            life: 0,
-            maxLife: rand(900, 1400), // dura bastante, cruzando devagar
-            a: rand(0.08, 0.15) // bem discreto
-          });
-        }
-
-        // ✅ NOVO: poeira espacial (rajada discreta)
-        function spawnDustBurst(){
-          var cx = rand(w*0.10, w*0.90);
-          var cy = rand(h*0.15, h*0.85);
-
-          var count = Math.floor(rand(18, 34));
-          var parts = [];
-          for (var i=0;i<count;i++){
-            var ang = rand(0.70, 0.98); // mesmo sentido geral
-            var sp = rand(0.25, 0.75);
-            parts.push({
-              x: cx + rand(-30, 30),
-              y: cy + rand(-20, 20),
-              vx: Math.cos(ang)*sp,
-              vy: Math.sin(ang)*sp,
-              r: rand(0.6, 1.6),
-              a: rand(0.05, 0.12)
-            });
-          }
-
-          dustBursts.push({
-            parts: parts,
-            life: 0,
-            maxLife: Math.floor(rand(140, 220))
-          });
-        }
-
         function draw(){
           t += 1;
           ctx.clearRect(0,0,w,h);
 
-          // estrelas
           for (var i=0;i<stars.length;i++){
             var s = stars[i];
             s.y += s.v;
@@ -798,7 +720,6 @@
             ctx.fill();
           }
 
-          // meteoros (como antes)
           if (t > nextMeteorAt){
             spawnMeteor();
             nextMeteorAt = t + Math.floor(rand(220, 420));
@@ -838,94 +759,7 @@
             }
           }
 
-          // ✅ NOVO: poeira (bem rara)
-          if (t > nextDustAt){
-            spawnDustBurst();
-            nextDustAt = t + Math.floor(rand(900, 1500)); // raridade A
-          }
-
-          for (var db=dustBursts.length-1; db>=0; db--){
-            var d = dustBursts[db];
-            d.life++;
-
-            var fade = 1 - (d.life / d.maxLife);
-            fade = clamp(fade, 0, 1);
-
-            // poeira bem sutil: pequenos pontos + um “véu” leve
-            for (var p=0;p<d.parts.length;p++){
-              var pr = d.parts[p];
-              pr.x += pr.vx;
-              pr.y += pr.vy;
-
-              var a2 = pr.a * fade;
-
-              ctx.beginPath();
-              ctx.fillStyle = "rgba(220,230,255," + a2.toFixed(3) + ")";
-              ctx.arc(pr.x, pr.y, pr.r, 0, Math.PI*2);
-              ctx.fill();
-            }
-
-            if (d.life >= d.maxLife){
-              dustBursts.splice(db,1);
-            }
-          }
-
-          // ✅ NOVO: pedras (bem raras)
-          if (t > nextRockAt){
-            spawnRock();
-            nextRockAt = t + Math.floor(rand(1400, 2300)); // raridade A (bem rara)
-          }
-
-          for (var r=rocks.length-1; r>=0; r--){
-            var rock = rocks[r];
-            rock.life++;
-            rock.x += rock.vx;
-            rock.y += rock.vy;
-            rock.rot += rock.vr;
-
-            var fadeIn = clamp(rock.life / 90, 0, 1);
-            var fadeOut = clamp(1 - (rock.life / rock.maxLife), 0, 1);
-            var alphaR = rock.a * fadeIn * fadeOut;
-
-            // desenha polígono irregular (asteroide pequeno)
-            ctx.save();
-            ctx.translate(rock.x, rock.y);
-            ctx.rotate(rock.rot);
-
-            ctx.beginPath();
-            for (var k2=0;k2<rock.pts.length;k2++){
-              var pt = rock.pts[k2];
-              var px = Math.cos(pt.a) * pt.r;
-              var py = Math.sin(pt.a) * pt.r;
-              if (k2 === 0) ctx.moveTo(px, py);
-              else ctx.lineTo(px, py);
-            }
-            ctx.closePath();
-
-            // preenchimento bem sutil + borda suave
-            ctx.fillStyle = "rgba(210,210,210," + (alphaR*0.55).toFixed(3) + ")";
-            ctx.strokeStyle = "rgba(255,255,255," + (alphaR*0.18).toFixed(3) + ")";
-            ctx.lineWidth = 1;
-
-            ctx.fill();
-            ctx.stroke();
-
-            // sombra interna/volume (leve)
-            ctx.globalCompositeOperation = "source-over";
-            ctx.fillStyle = "rgba(0,0,0," + (alphaR*0.20).toFixed(3) + ")";
-            ctx.beginPath();
-            ctx.ellipse(2, 2, 0.55*12, 0.55*9, 0, 0, Math.PI*2);
-            ctx.fill();
-
-            ctx.restore();
-
-            // remove quando sair ou expirar
-            if (rock.life > rock.maxLife || rock.x > w + 60 || rock.y > h + 60){
-              rocks.splice(r,1);
-            }
-          }
-
-          // vinheta (como antes)
+          // vinheta
           var vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.95);
           vignette.addColorStop(0, "rgba(0,0,0,0)");
           vignette.addColorStop(1, "rgba(0,0,0,0.62)");
