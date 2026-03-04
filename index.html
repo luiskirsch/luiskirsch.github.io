@@ -925,28 +925,86 @@
       window.addEventListener("pointerdown", unlock, { once:true });
       window.addEventListener("touchstart", unlock, { once:true });
 
-      window.preludioTick = function(){
-        if (!ctx) return;
-        try{
-          var t = ctx.currentTime;
+      <script>
+window.preludioTick = function(){
+  if (!ctx) return;
 
-          var o = ctx.createOscillator();
-          o.type = "square";
-          o.frequency.setValueAtTime(1200, t);
+  try{
+    var t = ctx.currentTime;
 
-          var g = ctx.createGain();
-          g.gain.setValueAtTime(0.00001, t);
-          g.gain.exponentialRampToValueAtTime(0.01, t + 0.005);
-          g.gain.exponentialRampToValueAtTime(0.00001, t + 0.055);
+    var VOL = 0.028;
 
-          o.connect(g);
-          g.connect(ctx.destination);
+    var o1 = ctx.createOscillator();
+    o1.type = "square";
+    o1.frequency.setValueAtTime(1700, t);
 
-          o.start(t);
-          o.stop(t + 0.06);
-        }catch(e){}
-      };
-    })();
+    var g1 = ctx.createGain();
+    g1.gain.setValueAtTime(0.00001, t);
+    g1.gain.exponentialRampToValueAtTime(VOL, t + 0.003);
+    g1.gain.exponentialRampToValueAtTime(0.00001, t + 0.030);
+
+    var f1 = ctx.createBiquadFilter();
+    f1.type = "bandpass";
+    f1.frequency.setValueAtTime(2400, t);
+    f1.Q.setValueAtTime(2.2, t);
+
+    o1.connect(f1);
+    f1.connect(g1);
+    g1.connect(ctx.destination);
+
+    o1.start(t);
+    o1.stop(t + 0.035);
+
+    var dt = 0.085;
+    var t2 = t + dt;
+
+    var o2 = ctx.createOscillator();
+    o2.type = "triangle";
+    o2.frequency.setValueAtTime(520, t2);
+
+    var g2 = ctx.createGain();
+    g2.gain.setValueAtTime(0.00001, t2);
+    g2.gain.exponentialRampToValueAtTime(VOL * 0.80, t2 + 0.004);
+    g2.gain.exponentialRampToValueAtTime(0.00001, t2 + 0.040);
+
+    var f2 = ctx.createBiquadFilter();
+    f2.type = "lowpass";
+    f2.frequency.setValueAtTime(1200, t2);
+    f2.Q.setValueAtTime(0.7, t2);
+
+    o2.connect(f2);
+    f2.connect(g2);
+    g2.connect(ctx.destination);
+
+    o2.start(t2);
+    o2.stop(t2 + 0.045);
+
+    var t3 = t + 0.012;
+
+    var o3 = ctx.createOscillator();
+    o3.type = "sine";
+    o3.frequency.setValueAtTime(3200, t3);
+
+    var g3 = ctx.createGain();
+    g3.gain.setValueAtTime(0.00001, t3);
+    g3.gain.exponentialRampToValueAtTime(VOL * 0.22, t3 + 0.002);
+    g3.gain.exponentialRampToValueAtTime(0.00001, t3 + 0.018);
+
+    var f3 = ctx.createBiquadFilter();
+    f3.type = "highpass";
+    f3.frequency.setValueAtTime(1600, t3);
+    f3.Q.setValueAtTime(0.8, t3);
+
+    o3.connect(f3);
+    f3.connect(g3);
+    g3.connect(ctx.destination);
+
+    o3.start(t3);
+    o3.stop(t3 + 0.020);
+
+  }catch(e){}
+};
+</script>
 
     /* =========================================================
        ✅ 1) Espaço AAA: estrelas com parallax real + poeira + micro-asteroides + micro-meteoros
