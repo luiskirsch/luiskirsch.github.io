@@ -901,7 +901,8 @@
 
   <script>
     /* =========================================================
-       ✅ Tick SFX independente do SOM do site
+       ✅ Tick SFX independente do SOM do site (CORRIGIDO)
+       - sem <script> dentro de <script>
        ========================================================= */
     (function(){
       var ctx = null;
@@ -925,86 +926,89 @@
       window.addEventListener("pointerdown", unlock, { once:true });
       window.addEventListener("touchstart", unlock, { once:true });
 
-      <script>
-window.preludioTick = function(){
-  if (!ctx) return;
+      window.preludioTick = function(){
+        if (!ctx) return;
 
-  try{
-    var t = ctx.currentTime;
+        try{
+          var t = ctx.currentTime;
 
-    var VOL = 0.028;
+          // volume geral do tick (ajusta aqui)
+          var VOL = 0.028;
 
-    var o1 = ctx.createOscillator();
-    o1.type = "square";
-    o1.frequency.setValueAtTime(1700, t);
+          // ===== clique 1: "tic"
+          var o1 = ctx.createOscillator();
+          o1.type = "square";
+          o1.frequency.setValueAtTime(1700, t);
 
-    var g1 = ctx.createGain();
-    g1.gain.setValueAtTime(0.00001, t);
-    g1.gain.exponentialRampToValueAtTime(VOL, t + 0.003);
-    g1.gain.exponentialRampToValueAtTime(0.00001, t + 0.030);
+          var g1 = ctx.createGain();
+          g1.gain.setValueAtTime(0.00001, t);
+          g1.gain.exponentialRampToValueAtTime(VOL, t + 0.003);
+          g1.gain.exponentialRampToValueAtTime(0.00001, t + 0.030);
 
-    var f1 = ctx.createBiquadFilter();
-    f1.type = "bandpass";
-    f1.frequency.setValueAtTime(2400, t);
-    f1.Q.setValueAtTime(2.2, t);
+          var f1 = ctx.createBiquadFilter();
+          f1.type = "bandpass";
+          f1.frequency.setValueAtTime(2400, t);
+          f1.Q.setValueAtTime(2.2, t);
 
-    o1.connect(f1);
-    f1.connect(g1);
-    g1.connect(ctx.destination);
+          o1.connect(f1);
+          f1.connect(g1);
+          g1.connect(ctx.destination);
 
-    o1.start(t);
-    o1.stop(t + 0.035);
+          o1.start(t);
+          o1.stop(t + 0.035);
 
-    var dt = 0.085;
-    var t2 = t + dt;
+          // ===== clique 2: "tac"
+          var dt = 0.085;
+          var t2 = t + dt;
 
-    var o2 = ctx.createOscillator();
-    o2.type = "triangle";
-    o2.frequency.setValueAtTime(520, t2);
+          var o2 = ctx.createOscillator();
+          o2.type = "triangle";
+          o2.frequency.setValueAtTime(520, t2);
 
-    var g2 = ctx.createGain();
-    g2.gain.setValueAtTime(0.00001, t2);
-    g2.gain.exponentialRampToValueAtTime(VOL * 0.80, t2 + 0.004);
-    g2.gain.exponentialRampToValueAtTime(0.00001, t2 + 0.040);
+          var g2 = ctx.createGain();
+          g2.gain.setValueAtTime(0.00001, t2);
+          g2.gain.exponentialRampToValueAtTime(VOL * 0.80, t2 + 0.004);
+          g2.gain.exponentialRampToValueAtTime(0.00001, t2 + 0.040);
 
-    var f2 = ctx.createBiquadFilter();
-    f2.type = "lowpass";
-    f2.frequency.setValueAtTime(1200, t2);
-    f2.Q.setValueAtTime(0.7, t2);
+          var f2 = ctx.createBiquadFilter();
+          f2.type = "lowpass";
+          f2.frequency.setValueAtTime(1200, t2);
+          f2.Q.setValueAtTime(0.7, t2);
 
-    o2.connect(f2);
-    f2.connect(g2);
-    g2.connect(ctx.destination);
+          o2.connect(f2);
+          f2.connect(g2);
+          g2.connect(ctx.destination);
 
-    o2.start(t2);
-    o2.stop(t2 + 0.045);
+          o2.start(t2);
+          o2.stop(t2 + 0.045);
 
-    var t3 = t + 0.012;
+          // ===== micro "clink"
+          var t3 = t + 0.012;
 
-    var o3 = ctx.createOscillator();
-    o3.type = "sine";
-    o3.frequency.setValueAtTime(3200, t3);
+          var o3 = ctx.createOscillator();
+          o3.type = "sine";
+          o3.frequency.setValueAtTime(3200, t3);
 
-    var g3 = ctx.createGain();
-    g3.gain.setValueAtTime(0.00001, t3);
-    g3.gain.exponentialRampToValueAtTime(VOL * 0.22, t3 + 0.002);
-    g3.gain.exponentialRampToValueAtTime(0.00001, t3 + 0.018);
+          var g3 = ctx.createGain();
+          g3.gain.setValueAtTime(0.00001, t3);
+          g3.gain.exponentialRampToValueAtTime(VOL * 0.22, t3 + 0.002);
+          g3.gain.exponentialRampToValueAtTime(0.00001, t3 + 0.018);
 
-    var f3 = ctx.createBiquadFilter();
-    f3.type = "highpass";
-    f3.frequency.setValueAtTime(1600, t3);
-    f3.Q.setValueAtTime(0.8, t3);
+          var f3 = ctx.createBiquadFilter();
+          f3.type = "highpass";
+          f3.frequency.setValueAtTime(1600, t3);
+          f3.Q.setValueAtTime(0.8, t3);
 
-    o3.connect(f3);
-    f3.connect(g3);
-    g3.connect(ctx.destination);
+          o3.connect(f3);
+          f3.connect(g3);
+          g3.connect(ctx.destination);
 
-    o3.start(t3);
-    o3.stop(t3 + 0.020);
+          o3.start(t3);
+          o3.stop(t3 + 0.020);
 
-  }catch(e){}
-};
-</script>
+        }catch(e){}
+      };
+    })();
 
     /* =========================================================
        ✅ 1) Espaço AAA: estrelas com parallax real + poeira + micro-asteroides + micro-meteoros
@@ -1491,18 +1495,21 @@ window.preludioTick = function(){
 
     /* =========================================================
        ✅ 4) Som do site (com volume + some ao rolar)
+       - CORRIGIDO:
+         • não usa .sound-card (não existe)
+         • o card só aparece quando chegar no topo
        ========================================================= */
     (function(){
       var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
       var reduced = mm ? mm.matches : false;
       if (reduced) return;
 
-      var panel = document.getElementById("soundPanel");
+      var panelEl = document.getElementById("soundPanel");
       var btn = document.getElementById("soundBtn");
       var stateEl = document.getElementById("soundState");
       var slider = document.getElementById("volumeSlider");
 
-      if (!btn || !stateEl || !slider || !panel) return;
+      if (!btn || !stateEl || !slider || !panelEl) return;
 
       var audioCtx = null;
       var started = false;
@@ -1705,21 +1712,70 @@ window.preludioTick = function(){
         applyVolume();
       });
 
-      var panel = document.querySelector(".sound-card");
+      // ✅ aparece só quando chegar no topo (não volta ao subir, só no topo)
+      function updatePanelVisibility(){
+        var y = window.scrollY || 0;
+        if (y <= 10) panelEl.classList.remove("isHidden");
+        else panelEl.classList.add("isHidden");
+      }
+      window.addEventListener("scroll", updatePanelVisibility, { passive:true });
+      updatePanelVisibility();
 
-window.addEventListener("scroll", function(){
+    })();
 
-  var y = window.scrollY || 0;
+    /* =========================================================
+       ✅ 5) "Puxar para recarregar" (mobile)
+       - só funciona quando estiver no topo
+       ========================================================= */
+    (function(){
+      var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+      var reduced = mm ? mm.matches : false;
+      if (reduced) return;
 
-  // aparece somente no topo
-  if(y <= 10){
-    panel.classList.remove("isHidden");
-  }else{
-    panel.classList.add("isHidden");
-  }
+      var startY = 0;
+      var pulling = false;
+      var dist = 0;
+      var THRESH = 85;
 
-}, { passive:true });
+      function atTop(){
+        return (window.scrollY || 0) <= 0;
+      }
 
+      function onStart(e){
+        if (!atTop()) return;
+        if (!e.touches || !e.touches[0]) return;
+        startY = e.touches[0].clientY;
+        pulling = true;
+        dist = 0;
+      }
+
+      function onMove(e){
+        if (!pulling) return;
+        if (!e.touches || !e.touches[0]) return;
+        var y = e.touches[0].clientY;
+        dist = y - startY;
+        if (dist > 0){
+          // impede o "rubber band" do navegador e deixa a sensação mais controlada
+          e.preventDefault();
+        }
+      }
+
+      function onEnd(){
+        if (!pulling) return;
+        pulling = false;
+
+        if (dist >= THRESH){
+          // recarrega de verdade
+          window.location.reload();
+        }
+
+        dist = 0;
+      }
+
+      window.addEventListener("touchstart", onStart, { passive:true });
+      window.addEventListener("touchmove", onMove, { passive:false });
+      window.addEventListener("touchend", onEnd, { passive:true });
+      window.addEventListener("touchcancel", onEnd, { passive:true });
     })();
   </script>
 </body>
