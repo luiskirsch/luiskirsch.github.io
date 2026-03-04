@@ -1097,31 +1097,53 @@
           }
 
           rocks = [];
-          var rockCount = clamp(Math.floor(area/150000), 6, 18);
+// ✅ mais rochas (bem mais frequente)
+var rockCount = clamp(Math.floor(area/52000), 18, 56);
 
-          for (var j=0;j<rockCount;j++){
-            var size = rand(3.5, 10.5);
+for (var j=0;j<rockCount;j++){
+  // ✅ maiores e mais “presentes”
+  var size = rand(6.5, 18.5);
 
-            var ang = rand(0, Math.PI * 2);
-            var spd = rand(0.10, 0.34);
+  var ang = rand(0, Math.PI * 2);
+  var spd = rand(0.08, 0.28);
 
-            var vx = Math.cos(ang) * spd;
-            var vy = Math.sin(ang) * spd;
+  var vx = Math.cos(ang) * spd;
+  var vy = Math.sin(ang) * spd;
 
-            rocks.push({
-              x: rand(-w*0.2, w*1.2),
-              y: rand(-h*0.2, h*1.2),
-              r: size,
-              a: rand(0.06, 0.15),
-              vx: vx,
-              vy: vy,
-              rot: rand(0, Math.PI*2),
-              rv: rand(-0.012, 0.012),
-              shade: rand(0.15, 0.38),
-              wob: rand(0.0008, 0.0022),
-              ph: rand(0, Math.PI*2)
-            });
-          }
+  // ✅ forma fixa: pontos do polígono (não muda por frame)
+  var spikes = Math.floor(rand(8, 13));
+  var pts = [];
+  for (var k=0;k<spikes;k++){
+    var a = (Math.PI*2) * (k/spikes);
+    // irregularidade controlada (pedra definida)
+    var rr = size * rand(0.72, 1.18);
+    pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
+  }
+
+  rocks.push({
+    x: rand(-w*0.2, w*1.2),
+    y: rand(-h*0.2, h*1.2),
+    r: size,
+    pts: pts,
+    spikes: spikes,
+
+    // ✅ mais visível
+    a: rand(0.16, 0.34),
+
+    vx: vx,
+    vy: vy,
+    rot: rand(0, Math.PI*2),
+    rv: rand(-0.010, 0.010),
+
+    // luz/sombra
+    shade: rand(0.20, 0.42),
+    hi: rand(0.22, 0.46),
+
+    // wobble bem sutil
+    wob: rand(0.0006, 0.0018),
+    ph: rand(0, Math.PI*2)
+  });
+}
 
           meteors = [];
           nextMeteorAt = Math.floor(rand(260, 520));
@@ -1210,55 +1232,73 @@
 
         // ✅ SOMENTE UMA versão do drawRocks (a sua nova)
         function drawRocks(px, py){
-          for (var i=0;i<rocks.length;i++){
-            var r = rocks[i];
+  for (var i=0;i<rocks.length;i++){
+    var r = rocks[i];
 
-            // drift + micro oscilação
-            r.ph += r.wob;
-            var wobX = Math.cos(r.ph) * 0.10;
-            var wobY = Math.sin(r.ph) * 0.10;
+    // drift + micro oscilação
+    r.ph += r.wob;
+    var wobX = Math.cos(r.ph) * 0.08;
+    var wobY = Math.sin(r.ph) * 0.08;
 
-            r.x += (r.vx + wobX);
-            r.y += (r.vy + wobY);
-            r.rot += r.rv;
+    r.x += (r.vx + wobX);
+    r.y += (r.vy + wobY);
+    r.rot += r.rv;
 
-            // wrap: se sair por qualquer lado, reaparece do lado oposto
-            if (r.x < -160) r.x = w + 160;
-            if (r.x > w + 160) r.x = -160;
-            if (r.y < -160) r.y = h + 160;
-            if (r.y > h + 160) r.y = -160;
+    // wrap: se sair por qualquer lado, reaparece do lado oposto
+    if (r.x < -200) r.x = w + 200;
+    if (r.x > w + 200) r.x = -200;
+    if (r.y < -200) r.y = h + 200;
+    if (r.y > h + 200) r.y = -200;
 
-            // parallax (rocha = mais “perto”)
-            var x = r.x + (px * 18);
-            var y = r.y + (py * 18);
+    // parallax (rocha = bem “perto”)
+    var x = r.x + (px * 22);
+    var y = r.y + (py * 22);
 
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(r.rot);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(r.rot);
 
-            // polígono irregular
-            ctx.beginPath();
-            var spikes = 7;
-            for (var k=0;k<spikes;k++){
-              var ang = (Math.PI*2) * (k/spikes);
-              var rr = r.r * rand(0.70, 1.22);
-              var xx = Math.cos(ang) * rr;
-              var yy = Math.sin(ang) * rr;
-              if (k === 0) ctx.moveTo(xx, yy);
-              else ctx.lineTo(xx, yy);
-            }
-            ctx.closePath();
+    // ===== forma fixa (não usa rand aqui)
+    ctx.beginPath();
+    var pts = r.pts;
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (var k=1;k<pts.length;k++){
+      ctx.lineTo(pts[k].x, pts[k].y);
+    }
+    ctx.closePath();
 
-            ctx.fillStyle = "rgba(255,255,255," + (r.a * 0.42).toFixed(3) + ")";
-            ctx.fill();
+    // ===== preenchimento “pedra” (escuro com leve luz)
+    var grad = ctx.createRadialGradient(-r.r*0.25, -r.r*0.35, r.r*0.10, 0, 0, r.r*1.25);
+    grad.addColorStop(0, "rgba(255,255,255," + (r.a * r.hi).toFixed(3) + ")");
+    grad.addColorStop(0.45, "rgba(255,255,255," + (r.a * 0.10).toFixed(3) + ")");
+    grad.addColorStop(1, "rgba(0,0,0," + (0.62 + r.shade*0.45).toFixed(3) + ")");
+    ctx.fillStyle = grad;
+    ctx.fill();
 
-            ctx.strokeStyle = "rgba(0,0,0," + (r.shade).toFixed(3) + ")";
-            ctx.lineWidth = 1;
-            ctx.stroke();
+    // ===== contorno definido (faz “parecer pedra”)
+    ctx.lineWidth = 1.25;
+    ctx.strokeStyle = "rgba(0,0,0," + (0.55 + r.shade*0.35).toFixed(3) + ")";
+    ctx.stroke();
 
-            ctx.restore();
-          }
-        }
+    // ===== highlight de borda (bem sutil, dá volume)
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(255,255,255," + (r.a * 0.16).toFixed(3) + ")";
+    ctx.stroke();
+
+    // ===== detalhe interno (rachadura simples)
+    ctx.globalAlpha = Math.min(0.55, r.a);
+    ctx.strokeStyle = "rgba(0,0,0," + (0.35 + r.shade*0.25).toFixed(3) + ")";
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(-r.r*0.15, -r.r*0.10);
+    ctx.lineTo(r.r*0.40, r.r*0.12);
+    ctx.lineTo(r.r*0.10, r.r*0.38);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+  }
+}
 
         function drawMeteors(){
           for (var j=meteors.length-1;j>=0;j--){
