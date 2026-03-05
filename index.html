@@ -13,8 +13,9 @@
 
   <style>
     :root{
-      --bg:#000006;
-      --bg2:#000002;
+      /* ✅ MAIS ESCURO (mais contraste e realismo) */
+      --bg:#000001;
+      --bg2:#000000;
       --gold:#e6c07b;
 
       --cardA:rgba(255,255,255,.070);
@@ -31,7 +32,7 @@
     html,body{ height:100%; }
 
     html{
-      background:#000006;
+      background:#000001;
       background: var(--bg);
       overscroll-behavior: none;
     }
@@ -53,17 +54,18 @@
       color:#f2f2f2;
       font-family: ui-serif, Georgia, "Times New Roman", serif;
 
-      background-color:#000006;
+      background-color:#000001;
 
+      /* ✅ mais escuro: menos glow no fundo */
       background:
-        radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.06), transparent 62%),
-        radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.035), transparent 72%),
-        radial-gradient(1400px 900px at 86% 80%, rgba(255,255,255,.030), transparent 74%),
-        linear-gradient(180deg, #000002, #000006);
+        radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.045), transparent 64%),
+        radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.022), transparent 76%),
+        radial-gradient(1400px 900px at 86% 80%, rgba(255,255,255,.018), transparent 78%),
+        linear-gradient(180deg, #000000, #000001);
       background:
-        radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.06), transparent 62%),
-        radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.035), transparent 72%),
-        radial-gradient(1400px 900px at 86% 80%, rgba(255,255,255,.030), transparent 74%),
+        radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.045), transparent 64%),
+        radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.022), transparent 76%),
+        radial-gradient(1400px 900px at 86% 80%, rgba(255,255,255,.018), transparent 78%),
         linear-gradient(180deg, var(--bg2), var(--bg));
     }
 
@@ -99,19 +101,19 @@
       pointer-events:none;
       z-index:1;
       background:
-        radial-gradient(1000px 560px at 28% 30%, rgba(255,255,255,.024), transparent 70%),
-        radial-gradient(1200px 680px at 70% 70%, rgba(230,192,123,.038), transparent 76%),
-        radial-gradient(900px 520px at 52% 18%, rgba(120,150,255,.016), transparent 70%),
-        radial-gradient(760px 420px at 50% 24%, rgba(230,192,123,.055), transparent 70%);
+        radial-gradient(1000px 560px at 28% 30%, rgba(255,255,255,.018), transparent 72%),
+        radial-gradient(1200px 680px at 70% 70%, rgba(230,192,123,.030), transparent 78%),
+        radial-gradient(900px 520px at 52% 18%, rgba(120,150,255,.012), transparent 72%),
+        radial-gradient(760px 420px at 50% 24%, rgba(230,192,123,.040), transparent 72%);
       filter: blur(18px);
-      opacity:.38;
+      opacity:.26; /* ✅ mais escuro */
       transform: translateZ(0);
       animation: fogMove 10.5s ease-in-out infinite;
     }
 
     @keyframes fogMove{
-      0%,100%{ transform: translate3d(0,0,0) scale(1); opacity:.30; }
-      50%{ transform: translate3d(10px,-10px,0) scale(1.02); opacity:.46; }
+      0%,100%{ transform: translate3d(0,0,0) scale(1); opacity:.20; }
+      50%{ transform: translate3d(10px,-10px,0) scale(1.02); opacity:.32; }
     }
 
     /* Canvas (parallax stars) */
@@ -120,8 +122,9 @@
       inset:0;
       z-index:2;
       pointer-events:none;
-      opacity:.95;
+      opacity:.98;
       transform: translateZ(0);
+      will-change: transform;
     }
 
     .wrap{
@@ -685,20 +688,20 @@
       inset:-12%;
       z-index:3;
       pointer-events:none;
-      opacity:.20;
+      opacity:.14; /* ✅ mais escuro */
       mix-blend-mode: screen;
-      filter: blur(22px) saturate(1.15) contrast(1.05);
+      filter: blur(22px) saturate(1.10) contrast(1.06);
       transform: translateZ(0);
       background:
-        radial-gradient(900px 520px at 18% 22%, rgba(120,160,255,.10), transparent 68%),
-        radial-gradient(980px 560px at 78% 30%, rgba(230,192,123,.10), transparent 70%),
-        radial-gradient(860px 520px at 55% 78%, rgba(170,120,255,.09), transparent 72%),
-        radial-gradient(740px 460px at 42% 44%, rgba(255,255,255,.05), transparent 70%);
+        radial-gradient(900px 520px at 18% 22%, rgba(120,160,255,.08), transparent 70%),
+        radial-gradient(980px 560px at 78% 30%, rgba(230,192,123,.08), transparent 72%),
+        radial-gradient(860px 520px at 55% 78%, rgba(170,120,255,.07), transparent 74%),
+        radial-gradient(740px 460px at 42% 44%, rgba(255,255,255,.04), transparent 74%);
       animation: nebulaDrift 16s ease-in-out infinite;
     }
     @keyframes nebulaDrift{
-      0%,100%{ transform: translate3d(0,0,0) scale(1.02); opacity:.16; }
-      50%{ transform: translate3d(14px,-10px,0) scale(1.04); opacity:.23; }
+      0%,100%{ transform: translate3d(0,0,0) scale(1.02); opacity:.11; }
+      50%{ transform: translate3d(14px,-10px,0) scale(1.04); opacity:.17; }
     }
 
     /* =========================
@@ -727,7 +730,7 @@
       100% { transform: translate3d(-1%,  3%, 0); }
     }
     @media (max-width:560px){
-      .nebulaLayer{ opacity:.16; }
+      .nebulaLayer{ opacity:.12; }
       .grainLayer{ opacity:.12; }
     }
 
@@ -1012,6 +1015,7 @@
 
     /* =========================================================
        ✅ 1) Espaço AAA: estrelas com parallax real + poeira + micro-asteroides + micro-meteoros
+       (ajustes: universo mais profundo + rochas mais longe/rápidas e sem sombra + keep-alive no scroll)
        ========================================================= */
     (function(){
       try{
@@ -1028,6 +1032,8 @@
 
         var par = { x:0, y:0, tx:0, ty:0 };
 
+        /* ✅ profundidade extra (camada ultra distante) */
+        var starsUltra = [];
         var starsFar = [];
         var starsMid = [];
         var starsNear = [];
@@ -1075,75 +1081,38 @@
         function buildScene(){
           var area = (w*h);
 
+          var ultraCount = clamp(Math.floor(area/18000), 120, 320);
           var farCount  = clamp(Math.floor(area/14000), 90, 240);
           var midCount  = clamp(Math.floor(area/17000), 70, 190);
           var nearCount = clamp(Math.floor(area/22000), 50, 140);
+
+          /* ✅ ultra distante: minúsculas, lentas, parallax quase zero */
+          starsUltra = makeStars(ultraCount,  0.20, 0.85, 0.015, 0.040, 0.06, 0.26);
 
           starsFar  = makeStars(farCount,  0.30, 1.10, 0.030, 0.070, 0.10, 0.45);
           starsMid  = makeStars(midCount,  0.45, 1.35, 0.060, 0.120, 0.12, 0.52);
           starsNear = makeStars(nearCount, 0.70, 1.85, 0.090, 0.170, 0.14, 0.62);
 
           dust = [];
-          var dustCount = clamp(Math.floor(area/60000), 18, 55);
+          var dustCount = clamp(Math.floor(area/68000), 16, 46);
           for (var i=0;i<dustCount;i++){
             dust.push({
               x: rand(-w*0.2, w*1.2),
               y: rand(-h*0.2, h*1.2),
-              r: rand(0.7, 2.2),
-              a: rand(0.02, 0.07),
-              vx: rand(0.05, 0.16),
-              vy: rand(0.01, 0.06)
+              r: rand(0.7, 2.1),
+              a: rand(0.02, 0.065),
+              vx: rand(0.05, 0.15),
+              vy: rand(0.01, 0.055)
             });
           }
 
           rocks = [];
-// ✅ mais rochas (bem mais frequente)
-var rockCount = clamp(Math.floor(area/52000), 18, 56);
-
-for (var j=0;j<rockCount;j++){
-  // ✅ maiores e mais “presentes”
-  var size = rand(6.5, 18.5);
-
-  var ang = rand(0, Math.PI * 2);
-  var spd = rand(0.08, 0.28);
-
-  var vx = Math.cos(ang) * spd;
-  var vy = Math.sin(ang) * spd;
-
-  // ✅ forma fixa: pontos do polígono (não muda por frame)
-  var spikes = Math.floor(rand(8, 13));
-  var pts = [];
-  for (var k=0;k<spikes;k++){
-    var a = (Math.PI*2) * (k/spikes);
-    // irregularidade controlada (pedra definida)
-    var rr = size * rand(0.72, 1.18);
-    pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
-  }
-
-  rocks.push({
-    x: rand(-w*0.2, w*1.2),
-    y: rand(-h*0.2, h*1.2),
-    r: size,
-    pts: pts,
-    spikes: spikes,
-
-    // ✅ mais visível
-    a: rand(0.16, 0.34),
-
-    vx: vx,
-    vy: vy,
-    rot: rand(0, Math.PI*2),
-    rv: rand(-0.010, 0.010),
-
-    // luz/sombra
-    shade: rand(0.20, 0.42),
-    hi: rand(0.22, 0.46),
-
-    // wobble bem sutil
-    wob: rand(0.0006, 0.0018),
-    ph: rand(0, Math.PI*2)
-  });
-}
+          /* ✅ rochas mais longe: menor tamanho médio */
+          var rockCount = clamp(Math.floor(area/98000), 8, 22);
+          for (var j=0;j<rockCount;j++){
+            var size = rand(7.5, 16.5);
+            rocks.push(makeRock(size));
+          }
 
           meteors = [];
           nextMeteorAt = Math.floor(rand(260, 520));
@@ -1229,215 +1198,238 @@ for (var j=0;j<rockCount;j++){
             ctx.fill();
           }
         }
+
+        function _rockMakeShape(size){
+          var spikes = Math.floor(rand(14, 22));
+          var pts = [];
+          for (var k=0;k<spikes;k++){
+            var a = (Math.PI*2) * (k/spikes);
+            var rr = size * rand(0.88, 1.12);
+            pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
+          }
+          return { spikes: spikes, pts: pts };
+        }
+
+        function _rockRespawn(r){
+          var M = 140;
+          var side = Math.floor(rand(0, 4));
+
+          var x, y, ang;
+          if (side === 0){
+            x = rand(-M, w+M);
+            y = -M;
+            ang = rand(Math.PI*0.25, Math.PI*0.75);
+          } else if (side === 1){
+            x = w + M;
+            y = rand(-M, h+M);
+            ang = rand(Math.PI*0.75, Math.PI*1.25);
+          } else if (side === 2){
+            x = rand(-M, w+M);
+            y = h + M;
+            ang = rand(Math.PI*1.25, Math.PI*1.75);
+          } else {
+            x = -M;
+            y = rand(-M, h+M);
+            ang = rand(-Math.PI*0.25, Math.PI*0.25);
+          }
+
+          /* ✅ mais rápidas (ritmo mais vivo, sem exagero) */
+          var spd = rand(0.12, 0.24);
+
+          r.x = x;
+          r.y = y;
+          r.vx = Math.cos(ang) * spd;
+          r.vy = Math.sin(ang) * spd;
+
+          r.rot = rand(0, Math.PI*2);
+          r.rv  = rand(-0.004, 0.004);
+
+          r.ph = rand(0, Math.PI*2);
+          r.wob = rand(0.0004, 0.0011);
+
+          var shp = _rockMakeShape(r.r);
+          r.spikes = shp.spikes;
+          r.pts = shp.pts;
+
+          r.m = Math.max(1, r.r*r.r);
+        }
+
         function makeRock(size){
-  var spikes = Math.floor(rand(8, 13));
-  var pts = [];
-  for (var k=0;k<spikes;k++){
-    var a = (Math.PI*2) * (k/spikes);
-    var rr = size * rand(0.72, 1.18);
-    pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
-  }
+          var shp = _rockMakeShape(size);
+          var r = {
+            x: 0, y: 0,
+            r: size,
+            pts: shp.pts,
+            spikes: shp.spikes,
 
-  var ang = rand(0, Math.PI * 2);
-  var spd = rand(0.08, 0.28);
+            a: 1,
+            vx: 0, vy: 0,
 
-  return {
-    x: rand(-w*0.2, w*1.2),
-    y: rand(-h*0.2, h*1.2),
-    r: size,
-    pts: pts,
-    spikes: spikes,
+            rot: rand(0, Math.PI*2),
+            rv: rand(-0.004, 0.004),
 
-    // ✅ agora é OPACO (não atravessa)
-    a: 1,
+            shade: rand(0.22, 0.40),
+            hi: rand(0.18, 0.34),
 
-    vx: Math.cos(ang) * spd,
-    vy: Math.sin(ang) * spd,
+            wob: rand(0.0004, 0.0011),
+            ph: rand(0, Math.PI*2),
 
-    rot: rand(0, Math.PI*2),
-    rv: rand(-0.010, 0.010),
+            m: Math.max(1, size*size)
+          };
+          _rockRespawn(r);
+          return r;
+        }
 
-    // luz/sombra
-    shade: rand(0.18, 0.40),
-    hi: rand(0.20, 0.42),
+        function shatterRock(idx, impact){
+          var r = rocks[idx];
+          if (!r) return false;
 
-    wob: rand(0.0006, 0.0018),
-    ph: rand(0, Math.PI*2),
+          var STRONG = 1.35;
+          var MIN_R  = 12;
+          if (impact < STRONG) return false;
+          if (r.r < MIN_R) return false;
 
-    // massa ~ área (para colisão)
-    m: Math.max(1, size*size)
-  };
-}
+          var pieces = Math.floor(rand(3, 6));
+          var base = r.r;
 
-function shatterRock(idx, impact){
-  // quebra só se for grande o bastante
-  var r = rocks[idx];
-  if (!r || r.r < 10) return false;
+          rocks.splice(idx, 1);
 
-  // chance baseada no impacto (impact ~ velocidade relativa)
-  if (impact < 0.75) return false;
-  if (Math.random() > 0.12) return false;
+          for (var i=0;i<pieces;i++){
+            var sz = rand(base*0.28, base*0.50);
+            var p = makeRock(sz);
 
-  var pieces = Math.floor(rand(3, 7));
-  var base = r.r;
+            p.x = r.x + rand(-base*0.18, base*0.18);
+            p.y = r.y + rand(-base*0.18, base*0.18);
 
-  // remove a rocha “mãe”
-  rocks.splice(idx, 1);
+            var a = rand(0, Math.PI*2);
+            var kick = rand(0.40, 1.05) * impact;
+            p.vx = r.vx * 0.50 + Math.cos(a) * kick;
+            p.vy = r.vy * 0.50 + Math.sin(a) * kick;
 
-  for (var i=0;i<pieces;i++){
-    var sz = rand(base*0.30, base*0.52);
-    var p = makeRock(sz);
+            p.rv *= rand(1.2, 1.9);
+            p.m = Math.max(1, p.r*p.r);
 
-    p.x = r.x + rand(-base*0.20, base*0.20);
-    p.y = r.y + rand(-base*0.20, base*0.20);
+            rocks.push(p);
+          }
 
-    // explode para direções diferentes
-    var a = rand(0, Math.PI*2);
-    var kick = rand(0.35, 1.10) * impact;
-    p.vx = r.vx * 0.55 + Math.cos(a) * kick;
-    p.vy = r.vy * 0.55 + Math.sin(a) * kick;
+          return true;
+        }
 
-    p.rv *= rand(1.2, 1.8);
-    p.m = Math.max(1, p.r*p.r);
+        function resolveRockCollisions(){
+          var REST = 0.90;
+          var FRICTION = 0.992;
 
-    rocks.push(p);
-  }
+          for (var i=0;i<rocks.length;i++){
+            for (var j=i+1;j<rocks.length;j++){
+              var a = rocks[i], b = rocks[j];
 
-  return true;
-}
+              var dx = b.x - a.x;
+              var dy = b.y - a.y;
+              var dist2 = dx*dx + dy*dy;
 
-function resolveRockCollisions(){
-  // elasticidade + atrito leve
-  var REST = 0.92;   // 1 = elástico total
-  var FRICTION = 0.985;
+              var minDist = a.r + b.r;
+              if (dist2 >= minDist*minDist) continue;
 
-  for (var i=0;i<rocks.length;i++){
-    for (var j=i+1;j<rocks.length;j++){
-      var a = rocks[i], b = rocks[j];
+              var dist = Math.sqrt(dist2) || 0.0001;
+              var nx = dx / dist;
+              var ny = dy / dist;
 
-      var dx = b.x - a.x;
-      var dy = b.y - a.y;
-      var dist2 = dx*dx + dy*dy;
+              var overlap = (minDist - dist);
+              var totalM = a.m + b.m;
+              a.x -= nx * (overlap * (b.m/totalM));
+              a.y -= ny * (overlap * (b.m/totalM));
+              b.x += nx * (overlap * (a.m/totalM));
+              b.y += ny * (overlap * (a.m/totalM));
 
-      var minDist = a.r + b.r;
-      if (dist2 >= minDist*minDist) continue;
+              var rvx = b.vx - a.vx;
+              var rvy = b.vy - a.vy;
+              var relN = rvx*nx + rvy*ny;
+              if (relN > 0) continue;
 
-      var dist = Math.sqrt(dist2) || 0.0001;
-      var nx = dx / dist;
-      var ny = dy / dist;
+              var impulse = (-(1 + REST) * relN) / (1/a.m + 1/b.m);
+              var ix = impulse * nx;
+              var iy = impulse * ny;
 
-      // separar para não “grudar”
-      var overlap = (minDist - dist);
-      var totalM = a.m + b.m;
-      a.x -= nx * (overlap * (b.m/totalM));
-      a.y -= ny * (overlap * (b.m/totalM));
-      b.x += nx * (overlap * (a.m/totalM));
-      b.y += ny * (overlap * (a.m/totalM));
+              a.vx -= ix / a.m; a.vy -= iy / a.m;
+              b.vx += ix / b.m; b.vy += iy / b.m;
 
-      // velocidade relativa no eixo normal
-      var rvx = b.vx - a.vx;
-      var rvy = b.vy - a.vy;
-      var relN = rvx*nx + rvy*ny;
+              a.vx *= FRICTION; a.vy *= FRICTION;
+              b.vx *= FRICTION; b.vy *= FRICTION;
 
-      // se já estão se afastando, ignora
-      if (relN > 0) continue;
+              var impact = Math.min(2.2, Math.sqrt(rvx*rvx + rvy*rvy));
 
-      // impulso (colisão elástica)
-      var impulse = (-(1 + REST) * relN) / (1/a.m + 1/b.m);
-      var ix = impulse * nx;
-      var iy = impulse * ny;
+              if (shatterRock(j, impact) || shatterRock(i, impact)) return;
+            }
+          }
+        }
 
-      a.vx -= ix / a.m;
-      a.vy -= iy / a.m;
-      b.vx += ix / b.m;
-      b.vy += iy / b.m;
-
-      // atrito leve
-      a.vx *= FRICTION; a.vy *= FRICTION;
-      b.vx *= FRICTION; b.vy *= FRICTION;
-
-      // impacto = magnitude da velocidade relativa
-      var impact = Math.min(2.0, Math.sqrt(rvx*rvx + rvy*rvy));
-
-      // ✅ opção de quebrar (tenta quebrar uma das duas)
-      // cuidado com índices: se quebrar, para o loop pra evitar confusão
-      if (shatterRock(j, impact) || shatterRock(i, impact)) return;
-    }
-  }
-}
-        // ✅ SOMENTE UMA versão do drawRocks (a sua nova)
         function drawRocks(px, py){
-  // 1) atualizar movimento
-  for (var i=0;i<rocks.length;i++){
-    var r = rocks[i];
+          /* ✅ MAIS LONGE: parallax menor */
+          var P = 4.2;
 
-    r.ph += r.wob;
-    var wobX = Math.cos(r.ph) * 0.08;
-    var wobY = Math.sin(r.ph) * 0.08;
+          var M = 170;
+          for (var i=0;i<rocks.length;i++){
+            var r = rocks[i];
 
-    r.x += (r.vx + wobX);
-    r.y += (r.vy + wobY);
-    r.rot += r.rv;
+            r.ph += r.wob;
+            var wobX = Math.cos(r.ph) * 0.04;
+            var wobY = Math.sin(r.ph) * 0.04;
 
-    // wrap
-    if (r.x < -220) r.x = w + 220;
-    if (r.x > w + 220) r.x = -220;
-    if (r.y < -220) r.y = h + 220;
-    if (r.y > h + 220) r.y = -220;
-  }
+            r.x += (r.vx + wobX);
+            r.y += (r.vy + wobY);
+            r.rot += r.rv;
 
-  // 2) colisões (muda rota / pode quebrar)
-  resolveRockCollisions();
+            if (r.x < -M*1.4 || r.x > w + M*1.4 || r.y < -M*1.4 || r.y > h + M*1.4){
+              _rockRespawn(r);
+            }
+          }
 
-  // 3) desenhar (OPACO)
-  for (var i=0;i<rocks.length;i++){
-    var r = rocks[i];
+          resolveRockCollisions();
 
-    var x = r.x + (px * 22);
-    var y = r.y + (py * 22);
+          for (var i=0;i<rocks.length;i++){
+            var r = rocks[i];
 
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(r.rot);
+            var x = r.x + (px * P);
+            var y = r.y + (py * P);
 
-    // forma fixa
-    ctx.beginPath();
-    var pts = r.pts;
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
-    ctx.closePath();
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(r.rot);
 
-    // ✅ “pedra” sólida (sem transparência)
-    var grad = ctx.createRadialGradient(-r.r*0.28, -r.r*0.35, r.r*0.10, 0, 0, r.r*1.35);
-    grad.addColorStop(0, "rgba(70,70,78,1)");                         // brilho
-    grad.addColorStop(0.45, "rgba(34,34,40,1)");                      // meio
-    grad.addColorStop(1, "rgba(10,10,14,1)");                         // sombra
+            /* ✅ SEM SOMBRA (universo não precisa) */
+            ctx.shadowColor = "rgba(0,0,0,0)";
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
 
-    ctx.fillStyle = grad;
-    ctx.fill();
+            ctx.beginPath();
+            var pts = r.pts;
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
+            ctx.closePath();
 
-    // contorno definido
-    ctx.lineWidth = 1.4;
-    ctx.strokeStyle = "rgba(0,0,0,1)";
-    ctx.stroke();
+            var grad = ctx.createRadialGradient(-r.r*0.26, -r.r*0.32, r.r*0.08, 0, 0, r.r*1.28);
+            grad.addColorStop(0, "rgba(78,78,86,1)");
+            grad.addColorStop(0.48, "rgba(36,36,42,1)");
+            grad.addColorStop(1, "rgba(8,8,12,1)");
+            ctx.fillStyle = grad;
+            ctx.fill();
 
-    // highlight de borda (mínimo, ainda opaco)
-    ctx.lineWidth = 1.0;
-    ctx.strokeStyle = "rgba(120,120,130,1)";
-    ctx.stroke();
+            ctx.lineWidth = 1.0;
+            ctx.strokeStyle = "rgba(0,0,0,0.55)";
+            ctx.stroke();
 
-    // rachadura (opaca)
-    ctx.strokeStyle = "rgba(0,0,0,1)";
-    ctx.lineWidth = 1.0;
-    ctx.beginPath();
-    ctx.moveTo(-r.r*0.18, -r.r*0.08);
-    ctx.lineTo(r.r*0.42, r.r*0.10);
-    ctx.lineTo(r.r*0.12, r.r*0.40);
-    ctx.stroke();
+            ctx.strokeStyle = "rgba(0,0,0,0.75)";
+            ctx.lineWidth = 0.9;
+            ctx.beginPath();
+            ctx.moveTo(-r.r*0.10, -r.r*0.06);
+            ctx.lineTo(r.r*0.38, r.r*0.08);
+            ctx.lineTo(r.r*0.10, r.r*0.34);
+            ctx.stroke();
 
-    ctx.restore();
-  }
-}
+            ctx.restore();
+          }
+        }
 
         function drawMeteors(){
           for (var j=meteors.length-1;j>=0;j--){
@@ -1478,352 +1470,14 @@ function resolveRockCollisions(){
         function drawVignette(){
           var vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.95);
           vignette.addColorStop(0, "rgba(0,0,0,0)");
-          vignette.addColorStop(1, "rgba(0,0,0,0.62)");
+          vignette.addColorStop(1, "rgba(0,0,0,0.72)"); /* ✅ mais profundo/escuro */
           ctx.fillStyle = vignette;
           ctx.fillRect(0,0,w,h);
-        }
-
-        /* =========================================================
-           ✅ ADD: Rochas realistas, opacas, sem contorno branco,
-              menos quantidade, parallax sutil,
-              spawn infinito vindo DE FORA da tela,
-              colisão real e quebra só com impacto FORTE.
-           (sem remover nada: apenas sobrescreve funções abaixo)
-           ========================================================= */
-
-        function _rockMakeShape(size){
-          // mais “redondo”, imperfeito (muitos pontos + pouca variação)
-          var spikes = Math.floor(rand(14, 22));
-          var pts = [];
-          for (var k=0;k<spikes;k++){
-            var a = (Math.PI*2) * (k/spikes);
-            var rr = size * rand(0.88, 1.12);
-            pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
-          }
-          return { spikes: spikes, pts: pts };
-        }
-
-        function _rockRespawn(r){
-          // nasce fora da tela e entra lentamente (infinito, sem “pop” no meio)
-          var M = 140; // margem fora
-          var side = Math.floor(rand(0, 4)); // 0 top,1 right,2 bottom,3 left
-
-          var x, y, ang;
-          if (side === 0){ // top
-            x = rand(-M, w+M);
-            y = -M;
-            ang = rand(Math.PI*0.25, Math.PI*0.75);
-          } else if (side === 1){ // right
-            x = w + M;
-            y = rand(-M, h+M);
-            ang = rand(Math.PI*0.75, Math.PI*1.25);
-          } else if (side === 2){ // bottom
-            x = rand(-M, w+M);
-            y = h + M;
-            ang = rand(Math.PI*1.25, Math.PI*1.75);
-          } else { // left
-            x = -M;
-            y = rand(-M, h+M);
-            ang = rand(-Math.PI*0.25, Math.PI*0.25);
-          }
-
-          var spd = rand(0.06, 0.16);
-          r.x = x;
-          r.y = y;
-          r.vx = Math.cos(ang) * spd;
-          r.vy = Math.sin(ang) * spd;
-
-          r.rot = rand(0, Math.PI*2);
-          r.rv  = rand(-0.004, 0.004);
-
-          r.ph = rand(0, Math.PI*2);
-          r.wob = rand(0.0004, 0.0011);
-
-          // shape novo (variação real)
-          var shp = _rockMakeShape(r.r);
-          r.spikes = shp.spikes;
-          r.pts = shp.pts;
-
-          // massa ~ área
-          r.m = Math.max(1, r.r*r.r);
-        }
-
-        function makeRock(size){
-          var shp = _rockMakeShape(size);
-          var r = {
-            x: 0, y: 0,
-            r: size,
-            pts: shp.pts,
-            spikes: shp.spikes,
-
-            a: 1, // opaco sempre
-            vx: 0, vy: 0,
-
-            rot: rand(0, Math.PI*2),
-            rv: rand(-0.004, 0.004),
-
-            shade: rand(0.22, 0.40),
-            hi: rand(0.18, 0.34),
-
-            wob: rand(0.0004, 0.0011),
-            ph: rand(0, Math.PI*2),
-
-            m: Math.max(1, size*size)
-          };
-          _rockRespawn(r);
-          return r;
-        }
-
-        function shatterRock(idx, impact){
-          // ✅ quebra SOMENTE com impacto forte (sem aleatoriedade)
-          var r = rocks[idx];
-          if (!r) return false;
-
-          var STRONG = 1.35;       // impacto forte (ajuste fino)
-          var MIN_R  = 12;         // não quebra pedrinhas
-          if (impact < STRONG) return false;
-          if (r.r < MIN_R) return false;
-
-          var pieces = Math.floor(rand(3, 6));
-          var base = r.r;
-
-          // remove a rocha “mãe”
-          rocks.splice(idx, 1);
-
-          for (var i=0;i<pieces;i++){
-            var sz = rand(base*0.28, base*0.50);
-            var p = makeRock(sz);
-
-            // nasce no ponto da colisão
-            p.x = r.x + rand(-base*0.18, base*0.18);
-            p.y = r.y + rand(-base*0.18, base*0.18);
-
-            // “explosão” proporcional ao impacto
-            var a = rand(0, Math.PI*2);
-            var kick = rand(0.40, 1.05) * impact;
-            p.vx = r.vx * 0.50 + Math.cos(a) * kick;
-            p.vy = r.vy * 0.50 + Math.sin(a) * kick;
-
-            p.rv *= rand(1.2, 1.9);
-            p.m = Math.max(1, p.r*p.r);
-
-            rocks.push(p);
-          }
-
-          return true;
-        }
-
-        function resolveRockCollisions(){
-          var REST = 0.90;
-          var FRICTION = 0.992;
-
-          for (var i=0;i<rocks.length;i++){
-            for (var j=i+1;j<rocks.length;j++){
-              var a = rocks[i], b = rocks[j];
-
-              var dx = b.x - a.x;
-              var dy = b.y - a.y;
-              var dist2 = dx*dx + dy*dy;
-
-              var minDist = a.r + b.r;
-              if (dist2 >= minDist*minDist) continue;
-
-              var dist = Math.sqrt(dist2) || 0.0001;
-              var nx = dx / dist;
-              var ny = dy / dist;
-
-              // separa para não “grudar”
-              var overlap = (minDist - dist);
-              var totalM = a.m + b.m;
-              a.x -= nx * (overlap * (b.m/totalM));
-              a.y -= ny * (overlap * (b.m/totalM));
-              b.x += nx * (overlap * (a.m/totalM));
-              b.y += ny * (overlap * (a.m/totalM));
-
-              // velocidade relativa
-              var rvx = b.vx - a.vx;
-              var rvy = b.vy - a.vy;
-              var relN = rvx*nx + rvy*ny;
-              if (relN > 0) continue;
-
-              // impulso elástico
-              var impulse = (-(1 + REST) * relN) / (1/a.m + 1/b.m);
-              var ix = impulse * nx;
-              var iy = impulse * ny;
-
-              a.vx -= ix / a.m; a.vy -= iy / a.m;
-              b.vx += ix / b.m; b.vy += iy / b.m;
-
-              // atrito leve
-              a.vx *= FRICTION; a.vy *= FRICTION;
-              b.vx *= FRICTION; b.vy *= FRICTION;
-
-              // impacto (velocidade relativa)
-              var impact = Math.min(2.2, Math.sqrt(rvx*rvx + rvy*rvy));
-
-              // ✅ quebra apenas se impacto for forte
-              // (se quebrar, sai para evitar confusão de índices)
-              if (shatterRock(j, impact) || shatterRock(i, impact)) return;
-            }
-          }
-        }
-
-        function drawRocks(px, py){
-          // parallax mais sutil (não “vai pros lados” demais)
-          var P = 7.5;
-
-          var M = 170; // margem para respawn fora
-          for (var i=0;i<rocks.length;i++){
-            var r = rocks[i];
-
-            r.ph += r.wob;
-            var wobX = Math.cos(r.ph) * 0.04;
-            var wobY = Math.sin(r.ph) * 0.04;
-
-            r.x += (r.vx + wobX);
-            r.y += (r.vy + wobY);
-            r.rot += r.rv;
-
-            // ✅ não “wrapa” (que dá sensação de sumir/aparecer)
-            // respawna fora da tela quando passa muito
-            if (r.x < -M*1.4 || r.x > w + M*1.4 || r.y < -M*1.4 || r.y > h + M*1.4){
-              _rockRespawn(r);
-            }
-          }
-
-          resolveRockCollisions();
-
-          for (var i=0;i<rocks.length;i++){
-            var r = rocks[i];
-
-            var x = r.x + (px * P);
-            var y = r.y + (py * P);
-
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(r.rot);
-
-            // sombra / profundidade
-            ctx.shadowColor = "rgba(0,0,0,0.55)";
-            ctx.shadowBlur = Math.max(6, r.r * 0.7);
-            ctx.shadowOffsetX = r.r * 0.20;
-            ctx.shadowOffsetY = r.r * 0.24;
-
-            // forma fixa
-            ctx.beginPath();
-            var pts = r.pts;
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
-            ctx.closePath();
-
-            // pedra opaca (sem borda branca)
-            var grad = ctx.createRadialGradient(-r.r*0.26, -r.r*0.32, r.r*0.08, 0, 0, r.r*1.28);
-            grad.addColorStop(0, "rgba(78,78,86,1)");
-            grad.addColorStop(0.48, "rgba(36,36,42,1)");
-            grad.addColorStop(1, "rgba(8,8,12,1)");
-            ctx.fillStyle = grad;
-            ctx.fill();
-
-            // ✅ sem contorno claro: só micro “quebra de luz” interna (bem escura)
-            ctx.shadowBlur = 0;
-            ctx.lineWidth = 1.0;
-            ctx.strokeStyle = "rgba(0,0,0,0.55)";
-            ctx.stroke();
-
-            // micro rachadura (bem discreta, escura)
-            ctx.strokeStyle = "rgba(0,0,0,0.75)";
-            ctx.lineWidth = 0.9;
-            ctx.beginPath();
-            ctx.moveTo(-r.r*0.10, -r.r*0.06);
-            ctx.lineTo(r.r*0.38, r.r*0.08);
-            ctx.lineTo(r.r*0.10, r.r*0.34);
-            ctx.stroke();
-
-            ctx.restore();
-          }
-        }
-
-        function buildScene(){
-          // sobrescreve a buildScene anterior com rochas mais realistas e menos quantidade
-          var area = (w*h);
-
-          var farCount  = clamp(Math.floor(area/14000), 90, 240);
-          var midCount  = clamp(Math.floor(area/17000), 70, 190);
-          var nearCount = clamp(Math.floor(area/22000), 50, 140);
-
-          starsFar  = makeStars(farCount,  0.30, 1.10, 0.030, 0.070, 0.10, 0.45);
-          starsMid  = makeStars(midCount,  0.45, 1.35, 0.060, 0.120, 0.12, 0.52);
-          starsNear = makeStars(nearCount, 0.70, 1.85, 0.090, 0.170, 0.14, 0.62);
-
-          dust = [];
-          var dustCount = clamp(Math.floor(area/68000), 16, 46);
-          for (var i=0;i<dustCount;i++){
-            dust.push({
-              x: rand(-w*0.2, w*1.2),
-              y: rand(-h*0.2, h*1.2),
-              r: rand(0.7, 2.1),
-              a: rand(0.02, 0.065),
-              vx: rand(0.05, 0.15),
-              vy: rand(0.01, 0.055)
-            });
-          }
-
-          rocks = [];
-          // ✅ menos quantidade, mais real (visíveis, mas sutis)
-          var rockCount = clamp(Math.floor(area/98000), 8, 22);
-          for (var j=0;j<rockCount;j++){
-            var size = rand(10.5, 24.5);
-            rocks.push(makeRock(size));
-          }
-
-          meteors = [];
-          nextMeteorAt = Math.floor(rand(260, 520));
-        }
-
-        /* =========================================================
-           ✅ END ADD
-           ========================================================= */
-
-        function drawMeteors(){
-          for (var j=meteors.length-1;j>=0;j--){
-            var m = meteors[j];
-            m.x += m.vx;
-            m.y += m.vy;
-            m.life++;
-
-            var k = Math.min(1, m.life / 8);
-            var a = m.a * k * (1 - (m.life / m.maxLife));
-
-            var norm = Math.sqrt(m.vx*m.vx + m.vy*m.vy) || 1;
-            var tx = m.x - (m.vx / norm) * m.len;
-            var ty = m.y - (m.vy / norm) * m.len;
-
-            var grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
-            grad.addColorStop(0, "rgba(255,255,255," + (a).toFixed(3) + ")");
-            grad.addColorStop(1, "rgba(255,255,255,0)");
-
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = m.w;
-            ctx.beginPath();
-            ctx.moveTo(m.x, m.y);
-            ctx.lineTo(tx, ty);
-            ctx.stroke();
-
-            ctx.fillStyle = "rgba(255,255,255," + (Math.min(1, a + 0.12)).toFixed(3) + ")";
-            ctx.beginPath();
-            ctx.arc(m.x, m.y, 1.4, 0, Math.PI*2);
-            ctx.fill();
-
-            if (m.life > m.maxLife || m.x > w + m.len || m.y > h + m.len){
-              meteors.splice(j,1);
-            }
-          }
         }
 
         function tick(){
           t++;
 
-          // parallax mais suave (menos “empurra pros lados”)
           par.x += (par.tx - par.x) * 0.045;
           par.y += (par.ty - par.y) * 0.045;
 
@@ -1832,6 +1486,8 @@ function resolveRockCollisions(){
 
           ctx.clearRect(0,0,w,h);
 
+          /* ✅ profundidade: ultra -> far -> mid -> near */
+          drawStars(starsUltra, px, py, 0.10);
           drawStars(starsFar,  px, py, 0.20);
           drawStars(starsMid,  px, py, 0.45);
           drawStars(starsNear, px, py, 0.85);
@@ -1855,6 +1511,17 @@ function resolveRockCollisions(){
           resize();
           tick();
         }
+
+        /* ✅ KEEP-ALIVE no scroll (mobile costuma “pausar” rAF ao rolar) */
+        function keepAlive(){
+          if (!raf){
+            try{ start(); }catch(e){}
+          }
+        }
+        window.addEventListener("scroll", keepAlive, { passive:true });
+        document.addEventListener("visibilitychange", function(){
+          if (!document.hidden) keepAlive();
+        });
 
         window.addEventListener("resize", start);
         start();
@@ -2247,7 +1914,6 @@ function resolveRockCollisions(){
         applyVolume();
       });
 
-      // ✅ aparece só quando chegar no topo (não volta ao subir, só no topo)
       function updatePanelVisibility(){
         var y = window.scrollY || 0;
         if (y <= 10) panelEl.classList.remove("isHidden");
@@ -2290,7 +1956,6 @@ function resolveRockCollisions(){
         var y = e.touches[0].clientY;
         dist = y - startY;
         if (dist > 0){
-          // impede o "rubber band" do navegador e deixa a sensação mais controlada
           e.preventDefault();
         }
       }
@@ -2300,7 +1965,6 @@ function resolveRockCollisions(){
         pulling = false;
 
         if (dist >= THRESH){
-          // recarrega de verdade
           window.location.reload();
         }
 
