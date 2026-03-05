@@ -1129,7 +1129,7 @@
               ph: rand(0, Math.PI*2),
               wob: rand(0.0006, 0.0018),
               z: depth,
-              a: rand(0.10, 0.22) // ✅ mais “longe”: menos contraste/alpha
+              a: rand(0.10, 0.22) // ✅ mais “longe”: menos contraste (NÃO transparência)
             });
           }
 
@@ -1236,6 +1236,11 @@
           r.rot = rand(0, Math.PI*2);
         }
 
+        /* =========================================================
+           ✅ AJUSTE PRINCIPAL AQUI:
+           - Rochas agora são 100% OPACAS (sem alpha)
+           - “Longe” vem de contraste/cor, não de transparência
+           ========================================================= */
         function drawRocks(px, py){
           for (var i=0;i<rocks.length;i++){
             var r = rocks[i];
@@ -1250,9 +1255,18 @@
             }
 
             // ✅ Parallax MUITO sutil (longe)
-            var P = 6.0 * r.z; // 1.3..3.3 px “sentido”, fica longe
+            var P = 6.0 * r.z;
             var x = r.x + (px * P * 0.10);
             var y = r.y + (py * P * 0.10);
+
+            // mapeia r.a (0.10..0.22) para “visibilidade” 0..1 (mas SEM alpha)
+            var vis = (r.a - 0.10) / 0.12;
+            vis = clamp(vis, 0, 1);
+
+            // cores opacas (RGB), variando com vis (mais claro = mais “próximo”)
+            var hl = Math.round(86 + vis * 44);  // highlight 86..130
+            var md = Math.round(42 + vis * 28);  // mid 42..70
+            var dk = Math.round(10 + vis * 10);  // dark 10..20
 
             ctx.save();
             ctx.translate(x, y);
@@ -1264,19 +1278,21 @@
             for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
             ctx.closePath();
 
-            // ✅ Sem sombra / pouco contraste / mais “universo”
+            // ✅ Gradiente 100% OPACO (sem rgba com alpha)
             var g = ctx.createRadialGradient(-r.r*0.25, -r.r*0.30, r.r*0.10, 0, 0, r.r*1.25);
-            g.addColorStop(0, "rgba(120,120,132," + (r.a*0.55).toFixed(3) + ")");
-            g.addColorStop(0.55, "rgba(58,58,70," + (r.a*0.55).toFixed(3) + ")");
-            g.addColorStop(1, "rgba(10,10,14," + (r.a*0.55).toFixed(3) + ")");
+            g.addColorStop(0,  "rgb(" + hl + "," + hl + "," + (hl+8) + ")");
+            g.addColorStop(0.55,"rgb(" + md + "," + md + "," + (md+8) + ")");
+            g.addColorStop(1,  "rgb(" + dk + "," + dk + "," + (dk+4) + ")");
 
             ctx.fillStyle = g;
             ctx.fill();
 
-            // contorno quase imperceptível (não “desenha” demais)
+            // contorno bem discreto, também opaco
             ctx.lineWidth = 1;
-            ctx.strokeStyle = "rgba(0,0,0," + (r.a*0.35).toFixed(3) + ")";
+            ctx.strokeStyle = "rgb(0,0,0)";
+            ctx.globalAlpha = 0.22 + (vis * 0.18); // só pro stroke ficar mais/menos perceptível
             ctx.stroke();
+            ctx.globalAlpha = 1;
 
             ctx.restore();
           }
