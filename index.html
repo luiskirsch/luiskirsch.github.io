@@ -62,9 +62,9 @@
       body{ min-height:100dvh; }
     }
 
-    /* ✅ Desativa qualquer “película/fog” em pseudo-elementos (universo vem do canvas) */
-    body::before{ content:""; opacity:0; }
-    body::after{ content:""; opacity:0; }
+    /* ✅ Garante que NÃO exista “película/fog” por pseudo-elementos */
+    body::before{ content:none !important; }
+    body::after{ content:none !important; }
 
     /* Canvas (parallax stars) */
     #stars{
@@ -897,10 +897,10 @@
 
     /* =========================================================
        ✅ Universo CINEMÁTICO (preto real + nebulosa localizada + brilho real)
-       - Nebulosa procedural (sem película uniforme)
-       - Dust lanes (faixas escuras sutis)
+       - Nebulosa procedural (SEM película uniforme)
+       - Dust lanes sutis
        - Estrelas com núcleo + glow curto + twinkle natural
-       - Raras estrelas “hero” com spike em X
+       - Detritos OPACOS (sem mostrar estrelas por trás)
        ========================================================= */
     (function(){
       try{
@@ -923,7 +923,8 @@
         var neb = {
           c: document.createElement("canvas"),
           x: 0, y: 0,
-          a: 0.20,
+          // ✅ bem mais sutil (tira “fumaça/película”)
+          a: 0.085,
           drift: 0.006
         };
         var nctx = neb.c.getContext("2d", { alpha:true });
@@ -1135,6 +1136,8 @@
           neb.y = rand(-0.25, 0.25);
         }
 
+        // ✅ (ESTAVA QUEBRADO NO SEU CÓDIGO) — função tinha sumido e o site “morria”
+        function drawNebula(px, py){
           neb.x += neb.drift;
           neb.y += neb.drift*0.6;
 
@@ -1265,66 +1268,65 @@
           r.rot = rand(0, Math.PI*2);
         }
 
+        // ✅ Detritos sólidos (sem “mostrar” estrelas atrás)
         function drawRocks(px, py){
-  for (var i=0;i<rocks.length;i++){
-    var r = rocks[i];
+          for (var i=0;i<rocks.length;i++){
+            var r = rocks[i];
 
-    r.ph += r.wob;
-    r.x += r.vx + (Math.cos(r.ph) * 0.03);
-    r.y += r.vy + (Math.sin(r.ph) * 0.03);
-    r.rot += r.rv;
+            r.ph += r.wob;
+            r.x += r.vx + (Math.cos(r.ph) * 0.03);
+            r.y += r.vy + (Math.sin(r.ph) * 0.03);
+            r.rot += r.rv;
 
-    if (r.x < -220 || r.x > w + 220 || r.y < -220 || r.y > h + 220){
-      respawnRock(r);
-    }
+            if (r.x < -220 || r.x > w + 220 || r.y < -220 || r.y > h + 220){
+              respawnRock(r);
+            }
 
-    var P = 6.0 * r.z;
-    var x = r.x + (px * P * 0.10);
-    var y = r.y + (py * P * 0.10);
+            var P = 6.0 * r.z;
+            var x = r.x + (px * P * 0.10);
+            var y = r.y + (py * P * 0.10);
 
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(r.rot);
+            ctx.save();
+            ctx.globalCompositeOperation = "source-over";
+            ctx.translate(x, y);
+            ctx.rotate(r.rot);
 
-    // Forma
-    ctx.beginPath();
-    var pts = r.pts;
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
-    ctx.closePath();
+            ctx.beginPath();
+            var pts = r.pts;
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
+            ctx.closePath();
 
-    // ✅ Detrito OPACO (sem ver estrelas por trás)
-    // Base sólida
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = "rgb(20,20,26)";
-    ctx.fill();
+            // Base opaca
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = "rgb(20,20,26)";
+            ctx.fill();
 
-    // Sombra interna (dá volume sem transparência no corpo)
-    var g = ctx.createRadialGradient(-r.r*0.35, -r.r*0.35, r.r*0.15, 0, 0, r.r*1.25);
-    g.addColorStop(0, "rgba(255,255,255,0.10)");
-    g.addColorStop(0.45, "rgba(255,255,255,0.04)");
-    g.addColorStop(1, "rgba(0,0,0,0.65)");
+            // Volume (sem virar “fantasma”)
+            var g = ctx.createRadialGradient(-r.r*0.35, -r.r*0.35, r.r*0.15, 0, 0, r.r*1.25);
+            g.addColorStop(0, "rgba(255,255,255,0.10)");
+            g.addColorStop(0.45, "rgba(255,255,255,0.04)");
+            g.addColorStop(1, "rgba(0,0,0,0.65)");
+            ctx.fillStyle = g;
+            ctx.fill();
 
-    ctx.fillStyle = g;
-    ctx.fill();
+            // Contorno sutil
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "rgba(0,0,0,0.75)";
+            ctx.stroke();
 
-    // Contorno sutil
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(0,0,0,0.75)";
-    ctx.stroke();
+            // Sombra externa (bem leve)
+            ctx.shadowColor = "rgba(0,0,0,0.55)";
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 6;
 
-    // Sombra externa leve (destaca do fundo, sem parecer “fantasma”)
-    ctx.shadowColor = "rgba(0,0,0,0.55)";
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 6;
-    // (repassa um fill invisível só pra aplicar sombra sem alterar cor)
-    ctx.fillStyle = "rgba(0,0,0,0)";
-    ctx.fill();
+            ctx.fillStyle = "rgba(0,0,0,0)";
+            ctx.fill();
 
-    ctx.restore();
-  }
-}
+            ctx.restore();
+          }
+        }
 
         function spawnMeteor(){
           var startX = rand(-w*0.15, w*0.35);
