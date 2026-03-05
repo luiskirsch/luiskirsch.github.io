@@ -1052,23 +1052,27 @@
         function makeStars(count, rMin, rMax, vMin, vMax, aMin, aMax){
   var arr = [];
   for (var i=0;i<count;i++){
-    var isBlink = Math.random() < 0.18; // ✅ só 18% piscam perceptível
-    var isGlow  = Math.random() < 0.12; // ✅ só 12% tem micro glow
+
+    // poucas estrelas maiores
+    var r = Math.random() < 0.08 ? rand(1.8,2.6) : rand(rMin,rMax);
+
+    // só algumas piscam
+    var blink = Math.random() < 0.12;
 
     arr.push({
       x: Math.random()*w,
       y: Math.random()*h,
-      r: rand(rMin,rMax),
+      r: r,
       v: rand(vMin,vMax),
       a: rand(aMin,aMax),
-      tw: rand(0.004, 0.014),
       ph: Math.random()*Math.PI*2,
 
-      // ✅ piscar natural: amplitude diferente por estrela
-      blink: isBlink ? rand(0.10, 0.28) : rand(0.02, 0.07),
+      // piscar bem lento
+      tw: rand(0.002,0.006),
+      blink: blink ? rand(0.08,0.22) : 0,
 
-      // ✅ glow minúsculo (NÃO cria véu)
-      glow: isGlow ? rand(2, 6) : 0
+      // brilho energético
+      glow: r > 1.6 ? rand(4,8) : rand(0,3)
     });
   }
   return arr;
@@ -1175,43 +1179,37 @@
   for (var i=0;i<arr.length;i++){
     var s = arr[i];
 
-    // movimento vertical suave
     s.y += s.v;
     if (s.y > h + 10){
       s.y = -10;
       s.x = Math.random()*w;
     }
 
-    // twinkle natural (poucas piscam de verdade)
+    // piscar natural
     s.ph += s.tw;
-    var tw = (Math.sin(s.ph) * 0.5 + 0.5); // 0..1
-    var blink = (s.blink || 0);            // 0..1 (se existir)
-    var a = clamp(s.a + (tw - 0.5) * blink, 0, 1);
+    var tw = Math.sin(s.ph)*0.5 + 0.5;
+    var a = clamp(s.a + (tw-0.5)*s.blink,0,1);
 
-    var x = s.x + (px * parScale);
-    var y = s.y + (py * parScale);
+    var x = s.x + (px*parScale);
+    var y = s.y + (py*parScale);
 
     if (x < -20) x += (w+40);
     if (x > w+20) x -= (w+40);
 
-    // ✅ Estrela = ponto real (núcleo)
+    // brilho energético
+    if (s.glow > 0){
+      ctx.save();
+      ctx.shadowColor = "rgba(255,255,255,"+(a*0.9).toFixed(3)+")";
+      ctx.shadowBlur = s.glow;
+    }
+
+    // núcleo da estrela
     ctx.beginPath();
-    ctx.fillStyle = "rgba(255,255,255," + a.toFixed(3) + ")";
-    ctx.arc(x, y, s.r, 0, Math.PI*2);
+    ctx.fillStyle = "rgba(255,255,255,"+a.toFixed(3)+")";
+    ctx.arc(x,y,s.r,0,Math.PI*2);
     ctx.fill();
 
-    // ✅ Micro brilho só nas mais brilhantes (sem “película”)
-    // (shadowBlur pequeno e só pra poucas)
-    if (s.glow && a > 0.25){
-      ctx.save();
-      ctx.shadowColor = "rgba(255,255,255," + (a*0.55).toFixed(3) + ")";
-      ctx.shadowBlur = s.glow; // pequeno (2..6)
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(255,255,255," + (a*0.40).toFixed(3) + ")";
-      ctx.arc(x, y, Math.max(0.6, s.r*0.8), 0, Math.PI*2);
-      ctx.fill();
-      ctx.restore();
-    }
+    if (s.glow > 0) ctx.restore();
   }
 }
 
