@@ -1258,37 +1258,60 @@ function buildLenses(){
 
           // ===== Spikes realistas (curtos e colados) =====
           // só em estrelas “fortes” (parece muito mais real)
-          var strength = r * aNow;
-          if (strength > 0.55){
-            // comprimento curto (nada de risco gigante)
-            var L = clamp(4.0 + r*5.2, 6.0, 14.0);
+          // ✅ spikes só em estrelas fortes (hero) e bem visíveis
+var strength = r * aNow;
+var isSpike = (strength > 0.42); // mais permissivo
+if (isSpike){
+  var L = clamp(6.0 + r*7.0, 10.0, 22.0); // maior e visível
+  var aSp = clamp((strength - 0.35) * 1.25, 0, 0.85);
 
-            // spikes concentrados perto do núcleo
-            var aSp = clamp((strength - 0.52) * 0.95, 0, 0.65);
+  ctx.globalCompositeOperation = "screen";
+  ctx.globalAlpha = aSp;
+  ctx.lineWidth = 1.05; // um pouco mais espesso
 
-            // linhas finas
-            ctx.globalCompositeOperation = "screen";
-            ctx.globalAlpha = aSp;
-            ctx.lineWidth = 0.85;
+  function strokeRay(angle){
+    var dx = Math.cos(angle) * L;
+    var dy = Math.sin(angle) * L;
 
-            function strokeRay(angle, tint){
-              var dx = Math.cos(angle) * L;
-              var dy = Math.sin(angle) * L;
+    var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
+    lg.addColorStop(0.00, "rgba(255,255,255,0)");
+    lg.addColorStop(0.48, "rgba(255,255,255,0)");
+    lg.addColorStop(0.50, "rgba(255,255,255,0.95)");
+    lg.addColorStop(0.52, "rgba(255,255,255,0)");
+    lg.addColorStop(1.00, "rgba(255,255,255,0)");
 
-              // pico de brilho bem “colado” no centro
-              var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
-              lg.addColorStop(0.00, "rgba(255,255,255,0)");
-              lg.addColorStop(0.42, "rgba("+tint.r+","+tint.g+","+tint.b+",0.00)");
-              lg.addColorStop(0.50, "rgba("+tint.r+","+tint.g+","+tint.b+",0.95)");
-              lg.addColorStop(0.58, "rgba("+tint.r+","+tint.g+","+tint.b+",0.00)");
-              lg.addColorStop(1.00, "rgba(255,255,255,0)");
+    ctx.strokeStyle = lg;
+    ctx.beginPath();
+    ctx.moveTo(x-dx, y-dy);
+    ctx.lineTo(x+dx, y+dy);
+    ctx.stroke();
+  }
 
-              ctx.strokeStyle = lg;
-              ctx.beginPath();
-              ctx.moveTo(x-dx, y-dy);
-              ctx.lineTo(x+dx, y+dy);
-              ctx.stroke();
-            }
+  // cruz principal (+)
+  strokeRay(0);
+  strokeRay(Math.PI/2);
+
+  // diagonais menores (difração)
+  ctx.globalAlpha = aSp * 0.55;
+  var L2 = L * 0.70;
+  function strokeRay2(angle){
+    var dx = Math.cos(angle) * L2;
+    var dy = Math.sin(angle) * L2;
+
+    var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
+    lg.addColorStop(0.00, "rgba(255,255,255,0)");
+    lg.addColorStop(0.50, "rgba(255,255,255,0.78)");
+    lg.addColorStop(1.00, "rgba(255,255,255,0)");
+
+    ctx.strokeStyle = lg;
+    ctx.beginPath();
+    ctx.moveTo(x-dx, y-dy);
+    ctx.lineTo(x+dx, y+dy);
+    ctx.stroke();
+  }
+  strokeRay2(Math.PI/4);
+  strokeRay2(-Math.PI/4);
+}
 
             // um toque de cromatismo no spike (refração no brilho)
             var warm = { r: 255, g: 238, b: 220 };
