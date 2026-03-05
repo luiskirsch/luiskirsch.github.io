@@ -980,7 +980,7 @@
               twa: twAmp,
               ph: Math.random()*Math.PI*2,
               hero: hero,
-              spike: hero && (Math.random() < 0.55),
+              spike: false,
               temp: temp
             });
           }
@@ -1227,7 +1227,11 @@
 
             if (x < -30) x += (w+60);
             if (x >  w+30) x -= (w+60);
+            var chroma = (Math.sin(s.ph * 0.85 + s.x * 0.002) * 0.5 + 0.5);
+var tempShift = (chroma - 0.5) * 0.18;
+var tempNow = clamp(s.temp + tempShift, -1, 1);
 
+drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.hero, false);
             drawStar(x,y,s.r,clamp(a,0,1),s.temp,s.hero,s.spike);
           }
         }
