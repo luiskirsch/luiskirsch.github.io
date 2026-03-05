@@ -50,80 +50,73 @@
       color:#f2f2f2;
       font-family: ui-serif, Georgia, "Times New Roman", serif;
 
-      /* ✅ Fundo com textura (mesmo se o canvas falhar, não fica “vazio preto”) */
-      background:
-        radial-gradient(1200px 700px at 50% -10%, rgba(230,192,123,.10), transparent 60%),
-        radial-gradient(900px 600px at 20% 110%, rgba(120,170,255,.07), transparent 55%),
-        #000;
-
-      /* ✅ Blindagem contra tema/WordPress (stacking context previsível) */
-      position: relative;
-      isolation: isolate;
+      background:#000;
+      background-color:#000;
     }
 
     @supports (height: 100dvh){
       body{ min-height:100dvh; }
     }
 
-    /* Sem película */
-    body::before{ content:none !important; }
-    body::after{ content:none !important; }
+    body::before,
+    body::after{
+      content:none !important;
+    }
 
-    /* ✅ Canvas sempre atrás (evita “tudo preto” por canvas sobreposto) */
     #stars{
       position:fixed;
       inset:0;
-      z-index:0;
+      z-index:2;
       pointer-events:none;
       opacity:.98;
-      transform: translateZ(0);
+      transform:translateZ(0);
     }
 
     .wrap{
       position:relative;
-      z-index:2;
+      z-index:5;
       width:min(1200px, 100%);
       margin:0 auto;
-      padding: 22px 0 28px;
+      padding:22px 0 28px;
     }
 
     .topbar{
       display:flex;
       align-items:center;
       justify-content:center;
-      margin: 12px auto 18px;
+      margin:12px auto 18px;
     }
     .logoOnly{
       width:128px;
       height:128px;
       object-fit:contain;
       display:block;
-      filter: drop-shadow(0 18px 38px rgba(0,0,0,.82));
+      filter:drop-shadow(0 18px 38px rgba(0,0,0,.82));
       user-select:none;
       -webkit-user-drag:none;
     }
 
     .grid{
       display:grid;
-      grid-template-columns: 1.15fr 0.85fr;
+      grid-template-columns:1.15fr 0.85fr;
       gap:22px;
       align-items:stretch;
-      margin-top: 8px;
+      margin-top:8px;
     }
 
     .card{
       border-radius:26px;
-      background: linear-gradient(180deg, var(--cardA), var(--cardB));
+      background:linear-gradient(180deg, var(--cardA), var(--cardB));
       border:1px solid rgba(255,255,255,.10);
-      box-shadow: 0 30px 90px rgba(0,0,0,.62);
+      box-shadow:0 30px 90px rgba(0,0,0,.62);
       position:relative;
       overflow:hidden;
     }
 
     @supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))){
       .card{
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter:blur(12px);
+        -webkit-backdrop-filter:blur(12px);
       }
     }
 
@@ -132,14 +125,14 @@
       position:absolute;
       inset:0;
       pointer-events:none;
-      background: radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.09), transparent 64%);
+      background:radial-gradient(900px 260px at 50% 0%, rgba(230,192,123,.09), transparent 64%);
       opacity:.85;
     }
 
     .inner{
       position:relative;
       z-index:1;
-      padding: 22px 22px 24px;
+      padding:22px 22px 24px;
     }
 
     .kicker{
@@ -150,24 +143,27 @@
       text-transform:uppercase;
       font-size:12px;
       color:rgba(230,192,123,.82);
-      margin: 2px 0 14px;
+      margin:2px 0 14px;
     }
+
     .dot{
-      width:5px;height:5px;border-radius:50%;
+      width:5px;
+      height:5px;
+      border-radius:50%;
       background:rgba(230,192,123,.85);
-      box-shadow: 0 0 18px rgba(230,192,123,.40);
+      box-shadow:0 0 18px rgba(230,192,123,.40);
       flex:0 0 auto;
     }
 
     .title{
       margin:0;
-      line-height: 1.04;
-      padding-bottom: .06em;
+      line-height:1.04;
+      padding-bottom:.06em;
       letter-spacing:.16em;
       text-transform:uppercase;
-      font-weight: 700;
-      font-size: clamp(48px, 6.2vw, 110px);
-      color: transparent;
+      font-weight:700;
+      font-size:clamp(48px, 6.2vw, 110px);
+      color:transparent;
       background-image:
         linear-gradient(90deg,
           rgba(230,192,123,.60) 0%,
@@ -175,143 +171,156 @@
           rgba(255,255,255,.92) 48%,
           rgba(230,192,123,.92) 58%,
           rgba(230,192,123,.60) 100%);
-      background-size: 260% 100%;
-      background-position: 0% 50%;
+      background-size:260% 100%;
+      background-position:0% 50%;
       -webkit-background-clip:text;
       background-clip:text;
-      text-shadow: 0 20px 70px rgba(0,0,0,.55);
-      animation: shineText 6.8s ease-in-out infinite;
+      text-shadow:0 20px 70px rgba(0,0,0,.55);
+      animation:shineText 6.8s ease-in-out infinite;
     }
+
     @keyframes shineText{
-      0%   { background-position:   0% 50%; }
-      60%  { background-position: 100% 50%; }
-      100% { background-position: 100% 50%; }
+      0%   { background-position:0% 50%; }
+      60%  { background-position:100% 50%; }
+      100% { background-position:100% 50%; }
     }
 
     .subtitle{
-      margin: 12px 0 0;
-      max-width: 70ch;
-      font-size: clamp(15px, 1.6vw, 20px);
-      color: rgba(255,255,255,.86);
+      margin:12px 0 0;
+      max-width:70ch;
+      font-size:clamp(15px, 1.6vw, 20px);
+      color:rgba(255,255,255,.86);
       line-height:1.55;
     }
-    .subtitle strong{ color: rgba(230,192,123,.95); font-weight:700; }
+    .subtitle strong{ color:rgba(230,192,123,.95); font-weight:700; }
 
     .whisper{
-      margin: 14px 0 0;
+      margin:14px 0 0;
       letter-spacing:.18em;
       text-transform:uppercase;
-      font-size: 12px;
-      color: rgba(255,255,255,.52);
+      font-size:12px;
+      color:rgba(255,255,255,.52);
       opacity:.72;
-      animation: breathe 3.2s ease-in-out infinite;
+      animation:breathe 3.2s ease-in-out infinite;
     }
+
     @keyframes breathe{
-      0%,100%{ opacity:.38; filter: blur(.35px); transform: translateY(0); }
-      50%{ opacity:.82; filter: blur(0); transform: translateY(-2px); }
+      0%,100%{ opacity:.38; filter:blur(.35px); transform:translateY(0); }
+      50%{ opacity:.82; filter:blur(0); transform:translateY(-2px); }
     }
 
     .rule{
-      margin: 16px 0 14px;
+      margin:16px 0 14px;
       height:10px;
-      width: min(760px, 100%);
+      width:min(760px, 100%);
       border-radius:999px;
-      background: linear-gradient(90deg,
+      background:linear-gradient(
+        90deg,
         rgba(255,255,255,.06),
         rgba(230,192,123,.20),
-        rgba(255,255,255,.06));
+        rgba(255,255,255,.06)
+      );
       opacity:.70;
     }
 
     .miniGrid{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns:1fr 1fr;
       gap:12px;
-      margin-top: 14px;
+      margin-top:14px;
     }
+
     .mini{
       border-radius:18px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.22);
-      padding: 14px 14px 12px;
-      box-shadow: inset 0 0 30px rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.22);
+      padding:14px 14px 12px;
+      box-shadow:inset 0 0 30px rgba(0,0,0,.25);
     }
+
     .mini h3{
       margin:0 0 8px;
       font-size:12px;
       letter-spacing:.22em;
       text-transform:uppercase;
-      color: rgba(230,192,123,.88);
+      color:rgba(230,192,123,.88);
     }
+
     .mini p{
       margin:0;
       font-size:16px;
       line-height:1.5;
-      color: rgba(255,255,255,.80);
+      color:rgba(255,255,255,.80);
     }
 
     .leadTitle{
-      margin: 10px 0 0;
-      font-size: clamp(18px, 2.1vw, 30px);
+      margin:10px 0 0;
+      font-size:clamp(18px, 2.1vw, 30px);
       line-height:1.35;
-      color: rgba(255,255,255,.92);
+      color:rgba(255,255,255,.92);
       text-align:center;
     }
 
     .form{
-      margin-top: 18px;
+      margin-top:18px;
       display:grid;
       gap:12px;
     }
+
     .row2{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns:1fr 1fr;
       gap:12px;
     }
+
     label{
       display:block;
       font-size:12px;
       letter-spacing:.22em;
       text-transform:uppercase;
-      color: rgba(255,255,255,.55);
-      margin: 0 0 8px;
+      color:rgba(255,255,255,.55);
+      margin:0 0 8px;
     }
+
     input{
       width:100%;
       border-radius:14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      color: rgba(255,255,255,.90);
-      padding: 12px 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      color:rgba(255,255,255,.90);
+      padding:12px 14px;
       outline:none;
-      box-shadow: inset 0 0 30px rgba(0,0,0,.26);
-      font-family: inherit;
-      font-size: 16px;
+      box-shadow:inset 0 0 30px rgba(0,0,0,.26);
+      font-family:inherit;
+      font-size:16px;
     }
-    input::placeholder{ color: rgba(255,255,255,.38); }
+
+    input::placeholder{ color:rgba(255,255,255,.38); }
 
     .consent{
       display:flex;
       gap:10px;
       align-items:flex-start;
-      color: rgba(255,255,255,.75);
-      font-size: 13px;
+      color:rgba(255,255,255,.75);
+      font-size:13px;
       line-height:1.35;
-      margin-top: 2px;
+      margin-top:2px;
       user-select:none;
     }
+
     .consent input{
       width:18px;
       height:18px;
-      margin-top: 2px;
-      accent-color: rgba(230,192,123,.9);
+      margin-top:2px;
+      accent-color:rgba(230,192,123,.9);
     }
+
     .status{
       text-align:center;
-      font-size: 13px;
-      color: rgba(255,255,255,.62);
-      margin-top: 6px;
-      min-height: 18px;
+      font-size:13px;
+      color:rgba(255,255,255,.62);
+      margin-top:6px;
+      min-height:18px;
     }
 
     .actions{
@@ -319,53 +328,57 @@
       flex-wrap:wrap;
       gap:12px;
       justify-content:center;
-      margin-top: 12px;
+      margin-top:12px;
     }
+
     button{
       border:1px solid rgba(230,192,123,.24);
-      background: rgba(0,0,0,.25);
-      color: rgba(230,192,123,.92);
-      padding: 12px 18px;
-      border-radius: 14px;
+      background:rgba(0,0,0,.25);
+      color:rgba(230,192,123,.92);
+      padding:12px 18px;
+      border-radius:14px;
       cursor:pointer;
-      font-family: inherit;
+      font-family:inherit;
       letter-spacing:.12em;
       text-transform:uppercase;
-      min-width: 190px;
-      transition: transform .12s ease, border-color .18s ease, background .18s ease, opacity .18s ease;
-      box-shadow: 0 14px 44px rgba(0,0,0,.35);
+      min-width:190px;
+      transition:transform .12s ease, border-color .18s ease, background .18s ease, opacity .18s ease;
+      box-shadow:0 14px 44px rgba(0,0,0,.35);
     }
-    button:hover{ transform: translateY(-1px); border-color: rgba(230,192,123,.38); }
-    button:active{ transform: translateY(0); opacity:.92; }
+
+    button:hover{ transform:translateY(-1px); border-color:rgba(230,192,123,.38); }
+    button:active{ transform:translateY(0); opacity:.92; }
 
     .chips{
       display:flex;
       flex-wrap:wrap;
       gap:10px;
       justify-content:center;
-      margin-top: 14px;
+      margin-top:14px;
     }
+
     .chip{
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      padding: 8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      padding:8px 12px;
       letter-spacing:.18em;
       text-transform:uppercase;
-      font-size: 11px;
-      color: rgba(230,192,123,.80);
+      font-size:11px;
+      color:rgba(230,192,123,.80);
       user-select:none;
     }
 
-    /* Countdown */
-    .launchCountdown{ margin-top: 18px; }
+    .launchCountdown{ margin-top:18px; }
+
     .countdownCard{
       border-radius:22px;
-      border: 1px solid rgba(230,192,123,.20);
-      background: linear-gradient(180deg, rgba(230,192,123,.08), rgba(255,255,255,.02));
-      padding: 18px;
-      box-shadow: inset 0 0 40px rgba(0,0,0,.24), 0 24px 70px rgba(0,0,0,.42);
+      border:1px solid rgba(230,192,123,.20);
+      background:linear-gradient(180deg, rgba(230,192,123,.08), rgba(255,255,255,.02));
+      padding:18px;
+      box-shadow:inset 0 0 40px rgba(0,0,0,.24), 0 24px 70px rgba(0,0,0,.42);
     }
+
     .countdownTop{
       display:flex;
       justify-content:space-between;
@@ -373,166 +386,179 @@
       gap:12px;
       flex-wrap:wrap;
     }
+
     .countdownTitle{
       margin:0;
       font-size:14px;
       letter-spacing:.24em;
       text-transform:uppercase;
-      color: rgba(230,192,123,.90);
+      color:rgba(230,192,123,.90);
     }
+
     .countdownDate{
       font-size:12px;
       letter-spacing:.14em;
       text-transform:uppercase;
-      color: rgba(255,255,255,.62);
+      color:rgba(255,255,255,.62);
     }
+
     .countdownLead{
       margin:10px 0 0;
-      font-size: clamp(18px, 2.2vw, 30px);
-      color: rgba(255,255,255,.92);
+      font-size:clamp(18px, 2.2vw, 30px);
+      color:rgba(255,255,255,.92);
       line-height:1.35;
     }
+
     .countdownGrid{
-      margin-top: 14px;
+      margin-top:14px;
       display:grid;
-      grid-template-columns: repeat(4, minmax(92px,1fr));
+      grid-template-columns:repeat(4, minmax(92px,1fr));
       gap:10px;
     }
+
     .countdownItem{
       border-radius:14px;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.25);
+      background:rgba(0,0,0,.25);
       padding:12px 10px;
       text-align:center;
     }
+
     .countdownValue{
       margin:0;
-      font-size: clamp(28px, 3vw, 42px);
+      font-size:clamp(28px, 3vw, 42px);
       font-weight:700;
-      color: rgba(230,192,123,.95);
+      color:rgba(230,192,123,.95);
       line-height:1;
-      text-shadow: 0 10px 30px rgba(0,0,0,.45);
-      font-variant-numeric: tabular-nums;
+      text-shadow:0 10px 30px rgba(0,0,0,.45);
+      font-variant-numeric:tabular-nums;
     }
+
     .countdownLabel{
       margin-top:6px;
       font-size:11px;
       letter-spacing:.16em;
       text-transform:uppercase;
-      color: rgba(255,255,255,.66);
+      color:rgba(255,255,255,.66);
     }
+
     .countdownTrack{
       margin-top:12px;
       height:8px;
       border-radius:999px;
       overflow:hidden;
-      background: rgba(255,255,255,.08);
+      background:rgba(255,255,255,.08);
       border:1px solid rgba(255,255,255,.12);
     }
+
     .countdownBar{
       height:100%;
       width:0%;
-      background: linear-gradient(90deg, rgba(230,192,123,.35), rgba(230,192,123,.92), rgba(255,255,255,.92));
-      box-shadow: 0 0 18px rgba(230,192,123,.35);
-      transition: width .6s ease;
+      background:linear-gradient(90deg, rgba(230,192,123,.35), rgba(230,192,123,.92), rgba(255,255,255,.92));
+      box-shadow:0 0 18px rgba(230,192,123,.35);
+      transition:width .6s ease;
     }
+
     .countdownStatus{
       margin-top:10px;
       font-size:12px;
       letter-spacing:.10em;
       text-transform:uppercase;
-      color: rgba(255,255,255,.66);
+      color:rgba(255,255,255,.66);
     }
 
     .below{
-      margin-top: 22px;
+      margin-top:22px;
       display:grid;
-      grid-template-columns: 1fr;
+      grid-template-columns:1fr;
       gap:18px;
     }
+
     .aboutTitle{
       margin:0;
-      font-size: 14px;
+      font-size:14px;
       letter-spacing:.22em;
       text-transform:uppercase;
-      color: rgba(230,192,123,.88);
+      color:rgba(230,192,123,.88);
     }
+
     .aboutText{
-      margin: 10px 0 0;
-      font-size: 18px;
-      line-height: 1.6;
-      color: rgba(255,255,255,.82);
-      max-width: 90ch;
+      margin:10px 0 0;
+      font-size:18px;
+      line-height:1.6;
+      color:rgba(255,255,255,.82);
+      max-width:90ch;
     }
-    .aboutText strong{ color: rgba(230,192,123,.95); }
+
+    .aboutText strong{ color:rgba(230,192,123,.95); }
 
     .footer{
       width:100%;
-      margin: 18px auto 0;
+      margin:18px auto 0;
       text-align:center;
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
-      color: rgba(255,255,255,.40);
-      padding: 0 10px 18px;
+      color:rgba(255,255,255,.40);
+      padding:0 10px 18px;
       pointer-events:none;
     }
-    .footer .brand{ color: rgba(230,192,123,.82); font-weight:700; }
 
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-      .title{ font-size: clamp(44px, 9vw, 78px); }
-      .miniGrid{ grid-template-columns: 1fr 1fr; }
+    .footer .brand{ color:rgba(230,192,123,.82); font-weight:700; }
+
+    @media (max-width:980px){
+      .grid{ grid-template-columns:1fr; }
+      .title{ font-size:clamp(44px, 9vw, 78px); }
+      .miniGrid{ grid-template-columns:1fr 1fr; }
     }
-    @media (max-width: 560px){
+
+    @media (max-width:560px){
       body{
         padding-left:max(14px, env(safe-area-inset-left));
         padding-right:max(14px, env(safe-area-inset-right));
       }
-      .inner{ padding: 18px 16px 18px; }
-      .row2{ grid-template-columns: 1fr; }
-      .miniGrid{ grid-template-columns: 1fr; }
-      button{ width: 100%; min-width: 0; }
+      .inner{ padding:18px 16px 18px; }
+      .row2{ grid-template-columns:1fr; }
+      .miniGrid{ grid-template-columns:1fr; }
+      button{ width:100%; min-width:0; }
       .logoOnly{ width:110px; height:110px; }
-      .countdownGrid{ grid-template-columns: repeat(2, minmax(90px,1fr)); }
+      .countdownGrid{ grid-template-columns:repeat(2, minmax(90px,1fr)); }
     }
 
-    /* Painel de Som */
     .soundPanel{
       position:fixed;
       right:max(14px, env(safe-area-inset-right));
       top:max(14px, env(safe-area-inset-top));
       z-index:40;
-
       display:flex;
       align-items:center;
       gap:10px;
-
       padding:10px 12px;
       border-radius:999px;
-
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.30);
-      box-shadow: 0 18px 60px rgba(0,0,0,.45);
-
-      transition: opacity .25s ease, transform .25s ease;
+      background:rgba(0,0,0,.30);
+      box-shadow:0 18px 60px rgba(0,0,0,.45);
+      transition:opacity .25s ease, transform .25s ease;
     }
+
     @supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))){
       .soundPanel{
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter:blur(10px);
+        -webkit-backdrop-filter:blur(10px);
       }
     }
+
     .soundPanel.isHidden{
       opacity:0;
-      transform: translateY(-10px);
+      transform:translateY(-10px);
       pointer-events:none;
     }
+
     .soundToggle{
       border:0;
       background:transparent;
-      color: rgba(255,255,255,.78);
-      font-family: inherit;
+      color:rgba(255,255,255,.78);
+      font-family:inherit;
       font-size:12px;
       letter-spacing:.10em;
       text-transform:uppercase;
@@ -540,9 +566,9 @@
       padding:0;
       margin:0;
       user-select:none;
-      min-width: 92px;
+      min-width:92px;
     }
-    .soundToggle strong{ color: var(--gold); }
+    .soundToggle strong{ color:var(--gold); }
 
     .soundVolume{
       display:flex;
@@ -551,10 +577,11 @@
       padding-left:12px;
       border-left:1px solid rgba(255,255,255,.10);
     }
+
     .volLabel{
       font-size:11px;
       letter-spacing:.12em;
-      color: rgba(255,255,255,.55);
+      color:rgba(255,255,255,.55);
       text-transform:uppercase;
     }
 
@@ -564,17 +591,19 @@
       height:16px;
       padding:0;
       margin:0;
-      background: transparent;
+      background:transparent;
       -webkit-appearance:none;
       appearance:none;
       outline:none;
-      touch-action: pan-y;
+      touch-action:pan-y;
     }
+
     #volumeSlider::-webkit-slider-runnable-track{
       height:4px;
       background:rgba(255,255,255,.25);
       border-radius:999px;
     }
+
     #volumeSlider::-webkit-slider-thumb{
       -webkit-appearance:none;
       appearance:none;
@@ -586,11 +615,13 @@
       cursor:pointer;
       box-shadow:0 0 10px rgba(230,192,123,.55);
     }
+
     #volumeSlider::-moz-range-track{
       height:4px;
       background:rgba(255,255,255,.25);
       border-radius:999px;
     }
+
     #volumeSlider::-moz-range-thumb{
       width:14px;
       height:14px;
@@ -600,7 +631,8 @@
       cursor:pointer;
       box-shadow:0 0 10px rgba(230,192,123,.55);
     }
-    @media (max-width: 560px){
+
+    @media (max-width:560px){
       #volumeSlider{ width:120px; min-width:120px; }
     }
 
@@ -614,7 +646,6 @@
 <body>
   <canvas id="stars" aria-hidden="true"></canvas>
 
-  <!-- Painel de Som -->
   <div class="soundPanel" id="soundPanel" aria-label="Controle de som">
     <button class="soundToggle" id="soundBtn" type="button" aria-label="Ativar ou desativar som">
       SOM: <strong id="soundState">OFF</strong>
@@ -712,7 +743,6 @@
       </aside>
     </section>
 
-    <!-- Contagem regressiva -->
     <section class="launchCountdown" aria-label="Contagem regressiva de lançamento">
       <article class="countdownCard">
         <div class="countdownTop">
@@ -771,9 +801,6 @@
   </div>
 
   <script>
-    /* =========================================================
-       ✅ Tick SFX independente do SOM do site
-       ========================================================= */
     (function(){
       var ctx = null;
       var unlocked = false;
@@ -781,10 +808,8 @@
       function unlock(){
         if (unlocked) return;
         unlocked = true;
-
         var Ctx = window.AudioContext || window.webkitAudioContext;
         if (!Ctx) return;
-
         try{
           ctx = new Ctx();
           if (ctx.state === "suspended"){
@@ -798,7 +823,6 @@
 
       window.preludioTick = function(){
         if (!ctx) return;
-
         try{
           var t = ctx.currentTime;
           var VOL = 0.028;
@@ -806,17 +830,14 @@
           var o1 = ctx.createOscillator();
           o1.type = "square";
           o1.frequency.setValueAtTime(1700, t);
-
           var g1 = ctx.createGain();
           g1.gain.setValueAtTime(0.00001, t);
           g1.gain.exponentialRampToValueAtTime(VOL, t + 0.003);
           g1.gain.exponentialRampToValueAtTime(0.00001, t + 0.030);
-
           var f1 = ctx.createBiquadFilter();
           f1.type = "bandpass";
           f1.frequency.setValueAtTime(2400, t);
           f1.Q.setValueAtTime(2.2, t);
-
           o1.connect(f1); f1.connect(g1); g1.connect(ctx.destination);
           o1.start(t); o1.stop(t + 0.035);
 
@@ -824,17 +845,14 @@
           var o2 = ctx.createOscillator();
           o2.type = "triangle";
           o2.frequency.setValueAtTime(520, t2);
-
           var g2 = ctx.createGain();
           g2.gain.setValueAtTime(0.00001, t2);
           g2.gain.exponentialRampToValueAtTime(VOL * 0.80, t2 + 0.004);
           g2.gain.exponentialRampToValueAtTime(0.00001, t2 + 0.040);
-
           var f2 = ctx.createBiquadFilter();
           f2.type = "lowpass";
           f2.frequency.setValueAtTime(1200, t2);
           f2.Q.setValueAtTime(0.7, t2);
-
           o2.connect(f2); f2.connect(g2); g2.connect(ctx.destination);
           o2.start(t2); o2.stop(t2 + 0.045);
 
@@ -842,29 +860,20 @@
           var o3 = ctx.createOscillator();
           o3.type = "sine";
           o3.frequency.setValueAtTime(3200, t3);
-
           var g3 = ctx.createGain();
           g3.gain.setValueAtTime(0.00001, t3);
           g3.gain.exponentialRampToValueAtTime(VOL * 0.22, t3 + 0.002);
           g3.gain.exponentialRampToValueAtTime(0.00001, t3 + 0.018);
-
           var f3 = ctx.createBiquadFilter();
           f3.type = "highpass";
           f3.frequency.setValueAtTime(1600, t3);
           f3.Q.setValueAtTime(0.8, t3);
-
           o3.connect(f3); f3.connect(g3); g3.connect(ctx.destination);
           o3.start(t3); o3.stop(t3 + 0.020);
-
         }catch(e){}
       };
     })();
 
-    /* =========================================================
-       ✅ Universo CINEMÁTICO + REFRAÇÃO VISÍVEL (lentes)
-       - Blindado: canvas sempre atrás, sem “tela preta”
-       - Refração robusta: buffer + drawImage sem esticar por w/h
-       ========================================================= */
     (function(){
       try{
         var canvas = document.getElementById("stars");
@@ -875,11 +884,6 @@
         var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
         if (mm && mm.matches) return;
 
-        // Buffer (para refração)
-        var buf = document.createElement("canvas");
-        var bctx = buf.getContext("2d");
-        if (!bctx) return;
-
         var w=0,h=0,dpr=1, raf=0, t=0;
         var par = { x:0, y:0, tx:0, ty:0 };
 
@@ -887,18 +891,14 @@
         var dust=[], rocks=[], meteors=[];
         var nextMeteorAt = 0;
 
-        // Nebulosa
         var neb = {
           c: document.createElement("canvas"),
-          x: 0, y: 0,
-          a: 0.0,
-          drift: 0.006
+          x: 0,
+          y: 0,
+          a: 0.10,
+          drift: 0.004
         };
         var nctx = neb.c.getContext("2d", { alpha:true });
-        if (!nctx) return;
-
-        // Lentes (orbes)
-        var lenses = [];
 
         function rand(min,max){ return min + Math.random()*(max-min); }
         function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
@@ -929,13 +929,8 @@
           canvas.style.height = h + "px";
           ctx.setTransform(dpr,0,0,dpr,0,0);
 
-          buf.width  = Math.floor(w * dpr);
-          buf.height = Math.floor(h * dpr);
-          bctx.setTransform(dpr,0,0,dpr,0,0);
-
           buildScene();
           buildNebulaTexture();
-          buildLenses();
         }
 
         function makeStars(count, rMin, rMax, vMin, vMax, aMin, aMax, tempBias){
@@ -943,15 +938,15 @@
           for (var i=0;i<count;i++){
             var temp = rand(-1, 1) * tempBias;
             var twBase = rand(0.002, 0.010);
-            var twAmp  = rand(0.00, 0.18);
-            var hero = (Math.random() < 0.045);
+            var twAmp  = rand(0.02, 0.20);
+            var hero = (Math.random() < 0.06);
 
             arr.push({
               x: Math.random()*w,
               y: Math.random()*h,
-              r: rand(rMin,rMax) * (hero ? rand(1.15, 1.8) : 1),
+              r: rand(rMin,rMax) * (hero ? rand(1.10, 1.60) : 1),
               v: rand(vMin,vMax),
-              a: rand(aMin,aMax) * (hero ? 1.15 : 1),
+              a: rand(aMin,aMax) * (hero ? 1.08 : 1),
               tw: twBase,
               twa: twAmp,
               ph: Math.random()*Math.PI*2,
@@ -965,13 +960,13 @@
         function buildScene(){
           var area = w*h;
 
-          var farCount  = clamp(Math.floor(area/16500), 80, 210);
-          var midCount  = clamp(Math.floor(area/19500), 60, 170);
-          var nearCount = clamp(Math.floor(area/25500), 40, 120);
+          var farCount  = clamp(Math.floor(area/14500), 95, 260);
+          var midCount  = clamp(Math.floor(area/17500), 70, 190);
+          var nearCount = clamp(Math.floor(area/23500), 48, 130);
 
-          starsFar  = makeStars(farCount,  0.30, 1.05, 0.018, 0.050, 0.10, 0.38, 0.08);
-          starsMid  = makeStars(midCount,  0.40, 1.25, 0.045, 0.095, 0.12, 0.48, 0.10);
-          starsNear = makeStars(nearCount, 0.55, 1.70, 0.070, 0.140, 0.14, 0.58, 0.12);
+          starsFar  = makeStars(farCount,  0.28, 0.95, 0.016, 0.045, 0.12, 0.34, 0.08);
+          starsMid  = makeStars(midCount,  0.38, 1.20, 0.040, 0.085, 0.14, 0.46, 0.10);
+          starsNear = makeStars(nearCount, 0.52, 1.65, 0.060, 0.120, 0.18, 0.60, 0.12);
 
           dust = [];
           var dustCount = clamp(Math.floor(area/90000), 10, 28);
@@ -1014,31 +1009,12 @@
               vy: Math.sin(ang) * spd,
               ph: rand(0, Math.PI*2),
               wob: rand(0.0006, 0.0018),
-              z: depth,
-              a: rand(0.10, 0.20)
+              z: depth
             });
           }
 
           meteors = [];
-          nextMeteorAt = Math.floor(rand(340, 760));
-        }
-
-        function buildLenses(){
-  lenses = [];
-}
-          var n = 3;
-          for (var i=0;i<n;i++){
-            lenses.push({
-              x: rand(w*0.18, w*0.82),
-              y: rand(h*0.12, h*0.48),
-              r: rand(78, 150),
-              k: rand(0.015, 0.030),
-              chroma: rand(0.8, 1.25),
-              glow: rand(0.06, 0.10),
-              drift: rand(0.0015, 0.0035),
-              ph: rand(0, Math.PI*2)
-            });
-          }
+          nextMeteorAt = Math.floor(rand(140, 340));
         }
 
         function onPointerMove(clientX, clientY){
@@ -1047,7 +1023,11 @@
           par.tx = clamp(nx, -1, 1);
           par.ty = clamp(ny, -1, 1);
         }
-        window.addEventListener("mousemove", function(e){ onPointerMove(e.clientX, e.clientY); }, { passive:true });
+
+        window.addEventListener("mousemove", function(e){
+          onPointerMove(e.clientX, e.clientY);
+        }, { passive:true });
+
         window.addEventListener("touchmove", function(e){
           if (!e.touches || !e.touches[0]) return;
           onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
@@ -1055,16 +1035,18 @@
 
         function blurPass(c, passes){
           var b = document.createElement("canvas");
-          b.width = c.width; b.height = c.height;
-          var bctx2 = b.getContext("2d");
+          b.width = c.width;
+          b.height = c.height;
+          var bctx = b.getContext("2d");
+
           for (var i=0;i<passes;i++){
-            bctx2.clearRect(0,0,b.width,b.height);
-            bctx2.globalAlpha = 0.50;
-            bctx2.drawImage(c, -1, 0);
-            bctx2.drawImage(c,  1, 0);
-            bctx2.drawImage(c,  0,-1);
-            bctx2.drawImage(c,  0, 1);
-            bctx2.globalAlpha = 1;
+            bctx.clearRect(0,0,b.width,b.height);
+            bctx.globalAlpha = 0.50;
+            bctx.drawImage(c, -1, 0);
+            bctx.drawImage(c, 1, 0);
+            bctx.drawImage(c, 0, -1);
+            bctx.drawImage(c, 0, 1);
+            bctx.globalAlpha = 1;
             var cctx = c.getContext("2d");
             cctx.clearRect(0,0,c.width,c.height);
             cctx.drawImage(b,0,0);
@@ -1075,17 +1057,16 @@
           var S = 640;
           neb.c.width = S;
           neb.c.height = S;
-
           nctx.clearRect(0,0,S,S);
 
-          for (var i=0;i<26;i++){
+          for (var i=0;i<20;i++){
             var x = rand(0, S);
             var y = rand(0, S);
-            var r = rand(S*0.10, S*0.28);
+            var r = rand(S*0.10, S*0.24);
 
             var g = nctx.createRadialGradient(x,y,0, x,y,r);
-            g.addColorStop(0, "rgba(140,190,255,"+rand(0.05,0.11)+")");
-            g.addColorStop(0.55, "rgba(70,120,210,"+rand(0.03,0.08)+")");
+            g.addColorStop(0, "rgba(90,140,255,"+rand(0.03,0.08)+")");
+            g.addColorStop(0.55, "rgba(40,85,170,"+rand(0.02,0.06)+")");
             g.addColorStop(1, "rgba(0,0,0,0)");
 
             nctx.fillStyle = g;
@@ -1095,41 +1076,13 @@
           }
 
           blurPass(neb.c, 2);
-
-          nctx.save();
-          nctx.globalCompositeOperation = "multiply";
-          nctx.globalAlpha = 0.85;
-
-          for (var d=0; d<6; d++){
-            nctx.save();
-            nctx.translate(S*0.5, S*0.5);
-            nctx.rotate(rand(-0.8, -0.25));
-            nctx.translate(-S*0.5, -S*0.5);
-
-            var lx = rand(-S*0.2, S*0.2);
-            var ly = rand(S*0.25, S*0.75);
-            var lw = S*1.4;
-            var lh = rand(S*0.05, S*0.12);
-
-            var lg = nctx.createLinearGradient(lx, ly, lx+lw, ly);
-            lg.addColorStop(0, "rgba(0,0,0,0)");
-            lg.addColorStop(0.35, "rgba(0,0,0,"+rand(0.30,0.55)+")");
-            lg.addColorStop(0.65, "rgba(0,0,0,"+rand(0.30,0.55)+")");
-            lg.addColorStop(1, "rgba(0,0,0,0)");
-
-            nctx.fillStyle = lg;
-            nctx.fillRect(lx, ly, lw, lh);
-            nctx.restore();
-          }
-          nctx.restore();
-
           neb.x = rand(-0.25, 0.25);
           neb.y = rand(-0.25, 0.25);
         }
 
         function drawNebula(px, py){
           neb.x += neb.drift;
-          neb.y += neb.drift*0.6;
+          neb.y += neb.drift*0.55;
 
           if (neb.x > 1) neb.x -= 1;
           if (neb.y > 1) neb.y -= 1;
@@ -1144,7 +1097,7 @@
 
           ctx.save();
           ctx.globalCompositeOperation = "screen";
-          ctx.globalAlpha = 0.18;
+          ctx.globalAlpha = neb.a;
 
           for (var ix=-1; ix<=1; ix++){
             for (var iy=-1; iy<=1; iy++){
@@ -1156,7 +1109,7 @@
 
         function starColor(temp, alpha){
           var b = clamp(-temp, 0, 1);
-          var g = clamp( temp, 0, 1);
+          var g = clamp(temp, 0, 1);
 
           var R = 255 - Math.floor(b*18) + Math.floor(g*14);
           var G = 255 - Math.floor(b*8)  + Math.floor(g*10);
@@ -1170,51 +1123,47 @@
           var flick2 = 0.92 + 0.08 * Math.cos(phase*2.25 + y*0.010);
           var aNow = clamp(alpha * flick * flick2, 0, 1);
 
-          var jit = (0.10 + r*0.05);
-          var jx = Math.sin(phase*3.10 + x*0.006) * jit;
-          var jy = Math.cos(phase*2.85 + y*0.006) * jit;
+          var jit = 0.08 + r*0.04;
+          x += Math.sin(phase*3.10 + x*0.006) * jit;
+          y += Math.cos(phase*2.85 + y*0.006) * jit;
 
-          x += jx; y += jy;
-
-          var glow = r*3.25;
+          var glow = r * 3.0;
           var core = Math.max(0.55, r*0.62);
 
-          var wob = 0.65 + r*0.20;
-          var ox = Math.sin(phase*1.12) * wob;
+          var wob = 0.45 + r*0.12;
+          var ox = Math.sin(phase*1.10) * wob;
           var oy = Math.cos(phase*1.04) * wob;
 
           ctx.save();
           ctx.globalCompositeOperation = "screen";
 
           var g = ctx.createRadialGradient(x,y,0, x,y,glow);
-          g.addColorStop(0, starColor(temp, clamp(aNow*0.92, 0, 1)));
-          g.addColorStop(0.20, starColor(temp, clamp(aNow*0.34, 0, 1)));
+          g.addColorStop(0, starColor(temp, clamp(aNow*0.95,0,1)));
+          g.addColorStop(0.22, starColor(temp, clamp(aNow*0.30,0,1)));
           g.addColorStop(1, "rgba(0,0,0,0)");
           ctx.fillStyle = g;
           ctx.beginPath();
           ctx.arc(x,y,glow,0,Math.PI*2);
           ctx.fill();
 
-          var ar = (aNow*0.18), ag = (aNow*0.13), ab = (aNow*0.18);
-
           var gr = ctx.createRadialGradient(x-ox, y-oy, 0, x-ox, y-oy, glow*0.92);
-          gr.addColorStop(0, "rgba(255,120,120," + clamp(ar,0,1).toFixed(3) + ")");
+          gr.addColorStop(0, "rgba(255,130,130," + clamp(aNow*0.12,0,1).toFixed(3) + ")");
           gr.addColorStop(1, "rgba(0,0,0,0)");
           ctx.fillStyle = gr;
           ctx.beginPath();
           ctx.arc(x-ox, y-oy, glow*0.92, 0, Math.PI*2);
           ctx.fill();
 
-          var gg = ctx.createRadialGradient(x+ox*0.60, y-oy*0.60, 0, x+ox*0.60, y-oy*0.60, glow*0.82);
-          gg.addColorStop(0, "rgba(160,255,190," + clamp(ag,0,1).toFixed(3) + ")");
+          var gg = ctx.createRadialGradient(x+ox*0.55, y-oy*0.55, 0, x+ox*0.55, y-oy*0.55, glow*0.78);
+          gg.addColorStop(0, "rgba(170,255,200," + clamp(aNow*0.08,0,1).toFixed(3) + ")");
           gg.addColorStop(1, "rgba(0,0,0,0)");
           ctx.fillStyle = gg;
           ctx.beginPath();
-          ctx.arc(x+ox*0.60, y-oy*0.60, glow*0.82, 0, Math.PI*2);
+          ctx.arc(x+ox*0.55, y-oy*0.55, glow*0.78, 0, Math.PI*2);
           ctx.fill();
 
           var gb = ctx.createRadialGradient(x+ox, y+oy, 0, x+ox, y+oy, glow*0.92);
-          gb.addColorStop(0, "rgba(160,190,255," + clamp(ab,0,1).toFixed(3) + ")");
+          gb.addColorStop(0, "rgba(160,190,255," + clamp(aNow*0.12,0,1).toFixed(3) + ")");
           gb.addColorStop(1, "rgba(0,0,0,0)");
           ctx.fillStyle = gb;
           ctx.beginPath();
@@ -1222,32 +1171,29 @@
           ctx.fill();
 
           ctx.globalCompositeOperation = "lighter";
-          ctx.fillStyle = starColor(temp, clamp(aNow*1.05, 0, 1));
+          ctx.fillStyle = starColor(temp, clamp(aNow*1.05,0,1));
           ctx.beginPath();
           ctx.arc(x,y,core,0,Math.PI*2);
           ctx.fill();
 
           var strength = r * aNow;
-          var isSpike = (strength > 0.42);
-          if (isSpike){
-            var L = clamp(6.0 + r*7.0, 10.0, 22.0);
-            var aSp = clamp((strength - 0.35) * 1.25, 0, 0.85);
+          if (strength > 0.46){
+            var L = clamp(4.5 + r*4.8, 7, 14);
+            var aSp = clamp((strength - 0.36) * 1.05, 0, 0.55);
 
             ctx.globalCompositeOperation = "screen";
             ctx.globalAlpha = aSp;
-            ctx.lineWidth = 1.05;
+            ctx.lineWidth = 0.9;
 
-            function strokeRay(angle){
-              var dx = Math.cos(angle) * L;
-              var dy = Math.sin(angle) * L;
-
+            function ray(angle, len, peak){
+              var dx = Math.cos(angle) * len;
+              var dy = Math.sin(angle) * len;
               var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
               lg.addColorStop(0.00, "rgba(255,255,255,0)");
-              lg.addColorStop(0.48, "rgba(255,255,255,0)");
-              lg.addColorStop(0.50, "rgba(255,255,255,0.95)");
-              lg.addColorStop(0.52, "rgba(255,255,255,0)");
+              lg.addColorStop(0.46, "rgba(255,255,255,0)");
+              lg.addColorStop(0.50, "rgba(255,255,255," + peak + ")");
+              lg.addColorStop(0.54, "rgba(255,255,255,0)");
               lg.addColorStop(1.00, "rgba(255,255,255,0)");
-
               ctx.strokeStyle = lg;
               ctx.beginPath();
               ctx.moveTo(x-dx, y-dy);
@@ -1255,32 +1201,12 @@
               ctx.stroke();
             }
 
-            strokeRay(0);
-            strokeRay(Math.PI/2);
+            ray(0, L, "0.95");
+            ray(Math.PI/2, L, "0.90");
 
-            ctx.globalAlpha = aSp * 0.55;
-            var L2 = L * 0.70;
-
-            function strokeRay2(angle){
-              var dx = Math.cos(angle) * L2;
-              var dy = Math.sin(angle) * L2;
-
-              var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
-              lg.addColorStop(0.00, "rgba(255,255,255,0)");
-              lg.addColorStop(0.50, "rgba(255,255,255,0.78)");
-              lg.addColorStop(1.00, "rgba(255,255,255,0)");
-
-              ctx.strokeStyle = lg;
-              ctx.beginPath();
-              ctx.moveTo(x-dx, y-dy);
-              ctx.lineTo(x+dx, y+dy);
-              ctx.stroke();
-            }
-
-            strokeRay2(Math.PI/4);
-            strokeRay2(-Math.PI/4);
-
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = aSp * 0.38;
+            ray(Math.PI/4, L*0.56, "0.78");
+            ray(-Math.PI/4, L*0.56, "0.78");
           }
 
           ctx.restore();
@@ -1304,10 +1230,10 @@
             var y = s.y + (py * parScale);
 
             if (x < -30) x += (w+60);
-            if (x >  w+30) x -= (w+60);
+            if (x > w+30) x -= (w+60);
 
             var chroma = (Math.sin(s.ph * 0.85 + s.x * 0.002) * 0.5 + 0.5);
-            var tempShift = (chroma - 0.5) * 0.22;
+            var tempShift = (chroma - 0.5) * 0.20;
             var tempNow = clamp(s.temp + tempShift, -1, 1);
 
             drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.ph);
@@ -1338,10 +1264,10 @@
           var side = Math.floor(rand(0, 4));
           var x,y,ang;
 
-          if (side === 0){ x = rand(-M, w+M); y = -M;        ang = rand(Math.PI*0.20, Math.PI*0.80); }
-          else if (side === 1){ x = w+M; y = rand(-M, h+M);  ang = rand(Math.PI*0.70, Math.PI*1.30); }
-          else if (side === 2){ x = rand(-M, w+M); y = h+M;  ang = rand(Math.PI*1.20, Math.PI*1.80); }
-          else { x = -M; y = rand(-M, h+M);                  ang = rand(-Math.PI*0.30, Math.PI*0.30); }
+          if (side === 0){ x = rand(-M, w+M); y = -M; ang = rand(Math.PI*0.20, Math.PI*0.80); }
+          else if (side === 1){ x = w+M; y = rand(-M, h+M); ang = rand(Math.PI*0.70, Math.PI*1.30); }
+          else if (side === 2){ x = rand(-M, w+M); y = h+M; ang = rand(Math.PI*1.20, Math.PI*1.80); }
+          else { x = -M; y = rand(-M, h+M); ang = rand(-Math.PI*0.30, Math.PI*0.30); }
 
           var base = rand(0.12, 0.28) * (0.55 + r.z);
           r.x = x; r.y = y;
@@ -1378,7 +1304,6 @@
             for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
             ctx.closePath();
 
-            ctx.globalAlpha = 1;
             ctx.fillStyle = "rgb(20,20,26)";
             ctx.fill();
 
@@ -1392,38 +1317,46 @@
             ctx.lineWidth = 1;
             ctx.strokeStyle = "rgba(0,0,0,0.75)";
             ctx.stroke();
-
-            ctx.shadowColor = "rgba(0,0,0,0.55)";
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 6;
-
-            ctx.fillStyle = "rgba(0,0,0,0)";
-            ctx.fill();
-
             ctx.restore();
           }
         }
 
         function spawnMeteor(){
+          var edge = Math.floor(rand(0,4));
+          var x, y, angle, speed;
 
-  var angle = Math.random() * Math.PI * 2;
+          speed = rand(8.5, 14.5);
 
-  var speed = rand(4,8);
+          if (edge === 0){
+            x = rand(-w*0.2, w*1.2);
+            y = -60;
+            angle = rand(0.35, 1.20);
+          } else if (edge === 1){
+            x = w + 60;
+            y = rand(-h*0.2, h*0.8);
+            angle = rand(2.20, 3.70);
+          } else if (edge === 2){
+            x = rand(-w*0.2, w*1.2);
+            y = h + 60;
+            angle = rand(3.80, 5.50);
+          } else {
+            x = -60;
+            y = rand(-h*0.2, h*0.8);
+            angle = rand(-0.50, 1.10);
+          }
 
-  meteors.push({
-    x: rand(0,w),
-    y: rand(0,h),
-    vx: Math.cos(angle) * speed,
-    vy: Math.sin(angle) * speed,
-    len: rand(80,140),
-    life:0,
-    maxLife:rand(40,70),
-    a:rand(0.6,1),
-    w:rand(1.2,2.2)
-  });
-
-}
+          meteors.push({
+            x:x,
+            y:y,
+            vx:Math.cos(angle) * speed,
+            vy:Math.sin(angle) * speed,
+            life:0,
+            maxLife:rand(28, 46),
+            len:rand(90, 170),
+            a:rand(0.30, 0.70),
+            w:rand(1.0, 2.2)
+          });
+        }
 
         function drawMeteors(){
           for (var j=meteors.length-1;j>=0;j--){
@@ -1432,7 +1365,7 @@
             m.y += m.vy;
             m.life++;
 
-            var k = Math.min(1, m.life / 8);
+            var k = Math.min(1, m.life / 7);
             var a = m.a * k * (1 - (m.life / m.maxLife));
 
             var norm = Math.sqrt(m.vx*m.vx + m.vy*m.vy) || 1;
@@ -1440,7 +1373,7 @@
             var ty = m.y - (m.vy / norm) * m.len;
 
             var grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
-            grad.addColorStop(0, "rgba(255,255,255," + (a).toFixed(3) + ")");
+            grad.addColorStop(0, "rgba(255,255,255," + a.toFixed(3) + ")");
             grad.addColorStop(1, "rgba(255,255,255,0)");
 
             ctx.strokeStyle = grad;
@@ -1450,108 +1383,15 @@
             ctx.lineTo(tx, ty);
             ctx.stroke();
 
-            ctx.fillStyle = "rgba(255,255,255," + (Math.min(1, a + 0.10)).toFixed(3) + ")";
+            ctx.fillStyle = "rgba(255,255,255," + Math.min(1, a + 0.10).toFixed(3) + ")";
             ctx.beginPath();
-            ctx.arc(m.x, m.y, 1.3, 0, Math.PI*2);
+            ctx.arc(m.x, m.y, 1.2, 0, Math.PI*2);
             ctx.fill();
 
-            if (m.life > m.maxLife || m.x > w + m.len || m.y > h + m.len){
+            if (m.life > m.maxLife || m.x < -m.len-120 || m.x > w + m.len + 120 || m.y < -m.len-120 || m.y > h + m.len + 120){
               meteors.splice(j,1);
             }
           }
-        }
-
-        // ✅ REFRAÇÃO (lentes): distorção radial sobre o buffer (robusta)
-        function applyLensRefraction(){
-  return;
-}
-
-          // Copia frame atual para buffer (sem esticar por w/h => evita black em alguns browsers)
-          bctx.setTransform(dpr,0,0,dpr,0,0);
-          bctx.clearRect(0,0,w,h);
-          bctx.drawImage(canvas, 0, 0);
-
-          // Reconstitui o frame base
-          ctx.clearRect(0,0,w,h);
-          ctx.drawImage(buf, 0, 0);
-
-          ctx.save();
-          ctx.globalCompositeOperation = "screen";
-
-          for (var i=0;i<lenses.length;i++){
-            var L = lenses[i];
-            L.ph += L.drift;
-
-            var cx = L.x + Math.sin(L.ph*0.9) * 8;
-            var cy = L.y + Math.cos(L.ph*0.8) * 6;
-            var r  = L.r;
-            var k  = L.k;
-            var chroma = L.chroma;
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI*2);
-            ctx.clip();
-
-            var step = 3;
-            var y0 = Math.floor(cy - r);
-            var y1 = Math.ceil(cy + r);
-
-            for (var y = y0; y <= y1; y += step){
-              var dy = y - cy;
-              var span = Math.sqrt(Math.max(0, r*r - dy*dy));
-              var x0 = cx - span;
-              var wSlice = span * 2;
-
-              var u = Math.abs(dy) / r;
-              var fall = (1 - u*u);
-              var shift = k * r * fall;
-
-              var sx = Math.sin(L.ph + dy*0.03) * shift * 0.55;
-              var sy = Math.cos(L.ph*0.9 + dy*0.02) * shift * 0.20;
-
-              ctx.globalAlpha = 0.34;
-              ctx.drawImage(
-                buf,
-                x0 - sx*1.15*chroma, (y - step/2) - sy*1.05*chroma, wSlice, step,
-                x0, (y - step/2), wSlice, step
-              );
-
-              ctx.globalAlpha = 0.28;
-              ctx.drawImage(
-                buf,
-                x0 - sx*0.85, (y - step/2) - sy*0.85, wSlice, step,
-                x0, (y - step/2), wSlice, step
-              );
-
-              ctx.globalAlpha = 0.34;
-              ctx.drawImage(
-                buf,
-                x0 - sx*0.55*chroma, (y - step/2) - sy*0.70*chroma, wSlice, step,
-                x0, (y - step/2), wSlice, step
-              );
-            }
-
-            ctx.globalAlpha = 1;
-            var ring = ctx.createRadialGradient(cx,cy, r*0.55, cx,cy,r);
-            ring.addColorStop(0, "rgba(255,255,255,0)");
-            ring.addColorStop(0.70, "rgba(230,192,123," + (L.glow*0.55).toFixed(3) + ")");
-            ring.addColorStop(1, "rgba(255,255,255,0)");
-            ctx.fillStyle = ring;
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI*2);
-            ctx.fill();
-
-            ctx.globalAlpha = 0.10;
-            ctx.fillStyle = "rgba(255,255,255,0.9)";
-            ctx.beginPath();
-            ctx.arc(cx - r*0.25, cy - r*0.25, r*0.18, 0, Math.PI*2);
-            ctx.fill();
-
-            ctx.restore();
-          }
-
-          ctx.restore();
         }
 
         function tick(){
@@ -1568,20 +1408,18 @@
           ctx.fillRect(0,0,w,h);
 
           drawNebula(px, py);
-
           drawStars(starsFar,  px, py, 0.12);
           drawStars(starsMid,  px, py, 0.28);
           drawStars(starsNear, px, py, 0.52);
-
-          applyLensRefraction();
 
           drawDust(px, py);
           drawRocks(px, py);
 
           if (t > nextMeteorAt){
             spawnMeteor();
-            nextMeteorAt = t + rand(160,420);
+            nextMeteorAt = t + Math.floor(rand(140, 340));
           }
+
           drawMeteors();
 
           raf = window.requestAnimationFrame(tick);
@@ -1598,19 +1436,15 @@
           clearTimeout(resizeTimer);
           resizeTimer = setTimeout(function(){ start(false); }, 180);
         }
+
         window.addEventListener("resize", onResize, { passive:true });
         window.addEventListener("orientationchange", function(){ start(true); }, { passive:true });
         document.addEventListener("visibilitychange", function(){ if (!document.hidden) start(true); });
 
         start(true);
-      }catch(e){
-        // fallback silencioso
-      }
+      }catch(e){}
     })();
 
-    /* =========================================================
-       ✅ Contagem regressiva
-       ========================================================= */
     (function(){
       try{
         var dayEl = document.getElementById("cdDays");
@@ -1623,7 +1457,7 @@
         var leadTextEl = document.getElementById("countdownLeadText");
         if (!dayEl || !hourEl || !minEl || !secEl || !statusEl || !barEl || !dateTextEl || !leadTextEl) return;
 
-        var MS = { sec: 1000, min: 60000, hour: 3600000, day: 86400000 };
+        var MS = { sec:1000, min:60000, hour:3600000, day:86400000 };
         var start = new Date();
         var target = new Date(start.getTime());
         target.setMonth(target.getMonth() + 3);
@@ -1669,7 +1503,7 @@
           statusEl.textContent = "Contagem ativa • " + days + " dia(s) restantes para o lançamento.";
         }
 
-        var fmt = new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" });
+        var fmt = new Intl.DateTimeFormat("pt-BR", { dateStyle:"long" });
         dateTextEl.textContent = "Lançamento previsto: " + fmt.format(target);
 
         update();
@@ -1677,9 +1511,6 @@
       }catch(e){}
     })();
 
-    /* =========================================================
-       ✅ Leads (estático)
-       ========================================================= */
     (function(){
       try{
         var LEAD_EMAIL_DESTINO = "luiskirsch22@hotmail.com";
@@ -1699,9 +1530,11 @@
           try{ return JSON.parse(localStorage.getItem("preludio_leads") || "[]"); }
           catch(e){ return []; }
         }
+
         function saveLeads(leads){
           localStorage.setItem("preludio_leads", JSON.stringify(leads));
         }
+
         function validEmail(email){
           return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
@@ -1737,9 +1570,11 @@
             var jaExiste = false;
             for (var i=0;i<leads.length;i++){
               if ((leads[i].email || "").toLowerCase() === email.toLowerCase()){
-                jaExiste = true; break;
+                jaExiste = true;
+                break;
               }
             }
+
             if (!jaExiste){
               leads.push(lead);
               saveLeads(leads);
@@ -1772,9 +1607,6 @@
       } catch(e){}
     })();
 
-    /* =========================================================
-       ✅ Som do site (com volume + some ao rolar)
-       ========================================================= */
     (function(){
       var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
       var reduced = mm ? mm.matches : false;
@@ -1788,7 +1620,6 @@
 
       var audioCtx = null;
       var started = false;
-
       var master = null;
       var gDrone = null;
       var airGain = null;
@@ -1799,6 +1630,7 @@
           return (v === null || v === undefined) ? fallback : v;
         }catch(e){ return fallback; }
       }
+
       function setLS(k, v){
         try{ localStorage.setItem(k, v); }catch(e){}
       }
@@ -1892,9 +1724,9 @@
           gDrone.gain.value = 0.0;
           gDrone.connect(master);
 
-          var o1 = audioCtx.createOscillator(); o1.type = "sine";     o1.frequency.value = 55;
+          var o1 = audioCtx.createOscillator(); o1.type = "sine"; o1.frequency.value = 55;
           var o2 = audioCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 110;
-          var o3 = audioCtx.createOscillator(); o3.type = "sine";     o3.frequency.value = 82.41;
+          var o3 = audioCtx.createOscillator(); o3.type = "sine"; o3.frequency.value = 82.41;
 
           var g1 = audioCtx.createGain(); g1.gain.value = 0.12;
           var g2 = audioCtx.createGain(); g2.gain.value = 0.06;
@@ -1950,7 +1782,6 @@
 
           started = true;
           setBtn(true);
-
           applyVolume();
           return true;
 
@@ -1992,14 +1823,11 @@
         if (y <= 10) panelEl.classList.remove("isHidden");
         else panelEl.classList.add("isHidden");
       }
+
       window.addEventListener("scroll", updatePanelVisibility, { passive:true });
       updatePanelVisibility();
-
     })();
 
-    /* =========================================================
-       ✅ "Puxar para recarregar" (mobile)
-       ========================================================= */
     (function(){
       var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
       var reduced = mm ? mm.matches : false;
@@ -2035,11 +1863,9 @@
       function onEnd(){
         if (!pulling) return;
         pulling = false;
-
         if (dist >= THRESH){
           window.location.reload();
         }
-
         dist = 0;
       }
 
