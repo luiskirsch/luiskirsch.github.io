@@ -14,13 +14,11 @@
   <style>
     :root{
       --bg:#000006;
-      --bg2:#000002;
       --gold:#e6c07b;
 
       --cardA:rgba(255,255,255,.070);
       --cardB:rgba(255,255,255,.035);
 
-      --shadow:rgba(0,0,0,.64);
       --line:rgba(230,192,123,.22);
 
       --ok:#9be37a;
@@ -31,7 +29,6 @@
     html,body{ height:100%; }
 
     html{
-      background:#000006;
       background: var(--bg);
       overscroll-behavior: none;
     }
@@ -53,7 +50,7 @@
       color:#f2f2f2;
       font-family: ui-serif, Georgia, "Times New Roman", serif;
 
-      /* ✅ Universo preto real */
+      /* fundo real */
       background:#000;
       background-color:#000;
     }
@@ -62,17 +59,17 @@
       body{ min-height:100dvh; }
     }
 
-    /* ✅ Garante que NÃO exista “película/fog” por pseudo-elementos */
+    /* Sem película */
     body::before{ content:none !important; }
     body::after{ content:none !important; }
 
-    /* Canvas (parallax stars) */
+    /* Canvas (universo) */
     #stars{
       position:fixed;
       inset:0;
       z-index:2;
       pointer-events:none;
-      opacity:.95;
+      opacity:.98;
       transform: translateZ(0);
     }
 
@@ -156,7 +153,6 @@
       flex:0 0 auto;
     }
 
-    /* ✅ Ajuste para NÃO cortar o "J" em alguns celulares (descender do serif) */
     .title{
       margin:0;
       line-height: 1.04;
@@ -165,31 +161,20 @@
       text-transform:uppercase;
       font-weight: 700;
       font-size: clamp(48px, 6.2vw, 110px);
-      color: var(--gold);
+      color: transparent;
+      background-image:
+        linear-gradient(90deg,
+          rgba(230,192,123,.60) 0%,
+          rgba(230,192,123,.92) 28%,
+          rgba(255,255,255,.92) 48%,
+          rgba(230,192,123,.92) 58%,
+          rgba(230,192,123,.60) 100%);
+      background-size: 260% 100%;
+      background-position: 0% 50%;
+      -webkit-background-clip:text;
+      background-clip:text;
       text-shadow: 0 20px 70px rgba(0,0,0,.55);
-      animation: titlePulse 4.2s ease-in-out infinite;
-    }
-    @keyframes titlePulse{
-      0%,100%{ text-shadow: 0 20px 70px rgba(0,0,0,.55); filter: brightness(1); }
-      50%{ text-shadow: 0 26px 90px rgba(0,0,0,.70); filter: brightness(1.08); }
-    }
-
-    @supports ((-webkit-background-clip:text) or (background-clip:text)){
-      .title{
-        animation: shineText 6.8s ease-in-out infinite;
-        color: transparent;
-        background-image:
-          linear-gradient(90deg,
-            rgba(230,192,123,.60) 0%,
-            rgba(230,192,123,.92) 28%,
-            rgba(255,255,255,.92) 48%,
-            rgba(230,192,123,.92) 58%,
-            rgba(230,192,123,.60) 100%);
-        background-size: 260% 100%;
-        background-position: 0% 50%;
-        -webkit-background-clip:text;
-        background-clip:text;
-      }
+      animation: shineText 6.8s ease-in-out infinite;
     }
     @keyframes shineText{
       0%   { background-position:   0% 50%; }
@@ -366,10 +351,8 @@
       user-select:none;
     }
 
-    /* ✅ Countdown */
-    .launchCountdown{
-      margin-top: 18px;
-    }
+    /* Countdown */
+    .launchCountdown{ margin-top: 18px; }
     .countdownCard{
       border-radius:22px;
       border: 1px solid rgba(230,192,123,.20);
@@ -495,7 +478,6 @@
       .title{ font-size: clamp(44px, 9vw, 78px); }
       .miniGrid{ grid-template-columns: 1fr 1fr; }
     }
-
     @media (max-width: 560px){
       body{
         padding-left:max(14px, env(safe-area-inset-left));
@@ -509,7 +491,7 @@
       .countdownGrid{ grid-template-columns: repeat(2, minmax(90px,1fr)); }
     }
 
-    /* ✅ Painel de Som */
+    /* Painel de Som */
     .soundPanel{
       position:fixed;
       right:max(14px, env(safe-area-inset-right));
@@ -529,20 +511,17 @@
 
       transition: opacity .25s ease, transform .25s ease;
     }
-
     @supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))){
       .soundPanel{
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
       }
     }
-
     .soundPanel.isHidden{
       opacity:0;
       transform: translateY(-10px);
       pointer-events:none;
     }
-
     .soundToggle{
       border:0;
       background:transparent;
@@ -557,10 +536,7 @@
       user-select:none;
       min-width: 92px;
     }
-
-    .soundToggle strong{
-      color: var(--gold);
-    }
+    .soundToggle strong{ color: var(--gold); }
 
     .soundVolume{
       display:flex;
@@ -569,7 +545,6 @@
       padding-left:12px;
       border-left:1px solid rgba(255,255,255,.10);
     }
-
     .volLabel{
       font-size:11px;
       letter-spacing:.12em;
@@ -577,7 +552,6 @@
       text-transform:uppercase;
     }
 
-    /* ✅ Slider corrigido (atinge mínimo e máximo visualmente) */
     #volumeSlider{
       width:170px;
       min-width:170px;
@@ -590,13 +564,11 @@
       outline:none;
       touch-action: pan-y;
     }
-
     #volumeSlider::-webkit-slider-runnable-track{
       height:4px;
       background:rgba(255,255,255,.25);
       border-radius:999px;
     }
-
     #volumeSlider::-webkit-slider-thumb{
       -webkit-appearance:none;
       appearance:none;
@@ -608,13 +580,11 @@
       cursor:pointer;
       box-shadow:0 0 10px rgba(230,192,123,.55);
     }
-
     #volumeSlider::-moz-range-track{
       height:4px;
       background:rgba(255,255,255,.25);
       border-radius:999px;
     }
-
     #volumeSlider::-moz-range-thumb{
       width:14px;
       height:14px;
@@ -624,13 +594,9 @@
       cursor:pointer;
       box-shadow:0 0 10px rgba(230,192,123,.55);
     }
-
     @media (max-width: 560px){
       #volumeSlider{ width:120px; min-width:120px; }
     }
-
-    /* (Opcional) Camadas extras — deixe comentadas se NÃO quiser */
-    .nebulaLayer, .grainLayer{ display:none; }
 
     @media (prefers-reduced-motion: reduce){
       .whisper, .title{ animation:none !important; }
@@ -642,7 +608,7 @@
 <body>
   <canvas id="stars" aria-hidden="true"></canvas>
 
-  <!-- ✅ Painel de Som (com volume) -->
+  <!-- Painel de Som -->
   <div class="soundPanel" id="soundPanel" aria-label="Controle de som">
     <button class="soundToggle" id="soundBtn" type="button" aria-label="Ativar ou desativar som">
       SOM: <strong id="soundState">OFF</strong>
@@ -740,7 +706,7 @@
       </aside>
     </section>
 
-    <!-- ✅ Contagem regressiva -->
+    <!-- Contagem regressiva -->
     <section class="launchCountdown" aria-label="Contagem regressiva de lançamento">
       <article class="countdownCard">
         <div class="countdownTop">
@@ -889,36 +855,23 @@
     })();
 
     /* =========================================================
-       ✅ Universo CINEMÁTICO
+       ✅ Universo CINEMÁTICO + REFRAÇÃO VISÍVEL (lentes)
+       - Sem tela preta: nenhuma função undefined
+       - Refração real: buffer + distorção radial + cromatismo sutil
        ========================================================= */
     (function(){
       try{
         var canvas = document.getElementById("stars");
-        // ✅ Buffer para aplicar refração “de lente” (visível)
-var buf = document.createElement("canvas");
-var bctx = buf.getContext("2d");
-
-// ✅ Orbes de refração (como vidro/lente no espaço)
-var lenses = [];
-function buildLenses(){
-  lenses = [];
-  var n = 3; // quantidade de lentes
-  for (var i=0;i<n;i++){
-    lenses.push({
-      x: rand(w*0.15, w*0.85),
-      y: rand(h*0.12, h*0.45),
-      r: rand(70, 140),
-      drift: rand(0.002, 0.006),
-      ph: rand(0, Math.PI*2)
-    });
-  }
-}
         if (!canvas || !canvas.getContext) return;
         var ctx = canvas.getContext("2d");
         if (!ctx) return;
 
         var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
         if (mm && mm.matches) return;
+
+        // Buffer (para refração)
+        var buf = document.createElement("canvas");
+        var bctx = buf.getContext("2d");
 
         var w=0,h=0,dpr=1, raf=0, t=0;
         var par = { x:0, y:0, tx:0, ty:0 };
@@ -927,6 +880,7 @@ function buildLenses(){
         var dust=[], rocks=[], meteors=[];
         var nextMeteorAt = 0;
 
+        // Nebulosa
         var neb = {
           c: document.createElement("canvas"),
           x: 0, y: 0,
@@ -934,6 +888,9 @@ function buildLenses(){
           drift: 0.006
         };
         var nctx = neb.c.getContext("2d", { alpha:true });
+
+        // Lentes (orbes)
+        var lenses = [];
 
         function rand(min,max){ return min + Math.random()*(max-min); }
         function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
@@ -954,6 +911,7 @@ function buildLenses(){
           var nh = Math.floor(window.innerHeight);
 
           if (!force && !shouldResize(nw, nh)) return;
+
           lastW = nw; lastH = nh;
           w = nw; h = nh;
 
@@ -963,8 +921,14 @@ function buildLenses(){
           canvas.style.height = h + "px";
           ctx.setTransform(dpr,0,0,dpr,0,0);
 
+          // buffer em "px CSS" também
+          buf.width  = Math.floor(w * dpr);
+          buf.height = Math.floor(h * dpr);
+          bctx.setTransform(dpr,0,0,dpr,0,0);
+
           buildScene();
           buildNebulaTexture();
+          buildLenses();
         }
 
         function makeStars(count, rMin, rMax, vMin, vMax, aMin, aMax, tempBias){
@@ -1052,6 +1016,27 @@ function buildLenses(){
           nextMeteorAt = Math.floor(rand(340, 760));
         }
 
+        function buildLenses(){
+          lenses = [];
+          // 3 lentes grandes, posicionadas na parte superior (como na sua ideia)
+          var n = 3;
+          for (var i=0;i<n;i++){
+            lenses.push({
+              x: rand(w*0.18, w*0.82),
+              y: rand(h*0.12, h*0.48),
+              r: rand(78, 150),
+              // força do "vidro"
+              k: rand(0.015, 0.030),
+              // cromatismo
+              chroma: rand(0.8, 1.25),
+              // brilho
+              glow: rand(0.06, 0.10),
+              drift: rand(0.0015, 0.0035),
+              ph: rand(0, Math.PI*2)
+            });
+          }
+        }
+
         function onPointerMove(clientX, clientY){
           var nx = (clientX / w) * 2 - 1;
           var ny = (clientY / h) * 2 - 1;
@@ -1067,15 +1052,15 @@ function buildLenses(){
         function blurPass(c, passes){
           var b = document.createElement("canvas");
           b.width = c.width; b.height = c.height;
-          var bctx = b.getContext("2d");
+          var bctx2 = b.getContext("2d");
           for (var i=0;i<passes;i++){
-            bctx.clearRect(0,0,b.width,b.height);
-            bctx.globalAlpha = 0.50;
-            bctx.drawImage(c, -1, 0);
-            bctx.drawImage(c,  1, 0);
-            bctx.drawImage(c,  0,-1);
-            bctx.drawImage(c,  0, 1);
-            bctx.globalAlpha = 1;
+            bctx2.clearRect(0,0,b.width,b.height);
+            bctx2.globalAlpha = 0.50;
+            bctx2.drawImage(c, -1, 0);
+            bctx2.drawImage(c,  1, 0);
+            bctx2.drawImage(c,  0,-1);
+            bctx2.drawImage(c,  0, 1);
+            bctx2.globalAlpha = 1;
             var cctx = c.getContext("2d");
             cctx.clearRect(0,0,c.width,c.height);
             cctx.drawImage(b,0,0);
@@ -1130,7 +1115,6 @@ function buildLenses(){
 
             nctx.fillStyle = lg;
             nctx.fillRect(lx, ly, lw, lh);
-
             nctx.restore();
           }
           nctx.restore();
@@ -1156,7 +1140,7 @@ function buildLenses(){
 
           ctx.save();
           ctx.globalCompositeOperation = "screen";
-          ctx.globalAlpha = neb.a;
+          ctx.globalAlpha = 0.18;
 
           for (var ix=-1; ix<=1; ix++){
             for (var iy=-1; iy<=1; iy++){
@@ -1177,32 +1161,20 @@ function buildLenses(){
           return "rgba(" + R + "," + G + "," + B + "," + alpha.toFixed(3) + ")";
         }
 
-        /* =========================================================
-           ✅ ESTRELAS (ATUALIZADO)
-           - spikes curtos e “colados” no corpo
-           - spikes só em estrelas fortes
-           - refração RGB + cintilação + oscilação de cor
-           ========================================================= */
         function drawStar(x,y,r,alpha,temp,phase){
-          // cintilação realista (intensidade + micro “seeing”)
           var flick = 0.86 + 0.14 * Math.sin(phase*1.75 + x*0.012);
           var flick2 = 0.92 + 0.08 * Math.cos(phase*2.25 + y*0.010);
           var aNow = clamp(alpha * flick * flick2, 0, 1);
 
-          // micro tremor de atmosfera (bem sutil, só dá “vida”)
           var jit = (0.10 + r*0.05);
           var jx = Math.sin(phase*3.10 + x*0.006) * jit;
           var jy = Math.cos(phase*2.85 + y*0.006) * jit;
 
-          x += jx;
-          y += jy;
+          x += jx; y += jy;
 
-          // brilho base
           var glow = r*3.25;
           var core = Math.max(0.55, r*0.62);
 
-          // ===== Refração (RGB micro-offset) =====
-          // deslocamento pequeno, mas VISÍVEL como “lente/atmosfera”
           var wob = 0.65 + r*0.20;
           var ox = Math.sin(phase*1.12) * wob;
           var oy = Math.cos(phase*1.04) * wob;
@@ -1210,7 +1182,7 @@ function buildLenses(){
           ctx.save();
           ctx.globalCompositeOperation = "screen";
 
-          // glow principal (cor pela temperatura)
+          // glow principal
           var g = ctx.createRadialGradient(x,y,0, x,y,glow);
           g.addColorStop(0, starColor(temp, clamp(aNow*0.92, 0, 1)));
           g.addColorStop(0.20, starColor(temp, clamp(aNow*0.34, 0, 1)));
@@ -1220,10 +1192,8 @@ function buildLenses(){
           ctx.arc(x,y,glow,0,Math.PI*2);
           ctx.fill();
 
-          // refração: 3 fantasmas sutis (RGB)
-          var ar = (aNow*0.18);
-          var ag = (aNow*0.13);
-          var ab = (aNow*0.18);
+          // cromatismo (fantasmas RGB)
+          var ar = (aNow*0.18), ag = (aNow*0.13), ab = (aNow*0.18);
 
           var gr = ctx.createRadialGradient(x-ox, y-oy, 0, x-ox, y-oy, glow*0.92);
           gr.addColorStop(0, "rgba(255,120,120," + clamp(ar,0,1).toFixed(3) + ")");
@@ -1256,84 +1226,26 @@ function buildLenses(){
           ctx.arc(x,y,core,0,Math.PI*2);
           ctx.fill();
 
-          // ===== Spikes realistas (curtos e colados) =====
-          // só em estrelas “fortes” (parece muito mais real)
-          // ✅ spikes só em estrelas fortes (hero) e bem visíveis
-var strength = r * aNow;
-var isSpike = (strength > 0.42); // mais permissivo
-if (isSpike){
-  var L = clamp(6.0 + r*7.0, 10.0, 22.0); // maior e visível
-  var aSp = clamp((strength - 0.35) * 1.25, 0, 0.85);
+          // spikes só em estrelas fortes
+          var strength = r * aNow;
+          var isSpike = (strength > 0.42);
+          if (isSpike){
+            var L = clamp(6.0 + r*7.0, 10.0, 22.0);
+            var aSp = clamp((strength - 0.35) * 1.25, 0, 0.85);
 
-  ctx.globalCompositeOperation = "screen";
-  ctx.globalAlpha = aSp;
-  ctx.lineWidth = 1.05; // um pouco mais espesso
+            ctx.globalCompositeOperation = "screen";
+            ctx.globalAlpha = aSp;
+            ctx.lineWidth = 1.05;
 
-  function strokeRay(angle){
-    var dx = Math.cos(angle) * L;
-    var dy = Math.sin(angle) * L;
-
-    var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
-    lg.addColorStop(0.00, "rgba(255,255,255,0)");
-    lg.addColorStop(0.48, "rgba(255,255,255,0)");
-    lg.addColorStop(0.50, "rgba(255,255,255,0.95)");
-    lg.addColorStop(0.52, "rgba(255,255,255,0)");
-    lg.addColorStop(1.00, "rgba(255,255,255,0)");
-
-    ctx.strokeStyle = lg;
-    ctx.beginPath();
-    ctx.moveTo(x-dx, y-dy);
-    ctx.lineTo(x+dx, y+dy);
-    ctx.stroke();
-  }
-
-  // cruz principal (+)
-  strokeRay(0);
-  strokeRay(Math.PI/2);
-
-  // diagonais menores (difração)
-  ctx.globalAlpha = aSp * 0.55;
-  var L2 = L * 0.70;
-  function strokeRay2(angle){
-    var dx = Math.cos(angle) * L2;
-    var dy = Math.sin(angle) * L2;
-
-    var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
-    lg.addColorStop(0.00, "rgba(255,255,255,0)");
-    lg.addColorStop(0.50, "rgba(255,255,255,0.78)");
-    lg.addColorStop(1.00, "rgba(255,255,255,0)");
-
-    ctx.strokeStyle = lg;
-    ctx.beginPath();
-    ctx.moveTo(x-dx, y-dy);
-    ctx.lineTo(x+dx, y+dy);
-    ctx.stroke();
-  }
-  strokeRay2(Math.PI/4);
-  strokeRay2(-Math.PI/4);
-}
-
-            // um toque de cromatismo no spike (refração no brilho)
-            var warm = { r: 255, g: 238, b: 220 };
-            var cool = { r: 210, g: 230, b: 255 };
-
-            // 4 pontas principais (+) e diagonais bem sutis
-            strokeRay(0, warm);
-            strokeRay(Math.PI/2, cool);
-
-            // diagonais bem menores (mais “difração”)
-            var oldAlpha = ctx.globalAlpha;
-            ctx.globalAlpha = oldAlpha * 0.55;
-            var L2 = L * 0.72;
-            function strokeRayShort(angle, tint){
-              var dx = Math.cos(angle) * L2;
-              var dy = Math.sin(angle) * L2;
+            function strokeRay(angle){
+              var dx = Math.cos(angle) * L;
+              var dy = Math.sin(angle) * L;
 
               var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
               lg.addColorStop(0.00, "rgba(255,255,255,0)");
-              lg.addColorStop(0.48, "rgba("+tint.r+","+tint.g+","+tint.b+",0.00)");
-              lg.addColorStop(0.50, "rgba("+tint.r+","+tint.g+","+tint.b+",0.85)");
-              lg.addColorStop(0.52, "rgba("+tint.r+","+tint.g+","+tint.b+",0.00)");
+              lg.addColorStop(0.48, "rgba(255,255,255,0)");
+              lg.addColorStop(0.50, "rgba(255,255,255,0.95)");
+              lg.addColorStop(0.52, "rgba(255,255,255,0)");
               lg.addColorStop(1.00, "rgba(255,255,255,0)");
 
               ctx.strokeStyle = lg;
@@ -1342,9 +1254,33 @@ if (isSpike){
               ctx.lineTo(x+dx, y+dy);
               ctx.stroke();
             }
-            strokeRayShort(Math.PI/4, warm);
-            strokeRayShort(-Math.PI/4, cool);
-            ctx.globalAlpha = oldAlpha;
+
+            strokeRay(0);
+            strokeRay(Math.PI/2);
+
+            ctx.globalAlpha = aSp * 0.55;
+            var L2 = L * 0.70;
+
+            function strokeRay2(angle){
+              var dx = Math.cos(angle) * L2;
+              var dy = Math.sin(angle) * L2;
+
+              var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
+              lg.addColorStop(0.00, "rgba(255,255,255,0)");
+              lg.addColorStop(0.50, "rgba(255,255,255,0.78)");
+              lg.addColorStop(1.00, "rgba(255,255,255,0)");
+
+              ctx.strokeStyle = lg;
+              ctx.beginPath();
+              ctx.moveTo(x-dx, y-dy);
+              ctx.lineTo(x+dx, y+dy);
+              ctx.stroke();
+            }
+
+            strokeRay2(Math.PI/4);
+            strokeRay2(-Math.PI/4);
+
+            ctx.globalAlpha = 1;
           }
 
           ctx.restore();
@@ -1370,7 +1306,6 @@ if (isSpike){
             if (x < -30) x += (w+60);
             if (x >  w+30) x -= (w+60);
 
-            // oscilação de cor (muito sutil, mas perceptível)
             var chroma = (Math.sin(s.ph * 0.85 + s.x * 0.002) * 0.5 + 0.5);
             var tempShift = (chroma - 0.5) * 0.22;
             var tempNow = clamp(s.temp + tempShift, -1, 1);
@@ -1403,7 +1338,7 @@ if (isSpike){
           var side = Math.floor(rand(0, 4));
           var x,y,ang;
 
-          if (side === 0){ x = rand(-M, w+M); y = -M;       ang = rand(Math.PI*0.20, Math.PI*0.80); }
+          if (side === 0){ x = rand(-M, w+M); y = -M;        ang = rand(Math.PI*0.20, Math.PI*0.80); }
           else if (side === 1){ x = w+M; y = rand(-M, h+M);  ang = rand(Math.PI*0.70, Math.PI*1.30); }
           else if (side === 2){ x = rand(-M, w+M); y = h+M;  ang = rand(Math.PI*1.20, Math.PI*1.80); }
           else { x = -M; y = rand(-M, h+M);                  ang = rand(-Math.PI*0.30, Math.PI*0.30); }
@@ -1525,6 +1460,109 @@ if (isSpike){
           }
         }
 
+        // ✅ REFRAÇÃO (lentes): distorção radial sobre o buffer
+        function applyLensRefraction(){
+          if (!lenses || !lenses.length) return;
+
+          // Copia frame atual para buffer
+          bctx.clearRect(0,0,w,h);
+          bctx.drawImage(canvas, 0, 0, w, h);
+
+          // Volta a desenhar do buffer para o canvas, aplicando lentes por cima
+          // Base: reconstitui frame como estava
+          ctx.clearRect(0,0,w,h);
+          ctx.drawImage(buf, 0, 0, w, h);
+
+          // Para performance: usa fatias (slices) horizontais dentro do círculo
+          // e cromatismo por 3 amostras deslocadas.
+          ctx.save();
+          ctx.globalCompositeOperation = "screen";
+
+          for (var i=0;i<lenses.length;i++){
+            var L = lenses[i];
+            L.ph += L.drift;
+
+            // deriva sutil
+            var cx = L.x + Math.sin(L.ph*0.9) * 8;
+            var cy = L.y + Math.cos(L.ph*0.8) * 6;
+            var r  = L.r;
+            var k  = L.k;
+            var chroma = L.chroma;
+
+            // recorte circular
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI*2);
+            ctx.clip();
+
+            // distorção por fatias
+            var step = 3; // quanto menor, mais bonito (mas mais pesado)
+            var y0 = Math.floor(cy - r);
+            var y1 = Math.ceil(cy + r);
+
+            for (var y = y0; y <= y1; y += step){
+              var dy = y - cy;
+              var span = Math.sqrt(Math.max(0, r*r - dy*dy));
+              var x0 = cx - span;
+              var wSlice = span * 2;
+
+              // intensidade radial (mais forte no meio)
+              var u = Math.abs(dy) / r;
+              var fall = (1 - u*u);
+              var shift = k * r * fall; // deslocamento
+
+              // deslocamento horizontal e vertical pequenos (efeito "vidro")
+              var sx = Math.sin(L.ph + dy*0.03) * shift * 0.55;
+              var sy = Math.cos(L.ph*0.9 + dy*0.02) * shift * 0.20;
+
+              // cromatismo: 3 amostras levemente deslocadas
+              // Vermelho
+              ctx.globalAlpha = 0.34;
+              ctx.drawImage(
+                buf,
+                x0 - sx*1.15*chroma, (y - step/2) - sy*1.05*chroma, wSlice, step,
+                x0, (y - step/2), wSlice, step
+              );
+              // Verde
+              ctx.globalAlpha = 0.28;
+              ctx.drawImage(
+                buf,
+                x0 - sx*0.85, (y - step/2) - sy*0.85, wSlice, step,
+                x0, (y - step/2), wSlice, step
+              );
+              // Azul
+              ctx.globalAlpha = 0.34;
+              ctx.drawImage(
+                buf,
+                x0 - sx*0.55*chroma, (y - step/2) - sy*0.70*chroma, wSlice, step,
+                x0, (y - step/2), wSlice, step
+              );
+            }
+
+            // brilho/anel da lente (bem discreto)
+            ctx.globalAlpha = 1;
+            var ring = ctx.createRadialGradient(cx,cy, r*0.55, cx,cy,r);
+            ring.addColorStop(0, "rgba(255,255,255,0)");
+            ring.addColorStop(0.70, "rgba(230,192,123," + (L.glow*0.55).toFixed(3) + ")");
+            ring.addColorStop(1, "rgba(255,255,255,0)");
+            ctx.fillStyle = ring;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI*2);
+            ctx.fill();
+
+            // highlight
+            ctx.globalAlpha = 0.10;
+            ctx.fillStyle = "rgba(255,255,255,0.9)";
+            ctx.beginPath();
+            ctx.arc(cx - r*0.25, cy - r*0.25, r*0.18, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.restore();
+          }
+
+          ctx.restore();
+        }
+
         function tick(){
           t++;
 
@@ -1534,6 +1572,7 @@ if (isSpike){
           var px = par.x * 18;
           var py = par.y * 12;
 
+          // desenha o frame "base"
           ctx.clearRect(0,0,w,h);
           ctx.fillStyle = "#000";
           ctx.fillRect(0,0,w,h);
@@ -1544,9 +1583,9 @@ if (isSpike){
           drawStars(starsMid,  px, py, 0.28);
           drawStars(starsNear, px, py, 0.52);
 
-          // ✅ Refração visível (lentes)
-applyLensRefraction(px, py);
-          
+          // ✅ aplica refração por cima do frame
+          applyLensRefraction();
+
           drawDust(px, py);
           drawRocks(px, py);
 
@@ -1756,7 +1795,6 @@ applyLensRefraction(px, py);
       var btn = document.getElementById("soundBtn");
       var stateEl = document.getElementById("soundState");
       var slider = document.getElementById("volumeSlider");
-
       if (!btn || !stateEl || !slider || !panelEl) return;
 
       var audioCtx = null;
