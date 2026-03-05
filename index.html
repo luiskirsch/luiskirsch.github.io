@@ -641,10 +641,6 @@
 
 <body>
   <canvas id="stars" aria-hidden="true"></canvas>
-  <!-- Se quiser ativar as camadas CSS (não recomendo agora), descomente:
-  <div class="nebulaLayer" aria-hidden="true"></div>
-  <div class="grainLayer" aria-hidden="true"></div>
-  -->
 
   <!-- ✅ Painel de Som (com volume) -->
   <div class="soundPanel" id="soundPanel" aria-label="Controle de som">
@@ -835,7 +831,6 @@
           var t = ctx.currentTime;
           var VOL = 0.028;
 
-          // clique 1
           var o1 = ctx.createOscillator();
           o1.type = "square";
           o1.frequency.setValueAtTime(1700, t);
@@ -853,7 +848,6 @@
           o1.connect(f1); f1.connect(g1); g1.connect(ctx.destination);
           o1.start(t); o1.stop(t + 0.035);
 
-          // clique 2
           var t2 = t + 0.085;
           var o2 = ctx.createOscillator();
           o2.type = "triangle";
@@ -872,7 +866,6 @@
           o2.connect(f2); f2.connect(g2); g2.connect(ctx.destination);
           o2.start(t2); o2.stop(t2 + 0.045);
 
-          // micro “clink”
           var t3 = t + 0.012;
           var o3 = ctx.createOscillator();
           o3.type = "sine";
@@ -896,11 +889,7 @@
     })();
 
     /* =========================================================
-       ✅ Universo CINEMÁTICO (preto real + nebulosa localizada + brilho real)
-       - Nebulosa procedural (SEM película uniforme)
-       - Dust lanes sutis
-       - Estrelas com núcleo + glow curto + twinkle natural
-       - Detritos OPACOS (sem mostrar estrelas por trás)
+       ✅ Universo CINEMÁTICO
        ========================================================= */
     (function(){
       try{
@@ -919,11 +908,9 @@
         var dust=[], rocks=[], meteors=[];
         var nextMeteorAt = 0;
 
-        // Nebulosa (textura offscreen)
         var neb = {
           c: document.createElement("canvas"),
           x: 0, y: 0,
-          // ✅ bem mais sutil (tira “fumaça/película”)
           a: 0.0,
           drift: 0.006
         };
@@ -932,7 +919,6 @@
         function rand(min,max){ return min + Math.random()*(max-min); }
         function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
-        // resize “inteligente”
         var lastW=0, lastH=0;
         function shouldResize(nw, nh){
           if (!lastW || !lastH) return true;
@@ -980,7 +966,6 @@
               twa: twAmp,
               ph: Math.random()*Math.PI*2,
               hero: hero,
-              spike: false,
               temp: temp
             });
           }
@@ -1060,7 +1045,6 @@
           onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive:true });
 
-        // ===== Nebulosa procedural =====
         function blurPass(c, passes){
           var b = document.createElement("canvas");
           b.width = c.width; b.height = c.height;
@@ -1136,7 +1120,6 @@
           neb.y = rand(-0.25, 0.25);
         }
 
-        // ✅ (ESTAVA QUEBRADO NO SEU CÓDIGO) — função tinha sumido e o site “morria”
         function drawNebula(px, py){
           neb.x += neb.drift;
           neb.y += neb.drift*0.6;
@@ -1164,7 +1147,6 @@
           ctx.restore();
         }
 
-        // ===== Estrelas com brilho real =====
         function starColor(temp, alpha){
           var b = clamp(-temp, 0, 1);
           var g = clamp( temp, 0, 1);
@@ -1176,102 +1158,155 @@
           return "rgba(" + R + "," + G + "," + B + "," + alpha.toFixed(3) + ")";
         }
 
-        
-function drawStar(x,y,r,alpha,temp,phase){
-  // brilho base
-  var glow = r*3.4;
-  var core = Math.max(0.55, r*0.62);
+        /* =========================================================
+           ✅ ESTRELAS (ATUALIZADO)
+           - spikes curtos e “colados” no corpo
+           - spikes só em estrelas fortes
+           - refração RGB + cintilação + oscilação de cor
+           ========================================================= */
+        function drawStar(x,y,r,alpha,temp,phase){
+          // cintilação realista (intensidade + micro “seeing”)
+          var flick = 0.86 + 0.14 * Math.sin(phase*1.75 + x*0.012);
+          var flick2 = 0.92 + 0.08 * Math.cos(phase*2.25 + y*0.010);
+          var aNow = clamp(alpha * flick * flick2, 0, 1);
 
-  // ===== Refração (RGB micro-offset) =====
-  // deslocamento pequeno, mas VISÍVEL como “lente/atmosfera”
-  var wob = 0.75 + r*0.22;     // aumenta com o tamanho
-  var ox = Math.sin(phase*1.15) * wob;
-  var oy = Math.cos(phase*1.05) * wob;
+          // micro tremor de atmosfera (bem sutil, só dá “vida”)
+          var jit = (0.10 + r*0.05);
+          var jx = Math.sin(phase*3.10 + x*0.006) * jit;
+          var jy = Math.cos(phase*2.85 + y*0.006) * jit;
 
-  ctx.save();
-  ctx.globalCompositeOperation = "screen";
+          x += jx;
+          y += jy;
 
-  // glow principal (cor pela temperatura)
-  var g = ctx.createRadialGradient(x,y,0, x,y,glow);
-  g.addColorStop(0, starColor(temp, clamp(alpha*0.95, 0, 1)));
-  g.addColorStop(0.22, starColor(temp, clamp(alpha*0.35, 0, 1)));
-  g.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(x,y,glow,0,Math.PI*2);
-  ctx.fill();
+          // brilho base
+          var glow = r*3.25;
+          var core = Math.max(0.55, r*0.62);
 
-  // refração: 3 “fantasmas” sutis
-  // vermelho
-  var gr = ctx.createRadialGradient(x-ox, y-oy, 0, x-ox, y-oy, glow*0.95);
-  gr.addColorStop(0, "rgba(255,120,120," + (alpha*0.18).toFixed(3) + ")");
-  gr.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = gr;
-  ctx.beginPath();
-  ctx.arc(x-ox, y-oy, glow*0.95, 0, Math.PI*2);
-  ctx.fill();
+          // ===== Refração (RGB micro-offset) =====
+          // deslocamento pequeno, mas VISÍVEL como “lente/atmosfera”
+          var wob = 0.65 + r*0.20;
+          var ox = Math.sin(phase*1.12) * wob;
+          var oy = Math.cos(phase*1.04) * wob;
 
-  // verde
-  var gg = ctx.createRadialGradient(x+ox*0.6, y-oy*0.6, 0, x+ox*0.6, y-oy*0.6, glow*0.85);
-  gg.addColorStop(0, "rgba(160,255,190," + (alpha*0.13).toFixed(3) + ")");
-  gg.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = gg;
-  ctx.beginPath();
-  ctx.arc(x+ox*0.6, y-oy*0.6, glow*0.85, 0, Math.PI*2);
-  ctx.fill();
+          ctx.save();
+          ctx.globalCompositeOperation = "screen";
 
-  // azul
-  var gb = ctx.createRadialGradient(x+ox, y+oy, 0, x+ox, y+oy, glow*0.95);
-  gb.addColorStop(0, "rgba(160,190,255," + (alpha*0.18).toFixed(3) + ")");
-  gb.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = gb;
-  ctx.beginPath();
-  ctx.arc(x+ox, y+oy, glow*0.95, 0, Math.PI*2);
-  ctx.fill();
+          // glow principal (cor pela temperatura)
+          var g = ctx.createRadialGradient(x,y,0, x,y,glow);
+          g.addColorStop(0, starColor(temp, clamp(aNow*0.92, 0, 1)));
+          g.addColorStop(0.20, starColor(temp, clamp(aNow*0.34, 0, 1)));
+          g.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(x,y,glow,0,Math.PI*2);
+          ctx.fill();
 
-  // núcleo
-  ctx.globalCompositeOperation = "lighter";
-  ctx.fillStyle = starColor(temp, clamp(alpha*1.05, 0, 1));
-  ctx.beginPath();
-  ctx.arc(x,y,core,0,Math.PI*2);
-  ctx.fill();
+          // refração: 3 fantasmas sutis (RGB)
+          var ar = (aNow*0.18);
+          var ag = (aNow*0.13);
+          var ab = (aNow*0.18);
 
-  // ===== Pontas “estrela da Terra” (4 + 6) =====
-  // (sem o “X” isolado — aqui o desenho fica mais natural)
-  var L = Math.max(7, r * 11.0);
-  var aSp = clamp(alpha * 0.55, 0, 1);
+          var gr = ctx.createRadialGradient(x-ox, y-oy, 0, x-ox, y-oy, glow*0.92);
+          gr.addColorStop(0, "rgba(255,120,120," + clamp(ar,0,1).toFixed(3) + ")");
+          gr.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = gr;
+          ctx.beginPath();
+          ctx.arc(x-ox, y-oy, glow*0.92, 0, Math.PI*2);
+          ctx.fill();
 
-  ctx.globalAlpha = aSp;
-  ctx.lineWidth = 1;
+          var gg = ctx.createRadialGradient(x+ox*0.60, y-oy*0.60, 0, x+ox*0.60, y-oy*0.60, glow*0.82);
+          gg.addColorStop(0, "rgba(160,255,190," + clamp(ag,0,1).toFixed(3) + ")");
+          gg.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = gg;
+          ctx.beginPath();
+          ctx.arc(x+ox*0.60, y-oy*0.60, glow*0.82, 0, Math.PI*2);
+          ctx.fill();
 
-  function strokeRay(angle){
-    var dx = Math.cos(angle) * L;
-    var dy = Math.sin(angle) * L;
+          var gb = ctx.createRadialGradient(x+ox, y+oy, 0, x+ox, y+oy, glow*0.92);
+          gb.addColorStop(0, "rgba(160,190,255," + clamp(ab,0,1).toFixed(3) + ")");
+          gb.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = gb;
+          ctx.beginPath();
+          ctx.arc(x+ox, y+oy, glow*0.92, 0, Math.PI*2);
+          ctx.fill();
 
-    // gradiente do raio: some nas pontas, forte no centro
-    var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
-    lg.addColorStop(0, "rgba(255,255,255,0)");
-    lg.addColorStop(0.5, "rgba(255,255,255,0.95)");
-    lg.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.strokeStyle = lg;
+          // núcleo
+          ctx.globalCompositeOperation = "lighter";
+          ctx.fillStyle = starColor(temp, clamp(aNow*1.05, 0, 1));
+          ctx.beginPath();
+          ctx.arc(x,y,core,0,Math.PI*2);
+          ctx.fill();
 
-    ctx.beginPath();
-    ctx.moveTo(x-dx, y-dy);
-    ctx.lineTo(x+dx, y+dy);
-    ctx.stroke();
-  }
+          // ===== Spikes realistas (curtos e colados) =====
+          // só em estrelas “fortes” (parece muito mais real)
+          var strength = r * aNow;
+          if (strength > 0.55){
+            // comprimento curto (nada de risco gigante)
+            var L = clamp(4.0 + r*5.2, 6.0, 14.0);
 
-  // 4 pontas ( + )
-  strokeRay(0);
-  strokeRay(Math.PI/2);
+            // spikes concentrados perto do núcleo
+            var aSp = clamp((strength - 0.52) * 0.95, 0, 0.65);
 
-  // 6 pontas (3 eixos: 0°, 60°, 120°)
-  strokeRay(Math.PI/3);
-  strokeRay(2*Math.PI/3);
-  strokeRay(0); // reforço sutil no eixo horizontal
+            // linhas finas
+            ctx.globalCompositeOperation = "screen";
+            ctx.globalAlpha = aSp;
+            ctx.lineWidth = 0.85;
 
-  ctx.restore();
-}
+            function strokeRay(angle, tint){
+              var dx = Math.cos(angle) * L;
+              var dy = Math.sin(angle) * L;
+
+              // pico de brilho bem “colado” no centro
+              var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
+              lg.addColorStop(0.00, "rgba(255,255,255,0)");
+              lg.addColorStop(0.42, "rgba("+tint.r+","+tint.g+","+tint.b+",0.00)");
+              lg.addColorStop(0.50, "rgba("+tint.r+","+tint.g+","+tint.b+",0.95)");
+              lg.addColorStop(0.58, "rgba("+tint.r+","+tint.g+","+tint.b+",0.00)");
+              lg.addColorStop(1.00, "rgba(255,255,255,0)");
+
+              ctx.strokeStyle = lg;
+              ctx.beginPath();
+              ctx.moveTo(x-dx, y-dy);
+              ctx.lineTo(x+dx, y+dy);
+              ctx.stroke();
+            }
+
+            // um toque de cromatismo no spike (refração no brilho)
+            var warm = { r: 255, g: 238, b: 220 };
+            var cool = { r: 210, g: 230, b: 255 };
+
+            // 4 pontas principais (+) e diagonais bem sutis
+            strokeRay(0, warm);
+            strokeRay(Math.PI/2, cool);
+
+            // diagonais bem menores (mais “difração”)
+            var oldAlpha = ctx.globalAlpha;
+            ctx.globalAlpha = oldAlpha * 0.55;
+            var L2 = L * 0.72;
+            function strokeRayShort(angle, tint){
+              var dx = Math.cos(angle) * L2;
+              var dy = Math.sin(angle) * L2;
+
+              var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
+              lg.addColorStop(0.00, "rgba(255,255,255,0)");
+              lg.addColorStop(0.48, "rgba("+tint.r+","+tint.g+","+tint.b+",0.00)");
+              lg.addColorStop(0.50, "rgba("+tint.r+","+tint.g+","+tint.b+",0.85)");
+              lg.addColorStop(0.52, "rgba("+tint.r+","+tint.g+","+tint.b+",0.00)");
+              lg.addColorStop(1.00, "rgba(255,255,255,0)");
+
+              ctx.strokeStyle = lg;
+              ctx.beginPath();
+              ctx.moveTo(x-dx, y-dy);
+              ctx.lineTo(x+dx, y+dy);
+              ctx.stroke();
+            }
+            strokeRayShort(Math.PI/4, warm);
+            strokeRayShort(-Math.PI/4, cool);
+            ctx.globalAlpha = oldAlpha;
+          }
+
+          ctx.restore();
+        }
 
         function drawStars(arr, px, py, parScale){
           for (var i=0;i<arr.length;i++){
@@ -1292,11 +1327,13 @@ function drawStar(x,y,r,alpha,temp,phase){
 
             if (x < -30) x += (w+60);
             if (x >  w+30) x -= (w+60);
-            var chroma = (Math.sin(s.ph * 0.85 + s.x * 0.002) * 0.5 + 0.5);
-var tempShift = (chroma - 0.5) * 0.18;
-var tempNow = clamp(s.temp + tempShift, -1, 1);
 
-drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.ph);
+            // oscilação de cor (muito sutil, mas perceptível)
+            var chroma = (Math.sin(s.ph * 0.85 + s.x * 0.002) * 0.5 + 0.5);
+            var tempShift = (chroma - 0.5) * 0.22;
+            var tempNow = clamp(s.temp + tempShift, -1, 1);
+
+            drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.ph);
           }
         }
 
@@ -1336,7 +1373,6 @@ drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.ph);
           r.rot = rand(0, Math.PI*2);
         }
 
-        // ✅ Detritos sólidos (sem “mostrar” estrelas atrás)
         function drawRocks(px, py){
           for (var i=0;i<rocks.length;i++){
             var r = rocks[i];
@@ -1365,12 +1401,10 @@ drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.ph);
             for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
             ctx.closePath();
 
-            // Base opaca
             ctx.globalAlpha = 1;
             ctx.fillStyle = "rgb(20,20,26)";
             ctx.fill();
 
-            // Volume (sem virar “fantasma”)
             var g = ctx.createRadialGradient(-r.r*0.35, -r.r*0.35, r.r*0.15, 0, 0, r.r*1.25);
             g.addColorStop(0, "rgba(255,255,255,0.10)");
             g.addColorStop(0.45, "rgba(255,255,255,0.04)");
@@ -1378,12 +1412,10 @@ drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.ph);
             ctx.fillStyle = g;
             ctx.fill();
 
-            // Contorno sutil
             ctx.lineWidth = 1;
             ctx.strokeStyle = "rgba(0,0,0,0.75)";
             ctx.stroke();
 
-            // Sombra externa (bem leve)
             ctx.shadowColor = "rgba(0,0,0,0.55)";
             ctx.shadowBlur = 10;
             ctx.shadowOffsetX = 0;
@@ -1895,7 +1927,6 @@ drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.ph);
 
     /* =========================================================
        ✅ "Puxar para recarregar" (mobile)
-       - só funciona quando estiver no topo
        ========================================================= */
     (function(){
       var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
