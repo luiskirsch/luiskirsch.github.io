@@ -37,41 +37,32 @@
     }
 
     body{
-      margin:0;
-      min-height:100vh;
-      overflow-x:hidden;
-      overflow-y:auto;
-      -webkit-text-size-adjust:100%;
-      -webkit-overflow-scrolling:touch;
-      overscroll-behavior: none;
+  margin:0;
+  min-height:100vh;
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-text-size-adjust:100%;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior: none;
 
-      padding-left:max(18px, env(safe-area-inset-left));
-      padding-right:max(18px, env(safe-area-inset-right));
-      padding-top:max(18px, env(safe-area-inset-top));
-      padding-bottom:max(18px, env(safe-area-inset-bottom));
+  padding-left:max(18px, env(safe-area-inset-left));
+  padding-right:max(18px, env(safe-area-inset-right));
+  padding-top:max(18px, env(safe-area-inset-top));
+  padding-bottom:max(18px, env(safe-area-inset-bottom));
 
-      color:#f2f2f2;
-      font-family: ui-serif, Georgia, "Times New Roman", serif;
+  color:#f2f2f2;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
 
-      background-color:#000006;
-
-      background:
-        radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.06), transparent 62%),
-        radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.035), transparent 72%),
-        radial-gradient(1400px 900px at 86% 80%, rgba(255,255,255,.030), transparent 74%),
-        linear-gradient(180deg, #000002, #000006);
-      background:
-        radial-gradient(1600px 900px at 50% 18%, rgba(230,192,123,.06), transparent 62%),
-        radial-gradient(1400px 900px at 18% 20%, rgba(255,255,255,.035), transparent 72%),
-        radial-gradient(1400px 900px at 86% 80%, rgba(255,255,255,.030), transparent 74%),
-        linear-gradient(180deg, var(--bg2), var(--bg));
-    }
+  /* ✅ Universo preto real */
+  background: #000;
+  background-color:#000;
+}
 
     @supports (height: 100dvh){
       body{ min-height:100dvh; }
     }
 
-    body::before{
+    body::before{ opacity:0; }
       content:"";
       position:fixed;
       inset:0;
@@ -92,7 +83,7 @@
       filter: blur(.15px);
     }
 
-    body::after{
+    body::after{ opacity:0; }
       content:"";
       position:fixed;
       inset:-22%;
