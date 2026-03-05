@@ -1019,7 +1019,10 @@
             y: h * 0.19,
             r: Math.min(w, h) * 0.075,
             px: 0.10,
-            py: 0.06
+            py: 0.06,
+            rx: 0,
+            ry: 0,
+            rr: 0
           };
 
           meteors = [];
@@ -1650,10 +1653,9 @@
           drawNebula(px, py);
           drawStars(starsFar, px, py, 0.12);
           drawStars(starsMid, px, py, 0.28);
-
           drawMoon(px, py);
-
           drawStars(starsNear, px, py, 0.52);
+
           drawDust(px, py);
           drawRocks(px, py);
 
