@@ -894,6 +894,25 @@
     (function(){
       try{
         var canvas = document.getElementById("stars");
+        // ✅ Buffer para aplicar refração “de lente” (visível)
+var buf = document.createElement("canvas");
+var bctx = buf.getContext("2d");
+
+// ✅ Orbes de refração (como vidro/lente no espaço)
+var lenses = [];
+function buildLenses(){
+  lenses = [];
+  var n = 3; // quantidade de lentes
+  for (var i=0;i<n;i++){
+    lenses.push({
+      x: rand(w*0.15, w*0.85),
+      y: rand(h*0.12, h*0.45),
+      r: rand(70, 140),
+      drift: rand(0.002, 0.006),
+      ph: rand(0, Math.PI*2)
+    });
+  }
+}
         if (!canvas || !canvas.getContext) return;
         var ctx = canvas.getContext("2d");
         if (!ctx) return;
@@ -1502,6 +1521,9 @@
           drawStars(starsMid,  px, py, 0.28);
           drawStars(starsNear, px, py, 0.52);
 
+          // ✅ Refração visível (lentes)
+applyLensRefraction(px, py);
+          
           drawDust(px, py);
           drawRocks(px, py);
 
