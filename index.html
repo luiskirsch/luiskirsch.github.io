@@ -1060,20 +1060,32 @@
         }
 
         function makeStars(count, rMin, rMax, vMin, vMax, aMin, aMax){
-          var arr = [];
-          for (var i=0;i<count;i++){
-            arr.push({
-              x: Math.random()*w,
-              y: Math.random()*h,
-              r: rand(rMin,rMax),
-              v: rand(vMin,vMax),
-              a: rand(aMin,aMax),
-              tw: rand(0.004, 0.014),
-              ph: Math.random()*Math.PI*2
-            });
-          }
-          return arr;
-        }
+  var arr = [];
+  for (var i=0;i<count;i++){
+    // poucas estrelas “piscam” mais, maioria quase estável
+    var twGroup = Math.random();
+    var twA = (twGroup < 0.16) ? rand(0.10, 0.28) : rand(0.02, 0.09); // 16% pisca mais
+    var twS = rand(0.006, 0.020); // velocidade do twinkle
+    var gl  = rand(0.8, 1.6);     // halo
+
+    // temperatura sutil: 0=mais frio, 1=mais quente
+    var temp = Math.random();
+
+    arr.push({
+      x: Math.random()*w,
+      y: Math.random()*h,
+      r: rand(rMin,rMax),
+      v: rand(vMin,vMax),
+      a: rand(aMin,aMax),
+      ph: Math.random()*Math.PI*2,
+      twA: twA,
+      twS: twS,
+      gl: gl,
+      temp: temp
+    });
+  }
+  return arr;
+}
 
         function buildScene(){
           var area = (w*h);
@@ -1173,31 +1185,63 @@
         }
 
         function drawStars(arr, px, py, parScale){
-          for (var i=0;i<arr.length;i++){
-            var s = arr[i];
+  for (var i=0;i<arr.length;i++){
+    var s = arr[i];
 
-            s.y += s.v;
-            if (s.y > h + 10){
-              s.y = -10;
-              s.x = Math.random()*w;
-            }
+    s.y += s.v;
+    if (s.y > h + 10){
+      s.y = -10;
+      s.x = Math.random()*w;
+    }
 
-            s.ph += s.tw;
-            var tw = (Math.sin(s.ph) * 0.5 + 0.5) * 0.12;
-            var a = clamp(s.a + tw, 0, 1);
+    // twinkle natural por estrela
+    s.ph += s.twS;
+    var tw = (Math.sin(s.ph) * 0.5 + 0.5);          // 0..1
+    var a = clamp(s.a + (tw - 0.5) * s.twA, 0, 1);  // alpha final
 
-            var x = s.x + (px * parScale);
-            var y = s.y + (py * parScale);
+    var x = s.x + (px * parScale);
+    var y = s.y + (py * parScale);
 
-            if (x < -20) x += (w+40);
-            if (x > w+20) x -= (w+40);
+    if (x < -20) x += (w+40);
+    if (x > w+20) x -= (w+40);
 
-            ctx.beginPath();
-            ctx.fillStyle = "rgba(255,255,255," + a.toFixed(3) + ")";
-            ctx.arc(x, y, s.r, 0, Math.PI*2);
-            ctx.fill();
-          }
-        }
+    // cor sutil (fria->quente), bem discreta
+    // frio: levemente azulado; quente: levemente dourado
+    var cold = { r: 210, g: 225, b: 255 };
+    var warm = { r: 255, g: 235, b: 205 };
+    var rr = Math.round(cold.r + (warm.r - cold.r) * s.temp);
+    var gg = Math.round(cold.g + (warm.g - cold.g) * s.temp);
+    var bb = Math.round(cold.b + (warm.b - cold.b) * s.temp);
+
+    // --- HALO (brilho próprio) ---
+    var haloR = Math.max(2.2, s.r * 6.0) * s.gl;
+    var halo = ctx.createRadialGradient(x, y, 0, x, y, haloR);
+    halo.addColorStop(0, "rgba(" + rr + "," + gg + "," + bb + "," + (a*0.55).toFixed(3) + ")");
+    halo.addColorStop(0.35, "rgba(" + rr + "," + gg + "," + bb + "," + (a*0.14).toFixed(3) + ")");
+    halo.addColorStop(1, "rgba(" + rr + "," + gg + "," + bb + ",0)");
+
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(x, y, haloR, 0, Math.PI*2);
+    ctx.fill();
+
+    // --- NÚCLEO (ponto) ---
+    ctx.fillStyle = "rgba(255,255,255," + a.toFixed(3) + ")";
+    ctx.beginPath();
+    ctx.arc(x, y, s.r, 0, Math.PI*2);
+    ctx.fill();
+
+    // opcional: micro “sparkle” só nas mais brilhantes (bem discreto)
+    if (s.twA > 0.18 && a > 0.42 && s.r > 1.1){
+      ctx.strokeStyle = "rgba(255,255,255," + (a*0.25).toFixed(3) + ")";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x - 3.2, y); ctx.lineTo(x + 3.2, y);
+      ctx.moveTo(x, y - 3.2); ctx.lineTo(x, y + 3.2);
+      ctx.stroke();
+    }
+  }
+}
 
         function drawDust(px, py){
           for (var i=0;i<dust.length;i++){
@@ -1212,7 +1256,7 @@
             var y = d.y + (py * 10);
 
             ctx.beginPath();
-            ctx.fillStyle = "rgba(255,255,255," + d.a.toFixed(3) + ")";
+            ctx.fillStyle = "rgba(220,230,255," + d.a.toFixed(3) + ")";
             ctx.arc(x, y, d.r, 0, Math.PI*2);
             ctx.fill();
           }
