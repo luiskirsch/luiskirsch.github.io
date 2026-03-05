@@ -50,9 +50,15 @@
       color:#f2f2f2;
       font-family: ui-serif, Georgia, "Times New Roman", serif;
 
-      /* fundo real */
-      background:#000;
-      background-color:#000;
+      /* ✅ Fundo com textura (mesmo se o canvas falhar, não fica “vazio preto”) */
+      background:
+        radial-gradient(1200px 700px at 50% -10%, rgba(230,192,123,.10), transparent 60%),
+        radial-gradient(900px 600px at 20% 110%, rgba(120,170,255,.07), transparent 55%),
+        #000;
+
+      /* ✅ Blindagem contra tema/WordPress (stacking context previsível) */
+      position: relative;
+      isolation: isolate;
     }
 
     @supports (height: 100dvh){
@@ -63,11 +69,11 @@
     body::before{ content:none !important; }
     body::after{ content:none !important; }
 
-    /* Canvas (universo) */
+    /* ✅ Canvas sempre atrás (evita “tudo preto” por canvas sobreposto) */
     #stars{
       position:fixed;
       inset:0;
-      z-index:2;
+      z-index:0;
       pointer-events:none;
       opacity:.98;
       transform: translateZ(0);
@@ -75,7 +81,7 @@
 
     .wrap{
       position:relative;
-      z-index:5;
+      z-index:2;
       width:min(1200px, 100%);
       margin:0 auto;
       padding: 22px 0 28px;
@@ -856,8 +862,8 @@
 
     /* =========================================================
        ✅ Universo CINEMÁTICO + REFRAÇÃO VISÍVEL (lentes)
-       - Sem tela preta: nenhuma função undefined
-       - Refração real: buffer + distorção radial + cromatismo sutil
+       - Blindado: canvas sempre atrás, sem “tela preta”
+       - Refração robusta: buffer + drawImage sem esticar por w/h
        ========================================================= */
     (function(){
       try{
@@ -872,6 +878,7 @@
         // Buffer (para refração)
         var buf = document.createElement("canvas");
         var bctx = buf.getContext("2d");
+        if (!bctx) return;
 
         var w=0,h=0,dpr=1, raf=0, t=0;
         var par = { x:0, y:0, tx:0, ty:0 };
@@ -888,6 +895,7 @@
           drift: 0.006
         };
         var nctx = neb.c.getContext("2d", { alpha:true });
+        if (!nctx) return;
 
         // Lentes (orbes)
         var lenses = [];
@@ -921,7 +929,6 @@
           canvas.style.height = h + "px";
           ctx.setTransform(dpr,0,0,dpr,0,0);
 
-          // buffer em "px CSS" também
           buf.width  = Math.floor(w * dpr);
           buf.height = Math.floor(h * dpr);
           bctx.setTransform(dpr,0,0,dpr,0,0);
@@ -1018,18 +1025,14 @@
 
         function buildLenses(){
           lenses = [];
-          // 3 lentes grandes, posicionadas na parte superior (como na sua ideia)
           var n = 3;
           for (var i=0;i<n;i++){
             lenses.push({
               x: rand(w*0.18, w*0.82),
               y: rand(h*0.12, h*0.48),
               r: rand(78, 150),
-              // força do "vidro"
               k: rand(0.015, 0.030),
-              // cromatismo
               chroma: rand(0.8, 1.25),
-              // brilho
               glow: rand(0.06, 0.10),
               drift: rand(0.0015, 0.0035),
               ph: rand(0, Math.PI*2)
@@ -1182,7 +1185,6 @@
           ctx.save();
           ctx.globalCompositeOperation = "screen";
 
-          // glow principal
           var g = ctx.createRadialGradient(x,y,0, x,y,glow);
           g.addColorStop(0, starColor(temp, clamp(aNow*0.92, 0, 1)));
           g.addColorStop(0.20, starColor(temp, clamp(aNow*0.34, 0, 1)));
@@ -1192,7 +1194,6 @@
           ctx.arc(x,y,glow,0,Math.PI*2);
           ctx.fill();
 
-          // cromatismo (fantasmas RGB)
           var ar = (aNow*0.18), ag = (aNow*0.13), ab = (aNow*0.18);
 
           var gr = ctx.createRadialGradient(x-ox, y-oy, 0, x-ox, y-oy, glow*0.92);
@@ -1219,14 +1220,12 @@
           ctx.arc(x+ox, y+oy, glow*0.92, 0, Math.PI*2);
           ctx.fill();
 
-          // núcleo
           ctx.globalCompositeOperation = "lighter";
           ctx.fillStyle = starColor(temp, clamp(aNow*1.05, 0, 1));
           ctx.beginPath();
           ctx.arc(x,y,core,0,Math.PI*2);
           ctx.fill();
 
-          // spikes só em estrelas fortes
           var strength = r * aNow;
           var isSpike = (strength > 0.42);
           if (isSpike){
@@ -1460,21 +1459,19 @@
           }
         }
 
-        // ✅ REFRAÇÃO (lentes): distorção radial sobre o buffer
+        // ✅ REFRAÇÃO (lentes): distorção radial sobre o buffer (robusta)
         function applyLensRefraction(){
           if (!lenses || !lenses.length) return;
 
-          // Copia frame atual para buffer
+          // Copia frame atual para buffer (sem esticar por w/h => evita black em alguns browsers)
+          bctx.setTransform(dpr,0,0,dpr,0,0);
           bctx.clearRect(0,0,w,h);
-          bctx.drawImage(canvas, 0, 0, w, h);
+          bctx.drawImage(canvas, 0, 0);
 
-          // Volta a desenhar do buffer para o canvas, aplicando lentes por cima
-          // Base: reconstitui frame como estava
+          // Reconstitui o frame base
           ctx.clearRect(0,0,w,h);
-          ctx.drawImage(buf, 0, 0, w, h);
+          ctx.drawImage(buf, 0, 0);
 
-          // Para performance: usa fatias (slices) horizontais dentro do círculo
-          // e cromatismo por 3 amostras deslocadas.
           ctx.save();
           ctx.globalCompositeOperation = "screen";
 
@@ -1482,21 +1479,18 @@
             var L = lenses[i];
             L.ph += L.drift;
 
-            // deriva sutil
             var cx = L.x + Math.sin(L.ph*0.9) * 8;
             var cy = L.y + Math.cos(L.ph*0.8) * 6;
             var r  = L.r;
             var k  = L.k;
             var chroma = L.chroma;
 
-            // recorte circular
             ctx.save();
             ctx.beginPath();
             ctx.arc(cx, cy, r, 0, Math.PI*2);
             ctx.clip();
 
-            // distorção por fatias
-            var step = 3; // quanto menor, mais bonito (mas mais pesado)
+            var step = 3;
             var y0 = Math.floor(cy - r);
             var y1 = Math.ceil(cy + r);
 
@@ -1506,31 +1500,27 @@
               var x0 = cx - span;
               var wSlice = span * 2;
 
-              // intensidade radial (mais forte no meio)
               var u = Math.abs(dy) / r;
               var fall = (1 - u*u);
-              var shift = k * r * fall; // deslocamento
+              var shift = k * r * fall;
 
-              // deslocamento horizontal e vertical pequenos (efeito "vidro")
               var sx = Math.sin(L.ph + dy*0.03) * shift * 0.55;
               var sy = Math.cos(L.ph*0.9 + dy*0.02) * shift * 0.20;
 
-              // cromatismo: 3 amostras levemente deslocadas
-              // Vermelho
               ctx.globalAlpha = 0.34;
               ctx.drawImage(
                 buf,
                 x0 - sx*1.15*chroma, (y - step/2) - sy*1.05*chroma, wSlice, step,
                 x0, (y - step/2), wSlice, step
               );
-              // Verde
+
               ctx.globalAlpha = 0.28;
               ctx.drawImage(
                 buf,
                 x0 - sx*0.85, (y - step/2) - sy*0.85, wSlice, step,
                 x0, (y - step/2), wSlice, step
               );
-              // Azul
+
               ctx.globalAlpha = 0.34;
               ctx.drawImage(
                 buf,
@@ -1539,7 +1529,6 @@
               );
             }
 
-            // brilho/anel da lente (bem discreto)
             ctx.globalAlpha = 1;
             var ring = ctx.createRadialGradient(cx,cy, r*0.55, cx,cy,r);
             ring.addColorStop(0, "rgba(255,255,255,0)");
@@ -1550,7 +1539,6 @@
             ctx.arc(cx, cy, r, 0, Math.PI*2);
             ctx.fill();
 
-            // highlight
             ctx.globalAlpha = 0.10;
             ctx.fillStyle = "rgba(255,255,255,0.9)";
             ctx.beginPath();
@@ -1572,7 +1560,6 @@
           var px = par.x * 18;
           var py = par.y * 12;
 
-          // desenha o frame "base"
           ctx.clearRect(0,0,w,h);
           ctx.fillStyle = "#000";
           ctx.fillRect(0,0,w,h);
@@ -1583,7 +1570,6 @@
           drawStars(starsMid,  px, py, 0.28);
           drawStars(starsNear, px, py, 0.52);
 
-          // ✅ aplica refração por cima do frame
           applyLensRefraction();
 
           drawDust(px, py);
@@ -1615,7 +1601,7 @@
 
         start(true);
       }catch(e){
-        // fallback: sem canvas
+        // fallback silencioso
       }
     })();
 
