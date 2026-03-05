@@ -1185,10 +1185,9 @@
       s.x = Math.random()*w;
     }
 
-    // piscar natural
     s.ph += s.tw;
-    var tw = Math.sin(s.ph)*0.5 + 0.5;
-    var a = clamp(s.a + (tw-0.5)*s.blink,0,1);
+    var twv = Math.sin(s.ph)*0.5 + 0.5;
+    var a = clamp(s.a + (twv-0.5)*s.blink, 0, 1);
 
     var x = s.x + (px*parScale);
     var y = s.y + (py*parScale);
@@ -1196,20 +1195,29 @@
     if (x < -20) x += (w+40);
     if (x > w+20) x -= (w+40);
 
-    // brilho energético
-    if (s.glow > 0){
-      ctx.save();
-      ctx.shadowColor = "rgba(255,255,255,"+(a*0.9).toFixed(3)+")";
-      ctx.shadowBlur = s.glow;
-    }
+    // 🌟 Glow energético (radial)
+    var glowR = (s.r * 5) + (s.glow || 0);
 
-    // núcleo da estrela
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+
+    var g = ctx.createRadialGradient(x, y, 0, x, y, glowR);
+    g.addColorStop(0, "rgba(255,255,255," + (a*0.70).toFixed(3) + ")");
+    g.addColorStop(0.35, "rgba(255,255,255," + (a*0.18).toFixed(3) + ")");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+
+    ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.fillStyle = "rgba(255,255,255,"+a.toFixed(3)+")";
-    ctx.arc(x,y,s.r,0,Math.PI*2);
+    ctx.arc(x, y, glowR, 0, Math.PI*2);
     ctx.fill();
 
-    if (s.glow > 0) ctx.restore();
+    ctx.restore();
+
+    // núcleo (ponto real)
+    ctx.beginPath();
+    ctx.fillStyle = "rgba(255,255,255," + a.toFixed(3) + ")";
+    ctx.arc(x, y, s.r, 0, Math.PI*2);
+    ctx.fill();
   }
 }
 
