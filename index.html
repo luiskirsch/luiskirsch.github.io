@@ -1062,14 +1062,8 @@
         function makeStars(count, rMin, rMax, vMin, vMax, aMin, aMax){
   var arr = [];
   for (var i=0;i<count;i++){
-    // poucas estrelas “piscam” mais, maioria quase estável
-    var twGroup = Math.random();
-    var twA = (twGroup < 0.16) ? rand(0.10, 0.28) : rand(0.02, 0.09); // 16% pisca mais
-    var twS = rand(0.006, 0.020); // velocidade do twinkle
-    var gl  = rand(0.8, 1.6);     // halo
-
-    // temperatura sutil: 0=mais frio, 1=mais quente
-    var temp = Math.random();
+    var isBlink = Math.random() < 0.18; // ✅ só 18% piscam perceptível
+    var isGlow  = Math.random() < 0.12; // ✅ só 12% tem micro glow
 
     arr.push({
       x: Math.random()*w,
@@ -1077,11 +1071,14 @@
       r: rand(rMin,rMax),
       v: rand(vMin,vMax),
       a: rand(aMin,aMax),
+      tw: rand(0.004, 0.014),
       ph: Math.random()*Math.PI*2,
-      twA: twA,
-      twS: twS,
-      gl: gl,
-      temp: temp
+
+      // ✅ piscar natural: amplitude diferente por estrela
+      blink: isBlink ? rand(0.10, 0.28) : rand(0.02, 0.07),
+
+      // ✅ glow minúsculo (NÃO cria véu)
+      glow: isGlow ? rand(2, 6) : 0
     });
   }
   return arr;
@@ -1188,16 +1185,18 @@
   for (var i=0;i<arr.length;i++){
     var s = arr[i];
 
+    // movimento vertical suave
     s.y += s.v;
     if (s.y > h + 10){
       s.y = -10;
       s.x = Math.random()*w;
     }
 
-    // twinkle natural por estrela
-    s.ph += s.twS;
-    var tw = (Math.sin(s.ph) * 0.5 + 0.5);          // 0..1
-    var a = clamp(s.a + (tw - 0.5) * s.twA, 0, 1);  // alpha final
+    // twinkle natural (poucas piscam de verdade)
+    s.ph += s.tw;
+    var tw = (Math.sin(s.ph) * 0.5 + 0.5); // 0..1
+    var blink = (s.blink || 0);            // 0..1 (se existir)
+    var a = clamp(s.a + (tw - 0.5) * blink, 0, 1);
 
     var x = s.x + (px * parScale);
     var y = s.y + (py * parScale);
@@ -1205,40 +1204,23 @@
     if (x < -20) x += (w+40);
     if (x > w+20) x -= (w+40);
 
-    // cor sutil (fria->quente), bem discreta
-    // frio: levemente azulado; quente: levemente dourado
-    var cold = { r: 210, g: 225, b: 255 };
-    var warm = { r: 255, g: 235, b: 205 };
-    var rr = Math.round(cold.r + (warm.r - cold.r) * s.temp);
-    var gg = Math.round(cold.g + (warm.g - cold.g) * s.temp);
-    var bb = Math.round(cold.b + (warm.b - cold.b) * s.temp);
-
-    // --- HALO (brilho próprio) ---
-    var haloR = Math.max(2.2, s.r * 6.0) * s.gl;
-    var halo = ctx.createRadialGradient(x, y, 0, x, y, haloR);
-    halo.addColorStop(0, "rgba(" + rr + "," + gg + "," + bb + "," + (a*0.55).toFixed(3) + ")");
-    halo.addColorStop(0.35, "rgba(" + rr + "," + gg + "," + bb + "," + (a*0.14).toFixed(3) + ")");
-    halo.addColorStop(1, "rgba(" + rr + "," + gg + "," + bb + ",0)");
-
-    ctx.fillStyle = halo;
+    // ✅ Estrela = ponto real (núcleo)
     ctx.beginPath();
-    ctx.arc(x, y, haloR, 0, Math.PI*2);
-    ctx.fill();
-
-    // --- NÚCLEO (ponto) ---
     ctx.fillStyle = "rgba(255,255,255," + a.toFixed(3) + ")";
-    ctx.beginPath();
     ctx.arc(x, y, s.r, 0, Math.PI*2);
     ctx.fill();
 
-    // opcional: micro “sparkle” só nas mais brilhantes (bem discreto)
-    if (s.twA > 0.18 && a > 0.42 && s.r > 1.1){
-      ctx.strokeStyle = "rgba(255,255,255," + (a*0.25).toFixed(3) + ")";
-      ctx.lineWidth = 1;
+    // ✅ Micro brilho só nas mais brilhantes (sem “película”)
+    // (shadowBlur pequeno e só pra poucas)
+    if (s.glow && a > 0.25){
+      ctx.save();
+      ctx.shadowColor = "rgba(255,255,255," + (a*0.55).toFixed(3) + ")";
+      ctx.shadowBlur = s.glow; // pequeno (2..6)
       ctx.beginPath();
-      ctx.moveTo(x - 3.2, y); ctx.lineTo(x + 3.2, y);
-      ctx.moveTo(x, y - 3.2); ctx.lineTo(x, y + 3.2);
-      ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255," + (a*0.40).toFixed(3) + ")";
+      ctx.arc(x, y, Math.max(0.6, s.r*0.8), 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
     }
   }
 }
@@ -1379,12 +1361,13 @@
         }
 
         function drawVignette(){
-          var vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.95);
-          vignette.addColorStop(0, "rgba(0,0,0,0)");
-          vignette.addColorStop(1, "rgba(0,0,0,0.62)");
-          ctx.fillStyle = vignette;
-          ctx.fillRect(0,0,w,h);
-        }
+  var vignette = ctx.createRadialGradient(w*0.5, h*0.35, 0, w*0.5, h*0.5, Math.max(w,h)*0.95);
+  vignette.addColorStop(0, "rgba(0,0,0,0)");
+  vignette.addColorStop(0.65, "rgba(0,0,0,0.35)");
+  vignette.addColorStop(1, "rgba(0,0,0,0.78)");
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0,0,w,h);
+}
 
         function tick(){
           t++;
