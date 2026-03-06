@@ -40,7 +40,7 @@
 
       padding-left:max(18px, env(safe-area-inset-left));
       padding-right:max(18px, env(safe-area-inset-right));
-      padding-top:max(18px, env(safe-area-inset-top));
+      padding-top:max(220px, calc(env(safe-area-inset-top) + 220px));
       padding-bottom:max(18px, env(safe-area-inset-bottom));
 
       color:#f2f2f2;
@@ -49,7 +49,7 @@
       background-color:#000;
     }
 
-    @supports (height: 100dvh){
+    @supports (height:100dvh){
       body{ min-height:100dvh; }
     }
 
@@ -67,29 +67,54 @@
       transform:translateZ(0);
     }
 
+    .moonWrap{
+      position:fixed;
+      left:50%;
+      top:max(26px, env(safe-area-inset-top));
+      transform:translateX(-50%);
+      z-index:1;
+      width:min(210px, 34vw);
+      aspect-ratio:1/1;
+      pointer-events:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      opacity:.95;
+      filter:
+        drop-shadow(0 0 18px rgba(255,255,255,.10))
+        drop-shadow(0 0 48px rgba(255,255,255,.08))
+        drop-shadow(0 0 110px rgba(150,170,255,.06));
+    }
+
+    .moonGlow{
+      position:absolute;
+      inset:-22%;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 50% 50%,
+          rgba(255,255,255,.18) 0%,
+          rgba(210,220,255,.08) 28%,
+          rgba(180,195,255,.04) 46%,
+          rgba(0,0,0,0) 72%);
+      filter:blur(10px);
+      opacity:.9;
+    }
+
+    .moon{
+      position:relative;
+      z-index:2;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      opacity:.96;
+    }
+
     .wrap{
       position:relative;
       z-index:5;
       width:min(1200px, 100%);
       margin:0 auto;
       padding:22px 0 28px;
-    }
-
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin:12px auto 18px;
-    }
-
-    .logoOnly{
-      width:128px;
-      height:128px;
-      object-fit:contain;
-      display:block;
-      filter:drop-shadow(0 18px 38px rgba(0,0,0,.82));
-      user-select:none;
-      -webkit-user-drag:none;
     }
 
     .grid{
@@ -109,7 +134,7 @@
       overflow:hidden;
     }
 
-    @supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))){
+    @supports ((backdrop-filter:blur(10px)) or (-webkit-backdrop-filter:blur(10px))){
       .card{
         backdrop-filter:blur(12px);
         -webkit-backdrop-filter:blur(12px);
@@ -151,19 +176,20 @@
       flex:0 0 auto;
     }
 
-    .brandRow{
+    .titleRow{
       display:flex;
       align-items:flex-start;
-      gap:18px;
+      gap:16px;
+      margin-top:2px;
     }
 
     .titleLogo{
-      width:98px;
-      height:98px;
+      width:58px;
+      height:58px;
       object-fit:contain;
       flex:0 0 auto;
-      margin-top:8px;
-      filter:drop-shadow(0 10px 24px rgba(0,0,0,.55));
+      margin-top:10px;
+      filter:drop-shadow(0 0 12px rgba(255,255,255,.08));
       user-select:none;
       -webkit-user-drag:none;
     }
@@ -193,9 +219,9 @@
     }
 
     @keyframes shineText{
-      0%   { background-position:0% 50%; }
-      60%  { background-position:100% 50%; }
-      100% { background-position:100% 50%; }
+      0%{ background-position:0% 50%; }
+      60%{ background-position:100% 50%; }
+      100%{ background-position:100% 50%; }
     }
 
     .subtitle{
@@ -205,7 +231,6 @@
       color:rgba(255,255,255,.86);
       line-height:1.55;
     }
-
     .subtitle strong{ color:rgba(230,192,123,.95); font-weight:700; }
 
     .whisper{
@@ -520,33 +545,6 @@
 
     .footer .brand{ color:rgba(230,192,123,.82); font-weight:700; }
 
-    @media (max-width:980px){
-      .grid{ grid-template-columns:1fr; }
-      .title{ font-size:clamp(44px, 9vw, 78px); }
-      .miniGrid{ grid-template-columns:1fr 1fr; }
-      .brandRow{ gap:14px; }
-      .titleLogo{ width:80px; height:80px; margin-top:6px; }
-    }
-
-    @media (max-width:560px){
-      body{
-        padding-left:max(14px, env(safe-area-inset-left));
-        padding-right:max(14px, env(safe-area-inset-right));
-      }
-      .inner{ padding:18px 16px 18px; }
-      .row2{ grid-template-columns:1fr; }
-      .miniGrid{ grid-template-columns:1fr; }
-      button{ width:100%; min-width:0; }
-      .logoOnly{ width:110px; height:110px; }
-      .countdownGrid{ grid-template-columns:repeat(2, minmax(90px,1fr)); }
-      .brandRow{ gap:10px; }
-      .titleLogo{
-        width:62px;
-        height:62px;
-        margin-top:4px;
-      }
-    }
-
     .soundPanel{
       position:fixed;
       right:max(14px, env(safe-area-inset-right));
@@ -563,7 +561,7 @@
       transition:opacity .25s ease, transform .25s ease;
     }
 
-    @supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))){
+    @supports ((backdrop-filter:blur(10px)) or (-webkit-backdrop-filter:blur(10px))){
       .soundPanel{
         backdrop-filter:blur(10px);
         -webkit-backdrop-filter:blur(10px);
@@ -590,7 +588,6 @@
       user-select:none;
       min-width:92px;
     }
-
     .soundToggle strong{ color:var(--gold); }
 
     .soundVolume{
@@ -655,13 +652,48 @@
       box-shadow:0 0 10px rgba(230,192,123,.55);
     }
 
-    @media (max-width:560px){
-      #volumeSlider{ width:120px; min-width:120px; }
+    @media (max-width:980px){
+      .grid{ grid-template-columns:1fr; }
+      .title{ font-size:clamp(44px, 9vw, 78px); }
+      .miniGrid{ grid-template-columns:1fr 1fr; }
+      .moonWrap{ width:min(190px, 38vw); }
     }
 
-    @media (prefers-reduced-motion: reduce){
+    @media (max-width:560px){
+      body{
+        padding-left:max(14px, env(safe-area-inset-left));
+        padding-right:max(14px, env(safe-area-inset-right));
+        padding-top:max(180px, calc(env(safe-area-inset-top) + 180px));
+      }
+
+      .inner{ padding:18px 16px 18px; }
+      .row2{ grid-template-columns:1fr; }
+      .miniGrid{ grid-template-columns:1fr; }
+      button{ width:100%; min-width:0; }
+      .countdownGrid{ grid-template-columns:repeat(2, minmax(90px,1fr)); }
+      #volumeSlider{ width:120px; min-width:120px; }
+
+      .titleRow{
+        gap:10px;
+        align-items:flex-start;
+      }
+
+      .titleLogo{
+        width:42px;
+        height:42px;
+        margin-top:8px;
+      }
+
+      .moonWrap{
+        width:min(150px, 42vw);
+        top:max(30px, env(safe-area-inset-top));
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce){
       .whisper, .title{ animation:none !important; }
       #stars{ display:none; }
+      .moonWrap{ filter:none; }
     }
   </style>
 </head>
@@ -669,11 +701,15 @@
 <body>
   <canvas id="stars" aria-hidden="true"></canvas>
 
+  <div class="moonWrap" aria-hidden="true">
+    <div class="moonGlow"></div>
+    <img src="./lua_site_transparente.png" alt="" class="moon">
+  </div>
+
   <div class="soundPanel" id="soundPanel" aria-label="Controle de som">
     <button class="soundToggle" id="soundBtn" type="button" aria-label="Ativar ou desativar som">
       SOM: <strong id="soundState">OFF</strong>
     </button>
-
     <div class="soundVolume">
       <span class="volLabel">VOL</span>
       <input id="volumeSlider" type="range" min="0" max="100" value="55" aria-label="Controle de volume do som do site" />
@@ -681,8 +717,6 @@
   </div>
 
   <div class="wrap">
-    <div class="topbar"></div>
-
     <section class="grid">
       <article class="card">
         <div class="inner">
@@ -691,9 +725,9 @@
             <span>Uma experiência psicológica em cartas físicas</span>
           </div>
 
-          <div class="brandRow">
-            <img class="titleLogo" src="./logo_oficial_fundo_transparente.png" alt="Logo Prelúdio Jogos" />
-            <h1 class="title">Prelúdio<br/>Jogos</h1>
+          <div class="titleRow">
+            <img class="titleLogo" src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos">
+            <h1 class="title">Prelúdio<br>Jogos</h1>
           </div>
 
           <p class="subtitle">
@@ -701,7 +735,7 @@
             As cartas são o corpo — o digital só mantém a tensão viva.
           </p>
 
-          <div class="whisper">ENTRE PRIMEIRO. DEPOIS, NÃO TEM VOLTA.</div>
+          <div class="whisper">Entre primeiro. Depois, não tem volta.</div>
           <div class="rule"></div>
 
           <div class="miniGrid">
@@ -727,7 +761,7 @@
 
           <p class="leadTitle">
             Quer receber novidades, descontos e a fase 2 assim que abrir?
-            <br/>Deixe seu contato e entre para a lista.
+            <br>Deixe seu contato e entre para a lista.
           </p>
 
           <div class="rule" style="margin-left:auto;margin-right:auto;max-width:720px;"></div>
@@ -811,7 +845,7 @@
           <p class="aboutText">
             Um jogo físico, psicológico e imersivo. Você não “joga” no celular — você joga na mesa.
             O site é a trilha: ele segura o clima, cronometra a tensão e impede “atalhos”.
-            <br/><br/>
+            <br><br>
             Recomendado para <strong>3 a 5 pessoas</strong> (ou solo). Abra a entrada, leia o ritual e comece a primeira rodada.
             Quando o tempo zerar, termina. <strong>Mesmo que alguém peça “só mais uma”.</strong>
           </p>
@@ -908,24 +942,58 @@
         var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
         if (mm && mm.matches) return;
 
-        var moonImg = new Image();
-        moonImg.src = "./lua_site_transparente.png";
-
-        var w=0,h=0,dpr=1,raf=0,t=0;
+        var w=0,h=0,dpr=1, raf=0, t=0;
         var par = { x:0, y:0, tx:0, ty:0 };
 
         var starsFar=[], starsMid=[], starsNear=[];
-        var dust=[], meteors=[], impacts=[];
+        var dust=[], rocks=[], meteors=[];
         var nextMeteorAt = 0;
-        var moon = null;
+        var moonMask = null;
+
+        var neb = {
+          c: document.createElement("canvas"),
+          x:0,
+          y:0,
+          a:0.00,
+          drift:0.004
+        };
+        var nctx = neb.c.getContext("2d", { alpha:true });
 
         function rand(min,max){ return min + Math.random()*(max-min); }
         function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
-        function resize(){
+        var lastW=0, lastH=0;
+        function shouldResize(nw, nh){
+          if (!lastW || !lastH) return true;
+          var dw = Math.abs(nw - lastW);
+          var dh = Math.abs(nh - lastH);
+          if (dw > 2) return true;
+          if (dh < 140) return false;
+          return true;
+        }
+
+        function updateMoonMask(){
+          var moonEl = document.querySelector(".moonWrap");
+          if (!moonEl) return;
+          var rect = moonEl.getBoundingClientRect();
+          moonMask = {
+            x: rect.left + rect.width * 0.5,
+            y: rect.top + rect.height * 0.5,
+            r: Math.min(rect.width, rect.height) * 0.42
+          };
+        }
+
+        function resize(force){
           dpr = Math.max(1, Math.min(2, (window.devicePixelRatio || 1)));
-          w = Math.floor(document.documentElement.clientWidth || window.innerWidth);
-          h = Math.floor(window.innerHeight);
+          var nw = Math.floor(document.documentElement.clientWidth || window.innerWidth);
+          var nh = Math.floor(window.innerHeight);
+
+          if (!force && !shouldResize(nw, nh)) return;
+
+          lastW = nw;
+          lastH = nh;
+          w = nw;
+          h = nh;
 
           canvas.width = Math.floor(w * dpr);
           canvas.height = Math.floor(h * dpr);
@@ -934,6 +1002,8 @@
           ctx.setTransform(dpr,0,0,dpr,0,0);
 
           buildScene();
+          buildNebulaTexture();
+          updateMoonMask();
         }
 
         function makeStars(count, rMin, rMax, vMin, vMax, aMin, aMax, tempBias){
@@ -941,17 +1011,19 @@
           for (var i=0;i<count;i++){
             var temp = rand(-1, 1) * tempBias;
             var twBase = rand(0.002, 0.010);
-            var twAmp  = rand(0.02, 0.20);
+            var twAmp = rand(0.02, 0.20);
+            var hero = (Math.random() < 0.06);
 
             arr.push({
               x: Math.random()*w,
               y: Math.random()*h,
-              r: rand(rMin,rMax),
+              r: rand(rMin,rMax) * (hero ? rand(1.10, 1.60) : 1),
               v: rand(vMin,vMax),
-              a: rand(aMin,aMax),
+              a: rand(aMin,aMax) * (hero ? 1.08 : 1),
               tw: twBase,
               twa: twAmp,
               ph: Math.random()*Math.PI*2,
+              hero: hero,
               temp: temp
             });
           }
@@ -961,36 +1033,61 @@
         function buildScene(){
           var area = w*h;
 
-          starsFar  = makeStars(clamp(Math.floor(area/15000), 80, 220), 0.28, 0.95, 0.016, 0.045, 0.10, 0.30, 0.08);
-          starsMid  = makeStars(clamp(Math.floor(area/18500), 55, 160), 0.36, 1.15, 0.040, 0.085, 0.12, 0.42, 0.10);
-          starsNear = makeStars(clamp(Math.floor(area/24500), 35, 100), 0.52, 1.60, 0.060, 0.120, 0.16, 0.56, 0.12);
+          var farCount  = clamp(Math.floor(area/14500), 95, 260);
+          var midCount  = clamp(Math.floor(area/17500), 70, 190);
+          var nearCount = clamp(Math.floor(area/23500), 48, 130);
+
+          starsFar  = makeStars(farCount,  0.28, 0.95, 0.016, 0.045, 0.12, 0.34, 0.08);
+          starsMid  = makeStars(midCount,  0.38, 1.20, 0.040, 0.085, 0.14, 0.46, 0.10);
+          starsNear = makeStars(nearCount, 0.52, 1.65, 0.060, 0.120, 0.18, 0.60, 0.12);
 
           dust = [];
-          for (var i=0;i<clamp(Math.floor(area/120000), 6, 14);i++){
+          var dustCount = clamp(Math.floor(area/90000), 10, 28);
+          for (var i=0;i<dustCount;i++){
             dust.push({
               x: rand(-w*0.2, w*1.2),
               y: rand(-h*0.2, h*1.2),
-              r: rand(0.7, 1.2),
-              a: rand(0.006, 0.020),
-              vx: rand(0.018, 0.050),
-              vy: rand(0.004, 0.016)
+              r: rand(0.7, 1.8),
+              a: rand(0.01, 0.045),
+              vx: rand(0.03, 0.10),
+              vy: rand(0.008, 0.038)
             });
           }
 
-          moon = {
-            x: w * 0.50,
-            y: h * 0.19,
-            r: Math.min(w, h) * 0.078,
-            px: 0.05,
-            py: 0.03,
-            rx: 0,
-            ry: 0,
-            rr: 0
-          };
+          rocks = [];
+          var rockCount = clamp(Math.floor(area/90000), 10, 34);
+          for (var j=0;j<rockCount;j++){
+            var depth = rand(0.18, 0.50);
+            var size = rand(3.0, 10.0) * (0.75 + depth);
+
+            var ang = rand(0, Math.PI*2);
+            var spd = rand(0.12, 0.30) * (0.55 + depth);
+
+            var spikes = Math.floor(rand(9, 14));
+            var pts = [];
+            for (var k=0;k<spikes;k++){
+              var a = (Math.PI*2) * (k/spikes);
+              var rr = size * rand(0.86, 1.14);
+              pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
+            }
+
+            rocks.push({
+              x: rand(-w*0.2, w*1.2),
+              y: rand(-h*0.2, h*1.2),
+              r: size,
+              pts: pts,
+              rot: rand(0, Math.PI*2),
+              rv: rand(-0.006, 0.006),
+              vx: Math.cos(ang) * spd,
+              vy: Math.sin(ang) * spd,
+              ph: rand(0, Math.PI*2),
+              wob: rand(0.0006, 0.0018),
+              z: depth
+            });
+          }
 
           meteors = [];
-          impacts = [];
-          nextMeteorAt = Math.floor(rand(110, 240));
+          nextMeteorAt = Math.floor(rand(140, 340));
         }
 
         function onPointerMove(clientX, clientY){
@@ -1009,12 +1106,88 @@
           onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive:true });
 
+        function blurPass(c, passes){
+          var b = document.createElement("canvas");
+          b.width = c.width;
+          b.height = c.height;
+          var bctx = b.getContext("2d");
+
+          for (var i=0;i<passes;i++){
+            bctx.clearRect(0,0,b.width,b.height);
+            bctx.globalAlpha = 0.50;
+            bctx.drawImage(c, -1, 0);
+            bctx.drawImage(c, 1, 0);
+            bctx.drawImage(c, 0, -1);
+            bctx.drawImage(c, 0, 1);
+            bctx.globalAlpha = 1;
+            var cctx = c.getContext("2d");
+            cctx.clearRect(0,0,c.width,c.height);
+            cctx.drawImage(b,0,0);
+          }
+        }
+
+        function buildNebulaTexture(){
+          var S = 640;
+          neb.c.width = S;
+          neb.c.height = S;
+          nctx.clearRect(0,0,S,S);
+
+          for (var i=0;i<20;i++){
+            var x = rand(0, S);
+            var y = rand(0, S);
+            var r = rand(S*0.10, S*0.24);
+
+            var g = nctx.createRadialGradient(x,y,0, x,y,r);
+            g.addColorStop(0, "rgba(90,140,255,"+rand(0.03,0.08)+")");
+            g.addColorStop(0.55, "rgba(40,85,170,"+rand(0.02,0.06)+")");
+            g.addColorStop(1, "rgba(0,0,0,0)");
+
+            nctx.fillStyle = g;
+            nctx.beginPath();
+            nctx.arc(x,y,r,0,Math.PI*2);
+            nctx.fill();
+          }
+
+          blurPass(neb.c, 2);
+          neb.x = rand(-0.25, 0.25);
+          neb.y = rand(-0.25, 0.25);
+        }
+
+        function drawNebula(px, py){
+          neb.x += neb.drift;
+          neb.y += neb.drift*0.55;
+
+          if (neb.x > 1) neb.x -= 1;
+          if (neb.y > 1) neb.y -= 1;
+
+          var S = neb.c.width;
+          var scale = Math.max(w,h) / S * 1.35;
+          var dw = S * scale;
+          var dh = S * scale;
+
+          var ox = (neb.x * dw) + (px * 0.10);
+          var oy = (neb.y * dh) + (py * 0.10);
+
+          ctx.save();
+          ctx.globalCompositeOperation = "screen";
+          ctx.globalAlpha = neb.a;
+
+          for (var ix=-1; ix<=1; ix++){
+            for (var iy=-1; iy<=1; iy++){
+              ctx.drawImage(neb.c, -ox + ix*dw, -oy + iy*dh, dw, dh);
+            }
+          }
+          ctx.restore();
+        }
+
         function starColor(temp, alpha){
           var b = clamp(-temp, 0, 1);
           var g = clamp(temp, 0, 1);
+
           var R = 255 - Math.floor(b*18) + Math.floor(g*14);
           var G = 255 - Math.floor(b*8)  + Math.floor(g*10);
           var B = 255 + Math.floor(b*18) - Math.floor(g*18);
+
           return "rgba(" + R + "," + G + "," + B + "," + alpha.toFixed(3) + ")";
         }
 
@@ -1023,28 +1196,101 @@
           var flick2 = 0.92 + 0.08 * Math.cos(phase*2.25 + y*0.010);
           var aNow = clamp(alpha * flick * flick2, 0, 1);
 
+          var jit = 0.08 + r*0.04;
+          x += Math.sin(phase*3.10 + x*0.006) * jit;
+          y += Math.cos(phase*2.85 + y*0.006) * jit;
+
           var glow = r * 3.0;
           var core = Math.max(0.55, r*0.62);
+
+          var wob = 0.45 + r*0.12;
+          var ox = Math.sin(phase*1.10) * wob;
+          var oy = Math.cos(phase*1.04) * wob;
 
           ctx.save();
           ctx.globalCompositeOperation = "screen";
 
           var g = ctx.createRadialGradient(x,y,0, x,y,glow);
           g.addColorStop(0, starColor(temp, clamp(aNow*0.95,0,1)));
-          g.addColorStop(0.24, starColor(temp, clamp(aNow*0.28,0,1)));
+          g.addColorStop(0.22, starColor(temp, clamp(aNow*0.30,0,1)));
           g.addColorStop(1, "rgba(0,0,0,0)");
           ctx.fillStyle = g;
           ctx.beginPath();
           ctx.arc(x,y,glow,0,Math.PI*2);
           ctx.fill();
 
+          var gr = ctx.createRadialGradient(x-ox, y-oy, 0, x-ox, y-oy, glow*0.92);
+          gr.addColorStop(0, "rgba(255,130,130," + clamp(aNow*0.12,0,1).toFixed(3) + ")");
+          gr.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = gr;
+          ctx.beginPath();
+          ctx.arc(x-ox, y-oy, glow*0.92, 0, Math.PI*2);
+          ctx.fill();
+
+          var gg = ctx.createRadialGradient(x+ox*0.55, y-oy*0.55, 0, x+ox*0.55, y-oy*0.55, glow*0.78);
+          gg.addColorStop(0, "rgba(170,255,200," + clamp(aNow*0.08,0,1).toFixed(3) + ")");
+          gg.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = gg;
+          ctx.beginPath();
+          ctx.arc(x+ox*0.55, y-oy*0.55, glow*0.78, 0, Math.PI*2);
+          ctx.fill();
+
+          var gb = ctx.createRadialGradient(x+ox, y+oy, 0, x+ox, y+oy, glow*0.92);
+          gb.addColorStop(0, "rgba(160,190,255," + clamp(aNow*0.12,0,1).toFixed(3) + ")");
+          gb.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = gb;
+          ctx.beginPath();
+          ctx.arc(x+ox, y+oy, glow*0.92, 0, Math.PI*2);
+          ctx.fill();
+
           ctx.globalCompositeOperation = "lighter";
-          ctx.fillStyle = starColor(temp, clamp(aNow*1.02,0,1));
+          ctx.fillStyle = starColor(temp, clamp(aNow*1.05,0,1));
           ctx.beginPath();
           ctx.arc(x,y,core,0,Math.PI*2);
           ctx.fill();
 
+          var strength = r * aNow;
+          if (strength > 0.46){
+            var L = clamp(4.5 + r*4.8, 7, 14);
+            var aSp = clamp((strength - 0.36) * 1.05, 0, 0.55);
+
+            ctx.globalCompositeOperation = "screen";
+            ctx.globalAlpha = aSp;
+            ctx.lineWidth = 0.9;
+
+            function ray(angle, len, peak){
+              var dx = Math.cos(angle) * len;
+              var dy = Math.sin(angle) * len;
+              var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
+              lg.addColorStop(0.00, "rgba(255,255,255,0)");
+              lg.addColorStop(0.46, "rgba(255,255,255,0)");
+              lg.addColorStop(0.50, "rgba(255,255,255," + peak + ")");
+              lg.addColorStop(0.54, "rgba(255,255,255,0)");
+              lg.addColorStop(1.00, "rgba(255,255,255,0)");
+              ctx.strokeStyle = lg;
+              ctx.beginPath();
+              ctx.moveTo(x-dx, y-dy);
+              ctx.lineTo(x+dx, y+dy);
+              ctx.stroke();
+            }
+
+            ray(0, L, "0.95");
+            ray(Math.PI/2, L, "0.90");
+
+            ctx.globalAlpha = aSp * 0.38;
+            ray(Math.PI/4, L*0.56, "0.78");
+            ray(-Math.PI/4, L*0.56, "0.78");
+          }
+
           ctx.restore();
+        }
+
+        function starInsideMoon(x, y, radius){
+          if (!moonMask) return false;
+          var dx = x - moonMask.x;
+          var dy = y - moonMask.y;
+          var extra = radius + 2;
+          return (dx*dx + dy*dy) <= ((moonMask.r + extra) * (moonMask.r + extra));
         }
 
         function drawStars(arr, px, py, parScale){
@@ -1065,10 +1311,12 @@
             var y = s.y + (py * parScale);
 
             if (x < -30) x += (w+60);
-            if (x >  w+30) x -= (w+60);
+            if (x > w+30) x -= (w+60);
+
+            if (starInsideMoon(x, y, s.r * 3.2)) continue;
 
             var chroma = (Math.sin(s.ph * 0.85 + s.x * 0.002) * 0.5 + 0.5);
-            var tempShift = (chroma - 0.5) * 0.18;
+            var tempShift = (chroma - 0.5) * 0.20;
             var tempNow = clamp(s.temp + tempShift, -1, 1);
 
             drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.ph);
@@ -1084,8 +1332,10 @@
             if (d.x > w + 80){ d.x = -80; d.y = rand(-h*0.2, h*1.2); }
             if (d.y > h + 80){ d.y = -80; d.x = rand(-w*0.2, w*1.2); }
 
-            var x = d.x + (px * 8);
-            var y = d.y + (py * 8);
+            var x = d.x + (px * 10);
+            var y = d.y + (py * 10);
+
+            if (starInsideMoon(x, y, d.r + 2)) continue;
 
             ctx.fillStyle = "rgba(255,255,255," + d.a.toFixed(3) + ")";
             ctx.beginPath();
@@ -1094,169 +1344,102 @@
           }
         }
 
-        function drawMoon(px, py){
-          if (!moon || !moonImg.complete || !moonImg.naturalWidth) return;
+        function respawnRock(r){
+          var M = 160;
+          var side = Math.floor(rand(0, 4));
+          var x,y,ang;
 
-          var mx = moon.x + px * moon.px;
-          var my = moon.y + py * moon.py;
-          var r = moon.r;
-          var size = r * 2;
+          if (side === 0){ x = rand(-M, w+M); y = -M; ang = rand(Math.PI*0.20, Math.PI*0.80); }
+          else if (side === 1){ x = w+M; y = rand(-M, h+M); ang = rand(Math.PI*0.70, Math.PI*1.30); }
+          else if (side === 2){ x = rand(-M, w+M); y = h+M; ang = rand(Math.PI*1.20, Math.PI*1.80); }
+          else { x = -M; y = rand(-M, h+M); ang = rand(-Math.PI*0.30, Math.PI*0.30); }
 
-          moon.rx = mx;
-          moon.ry = my;
-          moon.rr = r;
-
-          ctx.save();
-
-          var halo = ctx.createRadialGradient(mx, my, r * 0.70, mx, my, r * 1.55);
-          halo.addColorStop(0, "rgba(255,255,255,0.020)");
-          halo.addColorStop(0.40, "rgba(220,230,255,0.018)");
-          halo.addColorStop(0.75, "rgba(170,190,255,0.010)");
-          halo.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = halo;
-          ctx.beginPath();
-          ctx.arc(mx, my, r * 1.55, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(mx, my, r, 0, Math.PI * 2);
-          ctx.clip();
-
-          ctx.filter = "brightness(0.94) contrast(1.14) saturate(0.86)";
-          ctx.drawImage(moonImg, mx - r, my - r, size, size);
-
-          ctx.filter = "none";
-          var shade = ctx.createLinearGradient(mx - r, my - r * 0.1, mx + r, my + r * 0.1);
-          shade.addColorStop(0, "rgba(0,0,0,0.22)");
-          shade.addColorStop(0.18, "rgba(0,0,0,0.10)");
-          shade.addColorStop(0.50, "rgba(0,0,0,0.00)");
-          shade.addColorStop(0.82, "rgba(0,0,0,0.07)");
-          shade.addColorStop(1, "rgba(0,0,0,0.16)");
-          ctx.fillStyle = shade;
-          ctx.fillRect(mx - r, my - r, size, size);
-
-          var highlight = ctx.createRadialGradient(
-            mx - r * 0.25, my - r * 0.28, r * 0.05,
-            mx - r * 0.20, my - r * 0.22, r * 0.68
-          );
-          highlight.addColorStop(0, "rgba(255,255,255,0.16)");
-          highlight.addColorStop(0.30, "rgba(255,255,255,0.06)");
-          highlight.addColorStop(1, "rgba(255,255,255,0)");
-          ctx.fillStyle = highlight;
-          ctx.beginPath();
-          ctx.arc(mx, my, r, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.restore();
-
-          ctx.strokeStyle = "rgba(255,255,255,0.10)";
-          ctx.lineWidth = Math.max(1, r * 0.008);
-          ctx.beginPath();
-          ctx.arc(mx - r * 0.02, my - r * 0.02, r * 0.985, Math.PI * 0.90, Math.PI * 1.88);
-          ctx.stroke();
-
-          ctx.restore();
+          var base = rand(0.12, 0.28) * (0.55 + r.z);
+          r.x = x;
+          r.y = y;
+          r.vx = Math.cos(ang) * base;
+          r.vy = Math.sin(ang) * base;
+          r.rot = rand(0, Math.PI*2);
         }
 
-        function spawnMoonImpact(x, y){
-          impacts.push({
-            x:x,
-            y:y,
-            life:0,
-            maxLife:rand(10, 18),
-            r:rand(1.5, 2.8)
-          });
-        }
+        function drawRocks(px, py){
+          for (var i=0;i<rocks.length;i++){
+            var r = rocks[i];
 
-        function drawMoonImpacts(){
-          for (var i = impacts.length - 1; i >= 0; i--){
-            var p = impacts[i];
-            p.life++;
-            var k = p.life / p.maxLife;
-            var a = 1 - k;
-            var rr = p.r + k * 7;
+            r.ph += r.wob;
+            r.x += r.vx + (Math.cos(r.ph) * 0.03);
+            r.y += r.vy + (Math.sin(r.ph) * 0.03);
+            r.rot += r.rv;
 
-            var g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rr);
-            g.addColorStop(0, "rgba(255,245,210," + (a * 0.85).toFixed(3) + ")");
-            g.addColorStop(0.30, "rgba(255,220,150," + (a * 0.60).toFixed(3) + ")");
-            g.addColorStop(1, "rgba(255,200,120,0)");
-            ctx.fillStyle = g;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, rr, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = "rgba(255,255,255," + (a * 0.9).toFixed(3) + ")";
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, Math.max(0.7, p.r * (1 - k * 0.45)), 0, Math.PI * 2);
-            ctx.fill();
-
-            if (p.life >= p.maxLife){
-              impacts.splice(i, 1);
+            if (r.x < -220 || r.x > w + 220 || r.y < -220 || r.y > h + 220){
+              respawnRock(r);
             }
+
+            var P = 6.0 * r.z;
+            var x = r.x + (px * P * 0.10);
+            var y = r.y + (py * P * 0.10);
+
+            if (starInsideMoon(x, y, r.r + 10)) continue;
+
+            ctx.save();
+            ctx.globalCompositeOperation = "source-over";
+            ctx.translate(x, y);
+            ctx.rotate(r.rot);
+
+            ctx.beginPath();
+            var pts = r.pts;
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
+            ctx.closePath();
+
+            ctx.fillStyle = "rgb(20,20,26)";
+            ctx.fill();
+
+            var g = ctx.createRadialGradient(-r.r*0.35, -r.r*0.35, r.r*0.15, 0, 0, r.r*1.25);
+            g.addColorStop(0, "rgba(255,255,255,0.10)");
+            g.addColorStop(0.45, "rgba(255,255,255,0.04)");
+            g.addColorStop(1, "rgba(0,0,0,0.65)");
+            ctx.fillStyle = g;
+            ctx.fill();
+
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "rgba(0,0,0,0.75)";
+            ctx.stroke();
+            ctx.restore();
           }
-        }
-
-        function lineCircleIntersection(x1, y1, x2, y2, cx, cy, r){
-          var dx = x2 - x1;
-          var dy = y2 - y1;
-          var fx = x1 - cx;
-          var fy = y1 - cy;
-
-          var a = dx*dx + dy*dy;
-          var b = 2 * (fx*dx + fy*dy);
-          var c = fx*fx + fy*fy - r*r;
-
-          var disc = b*b - 4*a*c;
-          if (disc < 0) return null;
-
-          disc = Math.sqrt(disc);
-          var t1 = (-b - disc) / (2*a);
-          var t2 = (-b + disc) / (2*a);
-
-          var tHit = null;
-          if (t1 >= 0 && t1 <= 1) tHit = t1;
-          else if (t2 >= 0 && t2 <= 1) tHit = t2;
-
-          if (tHit === null) return null;
-
-          return {
-            x: x1 + dx * tHit,
-            y: y1 + dy * tHit
-          };
         }
 
         function spawnMeteor(){
           var edge = Math.floor(rand(0,4));
-          var x, y, angle, speed = rand(8.0, 13.8);
+          var x, y, angle, speed;
+
+          speed = rand(8.5, 14.5);
 
           if (edge === 0){
-            x = rand(-w*0.15, w*1.15);
+            x = rand(-w*0.2, w*1.2);
             y = -60;
             angle = rand(0.35, 1.20);
           } else if (edge === 1){
             x = w + 60;
-            y = rand(-h*0.15, h*0.85);
+            y = rand(-h*0.2, h*0.8);
             angle = rand(2.20, 3.70);
           } else if (edge === 2){
-            x = rand(-w*0.15, w*1.15);
+            x = rand(-w*0.2, w*1.2);
             y = h + 60;
             angle = rand(3.80, 5.50);
           } else {
             x = -60;
-            y = rand(-h*0.15, h*0.85);
+            y = rand(-h*0.2, h*0.8);
             angle = rand(-0.50, 1.10);
           }
 
           meteors.push({
             x:x,
             y:y,
-            prevX:x,
-            prevY:y,
             vx:Math.cos(angle) * speed,
             vy:Math.sin(angle) * speed,
             life:0,
-            maxLife:rand(26, 44),
+            maxLife:rand(28, 46),
             len:rand(90, 170),
             a:rand(0.30, 0.70),
             w:rand(1.0, 2.2)
@@ -1266,10 +1449,6 @@
         function drawMeteors(){
           for (var j=meteors.length-1;j>=0;j--){
             var m = meteors[j];
-
-            m.prevX = m.x;
-            m.prevY = m.y;
-
             m.x += m.vx;
             m.y += m.vy;
             m.life++;
@@ -1277,52 +1456,27 @@
             var k = Math.min(1, m.life / 7);
             var a = m.a * k * (1 - (m.life / m.maxLife));
 
-            var endX = m.x;
-            var endY = m.y;
-            var collided = false;
-
-            if (moon){
-              var hit = lineCircleIntersection(
-                m.prevX, m.prevY,
-                m.x, m.y,
-                moon.rx, moon.ry, moon.rr
-              );
-
-              if (hit){
-                endX = hit.x;
-                endY = hit.y;
-                spawnMoonImpact(hit.x, hit.y);
-                collided = true;
-              }
-            }
-
             var norm = Math.sqrt(m.vx*m.vx + m.vy*m.vy) || 1;
-            var tx = endX - (m.vx / norm) * m.len;
-            var ty = endY - (m.vy / norm) * m.len;
+            var tx = m.x - (m.vx / norm) * m.len;
+            var ty = m.y - (m.vy / norm) * m.len;
 
-            var grad = ctx.createLinearGradient(endX, endY, tx, ty);
+            var grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
             grad.addColorStop(0, "rgba(255,255,255," + a.toFixed(3) + ")");
-            grad.addColorStop(0.35, "rgba(255,245,210," + (a*0.72).toFixed(3) + ")");
             grad.addColorStop(1, "rgba(255,255,255,0)");
 
             ctx.strokeStyle = grad;
             ctx.lineWidth = m.w;
             ctx.beginPath();
-            ctx.moveTo(endX, endY);
+            ctx.moveTo(m.x, m.y);
             ctx.lineTo(tx, ty);
             ctx.stroke();
 
             ctx.fillStyle = "rgba(255,255,255," + Math.min(1, a + 0.10).toFixed(3) + ")";
             ctx.beginPath();
-            ctx.arc(endX, endY, 1.2, 0, Math.PI*2);
+            ctx.arc(m.x, m.y, 1.2, 0, Math.PI*2);
             ctx.fill();
 
-            if (
-              collided ||
-              m.life > m.maxLife ||
-              m.x < -m.len-120 || m.x > w + m.len + 120 ||
-              m.y < -m.len-120 || m.y > h + m.len + 120
-            ){
+            if (m.life > m.maxLife || m.x < -m.len-120 || m.x > w + m.len + 120 || m.y < -m.len-120 || m.y > h + m.len + 120){
               meteors.splice(j,1);
             }
           }
@@ -1334,51 +1488,62 @@
           par.x += (par.tx - par.x) * 0.045;
           par.y += (par.ty - par.y) * 0.045;
 
-          var px = par.x * 14;
-          var py = par.y * 9;
+          var px = par.x * 18;
+          var py = par.y * 12;
 
           ctx.clearRect(0,0,w,h);
           ctx.fillStyle = "#000";
           ctx.fillRect(0,0,w,h);
 
-          drawStars(starsFar,  px, py, 0.10);
-          drawStars(starsMid,  px, py, 0.20);
-          drawStars(starsNear, px, py, 0.34);
+          drawNebula(px, py);
+          drawStars(starsFar, px, py, 0.12);
+          drawStars(starsMid, px, py, 0.28);
+          drawStars(starsNear, px, py, 0.52);
           drawDust(px, py);
-
-          drawMoon(px, py);
+          drawRocks(px, py);
 
           if (t > nextMeteorAt){
             spawnMeteor();
-            nextMeteorAt = t + Math.floor(rand(100, 220));
+            nextMeteorAt = t + Math.floor(rand(100, 260));
           }
 
           drawMeteors();
-          drawMoonImpacts();
-
           raf = window.requestAnimationFrame(tick);
         }
 
-        function start(){
+        function start(force){
           if (raf) window.cancelAnimationFrame(raf);
-          resize();
+          resize(!!force);
           tick();
         }
 
         var resizeTimer = 0;
         function onResize(){
           clearTimeout(resizeTimer);
-          resizeTimer = setTimeout(start, 180);
+          resizeTimer = setTimeout(function(){
+            updateMoonMask();
+            start(false);
+          }, 180);
         }
 
         window.addEventListener("resize", onResize, { passive:true });
-        window.addEventListener("orientationchange", start, { passive:true });
+        window.addEventListener("orientationchange", function(){
+          updateMoonMask();
+          start(true);
+        }, { passive:true });
         document.addEventListener("visibilitychange", function(){
-          if (!document.hidden) start();
+          if (!document.hidden){
+            updateMoonMask();
+            start(true);
+          }
         });
 
-        moonImg.onload = start;
-        start();
+        window.addEventListener("load", function(){
+          updateMoonMask();
+          start(true);
+        });
+
+        start(true);
       }catch(e){}
     })();
 
@@ -1792,13 +1957,17 @@
         if (!e.touches || !e.touches[0]) return;
         var y = e.touches[0].clientY;
         dist = y - startY;
-        if (dist > 0) e.preventDefault();
+        if (dist > 0){
+          e.preventDefault();
+        }
       }
 
       function onEnd(){
         if (!pulling) return;
         pulling = false;
-        if (dist >= THRESH) window.location.reload();
+        if (dist >= THRESH){
+          window.location.reload();
+        }
         dist = 0;
       }
 
