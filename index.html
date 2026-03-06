@@ -969,16 +969,16 @@
           return true;
         }
 
-        function updateMoonMask(){
-          var moonEl = document.querySelector(".moonWrap");
-          if (!moonEl) return;
-          var rect = moonEl.getBoundingClientRect();
-          moonMask = {
-            x: rect.left + rect.width * 0.5,
-            y: rect.top + rect.height * 0.5,
-            r: Math.min(rect.width, rect.height) * 0.34
-          };
-        }
+       function updateMoonMask(){
+  var moonEl = document.querySelector(".moonWrap");
+  if (!moonEl) return;
+  var rect = moonEl.getBoundingClientRect();
+  moonMask = {
+    x: rect.left + rect.width * 0.5,
+    y: rect.top + rect.height * 0.5,
+    r: Math.min(rect.width, rect.height) * 0.24
+  };
+} 
 
         function resize(force){
           dpr = Math.max(1, Math.min(2, (window.devicePixelRatio || 1)));
