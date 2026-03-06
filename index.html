@@ -1873,79 +1873,103 @@ ctx.save();
     var next = 28000 + Math.random() * 52000;
     angstPulseTimer = setTimeout(playAngstPulse, next);
   }
+function playSpaceRadioSignal(){
+  if (!audioCtx || audioCtx.state === "closed") return;
 
-  function playSpaceRadioSignal(){
-    if (!audioCtx || audioCtx.state === "closed" || !master) return;
+  try{
+    var now = audioCtx.currentTime;
 
-    try{
-      var now = audioCtx.currentTime;
+    // ruído de estática curto
+    var noise = createBrownNoise(audioCtx);
 
-      var osc1 = audioCtx.createOscillator();
-      osc1.type = "sine";
-      osc1.frequency.setValueAtTime(980, now);
+    var noiseFilter = audioCtx.createBiquadFilter();
+    noiseFilter.type = "bandpass";
+    noiseFilter.frequency.setValueAtTime(1900, now);
+    noiseFilter.Q.setValueAtTime(2.8, now);
 
-      var filter1 = audioCtx.createBiquadFilter();
-      filter1.type = "bandpass";
-      filter1.frequency.setValueAtTime(1600, now);
-      filter1.Q.setValueAtTime(7, now);
+    var noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0.00001, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.020, now + 0.01);
+    noiseGain.gain.exponentialRampToValueAtTime(0.00001, now + 0.22);
 
-      var gain1 = audioCtx.createGain();
-      gain1.gain.setValueAtTime(0.00001, now);
-      gain1.gain.exponentialRampToValueAtTime(0.020, now + 0.01);
-      gain1.gain.exponentialRampToValueAtTime(0.00001, now + 0.18);
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(master);
 
-      osc1.connect(filter1);
-      filter1.connect(gain1);
-      gain1.connect(master);
+    noise.start(now);
+    noise.stop(now + 0.24);
 
-      osc1.start(now);
-      osc1.stop(now + 0.20);
+    // tom principal com cara de transmissão
+    var osc1 = audioCtx.createOscillator();
+    osc1.type = "sawtooth";
+    osc1.frequency.setValueAtTime(720, now + 0.02);
+    osc1.frequency.linearRampToValueAtTime(980, now + 0.12);
+    osc1.frequency.linearRampToValueAtTime(810, now + 0.26);
 
-      var now2 = now + 0.09;
-      var osc2 = audioCtx.createOscillator();
-      osc2.type = "triangle";
-      osc2.frequency.setValueAtTime(1240, now2);
+    var filter1 = audioCtx.createBiquadFilter();
+    filter1.type = "bandpass";
+    filter1.frequency.setValueAtTime(1450, now);
+    filter1.Q.setValueAtTime(8, now);
 
-      var filter2 = audioCtx.createBiquadFilter();
-      filter2.type = "bandpass";
-      filter2.frequency.setValueAtTime(2100, now2);
-      filter2.Q.setValueAtTime(8, now2);
+    var gain1 = audioCtx.createGain();
+    gain1.gain.setValueAtTime(0.00001, now + 0.02);
+    gain1.gain.exponentialRampToValueAtTime(0.016, now + 0.05);
+    gain1.gain.exponentialRampToValueAtTime(0.00001, now + 0.30);
 
-      var gain2 = audioCtx.createGain();
-      gain2.gain.setValueAtTime(0.00001, now2);
-      gain2.gain.exponentialRampToValueAtTime(0.012, now2 + 0.008);
-      gain2.gain.exponentialRampToValueAtTime(0.00001, now2 + 0.12);
+    osc1.connect(filter1);
+    filter1.connect(gain1);
+    gain1.connect(master);
 
-      osc2.connect(filter2);
-      filter2.connect(gain2);
-      gain2.connect(master);
+    osc1.start(now + 0.02);
+    osc1.stop(now + 0.31);
 
-      osc2.start(now2);
-      osc2.stop(now2 + 0.14);
+    // segundo tom mais fino, como interferência de canal
+    var osc2 = audioCtx.createOscillator();
+    osc2.type = "square";
+    osc2.frequency.setValueAtTime(1320, now + 0.08);
+    osc2.frequency.linearRampToValueAtTime(1180, now + 0.18);
 
-      var now3 = now + 0.22;
-      var osc3 = audioCtx.createOscillator();
-      osc3.type = "square";
-      osc3.frequency.setValueAtTime(2400, now3);
+    var filter2 = audioCtx.createBiquadFilter();
+    filter2.type = "bandpass";
+    filter2.frequency.setValueAtTime(2200, now);
+    filter2.Q.setValueAtTime(10, now);
 
-      var filter3 = audioCtx.createBiquadFilter();
-      filter3.type = "bandpass";
-      filter3.frequency.setValueAtTime(2600, now3);
-      filter3.Q.setValueAtTime(10, now3);
+    var gain2 = audioCtx.createGain();
+    gain2.gain.setValueAtTime(0.00001, now + 0.08);
+    gain2.gain.exponentialRampToValueAtTime(0.007, now + 0.10);
+    gain2.gain.exponentialRampToValueAtTime(0.00001, now + 0.22);
 
-      var gain3 = audioCtx.createGain();
-      gain3.gain.setValueAtTime(0.00001, now3);
-      gain3.gain.exponentialRampToValueAtTime(0.008, now3 + 0.003);
-      gain3.gain.exponentialRampToValueAtTime(0.00001, now3 + 0.03);
+    osc2.connect(filter2);
+    filter2.connect(gain2);
+    gain2.connect(master);
 
-      osc3.connect(filter3);
-      filter3.connect(gain3);
-      gain3.connect(master);
+    osc2.start(now + 0.08);
+    osc2.stop(now + 0.23);
 
-      osc3.start(now3);
-      osc3.stop(now3 + 0.04);
-    }catch(e){}
-  }
+    // clique final de rádio perdendo sintonia
+    var osc3 = audioCtx.createOscillator();
+    osc3.type = "triangle";
+    osc3.frequency.setValueAtTime(2100, now + 0.24);
+
+    var filter3 = audioCtx.createBiquadFilter();
+    filter3.type = "bandpass";
+    filter3.frequency.setValueAtTime(2500, now + 0.24);
+    filter3.Q.setValueAtTime(12, now + 0.24);
+
+    var gain3 = audioCtx.createGain();
+    gain3.gain.setValueAtTime(0.00001, now + 0.24);
+    gain3.gain.exponentialRampToValueAtTime(0.006, now + 0.245);
+    gain3.gain.exponentialRampToValueAtTime(0.00001, now + 0.29);
+
+    osc3.connect(filter3);
+    filter3.connect(gain3);
+    gain3.connect(master);
+
+    osc3.start(now + 0.24);
+    osc3.stop(now + 0.30);
+
+  }catch(e){}
+}
 
   function startAudio(){
     if (started) return true;
