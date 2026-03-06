@@ -1864,13 +1864,13 @@ var radioNoise = createBrownNoise(audioCtx);
 
 var radioFilter = audioCtx.createBiquadFilter();
 radioFilter.type = "bandpass";
-radioFilter.frequency.value = 1850;
-radioFilter.Q.value = 3.4;
+radioFilter.frequency.value = 1450;
+radioFilter.Q.value = 5.2;
 
 var radioHigh = audioCtx.createBiquadFilter();
 radioHigh.type = "highpass";
-radioHigh.frequency.value = 900;
-radioHigh.Q.value = 0.8;
+radioHigh.frequency.value = 520;
+radioHigh.Q.value = 0.9;
 
 var radioGain = audioCtx.createGain();
 radioGain.gain.value = 0.0;
@@ -1894,7 +1894,7 @@ radioLFOGain.connect(radioFilter.frequency);
 radioNoise.start();
 radioLFO.start();
 
-ramp(radioGain.gain, 0.055, 3.5);
+ramp(radioGain.gain, 0.11, 2.8);
 
 // micro rajadas de estática de rádio
 
