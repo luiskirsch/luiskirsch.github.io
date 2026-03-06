@@ -70,10 +70,10 @@
     .moonWrap{
   position:fixed;
   left:50%;
-  top:max(34px, env(safe-area-inset-top));
+  top:max(26px, env(safe-area-inset-top));
   transform:translateX(-50%);
   z-index:1;
-  width:min(300px, 44vw);
+  width:min(220px, 32vw);
   aspect-ratio:1/1;
   pointer-events:none;
   display:flex;
@@ -94,11 +94,7 @@
   height:100%;
   object-fit:contain;
   opacity:1;
-  filter:
-    brightness(1.85)
-    contrast(1.22)
-    saturate(1)
-    drop-shadow(0 0 6px rgba(255,255,255,.10));
+  filter:none;
 }
 
     .wrap{
@@ -978,7 +974,7 @@
     y: rect.top + rect.height * 0.5,
     r: Math.min(rect.width, rect.height) * 0.24
   };
-} 
+}
 
         function resize(force){
           dpr = Math.max(1, Math.min(2, (window.devicePixelRatio || 1)));
