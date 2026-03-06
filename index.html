@@ -1853,20 +1853,18 @@ ctx.save();
           airLP.connect(airGain);
           airGain.connect(master);
           
-// ===== camada ANGEST: rádio distante + pulsos raros =====
-
-// rádio espacial / interferência
+// ===== camada ANGEST: rádio distante mais perceptível =====
 var radioNoise = createBrownNoise(audioCtx);
 
 var radioFilter = audioCtx.createBiquadFilter();
 radioFilter.type = "bandpass";
-radioFilter.frequency.value = 1350;
-radioFilter.Q.value = 2.8;
+radioFilter.frequency.value = 1850;
+radioFilter.Q.value = 3.4;
 
 var radioHigh = audioCtx.createBiquadFilter();
 radioHigh.type = "highpass";
-radioHigh.frequency.value = 480;
-radioHigh.Q.value = 0.7;
+radioHigh.frequency.value = 900;
+radioHigh.Q.value = 0.8;
 
 var radioGain = audioCtx.createGain();
 radioGain.gain.value = 0.0;
@@ -1876,13 +1874,13 @@ radioFilter.connect(radioHigh);
 radioHigh.connect(radioGain);
 radioGain.connect(master);
 
-// movimento lento de sintonia
+// movimento de sintonia mais audível
 var radioLFO = audioCtx.createOscillator();
 radioLFO.type = "sine";
-radioLFO.frequency.value = 0.035;
+radioLFO.frequency.value = 0.09;
 
 var radioLFOGain = audioCtx.createGain();
-radioLFOGain.gain.value = 260;
+radioLFOGain.gain.value = 620;
 
 radioLFO.connect(radioLFOGain);
 radioLFOGain.connect(radioFilter.frequency);
@@ -1890,10 +1888,47 @@ radioLFOGain.connect(radioFilter.frequency);
 radioNoise.start();
 radioLFO.start();
 
-ramp(radioGain.gain, 0.020, 4.5);
+ramp(radioGain.gain, 0.055, 3.5);
 
-// pulsos raros tipo sinal perdido
-var angstPulseTimer = null;
+// micro rajadas de estática de rádio
+var radioBurstTimer = null;
+
+function playRadioBurst(){
+  if (!audioCtx || audioCtx.state === "closed") return;
+
+  try{
+    var now = audioCtx.currentTime;
+
+    var burst = createBrownNoise(audioCtx);
+
+    var burstFilter = audioCtx.createBiquadFilter();
+    burstFilter.type = "bandpass";
+    burstFilter.frequency.setValueAtTime(2100 + Math.random() * 900, now);
+    burstFilter.Q.setValueAtTime(4.8, now);
+
+    var burstGain = audioCtx.createGain();
+    burstGain.gain.setValueAtTime(0.00001, now);
+    burstGain.gain.exponentialRampToValueAtTime(0.020, now + 0.01);
+    burstGain.gain.exponentialRampToValueAtTime(0.00001, now + 0.16);
+
+    burst.connect(burstFilter);
+    burstFilter.connect(burstGain);
+    burstGain.connect(master);
+
+    burst.start(now);
+    burst.stop(now + 0.18);
+  }catch(e){}
+
+  scheduleRadioBurst();
+}
+
+function scheduleRadioBurst(){
+  clearTimeout(radioBurstTimer);
+  var next = 9000 + Math.random() * 16000;
+  radioBurstTimer = setTimeout(playRadioBurst, next);
+}
+
+scheduleRadioBurst();
 
 function playAngstPulse(){
   if (!audioCtx || audioCtx.state === "closed") return;
@@ -1994,6 +2029,7 @@ scheduleAngstPulse();
 
       function stopAudio(){
         clearTimeout(angstPulseTimer);
+        clearTimeout(radioBurstTimer);
         try{
           if (audioCtx){
             try{ audioCtx.close(); }catch(e){}
