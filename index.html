@@ -40,7 +40,7 @@
 
       padding-left:max(18px, env(safe-area-inset-left));
       padding-right:max(18px, env(safe-area-inset-right));
-      padding-top:max(28px, env(safe-area-inset-top));
+      padding-top:max(250px, calc(env(safe-area-inset-top) + 250px));
       padding-bottom:max(18px, env(safe-area-inset-bottom));
 
       color:#f2f2f2;
@@ -73,27 +73,33 @@
   top:max(18px, env(safe-area-inset-top));
   transform:translateX(-50%);
   z-index:1;
-  width:min(210px, 28vw);
+  width:min(360px, 52vw);
   aspect-ratio:1/1;
   pointer-events:none;
   display:flex;
   align-items:center;
   justify-content:center;
-  opacity:.98;
+  opacity:1;
+  overflow:visible;
+  filter:
+    drop-shadow(0 0 18px rgba(255,255,255,.20))
+    drop-shadow(0 0 42px rgba(255,255,255,.16))
+    drop-shadow(0 0 95px rgba(170,190,255,.14));
 }
 
 .moonGlow{
   position:absolute;
-  inset:-16%;
+  inset:-28%;
   border-radius:50%;
   background:
     radial-gradient(circle at 50% 50%,
-      rgba(255,255,255,.22) 0%,
-      rgba(210,220,255,.10) 30%,
-      rgba(180,195,255,.04) 52%,
+      rgba(255,255,255,.34) 0%,
+      rgba(230,235,255,.18) 18%,
+      rgba(190,205,255,.10) 38%,
+      rgba(120,140,255,.04) 54%,
       rgba(0,0,0,0) 76%);
-  filter:blur(10px);
-  opacity:.95;
+  filter:blur(18px);
+  opacity:1;
 }
 
 .moon{
@@ -102,11 +108,11 @@
   width:100%;
   height:100%;
   object-fit:contain;
-  opacity:.98;
+  opacity:1;
   filter:
-    drop-shadow(0 0 12px rgba(255,255,255,.18))
-    drop-shadow(0 0 34px rgba(255,255,255,.10))
-    drop-shadow(0 0 70px rgba(150,170,255,.08));
+    brightness(1.22)
+    contrast(1.10)
+    saturate(.92);
 }
 
     .wrap{
