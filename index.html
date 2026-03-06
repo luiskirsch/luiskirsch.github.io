@@ -70,36 +70,21 @@
     .moonWrap{
   position:fixed;
   left:50%;
-  top:max(18px, env(safe-area-inset-top));
+  top:max(34px, env(safe-area-inset-top));
   transform:translateX(-50%);
   z-index:1;
-  width:min(360px, 52vw);
+  width:min(300px, 44vw);
   aspect-ratio:1/1;
   pointer-events:none;
   display:flex;
   align-items:center;
   justify-content:center;
   opacity:1;
-  overflow:visible;
-  filter:
-    drop-shadow(0 0 18px rgba(255,255,255,.20))
-    drop-shadow(0 0 42px rgba(255,255,255,.16))
-    drop-shadow(0 0 95px rgba(170,190,255,.14));
+  filter:none;
 }
 
 .moonGlow{
-  position:absolute;
-  inset:-28%;
-  border-radius:50%;
-  background:
-    radial-gradient(circle at 50% 50%,
-      rgba(255,255,255,.34) 0%,
-      rgba(230,235,255,.18) 18%,
-      rgba(190,205,255,.10) 38%,
-      rgba(120,140,255,.04) 54%,
-      rgba(0,0,0,0) 76%);
-  filter:blur(18px);
-  opacity:1;
+  display:none;
 }
 
 .moon{
@@ -110,12 +95,10 @@
   object-fit:contain;
   opacity:1;
   filter:
-    brightness(1.25)
-    contrast(1.12)
-    saturate(.95)
-    drop-shadow(0 0 14px rgba(255,255,255,.25))
-    drop-shadow(0 0 40px rgba(255,255,255,.20))
-    drop-shadow(0 0 90px rgba(170,190,255,.15));
+    brightness(1.85)
+    contrast(1.22)
+    saturate(1)
+    drop-shadow(0 0 6px rgba(255,255,255,.10));
 }
 
     .wrap{
