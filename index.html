@@ -1935,6 +1935,41 @@ function scheduleRadioBurst(){
 
 scheduleRadioBurst();
 
+    function playRadioClick(){
+  if (!audioCtx || audioCtx.state === "closed") return;
+
+  try{
+    var now = audioCtx.currentTime;
+
+    var clickOsc = audioCtx.createOscillator();
+    clickOsc.type = "square";
+    clickOsc.frequency.setValueAtTime(2400 + Math.random() * 800, now);
+
+    var clickGain = audioCtx.createGain();
+    clickGain.gain.setValueAtTime(0.00001, now);
+    clickGain.gain.exponentialRampToValueAtTime(0.018, now + 0.002);
+    clickGain.gain.exponentialRampToValueAtTime(0.00001, now + 0.028);
+
+    var clickFilter = audioCtx.createBiquadFilter();
+    clickFilter.type = "bandpass";
+    clickFilter.frequency.setValueAtTime(1800, now);
+    clickFilter.Q.setValueAtTime(6, now);
+
+    clickOsc.connect(clickFilter);
+    clickFilter.connect(clickGain);
+    clickGain.connect(master);
+
+    clickOsc.start(now);
+    clickOsc.stop(now + 0.03);
+  }catch(e){}
+}
+
+setInterval(function(){
+  if (started && Math.random() < 0.35){
+    playRadioClick();
+  }
+}, 7000);
+
 function playAngstPulse(){
   if (!audioCtx || audioCtx.state === "closed") return;
 
