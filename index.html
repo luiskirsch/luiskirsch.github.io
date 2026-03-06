@@ -1367,12 +1367,10 @@
             }
 
             var P = 6.0 * r.z;
-            var x = r.x + (px * P * 0.10);
-            var y = r.y + (py * P * 0.10);
+var x = r.x + (px * P * 0.10);
+var y = r.y + (py * P * 0.10);
 
-            if (starInsideMoon(x, y, r.r + 10)) continue;
-
-            ctx.save();
+ctx.save();
             ctx.globalCompositeOperation = "source-over";
             ctx.translate(x, y);
             ctx.rotate(r.rot);
