@@ -673,33 +673,27 @@
       .grid{ grid-template-columns:1fr; }
       .title{ font-size:clamp(44px, 9vw, 78px); }
       .miniGrid{ grid-template-columns:1fr 1fr; }
-      .moonWrap{ width:min(210px, 40vw); }
+      .moonWrap{ width:min(180px, 34vw); }
     }
 
     @media (max-width:560px){
       body{
-        padding-left:max(14px, env(safe-area-inset-left));
-        padding-right:max(14px, env(safe-area-inset-right));
-        padding-top:max(138px, calc(env(safe-area-inset-top) + 138px));
-      }
+  padding-left:max(14px, env(safe-area-inset-left));
+  padding-right:max(14px, env(safe-area-inset-right));
+  padding-top:max(18px, env(safe-area-inset-top));
+}
 
-      .inner{ padding:18px 16px 18px; }
-      .row2{ grid-template-columns:1fr; }
-      .miniGrid{ grid-template-columns:1fr; }
-      button{ width:100%; min-width:0; }
-      .countdownGrid{ grid-template-columns:repeat(2, minmax(90px,1fr)); }
-      #volumeSlider{ width:120px; min-width:120px; }
+.wrap{
+  padding:112px 0 28px;
+}
 
-      .titleLogo{
-        width:120px;
-        height:120px;
-      }
-
-      .moonWrap{
-        width:min(170px, 44vw);
-        top:max(14px, env(safe-area-inset-top));
-      }
+.moonWrap{
+  width:min(138px, 34vw);
+  top:max(12px, env(safe-area-inset-top));
     }
+  }
+}
+
 
     @media (prefers-reduced-motion:reduce){
       .whisper, .title{ animation:none !important; }
@@ -990,7 +984,7 @@
           moonMask = {
             x: rect.left + rect.width * 0.5,
             y: rect.top + rect.height * 0.5,
-            r: Math.min(rect.width, rect.height) * 0.42
+            r: Math.min(rect.width, rect.height) * 0.34
           };
         }
 
