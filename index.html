@@ -1713,10 +1713,12 @@ ctx.save();
       if (!btn || !stateEl || !slider || !panelEl) return;
 
       var audioCtx = null;
-      var started = false;
-      var master = null;
-      var gDrone = null;
-      var airGain = null;
+var started = false;
+var master = null;
+var gDrone = null;
+var airGain = null;
+var radioBurstTimer = null;
+var angstPulseTimer = null;
 
       function getLS(k, fallback){
         try{
@@ -1781,10 +1783,14 @@ ctx.save();
       }
 
       function startAudio(){
-        if (started) return true;
+  if (started) return true;
 
-        try{
-          var Ctx = window.AudioContext || window.webkitAudioContext;
+  clearTimeout(radioBurstTimer);
+  clearTimeout(angstPulseTimer);
+
+  try{
+
+        var Ctx = window.AudioContext || window.webkitAudioContext;
           if (!Ctx) return false;
 
           audioCtx = new Ctx();
@@ -1891,7 +1897,6 @@ radioLFO.start();
 ramp(radioGain.gain, 0.055, 3.5);
 
 // micro rajadas de estática de rádio
-var radioBurstTimer = null;
 
 function playRadioBurst(){
   if (!audioCtx || audioCtx.state === "closed") return;
@@ -2028,8 +2033,6 @@ scheduleAngstPulse();
       }
 
       function stopAudio(){
-        clearTimeout(angstPulseTimer);
-        clearTimeout(radioBurstTimer);
         try{
           if (audioCtx){
             try{ audioCtx.close(); }catch(e){}
