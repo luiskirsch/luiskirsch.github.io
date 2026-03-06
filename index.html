@@ -1873,100 +1873,98 @@ ctx.save();
     var next = 28000 + Math.random() * 52000;
     angstPulseTimer = setTimeout(playAngstPulse, next);
   }
-function playSpaceRadioSignal(){
+
+    function playSpaceRadioSignal(){
   if (!audioCtx || audioCtx.state === "closed") return;
 
   try{
     var now = audioCtx.currentTime;
 
-    // ruído de estática curto
+    // base de chiado
     var noise = createBrownNoise(audioCtx);
 
-    var noiseFilter = audioCtx.createBiquadFilter();
-    noiseFilter.type = "bandpass";
-    noiseFilter.frequency.setValueAtTime(1900, now);
-    noiseFilter.Q.setValueAtTime(2.8, now);
+    var band = audioCtx.createBiquadFilter();
+    band.type = "bandpass";
+    band.frequency.setValueAtTime(1650, now);
+    band.Q.setValueAtTime(1.8, now);
 
-    var noiseGain = audioCtx.createGain();
-    noiseGain.gain.setValueAtTime(0.00001, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.020, now + 0.01);
-    noiseGain.gain.exponentialRampToValueAtTime(0.00001, now + 0.22);
+    // variação de sintonia
+    var lfo = audioCtx.createOscillator();
+    lfo.type = "sine";
+    lfo.frequency.setValueAtTime(0.18, now);
 
-    noise.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(master);
+    var lfoGain = audioCtx.createGain();
+    lfoGain.gain.setValueAtTime(480, now);
+
+    lfo.connect(lfoGain);
+    lfoGain.connect(band.frequency);
+
+    // ganho geral do chiado
+    var gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.00001, now);
+    gain.gain.exponentialRampToValueAtTime(0.018, now + 0.18);
+    gain.gain.setValueAtTime(0.018, now + 2.35);
+    gain.gain.exponentialRampToValueAtTime(0.00001, now + 3.0);
+
+    noise.connect(band);
+    band.connect(gain);
+    gain.connect(master);
 
     noise.start(now);
-    noise.stop(now + 0.24);
+    lfo.start(now);
 
-    // tom principal com cara de transmissão
-    var osc1 = audioCtx.createOscillator();
-    osc1.type = "sawtooth";
-    osc1.frequency.setValueAtTime(720, now + 0.02);
-    osc1.frequency.linearRampToValueAtTime(980, now + 0.12);
-    osc1.frequency.linearRampToValueAtTime(810, now + 0.26);
+    // pulsos curtos de interferência durante o chiado
+    for (var i = 0; i < 5; i++){
+      var t = now + 0.35 + (i * 0.48) + (Math.random() * 0.18);
 
-    var filter1 = audioCtx.createBiquadFilter();
-    filter1.type = "bandpass";
-    filter1.frequency.setValueAtTime(1450, now);
-    filter1.Q.setValueAtTime(8, now);
+      var burstOsc = audioCtx.createOscillator();
+      burstOsc.type = Math.random() < 0.5 ? "square" : "sawtooth";
+      burstOsc.frequency.setValueAtTime(900 + Math.random() * 1400, t);
 
-    var gain1 = audioCtx.createGain();
-    gain1.gain.setValueAtTime(0.00001, now + 0.02);
-    gain1.gain.exponentialRampToValueAtTime(0.016, now + 0.05);
-    gain1.gain.exponentialRampToValueAtTime(0.00001, now + 0.30);
+      var burstFilter = audioCtx.createBiquadFilter();
+      burstFilter.type = "bandpass";
+      burstFilter.frequency.setValueAtTime(1700 + Math.random() * 1000, t);
+      burstFilter.Q.setValueAtTime(7, t);
 
-    osc1.connect(filter1);
-    filter1.connect(gain1);
-    gain1.connect(master);
+      var burstGain = audioCtx.createGain();
+      burstGain.gain.setValueAtTime(0.00001, t);
+      burstGain.gain.exponentialRampToValueAtTime(0.006 + Math.random() * 0.006, t + 0.015);
+      burstGain.gain.exponentialRampToValueAtTime(0.00001, t + 0.11);
 
-    osc1.start(now + 0.02);
-    osc1.stop(now + 0.31);
+      burstOsc.connect(burstFilter);
+      burstFilter.connect(burstGain);
+      burstGain.connect(master);
 
-    // segundo tom mais fino, como interferência de canal
-    var osc2 = audioCtx.createOscillator();
-    osc2.type = "square";
-    osc2.frequency.setValueAtTime(1320, now + 0.08);
-    osc2.frequency.linearRampToValueAtTime(1180, now + 0.18);
+      burstOsc.start(t);
+      burstOsc.stop(t + 0.12);
+    }
 
-    var filter2 = audioCtx.createBiquadFilter();
-    filter2.type = "bandpass";
-    filter2.frequency.setValueAtTime(2200, now);
-    filter2.Q.setValueAtTime(10, now);
+    // clique final de perda de sinal
+    var endT = now + 2.72;
 
-    var gain2 = audioCtx.createGain();
-    gain2.gain.setValueAtTime(0.00001, now + 0.08);
-    gain2.gain.exponentialRampToValueAtTime(0.007, now + 0.10);
-    gain2.gain.exponentialRampToValueAtTime(0.00001, now + 0.22);
+    var clickOsc = audioCtx.createOscillator();
+    clickOsc.type = "triangle";
+    clickOsc.frequency.setValueAtTime(2400, endT);
 
-    osc2.connect(filter2);
-    filter2.connect(gain2);
-    gain2.connect(master);
+    var clickFilter = audioCtx.createBiquadFilter();
+    clickFilter.type = "bandpass";
+    clickFilter.frequency.setValueAtTime(2500, endT);
+    clickFilter.Q.setValueAtTime(10, endT);
 
-    osc2.start(now + 0.08);
-    osc2.stop(now + 0.23);
+    var clickGain = audioCtx.createGain();
+    clickGain.gain.setValueAtTime(0.00001, endT);
+    clickGain.gain.exponentialRampToValueAtTime(0.008, endT + 0.01);
+    clickGain.gain.exponentialRampToValueAtTime(0.00001, endT + 0.08);
 
-    // clique final de rádio perdendo sintonia
-    var osc3 = audioCtx.createOscillator();
-    osc3.type = "triangle";
-    osc3.frequency.setValueAtTime(2100, now + 0.24);
+    clickOsc.connect(clickFilter);
+    clickFilter.connect(clickGain);
+    clickGain.connect(master);
 
-    var filter3 = audioCtx.createBiquadFilter();
-    filter3.type = "bandpass";
-    filter3.frequency.setValueAtTime(2500, now + 0.24);
-    filter3.Q.setValueAtTime(12, now + 0.24);
+    clickOsc.start(endT);
+    clickOsc.stop(endT + 0.09);
 
-    var gain3 = audioCtx.createGain();
-    gain3.gain.setValueAtTime(0.00001, now + 0.24);
-    gain3.gain.exponentialRampToValueAtTime(0.006, now + 0.245);
-    gain3.gain.exponentialRampToValueAtTime(0.00001, now + 0.29);
-
-    osc3.connect(filter3);
-    filter3.connect(gain3);
-    gain3.connect(master);
-
-    osc3.start(now + 0.24);
-    osc3.stop(now + 0.30);
+    noise.stop(now + 3.05);
+    lfo.stop(now + 3.05);
 
   }catch(e){}
 }
@@ -2070,7 +2068,7 @@ function playSpaceRadioSignal(){
       ramp(airGain.gain, 0.085, 1.8);
 
       playSpaceRadioSignal();
-      spaceRadioInterval = setInterval(playSpaceRadioSignal, 15000);
+      spaceRadioInterval = setInterval(playSpaceRadioSignal, 20000);
 
       radioClickInterval = setInterval(function(){
         if (started && Math.random() < 0.35){
