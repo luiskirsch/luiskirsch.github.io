@@ -664,20 +664,19 @@
     }
 
     @media (max-width:560px){
-      body{
-  padding-left:max(14px, env(safe-area-inset-left));
-  padding-right:max(14px, env(safe-area-inset-right));
-  padding-top:max(18px, env(safe-area-inset-top));
-}
+  body{
+    padding-left:max(14px, env(safe-area-inset-left));
+    padding-right:max(14px, env(safe-area-inset-right));
+    padding-top:max(18px, env(safe-area-inset-top));
+  }
 
-.wrap{
-  padding:112px 0 28px;
-}
+  .wrap{
+    padding:112px 0 28px;
+  }
 
-.moonWrap{
-  width:min(210px, 50vw);
-  top:max(22px, env(safe-area-inset-top));
-}
+  .moonWrap{
+    width:min(210px, 50vw);
+    top:max(22px, env(safe-area-inset-top));
   }
 }
 
@@ -1316,26 +1315,26 @@
         }
 
         function drawDust(px, py){
-          for (var i=0;i<dust.length;i++){
-            var d = dust[i];
-            d.x += d.vx;
-            d.y += d.vy;
+  for (var i=0;i<dust.length;i++){
+    var d = dust[i];
+    d.x += d.vx;
+    d.y += d.vy;
 
-            if (d.x > w + 80){ d.x = -80; d.y = rand(-h*0.2, h*1.2); }
-            if (d.y > h + 80){ d.y = -80; d.x = rand(-w*0.2, w*1.2); }
+    if (d.x > w + 80){ d.x = -80; d.y = rand(-h*0.2, h*1.2); }
+    if (d.y > h + 80){ d.y = -80; d.x = rand(-w*0.2, w*1.2); }
 
-            var x = d.x + (px * 10);
-            var y = d.y + (py * 10);
+    var x = d.x + (px * 10);
+    var y = d.y + (py * 10);
 
-            if (starInsideMoon(x, y, d.r + 2)) continue;
+    if (starInsideMoon(x, y, d.r + 2)) continue;
 
-            ctx.fillStyle = "rgba(255,255,255," + d.a.toFixed(3) + ")";
-            ctx.beginPath();
-            ctx.arc(m.x, m.y, 1.9, 0, Math.PI*2);
-            ctx.fill();
-          }
-        }
-
+    ctx.fillStyle = "rgba(255,255,255," + d.a.toFixed(3) + ")";
+    ctx.beginPath();
+    ctx.arc(x, y, d.r, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+        
         function respawnRock(r){
           var M = 160;
           var side = Math.floor(rand(0, 4));
