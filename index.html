@@ -964,14 +964,14 @@
           return true;
         }
 
-      function updateMoonMask(){
-  const moonEl = document.querySelector(".moonWrap");
-  const rect = moonEl.getBoundingClientRect();
-
+     function updateMoonMask(){
+  var moonEl = document.querySelector(".moonWrap");
+  if (!moonEl) return;
+  var rect = moonEl.getBoundingClientRect();
   moonMask = {
-    x: rect.left + rect.width / 2,
-    y: rect.top + rect.height / 2,
-    r: rect.width * 0.45
+    x: rect.left + rect.width * 0.5,
+    y: rect.top + rect.height * 0.5,
+    r: Math.min(rect.width, rect.height) * 0.05
   };
 } 
 
