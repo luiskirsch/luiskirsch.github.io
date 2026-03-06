@@ -1858,14 +1858,7 @@ var spaceRadioInterval = null;
 
           air.connect(airLP);
           airLP.connect(airGain);
-          airGain.connect(master);
-          
-
-function scheduleRadioBurst(){
-  clearTimeout(radioBurstTimer);
-  var next = 9000 + Math.random() * 16000;
-  radioBurstTimer = setTimeout(playRadioBurst, next);
-}
+          airGain.connect(master);     
 
 scheduleRadioBurst();
 
