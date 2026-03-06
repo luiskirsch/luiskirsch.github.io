@@ -67,35 +67,36 @@
       transform:translateZ(0);
     }
 
-.moonWrap{
-  position:fixed;
-  left:50%;
-  top:max(50px, env(safe-area-inset-top));
-  transform:translateX(-50%);
-  z-index:4;
-  width:min(280px, 34vw);
-  aspect-ratio:1/1;
-  pointer-events:none;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  opacity:1;
-  filter:none;
-}
+    .moonWrap{
+      position:fixed;
+      left:50%;
+      top:max(50px, env(safe-area-inset-top));
+      transform:translateX(-50%);
+      z-index:4;
+      width:min(280px, 34vw);
+      aspect-ratio:1/1;
+      pointer-events:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      opacity:1;
+      filter:none;
+    }
 
-.moonGlow{
-  display:none;
-}
+    .moonGlow{
+      display:none;
+    }
 
-.moon{
-  position:relative;
-  z-index:1;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  opacity:1;
-  filter:none;
-}
+    .moon{
+      position:relative;
+      z-index:1;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      opacity:1;
+      filter:none;
+    }
+
     .wrap{
       position:relative;
       z-index:5;
@@ -664,22 +665,21 @@
     }
 
     @media (max-width:560px){
-  body{
-    padding-left:max(14px, env(safe-area-inset-left));
-    padding-right:max(14px, env(safe-area-inset-right));
-    padding-top:max(18px, env(safe-area-inset-top));
-  }
+      body{
+        padding-left:max(14px, env(safe-area-inset-left));
+        padding-right:max(14px, env(safe-area-inset-right));
+        padding-top:max(18px, env(safe-area-inset-top));
+      }
 
-  .wrap{
-    padding:112px 0 28px;
-  }
+      .wrap{
+        padding:112px 0 28px;
+      }
 
-  .moonWrap{
-    width:min(210px, 50vw);
-    top:max(22px, env(safe-area-inset-top));
-  }
-}
-
+      .moonWrap{
+        width:min(210px, 50vw);
+        top:max(22px, env(safe-area-inset-top));
+      }
+    }
 
     @media (prefers-reduced-motion:reduce){
       .whisper, .title{ animation:none !important; }
@@ -963,16 +963,16 @@
           return true;
         }
 
-     function updateMoonMask(){
-  var moonEl = document.querySelector(".moonWrap");
-  if (!moonEl) return;
-  var rect = moonEl.getBoundingClientRect();
-  moonMask = {
-    x: rect.left + rect.width * 0.5,
-    y: rect.top + rect.height * 0.5,
-    r: Math.min(rect.width, rect.height) * 0.06
-  };
-} 
+        function updateMoonMask(){
+          var moonEl = document.querySelector(".moonWrap");
+          if (!moonEl) return;
+          var rect = moonEl.getBoundingClientRect();
+          moonMask = {
+            x: rect.left + rect.width * 0.5,
+            y: rect.top + rect.height * 0.5,
+            r: Math.min(rect.width, rect.height) * 0.06
+          };
+        }
 
         function resize(force){
           dpr = Math.max(1, Math.min(2, (window.devicePixelRatio || 1)));
@@ -1315,26 +1315,26 @@
         }
 
         function drawDust(px, py){
-  for (var i=0;i<dust.length;i++){
-    var d = dust[i];
-    d.x += d.vx;
-    d.y += d.vy;
+          for (var i=0;i<dust.length;i++){
+            var d = dust[i];
+            d.x += d.vx;
+            d.y += d.vy;
 
-    if (d.x > w + 80){ d.x = -80; d.y = rand(-h*0.2, h*1.2); }
-    if (d.y > h + 80){ d.y = -80; d.x = rand(-w*0.2, w*1.2); }
+            if (d.x > w + 80){ d.x = -80; d.y = rand(-h*0.2, h*1.2); }
+            if (d.y > h + 80){ d.y = -80; d.x = rand(-w*0.2, w*1.2); }
 
-    var x = d.x + (px * 10);
-    var y = d.y + (py * 10);
+            var x = d.x + (px * 10);
+            var y = d.y + (py * 10);
 
-    if (starInsideMoon(x, y, d.r + 2)) continue;
+            if (starInsideMoon(x, y, d.r + 2)) continue;
 
-    ctx.fillStyle = "rgba(255,255,255," + d.a.toFixed(3) + ")";
-    ctx.beginPath();
-    ctx.arc(x, y, d.r, 0, Math.PI*2);
-    ctx.fill();
-  }
-}
-        
+            ctx.fillStyle = "rgba(255,255,255," + d.a.toFixed(3) + ")";
+            ctx.beginPath();
+            ctx.arc(x, y, d.r, 0, Math.PI*2);
+            ctx.fill();
+          }
+        }
+
         function respawnRock(r){
           var M = 160;
           var side = Math.floor(rand(0, 4));
@@ -1367,13 +1367,12 @@
             }
 
             var P = 6.0 * r.z;
-var x = r.x + (px * P * 0.10);
-var y = r.y + (py * P * 0.10);
+            var x = r.x + (px * P * 0.10);
+            var y = r.y + (py * P * 0.10);
 
-// só detritos pequenos passam por trás da lua
-if (r.r < 6 && starInsideMoon(x, y, r.r + 6)) continue;
+            if (r.r < 6 && starInsideMoon(x, y, r.r + 6)) continue;
 
-ctx.save();
+            ctx.save();
             ctx.globalCompositeOperation = "source-over";
             ctx.translate(x, y);
             ctx.rotate(r.rot);
@@ -1701,436 +1700,382 @@ ctx.save();
       }catch(e){}
     })();
 
-(function(){
-  var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
-  var reduced = mm ? mm.matches : false;
-  if (reduced) return;
-
-  var panelEl = document.getElementById("soundPanel");
-  var btn = document.getElementById("soundBtn");
-  var stateEl = document.getElementById("soundState");
-  var slider = document.getElementById("volumeSlider");
-  if (!btn || !stateEl || !slider || !panelEl) return;
-
-  var audioCtx = null;
-  var started = false;
-  var master = null;
-  var gDrone = null;
-  var airGain = null;
-  var angstPulseTimer = null;
-  var spaceRadioInterval = null;
-  var radioClickInterval = null;
-
-  function getLS(k, fallback){
-    try{
-      var v = localStorage.getItem(k);
-      return (v === null || v === undefined) ? fallback : v;
-    }catch(e){ return fallback; }
-  }
-
-  function setLS(k, v){
-    try{ localStorage.setItem(k, v); }catch(e){}
-  }
-
-  var savedVol = parseInt(getLS("preludio_volume", "55"), 10);
-  if (isNaN(savedVol)) savedVol = 55;
-  savedVol = Math.max(0, Math.min(100, savedVol));
-  slider.value = String(savedVol);
-
-  function setBtn(on){
-    stateEl.textContent = on ? "ON" : "OFF";
-  }
-  setBtn(false);
-
-  function ramp(param, value, time){
-    var now = audioCtx.currentTime;
-    try{
-      param.cancelScheduledValues(now);
-      param.setValueAtTime(param.value, now);
-      param.linearRampToValueAtTime(value, now + time);
-    }catch(e){}
-  }
-
-  function createBrownNoise(ctx){
-    var bufferSize = 2 * ctx.sampleRate;
-    var noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    var output = noiseBuffer.getChannelData(0);
-    var lastOut = 0.0;
-    for (var i = 0; i < bufferSize; i++) {
-      var white = Math.random() * 2 - 1;
-      lastOut = (lastOut + (0.02 * white)) / 1.02;
-      output[i] = lastOut * 0.32;
-    }
-    var src = ctx.createBufferSource();
-    src.buffer = noiseBuffer;
-    src.loop = true;
-    return src;
-  }
-
-  function applyVolume(){
-    if (!master || !audioCtx) return;
-
-    var v = parseInt(slider.value, 10);
-    if (isNaN(v)) v = 55;
-    v = Math.max(0, Math.min(100, v));
-    setLS("preludio_volume", String(v));
-
-    var gain = (v / 100);
-    gain = Math.pow(gain, 1.25);
-
-    try{
-      master.gain.setValueAtTime(Math.max(0.00001, gain), audioCtx.currentTime);
-    }catch(e){}
-  }
-
-  function playRadioClick(){
-    if (!audioCtx || audioCtx.state === "closed" || !master) return;
-
-    try{
-      var now = audioCtx.currentTime;
-
-      var clickOsc = audioCtx.createOscillator();
-      clickOsc.type = "square";
-      clickOsc.frequency.setValueAtTime(2400 + Math.random() * 800, now);
-
-      var clickGain = audioCtx.createGain();
-      clickGain.gain.setValueAtTime(0.00001, now);
-      clickGain.gain.exponentialRampToValueAtTime(0.018, now + 0.002);
-      clickGain.gain.exponentialRampToValueAtTime(0.00001, now + 0.028);
-
-      var clickFilter = audioCtx.createBiquadFilter();
-      clickFilter.type = "bandpass";
-      clickFilter.frequency.setValueAtTime(1800, now);
-      clickFilter.Q.setValueAtTime(6, now);
-
-      clickOsc.connect(clickFilter);
-      clickFilter.connect(clickGain);
-      clickGain.connect(master);
-
-      clickOsc.start(now);
-      clickOsc.stop(now + 0.03);
-    }catch(e){}
-  }
-
-  function playAngstPulse(){
-    if (!audioCtx || audioCtx.state === "closed" || !master) return;
-
-    try{
-      var now = audioCtx.currentTime;
-
-      var osc = audioCtx.createOscillator();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(920 + Math.random() * 240, now);
-
-      var pulseFilter = audioCtx.createBiquadFilter();
-      pulseFilter.type = "bandpass";
-      pulseFilter.frequency.setValueAtTime(1400 + Math.random() * 500, now);
-      pulseFilter.Q.setValueAtTime(5, now);
-
-      var pulseGain = audioCtx.createGain();
-      pulseGain.gain.setValueAtTime(0.00001, now);
-      pulseGain.gain.exponentialRampToValueAtTime(0.010, now + 0.008);
-      pulseGain.gain.exponentialRampToValueAtTime(0.00001, now + 0.09);
-
-      osc.connect(pulseFilter);
-      pulseFilter.connect(pulseGain);
-      pulseGain.connect(master);
-
-      osc.start(now);
-      osc.stop(now + 0.10);
-
-      if (Math.random() < 0.38){
-        var now2 = now + 0.16 + Math.random() * 0.12;
-
-        var osc2 = audioCtx.createOscillator();
-        osc2.type = "triangle";
-        osc2.frequency.setValueAtTime(780 + Math.random() * 180, now2);
-
-        var pulseFilter2 = audioCtx.createBiquadFilter();
-        pulseFilter2.type = "bandpass";
-        pulseFilter2.frequency.setValueAtTime(1200 + Math.random() * 400, now2);
-        pulseFilter2.Q.setValueAtTime(4.2, now2);
-
-        var pulseGain2 = audioCtx.createGain();
-        pulseGain2.gain.setValueAtTime(0.00001, now2);
-        pulseGain2.gain.exponentialRampToValueAtTime(0.007, now2 + 0.008);
-        pulseGain2.gain.exponentialRampToValueAtTime(0.00001, now2 + 0.075);
-
-        osc2.connect(pulseFilter2);
-        pulseFilter2.connect(pulseGain2);
-        pulseGain2.connect(master);
-
-        osc2.start(now2);
-        osc2.stop(now2 + 0.08);
-      }
-    }catch(e){}
-
-    scheduleAngstPulse();
-  }
-
-  function scheduleAngstPulse(){
-    clearTimeout(angstPulseTimer);
-    var next = 28000 + Math.random() * 52000;
-    angstPulseTimer = setTimeout(playAngstPulse, next);
-  }
-
-    function playSpaceRadioSignal(){
-  if (!audioCtx || audioCtx.state === "closed") return;
-
-  try{
-    var now = audioCtx.currentTime;
-
-    // base de chiado
-    var noise = createBrownNoise(audioCtx);
-
-    var band = audioCtx.createBiquadFilter();
-    band.type = "bandpass";
-    band.frequency.setValueAtTime(1650, now);
-    band.Q.setValueAtTime(1.8, now);
-
-    // variação de sintonia
-    var lfo = audioCtx.createOscillator();
-    lfo.type = "sine";
-    lfo.frequency.setValueAtTime(0.18, now);
-
-    var lfoGain = audioCtx.createGain();
-    lfoGain.gain.setValueAtTime(480, now);
-
-    lfo.connect(lfoGain);
-    lfoGain.connect(band.frequency);
-
-    // ganho geral do chiado
-    var gain = audioCtx.createGain();
-    gain.gain.setValueAtTime(0.00001, now);
-    gain.gain.exponentialRampToValueAtTime(0.018, now + 0.18);
-    gain.gain.setValueAtTime(0.018, now + 2.35);
-    gain.gain.exponentialRampToValueAtTime(0.00001, now + 3.0);
-
-    noise.connect(band);
-    band.connect(gain);
-    gain.connect(master);
-
-    noise.start(now);
-    lfo.start(now);
-
-    // pulsos curtos de interferência durante o chiado
-    for (var i = 0; i < 5; i++){
-      var t = now + 0.35 + (i * 0.48) + (Math.random() * 0.18);
-
-      var burstOsc = audioCtx.createOscillator();
-      burstOsc.type = Math.random() < 0.5 ? "square" : "sawtooth";
-      burstOsc.frequency.setValueAtTime(900 + Math.random() * 1400, t);
-
-      var burstFilter = audioCtx.createBiquadFilter();
-      burstFilter.type = "bandpass";
-      burstFilter.frequency.setValueAtTime(1700 + Math.random() * 1000, t);
-      burstFilter.Q.setValueAtTime(7, t);
-
-      var burstGain = audioCtx.createGain();
-      burstGain.gain.setValueAtTime(0.00001, t);
-      burstGain.gain.exponentialRampToValueAtTime(0.006 + Math.random() * 0.006, t + 0.015);
-      burstGain.gain.exponentialRampToValueAtTime(0.00001, t + 0.11);
-
-      burstOsc.connect(burstFilter);
-      burstFilter.connect(burstGain);
-      burstGain.connect(master);
-
-      burstOsc.start(t);
-      burstOsc.stop(t + 0.12);
-    }
-
-    // clique final de perda de sinal
-    var endT = now + 2.72;
-
-    var clickOsc = audioCtx.createOscillator();
-    clickOsc.type = "triangle";
-    clickOsc.frequency.setValueAtTime(2400, endT);
-
-    var clickFilter = audioCtx.createBiquadFilter();
-    clickFilter.type = "bandpass";
-    clickFilter.frequency.setValueAtTime(2500, endT);
-    clickFilter.Q.setValueAtTime(10, endT);
-
-    var clickGain = audioCtx.createGain();
-    clickGain.gain.setValueAtTime(0.00001, endT);
-    clickGain.gain.exponentialRampToValueAtTime(0.008, endT + 0.01);
-    clickGain.gain.exponentialRampToValueAtTime(0.00001, endT + 0.08);
-
-    clickOsc.connect(clickFilter);
-    clickFilter.connect(clickGain);
-    clickGain.connect(master);
-
-    clickOsc.start(endT);
-    clickOsc.stop(endT + 0.09);
-
-    noise.stop(now + 3.05);
-    lfo.stop(now + 3.05);
-
-  }catch(e){}
-}
-
-  function startAudio(){
-    if (started) return true;
-
-    clearTimeout(angstPulseTimer);
-    clearInterval(spaceRadioInterval);
-    clearInterval(radioClickInterval);
-
-    try{
-      var Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return false;
-
-      audioCtx = new Ctx();
-
-      master = audioCtx.createGain();
-      master.gain.value = 0.00001;
-
-      var comp = audioCtx.createDynamicsCompressor();
-      comp.threshold.value = -28;
-      comp.knee.value = 24;
-      comp.ratio.value = 1.8;
-      comp.attack.value = 0.02;
-      comp.release.value = 0.25;
-
-      var lp = audioCtx.createBiquadFilter();
-      lp.type = "lowpass";
-      lp.frequency.value = 1200;
-      lp.Q.value = 0.7;
-
-      var hp = audioCtx.createBiquadFilter();
-      hp.type = "highpass";
-      hp.frequency.value = 35;
-      hp.Q.value = 0.7;
-
-      master.connect(comp);
-      comp.connect(lp);
-      lp.connect(hp);
-      hp.connect(audioCtx.destination);
-
-      gDrone = audioCtx.createGain();
-      gDrone.gain.value = 0.0;
-      gDrone.connect(master);
-
-      var o1 = audioCtx.createOscillator(); o1.type = "sine"; o1.frequency.value = 55;
-      var o2 = audioCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 110;
-      var o3 = audioCtx.createOscillator(); o3.type = "sine"; o3.frequency.value = 82.41;
-
-      var g1 = audioCtx.createGain(); g1.gain.value = 0.12;
-      var g2 = audioCtx.createGain(); g2.gain.value = 0.06;
-      var g3 = audioCtx.createGain(); g3.gain.value = 0.08;
-
-      o1.connect(g1); g1.connect(gDrone);
-      o2.connect(g2); g2.connect(gDrone);
-      o3.connect(g3); g3.connect(gDrone);
-
-      var lfo = audioCtx.createOscillator();
-      lfo.type = "sine";
-      lfo.frequency.value = 0.03;
-
-      var lfoGain = audioCtx.createGain();
-      lfoGain.gain.value = 0.10;
-
-      lfo.connect(lfoGain);
-      lfoGain.connect(gDrone.gain);
-
-      var air = createBrownNoise(audioCtx);
-      airGain = audioCtx.createGain();
-      airGain.gain.value = 0.0;
-
-      var airLP = audioCtx.createBiquadFilter();
-      airLP.type = "lowpass";
-      airLP.frequency.value = 420;
-      airLP.Q.value = 0.6;
-
-      air.connect(airLP);
-      airLP.connect(airGain);
-      airGain.connect(master);
-
-      var delay = audioCtx.createDelay(0.5);
-      delay.delayTime.value = 0.22;
-
-      var dGain = audioCtx.createGain();
-      dGain.gain.value = 0.10;
-
-      gDrone.connect(delay);
-      delay.connect(dGain);
-      dGain.connect(master);
-
-      o1.start(); o2.start(); o3.start();
-      lfo.start();
-      air.start();
-
-      if (audioCtx.state === "suspended"){
-        try{ audioCtx.resume(); }catch(e){}
+    (function(){
+      var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+      var reduced = mm ? mm.matches : false;
+      if (reduced) return;
+
+      var panelEl = document.getElementById("soundPanel");
+      var btn = document.getElementById("soundBtn");
+      var stateEl = document.getElementById("soundState");
+      var slider = document.getElementById("volumeSlider");
+      if (!btn || !stateEl || !slider || !panelEl) return;
+
+      var audioCtx = null;
+      var started = false;
+      var master = null;
+      var gDrone = null;
+      var airGain = null;
+      var spaceRadioTimeout = null;
+
+      function getLS(k, fallback){
+        try{
+          var v = localStorage.getItem(k);
+          return (v === null || v === undefined) ? fallback : v;
+        }catch(e){ return fallback; }
       }
 
-      ramp(gDrone.gain, 0.44, 1.6);
-      ramp(airGain.gain, 0.085, 1.8);
+      function setLS(k, v){
+        try{ localStorage.setItem(k, v); }catch(e){}
+      }
 
-      playSpaceRadioSignal();
-      spaceRadioInterval = setInterval(playSpaceRadioSignal, 20000);
+      var savedVol = parseInt(getLS("preludio_volume", "55"), 10);
+      if (isNaN(savedVol)) savedVol = 55;
+      savedVol = Math.max(0, Math.min(100, savedVol));
+      slider.value = String(savedVol);
 
-      radioClickInterval = setInterval(function(){
-        if (started && Math.random() < 0.35){
-          playRadioClick();
-        }
-      }, 7000);
-
-      scheduleAngstPulse();
-
-      started = true;
-      setBtn(true);
-      applyVolume();
-      return true;
-
-    }catch(e){
+      function setBtn(on){
+        stateEl.textContent = on ? "ON" : "OFF";
+      }
       setBtn(false);
-      return false;
-    }
-  }
 
-  function stopAudio(){
-    clearTimeout(angstPulseTimer);
-    clearInterval(spaceRadioInterval);
-    clearInterval(radioClickInterval);
-
-    try{
-      if (audioCtx){
-        try{ audioCtx.close(); }catch(e){}
+      function ramp(param, value, time){
+        var now = audioCtx.currentTime;
+        try{
+          param.cancelScheduledValues(now);
+          param.setValueAtTime(param.value, now);
+          param.linearRampToValueAtTime(value, now + time);
+        }catch(e){}
       }
-    }catch(e){}
 
-    audioCtx = null;
-    started = false;
-    master = null;
-    gDrone = null;
-    airGain = null;
-    setBtn(false);
-  }
+      function createBrownNoise(ctx){
+        var bufferSize = 2 * ctx.sampleRate;
+        var noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        var output = noiseBuffer.getChannelData(0);
+        var lastOut = 0.0;
+        for (var i = 0; i < bufferSize; i++) {
+          var white = Math.random() * 2 - 1;
+          lastOut = (lastOut + (0.02 * white)) / 1.02;
+          output[i] = lastOut * 0.32;
+        }
+        var src = ctx.createBufferSource();
+        src.buffer = noiseBuffer;
+        src.loop = true;
+        return src;
+      }
 
-  btn.addEventListener("click", function(){
-    if (!started){
-      var ok = startAudio();
-      if (!ok) setBtn(false);
-    } else {
-      stopAudio();
-    }
-  });
+      function applyVolume(){
+        if (!master || !audioCtx) return;
 
-  slider.addEventListener("input", function(){
-    applyVolume();
-  });
+        var v = parseInt(slider.value, 10);
+        if (isNaN(v)) v = 55;
+        v = Math.max(0, Math.min(100, v));
+        setLS("preludio_volume", String(v));
 
-  function updatePanelVisibility(){
-    var y = window.scrollY || 0;
-    if (y <= 10) panelEl.classList.remove("isHidden");
-    else panelEl.classList.add("isHidden");
-  }
+        var gain = (v / 100);
+        gain = Math.pow(gain, 1.25);
 
-  window.addEventListener("scroll", updatePanelVisibility, { passive:true });
-  updatePanelVisibility();
-})();
-    
+        try{
+          master.gain.setValueAtTime(Math.max(0.00001, gain), audioCtx.currentTime);
+        }catch(e){}
+      }
+
+      function playSpaceRadioSignal(){
+        if (!audioCtx || audioCtx.state === "closed" || !master) return;
+
+        try{
+          var now = audioCtx.currentTime;
+
+          var noise = createBrownNoise(audioCtx);
+
+          var band = audioCtx.createBiquadFilter();
+          band.type = "bandpass";
+          band.frequency.setValueAtTime(1580, now);
+          band.Q.setValueAtTime(1.7, now);
+
+          var lfo = audioCtx.createOscillator();
+          lfo.type = "sine";
+          lfo.frequency.setValueAtTime(0.17, now);
+
+          var lfoGain = audioCtx.createGain();
+          lfoGain.gain.setValueAtTime(520, now);
+
+          lfo.connect(lfoGain);
+          lfoGain.connect(band.frequency);
+
+          var gain = audioCtx.createGain();
+          gain.gain.setValueAtTime(0.00001, now);
+          gain.gain.exponentialRampToValueAtTime(0.016, now + 0.22);
+          gain.gain.setValueAtTime(0.016, now + 2.20);
+          gain.gain.exponentialRampToValueAtTime(0.00001, now + 3.05);
+
+          noise.connect(band);
+          band.connect(gain);
+          gain.connect(master);
+
+          noise.start(now);
+          lfo.start(now);
+
+          var drone1 = audioCtx.createOscillator();
+          drone1.type = "sine";
+          drone1.frequency.setValueAtTime(182, now + 0.16);
+          drone1.frequency.linearRampToValueAtTime(205, now + 1.30);
+          drone1.frequency.linearRampToValueAtTime(168, now + 2.70);
+
+          var drone1Filter = audioCtx.createBiquadFilter();
+          drone1Filter.type = "bandpass";
+          drone1Filter.frequency.setValueAtTime(620, now);
+          drone1Filter.Q.setValueAtTime(3.0, now);
+
+          var drone1Gain = audioCtx.createGain();
+          drone1Gain.gain.setValueAtTime(0.00001, now + 0.16);
+          drone1Gain.gain.exponentialRampToValueAtTime(0.0055, now + 0.36);
+          drone1Gain.gain.setValueAtTime(0.0055, now + 2.10);
+          drone1Gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.95);
+
+          drone1.connect(drone1Filter);
+          drone1Filter.connect(drone1Gain);
+          drone1Gain.connect(master);
+
+          drone1.start(now + 0.16);
+          drone1.stop(now + 3.0);
+
+          var drone2 = audioCtx.createOscillator();
+          drone2.type = "triangle";
+          drone2.frequency.setValueAtTime(412, now + 0.45);
+          drone2.frequency.linearRampToValueAtTime(460, now + 1.6);
+
+          var drone2Filter = audioCtx.createBiquadFilter();
+          drone2Filter.type = "bandpass";
+          drone2Filter.frequency.setValueAtTime(980, now);
+          drone2Filter.Q.setValueAtTime(5.0, now);
+
+          var drone2Gain = audioCtx.createGain();
+          drone2Gain.gain.setValueAtTime(0.00001, now + 0.45);
+          drone2Gain.gain.exponentialRampToValueAtTime(0.0035, now + 0.62);
+          drone2Gain.gain.setValueAtTime(0.0035, now + 1.95);
+          drone2Gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.80);
+
+          drone2.connect(drone2Filter);
+          drone2Filter.connect(drone2Gain);
+          drone2Gain.connect(master);
+
+          drone2.start(now + 0.45);
+          drone2.stop(now + 2.82);
+
+          for (var i = 0; i < 4; i++){
+            var t = now + 0.55 + (i * 0.50) + (Math.random() * 0.16);
+
+            var burstOsc = audioCtx.createOscillator();
+            burstOsc.type = Math.random() < 0.5 ? "square" : "sawtooth";
+            burstOsc.frequency.setValueAtTime(950 + Math.random() * 1200, t);
+
+            var burstFilter = audioCtx.createBiquadFilter();
+            burstFilter.type = "bandpass";
+            burstFilter.frequency.setValueAtTime(1700 + Math.random() * 850, t);
+            burstFilter.Q.setValueAtTime(7.2, t);
+
+            var burstGain = audioCtx.createGain();
+            burstGain.gain.setValueAtTime(0.00001, t);
+            burstGain.gain.exponentialRampToValueAtTime(0.004 + Math.random() * 0.004, t + 0.018);
+            burstGain.gain.exponentialRampToValueAtTime(0.00001, t + 0.12);
+
+            burstOsc.connect(burstFilter);
+            burstFilter.connect(burstGain);
+            burstGain.connect(master);
+
+            burstOsc.start(t);
+            burstOsc.stop(t + 0.13);
+          }
+
+          var endT = now + 2.76;
+
+          var clickOsc = audioCtx.createOscillator();
+          clickOsc.type = "triangle";
+          clickOsc.frequency.setValueAtTime(2280, endT);
+
+          var clickFilter = audioCtx.createBiquadFilter();
+          clickFilter.type = "bandpass";
+          clickFilter.frequency.setValueAtTime(2450, endT);
+          clickFilter.Q.setValueAtTime(10, endT);
+
+          var clickGain = audioCtx.createGain();
+          clickGain.gain.setValueAtTime(0.00001, endT);
+          clickGain.gain.exponentialRampToValueAtTime(0.005, endT + 0.012);
+          clickGain.gain.exponentialRampToValueAtTime(0.00001, endT + 0.09);
+
+          clickOsc.connect(clickFilter);
+          clickFilter.connect(clickGain);
+          clickGain.connect(master);
+
+          clickOsc.start(endT);
+          clickOsc.stop(endT + 0.10);
+
+          noise.stop(now + 3.1);
+          lfo.stop(now + 3.1);
+        }catch(e){}
+      }
+
+      function scheduleSpaceRadio(){
+        clearTimeout(spaceRadioTimeout);
+        var next = 20000 + Math.random() * 10000;
+        spaceRadioTimeout = setTimeout(function(){
+          if (started){
+            playSpaceRadioSignal();
+            scheduleSpaceRadio();
+          }
+        }, next);
+      }
+
+      function startAudio(){
+        if (started) return true;
+
+        clearTimeout(spaceRadioTimeout);
+
+        try{
+          var Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return false;
+
+          audioCtx = new Ctx();
+
+          master = audioCtx.createGain();
+          master.gain.value = 0.00001;
+
+          var comp = audioCtx.createDynamicsCompressor();
+          comp.threshold.value = -28;
+          comp.knee.value = 24;
+          comp.ratio.value = 1.8;
+          comp.attack.value = 0.02;
+          comp.release.value = 0.25;
+
+          var lp = audioCtx.createBiquadFilter();
+          lp.type = "lowpass";
+          lp.frequency.value = 1200;
+          lp.Q.value = 0.7;
+
+          var hp = audioCtx.createBiquadFilter();
+          hp.type = "highpass";
+          hp.frequency.value = 35;
+          hp.Q.value = 0.7;
+
+          master.connect(comp);
+          comp.connect(lp);
+          lp.connect(hp);
+          hp.connect(audioCtx.destination);
+
+          gDrone = audioCtx.createGain();
+          gDrone.gain.value = 0.0;
+          gDrone.connect(master);
+
+          var o1 = audioCtx.createOscillator(); o1.type = "sine"; o1.frequency.value = 55;
+          var o2 = audioCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 110;
+          var o3 = audioCtx.createOscillator(); o3.type = "sine"; o3.frequency.value = 82.41;
+
+          var g1 = audioCtx.createGain(); g1.gain.value = 0.12;
+          var g2 = audioCtx.createGain(); g2.gain.value = 0.06;
+          var g3 = audioCtx.createGain(); g3.gain.value = 0.08;
+
+          o1.connect(g1); g1.connect(gDrone);
+          o2.connect(g2); g2.connect(gDrone);
+          o3.connect(g3); g3.connect(gDrone);
+
+          var lfo = audioCtx.createOscillator();
+          lfo.type = "sine";
+          lfo.frequency.value = 0.03;
+
+          var lfoGain = audioCtx.createGain();
+          lfoGain.gain.value = 0.10;
+
+          lfo.connect(lfoGain);
+          lfoGain.connect(gDrone.gain);
+
+          var air = createBrownNoise(audioCtx);
+          airGain = audioCtx.createGain();
+          airGain.gain.value = 0.0;
+
+          var airLP = audioCtx.createBiquadFilter();
+          airLP.type = "lowpass";
+          airLP.frequency.value = 420;
+          airLP.Q.value = 0.6;
+
+          air.connect(airLP);
+          airLP.connect(airGain);
+          airGain.connect(master);
+
+          var delay = audioCtx.createDelay(0.5);
+          delay.delayTime.value = 0.22;
+
+          var dGain = audioCtx.createGain();
+          dGain.gain.value = 0.10;
+
+          gDrone.connect(delay);
+          delay.connect(dGain);
+          dGain.connect(master);
+
+          o1.start(); o2.start(); o3.start();
+          lfo.start();
+          air.start();
+
+          if (audioCtx.state === "suspended"){
+            try{ audioCtx.resume(); }catch(e){}
+          }
+
+          ramp(gDrone.gain, 0.44, 1.6);
+          ramp(airGain.gain, 0.085, 1.8);
+
+          started = true;
+          setBtn(true);
+          applyVolume();
+
+          scheduleSpaceRadio();
+          return true;
+
+        }catch(e){
+          setBtn(false);
+          return false;
+        }
+      }
+
+      function stopAudio(){
+        clearTimeout(spaceRadioTimeout);
+
+        try{
+          if (audioCtx){
+            try{ audioCtx.close(); }catch(e){}
+          }
+        }catch(e){}
+
+        audioCtx = null;
+        started = false;
+        master = null;
+        gDrone = null;
+        airGain = null;
+        setBtn(false);
+      }
+
+      btn.addEventListener("click", function(){
+        if (!started){
+          var ok = startAudio();
+          if (!ok) setBtn(false);
+        } else {
+          stopAudio();
+        }
+      });
+
+      slider.addEventListener("input", function(){
+        applyVolume();
+      });
+
+      function updatePanelVisibility(){
+        var y = window.scrollY || 0;
+        if (y <= 10) panelEl.classList.remove("isHidden");
+        else panelEl.classList.add("isHidden");
+      }
+
+      window.addEventListener("scroll", updatePanelVisibility, { passive:true });
+      updatePanelVisibility();
+    })();
+
     (function(){
       var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
       var reduced = mm ? mm.matches : false;
