@@ -1331,7 +1331,7 @@
 
             ctx.fillStyle = "rgba(255,255,255," + d.a.toFixed(3) + ")";
             ctx.beginPath();
-            ctx.arc(x, y, d.r, 0, Math.PI*2);
+            ctx.arc(m.x, m.y, 1.9, 0, Math.PI*2);
             ctx.fill();
           }
         }
@@ -1453,11 +1453,11 @@
             var ty = m.y - (m.vy / norm) * m.len;
 
             var grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
-            grad.addColorStop(0, "rgba(255,255,255," + a.toFixed(3) + ")");
+            grad.addColorStop(0, "rgba(255,255,255," + (a*1.6).toFixed(3) + ")");
             grad.addColorStop(1, "rgba(255,255,255,0)");
 
             ctx.strokeStyle = grad;
-            ctx.lineWidth = m.w;
+            ctx.lineWidth = m.w * 1.9;
             ctx.beginPath();
             ctx.moveTo(m.x, m.y);
             ctx.lineTo(tx, ty);
