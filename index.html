@@ -964,16 +964,16 @@
           return true;
         }
 
-       function updateMoonMask(){
-  var moonEl = document.querySelector(".moonWrap");
-  if (!moonEl) return;
-  var rect = moonEl.getBoundingClientRect();
+      function updateMoonMask(){
+  const moonEl = document.querySelector(".moonWrap");
+  const rect = moonEl.getBoundingClientRect();
+
   moonMask = {
-    x: rect.left + rect.width * 0.5,
-    y: rect.top + rect.height * 0.5,
-    r: Math.min(rect.width, rect.height) * 0.1
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+    r: rect.width * 0.45
   };
-}
+} 
 
         function resize(force){
           dpr = Math.max(1, Math.min(2, (window.devicePixelRatio || 1)));
@@ -1305,7 +1305,7 @@
             if (x < -30) x += (w+60);
             if (x > w+30) x -= (w+60);
 
-            if (starInsideMoon(x, y, s.r * 3.2)) continue;
+            if (starInsideMoon(x, y, s.r * 1.6)) continue;
 
             var chroma = (Math.sin(s.ph * 0.85 + s.x * 0.002) * 0.5 + 0.5);
             var tempShift = (chroma - 0.5) * 0.20;
