@@ -1370,6 +1370,9 @@
 var x = r.x + (px * P * 0.10);
 var y = r.y + (py * P * 0.10);
 
+// só detritos pequenos passam por trás da lua
+if (r.r < 6 && starInsideMoon(x, y, r.r + 6)) continue;
+
 ctx.save();
             ctx.globalCompositeOperation = "source-over";
             ctx.translate(x, y);
@@ -1849,7 +1852,114 @@ ctx.save();
           air.connect(airLP);
           airLP.connect(airGain);
           airGain.connect(master);
+          
+// ===== camada ANGEST: rádio distante + pulsos raros =====
 
+// rádio espacial / interferência
+var radioNoise = createBrownNoise(audioCtx);
+
+var radioFilter = audioCtx.createBiquadFilter();
+radioFilter.type = "bandpass";
+radioFilter.frequency.value = 1350;
+radioFilter.Q.value = 2.8;
+
+var radioHigh = audioCtx.createBiquadFilter();
+radioHigh.type = "highpass";
+radioHigh.frequency.value = 480;
+radioHigh.Q.value = 0.7;
+
+var radioGain = audioCtx.createGain();
+radioGain.gain.value = 0.0;
+
+radioNoise.connect(radioFilter);
+radioFilter.connect(radioHigh);
+radioHigh.connect(radioGain);
+radioGain.connect(master);
+
+// movimento lento de sintonia
+var radioLFO = audioCtx.createOscillator();
+radioLFO.type = "sine";
+radioLFO.frequency.value = 0.035;
+
+var radioLFOGain = audioCtx.createGain();
+radioLFOGain.gain.value = 260;
+
+radioLFO.connect(radioLFOGain);
+radioLFOGain.connect(radioFilter.frequency);
+
+radioNoise.start();
+radioLFO.start();
+
+ramp(radioGain.gain, 0.020, 4.5);
+
+// pulsos raros tipo sinal perdido
+var angstPulseTimer = null;
+
+function playAngstPulse(){
+  if (!audioCtx || audioCtx.state === "closed") return;
+
+  try{
+    var now = audioCtx.currentTime;
+
+    var osc = audioCtx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(920 + Math.random() * 240, now);
+
+    var pulseFilter = audioCtx.createBiquadFilter();
+    pulseFilter.type = "bandpass";
+    pulseFilter.frequency.setValueAtTime(1400 + Math.random() * 500, now);
+    pulseFilter.Q.setValueAtTime(5, now);
+
+    var pulseGain = audioCtx.createGain();
+    pulseGain.gain.setValueAtTime(0.00001, now);
+    pulseGain.gain.exponentialRampToValueAtTime(0.010, now + 0.008);
+    pulseGain.gain.exponentialRampToValueAtTime(0.00001, now + 0.09);
+
+    osc.connect(pulseFilter);
+    pulseFilter.connect(pulseGain);
+    pulseGain.connect(master);
+
+    osc.start(now);
+    osc.stop(now + 0.10);
+
+    // às vezes toca um segundo pulso
+    if (Math.random() < 0.38){
+      var now2 = now + 0.16 + Math.random() * 0.12;
+
+      var osc2 = audioCtx.createOscillator();
+      osc2.type = "triangle";
+      osc2.frequency.setValueAtTime(780 + Math.random() * 180, now2);
+
+      var pulseFilter2 = audioCtx.createBiquadFilter();
+      pulseFilter2.type = "bandpass";
+      pulseFilter2.frequency.setValueAtTime(1200 + Math.random() * 400, now2);
+      pulseFilter2.Q.setValueAtTime(4.2, now2);
+
+      var pulseGain2 = audioCtx.createGain();
+      pulseGain2.gain.setValueAtTime(0.00001, now2);
+      pulseGain2.gain.exponentialRampToValueAtTime(0.007, now2 + 0.008);
+      pulseGain2.gain.exponentialRampToValueAtTime(0.00001, now2 + 0.075);
+
+      osc2.connect(pulseFilter2);
+      pulseFilter2.connect(pulseGain2);
+      pulseGain2.connect(master);
+
+      osc2.start(now2);
+      osc2.stop(now2 + 0.08);
+    }
+  }catch(e){}
+
+  scheduleAngstPulse();
+}
+
+function scheduleAngstPulse(){
+  clearTimeout(angstPulseTimer);
+  var next = 28000 + Math.random() * 52000; // entre 28s e 80s
+  angstPulseTimer = setTimeout(playAngstPulse, next);
+}
+
+scheduleAngstPulse();
+          
           var delay = audioCtx.createDelay(0.5);
           delay.delayTime.value = 0.22;
 
@@ -1883,6 +1993,7 @@ ctx.save();
       }
 
       function stopAudio(){
+        clearTimeout(angstPulseTimer);
         try{
           if (audioCtx){
             try{ audioCtx.close(); }catch(e){}
