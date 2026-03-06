@@ -46,6 +46,7 @@
       color:#f2f2f2;
       font-family:ui-serif, Georgia, "Times New Roman", serif;
       background:#000;
+      background-color:#000;
     }
 
     @supports (height: 100dvh){
@@ -57,18 +58,57 @@
       content:none !important;
     }
 
-    #stars{
+    /* CAMADAS DO UNIVERSO */
+    #sky,
+    #meteors{
       position:fixed;
       inset:0;
-      z-index:2;
       pointer-events:none;
-      opacity:.98;
       transform:translateZ(0);
     }
 
+    #sky{ z-index:2; opacity:.98; }
+    #moonWrap{
+      position:fixed;
+      inset:0;
+      z-index:3;
+      pointer-events:none;
+      overflow:hidden;
+    }
+
+    #moon{
+      position:absolute;
+      top:8vh;
+      right:7vw;
+      width:min(23vw, 270px);
+      max-width:270px;
+      min-width:150px;
+      height:auto;
+      opacity:.97;
+      user-select:none;
+      -webkit-user-drag:none;
+      transform:translate3d(0,0,0);
+      filter:
+        brightness(1.03)
+        contrast(1.05)
+        saturate(.92)
+        drop-shadow(0 0 8px rgba(255,255,255,.05))
+        drop-shadow(0 0 28px rgba(210,220,255,.05))
+        drop-shadow(0 0 70px rgba(255,255,255,.03));
+      will-change:transform;
+    }
+
+    #moonGlow{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+    }
+
+    #meteors{ z-index:4; }
+
     .wrap{
       position:relative;
-      z-index:5;
+      z-index:10;
       width:min(1200px, 100%);
       margin:0 auto;
       padding:22px 0 28px;
@@ -187,7 +227,6 @@
       color:rgba(255,255,255,.86);
       line-height:1.55;
     }
-
     .subtitle strong{ color:rgba(230,192,123,.95); font-weight:700; }
 
     .whisper{
@@ -506,6 +545,11 @@
       .grid{ grid-template-columns:1fr; }
       .title{ font-size:clamp(44px, 9vw, 78px); }
       .miniGrid{ grid-template-columns:1fr 1fr; }
+      #moon{
+        top:11vh;
+        right:6vw;
+        width:min(28vw, 240px);
+      }
     }
 
     @media (max-width:560px){
@@ -519,6 +563,13 @@
       button{ width:100%; min-width:0; }
       .logoOnly{ width:110px; height:110px; }
       .countdownGrid{ grid-template-columns:repeat(2, minmax(90px,1fr)); }
+
+      #moon{
+        top:13vh;
+        right:5vw;
+        width:min(34vw, 185px);
+        min-width:120px;
+      }
     }
 
     .soundPanel{
@@ -635,12 +686,20 @@
 
     @media (prefers-reduced-motion: reduce){
       .whisper, .title{ animation:none !important; }
-      #stars{ display:none; }
+      #sky, #meteors, #moonWrap{ display:none; }
     }
   </style>
 </head>
+
 <body>
-  <canvas id="stars" aria-hidden="true"></canvas>
+  <canvas id="sky" aria-hidden="true"></canvas>
+
+  <div id="moonWrap" aria-hidden="true">
+    <img id="moon" src="./lua.png" alt="">
+    <canvas id="moonGlow"></canvas>
+  </div>
+
+  <canvas id="meteors" aria-hidden="true"></canvas>
 
   <div class="soundPanel" id="soundPanel" aria-label="Controle de som">
     <button class="soundToggle" id="soundBtn" type="button" aria-label="Ativar ou desativar som">
@@ -666,7 +725,7 @@
             <span>Uma experiência psicológica em cartas físicas</span>
           </div>
 
-          <h1 class="title">Prelúdio<br/>Jogos</h1>
+          <h1 class="title">Prelúdio<br>Jogos</h1>
 
           <p class="subtitle">
             O site é a trilha: <strong>tempo</strong>, <strong>clima</strong> e <strong>silêncio</strong>.
@@ -699,7 +758,7 @@
 
           <p class="leadTitle">
             Quer receber novidades, descontos e a fase 2 assim que abrir?
-            <br/>Deixe seu contato e entre para a lista.
+            <br>Deixe seu contato e entre para a lista.
           </p>
 
           <div class="rule" style="margin-left:auto;margin-right:auto;max-width:720px;"></div>
@@ -783,7 +842,7 @@
           <p class="aboutText">
             Um jogo físico, psicológico e imersivo. Você não “joga” no celular — você joga na mesa.
             O site é a trilha: ele segura o clima, cronometra a tensão e impede “atalhos”.
-            <br/><br/>
+            <br><br>
             Recomendado para <strong>3 a 5 pessoas</strong> (ou solo). Abra a entrada, leia o ritual e comece a primeira rodada.
             Quando o tempo zerar, termina. <strong>Mesmo que alguém peça “só mais uma”.</strong>
           </p>
@@ -797,6 +856,7 @@
   </div>
 
   <script>
+    /* Tick SFX */
     (function(){
       var ctx = null;
       var unlocked = false;
@@ -804,10 +864,8 @@
       function unlock(){
         if (unlocked) return;
         unlocked = true;
-
         var Ctx = window.AudioContext || window.webkitAudioContext;
         if (!Ctx) return;
-
         try{
           ctx = new Ctx();
           if (ctx.state === "suspended"){
@@ -821,7 +879,6 @@
 
       window.preludioTick = function(){
         if (!ctx) return;
-
         try{
           var t = ctx.currentTime;
           var VOL = 0.028;
@@ -829,17 +886,14 @@
           var o1 = ctx.createOscillator();
           o1.type = "square";
           o1.frequency.setValueAtTime(1700, t);
-
           var g1 = ctx.createGain();
           g1.gain.setValueAtTime(0.00001, t);
           g1.gain.exponentialRampToValueAtTime(VOL, t + 0.003);
           g1.gain.exponentialRampToValueAtTime(0.00001, t + 0.030);
-
           var f1 = ctx.createBiquadFilter();
           f1.type = "bandpass";
           f1.frequency.setValueAtTime(2400, t);
           f1.Q.setValueAtTime(2.2, t);
-
           o1.connect(f1); f1.connect(g1); g1.connect(ctx.destination);
           o1.start(t); o1.stop(t + 0.035);
 
@@ -847,48 +901,33 @@
           var o2 = ctx.createOscillator();
           o2.type = "triangle";
           o2.frequency.setValueAtTime(520, t2);
-
           var g2 = ctx.createGain();
           g2.gain.setValueAtTime(0.00001, t2);
           g2.gain.exponentialRampToValueAtTime(VOL * 0.80, t2 + 0.004);
           g2.gain.exponentialRampToValueAtTime(0.00001, t2 + 0.040);
-
           var f2 = ctx.createBiquadFilter();
           f2.type = "lowpass";
           f2.frequency.setValueAtTime(1200, t2);
           f2.Q.setValueAtTime(0.7, t2);
-
           o2.connect(f2); f2.connect(g2); g2.connect(ctx.destination);
           o2.start(t2); o2.stop(t2 + 0.045);
-
-          var t3 = t + 0.012;
-          var o3 = ctx.createOscillator();
-          o3.type = "sine";
-          o3.frequency.setValueAtTime(3200, t3);
-
-          var g3 = ctx.createGain();
-          g3.gain.setValueAtTime(0.00001, t3);
-          g3.gain.exponentialRampToValueAtTime(VOL * 0.22, t3 + 0.002);
-          g3.gain.exponentialRampToValueAtTime(0.00001, t3 + 0.018);
-
-          var f3 = ctx.createBiquadFilter();
-          f3.type = "highpass";
-          f3.frequency.setValueAtTime(1600, t3);
-          f3.Q.setValueAtTime(0.8, t3);
-
-          o3.connect(f3); f3.connect(g3); g3.connect(ctx.destination);
-          o3.start(t3); o3.stop(t3 + 0.020);
 
         }catch(e){}
       };
     })();
 
+    /* Universo: céu + lua real + meteoros */
     (function(){
       try{
-        var canvas = document.getElementById("stars");
-        if (!canvas || !canvas.getContext) return;
-        var ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        var sky = document.getElementById("sky");
+        var skyCtx = sky.getContext("2d");
+        var meteorCanvas = document.getElementById("meteors");
+        var meteorCtx = meteorCanvas.getContext("2d");
+        var moonEl = document.getElementById("moon");
+        var moonGlow = document.getElementById("moonGlow");
+        var glowCtx = moonGlow.getContext("2d");
+
+        if (!skyCtx || !meteorCtx || !moonEl || !glowCtx) return;
 
         var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
         if (mm && mm.matches) return;
@@ -897,44 +936,67 @@
         var par = { x:0, y:0, tx:0, ty:0 };
 
         var starsFar=[], starsMid=[], starsNear=[];
-        var dust=[], rocks=[], meteors=[];
+        var dust=[], rocks=[], meteors=[], impacts=[];
         var nextMeteorAt = 0;
+        var moon = {
+          baseX:0,
+          baseY:0,
+          r:0,
+          x:0,
+          y:0
+        };
 
         function rand(min,max){ return min + Math.random()*(max-min); }
         function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
         function resize(){
-          dpr = Math.max(1, Math.min(2, (window.devicePixelRatio || 1)));
-          w = Math.floor(document.documentElement.clientWidth || window.innerWidth);
+          dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+          w = Math.floor(window.innerWidth);
           h = Math.floor(window.innerHeight);
 
-          canvas.width = Math.floor(w * dpr);
-          canvas.height = Math.floor(h * dpr);
-          canvas.style.width = w + "px";
-          canvas.style.height = h + "px";
-          ctx.setTransform(dpr,0,0,dpr,0,0);
+          sky.width = Math.floor(w * dpr);
+          sky.height = Math.floor(h * dpr);
+          sky.style.width = w + "px";
+          sky.style.height = h + "px";
+          skyCtx.setTransform(dpr,0,0,dpr,0,0);
+
+          meteorCanvas.width = Math.floor(w * dpr);
+          meteorCanvas.height = Math.floor(h * dpr);
+          meteorCanvas.style.width = w + "px";
+          meteorCanvas.style.height = h + "px";
+          meteorCtx.setTransform(dpr,0,0,dpr,0,0);
+
+          moonGlow.width = Math.floor(w * dpr);
+          moonGlow.height = Math.floor(h * dpr);
+          moonGlow.style.width = w + "px";
+          moonGlow.style.height = h + "px";
+          glowCtx.setTransform(dpr,0,0,dpr,0,0);
 
           buildScene();
+          layoutMoon();
+        }
+
+        function layoutMoon(){
+          var rect = moonEl.getBoundingClientRect();
+          moon.baseX = rect.left + rect.width / 2;
+          moon.baseY = rect.top + rect.height / 2;
+          moon.r = Math.min(rect.width, rect.height) / 2;
         }
 
         function makeStars(count, rMin, rMax, vMin, vMax, aMin, aMax, tempBias){
           var arr = [];
           for (var i=0;i<count;i++){
-            var temp = rand(-1, 1) * tempBias;
-            var twBase = rand(0.002, 0.010);
-            var twAmp  = rand(0.02, 0.20);
-            var hero = (Math.random() < 0.06);
-
             arr.push({
               x: Math.random()*w,
               y: Math.random()*h,
-              r: rand(rMin,rMax) * (hero ? rand(1.10, 1.60) : 1),
+              r: rand(rMin,rMax),
               v: rand(vMin,vMax),
-              a: rand(aMin,aMax) * (hero ? 1.08 : 1),
-              tw: twBase,
-              twa: twAmp,
+              a: rand(aMin,aMax),
+              tw: rand(0.002, 0.010),
+              twa: rand(0.02, 0.20),
               ph: Math.random()*Math.PI*2,
-              temp: temp
+              temp: rand(-1, 1) * tempBias,
+              hero: Math.random() < 0.06
             });
           }
           return arr;
@@ -943,17 +1005,12 @@
         function buildScene(){
           var area = w*h;
 
-          var farCount  = clamp(Math.floor(area/14500), 95, 260);
-          var midCount  = clamp(Math.floor(area/17500), 70, 190);
-          var nearCount = clamp(Math.floor(area/23500), 48, 130);
-
-          starsFar  = makeStars(farCount,  0.28, 0.95, 0.016, 0.045, 0.12, 0.34, 0.08);
-          starsMid  = makeStars(midCount,  0.38, 1.20, 0.040, 0.085, 0.14, 0.46, 0.10);
-          starsNear = makeStars(nearCount, 0.52, 1.65, 0.060, 0.120, 0.18, 0.60, 0.12);
+          starsFar  = makeStars(clamp(Math.floor(area/14500), 95, 260), 0.28, 0.95, 0.016, 0.045, 0.12, 0.34, 0.08);
+          starsMid  = makeStars(clamp(Math.floor(area/17500), 70, 190), 0.38, 1.20, 0.040, 0.085, 0.14, 0.46, 0.10);
+          starsNear = makeStars(clamp(Math.floor(area/23500), 48, 130), 0.52, 1.65, 0.060, 0.120, 0.18, 0.60, 0.12);
 
           dust = [];
-          var dustCount = clamp(Math.floor(area/90000), 10, 28);
-          for (var i=0;i<dustCount;i++){
+          for (var i=0, dc=clamp(Math.floor(area/90000), 10, 28); i<dc; i++){
             dust.push({
               x: rand(-w*0.2, w*1.2),
               y: rand(-h*0.2, h*1.2),
@@ -965,11 +1022,9 @@
           }
 
           rocks = [];
-          var rockCount = clamp(Math.floor(area/90000), 10, 34);
-          for (var j=0;j<rockCount;j++){
+          for (var j=0, rc=clamp(Math.floor(area/90000), 10, 24); j<rc; j++){
             var depth = rand(0.18, 0.50);
             var size = rand(3.0, 10.0) * (0.75 + depth);
-
             var ang = rand(0, Math.PI*2);
             var spd = rand(0.12, 0.30) * (0.55 + depth);
 
@@ -997,7 +1052,8 @@
           }
 
           meteors = [];
-          nextMeteorAt = Math.floor(rand(100, 260));
+          impacts = [];
+          nextMeteorAt = Math.floor(rand(130, 280));
         }
 
         function onPointerMove(clientX, clientY){
@@ -1027,7 +1083,7 @@
           return "rgba(" + R + "," + G + "," + B + "," + alpha.toFixed(3) + ")";
         }
 
-        function drawStar(x,y,r,alpha,temp,phase){
+        function drawStar(ctx, x, y, r, alpha, temp, phase){
           var flick = 0.86 + 0.14 * Math.sin(phase*1.75 + x*0.012);
           var flick2 = 0.92 + 0.08 * Math.cos(phase*2.25 + y*0.010);
           var aNow = clamp(alpha * flick * flick2, 0, 1);
@@ -1038,10 +1094,6 @@
 
           var glow = r * 3.0;
           var core = Math.max(0.55, r*0.62);
-
-          var wob = 0.45 + r*0.12;
-          var ox = Math.sin(phase*1.10) * wob;
-          var oy = Math.cos(phase*1.04) * wob;
 
           ctx.save();
           ctx.globalCompositeOperation = "screen";
@@ -1055,35 +1107,40 @@
           ctx.arc(x,y,glow,0,Math.PI*2);
           ctx.fill();
 
-          var gr = ctx.createRadialGradient(x-ox, y-oy, 0, x-ox, y-oy, glow*0.92);
-          gr.addColorStop(0, "rgba(255,130,130," + clamp(aNow*0.12,0,1).toFixed(3) + ")");
-          gr.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = gr;
-          ctx.beginPath();
-          ctx.arc(x-ox, y-oy, glow*0.92, 0, Math.PI*2);
-          ctx.fill();
-
-          var gg = ctx.createRadialGradient(x+ox*0.55, y-oy*0.55, 0, x+ox*0.55, y-oy*0.55, glow*0.78);
-          gg.addColorStop(0, "rgba(170,255,200," + clamp(aNow*0.08,0,1).toFixed(3) + ")");
-          gg.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = gg;
-          ctx.beginPath();
-          ctx.arc(x+ox*0.55, y-oy*0.55, glow*0.78, 0, Math.PI*2);
-          ctx.fill();
-
-          var gb = ctx.createRadialGradient(x+ox, y+oy, 0, x+ox, y+oy, glow*0.92);
-          gb.addColorStop(0, "rgba(160,190,255," + clamp(aNow*0.12,0,1).toFixed(3) + ")");
-          gb.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = gb;
-          ctx.beginPath();
-          ctx.arc(x+ox, y+oy, glow*0.92, 0, Math.PI*2);
-          ctx.fill();
-
           ctx.globalCompositeOperation = "lighter";
           ctx.fillStyle = starColor(temp, clamp(aNow*1.05,0,1));
           ctx.beginPath();
           ctx.arc(x,y,core,0,Math.PI*2);
           ctx.fill();
+
+          var strength = r * aNow;
+          if (strength > 0.46){
+            var L = clamp(4.5 + r*4.8, 7, 14);
+            var aSp = clamp((strength - 0.36) * 1.05, 0, 0.55);
+
+            ctx.globalCompositeOperation = "screen";
+            ctx.globalAlpha = aSp;
+            ctx.lineWidth = 0.9;
+
+            function ray(angle, len, peak){
+              var dx = Math.cos(angle) * len;
+              var dy = Math.sin(angle) * len;
+              var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
+              lg.addColorStop(0.00, "rgba(255,255,255,0)");
+              lg.addColorStop(0.46, "rgba(255,255,255,0)");
+              lg.addColorStop(0.50, "rgba(255,255,255," + peak + ")");
+              lg.addColorStop(0.54, "rgba(255,255,255,0)");
+              lg.addColorStop(1.00, "rgba(255,255,255,0)");
+              ctx.strokeStyle = lg;
+              ctx.beginPath();
+              ctx.moveTo(x-dx, y-dy);
+              ctx.lineTo(x+dx, y+dy);
+              ctx.stroke();
+            }
+
+            ray(0, L, "0.95");
+            ray(Math.PI/2, L, "0.90");
+          }
 
           ctx.restore();
         }
@@ -1112,7 +1169,7 @@
             var tempShift = (chroma - 0.5) * 0.20;
             var tempNow = clamp(s.temp + tempShift, -1, 1);
 
-            drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.ph);
+            drawStar(skyCtx, x, y, s.r, clamp(a,0,1), tempNow, s.ph);
           }
         }
 
@@ -1128,10 +1185,10 @@
             var x = d.x + (px * 10);
             var y = d.y + (py * 10);
 
-            ctx.fillStyle = "rgba(255,255,255," + d.a.toFixed(3) + ")";
-            ctx.beginPath();
-            ctx.arc(x, y, d.r, 0, Math.PI*2);
-            ctx.fill();
+            skyCtx.fillStyle = "rgba(255,255,255," + d.a.toFixed(3) + ")";
+            skyCtx.beginPath();
+            skyCtx.arc(x, y, d.r, 0, Math.PI*2);
+            skyCtx.fill();
           }
         }
 
@@ -1169,39 +1226,131 @@
             var x = r.x + (px * P * 0.10);
             var y = r.y + (py * P * 0.10);
 
-            ctx.save();
-            ctx.globalCompositeOperation = "source-over";
-            ctx.translate(x, y);
-            ctx.rotate(r.rot);
+            skyCtx.save();
+            skyCtx.translate(x, y);
+            skyCtx.rotate(r.rot);
 
-            ctx.beginPath();
+            skyCtx.beginPath();
             var pts = r.pts;
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
-            ctx.closePath();
+            skyCtx.moveTo(pts[0].x, pts[0].y);
+            for (var k=1;k<pts.length;k++) skyCtx.lineTo(pts[k].x, pts[k].y);
+            skyCtx.closePath();
 
-            ctx.fillStyle = "rgb(20,20,26)";
-            ctx.fill();
+            skyCtx.fillStyle = "rgb(20,20,26)";
+            skyCtx.fill();
 
-            var g = ctx.createRadialGradient(-r.r*0.35, -r.r*0.35, r.r*0.15, 0, 0, r.r*1.25);
+            var g = skyCtx.createRadialGradient(-r.r*0.35, -r.r*0.35, r.r*0.15, 0, 0, r.r*1.25);
             g.addColorStop(0, "rgba(255,255,255,0.10)");
             g.addColorStop(0.45, "rgba(255,255,255,0.04)");
             g.addColorStop(1, "rgba(0,0,0,0.65)");
-            ctx.fillStyle = g;
-            ctx.fill();
+            skyCtx.fillStyle = g;
+            skyCtx.fill();
 
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = "rgba(0,0,0,0.75)";
-            ctx.stroke();
-            ctx.restore();
+            skyCtx.lineWidth = 1;
+            skyCtx.strokeStyle = "rgba(0,0,0,0.75)";
+            skyCtx.stroke();
+            skyCtx.restore();
           }
+        }
+
+        function drawMoonGlow(){
+          glowCtx.clearRect(0,0,w,h);
+          if (!moon.r) return;
+
+          var g = glowCtx.createRadialGradient(moon.x, moon.y, moon.r*0.82, moon.x, moon.y, moon.r*1.65);
+          g.addColorStop(0, "rgba(255,255,255,0.012)");
+          g.addColorStop(0.35, "rgba(220,228,255,0.020)");
+          g.addColorStop(0.65, "rgba(165,185,255,0.012)");
+          g.addColorStop(1, "rgba(0,0,0,0)");
+          glowCtx.fillStyle = g;
+          glowCtx.beginPath();
+          glowCtx.arc(moon.x, moon.y, moon.r*1.65, 0, Math.PI*2);
+          glowCtx.fill();
+        }
+
+        function updateMoon(px, py){
+          if (!moonEl.complete) return;
+
+          moon.x = moon.baseX + px * 0.20;
+          moon.y = moon.baseY + py * 0.12;
+
+          var tx = px * 0.20;
+          var ty = py * 0.12;
+
+          moonEl.style.transform = "translate3d(" + tx.toFixed(2) + "px," + ty.toFixed(2) + "px,0)";
+          drawMoonGlow();
+        }
+
+        function spawnMoonImpact(x, y){
+          impacts.push({
+            x:x,
+            y:y,
+            life:0,
+            maxLife:rand(10, 18),
+            r:rand(1.5, 2.8)
+          });
+        }
+
+        function drawMoonImpacts(){
+          for (var i = impacts.length - 1; i >= 0; i--){
+            var p = impacts[i];
+            p.life++;
+            var k = p.life / p.maxLife;
+            var a = 1 - k;
+            var rr = p.r + k * 7;
+
+            var g = meteorCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rr);
+            g.addColorStop(0, "rgba(255,245,210," + (a * 0.85).toFixed(3) + ")");
+            g.addColorStop(0.30, "rgba(255,220,150," + (a * 0.60).toFixed(3) + ")");
+            g.addColorStop(1, "rgba(255,200,120,0)");
+            meteorCtx.fillStyle = g;
+            meteorCtx.beginPath();
+            meteorCtx.arc(p.x, p.y, rr, 0, Math.PI * 2);
+            meteorCtx.fill();
+
+            meteorCtx.fillStyle = "rgba(255,255,255," + (a * 0.9).toFixed(3) + ")";
+            meteorCtx.beginPath();
+            meteorCtx.arc(p.x, p.y, Math.max(0.7, p.r * (1 - k * 0.45)), 0, Math.PI * 2);
+            meteorCtx.fill();
+
+            if (p.life >= p.maxLife){
+              impacts.splice(i, 1);
+            }
+          }
+        }
+
+        function lineCircleIntersection(x1, y1, x2, y2, cx, cy, r){
+          var dx = x2 - x1;
+          var dy = y2 - y1;
+          var fx = x1 - cx;
+          var fy = y1 - cy;
+
+          var a = dx*dx + dy*dy;
+          var b = 2 * (fx*dx + fy*dy);
+          var c = fx*fx + fy*fy - r*r;
+
+          var disc = b*b - 4*a*c;
+          if (disc < 0) return null;
+
+          disc = Math.sqrt(disc);
+          var t1 = (-b - disc) / (2*a);
+          var t2 = (-b + disc) / (2*a);
+
+          var tHit = null;
+          if (t1 >= 0 && t1 <= 1) tHit = t1;
+          else if (t2 >= 0 && t2 <= 1) tHit = t2;
+
+          if (tHit === null) return null;
+
+          return {
+            x: x1 + dx * tHit,
+            y: y1 + dy * tHit
+          };
         }
 
         function spawnMeteor(){
           var edge = Math.floor(rand(0,4));
-          var x, y, angle, speed;
-
-          speed = rand(8.5, 14.5);
+          var x, y, angle, speed = rand(8.5, 14.5);
 
           if (edge === 0){
             x = rand(-w*0.2, w*1.2);
@@ -1224,6 +1373,8 @@
           meteors.push({
             x:x,
             y:y,
+            prevX:x,
+            prevY:y,
             vx:Math.cos(angle) * speed,
             vy:Math.sin(angle) * speed,
             life:0,
@@ -1237,6 +1388,10 @@
         function drawMeteors(){
           for (var j=meteors.length-1;j>=0;j--){
             var m = meteors[j];
+
+            m.prevX = m.x;
+            m.prevY = m.y;
+
             m.x += m.vx;
             m.y += m.vy;
             m.life++;
@@ -1244,27 +1399,47 @@
             var k = Math.min(1, m.life / 7);
             var a = m.a * k * (1 - (m.life / m.maxLife));
 
-            var norm = Math.sqrt(m.vx*m.vx + m.vy*m.vy) || 1;
-            var tx = m.x - (m.vx / norm) * m.len;
-            var ty = m.y - (m.vy / norm) * m.len;
+            var endX = m.x;
+            var endY = m.y;
+            var collided = false;
 
-            var grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
+            if (moon.r){
+              var hit = lineCircleIntersection(
+                m.prevX, m.prevY,
+                m.x, m.y,
+                moon.x, moon.y, moon.r
+              );
+
+              if (hit){
+                endX = hit.x;
+                endY = hit.y;
+                spawnMoonImpact(hit.x, hit.y);
+                collided = true;
+              }
+            }
+
+            var norm = Math.sqrt(m.vx*m.vx + m.vy*m.vy) || 1;
+            var tx = endX - (m.vx / norm) * m.len;
+            var ty = endY - (m.vy / norm) * m.len;
+
+            var grad = meteorCtx.createLinearGradient(endX, endY, tx, ty);
             grad.addColorStop(0, "rgba(255,255,255," + a.toFixed(3) + ")");
             grad.addColorStop(1, "rgba(255,255,255,0)");
 
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = m.w;
-            ctx.beginPath();
-            ctx.moveTo(m.x, m.y);
-            ctx.lineTo(tx, ty);
-            ctx.stroke();
+            meteorCtx.strokeStyle = grad;
+            meteorCtx.lineWidth = m.w;
+            meteorCtx.beginPath();
+            meteorCtx.moveTo(endX, endY);
+            meteorCtx.lineTo(tx, ty);
+            meteorCtx.stroke();
 
-            ctx.fillStyle = "rgba(255,255,255," + Math.min(1, a + 0.10).toFixed(3) + ")";
-            ctx.beginPath();
-            ctx.arc(m.x, m.y, 1.2, 0, Math.PI*2);
-            ctx.fill();
+            meteorCtx.fillStyle = "rgba(255,255,255," + Math.min(1, a + 0.10).toFixed(3) + ")";
+            meteorCtx.beginPath();
+            meteorCtx.arc(endX, endY, 1.2, 0, Math.PI*2);
+            meteorCtx.fill();
 
             if (
+              collided ||
               m.life > m.maxLife ||
               m.x < -m.len-120 || m.x > w + m.len + 120 ||
               m.y < -m.len-120 || m.y > h + m.len + 120
@@ -1283,13 +1458,16 @@
           var px = par.x * 18;
           var py = par.y * 12;
 
-          ctx.clearRect(0,0,w,h);
-          ctx.fillStyle = "#000";
-          ctx.fillRect(0,0,w,h);
+          skyCtx.clearRect(0,0,w,h);
+          skyCtx.fillStyle = "#000";
+          skyCtx.fillRect(0,0,w,h);
 
-          drawStars(starsFar,  px, py, 0.12);
-          drawStars(starsMid,  px, py, 0.28);
-          drawStars(starsNear, px, py, 0.52);
+          meteorCtx.clearRect(0,0,w,h);
+
+          drawStars(starsFar, px, py, 0.12);
+          drawStars(starsMid, px, py, 0.28);
+
+          updateMoon(px, py);
 
           drawDust(px, py);
           drawRocks(px, py);
@@ -1300,26 +1478,37 @@
           }
 
           drawMeteors();
+          drawMoonImpacts();
 
           raf = window.requestAnimationFrame(tick);
         }
 
+        moonEl.addEventListener("load", function(){
+          layoutMoon();
+          drawMoonGlow();
+        });
+
         function start(){
-          if (raf) window.cancelAnimationFrame(raf);
+          if (raf) cancelAnimationFrame(raf);
           resize();
           tick();
         }
 
-        window.addEventListener("resize", start, { passive:true });
-        window.addEventListener("orientationchange", start, { passive:true });
-        document.addEventListener("visibilitychange", function(){
-          if (!document.hidden) start();
-        });
+        var resizeTimer = 0;
+        function onResize(){
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(start, 180);
+        }
+
+        window.addEventListener("resize", onResize, { passive:true });
+        window.addEventListener("orientationchange", function(){ start(); }, { passive:true });
+        document.addEventListener("visibilitychange", function(){ if (!document.hidden) start(); });
 
         start();
       }catch(e){}
     })();
 
+    /* Contagem regressiva */
     (function(){
       try{
         var dayEl = document.getElementById("cdDays");
@@ -1386,6 +1575,7 @@
       }catch(e){}
     })();
 
+    /* Leads */
     (function(){
       try{
         var LEAD_EMAIL_DESTINO = "luiskirsch22@hotmail.com";
@@ -1482,6 +1672,7 @@
       } catch(e){}
     })();
 
+    /* Som do site */
     (function(){
       var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
       var reduced = mm ? mm.matches : false;
@@ -1553,9 +1744,7 @@
         v = Math.max(0, Math.min(100, v));
         setLS("preludio_volume", String(v));
 
-        var gain = (v/100);
-        gain = Math.pow(gain, 1.25);
-
+        var gain = Math.pow((v/100), 1.25);
         try{
           master.gain.setValueAtTime(Math.max(0.00001, gain), audioCtx.currentTime);
         }catch(e){}
@@ -1636,10 +1825,8 @@
 
           var delay = audioCtx.createDelay(0.5);
           delay.delayTime.value = 0.22;
-
           var dGain = audioCtx.createGain();
           dGain.gain.value = 0.10;
-
           gDrone.connect(delay);
           delay.connect(dGain);
           dGain.connect(master);
@@ -1689,9 +1876,7 @@
         }
       });
 
-      slider.addEventListener("input", function(){
-        applyVolume();
-      });
+      slider.addEventListener("input", applyVolume);
 
       function updatePanelVisibility(){
         var y = window.scrollY || 0;
@@ -1703,6 +1888,7 @@
       updatePanelVisibility();
     })();
 
+    /* Puxar para recarregar */
     (function(){
       var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
       var reduced = mm ? mm.matches : false;
@@ -1730,17 +1916,13 @@
         if (!e.touches || !e.touches[0]) return;
         var y = e.touches[0].clientY;
         dist = y - startY;
-        if (dist > 0){
-          e.preventDefault();
-        }
+        if (dist > 0) e.preventDefault();
       }
 
       function onEnd(){
         if (!pulling) return;
         pulling = false;
-        if (dist >= THRESH){
-          window.location.reload();
-        }
+        if (dist >= THRESH) window.location.reload();
         dist = 0;
       }
 
