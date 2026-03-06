@@ -68,37 +68,38 @@
     }
 
     .moonWrap{
-      position:fixed;
-      left:50%;
-      top:max(26px, env(safe-area-inset-top));
-      transform:translateX(-50%);
-      z-index:1;
-      width:min(210px, 34vw);
-      aspect-ratio:1/1;
-      pointer-events:none;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      opacity:.95;
-      filter:
-        drop-shadow(0 0 18px rgba(255,255,255,.10))
-        drop-shadow(0 0 48px rgba(255,255,255,.08))
-        drop-shadow(0 0 110px rgba(150,170,255,.06));
-    }
+  position:fixed;
+  left:50%;
+  top:max(34px, env(safe-area-inset-top));
+  transform:translateX(-50%);
+  z-index:1;
+  width:min(300px, 44vw);
+  aspect-ratio:1/1;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:1;
+  filter:
+    drop-shadow(0 0 28px rgba(255,255,255,.18))
+    drop-shadow(0 0 70px rgba(255,255,255,.14))
+    drop-shadow(0 0 150px rgba(150,170,255,.10));
+}
 
     .moonGlow{
-      position:absolute;
-      inset:-22%;
-      border-radius:50%;
-      background:
-        radial-gradient(circle at 50% 50%,
-          rgba(255,255,255,.18) 0%,
-          rgba(210,220,255,.08) 28%,
-          rgba(180,195,255,.04) 46%,
-          rgba(0,0,0,0) 72%);
-      filter:blur(10px);
-      opacity:.9;
-    }
+    .moonGlow{
+  position:absolute;
+  inset:-18%;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%,
+      rgba(255,255,255,.30) 0%,
+      rgba(210,220,255,.14) 26%,
+      rgba(180,195,255,.06) 46%,
+      rgba(0,0,0,0) 72%);
+  filter:blur(12px);
+  opacity:1;
+}
 
     .moon{
       position:relative;
