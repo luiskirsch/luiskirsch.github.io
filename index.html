@@ -1716,7 +1716,7 @@
       var master = null;
       var gDrone = null;
       var airGain = null;
-      var spaceRadioTimeout = null;
+      var radioTimer = null;
 
       function getLS(k, fallback){
         try{
@@ -1753,11 +1753,13 @@
         var noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         var output = noiseBuffer.getChannelData(0);
         var lastOut = 0.0;
+
         for (var i = 0; i < bufferSize; i++) {
           var white = Math.random() * 2 - 1;
           lastOut = (lastOut + (0.02 * white)) / 1.02;
           output[i] = lastOut * 0.32;
         }
+
         var src = ctx.createBufferSource();
         src.buffer = noiseBuffer;
         src.loop = true;
@@ -1790,139 +1792,161 @@
 
           var band = audioCtx.createBiquadFilter();
           band.type = "bandpass";
-          band.frequency.setValueAtTime(1580, now);
-          band.Q.setValueAtTime(1.7, now);
+          band.frequency.setValueAtTime(1500, now);
+          band.Q.setValueAtTime(1.45, now);
 
           var lfo = audioCtx.createOscillator();
           lfo.type = "sine";
-          lfo.frequency.setValueAtTime(0.17, now);
+          lfo.frequency.setValueAtTime(0.14, now);
 
           var lfoGain = audioCtx.createGain();
-          lfoGain.gain.setValueAtTime(520, now);
+          lfoGain.gain.setValueAtTime(580, now);
 
           lfo.connect(lfoGain);
           lfoGain.connect(band.frequency);
 
-          var gain = audioCtx.createGain();
-          gain.gain.setValueAtTime(0.00001, now);
-          gain.gain.exponentialRampToValueAtTime(0.016, now + 0.22);
-          gain.gain.setValueAtTime(0.016, now + 2.20);
-          gain.gain.exponentialRampToValueAtTime(0.00001, now + 3.05);
+          var radioGain = audioCtx.createGain();
+          radioGain.gain.setValueAtTime(0.00001, now);
+          radioGain.gain.exponentialRampToValueAtTime(0.026, now + 0.35);
+          radioGain.gain.setValueAtTime(0.026, now + 2.20);
+          radioGain.gain.exponentialRampToValueAtTime(0.00001, now + 3.00);
 
           noise.connect(band);
-          band.connect(gain);
-          gain.connect(master);
+          band.connect(radioGain);
+          radioGain.connect(master);
 
           noise.start(now);
           lfo.start(now);
 
-          var drone1 = audioCtx.createOscillator();
-          drone1.type = "sine";
-          drone1.frequency.setValueAtTime(182, now + 0.16);
-          drone1.frequency.linearRampToValueAtTime(205, now + 1.30);
-          drone1.frequency.linearRampToValueAtTime(168, now + 2.70);
+          var melody1 = audioCtx.createOscillator();
+          melody1.type = "sine";
+          melody1.frequency.setValueAtTime(168, now + 0.18);
+          melody1.frequency.linearRampToValueAtTime(182, now + 0.90);
+          melody1.frequency.linearRampToValueAtTime(162, now + 2.40);
 
-          var drone1Filter = audioCtx.createBiquadFilter();
-          drone1Filter.type = "bandpass";
-          drone1Filter.frequency.setValueAtTime(620, now);
-          drone1Filter.Q.setValueAtTime(3.0, now);
+          var melody1Filter = audioCtx.createBiquadFilter();
+          melody1Filter.type = "bandpass";
+          melody1Filter.frequency.setValueAtTime(520, now);
+          melody1Filter.Q.setValueAtTime(2.2, now);
 
-          var drone1Gain = audioCtx.createGain();
-          drone1Gain.gain.setValueAtTime(0.00001, now + 0.16);
-          drone1Gain.gain.exponentialRampToValueAtTime(0.0055, now + 0.36);
-          drone1Gain.gain.setValueAtTime(0.0055, now + 2.10);
-          drone1Gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.95);
+          var melody1Gain = audioCtx.createGain();
+          melody1Gain.gain.setValueAtTime(0.00001, now + 0.18);
+          melody1Gain.gain.exponentialRampToValueAtTime(0.010, now + 0.55);
+          melody1Gain.gain.setValueAtTime(0.010, now + 2.05);
+          melody1Gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.95);
 
-          drone1.connect(drone1Filter);
-          drone1Filter.connect(drone1Gain);
-          drone1Gain.connect(master);
+          melody1.connect(melody1Filter);
+          melody1Filter.connect(melody1Gain);
+          melody1Gain.connect(master);
 
-          drone1.start(now + 0.16);
-          drone1.stop(now + 3.0);
+          melody1.start(now + 0.18);
+          melody1.stop(now + 3.0);
 
-          var drone2 = audioCtx.createOscillator();
-          drone2.type = "triangle";
-          drone2.frequency.setValueAtTime(412, now + 0.45);
-          drone2.frequency.linearRampToValueAtTime(460, now + 1.6);
+          var melody2 = audioCtx.createOscillator();
+          melody2.type = "triangle";
+          melody2.frequency.setValueAtTime(336, now + 0.55);
+          melody2.frequency.linearRampToValueAtTime(372, now + 1.70);
 
-          var drone2Filter = audioCtx.createBiquadFilter();
-          drone2Filter.type = "bandpass";
-          drone2Filter.frequency.setValueAtTime(980, now);
-          drone2Filter.Q.setValueAtTime(5.0, now);
+          var melody2Filter = audioCtx.createBiquadFilter();
+          melody2Filter.type = "bandpass";
+          melody2Filter.frequency.setValueAtTime(900, now);
+          melody2Filter.Q.setValueAtTime(4.4, now);
 
-          var drone2Gain = audioCtx.createGain();
-          drone2Gain.gain.setValueAtTime(0.00001, now + 0.45);
-          drone2Gain.gain.exponentialRampToValueAtTime(0.0035, now + 0.62);
-          drone2Gain.gain.setValueAtTime(0.0035, now + 1.95);
-          drone2Gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.80);
+          var melody2Gain = audioCtx.createGain();
+          melody2Gain.gain.setValueAtTime(0.00001, now + 0.55);
+          melody2Gain.gain.exponentialRampToValueAtTime(0.0065, now + 0.85);
+          melody2Gain.gain.setValueAtTime(0.0065, now + 1.95);
+          melody2Gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.75);
 
-          drone2.connect(drone2Filter);
-          drone2Filter.connect(drone2Gain);
-          drone2Gain.connect(master);
+          melody2.connect(melody2Filter);
+          melody2Filter.connect(melody2Gain);
+          melody2Gain.connect(master);
 
-          drone2.start(now + 0.45);
-          drone2.stop(now + 2.82);
+          melody2.start(now + 0.55);
+          melody2.stop(now + 2.8);
 
-          for (var i = 0; i < 4; i++){
-            var t = now + 0.55 + (i * 0.50) + (Math.random() * 0.16);
+          var melody3 = audioCtx.createOscillator();
+          melody3.type = "sine";
+          melody3.frequency.setValueAtTime(504, now + 1.05);
+          melody3.frequency.linearRampToValueAtTime(446, now + 1.90);
+
+          var melody3Filter = audioCtx.createBiquadFilter();
+          melody3Filter.type = "bandpass";
+          melody3Filter.frequency.setValueAtTime(1180, now);
+          melody3Filter.Q.setValueAtTime(5.4, now);
+
+          var melody3Gain = audioCtx.createGain();
+          melody3Gain.gain.setValueAtTime(0.00001, now + 1.05);
+          melody3Gain.gain.exponentialRampToValueAtTime(0.0045, now + 1.30);
+          melody3Gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.55);
+
+          melody3.connect(melody3Filter);
+          melody3Filter.connect(melody3Gain);
+          melody3Gain.connect(master);
+
+          melody3.start(now + 1.05);
+          melody3.stop(now + 2.6);
+
+          for (var i = 0; i < 5; i++){
+            var t = now + 0.50 + (i * 0.40) + (Math.random() * 0.14);
 
             var burstOsc = audioCtx.createOscillator();
             burstOsc.type = Math.random() < 0.5 ? "square" : "sawtooth";
-            burstOsc.frequency.setValueAtTime(950 + Math.random() * 1200, t);
+            burstOsc.frequency.setValueAtTime(980 + Math.random() * 1100, t);
 
             var burstFilter = audioCtx.createBiquadFilter();
             burstFilter.type = "bandpass";
-            burstFilter.frequency.setValueAtTime(1700 + Math.random() * 850, t);
-            burstFilter.Q.setValueAtTime(7.2, t);
+            burstFilter.frequency.setValueAtTime(1750 + Math.random() * 750, t);
+            burstFilter.Q.setValueAtTime(7.5, t);
 
             var burstGain = audioCtx.createGain();
             burstGain.gain.setValueAtTime(0.00001, t);
-            burstGain.gain.exponentialRampToValueAtTime(0.004 + Math.random() * 0.004, t + 0.018);
-            burstGain.gain.exponentialRampToValueAtTime(0.00001, t + 0.12);
+            burstGain.gain.exponentialRampToValueAtTime(0.004 + Math.random() * 0.004, t + 0.016);
+            burstGain.gain.exponentialRampToValueAtTime(0.00001, t + 0.11);
 
             burstOsc.connect(burstFilter);
             burstFilter.connect(burstGain);
             burstGain.connect(master);
 
             burstOsc.start(t);
-            burstOsc.stop(t + 0.13);
+            burstOsc.stop(t + 0.12);
           }
 
-          var endT = now + 2.76;
+          var endT = now + 2.68;
 
-          var clickOsc = audioCtx.createOscillator();
-          clickOsc.type = "triangle";
-          clickOsc.frequency.setValueAtTime(2280, endT);
+          var fadeTone = audioCtx.createOscillator();
+          fadeTone.type = "sine";
+          fadeTone.frequency.setValueAtTime(240, endT);
+          fadeTone.frequency.linearRampToValueAtTime(170, endT + 0.28);
 
-          var clickFilter = audioCtx.createBiquadFilter();
-          clickFilter.type = "bandpass";
-          clickFilter.frequency.setValueAtTime(2450, endT);
-          clickFilter.Q.setValueAtTime(10, endT);
+          var fadeFilter = audioCtx.createBiquadFilter();
+          fadeFilter.type = "lowpass";
+          fadeFilter.frequency.setValueAtTime(780, endT);
 
-          var clickGain = audioCtx.createGain();
-          clickGain.gain.setValueAtTime(0.00001, endT);
-          clickGain.gain.exponentialRampToValueAtTime(0.005, endT + 0.012);
-          clickGain.gain.exponentialRampToValueAtTime(0.00001, endT + 0.09);
+          var fadeGain = audioCtx.createGain();
+          fadeGain.gain.setValueAtTime(0.00001, endT);
+          fadeGain.gain.exponentialRampToValueAtTime(0.004, endT + 0.04);
+          fadeGain.gain.exponentialRampToValueAtTime(0.00001, endT + 0.34);
 
-          clickOsc.connect(clickFilter);
-          clickFilter.connect(clickGain);
-          clickGain.connect(master);
+          fadeTone.connect(fadeFilter);
+          fadeFilter.connect(fadeGain);
+          fadeGain.connect(master);
 
-          clickOsc.start(endT);
-          clickOsc.stop(endT + 0.10);
+          fadeTone.start(endT);
+          fadeTone.stop(endT + 0.36);
 
-          noise.stop(now + 3.1);
-          lfo.stop(now + 3.1);
+          noise.stop(now + 3.05);
+          lfo.stop(now + 3.05);
         }catch(e){}
       }
 
-      function scheduleSpaceRadio(){
-        clearTimeout(spaceRadioTimeout);
+      function scheduleRadio(){
+        clearTimeout(radioTimer);
         var next = 20000 + Math.random() * 10000;
-        spaceRadioTimeout = setTimeout(function(){
+        radioTimer = setTimeout(function(){
           if (started){
             playSpaceRadioSignal();
-            scheduleSpaceRadio();
+            scheduleRadio();
           }
         }, next);
       }
@@ -1930,7 +1954,7 @@
       function startAudio(){
         if (started) return true;
 
-        clearTimeout(spaceRadioTimeout);
+        clearTimeout(radioTimer);
 
         try{
           var Ctx = window.AudioContext || window.webkitAudioContext;
@@ -1950,7 +1974,7 @@
 
           var lp = audioCtx.createBiquadFilter();
           lp.type = "lowpass";
-          lp.frequency.value = 1200;
+          lp.frequency.value = 1300;
           lp.Q.value = 0.7;
 
           var hp = audioCtx.createBiquadFilter();
@@ -1971,9 +1995,9 @@
           var o2 = audioCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 110;
           var o3 = audioCtx.createOscillator(); o3.type = "sine"; o3.frequency.value = 82.41;
 
-          var g1 = audioCtx.createGain(); g1.gain.value = 0.12;
-          var g2 = audioCtx.createGain(); g2.gain.value = 0.06;
-          var g3 = audioCtx.createGain(); g3.gain.value = 0.08;
+          var g1 = audioCtx.createGain(); g1.gain.value = 0.13;
+          var g2 = audioCtx.createGain(); g2.gain.value = 0.065;
+          var g3 = audioCtx.createGain(); g3.gain.value = 0.085;
 
           o1.connect(g1); g1.connect(gDrone);
           o2.connect(g2); g2.connect(gDrone);
@@ -2020,16 +2044,15 @@
             try{ audioCtx.resume(); }catch(e){}
           }
 
-          ramp(gDrone.gain, 0.44, 1.6);
-          ramp(airGain.gain, 0.085, 1.8);
+          ramp(gDrone.gain, 0.46, 1.6);
+          ramp(airGain.gain, 0.09, 1.8);
 
           started = true;
           setBtn(true);
           applyVolume();
 
-          scheduleSpaceRadio();
+          scheduleRadio();
           return true;
-
         }catch(e){
           setBtn(false);
           return false;
@@ -2037,7 +2060,7 @@
       }
 
       function stopAudio(){
-        clearTimeout(spaceRadioTimeout);
+        clearTimeout(radioTimer);
 
         try{
           if (audioCtx){
