@@ -1790,153 +1790,171 @@
 
           var noise = createBrownNoise(audioCtx);
 
+          var hp = audioCtx.createBiquadFilter();
+          hp.type = "highpass";
+          hp.frequency.setValueAtTime(520, now);
+          hp.Q.setValueAtTime(0.7, now);
+
           var band = audioCtx.createBiquadFilter();
           band.type = "bandpass";
-          band.frequency.setValueAtTime(1500, now);
-          band.Q.setValueAtTime(1.45, now);
+          band.frequency.setValueAtTime(1850, now);
+          band.Q.setValueAtTime(1.9, now);
 
-          var lfo = audioCtx.createOscillator();
-          lfo.type = "sine";
-          lfo.frequency.setValueAtTime(0.14, now);
+          var lp = audioCtx.createBiquadFilter();
+          lp.type = "lowpass";
+          lp.frequency.setValueAtTime(4200, now);
+          lp.Q.setValueAtTime(0.8, now);
 
-          var lfoGain = audioCtx.createGain();
-          lfoGain.gain.setValueAtTime(580, now);
+          var tuneLFO = audioCtx.createOscillator();
+          tuneLFO.type = "sine";
+          tuneLFO.frequency.setValueAtTime(0.22, now);
 
-          lfo.connect(lfoGain);
-          lfoGain.connect(band.frequency);
+          var tuneGain = audioCtx.createGain();
+          tuneGain.gain.setValueAtTime(760, now);
+
+          tuneLFO.connect(tuneGain);
+          tuneGain.connect(band.frequency);
 
           var radioGain = audioCtx.createGain();
           radioGain.gain.setValueAtTime(0.00001, now);
-          radioGain.gain.exponentialRampToValueAtTime(0.026, now + 0.35);
-          radioGain.gain.setValueAtTime(0.026, now + 2.20);
-          radioGain.gain.exponentialRampToValueAtTime(0.00001, now + 3.00);
+          radioGain.gain.exponentialRampToValueAtTime(0.052, now + 0.18);
+          radioGain.gain.setValueAtTime(0.052, now + 4.10);
+          radioGain.gain.exponentialRampToValueAtTime(0.00001, now + 5.00);
 
-          noise.connect(band);
-          band.connect(radioGain);
+          noise.connect(hp);
+          hp.connect(band);
+          band.connect(lp);
+          lp.connect(radioGain);
           radioGain.connect(master);
 
           noise.start(now);
-          lfo.start(now);
+          tuneLFO.start(now);
 
-          var melody1 = audioCtx.createOscillator();
-          melody1.type = "sine";
-          melody1.frequency.setValueAtTime(168, now + 0.18);
-          melody1.frequency.linearRampToValueAtTime(182, now + 0.90);
-          melody1.frequency.linearRampToValueAtTime(162, now + 2.40);
+          var carrier = audioCtx.createOscillator();
+          carrier.type = "sawtooth";
+          carrier.frequency.setValueAtTime(1320, now + 0.05);
+          carrier.frequency.linearRampToValueAtTime(1180, now + 1.00);
+          carrier.frequency.linearRampToValueAtTime(1460, now + 2.20);
+          carrier.frequency.linearRampToValueAtTime(980, now + 4.10);
 
-          var melody1Filter = audioCtx.createBiquadFilter();
-          melody1Filter.type = "bandpass";
-          melody1Filter.frequency.setValueAtTime(520, now);
-          melody1Filter.Q.setValueAtTime(2.2, now);
+          var carrierFilter = audioCtx.createBiquadFilter();
+          carrierFilter.type = "bandpass";
+          carrierFilter.frequency.setValueAtTime(2100, now);
+          carrierFilter.Q.setValueAtTime(8.5, now);
 
-          var melody1Gain = audioCtx.createGain();
-          melody1Gain.gain.setValueAtTime(0.00001, now + 0.18);
-          melody1Gain.gain.exponentialRampToValueAtTime(0.010, now + 0.55);
-          melody1Gain.gain.setValueAtTime(0.010, now + 2.05);
-          melody1Gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.95);
+          var carrierGain = audioCtx.createGain();
+          carrierGain.gain.setValueAtTime(0.00001, now + 0.05);
+          carrierGain.gain.exponentialRampToValueAtTime(0.020, now + 0.14);
+          carrierGain.gain.setValueAtTime(0.020, now + 3.10);
+          carrierGain.gain.exponentialRampToValueAtTime(0.00001, now + 4.55);
 
-          melody1.connect(melody1Filter);
-          melody1Filter.connect(melody1Gain);
-          melody1Gain.connect(master);
+          carrier.connect(carrierFilter);
+          carrierFilter.connect(carrierGain);
+          carrierGain.connect(master);
 
-          melody1.start(now + 0.18);
-          melody1.stop(now + 3.0);
+          carrier.start(now + 0.05);
+          carrier.stop(now + 4.6);
 
-          var melody2 = audioCtx.createOscillator();
-          melody2.type = "triangle";
-          melody2.frequency.setValueAtTime(336, now + 0.55);
-          melody2.frequency.linearRampToValueAtTime(372, now + 1.70);
+          var carrier2 = audioCtx.createOscillator();
+          carrier2.type = "square";
+          carrier2.frequency.setValueAtTime(860, now + 0.32);
+          carrier2.frequency.linearRampToValueAtTime(940, now + 1.40);
+          carrier2.frequency.linearRampToValueAtTime(760, now + 3.20);
 
-          var melody2Filter = audioCtx.createBiquadFilter();
-          melody2Filter.type = "bandpass";
-          melody2Filter.frequency.setValueAtTime(900, now);
-          melody2Filter.Q.setValueAtTime(4.4, now);
+          var carrier2Filter = audioCtx.createBiquadFilter();
+          carrier2Filter.type = "bandpass";
+          carrier2Filter.frequency.setValueAtTime(1450, now);
+          carrier2Filter.Q.setValueAtTime(10, now);
 
-          var melody2Gain = audioCtx.createGain();
-          melody2Gain.gain.setValueAtTime(0.00001, now + 0.55);
-          melody2Gain.gain.exponentialRampToValueAtTime(0.0065, now + 0.85);
-          melody2Gain.gain.setValueAtTime(0.0065, now + 1.95);
-          melody2Gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.75);
+          var carrier2Gain = audioCtx.createGain();
+          carrier2Gain.gain.setValueAtTime(0.00001, now + 0.32);
+          carrier2Gain.gain.exponentialRampToValueAtTime(0.010, now + 0.42);
+          carrier2Gain.gain.setValueAtTime(0.010, now + 2.95);
+          carrier2Gain.gain.exponentialRampToValueAtTime(0.00001, now + 4.05);
 
-          melody2.connect(melody2Filter);
-          melody2Filter.connect(melody2Gain);
-          melody2Gain.connect(master);
+          carrier2.connect(carrier2Filter);
+          carrier2Filter.connect(carrier2Gain);
+          carrier2Gain.connect(master);
 
-          melody2.start(now + 0.55);
-          melody2.stop(now + 2.8);
+          carrier2.start(now + 0.32);
+          carrier2.stop(now + 4.1);
 
-          var melody3 = audioCtx.createOscillator();
-          melody3.type = "sine";
-          melody3.frequency.setValueAtTime(504, now + 1.05);
-          melody3.frequency.linearRampToValueAtTime(446, now + 1.90);
+          for (var i = 0; i < 10; i++){
+            var t = now + 0.30 + i * 0.38 + Math.random() * 0.10;
 
-          var melody3Filter = audioCtx.createBiquadFilter();
-          melody3Filter.type = "bandpass";
-          melody3Filter.frequency.setValueAtTime(1180, now);
-          melody3Filter.Q.setValueAtTime(5.4, now);
+            var ping = audioCtx.createOscillator();
+            ping.type = (i % 2 === 0) ? "square" : "triangle";
+            ping.frequency.setValueAtTime(1450 + Math.random() * 900, t);
 
-          var melody3Gain = audioCtx.createGain();
-          melody3Gain.gain.setValueAtTime(0.00001, now + 1.05);
-          melody3Gain.gain.exponentialRampToValueAtTime(0.0045, now + 1.30);
-          melody3Gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.55);
+            var pingFilter = audioCtx.createBiquadFilter();
+            pingFilter.type = "bandpass";
+            pingFilter.frequency.setValueAtTime(2200 + Math.random() * 1000, t);
+            pingFilter.Q.setValueAtTime(9, t);
 
-          melody3.connect(melody3Filter);
-          melody3Filter.connect(melody3Gain);
-          melody3Gain.connect(master);
+            var pingGain = audioCtx.createGain();
+            pingGain.gain.setValueAtTime(0.00001, t);
+            pingGain.gain.exponentialRampToValueAtTime(0.010, t + 0.012);
+            pingGain.gain.exponentialRampToValueAtTime(0.00001, t + 0.085);
 
-          melody3.start(now + 1.05);
-          melody3.stop(now + 2.6);
+            ping.connect(pingFilter);
+            pingFilter.connect(pingGain);
+            pingGain.connect(master);
 
-          for (var i = 0; i < 5; i++){
-            var t = now + 0.50 + (i * 0.40) + (Math.random() * 0.14);
-
-            var burstOsc = audioCtx.createOscillator();
-            burstOsc.type = Math.random() < 0.5 ? "square" : "sawtooth";
-            burstOsc.frequency.setValueAtTime(980 + Math.random() * 1100, t);
-
-            var burstFilter = audioCtx.createBiquadFilter();
-            burstFilter.type = "bandpass";
-            burstFilter.frequency.setValueAtTime(1750 + Math.random() * 750, t);
-            burstFilter.Q.setValueAtTime(7.5, t);
-
-            var burstGain = audioCtx.createGain();
-            burstGain.gain.setValueAtTime(0.00001, t);
-            burstGain.gain.exponentialRampToValueAtTime(0.004 + Math.random() * 0.004, t + 0.016);
-            burstGain.gain.exponentialRampToValueAtTime(0.00001, t + 0.11);
-
-            burstOsc.connect(burstFilter);
-            burstFilter.connect(burstGain);
-            burstGain.connect(master);
-
-            burstOsc.start(t);
-            burstOsc.stop(t + 0.12);
+            ping.start(t);
+            ping.stop(t + 0.09);
           }
 
-          var endT = now + 2.68;
+          for (var j = 0; j < 8; j++){
+            var tt = now + 0.55 + j * 0.46 + Math.random() * 0.12;
+
+            var crack = audioCtx.createOscillator();
+            crack.type = "square";
+            crack.frequency.setValueAtTime(2500 + Math.random() * 1600, tt);
+
+            var crackGain = audioCtx.createGain();
+            crackGain.gain.setValueAtTime(0.00001, tt);
+            crackGain.gain.exponentialRampToValueAtTime(0.008, tt + 0.004);
+            crackGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.03);
+
+            var crackFilter = audioCtx.createBiquadFilter();
+            crackFilter.type = "bandpass";
+            crackFilter.frequency.setValueAtTime(3000, tt);
+            crackFilter.Q.setValueAtTime(12, tt);
+
+            crack.connect(crackFilter);
+            crackFilter.connect(crackGain);
+            crackGain.connect(master);
+
+            crack.start(tt);
+            crack.stop(tt + 0.035);
+          }
+
+          var endT = now + 4.45;
 
           var fadeTone = audioCtx.createOscillator();
-          fadeTone.type = "sine";
-          fadeTone.frequency.setValueAtTime(240, endT);
-          fadeTone.frequency.linearRampToValueAtTime(170, endT + 0.28);
+          fadeTone.type = "triangle";
+          fadeTone.frequency.setValueAtTime(420, endT);
+          fadeTone.frequency.linearRampToValueAtTime(180, endT + 0.44);
 
           var fadeFilter = audioCtx.createBiquadFilter();
-          fadeFilter.type = "lowpass";
-          fadeFilter.frequency.setValueAtTime(780, endT);
+          fadeFilter.type = "bandpass";
+          fadeFilter.frequency.setValueAtTime(900, endT);
+          fadeFilter.Q.setValueAtTime(4.5, endT);
 
           var fadeGain = audioCtx.createGain();
           fadeGain.gain.setValueAtTime(0.00001, endT);
-          fadeGain.gain.exponentialRampToValueAtTime(0.004, endT + 0.04);
-          fadeGain.gain.exponentialRampToValueAtTime(0.00001, endT + 0.34);
+          fadeGain.gain.exponentialRampToValueAtTime(0.006, endT + 0.03);
+          fadeGain.gain.exponentialRampToValueAtTime(0.00001, endT + 0.50);
 
           fadeTone.connect(fadeFilter);
           fadeFilter.connect(fadeGain);
           fadeGain.connect(master);
 
           fadeTone.start(endT);
-          fadeTone.stop(endT + 0.36);
+          fadeTone.stop(endT + 0.55);
 
-          noise.stop(now + 3.05);
-          lfo.stop(now + 3.05);
+          noise.stop(now + 5.10);
+          tuneLFO.stop(now + 5.10);
         }catch(e){}
       }
 
@@ -2044,8 +2062,8 @@
             try{ audioCtx.resume(); }catch(e){}
           }
 
-          ramp(gDrone.gain, 0.46, 1.6);
-          ramp(airGain.gain, 0.09, 1.8);
+          ramp(gDrone.gain, 0.34, 1.6);
+          ramp(airGain.gain, 0.06, 1.8);
 
           started = true;
           setBtn(true);
