@@ -806,6 +806,136 @@
       .moonWrap{ filter:none; }
     }
   </style>
+
+  <script>
+    (function(){
+      try{
+        var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+        var prefersReduced = !!(mm && mm.matches);
+        var ua = navigator.userAgent || "";
+        var touchPoints = navigator.maxTouchPoints || 0;
+        var isTouch = ("ontouchstart" in window) || touchPoints > 0;
+        var isIPhone = /iPhone/i.test(ua);
+        var isIPad = /iPad/i.test(ua) || (/Macintosh/i.test(ua) && touchPoints > 1);
+        var isAndroidMobile = /Android.+Mobile/i.test(ua);
+        var isMobileUA = /iPhone|Android.+Mobile|Windows Phone|webOS|BlackBerry|Opera Mini/i.test(ua);
+        var isTabletUA = /Android(?!.*Mobile)|Tablet|Silk/i.test(ua) || isIPad;
+
+        var cores = navigator.hardwareConcurrency || 0;
+        var mem = navigator.deviceMemory || 0;
+        var dpr = window.devicePixelRatio || 1;
+        var sw = Math.min(screen.width || innerWidth || 0, screen.height || innerHeight || 0);
+        var vw = Math.min(window.innerWidth || 0, window.innerHeight || 0);
+
+        var kind = "desktop";
+        if (isMobileUA) kind = "mobile";
+        else if (isTabletUA) kind = "tablet";
+        else if (isTouch && vw <= 1024) kind = "tablet";
+
+        var score = 0;
+
+        if (kind === "desktop") score += 100;
+        if (kind === "tablet") score += 90;
+        if (kind === "mobile") score += 50;
+
+        if (cores >= 8) score += 26;
+        else if (cores >= 6) score += 18;
+        else if (cores >= 4) score += 8;
+        else if (cores > 0) score -= 10;
+
+        if (mem >= 8) score += 24;
+        else if (mem >= 6) score += 18;
+        else if (mem >= 4) score += 10;
+        else if (mem > 0) score -= 8;
+
+        if (dpr >= 3) score -= 8;
+        else if (dpr >= 2) score -= 4;
+
+        if (isIPad) score += 20;
+        if (kind === "tablet") score += 14;
+        if (kind === "desktop") score += 20;
+
+        if (isIPhone && sw <= 750) score -= 18;
+        if (isAndroidMobile && sw <= 412 && cores && cores <= 4) score -= 12;
+
+        if (prefersReduced) score -= 60;
+
+        var initialTier = "balanced";
+        if (kind === "desktop" || kind === "tablet") initialTier = "max";
+        else if (score >= 86) initialTier = "max";
+        else if (score <= 48) initialTier = "lite";
+
+        window.__PRELUDIO_DEVICE__ = {
+          kind: kind,
+          score: score,
+          initialTier: initialTier,
+          finalTier: initialTier,
+          prefersReduced: prefersReduced,
+          hardwareConcurrency: cores,
+          deviceMemory: mem,
+          dpr: dpr,
+          tested: false
+        };
+
+        if (prefersReduced) return;
+
+        var samples = [];
+        var sampleCount = 10;
+        var start = performance.now();
+
+        function finish(){
+          if (!window.__PRELUDIO_DEVICE__) return;
+          if (window.__PRELUDIO_DEVICE__.kind === "desktop" || window.__PRELUDIO_DEVICE__.kind === "tablet"){
+            window.__PRELUDIO_DEVICE__.finalTier = "max";
+            window.__PRELUDIO_DEVICE__.tested = true;
+            return;
+          }
+
+          if (!samples.length){
+            window.__PRELUDIO_DEVICE__.tested = true;
+            return;
+          }
+
+          var total = 0;
+          for (var i=0;i<samples.length;i++) total += samples[i];
+          var avg = total / samples.length;
+
+          if (avg <= 18 && window.__PRELUDIO_DEVICE__.score >= 72){
+            window.__PRELUDIO_DEVICE__.finalTier = "max";
+          } else if (avg <= 24 && window.__PRELUDIO_DEVICE__.score >= 52){
+            window.__PRELUDIO_DEVICE__.finalTier = "balanced";
+          } else {
+            window.__PRELUDIO_DEVICE__.finalTier = "lite";
+          }
+
+          window.__PRELUDIO_DEVICE__.tested = true;
+        }
+
+        requestAnimationFrame(function(t0){
+          function step(prev){
+            requestAnimationFrame(function(t1){
+              samples.push(t1 - prev);
+              if (samples.length >= sampleCount || (t1 - start) > 260){
+                finish();
+              } else {
+                step(t1);
+              }
+            });
+          }
+          step(t0);
+        });
+      }catch(e){
+        window.__PRELUDIO_DEVICE__ = {
+          kind: "desktop",
+          score: 100,
+          initialTier: "max",
+          finalTier: "max",
+          prefersReduced: false,
+          tested: true
+        };
+      }
+    })();
+  </script>
 </head>
 
 <body>
@@ -1051,22 +1181,20 @@
         var ctx = canvas.getContext("2d", { alpha:true });
         if (!ctx) return;
 
-        var mm = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
-        if (mm && mm.matches) return;
+        var device = window.__PRELUDIO_DEVICE__ || {
+          kind: "desktop",
+          finalTier: "max",
+          prefersReduced: false
+        };
 
-        var ua = navigator.userAgent || "";
-        var isTouch = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
-        var isMobileUA = /iPhone|Android.+Mobile|Windows Phone|webOS|BlackBerry|Opera Mini/i.test(ua);
-        var isIPad = /iPad/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
-        var isTabletUA = /Android(?!.*Mobile)|Tablet|Silk/i.test(ua) || isIPad;
+        if (device.prefersReduced) return;
 
-        var perfMode = "desktop";
-        if (isMobileUA) perfMode = "mobile";
-        else if (isTabletUA || isTouch) perfMode = "tablet";
+        var tier = device.finalTier || device.initialTier || "balanced";
+        var kind = device.kind || "desktop";
 
-        var PERF = {
-          desktop: {
-            dprCap: 2,
+        var PERF_BY_TIER = {
+          max: {
+            dprCap: kind === "tablet" ? 1.9 : 2,
             farMul: 1,
             midMul: 1,
             nearMul: 1,
@@ -1075,33 +1203,41 @@
             parLerp: 0.045,
             tickSkip: 0,
             nebulaSize: 640,
-            meteorChanceMul: 1
+            meteorChanceMul: 1,
+            starCross: true,
+            cloudPasses: 2
           },
-          tablet: {
-            dprCap: 1.6,
-            farMul: 0.92,
-            midMul: 0.92,
-            nearMul: 0.95,
-            dustMul: 0.90,
-            rockMul: 0.92,
-            parLerp: 0.036,
-            tickSkip: 0,
-            nebulaSize: 560,
-            meteorChanceMul: 0.95
+          balanced: {
+            dprCap: kind === "tablet" ? 1.7 : 1.45,
+            farMul: 0.82,
+            midMul: 0.80,
+            nearMul: 0.84,
+            dustMul: 0.72,
+            rockMul: 0.74,
+            parLerp: 0.032,
+            tickSkip: 1,
+            nebulaSize: 500,
+            meteorChanceMul: 0.82,
+            starCross: false,
+            cloudPasses: 1
           },
-          mobile: {
-  dprCap: 1.25,
-  farMul: 0.72,
-  midMul: 0.70,
-  nearMul: 0.74,
-  dustMul: 0.58,
-  rockMul: 0.62,
-  parLerp: 0.028,
-  tickSkip: 1,
-  nebulaSize: 420,
-  meteorChanceMul: 0.72
-}
-        }[perfMode];
+          lite: {
+            dprCap: 1.15,
+            farMul: 0.58,
+            midMul: 0.56,
+            nearMul: 0.60,
+            dustMul: 0.42,
+            rockMul: 0.46,
+            parLerp: 0.022,
+            tickSkip: 2,
+            nebulaSize: 360,
+            meteorChanceMul: 0.62,
+            starCross: false,
+            cloudPasses: 1
+          }
+        };
+
+        var PERF = PERF_BY_TIER[tier] || PERF_BY_TIER.balanced;
 
         var w=0,h=0,dpr=1, raf=0, t=0, frame=0;
         var par = { x:0, y:0, tx:0, ty:0 };
@@ -1116,7 +1252,7 @@
           x:0,
           y:0,
           a:0.00,
-          drift: perfMode === "mobile" ? 0.0032 : 0.004
+          drift: tier === "lite" ? 0.0028 : (tier === "balanced" ? 0.0032 : 0.004)
         };
         var nctx = neb.c.getContext("2d", { alpha:true });
 
@@ -1169,11 +1305,13 @@
 
         function makeStars(count, rMin, rMax, vMin, vMax, aMin, aMax, tempBias){
           var arr = [];
+          var heroChance = tier === "max" ? 0.06 : (tier === "balanced" ? 0.04 : 0.025);
+
           for (var i=0;i<count;i++){
             var temp = rand(-1, 1) * tempBias;
             var twBase = rand(0.002, 0.010);
             var twAmp = rand(0.02, 0.20);
-            var hero = (Math.random() < (perfMode === "mobile" ? 0.04 : 0.06));
+            var hero = (Math.random() < heroChance);
 
             arr.push({
               x: Math.random()*w,
@@ -1194,16 +1332,16 @@
         function buildScene(){
           var area = w*h;
 
-          var farCount  = clamp(Math.floor(area/14500 * PERF.farMul), 60, 260);
-          var midCount  = clamp(Math.floor(area/17500 * PERF.midMul), 44, 190);
-          var nearCount = clamp(Math.floor(area/23500 * PERF.nearMul), 28, 130);
+          var farCount  = clamp(Math.floor(area/14500 * PERF.farMul), 46, 260);
+          var midCount  = clamp(Math.floor(area/17500 * PERF.midMul), 32, 190);
+          var nearCount = clamp(Math.floor(area/23500 * PERF.nearMul), 20, 130);
 
           starsFar  = makeStars(farCount,  0.28, 0.95, 0.016, 0.045, 0.12, 0.34, 0.08);
           starsMid  = makeStars(midCount,  0.38, 1.20, 0.040, 0.085, 0.14, 0.46, 0.10);
           starsNear = makeStars(nearCount, 0.52, 1.65, 0.060, 0.120, 0.18, 0.60, 0.12);
 
           dust = [];
-          var dustCount = clamp(Math.floor(area/90000 * PERF.dustMul), 6, 28);
+          var dustCount = clamp(Math.floor(area/90000 * PERF.dustMul), 4, 28);
           for (var i=0;i<dustCount;i++){
             dust.push({
               x: rand(-w*0.2, w*1.2),
@@ -1216,7 +1354,7 @@
           }
 
           rocks = [];
-          var rockCount = clamp(Math.floor(area/90000 * PERF.rockMul), 6, 34);
+          var rockCount = clamp(Math.floor(area/90000 * PERF.rockMul), 4, 34);
           for (var j=0;j<rockCount;j++){
             var depth = rand(0.18, 0.50);
             var size = rand(3.0, 10.0) * (0.75 + depth);
@@ -1293,7 +1431,7 @@
           neb.c.height = S;
           nctx.clearRect(0,0,S,S);
 
-          var clouds = perfMode === "mobile" ? 12 : 20;
+          var clouds = tier === "max" ? 20 : (tier === "balanced" ? 14 : 10);
 
           for (var i=0;i<clouds;i++){
             var x = rand(0, S);
@@ -1311,7 +1449,7 @@
             nctx.fill();
           }
 
-          blurPass(neb.c, perfMode === "mobile" ? 1 : 2);
+          blurPass(neb.c, PERF.cloudPasses);
           neb.x = rand(-0.25, 0.25);
           neb.y = rand(-0.25, 0.25);
         }
@@ -1413,7 +1551,7 @@
           ctx.fill();
 
           var strength = r * aNow;
-          if (strength > 0.46 && perfMode !== "mobile"){
+          if (strength > 0.46 && PERF.starCross){
             var L = clamp(4.5 + r*4.8, 7, 14);
             var aSp = clamp((strength - 0.36) * 1.05, 0, 0.55);
 
