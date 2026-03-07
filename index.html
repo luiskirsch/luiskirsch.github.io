@@ -1168,51 +1168,50 @@
         if (!ctx) return;
         try{
           var t = ctx.currentTime;
-          var VOL = 0.028;
+          var baseVol = 0.016 + Math.random() * 0.014;
+          var variant = Math.floor(Math.random() * 4);
 
-          var o1 = ctx.createOscillator();
-          o1.type = "square";
-          o1.frequency.setValueAtTime(1700, t);
-          var g1 = ctx.createGain();
-          g1.gain.setValueAtTime(0.00001, t);
-          g1.gain.exponentialRampToValueAtTime(VOL, t + 0.003);
-          g1.gain.exponentialRampToValueAtTime(0.00001, t + 0.030);
-          var f1 = ctx.createBiquadFilter();
-          f1.type = "bandpass";
-          f1.frequency.setValueAtTime(2400, t);
-          f1.Q.setValueAtTime(2.2, t);
-          o1.connect(f1); f1.connect(g1); g1.connect(ctx.destination);
-          o1.start(t); o1.stop(t + 0.035);
+          function makeTone(type, freqStart, freqEnd, startAt, attack, release, gainAmount, filterType, filterFreq, q){
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            var filter = ctx.createBiquadFilter();
 
-          var t2 = t + 0.085;
-          var o2 = ctx.createOscillator();
-          o2.type = "triangle";
-          o2.frequency.setValueAtTime(520, t2);
-          var g2 = ctx.createGain();
-          g2.gain.setValueAtTime(0.00001, t2);
-          g2.gain.exponentialRampToValueAtTime(VOL * 0.80, t2 + 0.004);
-          g2.gain.exponentialRampToValueAtTime(0.00001, t2 + 0.040);
-          var f2 = ctx.createBiquadFilter();
-          f2.type = "lowpass";
-          f2.frequency.setValueAtTime(1200, t2);
-          f2.Q.setValueAtTime(0.7, t2);
-          o2.connect(f2); f2.connect(g2); g2.connect(ctx.destination);
-          o2.start(t2); o2.stop(t2 + 0.045);
+            osc.type = type;
+            osc.frequency.setValueAtTime(freqStart, startAt);
+            if (typeof freqEnd === "number" && freqEnd !== freqStart){
+              osc.frequency.exponentialRampToValueAtTime(Math.max(40, freqEnd), startAt + attack + release);
+            }
 
-          var t3 = t + 0.012;
-          var o3 = ctx.createOscillator();
-          o3.type = "sine";
-          o3.frequency.setValueAtTime(3200, t3);
-          var g3 = ctx.createGain();
-          g3.gain.setValueAtTime(0.00001, t3);
-          g3.gain.exponentialRampToValueAtTime(VOL * 0.22, t3 + 0.002);
-          g3.gain.exponentialRampToValueAtTime(0.00001, t3 + 0.018);
-          var f3 = ctx.createBiquadFilter();
-          f3.type = "highpass";
-          f3.frequency.setValueAtTime(1600, t3);
-          f3.Q.setValueAtTime(0.8, t3);
-          o3.connect(f3); f3.connect(g3); g3.connect(ctx.destination);
-          o3.start(t3); o3.stop(t3 + 0.020);
+            filter.type = filterType;
+            filter.frequency.setValueAtTime(filterFreq, startAt);
+            filter.Q.setValueAtTime(q, startAt);
+
+            gain.gain.setValueAtTime(0.00001, startAt);
+            gain.gain.exponentialRampToValueAtTime(gainAmount, startAt + attack);
+            gain.gain.exponentialRampToValueAtTime(0.00001, startAt + attack + release);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(startAt);
+            osc.stop(startAt + attack + release + 0.01);
+          }
+
+          if (variant === 0){
+            makeTone("triangle", 1320 + Math.random()*380, 920 + Math.random()*180, t, 0.003, 0.040, baseVol, "bandpass", 2100 + Math.random()*900, 2.2);
+            makeTone("sine", 520 + Math.random()*120, 410 + Math.random()*80, t + 0.045, 0.004, 0.050, baseVol * 0.70, "lowpass", 1300 + Math.random()*300, 0.9);
+          } else if (variant === 1){
+            makeTone("square", 1580 + Math.random()*500, 1180 + Math.random()*180, t, 0.002, 0.024, baseVol * 0.85, "bandpass", 2600 + Math.random()*700, 3.0);
+            makeTone("triangle", 640 + Math.random()*140, 500 + Math.random()*90, t + 0.060, 0.004, 0.040, baseVol * 0.52, "lowpass", 1400 + Math.random()*260, 0.8);
+          } else if (variant === 2){
+            makeTone("sine", 980 + Math.random()*260, 760 + Math.random()*120, t, 0.003, 0.060, baseVol * 0.72, "highpass", 1200 + Math.random()*500, 0.8);
+            makeTone("triangle", 430 + Math.random()*100, 310 + Math.random()*70, t + 0.030, 0.005, 0.065, baseVol * 0.58, "bandpass", 900 + Math.random()*240, 1.3);
+          } else {
+            makeTone("triangle", 1460 + Math.random()*280, 1020 + Math.random()*130, t, 0.002, 0.030, baseVol * 0.88, "bandpass", 2350 + Math.random()*600, 2.6);
+            makeTone("sine", 720 + Math.random()*90, 560 + Math.random()*70, t + 0.070, 0.004, 0.055, baseVol * 0.44, "lowpass", 1100 + Math.random()*220, 0.7);
+            makeTone("sine", 2500 + Math.random()*700, 1900 + Math.random()*500, t + 0.010, 0.0015, 0.014, baseVol * 0.18, "highpass", 1700 + Math.random()*400, 1.0);
+          }
         }catch(e){}
       };
     })();
@@ -1326,7 +1325,7 @@
           moonMask = {
             x: rect.left + rect.width * 0.5,
             y: rect.top + rect.height * 0.5,
-            r: Math.min(rect.width, rect.height) * 0.06
+            r: Math.min(rect.width, rect.height) * 0.42
           };
         }
 
@@ -1426,7 +1425,6 @@
           r.fadeBias = rand(0.78, 1.00);
 
           r.mode = pickRockMode();
-
           r.attractMoon = (r.mode === "moon");
           r.moonPull = rand(0.0012, 0.0038);
 
@@ -1731,6 +1729,7 @@
         function drawRocks(px, py){
           var moonX = moonMask ? moonMask.x : w*0.5;
           var moonY = moonMask ? moonMask.y : h*0.18;
+          var moonR = moonMask ? moonMask.r : 40;
 
           for (var i=0;i<rocks.length;i++){
             var r = rocks[i];
@@ -1767,7 +1766,19 @@
             var y = r.y + (py * P * 0.10);
 
             if (rr < 0.8) continue;
-            if (starInsideMoon(x, y, rr + 6)) continue;
+
+            var dxMoon = x - moonX;
+            var dyMoon = y - moonY;
+            var distMoon = Math.sqrt(dxMoon*dxMoon + dyMoon*dyMoon);
+
+            if (distMoon < moonR * 1.9){
+              var prox = 1 - clamp((distMoon - moonR) / (moonR * 0.9), 0, 1);
+              var sizeCap = lerp(1, 0.32, prox);
+              rr *= sizeCap;
+              worldScale *= sizeCap;
+            }
+
+            if (rr < 0.45) continue;
 
             var alpha = clamp(depthScale * r.fadeBias, 0.08, 1);
 
@@ -2403,53 +2414,53 @@
           subDrone.stop(now + 4.62);
 
           for (var i = 0; i < 7; i++){
-            var tt1 = now + 0.60 + i * 0.52 + Math.random() * 0.10;
+            var tt = now + 0.60 + i * 0.52 + Math.random() * 0.10;
 
             var pulse = audioCtx.createOscillator();
             pulse.type = "square";
-            pulse.frequency.setValueAtTime(520 + Math.random() * 260, tt1);
+            pulse.frequency.setValueAtTime(520 + Math.random() * 260, tt);
 
             var pulseFilter = audioCtx.createBiquadFilter();
             pulseFilter.type = "bandpass";
-            pulseFilter.frequency.setValueAtTime(1100 + Math.random() * 220, tt1);
-            pulseFilter.Q.setValueAtTime(7, tt1);
+            pulseFilter.frequency.setValueAtTime(1100 + Math.random() * 220, tt);
+            pulseFilter.Q.setValueAtTime(7, tt);
 
             var pulseGain = audioCtx.createGain();
-            pulseGain.gain.setValueAtTime(0.00001, tt1);
-            pulseGain.gain.exponentialRampToValueAtTime(0.006, tt1 + 0.015);
-            pulseGain.gain.exponentialRampToValueAtTime(0.00001, tt1 + 0.11);
+            pulseGain.gain.setValueAtTime(0.00001, tt);
+            pulseGain.gain.exponentialRampToValueAtTime(0.006, tt + 0.015);
+            pulseGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.11);
 
             pulse.connect(pulseFilter);
             pulseFilter.connect(pulseGain);
             pulseGain.connect(master);
 
-            pulse.start(tt1);
-            pulse.stop(tt1 + 0.12);
+            pulse.start(tt);
+            pulse.stop(tt + 0.12);
           }
 
           for (var j = 0; j < 5; j++){
-            var tt = now + 0.90 + j * 0.68 + Math.random() * 0.14;
+            var ttt = now + 0.90 + j * 0.68 + Math.random() * 0.14;
 
             var clickOsc = audioCtx.createOscillator();
             clickOsc.type = "triangle";
-            clickOsc.frequency.setValueAtTime(880 + Math.random() * 320, tt);
+            clickOsc.frequency.setValueAtTime(880 + Math.random() * 320, ttt);
 
             var clickFilter = audioCtx.createBiquadFilter();
             clickFilter.type = "bandpass";
-            clickFilter.frequency.setValueAtTime(1300, tt);
-            clickFilter.Q.setValueAtTime(8, tt);
+            clickFilter.frequency.setValueAtTime(1300, ttt);
+            clickFilter.Q.setValueAtTime(8, ttt);
 
             var clickGain = audioCtx.createGain();
-            clickGain.gain.setValueAtTime(0.00001, tt);
-            clickGain.gain.exponentialRampToValueAtTime(0.0045, tt + 0.01);
-            clickGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.06);
+            clickGain.gain.setValueAtTime(0.00001, ttt);
+            clickGain.gain.exponentialRampToValueAtTime(0.0045, ttt + 0.01);
+            clickGain.gain.exponentialRampToValueAtTime(0.00001, ttt + 0.06);
 
             clickOsc.connect(clickFilter);
             clickFilter.connect(clickGain);
             clickGain.connect(master);
 
-            clickOsc.start(tt);
-            clickOsc.stop(tt + 0.07);
+            clickOsc.start(ttt);
+            clickOsc.stop(ttt + 0.07);
           }
 
           var endT = now + 4.35;
