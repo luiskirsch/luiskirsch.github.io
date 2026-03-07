@@ -659,28 +659,152 @@
     }
 
     @media (max-width:980px){
-      .grid{ grid-template-columns:1fr; }
-      .title{ font-size:clamp(44px, 9vw, 78px); }
-      .miniGrid{ grid-template-columns:1fr 1fr; }
-      .moonWrap{ width:min(180px, 34vw); }
-    }
 
-    @media (max-width:560px){
-      body{
-        padding-left:max(14px, env(safe-area-inset-left));
-        padding-right:max(14px, env(safe-area-inset-right));
-        padding-top:max(18px, env(safe-area-inset-top));
-      }
+  .grid{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
 
-      .wrap{
-        padding:112px 0 28px;
-      }
+  .title{
+    font-size:clamp(42px, 8vw, 72px);
+  }
 
-      .moonWrap{
-        width:min(210px, 50vw);
-        top:max(22px, env(safe-area-inset-top));
-      }
-    }
+  .miniGrid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .moonWrap{
+    width:min(180px, 32vw);
+    top:max(60px, env(safe-area-inset-top));
+  }
+
+}
+
+@media (max-width:700px){
+
+  body{
+    padding-left:max(14px, env(safe-area-inset-left));
+    padding-right:max(14px, env(safe-area-inset-right));
+    padding-top:max(16px, env(safe-area-inset-top));
+  }
+
+  .wrap{
+    padding:120px 0 24px;
+  }
+
+  .moonWrap{
+    width:min(150px, 36vw);
+    top:max(50px, env(safe-area-inset-top));
+  }
+
+  .titleRow{
+    padding-left:74px;
+  }
+
+  .titleLogo{
+    width:82px;
+    height:82px;
+    left:-6px;
+    top:-6px;
+  }
+
+  .title{
+    font-size:clamp(34px, 9vw, 52px);
+    letter-spacing:.10em;
+  }
+
+  .subtitle{
+    font-size:16px;
+  }
+
+  .miniGrid{
+    grid-template-columns:1fr;
+  }
+
+  .row2{
+    grid-template-columns:1fr;
+  }
+
+  .countdownGrid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .soundPanel{
+    right:10px;
+    left:10px;
+    width:auto;
+    justify-content:space-between;
+  }
+
+  #volumeSlider{
+    width:120px;
+    min-width:120px;
+  }
+
+}
+
+@media (max-width:480px){
+
+  .wrap{
+    padding:108px 0 22px;
+  }
+
+  .moonWrap{
+    width:min(120px, 32vw);
+    top:max(60px, env(safe-area-inset-top));
+  }
+
+  .inner{
+    padding:18px 16px 20px;
+  }
+
+  .titleRow{
+    padding-left:60px;
+  }
+
+  .titleLogo{
+    width:64px;
+    height:64px;
+    left:-4px;
+    top:4px;
+  }
+
+  .title{
+    font-size:clamp(28px, 9.5vw, 40px);
+    letter-spacing:.08em;
+  }
+
+  .subtitle{
+    font-size:15px;
+  }
+
+  .mini p{
+    font-size:15px;
+  }
+
+  button{
+    width:100%;
+    min-width:0;
+  }
+
+  .actions{
+    flex-direction:column;
+  }
+
+  .countdownValue{
+    font-size:30px;
+  }
+
+  .soundPanel{
+    padding:8px 10px;
+  }
+
+  #volumeSlider{
+    width:90px;
+    min-width:90px;
+  }
+
+}
 
     @media (prefers-reduced-motion:reduce){
       .whisper, .title{ animation:none !important; }
