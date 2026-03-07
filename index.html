@@ -1250,7 +1250,8 @@
             nebulaSize: 640,
             meteorChanceMul: 1,
             starCross: true,
-            cloudPasses: 2
+            cloudPasses: 2,
+            flybyChance: 1
           },
           balanced: {
             dprCap: kind === "tablet" ? 1.7 : 1.45,
@@ -1264,7 +1265,8 @@
             nebulaSize: 500,
             meteorChanceMul: 0.82,
             starCross: false,
-            cloudPasses: 1
+            cloudPasses: 1,
+            flybyChance: 0.75
           },
           lite: {
             dprCap: 1.15,
@@ -1278,7 +1280,8 @@
             nebulaSize: 360,
             meteorChanceMul: 0.62,
             starCross: false,
-            cloudPasses: 1
+            cloudPasses: 1,
+            flybyChance: 0.45
           }
         };
 
@@ -1288,21 +1291,23 @@
         var par = { x:0, y:0, tx:0, ty:0 };
 
         var starsFar=[], starsMid=[], starsNear=[];
-        var dust=[], rocks=[], meteors=[];
+        var dust=[], rocks=[], meteors=[], flybys=[];
         var nextMeteorAt = 0;
+        var nextFlybyAt = 0;
         var moonMask = null;
 
         var neb = {
           c: document.createElement("canvas"),
           x:0,
           y:0,
-          a:0.00,
+          a:(tier === "lite" ? 0.035 : tier === "balanced" ? 0.05 : 0.065),
           drift: tier === "lite" ? 0.0028 : (tier === "balanced" ? 0.0032 : 0.004)
         };
         var nctx = neb.c.getContext("2d", { alpha:true });
 
         function rand(min,max){ return min + Math.random()*(max-min); }
         function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+        function lerp(a,b,t){ return a + (b-a)*t; }
 
         var lastW=0, lastH=0;
         function shouldResize(nw, nh){
@@ -1374,6 +1379,49 @@
           return arr;
         }
 
+        function buildRockShape(size){
+          var spikes = Math.floor(rand(9, 14));
+          var pts = [];
+          for (var k=0;k<spikes;k++){
+            var a = (Math.PI*2) * (k/spikes);
+            var rr = size * rand(0.86, 1.14);
+            pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
+          }
+          return pts;
+        }
+
+        function respawnRock(r, initial){
+          var M = 180;
+          var side = Math.floor(rand(0, 4));
+          var x,y,ang;
+
+          if (side === 0){ x = rand(-M, w+M); y = -M; ang = rand(Math.PI*0.18, Math.PI*0.82); }
+          else if (side === 1){ x = w+M; y = rand(-M, h+M); ang = rand(Math.PI*0.70, Math.PI*1.30); }
+          else if (side === 2){ x = rand(-M, w+M); y = h+M; ang = rand(Math.PI*1.18, Math.PI*1.82); }
+          else { x = -M; y = rand(-M, h+M); ang = rand(-Math.PI*0.30, Math.PI*0.30); }
+
+          var baseZ = initial ? rand(0.65, 1.08) : rand(0.88, 1.18);
+          var base = rand(0.12, 0.30) * (0.55 + baseZ);
+
+          r.x = x;
+          r.y = y;
+          r.vx = Math.cos(ang) * base;
+          r.vy = Math.sin(ang) * base;
+          r.rot = rand(0, Math.PI*2);
+          r.rv = rand(-0.006, 0.006);
+          r.ph = rand(0, Math.PI*2);
+          r.wob = rand(0.0006, 0.0018);
+
+          r.baseR = rand(4.0, 12.0);
+          r.pts = buildRockShape(r.baseR);
+          r.z = baseZ;
+          r.vz = rand(0.0012, 0.0032) * (tier === "lite" ? 0.8 : 1);
+
+          r.attractMoon = Math.random() < (tier === "max" ? 0.24 : 0.16);
+          r.moonPull = rand(0.0025, 0.010);
+          r.fadeBias = rand(0.78, 1.00);
+        }
+
         function buildScene(){
           var area = w*h;
 
@@ -1401,37 +1449,15 @@
           rocks = [];
           var rockCount = clamp(Math.floor(area/90000 * PERF.rockMul), 4, 34);
           for (var j=0;j<rockCount;j++){
-            var depth = rand(0.18, 0.50);
-            var size = rand(3.0, 10.0) * (0.75 + depth);
-
-            var ang = rand(0, Math.PI*2);
-            var spd = rand(0.12, 0.30) * (0.55 + depth);
-
-            var spikes = Math.floor(rand(9, 14));
-            var pts = [];
-            for (var k=0;k<spikes;k++){
-              var a = (Math.PI*2) * (k/spikes);
-              var rr = size * rand(0.86, 1.14);
-              pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
-            }
-
-            rocks.push({
-              x: rand(-w*0.2, w*1.2),
-              y: rand(-h*0.2, h*1.2),
-              r: size,
-              pts: pts,
-              rot: rand(0, Math.PI*2),
-              rv: rand(-0.006, 0.006),
-              vx: Math.cos(ang) * spd,
-              vy: Math.sin(ang) * spd,
-              ph: rand(0, Math.PI*2),
-              wob: rand(0.0006, 0.0018),
-              z: depth
-            });
+            var rock = {};
+            respawnRock(rock, true);
+            rocks.push(rock);
           }
 
           meteors = [];
+          flybys = [];
           nextMeteorAt = Math.floor(rand(140, 340) / PERF.meteorChanceMul);
+          nextFlybyAt = t + Math.floor(rand(260, 620) / PERF.flybyChance);
         }
 
         function onPointerMove(clientX, clientY){
@@ -1690,25 +1716,10 @@
           }
         }
 
-        function respawnRock(r){
-          var M = 160;
-          var side = Math.floor(rand(0, 4));
-          var x,y,ang;
-
-          if (side === 0){ x = rand(-M, w+M); y = -M; ang = rand(Math.PI*0.20, Math.PI*0.80); }
-          else if (side === 1){ x = w+M; y = rand(-M, h+M); ang = rand(Math.PI*0.70, Math.PI*1.30); }
-          else if (side === 2){ x = rand(-M, w+M); y = h+M; ang = rand(Math.PI*1.20, Math.PI*1.80); }
-          else { x = -M; y = rand(-M, h+M); ang = rand(-Math.PI*0.30, Math.PI*0.30); }
-
-          var base = rand(0.12, 0.28) * (0.55 + r.z);
-          r.x = x;
-          r.y = y;
-          r.vx = Math.cos(ang) * base;
-          r.vy = Math.sin(ang) * base;
-          r.rot = rand(0, Math.PI*2);
-        }
-
         function drawRocks(px, py){
+          var moonX = moonMask ? moonMask.x : w*0.5;
+          var moonY = moonMask ? moonMask.y : h*0.18;
+
           for (var i=0;i<rocks.length;i++){
             var r = rocks[i];
 
@@ -1717,38 +1728,55 @@
             r.y += r.vy + (Math.sin(r.ph) * 0.03);
             r.rot += r.rv;
 
-            if (r.x < -220 || r.x > w + 220 || r.y < -220 || r.y > h + 220){
-              respawnRock(r);
+            if (r.attractMoon){
+              var dxm = moonX - r.x;
+              var dym = moonY - r.y;
+              r.x += dxm * r.moonPull * (1.22 - Math.min(1.1, r.z));
+              r.y += dym * r.moonPull * (1.22 - Math.min(1.1, r.z));
             }
 
-            var P = 6.0 * r.z;
+            r.z -= r.vz;
+
+            if (r.x < -260 || r.x > w + 260 || r.y < -260 || r.y > h + 260 || r.z <= 0.06){
+              respawnRock(r, false);
+            }
+
+            var depthScale = clamp(r.z, 0.03, 1.25);
+            var worldScale = Math.pow(depthScale, 1.22);
+            var rr = r.baseR * worldScale;
+
+            var P = 6.0 * depthScale;
             var x = r.x + (px * P * 0.10);
             var y = r.y + (py * P * 0.10);
 
-            if (r.r < 6 && starInsideMoon(x, y, r.r + 6)) continue;
+            if (rr < 0.8) continue;
+            if (starInsideMoon(x, y, rr + 6)) continue;
+
+            var alpha = clamp(depthScale * r.fadeBias, 0.08, 1);
 
             ctx.save();
             ctx.globalCompositeOperation = "source-over";
+            ctx.globalAlpha = alpha;
             ctx.translate(x, y);
             ctx.rotate(r.rot);
 
             ctx.beginPath();
             var pts = r.pts;
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x, pts[k].y);
+            ctx.moveTo(pts[0].x * worldScale, pts[0].y * worldScale);
+            for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x * worldScale, pts[k].y * worldScale);
             ctx.closePath();
 
             ctx.fillStyle = "rgb(20,20,26)";
             ctx.fill();
 
-            var g = ctx.createRadialGradient(-r.r*0.35, -r.r*0.35, r.r*0.15, 0, 0, r.r*1.25);
+            var g = ctx.createRadialGradient(-rr*0.35, -rr*0.35, rr*0.15, 0, 0, rr*1.25);
             g.addColorStop(0, "rgba(255,255,255,0.10)");
             g.addColorStop(0.45, "rgba(255,255,255,0.04)");
             g.addColorStop(1, "rgba(0,0,0,0.65)");
             ctx.fillStyle = g;
             ctx.fill();
 
-            ctx.lineWidth = 1;
+            ctx.lineWidth = Math.max(0.6, 0.9 * worldScale);
             ctx.strokeStyle = "rgba(0,0,0,0.75)";
             ctx.stroke();
             ctx.restore();
@@ -1828,6 +1856,84 @@
           }
         }
 
+        function spawnFlyby(){
+          var startFromLeft = Math.random() < 0.5;
+          var y = rand(h * 0.12, h * 0.82);
+          var x = startFromLeft ? -120 : w + 120;
+          var dir = startFromLeft ? 1 : -1;
+          var vx = rand(10.5, 16.5) * dir;
+          var vy = rand(-0.8, 0.8);
+          var targetShrink = rand(0.88, 0.94);
+
+          flybys.push({
+            x:x,
+            y:y,
+            vx:vx,
+            vy:vy,
+            life:0,
+            maxLife:rand(24, 34),
+            size:rand(18, 34),
+            rot:rand(0, Math.PI*2),
+            rv:rand(-0.08, 0.08),
+            a:rand(0.18, 0.34),
+            shrinkTo:targetShrink,
+            len:rand(70, 140)
+          });
+        }
+
+        function drawFlybys(px, py){
+          for (var i=flybys.length-1;i>=0;i--){
+            var f = flybys[i];
+            f.life++;
+            f.x += f.vx;
+            f.y += f.vy;
+            f.rot += f.rv;
+
+            var progress = clamp(f.life / f.maxLife, 0, 1);
+            var scale = lerp(1, f.shrinkTo, progress);
+            var alpha = f.a * (1 - progress);
+
+            var headX = f.x + px * 0.16;
+            var headY = f.y + py * 0.16;
+
+            var tailX = headX - f.vx * (f.len / Math.max(1, Math.abs(f.vx)));
+            var tailY = headY - f.vy * (f.len / Math.max(1, Math.abs(f.vx)));
+
+            ctx.save();
+            ctx.globalCompositeOperation = "screen";
+            ctx.globalAlpha = alpha;
+
+            var grad = ctx.createLinearGradient(headX, headY, tailX, tailY);
+            grad.addColorStop(0, "rgba(220,220,255,0.75)");
+            grad.addColorStop(0.25, "rgba(180,180,220,0.18)");
+            grad.addColorStop(1, "rgba(255,255,255,0)");
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = Math.max(1, f.size * 0.18 * scale);
+            ctx.beginPath();
+            ctx.moveTo(headX, headY);
+            ctx.lineTo(tailX, tailY);
+            ctx.stroke();
+
+            ctx.translate(headX, headY);
+            ctx.rotate(f.rot);
+            ctx.scale(scale, scale);
+
+            ctx.beginPath();
+            ctx.moveTo(-f.size*0.25, -f.size*0.10);
+            ctx.lineTo(f.size*0.38, 0);
+            ctx.lineTo(-f.size*0.22, f.size*0.12);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(210,210,225,0.32)";
+            ctx.fill();
+
+            ctx.restore();
+
+            if (f.life >= f.maxLife || headX < -220 || headX > w + 220 || headY < -180 || headY > h + 180){
+              flybys.splice(i,1);
+            }
+          }
+        }
+
         function renderFrame(){
           par.x += (par.tx - par.x) * PERF.parLerp;
           par.y += (par.ty - par.y) * PERF.parLerp;
@@ -1851,7 +1957,13 @@
             nextMeteorAt = t + Math.floor(rand(100, 260) / PERF.meteorChanceMul);
           }
 
+          if (t > nextFlybyAt){
+            spawnFlyby();
+            nextFlybyAt = t + Math.floor(rand(320, 760) / PERF.flybyChance);
+          }
+
           drawMeteors();
+          drawFlybys(px, py);
         }
 
         function tick(){
