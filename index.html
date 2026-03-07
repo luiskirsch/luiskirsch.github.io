@@ -200,17 +200,18 @@
           rgba(230,192,123,.92) 58%,
           rgba(230,192,123,.60) 100%);
       background-size:260% 100%;
-      background-position:0% 50%;
+      background-position:-35% 50%;
       -webkit-background-clip:text;
       background-clip:text;
       text-shadow:0 20px 70px rgba(0,0,0,.55);
-      animation:shineText 6.8s ease-in-out infinite;
+      animation:shineText 7.8s linear infinite;
     }
 
     @keyframes shineText{
-      0%{ background-position:0% 50%; }
-      60%{ background-position:100% 50%; }
-      100%{ background-position:100% 50%; }
+      0%{ background-position:-35% 50%; }
+      22%{ background-position:-35% 50%; }
+      58%{ background-position:135% 50%; }
+      100%{ background-position:135% 50%; }
     }
 
     .subtitle{
