@@ -658,6 +658,72 @@
       box-shadow:0 0 10px rgba(230,192,123,.55);
     }
 
+    .diagPanel{
+      position:fixed;
+      left:12px;
+      right:12px;
+      bottom:max(12px, env(safe-area-inset-bottom));
+      z-index:999;
+      border-radius:18px;
+      border:1px solid rgba(230,192,123,.22);
+      background:rgba(0,0,0,.82);
+      color:rgba(255,255,255,.92);
+      box-shadow:0 20px 60px rgba(0,0,0,.55);
+      padding:14px 14px 12px;
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      display:none;
+      max-width:420px;
+      margin:0 auto;
+      font-family:ui-serif, Georgia, "Times New Roman", serif;
+    }
+
+    .diagPanel.isOpen{
+      display:block;
+    }
+
+    .diagTitle{
+      margin:0 0 10px;
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(230,192,123,.92);
+    }
+
+    .diagGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px 12px;
+    }
+
+    .diagItem{
+      border-radius:12px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      padding:8px 10px;
+    }
+
+    .diagLabel{
+      font-size:10px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.55);
+      margin-bottom:4px;
+    }
+
+    .diagValue{
+      font-size:14px;
+      color:rgba(255,255,255,.94);
+      word-break:break-word;
+    }
+
+    .diagClose{
+      margin-top:10px;
+      width:100%;
+      min-width:0;
+      padding:10px 12px;
+    }
+
     @media (max-width:980px){
       .grid{
         grid-template-columns:1fr;
@@ -797,6 +863,16 @@
       #volumeSlider{
         width:90px;
         min-width:90px;
+      }
+    }
+
+    @media (min-width:700px){
+      .diagPanel{
+        left:20px;
+        right:auto;
+        bottom:20px;
+        width:380px;
+        margin:0;
       }
     }
 
@@ -1096,6 +1172,54 @@
     <footer class="footer" aria-label="Direitos autorais">
       © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
     </footer>
+  </div>
+
+  <div class="diagPanel" id="diagPanel" aria-hidden="true">
+    <h3 class="diagTitle">Diagnóstico do dispositivo</h3>
+
+    <div class="diagGrid">
+      <div class="diagItem">
+        <div class="diagLabel">Tipo</div>
+        <div class="diagValue" id="diagKind">—</div>
+      </div>
+
+      <div class="diagItem">
+        <div class="diagLabel">Score</div>
+        <div class="diagValue" id="diagScore">—</div>
+      </div>
+
+      <div class="diagItem">
+        <div class="diagLabel">Inicial</div>
+        <div class="diagValue" id="diagInitial">—</div>
+      </div>
+
+      <div class="diagItem">
+        <div class="diagLabel">Final</div>
+        <div class="diagValue" id="diagFinal">—</div>
+      </div>
+
+      <div class="diagItem">
+        <div class="diagLabel">Núcleos</div>
+        <div class="diagValue" id="diagCores">—</div>
+      </div>
+
+      <div class="diagItem">
+        <div class="diagLabel">Memória</div>
+        <div class="diagValue" id="diagMemory">—</div>
+      </div>
+
+      <div class="diagItem">
+        <div class="diagLabel">DPR</div>
+        <div class="diagValue" id="diagDpr">—</div>
+      </div>
+
+      <div class="diagItem">
+        <div class="diagLabel">Teste</div>
+        <div class="diagValue" id="diagTested">—</div>
+      </div>
+    </div>
+
+    <button type="button" class="diagClose" id="diagCloseBtn">Fechar diagnóstico</button>
   </div>
 
   <script>
@@ -2505,6 +2629,132 @@
       window.addEventListener("touchmove", onMove, { passive:false });
       window.addEventListener("touchend", onEnd, { passive:true });
       window.addEventListener("touchcancel", onEnd, { passive:true });
+    })();
+  </script>
+
+  <script>
+    (function(){
+      try{
+        var panel = document.getElementById("diagPanel");
+        var closeBtn = document.getElementById("diagCloseBtn");
+        if (!panel) return;
+
+        var ADMIN_PASSWORD = "1951";
+
+        var ids = {
+          kind: document.getElementById("diagKind"),
+          score: document.getElementById("diagScore"),
+          initial: document.getElementById("diagInitial"),
+          final: document.getElementById("diagFinal"),
+          cores: document.getElementById("diagCores"),
+          memory: document.getElementById("diagMemory"),
+          dpr: document.getElementById("diagDpr"),
+          tested: document.getElementById("diagTested")
+        };
+
+        var unlockHits = [];
+        var unlockedUntil = 0;
+
+        function getDeviceData(){
+          return window.__PRELUDIO_DEVICE__ || {
+            kind: "desconhecido",
+            score: "—",
+            initialTier: "—",
+            finalTier: "—",
+            hardwareConcurrency: "—",
+            deviceMemory: "—",
+            dpr: (window.devicePixelRatio || 1),
+            tested: false
+          };
+        }
+
+        function fillPanel(){
+          var d = getDeviceData();
+
+          if (ids.kind) ids.kind.textContent = d.kind || "—";
+          if (ids.score) ids.score.textContent = (typeof d.score !== "undefined" ? d.score : "—");
+          if (ids.initial) ids.initial.textContent = d.initialTier || "—";
+          if (ids.final) ids.final.textContent = d.finalTier || "—";
+          if (ids.cores) ids.cores.textContent = d.hardwareConcurrency || "—";
+          if (ids.memory) ids.memory.textContent = d.deviceMemory ? (d.deviceMemory + " GB") : "—";
+          if (ids.dpr) ids.dpr.textContent = d.dpr || (window.devicePixelRatio || 1);
+          if (ids.tested) ids.tested.textContent = d.tested ? "concluído" : "em andamento";
+        }
+
+        function isUnlocked(){
+          return Date.now() < unlockedUntil;
+        }
+
+        function askPasswordAndOpen(){
+          var pass = window.prompt("Senha do painel:");
+          if (pass === null) return;
+          if (String(pass).trim() !== ADMIN_PASSWORD){
+            window.alert("Senha incorreta.");
+            return;
+          }
+          unlockedUntil = Date.now() + 5 * 60 * 1000;
+          openPanel();
+        }
+
+        function openPanel(){
+          if (!isUnlocked()){
+            askPasswordAndOpen();
+            return;
+          }
+          fillPanel();
+          panel.classList.add("isOpen");
+          panel.setAttribute("aria-hidden", "false");
+        }
+
+        function closePanel(){
+          panel.classList.remove("isOpen");
+          panel.setAttribute("aria-hidden", "true");
+        }
+
+        function togglePanel(){
+          if (panel.classList.contains("isOpen")){
+            closePanel();
+          } else {
+            openPanel();
+          }
+        }
+
+        if (closeBtn){
+          closeBtn.addEventListener("click", closePanel);
+        }
+
+        document.addEventListener("keydown", function(e){
+          if (e.ctrlKey && e.shiftKey && (e.key === "D" || e.key === "d")){
+            e.preventDefault();
+            togglePanel();
+          }
+        });
+
+        document.addEventListener("touchstart", function(e){
+          if (!e.touches || e.touches.length < 2) return;
+
+          var y1 = e.touches[0].clientY;
+          var y2 = e.touches[1].clientY;
+          var topLimit = Math.max(120, window.innerHeight * 0.16);
+
+          if (y1 > topLimit || y2 > topLimit) return;
+
+          var now = Date.now();
+          unlockHits.push(now);
+          unlockHits = unlockHits.filter(function(t){ return now - t < 500; });
+
+          if (unlockHits.length >= 2){
+            unlockHits = [];
+            togglePanel();
+          }
+        }, { passive:true });
+
+        setInterval(function(){
+          if (panel.classList.contains("isOpen")){
+            fillPanel();
+          }
+        }, 400);
+      }catch(e){}
     })();
   </script>
 </body>
