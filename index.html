@@ -1245,10 +1245,8 @@
             rockMul: 1,
             parLerp: 0.045,
             tickSkip: 0,
-            nebulaSize: 640,
             meteorChanceMul: 1,
             starCross: true,
-            cloudPasses: 2,
             flybyChance: 1
           },
           balanced: {
@@ -1260,10 +1258,8 @@
             rockMul: 0.74,
             parLerp: 0.032,
             tickSkip: 1,
-            nebulaSize: 500,
             meteorChanceMul: 0.82,
             starCross: false,
-            cloudPasses: 1,
             flybyChance: 0.75
           },
           lite: {
@@ -1275,10 +1271,8 @@
             rockMul: 0.46,
             parLerp: 0.022,
             tickSkip: 2,
-            nebulaSize: 360,
             meteorChanceMul: 0.62,
             starCross: false,
-            cloudPasses: 1,
             flybyChance: 0.45
           }
         };
@@ -1293,15 +1287,6 @@
         var nextMeteorAt = 0;
         var nextFlybyAt = 0;
         var moonMask = null;
-
-        var neb = {
-          c: document.createElement("canvas"),
-          x:0,
-          y:0,
-          a:(tier === "lite" ? 0.035 : tier === "balanced" ? 0.05 : 0.065),
-          drift: tier === "lite" ? 0.0028 : (tier === "balanced" ? 0.0032 : 0.004)
-        };
-        var nctx = neb.c.getContext("2d", { alpha:true });
 
         function rand(min,max){ return min + Math.random()*(max-min); }
         function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
@@ -1347,7 +1332,6 @@
           ctx.setTransform(dpr,0,0,dpr,0,0);
 
           buildScene();
-          buildNebulaTexture();
           updateMoonMask();
         }
 
@@ -1484,82 +1468,6 @@
           if (!e.touches || !e.touches[0]) return;
           onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive:true });
-
-        function blurPass(c, passes){
-          var b = document.createElement("canvas");
-          b.width = c.width;
-          b.height = c.height;
-          var bctx = b.getContext("2d");
-
-          for (var i=0;i<passes;i++){
-            bctx.clearRect(0,0,b.width,b.height);
-            bctx.globalAlpha = 0.50;
-            bctx.drawImage(c, -1, 0);
-            bctx.drawImage(c, 1, 0);
-            bctx.drawImage(c, 0, -1);
-            bctx.drawImage(c, 0, 1);
-            bctx.globalAlpha = 1;
-            var cctx = c.getContext("2d");
-            cctx.clearRect(0,0,c.width,c.height);
-            cctx.drawImage(b,0,0);
-          }
-        }
-
-        function buildNebulaTexture(){
-          var S = PERF.nebulaSize;
-          neb.c.width = S;
-          neb.c.height = S;
-          nctx.clearRect(0,0,S,S);
-
-          var clouds = tier === "max" ? 20 : (tier === "balanced" ? 14 : 10);
-
-          for (var i=0;i<clouds;i++){
-            var x = rand(0, S);
-            var y = rand(0, S);
-            var r = rand(S*0.10, S*0.24);
-
-            var g = nctx.createRadialGradient(x,y,0, x,y,r);
-            g.addColorStop(0, "rgba(90,140,255,"+rand(0.03,0.08)+")");
-            g.addColorStop(0.55, "rgba(40,85,170,"+rand(0.02,0.06)+")");
-            g.addColorStop(1, "rgba(0,0,0,0)");
-
-            nctx.fillStyle = g;
-            nctx.beginPath();
-            nctx.arc(x,y,r,0,Math.PI*2);
-            nctx.fill();
-          }
-
-          blurPass(neb.c, PERF.cloudPasses);
-          neb.x = rand(-0.25, 0.25);
-          neb.y = rand(-0.25, 0.25);
-        }
-
-        function drawNebula(px, py){
-          neb.x += neb.drift;
-          neb.y += neb.drift*0.55;
-
-          if (neb.x > 1) neb.x -= 1;
-          if (neb.y > 1) neb.y -= 1;
-
-          var S = neb.c.width;
-          var scale = Math.max(w,h) / S * 1.35;
-          var dw = S * scale;
-          var dh = S * scale;
-
-          var ox = (neb.x * dw) + (px * 0.10);
-          var oy = (neb.y * dh) + (py * 0.10);
-
-          ctx.save();
-          ctx.globalCompositeOperation = "screen";
-          ctx.globalAlpha = neb.a;
-
-          for (var ix=-1; ix<=1; ix++){
-            for (var iy=-1; iy<=1; iy++){
-              ctx.drawImage(neb.c, -ox + ix*dw, -oy + iy*dh, dw, dh);
-            }
-          }
-          ctx.restore();
-        }
 
         function starColor(temp, alpha){
           var b = clamp(-temp, 0, 1);
@@ -1960,7 +1868,6 @@
           ctx.fillStyle = "#000";
           ctx.fillRect(0,0,w,h);
 
-          drawNebula(px, py);
           drawStars(starsFar, px, py, 0.12);
           drawStars(starsMid, px, py, 0.28);
           drawStars(starsNear, px, py, 0.52);
@@ -2306,10 +2213,10 @@
 
           var radioGain = audioCtx.createGain();
           radioGain.gain.setValueAtTime(0.00001, now);
-          radioGain.gain.exponentialRampToValueAtTime(0.010, now + 0.25);
-          radioGain.gain.linearRampToValueAtTime(0.020 + Math.random()*0.010, now + 1.2);
-          radioGain.gain.linearRampToValueAtTime(0.034 + Math.random()*0.010, now + 3.8);
-          radioGain.gain.linearRampToValueAtTime(0.040 + Math.random()*0.012, now + 4.7);
+          radioGain.gain.exponentialRampToValueAtTime(0.020, now + 0.25);
+          radioGain.gain.linearRampToValueAtTime(0.040 + Math.random()*0.020, now + 1.2);
+          radioGain.gain.linearRampToValueAtTime(0.068 + Math.random()*0.020, now + 3.8);
+          radioGain.gain.linearRampToValueAtTime(0.080 + Math.random()*0.024, now + 4.7);
           radioGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           noise.connect(hp);
@@ -2344,8 +2251,8 @@
 
           var shimmerGain = audioCtx.createGain();
           shimmerGain.gain.setValueAtTime(0.00001, now);
-          shimmerGain.gain.exponentialRampToValueAtTime(0.0032 + Math.random()*0.0018, now + 2.7);
-          shimmerGain.gain.setValueAtTime(0.0032 + Math.random()*0.0018, now + 4.8);
+          shimmerGain.gain.exponentialRampToValueAtTime(0.0064 + Math.random()*0.0036, now + 2.7);
+          shimmerGain.gain.setValueAtTime(0.0064 + Math.random()*0.0036, now + 4.8);
           shimmerGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           shimmerNoise.connect(shimmerHP);
