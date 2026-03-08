@@ -115,139 +115,177 @@
       filter:none;
     }
 
-    #radioMessage{
+    /* TRANSMISSÃO NO UNIVERSO */
+    #transmissionField{
       position:fixed;
-      left:50%;
-      top:72%;
-      transform:translate(-50%,-50%);
+      left:7vw;
+      top:19vh;
+      width:min(520px, 38vw);
+      min-height:108px;
       z-index:7;
-      width:min(560px, 78vw);
-      min-height:74px;
-      padding:16px 20px 14px;
       pointer-events:none;
       opacity:0;
-      border-radius:18px;
-      border:1px solid rgba(230,192,123,.18);
-      background:
-        linear-gradient(
-          180deg,
-          rgba(255,255,255,.02),
-          rgba(255,255,255,.01)
-        );
-      box-shadow:
-        0 0 30px rgba(230,192,123,.08),
-        inset 0 0 30px rgba(255,255,255,.02);
-      overflow:hidden;
-      backdrop-filter:blur(3px);
-      -webkit-backdrop-filter:blur(3px);
-    }
-
-    #radioMessage.isActive{
-      opacity:1;
-      animation:radioWrapIn .22s ease-out forwards;
-    }
-
-    #radioMessage.isLeaving{
-      opacity:1;
-      animation:radioWrapOut .5s ease forwards;
-    }
-
-    .radioScan{
-      position:absolute;
-      left:-8%;
-      top:0;
-      width:116%;
-      height:100%;
-      opacity:0;
-      background:
-        repeating-linear-gradient(
-          180deg,
-          rgba(255,255,255,.00) 0px,
-          rgba(255,255,255,.00) 6px,
-          rgba(255,255,255,.035) 7px,
-          rgba(255,255,255,.00) 8px
-        ),
-        linear-gradient(
-          90deg,
-          rgba(255,255,255,0),
-          rgba(230,192,123,.22),
-          rgba(255,255,255,0)
-        );
-      transform:translateX(-100%);
+      transform:translateY(8px);
+      transition:opacity .35s ease, transform .35s ease;
       mix-blend-mode:screen;
     }
 
-    #radioMessage.isActive .radioScan{
+    #transmissionField.isActive{
       opacity:1;
-      animation:radioScanMove 1.15s ease-out forwards;
+      transform:translateY(0);
     }
 
-    .radioLabel{
-      position:relative;
-      z-index:2;
-      margin-bottom:8px;
-      font-size:10px;
-      letter-spacing:.28em;
-      text-transform:uppercase;
-      color:rgba(230,192,123,.65);
-      text-align:center;
+    #transmissionField.isLeaving{
+      opacity:0;
+      transform:translateY(-6px);
+      transition:opacity .5s ease, transform .5s ease;
     }
 
-    .radioText{
+    .tfNoise{
+      position:absolute;
+      inset:-8px -14px;
+      opacity:0;
+      overflow:hidden;
+      filter:blur(.2px);
+    }
+
+    #transmissionField.isActive .tfNoise{
+      opacity:1;
+    }
+
+    .tfNoise::before,
+    .tfNoise::after{
+      content:"";
+      position:absolute;
+      left:-10%;
+      width:120%;
+      height:2px;
+      background:linear-gradient(90deg, rgba(255,255,255,0), rgba(230,192,123,.78), rgba(255,255,255,0));
+      box-shadow:
+        0 0 14px rgba(230,192,123,.28),
+        0 0 26px rgba(255,255,255,.10);
+      opacity:.65;
+    }
+
+    .tfNoise::before{
+      top:28%;
+      animation:tfSweepA 1.05s linear infinite;
+    }
+
+    .tfNoise::after{
+      top:64%;
+      animation:tfSweepB 1.35s linear infinite;
+    }
+
+    .tfNoise i{
+      position:absolute;
+      left:0;
+      width:100%;
+      height:100%;
+      display:block;
+      background:
+        repeating-linear-gradient(
+          180deg,
+          rgba(255,255,255,0) 0px,
+          rgba(255,255,255,0) 4px,
+          rgba(255,255,255,.038) 5px,
+          rgba(255,255,255,0) 6px
+        );
+      opacity:.32;
+      animation:tfFlicker .14s steps(2,end) infinite;
+    }
+
+    .tfCore{
       position:relative;
       z-index:2;
-      min-height:28px;
-      text-align:center;
+      padding:8px 10px;
+    }
+
+    .tfTitle{
+      min-height:16px;
       font-family:"Courier New", ui-monospace, monospace;
-      font-size:clamp(16px, 2vw, 24px);
-      letter-spacing:.12em;
-      line-height:1.45;
-      color:rgba(245,245,245,.94);
+      font-size:11px;
+      letter-spacing:.34em;
+      text-transform:uppercase;
+      color:rgba(230,192,123,.88);
       text-shadow:
-        0 0 8px rgba(255,255,255,.10),
-        0 0 18px rgba(230,192,123,.16);
+        0 0 10px rgba(230,192,123,.14),
+        0 0 22px rgba(230,192,123,.08);
+      opacity:0;
+      transform:translateX(-4px);
+    }
+
+    #transmissionField.showTitle .tfTitle{
+      opacity:1;
+      transform:translateX(0);
+      transition:opacity .25s ease, transform .25s ease;
+    }
+
+    .tfMessage{
+      margin-top:10px;
+      min-height:54px;
+      font-family:"Courier New", ui-monospace, monospace;
+      font-size:clamp(18px, 1.8vw, 26px);
+      line-height:1.45;
+      letter-spacing:.16em;
+      color:rgba(244,244,244,.96);
+      text-shadow:
+        0 0 9px rgba(255,255,255,.10),
+        0 0 20px rgba(230,192,123,.10);
       white-space:pre-wrap;
       word-break:break-word;
+      opacity:0;
     }
 
-    @keyframes radioScanMove{
-      0%{
-        transform:translateX(-100%);
-        opacity:0;
-      }
-      14%{
-        opacity:1;
-      }
-      100%{
-        transform:translateX(100%);
-        opacity:.30;
-      }
+    #transmissionField.showMessage .tfMessage{
+      opacity:1;
+      transition:opacity .18s ease;
     }
 
-    @keyframes radioWrapIn{
-      0%{
-        opacity:0;
-        transform:translate(-50%,-46%);
-        filter:blur(7px);
-      }
-      100%{
-        opacity:1;
-        transform:translate(-50%,-50%);
-        filter:blur(0);
-      }
+    .tfGhost{
+      position:absolute;
+      inset:0;
+      z-index:1;
+      font-family:"Courier New", ui-monospace, monospace;
+      font-size:clamp(18px, 1.8vw, 26px);
+      line-height:1.45;
+      letter-spacing:.16em;
+      color:rgba(255,255,255,.08);
+      transform:translate(1px, -1px);
+      white-space:pre-wrap;
+      word-break:break-word;
+      opacity:0;
+      pointer-events:none;
+      filter:blur(.6px);
     }
 
-    @keyframes radioWrapOut{
-      0%{
-        opacity:1;
-        transform:translate(-50%,-50%);
-        filter:blur(0);
-      }
-      100%{
-        opacity:0;
-        transform:translate(-50%,-54%);
-        filter:blur(6px);
-      }
+    #transmissionField.showMessage .tfGhost{
+      opacity:1;
+      animation:tfGhostShift .11s steps(2,end) infinite;
+    }
+
+    @keyframes tfSweepA{
+      0%{ transform:translateX(-100%); opacity:0; }
+      10%{ opacity:.9; }
+      100%{ transform:translateX(100%); opacity:0; }
+    }
+
+    @keyframes tfSweepB{
+      0%{ transform:translateX(100%); opacity:0; }
+      14%{ opacity:.7; }
+      100%{ transform:translateX(-100%); opacity:0; }
+    }
+
+    @keyframes tfFlicker{
+      0%{ opacity:.18; }
+      50%{ opacity:.36; }
+      100%{ opacity:.24; }
+    }
+
+    @keyframes tfGhostShift{
+      0%{ transform:translate(1px,-1px); }
+      50%{ transform:translate(-1px,1px); }
+      100%{ transform:translate(1px,0); }
     }
 
     .wrap{
@@ -839,6 +877,12 @@
         width:min(180px, 32vw);
         top:max(38px, env(safe-area-inset-top));
       }
+
+      #transmissionField{
+        left:5vw;
+        top:16vh;
+        width:min(420px, 46vw);
+      }
     }
 
     @media (max-width:700px){
@@ -901,15 +945,15 @@
         min-width:120px;
       }
 
-      #radioMessage{
-        top:68%;
-        width:min(92vw, 520px);
-        padding:14px 14px 12px;
+      #transmissionField{
+        left:5vw;
+        top:14vh;
+        width:min(72vw, 360px);
       }
 
-      .radioText{
-        font-size:clamp(15px, 4.5vw, 20px);
-        letter-spacing:.08em;
+      .tfMessage{
+        font-size:clamp(15px, 4.4vw, 19px);
+        letter-spacing:.10em;
       }
     }
 
@@ -973,8 +1017,15 @@
         min-width:90px;
       }
 
-      #radioMessage{
-        top:64%;
+      #transmissionField{
+        left:4vw;
+        top:13vh;
+        width:min(76vw, 320px);
+      }
+
+      .tfTitle{
+        font-size:10px;
+        letter-spacing:.22em;
       }
     }
 
@@ -982,6 +1033,10 @@
       .whisper, .title{ animation:none !important; }
       #stars{ display:none; }
       .moonWrap{ filter:none; }
+      .tfNoise::before,
+      .tfNoise::after,
+      .tfNoise i,
+      .tfGhost{ animation:none !important; }
     }
   </style>
 
@@ -1131,10 +1186,13 @@
 <body>
   <canvas id="stars" aria-hidden="true"></canvas>
 
-  <div id="radioMessage" aria-hidden="true">
-    <div class="radioScan"></div>
-    <div class="radioLabel">TRANSMISSÃO</div>
-    <div class="radioText" id="radioText"></div>
+  <div id="transmissionField" aria-hidden="true">
+    <div class="tfNoise"><i></i></div>
+    <div class="tfCore">
+      <div class="tfTitle" id="tfTitle">UMA TRANSMISSÃO RECEBIDA</div>
+      <div class="tfMessage" id="tfMessage"></div>
+      <div class="tfGhost" id="tfGhost"></div>
+    </div>
   </div>
 
   <div class="moonWrap" aria-hidden="true">
@@ -1301,48 +1359,76 @@
 
   <script>
     (function(){
-      var box = document.getElementById("radioMessage");
-      var textEl = document.getElementById("radioText");
-      if (!box || !textEl) return;
+      var field = document.getElementById("transmissionField");
+      var titleEl = document.getElementById("tfTitle");
+      var msgEl = document.getElementById("tfMessage");
+      var ghostEl = document.getElementById("tfGhost");
+      if (!field || !titleEl || !msgEl || !ghostEl) return;
 
-      var typingTimer = null;
+      var typeTimer = null;
+      var stageTimer1 = null;
+      var stageTimer2 = null;
       var hideTimer = null;
+      var leaveTimer = null;
 
-      function typeText(text, speed){
-        clearInterval(typingTimer);
-        textEl.textContent = "";
+      function clearAll(){
+        clearInterval(typeTimer);
+        clearTimeout(stageTimer1);
+        clearTimeout(stageTimer2);
+        clearTimeout(hideTimer);
+        clearTimeout(leaveTimer);
+      }
+
+      function typeMessage(text, speed){
+        clearInterval(typeTimer);
+        msgEl.textContent = "";
+        ghostEl.textContent = "";
         var i = 0;
 
-        typingTimer = setInterval(function(){
+        typeTimer = setInterval(function(){
           i++;
-          textEl.textContent = text.slice(0, i);
+          var slice = text.slice(0, i);
+          msgEl.textContent = slice;
+          ghostEl.textContent = slice;
+
           if (i >= text.length){
-            clearInterval(typingTimer);
+            clearInterval(typeTimer);
           }
-        }, speed || 52);
+        }, speed || 58);
       }
 
-      function showRadioMessage(message){
-        clearInterval(typingTimer);
-        clearTimeout(hideTimer);
+      function showTransmissionSequence(title, message){
+        clearAll();
 
-        box.classList.remove("isLeaving");
-        box.classList.add("isActive");
+        field.classList.remove("isLeaving", "showTitle", "showMessage");
+        msgEl.textContent = "";
+        ghostEl.textContent = "";
+        titleEl.textContent = title || "UMA TRANSMISSÃO RECEBIDA";
 
-        typeText(message, 52);
+        field.classList.add("isActive");
+
+        stageTimer1 = setTimeout(function(){
+          field.classList.add("showTitle");
+        }, 120);
+
+        stageTimer2 = setTimeout(function(){
+          field.classList.add("showMessage");
+          typeMessage(message || "Olá, seja bem-vindo(a)", 62);
+        }, 1050);
 
         hideTimer = setTimeout(function(){
-          box.classList.remove("isActive");
-          box.classList.add("isLeaving");
+          field.classList.remove("showMessage", "showTitle");
+          field.classList.add("isLeaving");
 
-          setTimeout(function(){
-            box.classList.remove("isLeaving");
-            textEl.textContent = "";
-          }, 520);
-        }, 4200);
+          leaveTimer = setTimeout(function(){
+            field.classList.remove("isActive", "isLeaving");
+            msgEl.textContent = "";
+            ghostEl.textContent = "";
+          }, 650);
+        }, 7200);
       }
 
-      window.showRadioMessage = showRadioMessage;
+      window.showTransmissionSequence = showTransmissionSequence;
     })();
   </script>
 
@@ -2325,6 +2411,8 @@
       var gDrone = null;
       var airGain = null;
       var radioTimer = null;
+      var selectedVoice = null;
+      var hasUserGesture = false;
 
       function getLS(k, fallback){
         try{
@@ -2390,38 +2478,102 @@
         }catch(e){}
       }
 
+      function chooseVoice(){
+        try{
+          var voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+          if (!voices || !voices.length) return null;
+
+          var preferred = null;
+          for (var i=0;i<voices.length;i++){
+            if (/pt-BR/i.test(voices[i].lang) && /female|helena|luciana|microsoft maria|google português do brasil/i.test(voices[i].name)){
+              preferred = voices[i];
+              break;
+            }
+          }
+          if (!preferred){
+            for (var j=0;j<voices.length;j++){
+              if (/pt-BR/i.test(voices[j].lang)){
+                preferred = voices[j];
+                break;
+              }
+            }
+          }
+          if (!preferred) preferred = voices[0];
+          return preferred;
+        }catch(e){
+          return null;
+        }
+      }
+
+      function speakTransmission(text){
+        if (!hasUserGesture || !window.speechSynthesis) return;
+        try{
+          selectedVoice = selectedVoice || chooseVoice();
+          var utter = new SpeechSynthesisUtterance(text);
+          utter.lang = "pt-BR";
+          utter.rate = 0.92;
+          utter.pitch = 0.82;
+          utter.volume = 1;
+          if (selectedVoice) utter.voice = selectedVoice;
+
+          speechSynthesis.cancel();
+          speechSynthesis.speak(utter);
+        }catch(e){}
+      }
+
+      if (window.speechSynthesis){
+        try{
+          speechSynthesis.onvoiceschanged = function(){
+            selectedVoice = chooseVoice();
+          };
+        }catch(e){}
+      }
+
+      function triggerTransmission(){
+        var title = "UMA TRANSMISSÃO RECEBIDA";
+        var message = "Olá, seja bem-vindo(a)";
+
+        if (window.showTransmissionSequence){
+          window.showTransmissionSequence(title, message);
+        }
+
+        setTimeout(function(){
+          speakTransmission(message);
+        }, 1200);
+      }
+
       function playSpaceRadioSignal(){
         if (!audioCtx || audioCtx.state === "closed" || !master) return;
 
         try{
-          if (window.showRadioMessage) window.showRadioMessage("Olá, seja bem-vindo(a)");
+          triggerTransmission();
 
           var now = audioCtx.currentTime;
-          var totalDur = 5.2;
+          var totalDur = 6.0;
 
           var noise = createBrownNoise(audioCtx);
 
           var hp = audioCtx.createBiquadFilter();
           hp.type = "highpass";
-          hp.frequency.setValueAtTime(220 + Math.random()*70, now);
+          hp.frequency.setValueAtTime(210 + Math.random()*65, now);
           hp.Q.setValueAtTime(0.7, now);
 
           var bp = audioCtx.createBiquadFilter();
           bp.type = "bandpass";
-          bp.frequency.setValueAtTime(1150 + Math.random()*220, now);
-          bp.Q.setValueAtTime(0.95 + Math.random()*0.45, now);
+          bp.frequency.setValueAtTime(1080 + Math.random()*240, now);
+          bp.Q.setValueAtTime(0.9 + Math.random()*0.4, now);
 
           var lp = audioCtx.createBiquadFilter();
           lp.type = "lowpass";
-          lp.frequency.setValueAtTime(2400 + Math.random()*350, now);
-          lp.Q.setValueAtTime(0.7, now);
+          lp.frequency.setValueAtTime(2550 + Math.random()*420, now);
+          lp.Q.setValueAtTime(0.72, now);
 
           var radioGain = audioCtx.createGain();
           radioGain.gain.setValueAtTime(0.00001, now);
-          radioGain.gain.exponentialRampToValueAtTime(0.060, now + 0.25);
-          radioGain.gain.linearRampToValueAtTime(0.120 + Math.random()*0.060, now + 1.2);
-          radioGain.gain.linearRampToValueAtTime(0.204 + Math.random()*0.060, now + 3.8);
-          radioGain.gain.linearRampToValueAtTime(0.240 + Math.random()*0.072, now + 4.7);
+          radioGain.gain.exponentialRampToValueAtTime(0.12, now + 0.30);
+          radioGain.gain.linearRampToValueAtTime(0.22 + Math.random()*0.06, now + 1.6);
+          radioGain.gain.linearRampToValueAtTime(0.34 + Math.random()*0.08, now + 4.5);
+          radioGain.gain.linearRampToValueAtTime(0.42 + Math.random()*0.08, now + 5.4);
           radioGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           noise.connect(hp);
@@ -2434,10 +2586,10 @@
 
           var flutterLFO = audioCtx.createOscillator();
           flutterLFO.type = "sine";
-          flutterLFO.frequency.setValueAtTime(0.18 + Math.random()*0.16, now);
+          flutterLFO.frequency.setValueAtTime(0.16 + Math.random()*0.18, now);
 
           var flutterGain = audioCtx.createGain();
-          flutterGain.gain.setValueAtTime(120 + Math.random()*80, now);
+          flutterGain.gain.setValueAtTime(130 + Math.random()*90, now);
 
           flutterLFO.connect(flutterGain);
           flutterGain.connect(bp.frequency);
@@ -2447,17 +2599,17 @@
           var shimmerNoise = createBrownNoise(audioCtx);
           var shimmerHP = audioCtx.createBiquadFilter();
           shimmerHP.type = "highpass";
-          shimmerHP.frequency.setValueAtTime(1800 + Math.random()*300, now);
+          shimmerHP.frequency.setValueAtTime(1700 + Math.random()*340, now);
 
           var shimmerBP = audioCtx.createBiquadFilter();
           shimmerBP.type = "bandpass";
-          shimmerBP.frequency.setValueAtTime(2300 + Math.random()*400, now);
-          shimmerBP.Q.setValueAtTime(2.8, now);
+          shimmerBP.frequency.setValueAtTime(2250 + Math.random()*450, now);
+          shimmerBP.Q.setValueAtTime(2.6, now);
 
           var shimmerGain = audioCtx.createGain();
           shimmerGain.gain.setValueAtTime(0.00001, now);
-          shimmerGain.gain.exponentialRampToValueAtTime(0.0192 + Math.random()*0.0108, now + 2.7);
-          shimmerGain.gain.setValueAtTime(0.0192 + Math.random()*0.0108, now + 4.8);
+          shimmerGain.gain.exponentialRampToValueAtTime(0.030 + Math.random()*0.010, now + 2.2);
+          shimmerGain.gain.setValueAtTime(0.030 + Math.random()*0.010, now + 5.2);
           shimmerGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           shimmerNoise.connect(shimmerHP);
@@ -2469,17 +2621,17 @@
 
           var lowHum = audioCtx.createOscillator();
           lowHum.type = "sine";
-          lowHum.frequency.setValueAtTime(72 + Math.random()*18, now);
+          lowHum.frequency.setValueAtTime(68 + Math.random()*14, now);
 
           var lowHumGain = audioCtx.createGain();
           lowHumGain.gain.setValueAtTime(0.00001, now);
-          lowHumGain.gain.exponentialRampToValueAtTime(0.0012 + Math.random()*0.0012, now + 1.5);
-          lowHumGain.gain.setValueAtTime(0.0012 + Math.random()*0.0012, now + 4.2);
+          lowHumGain.gain.exponentialRampToValueAtTime(0.0022 + Math.random()*0.0012, now + 1.4);
+          lowHumGain.gain.setValueAtTime(0.0022 + Math.random()*0.0012, now + 5.0);
           lowHumGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           var lowHumLP = audioCtx.createBiquadFilter();
           lowHumLP.type = "lowpass";
-          lowHumLP.frequency.setValueAtTime(180, now);
+          lowHumLP.frequency.setValueAtTime(170, now);
 
           lowHum.connect(lowHumLP);
           lowHumLP.connect(lowHumGain);
@@ -2487,23 +2639,23 @@
           lowHum.start(now);
           lowHum.stop(now + totalDur);
 
-          var clickCount = 2 + Math.floor(Math.random()*3);
+          var clickCount = 3 + Math.floor(Math.random()*3);
           for (var i=0;i<clickCount;i++){
-            var tt = now + 1.7 + Math.random()*2.4;
+            var tt = now + 1.9 + Math.random()*2.9;
 
             var cOsc = audioCtx.createOscillator();
             cOsc.type = "triangle";
-            cOsc.frequency.setValueAtTime(1400 + Math.random()*900, tt);
+            cOsc.frequency.setValueAtTime(1200 + Math.random()*900, tt);
 
             var cBP = audioCtx.createBiquadFilter();
             cBP.type = "bandpass";
-            cBP.frequency.setValueAtTime(1800 + Math.random()*600, tt);
+            cBP.frequency.setValueAtTime(1700 + Math.random()*700, tt);
             cBP.Q.setValueAtTime(7, tt);
 
             var cGain = audioCtx.createGain();
             cGain.gain.setValueAtTime(0.00001, tt);
-            cGain.gain.exponentialRampToValueAtTime(0.0017 + Math.random()*0.0012, tt + 0.008);
-            cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.040);
+            cGain.gain.exponentialRampToValueAtTime(0.003 + Math.random()*0.0016, tt + 0.008);
+            cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.045);
 
             cOsc.connect(cBP);
             cBP.connect(cGain);
@@ -2532,6 +2684,8 @@
         clearTimeout(radioTimer);
 
         try{
+          hasUserGesture = true;
+
           var Ctx = window.AudioContext || window.webkitAudioContext;
           if (!Ctx) return false;
 
@@ -2619,6 +2773,8 @@
             try{ audioCtx.resume(); }catch(e){}
           }
 
+          selectedVoice = chooseVoice();
+
           ramp(gDrone.gain, 0.30, 1.6);
           ramp(airGain.gain, 0.05, 1.8);
 
@@ -2636,6 +2792,12 @@
 
       function stopAudio(){
         clearTimeout(radioTimer);
+
+        try{
+          if (window.speechSynthesis){
+            speechSynthesis.cancel();
+          }
+        }catch(e){}
 
         try{
           if (audioCtx){
