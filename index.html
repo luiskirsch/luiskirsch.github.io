@@ -10,7 +10,6 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
@@ -55,12 +54,10 @@
       -webkit-text-size-adjust:100%;
       -webkit-overflow-scrolling:touch;
       overscroll-behavior:none;
-
       padding-left:max(18px, env(safe-area-inset-left));
       padding-right:max(18px, env(safe-area-inset-right));
       padding-top:max(250px, calc(env(safe-area-inset-top) + 250px));
       padding-bottom:max(18px, env(safe-area-inset-bottom));
-
       color:#f2f2f2;
       font-family:ui-serif, Georgia, "Times New Roman", serif;
       background:#000;
@@ -88,7 +85,7 @@
     .moonWrap{
       position:fixed;
       left:50%;
-      top:max(50px, env(safe-area-inset-top));
+      top:max(44px, env(safe-area-inset-top));
       transform:translateX(-50%);
       z-index:4;
       width:min(280px, 34vw);
@@ -101,9 +98,7 @@
       filter:none;
     }
 
-    .moonGlow{
-      display:none;
-    }
+    .moonGlow{ display:none; }
 
     .moon{
       position:relative;
@@ -115,17 +110,17 @@
       filter:none;
     }
 
-    /* TRANSMISSÃO NO UNIVERSO */
+    /* TRANSMISSÃO */
     #transmissionField{
       position:fixed;
-      left:7vw;
-      top:19vh;
-      width:min(520px, 38vw);
-      min-height:108px;
-      z-index:7;
+      left:5.6vw;
+      top:18.5vh;
+      width:min(560px, 37vw);
+      min-height:104px;
+      z-index:9;
       pointer-events:none;
       opacity:0;
-      transform:translateY(8px);
+      transform:translateY(12px);
       transition:opacity .35s ease, transform .35s ease;
       mix-blend-mode:screen;
     }
@@ -135,157 +130,116 @@
       transform:translateY(0);
     }
 
-    #transmissionField.isLeaving{
-      opacity:0;
-      transform:translateY(-6px);
-      transition:opacity .5s ease, transform .5s ease;
-    }
-
     .tfNoise{
       position:absolute;
-      inset:-8px -14px;
-      opacity:0;
+      inset:-8px;
+      border-radius:18px;
       overflow:hidden;
-      filter:blur(.2px);
-    }
-
-    #transmissionField.isActive .tfNoise{
-      opacity:1;
-    }
-
-    .tfNoise::before,
-    .tfNoise::after{
-      content:"";
-      position:absolute;
-      left:-10%;
-      width:120%;
-      height:2px;
-      background:linear-gradient(90deg, rgba(255,255,255,0), rgba(230,192,123,.78), rgba(255,255,255,0));
-      box-shadow:
-        0 0 14px rgba(230,192,123,.28),
-        0 0 26px rgba(255,255,255,.10);
-      opacity:.65;
+      opacity:.55;
     }
 
     .tfNoise::before{
-      top:28%;
-      animation:tfSweepA 1.05s linear infinite;
-    }
-
-    .tfNoise::after{
-      top:64%;
-      animation:tfSweepB 1.35s linear infinite;
-    }
-
-    .tfNoise i{
+      content:"";
       position:absolute;
-      left:0;
-      width:100%;
-      height:100%;
-      display:block;
+      inset:0;
       background:
         repeating-linear-gradient(
           180deg,
           rgba(255,255,255,0) 0px,
           rgba(255,255,255,0) 4px,
-          rgba(255,255,255,.038) 5px,
+          rgba(255,255,255,.055) 5px,
           rgba(255,255,255,0) 6px
         );
-      opacity:.32;
-      animation:tfFlicker .14s steps(2,end) infinite;
+      animation:tfFlicker .10s linear infinite;
+    }
+
+    .tfNoise::after{
+      content:"";
+      position:absolute;
+      left:-30%;
+      top:0;
+      width:30%;
+      height:100%;
+      background:linear-gradient(90deg, rgba(255,255,255,0), rgba(230,192,123,.22), rgba(255,255,255,0));
+      filter:blur(8px);
+      animation:tfSweep 1.3s linear infinite;
+      opacity:.7;
     }
 
     .tfCore{
       position:relative;
-      z-index:2;
-      padding:8px 10px;
+      border-radius:18px;
+      padding:16px 18px 16px;
+      border:1px solid rgba(230,192,123,.16);
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.012));
+      box-shadow:
+        0 0 32px rgba(230,192,123,.08),
+        inset 0 0 24px rgba(255,255,255,.02);
+      backdrop-filter:blur(3px);
+      -webkit-backdrop-filter:blur(3px);
+      overflow:hidden;
+    }
+
+    .tfCore::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+      pointer-events:none;
     }
 
     .tfTitle{
-      min-height:16px;
+      position:relative;
+      z-index:2;
       font-family:"Courier New", ui-monospace, monospace;
       font-size:11px;
-      letter-spacing:.34em;
+      letter-spacing:.26em;
       text-transform:uppercase;
-      color:rgba(230,192,123,.88);
-      text-shadow:
-        0 0 10px rgba(230,192,123,.14),
-        0 0 22px rgba(230,192,123,.08);
-      opacity:0;
-      transform:translateX(-4px);
-    }
-
-    #transmissionField.showTitle .tfTitle{
-      opacity:1;
-      transform:translateX(0);
-      transition:opacity .25s ease, transform .25s ease;
+      color:rgba(230,192,123,.84);
+      margin-bottom:10px;
+      text-shadow:0 0 8px rgba(230,192,123,.18);
+      min-height:14px;
     }
 
     .tfMessage{
-      margin-top:10px;
-      min-height:54px;
+      position:relative;
+      z-index:2;
+      min-height:34px;
       font-family:"Courier New", ui-monospace, monospace;
-      font-size:clamp(18px, 1.8vw, 26px);
+      font-size:clamp(16px, 1.6vw, 24px);
       line-height:1.45;
-      letter-spacing:.16em;
-      color:rgba(244,244,244,.96);
+      letter-spacing:.12em;
+      color:rgba(245,245,245,.96);
       text-shadow:
-        0 0 9px rgba(255,255,255,.10),
-        0 0 20px rgba(230,192,123,.10);
+        0 0 8px rgba(255,255,255,.12),
+        0 0 18px rgba(230,192,123,.16);
       white-space:pre-wrap;
       word-break:break-word;
-      opacity:0;
-    }
-
-    #transmissionField.showMessage .tfMessage{
-      opacity:1;
-      transition:opacity .18s ease;
     }
 
     .tfGhost{
       position:absolute;
-      inset:0;
-      z-index:1;
+      inset:auto 18px 16px 18px;
       font-family:"Courier New", ui-monospace, monospace;
-      font-size:clamp(18px, 1.8vw, 26px);
+      font-size:clamp(16px, 1.6vw, 24px);
       line-height:1.45;
-      letter-spacing:.16em;
-      color:rgba(255,255,255,.08);
-      transform:translate(1px, -1px);
+      letter-spacing:.12em;
+      color:rgba(255,255,255,.05);
+      filter:blur(.65px);
       white-space:pre-wrap;
       word-break:break-word;
-      opacity:0;
       pointer-events:none;
-      filter:blur(.6px);
-    }
-
-    #transmissionField.showMessage .tfGhost{
-      opacity:1;
-      animation:tfGhostShift .11s steps(2,end) infinite;
-    }
-
-    @keyframes tfSweepA{
-      0%{ transform:translateX(-100%); opacity:0; }
-      10%{ opacity:.9; }
-      100%{ transform:translateX(100%); opacity:0; }
-    }
-
-    @keyframes tfSweepB{
-      0%{ transform:translateX(100%); opacity:0; }
-      14%{ opacity:.7; }
-      100%{ transform:translateX(-100%); opacity:0; }
     }
 
     @keyframes tfFlicker{
-      0%{ opacity:.18; }
-      50%{ opacity:.36; }
-      100%{ opacity:.24; }
+      0%{opacity:.18}
+      35%{opacity:.48}
+      100%{opacity:.24}
     }
 
-    @keyframes tfGhostShift{
-      0%{ transform:translate(1px,-1px); }
-      50%{ transform:translate(-1px,1px); }
-      100%{ transform:translate(1px,0); }
+    @keyframes tfSweep{
+      0%{transform:translateX(0)}
+      100%{transform:translateX(520%)}
     }
 
     .wrap{
@@ -519,9 +473,7 @@
       font-size:16px;
     }
 
-    input::placeholder{
-      color:rgba(255,255,255,.38);
-    }
+    input::placeholder{ color:rgba(255,255,255,.38); }
 
     .hpTrap{
       position:absolute !important;
@@ -605,9 +557,7 @@
       user-select:none;
     }
 
-    .launchCountdown{
-      margin-top:18px;
-    }
+    .launchCountdown{ margin-top:18px; }
 
     .countdownCard{
       border-radius:22px;
@@ -728,9 +678,7 @@
       max-width:90ch;
     }
 
-    .aboutText strong{
-      color:rgba(230,192,123,.95);
-    }
+    .aboutText strong{ color:rgba(230,192,123,.95); }
 
     .footer{
       width:100%;
@@ -793,9 +741,7 @@
       min-width:92px;
     }
 
-    .soundToggle strong{
-      color:var(--gold);
-    }
+    .soundToggle strong{ color:var(--gold); }
 
     .soundVolume{
       display:flex;
@@ -860,28 +806,18 @@
     }
 
     @media (max-width:980px){
-      .grid{
-        grid-template-columns:1fr;
-        gap:18px;
-      }
-
-      .title{
-        font-size:clamp(42px, 8vw, 72px);
-      }
-
-      .miniGrid{
-        grid-template-columns:1fr 1fr;
-      }
-
+      .grid{ grid-template-columns:1fr; gap:18px; }
+      .title{ font-size:clamp(42px, 8vw, 72px); }
+      .miniGrid{ grid-template-columns:1fr 1fr; }
       .moonWrap{
         width:min(180px, 32vw);
-        top:max(38px, env(safe-area-inset-top));
+        top:max(42px, env(safe-area-inset-top));
       }
 
       #transmissionField{
-        left:5vw;
+        left:4vw;
         top:16vh;
-        width:min(420px, 46vw);
+        width:min(420px, 44vw);
       }
     }
 
@@ -892,18 +828,14 @@
         padding-top:max(16px, env(safe-area-inset-top));
       }
 
-      .wrap{
-        padding:120px 0 24px;
-      }
+      .wrap{ padding:120px 0 24px; }
 
       .moonWrap{
         width:min(150px, 36vw);
-        top:max(24px, env(safe-area-inset-top));
+        top:max(40px, env(safe-area-inset-top));
       }
 
-      .titleRow{
-        padding-left:74px;
-      }
+      .titleRow{ padding-left:74px; }
 
       .titleLogo{
         width:82px;
@@ -917,21 +849,10 @@
         letter-spacing:.10em;
       }
 
-      .subtitle{
-        font-size:16px;
-      }
-
-      .miniGrid{
-        grid-template-columns:1fr;
-      }
-
-      .row2{
-        grid-template-columns:1fr;
-      }
-
-      .countdownGrid{
-        grid-template-columns:repeat(2,1fr);
-      }
+      .subtitle{ font-size:16px; }
+      .miniGrid{ grid-template-columns:1fr; }
+      .row2{ grid-template-columns:1fr; }
+      .countdownGrid{ grid-template-columns:repeat(2,1fr); }
 
       .soundPanel{
         right:10px;
@@ -946,34 +867,27 @@
       }
 
       #transmissionField{
-        left:5vw;
-        top:14vh;
-        width:min(72vw, 360px);
+        left:4vw;
+        top:15vh;
+        width:min(72vw, 420px);
       }
 
-      .tfMessage{
-        font-size:clamp(15px, 4.4vw, 19px);
-        letter-spacing:.10em;
+      .tfMessage,.tfGhost{
+        font-size:clamp(15px, 4.2vw, 20px);
+        letter-spacing:.08em;
       }
     }
 
     @media (max-width:480px){
-      .wrap{
-        padding:108px 0 22px;
-      }
+      .wrap{ padding:108px 0 22px; }
 
       .moonWrap{
         width:min(120px, 32vw);
-        top:max(20px, env(safe-area-inset-top));
+        top:max(38px, env(safe-area-inset-top));
       }
 
-      .inner{
-        padding:18px 16px 20px;
-      }
-
-      .titleRow{
-        padding-left:60px;
-      }
+      .inner{ padding:18px 16px 20px; }
+      .titleRow{ padding-left:60px; }
 
       .titleLogo{
         width:64px;
@@ -987,30 +901,18 @@
         letter-spacing:.08em;
       }
 
-      .subtitle{
-        font-size:15px;
-      }
-
-      .mini p{
-        font-size:15px;
-      }
+      .subtitle{ font-size:15px; }
+      .mini p{ font-size:15px; }
 
       button{
         width:100%;
         min-width:0;
       }
 
-      .actions{
-        flex-direction:column;
-      }
+      .actions{ flex-direction:column; }
+      .countdownValue{ font-size:30px; }
 
-      .countdownValue{
-        font-size:30px;
-      }
-
-      .soundPanel{
-        padding:8px 10px;
-      }
+      .soundPanel{ padding:8px 10px; }
 
       #volumeSlider{
         width:90px;
@@ -1019,8 +921,8 @@
 
       #transmissionField{
         left:4vw;
-        top:13vh;
-        width:min(76vw, 320px);
+        top:14.5vh;
+        width:76vw;
       }
 
       .tfTitle{
@@ -1030,13 +932,9 @@
     }
 
     @media (prefers-reduced-motion:reduce){
-      .whisper, .title{ animation:none !important; }
+      .whisper, .title, .tfNoise::before, .tfNoise::after{ animation:none !important; }
       #stars{ display:none; }
       .moonWrap{ filter:none; }
-      .tfNoise::before,
-      .tfNoise::after,
-      .tfNoise i,
-      .tfGhost{ animation:none !important; }
     }
   </style>
 
@@ -1078,31 +976,24 @@
         else if (isTouch && vw <= 1024) kind = "tablet";
 
         var score = 0;
-
         if (kind === "desktop") score += 100;
         if (kind === "tablet") score += 90;
         if (kind === "mobile") score += 50;
-
         if (cores >= 8) score += 26;
         else if (cores >= 6) score += 18;
         else if (cores >= 4) score += 8;
         else if (cores > 0) score -= 10;
-
         if (mem >= 8) score += 24;
         else if (mem >= 6) score += 18;
         else if (mem >= 4) score += 10;
         else if (mem > 0) score -= 8;
-
         if (dpr >= 3) score -= 8;
         else if (dpr >= 2) score -= 4;
-
         if (isIPad) score += 20;
         if (kind === "tablet") score += 14;
         if (kind === "desktop") score += 20;
-
         if (isIPhone && sw <= 750) score -= 18;
         if (isAndroidMobile && sw <= 412 && cores && cores <= 4) score -= 12;
-
         if (prefersReduced) score -= 60;
 
         var initialTier = "balanced";
@@ -1187,9 +1078,9 @@
   <canvas id="stars" aria-hidden="true"></canvas>
 
   <div id="transmissionField" aria-hidden="true">
-    <div class="tfNoise"><i></i></div>
+    <div class="tfNoise"></div>
     <div class="tfCore">
-      <div class="tfTitle" id="tfTitle">UMA TRANSMISSÃO RECEBIDA</div>
+      <div class="tfTitle" id="tfTitle"></div>
       <div class="tfMessage" id="tfMessage"></div>
       <div class="tfGhost" id="tfGhost"></div>
     </div>
@@ -1366,20 +1257,59 @@
       if (!field || !titleEl || !msgEl || !ghostEl) return;
 
       var typeTimer = null;
-      var stageTimer1 = null;
-      var stageTimer2 = null;
-      var hideTimer = null;
       var leaveTimer = null;
+      var speakTimer = null;
+      var currentUtter = null;
 
       function clearAll(){
         clearInterval(typeTimer);
-        clearTimeout(stageTimer1);
-        clearTimeout(stageTimer2);
-        clearTimeout(hideTimer);
         clearTimeout(leaveTimer);
+        clearTimeout(speakTimer);
+        if (window.speechSynthesis){
+          try{ window.speechSynthesis.cancel(); }catch(e){}
+        }
       }
 
-      function typeMessage(text, speed){
+      function findVoice(){
+        if (!window.speechSynthesis) return null;
+        var voices = window.speechSynthesis.getVoices() || [];
+        var preferred = null;
+
+        for (var i=0;i<voices.length;i++){
+          if (/pt-BR/i.test(voices[i].lang)) {
+            preferred = voices[i];
+            if (/Google|Luciana|Francisca|Brazil/i.test((voices[i].name || ""))) break;
+          }
+        }
+
+        if (!preferred){
+          for (var j=0;j<voices.length;j++){
+            if (/pt/i.test(voices[j].lang)) {
+              preferred = voices[j];
+              break;
+            }
+          }
+        }
+
+        return preferred || null;
+      }
+
+      function speakText(text){
+        if (!window.speechSynthesis) return;
+        try{
+          window.speechSynthesis.cancel();
+          currentUtter = new SpeechSynthesisUtterance(text);
+          currentUtter.lang = "pt-BR";
+          currentUtter.rate = 0.92;
+          currentUtter.pitch = 0.86;
+          currentUtter.volume = 1;
+          var voice = findVoice();
+          if (voice) currentUtter.voice = voice;
+          window.speechSynthesis.speak(currentUtter);
+        }catch(e){}
+      }
+
+      function typeText(text, speed){
         clearInterval(typeTimer);
         msgEl.textContent = "";
         ghostEl.textContent = "";
@@ -1390,45 +1320,44 @@
           var slice = text.slice(0, i);
           msgEl.textContent = slice;
           ghostEl.textContent = slice;
-
-          if (i >= text.length){
-            clearInterval(typeTimer);
-          }
-        }, speed || 58);
+          if (i >= text.length) clearInterval(typeTimer);
+        }, speed || 64);
       }
 
-      function showTransmissionSequence(title, message){
+      window.showTransmissionSequence = function(title, text){
         clearAll();
 
-        field.classList.remove("isLeaving", "showTitle", "showMessage");
+        titleEl.textContent = "";
         msgEl.textContent = "";
         ghostEl.textContent = "";
-        titleEl.textContent = title || "UMA TRANSMISSÃO RECEBIDA";
 
         field.classList.add("isActive");
 
-        stageTimer1 = setTimeout(function(){
-          field.classList.add("showTitle");
-        }, 120);
+        setTimeout(function(){
+          titleEl.textContent = title || "UMA TRANSMISSÃO RECEBIDA";
+        }, 140);
 
-        stageTimer2 = setTimeout(function(){
-          field.classList.add("showMessage");
-          typeMessage(message || "Olá, seja bem-vindo(a)", 62);
-        }, 1050);
+        setTimeout(function(){
+          typeText(text || "", 64);
+          speakText(text || "");
+        }, 1000);
 
-        hideTimer = setTimeout(function(){
-          field.classList.remove("showMessage", "showTitle");
-          field.classList.add("isLeaving");
-
-          leaveTimer = setTimeout(function(){
-            field.classList.remove("isActive", "isLeaving");
+        leaveTimer = setTimeout(function(){
+          field.classList.remove("isActive");
+          setTimeout(function(){
+            titleEl.textContent = "";
             msgEl.textContent = "";
             ghostEl.textContent = "";
-          }, 650);
-        }, 7200);
-      }
+          }, 420);
+        }, 7600);
+      };
 
-      window.showTransmissionSequence = showTransmissionSequence;
+      if (window.speechSynthesis){
+        try{
+          window.speechSynthesis.onvoiceschanged = function(){};
+          window.speechSynthesis.getVoices();
+        }catch(e){}
+      }
     })();
   </script>
 
@@ -1457,7 +1386,7 @@
         if (!ctx) return;
         try{
           var t = ctx.currentTime;
-          var baseVol = 0.008 + Math.random() * 0.005;
+          var baseVol = 0.006 + Math.random() * 0.004;
           var shape = Math.floor(Math.random() * 4);
 
           function pulse(type, f1, f2, when, attack, release, gainValue, filterType, filterFreq, q){
@@ -1488,17 +1417,17 @@
           }
 
           if (shape === 0){
-            pulse("sine", 920 + Math.random()*120, 760 + Math.random()*60, t, 0.005, 0.045, baseVol*0.50, "lowpass", 1050 + Math.random()*120, 0.6);
-            pulse("triangle", 500 + Math.random()*70, 420 + Math.random()*40, t + 0.050, 0.005, 0.050, baseVol*0.26, "bandpass", 760 + Math.random()*100, 1.0);
+            pulse("sine", 900 + Math.random()*110, 760 + Math.random()*55, t, 0.005, 0.040, baseVol*0.42, "lowpass", 1000 + Math.random()*110, 0.55);
+            pulse("triangle", 480 + Math.random()*60, 415 + Math.random()*30, t + 0.052, 0.005, 0.045, baseVol*0.22, "bandpass", 720 + Math.random()*90, 1.0);
           } else if (shape === 1){
-            pulse("triangle", 1080 + Math.random()*120, 900 + Math.random()*70, t, 0.004, 0.036, baseVol*0.42, "bandpass", 1450 + Math.random()*160, 1.4);
-            pulse("sine", 430 + Math.random()*50, 360 + Math.random()*35, t + 0.040, 0.005, 0.050, baseVol*0.25, "lowpass", 720 + Math.random()*90, 0.6);
+            pulse("triangle", 1060 + Math.random()*110, 900 + Math.random()*60, t, 0.004, 0.034, baseVol*0.36, "bandpass", 1400 + Math.random()*150, 1.25);
+            pulse("sine", 420 + Math.random()*42, 360 + Math.random()*30, t + 0.040, 0.005, 0.044, baseVol*0.20, "lowpass", 690 + Math.random()*80, 0.55);
           } else if (shape === 2){
-            pulse("sine", 760 + Math.random()*100, 630 + Math.random()*50, t, 0.004, 0.042, baseVol*0.40, "bandpass", 1200 + Math.random()*180, 1.2);
-            pulse("sine", 340 + Math.random()*40, 290 + Math.random()*30, t + 0.030, 0.005, 0.055, baseVol*0.22, "lowpass", 640 + Math.random()*80, 0.55);
+            pulse("sine", 740 + Math.random()*90, 620 + Math.random()*45, t, 0.004, 0.038, baseVol*0.34, "bandpass", 1160 + Math.random()*150, 1.15);
+            pulse("sine", 330 + Math.random()*35, 285 + Math.random()*25, t + 0.030, 0.005, 0.048, baseVol*0.18, "lowpass", 620 + Math.random()*70, 0.5);
           } else {
-            pulse("triangle", 980 + Math.random()*120, 820 + Math.random()*60, t, 0.004, 0.038, baseVol*0.38, "bandpass", 1380 + Math.random()*180, 1.3);
-            pulse("sine", 470 + Math.random()*45, 390 + Math.random()*35, t + 0.050, 0.005, 0.048, baseVol*0.24, "lowpass", 760 + Math.random()*90, 0.6);
+            pulse("triangle", 960 + Math.random()*110, 810 + Math.random()*55, t, 0.004, 0.035, baseVol*0.34, "bandpass", 1320 + Math.random()*150, 1.2);
+            pulse("sine", 455 + Math.random()*40, 390 + Math.random()*30, t + 0.050, 0.005, 0.044, baseVol*0.20, "lowpass", 740 + Math.random()*80, 0.55);
           }
         }catch(e){}
       };
@@ -1570,7 +1499,6 @@
 
         var w=0,h=0,dpr=1, raf=0, t=0, frame=0;
         var par = { x:0, y:0, tx:0, ty:0 };
-
         var starsFar=[], starsMid=[], starsNear=[];
         var dust=[], rocks=[], meteors=[], flybys=[];
         var nextMeteorAt = 0;
@@ -1699,7 +1627,6 @@
           r.mode = pickRockMode();
           r.attractMoon = (r.mode === "moon");
           r.moonPull = rand(0.0012, 0.0038);
-
           r.deepDriftX = rand(-0.22, 0.22);
           r.deepDriftY = rand(-0.22, 0.22);
         }
@@ -1761,11 +1688,9 @@
         function starColor(temp, alpha){
           var b = clamp(-temp, 0, 1);
           var g = clamp(temp, 0, 1);
-
           var R = 255 - Math.floor(b*18) + Math.floor(g*14);
           var G = 255 - Math.floor(b*8)  + Math.floor(g*10);
           var B = 255 + Math.floor(b*18) - Math.floor(g*18);
-
           return "rgba(" + R + "," + G + "," + B + "," + alpha.toFixed(3) + ")";
         }
 
@@ -1854,7 +1779,6 @@
 
             ray(0, L, "0.95");
             ray(Math.PI/2, L, "0.90");
-
             ctx.globalAlpha = aSp * 0.38;
             ray(Math.PI/4, L*0.56, "0.78");
             ray(-Math.PI/4, L*0.56, "0.78");
@@ -1997,31 +1921,20 @@
 
         function spawnMeteor(){
           var edge = Math.floor(rand(0,4));
-          var x, y, angle, speed;
-
-          speed = rand(8.5, 14.5);
+          var x, y, angle, speed = rand(8.5, 14.5);
 
           if (edge === 0){
-            x = rand(-w*0.2, w*1.2);
-            y = -60;
-            angle = rand(0.35, 1.20);
+            x = rand(-w*0.2, w*1.2); y = -60; angle = rand(0.35, 1.20);
           } else if (edge === 1){
-            x = w + 60;
-            y = rand(-h*0.2, h*0.8);
-            angle = rand(2.20, 3.70);
+            x = w + 60; y = rand(-h*0.2, h*0.8); angle = rand(2.20, 3.70);
           } else if (edge === 2){
-            x = rand(-w*0.2, w*1.2);
-            y = h + 60;
-            angle = rand(3.80, 5.50);
+            x = rand(-w*0.2, w*1.2); y = h + 60; angle = rand(3.80, 5.50);
           } else {
-            x = -60;
-            y = rand(-h*0.2, h*0.8);
-            angle = rand(-0.50, 1.10);
+            x = -60; y = rand(-h*0.2, h*0.8); angle = rand(-0.50, 1.10);
           }
 
           meteors.push({
-            x:x,
-            y:y,
+            x:x, y:y,
             vx:Math.cos(angle) * speed,
             vy:Math.sin(angle) * speed,
             life:0,
@@ -2078,10 +1991,7 @@
           var targetShrink = rand(0.88, 0.94);
 
           flybys.push({
-            x:x,
-            y:y,
-            vx:vx,
-            vy:vy,
+            x:x, y:y, vx:vx, vy:vy,
             life:0,
             maxLife:rand(24, 34),
             size:rand(18, 34),
@@ -2107,7 +2017,6 @@
 
             var headX = f.x + px * 0.16;
             var headY = f.y + py * 0.16;
-
             var tailX = headX - f.vx * (f.len / Math.max(1, Math.abs(f.vx)));
             var tailY = headY - f.vy * (f.len / Math.max(1, Math.abs(f.vx)));
 
@@ -2180,11 +2089,9 @@
         function tick(){
           t++;
           frame++;
-
           if (PERF.tickSkip === 0 || frame % (PERF.tickSkip + 1) === 0){
             renderFrame();
           }
-
           raf = window.requestAnimationFrame(tick);
         }
 
@@ -2249,7 +2156,6 @@
         function update(){
           var now = new Date();
           var diff = target.getTime() - now.getTime();
-
           if (window.preludioTick) window.preludioTick();
 
           if (diff <= 0){
@@ -2263,12 +2169,9 @@
             return;
           }
 
-          var days = Math.floor(diff / MS.day);
-          diff -= days * MS.day;
-          var hours = Math.floor(diff / MS.hour);
-          diff -= hours * MS.hour;
-          var mins = Math.floor(diff / MS.min);
-          diff -= mins * MS.min;
+          var days = Math.floor(diff / MS.day); diff -= days * MS.day;
+          var hours = Math.floor(diff / MS.hour); diff -= hours * MS.hour;
+          var mins = Math.floor(diff / MS.min); diff -= mins * MS.min;
           var secs = Math.floor(diff / MS.sec);
 
           dayEl.textContent = pad(days);
@@ -2411,8 +2314,6 @@
       var gDrone = null;
       var airGain = null;
       var radioTimer = null;
-      var selectedVoice = null;
-      var hasUserGesture = false;
 
       function getLS(k, fallback){
         try{
@@ -2478,75 +2379,16 @@
         }catch(e){}
       }
 
-      function chooseVoice(){
-        try{
-          var voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
-          if (!voices || !voices.length) return null;
-
-          var preferred = null;
-          for (var i=0;i<voices.length;i++){
-            if (/pt-BR/i.test(voices[i].lang) && /female|helena|luciana|microsoft maria|google português do brasil/i.test(voices[i].name)){
-              preferred = voices[i];
-              break;
-            }
-          }
-          if (!preferred){
-            for (var j=0;j<voices.length;j++){
-              if (/pt-BR/i.test(voices[j].lang)){
-                preferred = voices[j];
-                break;
-              }
-            }
-          }
-          if (!preferred) preferred = voices[0];
-          return preferred;
-        }catch(e){
-          return null;
-        }
-      }
-
-      function speakTransmission(text){
-        if (!hasUserGesture || !window.speechSynthesis) return;
-        try{
-          selectedVoice = selectedVoice || chooseVoice();
-          var utter = new SpeechSynthesisUtterance(text);
-          utter.lang = "pt-BR";
-          utter.rate = 0.92;
-          utter.pitch = 0.82;
-          utter.volume = 1;
-          if (selectedVoice) utter.voice = selectedVoice;
-
-          speechSynthesis.cancel();
-          speechSynthesis.speak(utter);
-        }catch(e){}
-      }
-
-      if (window.speechSynthesis){
-        try{
-          speechSynthesis.onvoiceschanged = function(){
-            selectedVoice = chooseVoice();
-          };
-        }catch(e){}
-      }
-
-      function triggerTransmission(){
-        var title = "UMA TRANSMISSÃO RECEBIDA";
-        var message = "Olá, seja bem-vindo(a)";
-
-        if (window.showTransmissionSequence){
-          window.showTransmissionSequence(title, message);
-        }
-
-        setTimeout(function(){
-          speakTransmission(message);
-        }, 1200);
-      }
-
       function playSpaceRadioSignal(){
         if (!audioCtx || audioCtx.state === "closed" || !master) return;
 
         try{
-          triggerTransmission();
+          if (window.showTransmissionSequence){
+            window.showTransmissionSequence(
+              "UMA TRANSMISSÃO RECEBIDA",
+              "Olá, seja bem-vindo(a)"
+            );
+          }
 
           var now = audioCtx.currentTime;
           var totalDur = 6.0;
@@ -2555,25 +2397,25 @@
 
           var hp = audioCtx.createBiquadFilter();
           hp.type = "highpass";
-          hp.frequency.setValueAtTime(210 + Math.random()*65, now);
+          hp.frequency.setValueAtTime(220 + Math.random()*70, now);
           hp.Q.setValueAtTime(0.7, now);
 
           var bp = audioCtx.createBiquadFilter();
           bp.type = "bandpass";
-          bp.frequency.setValueAtTime(1080 + Math.random()*240, now);
-          bp.Q.setValueAtTime(0.9 + Math.random()*0.4, now);
+          bp.frequency.setValueAtTime(1120 + Math.random()*240, now);
+          bp.Q.setValueAtTime(0.95 + Math.random()*0.45, now);
 
           var lp = audioCtx.createBiquadFilter();
           lp.type = "lowpass";
-          lp.frequency.setValueAtTime(2550 + Math.random()*420, now);
-          lp.Q.setValueAtTime(0.72, now);
+          lp.frequency.setValueAtTime(2450 + Math.random()*380, now);
+          lp.Q.setValueAtTime(0.7, now);
 
           var radioGain = audioCtx.createGain();
           radioGain.gain.setValueAtTime(0.00001, now);
-          radioGain.gain.exponentialRampToValueAtTime(0.12, now + 0.30);
-          radioGain.gain.linearRampToValueAtTime(0.22 + Math.random()*0.06, now + 1.6);
-          radioGain.gain.linearRampToValueAtTime(0.34 + Math.random()*0.08, now + 4.5);
-          radioGain.gain.linearRampToValueAtTime(0.42 + Math.random()*0.08, now + 5.4);
+          radioGain.gain.exponentialRampToValueAtTime(0.12, now + 0.35);
+          radioGain.gain.linearRampToValueAtTime(0.26 + Math.random()*0.10, now + 1.6);
+          radioGain.gain.linearRampToValueAtTime(0.38 + Math.random()*0.12, now + 4.2);
+          radioGain.gain.linearRampToValueAtTime(0.48 + Math.random()*0.12, now + 5.5);
           radioGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           noise.connect(hp);
@@ -2586,7 +2428,7 @@
 
           var flutterLFO = audioCtx.createOscillator();
           flutterLFO.type = "sine";
-          flutterLFO.frequency.setValueAtTime(0.16 + Math.random()*0.18, now);
+          flutterLFO.frequency.setValueAtTime(0.18 + Math.random()*0.18, now);
 
           var flutterGain = audioCtx.createGain();
           flutterGain.gain.setValueAtTime(130 + Math.random()*90, now);
@@ -2599,17 +2441,17 @@
           var shimmerNoise = createBrownNoise(audioCtx);
           var shimmerHP = audioCtx.createBiquadFilter();
           shimmerHP.type = "highpass";
-          shimmerHP.frequency.setValueAtTime(1700 + Math.random()*340, now);
+          shimmerHP.frequency.setValueAtTime(1900 + Math.random()*300, now);
 
           var shimmerBP = audioCtx.createBiquadFilter();
           shimmerBP.type = "bandpass";
-          shimmerBP.frequency.setValueAtTime(2250 + Math.random()*450, now);
-          shimmerBP.Q.setValueAtTime(2.6, now);
+          shimmerBP.frequency.setValueAtTime(2360 + Math.random()*420, now);
+          shimmerBP.Q.setValueAtTime(2.8, now);
 
           var shimmerGain = audioCtx.createGain();
           shimmerGain.gain.setValueAtTime(0.00001, now);
-          shimmerGain.gain.exponentialRampToValueAtTime(0.030 + Math.random()*0.010, now + 2.2);
-          shimmerGain.gain.setValueAtTime(0.030 + Math.random()*0.010, now + 5.2);
+          shimmerGain.gain.exponentialRampToValueAtTime(0.028 + Math.random()*0.014, now + 2.8);
+          shimmerGain.gain.setValueAtTime(0.028 + Math.random()*0.014, now + 5.4);
           shimmerGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           shimmerNoise.connect(shimmerHP);
@@ -2621,17 +2463,17 @@
 
           var lowHum = audioCtx.createOscillator();
           lowHum.type = "sine";
-          lowHum.frequency.setValueAtTime(68 + Math.random()*14, now);
+          lowHum.frequency.setValueAtTime(72 + Math.random()*16, now);
 
           var lowHumGain = audioCtx.createGain();
           lowHumGain.gain.setValueAtTime(0.00001, now);
-          lowHumGain.gain.exponentialRampToValueAtTime(0.0022 + Math.random()*0.0012, now + 1.4);
-          lowHumGain.gain.setValueAtTime(0.0022 + Math.random()*0.0012, now + 5.0);
+          lowHumGain.gain.exponentialRampToValueAtTime(0.0013 + Math.random()*0.0011, now + 1.5);
+          lowHumGain.gain.setValueAtTime(0.0013 + Math.random()*0.0011, now + 4.8);
           lowHumGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           var lowHumLP = audioCtx.createBiquadFilter();
           lowHumLP.type = "lowpass";
-          lowHumLP.frequency.setValueAtTime(170, now);
+          lowHumLP.frequency.setValueAtTime(180, now);
 
           lowHum.connect(lowHumLP);
           lowHumLP.connect(lowHumGain);
@@ -2639,23 +2481,23 @@
           lowHum.start(now);
           lowHum.stop(now + totalDur);
 
-          var clickCount = 3 + Math.floor(Math.random()*3);
+          var clickCount = 2 + Math.floor(Math.random()*3);
           for (var i=0;i<clickCount;i++){
-            var tt = now + 1.9 + Math.random()*2.9;
+            var tt = now + 2.2 + Math.random()*2.8;
 
             var cOsc = audioCtx.createOscillator();
             cOsc.type = "triangle";
-            cOsc.frequency.setValueAtTime(1200 + Math.random()*900, tt);
+            cOsc.frequency.setValueAtTime(1400 + Math.random()*900, tt);
 
             var cBP = audioCtx.createBiquadFilter();
             cBP.type = "bandpass";
-            cBP.frequency.setValueAtTime(1700 + Math.random()*700, tt);
+            cBP.frequency.setValueAtTime(1800 + Math.random()*600, tt);
             cBP.Q.setValueAtTime(7, tt);
 
             var cGain = audioCtx.createGain();
             cGain.gain.setValueAtTime(0.00001, tt);
-            cGain.gain.exponentialRampToValueAtTime(0.003 + Math.random()*0.0016, tt + 0.008);
-            cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.045);
+            cGain.gain.exponentialRampToValueAtTime(0.0017 + Math.random()*0.0012, tt + 0.008);
+            cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.040);
 
             cOsc.connect(cBP);
             cBP.connect(cGain);
@@ -2680,12 +2522,9 @@
 
       function startAudio(){
         if (started) return true;
-
         clearTimeout(radioTimer);
 
         try{
-          hasUserGesture = true;
-
           var Ctx = window.AudioContext || window.webkitAudioContext;
           if (!Ctx) return false;
 
@@ -2773,15 +2612,12 @@
             try{ audioCtx.resume(); }catch(e){}
           }
 
-          selectedVoice = chooseVoice();
-
           ramp(gDrone.gain, 0.30, 1.6);
           ramp(airGain.gain, 0.05, 1.8);
 
           started = true;
           setBtn(true);
           applyVolume();
-
           scheduleRadio();
           return true;
         }catch(e){
@@ -2792,18 +2628,15 @@
 
       function stopAudio(){
         clearTimeout(radioTimer);
-
-        try{
-          if (window.speechSynthesis){
-            speechSynthesis.cancel();
-          }
-        }catch(e){}
-
         try{
           if (audioCtx){
             try{ audioCtx.close(); }catch(e){}
           }
         }catch(e){}
+
+        if (window.speechSynthesis){
+          try{ window.speechSynthesis.cancel(); }catch(e){}
+        }
 
         audioCtx = null;
         started = false;
