@@ -115,6 +115,141 @@
       filter:none;
     }
 
+    #radioMessage{
+      position:fixed;
+      left:50%;
+      top:72%;
+      transform:translate(-50%,-50%);
+      z-index:7;
+      width:min(560px, 78vw);
+      min-height:74px;
+      padding:16px 20px 14px;
+      pointer-events:none;
+      opacity:0;
+      border-radius:18px;
+      border:1px solid rgba(230,192,123,.18);
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,.02),
+          rgba(255,255,255,.01)
+        );
+      box-shadow:
+        0 0 30px rgba(230,192,123,.08),
+        inset 0 0 30px rgba(255,255,255,.02);
+      overflow:hidden;
+      backdrop-filter:blur(3px);
+      -webkit-backdrop-filter:blur(3px);
+    }
+
+    #radioMessage.isActive{
+      opacity:1;
+      animation:radioWrapIn .22s ease-out forwards;
+    }
+
+    #radioMessage.isLeaving{
+      opacity:1;
+      animation:radioWrapOut .5s ease forwards;
+    }
+
+    .radioScan{
+      position:absolute;
+      left:-8%;
+      top:0;
+      width:116%;
+      height:100%;
+      opacity:0;
+      background:
+        repeating-linear-gradient(
+          180deg,
+          rgba(255,255,255,.00) 0px,
+          rgba(255,255,255,.00) 6px,
+          rgba(255,255,255,.035) 7px,
+          rgba(255,255,255,.00) 8px
+        ),
+        linear-gradient(
+          90deg,
+          rgba(255,255,255,0),
+          rgba(230,192,123,.22),
+          rgba(255,255,255,0)
+        );
+      transform:translateX(-100%);
+      mix-blend-mode:screen;
+    }
+
+    #radioMessage.isActive .radioScan{
+      opacity:1;
+      animation:radioScanMove 1.15s ease-out forwards;
+    }
+
+    .radioLabel{
+      position:relative;
+      z-index:2;
+      margin-bottom:8px;
+      font-size:10px;
+      letter-spacing:.28em;
+      text-transform:uppercase;
+      color:rgba(230,192,123,.65);
+      text-align:center;
+    }
+
+    .radioText{
+      position:relative;
+      z-index:2;
+      min-height:28px;
+      text-align:center;
+      font-family:"Courier New", ui-monospace, monospace;
+      font-size:clamp(16px, 2vw, 24px);
+      letter-spacing:.12em;
+      line-height:1.45;
+      color:rgba(245,245,245,.94);
+      text-shadow:
+        0 0 8px rgba(255,255,255,.10),
+        0 0 18px rgba(230,192,123,.16);
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    @keyframes radioScanMove{
+      0%{
+        transform:translateX(-100%);
+        opacity:0;
+      }
+      14%{
+        opacity:1;
+      }
+      100%{
+        transform:translateX(100%);
+        opacity:.30;
+      }
+    }
+
+    @keyframes radioWrapIn{
+      0%{
+        opacity:0;
+        transform:translate(-50%,-46%);
+        filter:blur(7px);
+      }
+      100%{
+        opacity:1;
+        transform:translate(-50%,-50%);
+        filter:blur(0);
+      }
+    }
+
+    @keyframes radioWrapOut{
+      0%{
+        opacity:1;
+        transform:translate(-50%,-50%);
+        filter:blur(0);
+      }
+      100%{
+        opacity:0;
+        transform:translate(-50%,-54%);
+        filter:blur(6px);
+      }
+    }
+
     .wrap{
       position:relative;
       z-index:5;
@@ -765,6 +900,17 @@
         width:120px;
         min-width:120px;
       }
+
+      #radioMessage{
+        top:68%;
+        width:min(92vw, 520px);
+        padding:14px 14px 12px;
+      }
+
+      .radioText{
+        font-size:clamp(15px, 4.5vw, 20px);
+        letter-spacing:.08em;
+      }
     }
 
     @media (max-width:480px){
@@ -825,6 +971,10 @@
       #volumeSlider{
         width:90px;
         min-width:90px;
+      }
+
+      #radioMessage{
+        top:64%;
       }
     }
 
@@ -980,6 +1130,12 @@
 
 <body>
   <canvas id="stars" aria-hidden="true"></canvas>
+
+  <div id="radioMessage" aria-hidden="true">
+    <div class="radioScan"></div>
+    <div class="radioLabel">TRANSMISSÃO</div>
+    <div class="radioText" id="radioText"></div>
+  </div>
 
   <div class="moonWrap" aria-hidden="true">
     <div class="moonGlow"></div>
@@ -1142,6 +1298,53 @@
       © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
     </footer>
   </div>
+
+  <script>
+    (function(){
+      var box = document.getElementById("radioMessage");
+      var textEl = document.getElementById("radioText");
+      if (!box || !textEl) return;
+
+      var typingTimer = null;
+      var hideTimer = null;
+
+      function typeText(text, speed){
+        clearInterval(typingTimer);
+        textEl.textContent = "";
+        var i = 0;
+
+        typingTimer = setInterval(function(){
+          i++;
+          textEl.textContent = text.slice(0, i);
+          if (i >= text.length){
+            clearInterval(typingTimer);
+          }
+        }, speed || 52);
+      }
+
+      function showRadioMessage(message){
+        clearInterval(typingTimer);
+        clearTimeout(hideTimer);
+
+        box.classList.remove("isLeaving");
+        box.classList.add("isActive");
+
+        typeText(message, 52);
+
+        hideTimer = setTimeout(function(){
+          box.classList.remove("isActive");
+          box.classList.add("isLeaving");
+
+          setTimeout(function(){
+            box.classList.remove("isLeaving");
+            textEl.textContent = "";
+          }, 520);
+        }, 4200);
+      }
+
+      window.showRadioMessage = showRadioMessage;
+    })();
+  </script>
 
   <script>
     (function(){
@@ -2191,6 +2394,8 @@
         if (!audioCtx || audioCtx.state === "closed" || !master) return;
 
         try{
+          if (window.showRadioMessage) window.showRadioMessage("Olá, seja bem-vindo(a)");
+
           var now = audioCtx.currentTime;
           var totalDur = 5.2;
 
