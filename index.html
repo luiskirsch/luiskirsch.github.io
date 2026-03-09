@@ -370,41 +370,91 @@
       -webkit-user-drag:none;
     }
 
-    .titleWrap{
-      position:relative;
-      width:min(930px, 100%);
+    .titleClean{
       margin:0;
-      line-height:0;
-      filter:drop-shadow(0 16px 34px rgba(0,0,0,.42));
-    }
-
-    .titleSvg{
-      width:100%;
-      height:auto;
-      display:block;
-      overflow:visible;
-    }
-
-    .titleSvg text{
+      display:inline-flex;
+      flex-direction:column;
+      gap:.02em;
+      line-height:.92;
+      text-transform:uppercase;
       font-family:Georgia, "Times New Roman", serif;
       font-weight:700;
-      letter-spacing:.16em;
-      text-transform:uppercase;
+      font-size:clamp(48px, 6.2vw, 110px);
+      letter-spacing:.12em;
     }
 
-    .titleBase{
-      filter:url(#titleDepthShadow);
+    .titleClean span{
+      position:relative;
+      display:block;
+      width:max-content;
+      color:transparent;
+      -webkit-text-fill-color:transparent;
+      background:
+        linear-gradient(
+          180deg,
+          #4c3210 0%,
+          #875d22 16%,
+          #c59144 34%,
+          #f2d488 50%,
+          #d4a65b 63%,
+          #855a22 80%,
+          #4f3514 100%
+        );
+      background-clip:text;
+      -webkit-background-clip:text;
+      text-shadow:
+        0 1px 0 rgba(255,245,220,.06),
+        0 4px 10px rgba(0,0,0,.26),
+        0 12px 24px rgba(0,0,0,.34);
+      filter:drop-shadow(0 0 10px rgba(214,171,99,.06));
+      overflow:hidden;
     }
 
-    .titleShineBand{
-      animation:titleSweepMove 5s linear infinite;
-      transform-box:fill-box;
-      transform-origin:center;
+    .titleClean span::after{
+      content:"";
+      position:absolute;
+      top:-8%;
+      left:-38%;
+      width:26%;
+      height:116%;
+      background:linear-gradient(
+        90deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,245,220,.08) 35%,
+        rgba(255,255,255,.85) 50%,
+        rgba(255,240,190,.18) 65%,
+        rgba(255,255,255,0) 100%
+      );
+      transform:skewX(-18deg);
+      filter:blur(6px);
+      mix-blend-mode:screen;
+      animation:titleSweepSoft 5s linear infinite;
+      pointer-events:none;
     }
 
-    @keyframes titleSweepMove{
-      0%{ transform:translateX(-560px); }
-      100%{ transform:translateX(980px); }
+    .titleClean span:last-child::after{
+      animation-delay:.18s;
+    }
+
+    @keyframes titleSweepSoft{
+      0%{
+        left:-38%;
+        opacity:0;
+      }
+      8%{
+        opacity:.95;
+      }
+      42%{
+        opacity:.95;
+      }
+      55%{
+        left:112%;
+        opacity:0;
+      }
+      100%{
+        left:112%;
+        opacity:0;
+      }
     }
 
     .subtitle{
@@ -860,6 +910,7 @@
 
     @media (max-width:980px){
       .grid{ grid-template-columns:1fr; gap:18px; }
+      .titleClean{ font-size:clamp(42px, 8vw, 72px); }
       .miniGrid{ grid-template-columns:1fr 1fr; }
 
       .moonWrap{
@@ -897,8 +948,9 @@
         top:-6px;
       }
 
-      .titleWrap{
-        width:min(560px, 100%);
+      .titleClean{
+        font-size:clamp(34px, 9vw, 52px);
+        letter-spacing:.10em;
       }
 
       .subtitle{ font-size:16px; }
@@ -959,8 +1011,9 @@
         top:4px;
       }
 
-      .titleWrap{
-        width:min(430px, 100%);
+      .titleClean{
+        font-size:clamp(28px, 9.5vw, 40px);
+        letter-spacing:.08em;
       }
 
       .subtitle{ font-size:15px; }
@@ -1005,7 +1058,7 @@
     }
 
     @media (prefers-reduced-motion:reduce){
-      .whisper, .titleShineBand, .tfNoise::before, .tfNoise::after{ animation:none !important; }
+      .whisper, .titleClean span::after, .tfNoise::before, .tfNoise::after{ animation:none !important; }
       #stars{ display:none; }
       .moonWrap{ filter:none; }
     }
@@ -1200,53 +1253,10 @@
 
           <div class="titleRow">
             <img class="titleLogo" src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" referrerpolicy="no-referrer">
-
-            <div class="titleWrap" aria-label="Prelúdio Jogos">
-              <svg class="titleSvg" viewBox="0 0 980 420" aria-hidden="true" preserveAspectRatio="xMinYMin meet">
-                <defs>
-                  <linearGradient id="goldFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#4a3111"/>
-                    <stop offset="16%" stop-color="#835b22"/>
-                    <stop offset="34%" stop-color="#c89447"/>
-                    <stop offset="50%" stop-color="#f3d78f"/>
-                    <stop offset="63%" stop-color="#d4a75d"/>
-                    <stop offset="80%" stop-color="#865c22"/>
-                    <stop offset="100%" stop-color="#4f3515"/>
-                  </linearGradient>
-
-                  <linearGradient id="shineFill" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stop-color="rgba(255,255,255,0)" stop-opacity="0"/>
-                    <stop offset="40%" stop-color="#fff8e1" stop-opacity="0"/>
-                    <stop offset="47%" stop-color="#fff6da" stop-opacity=".16"/>
-                    <stop offset="50%" stop-color="#ffffff" stop-opacity=".98"/>
-                    <stop offset="53%" stop-color="#fff0c4" stop-opacity=".28"/>
-                    <stop offset="60%" stop-color="#ffffff" stop-opacity="0"/>
-                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-                  </linearGradient>
-
-                  <filter id="titleDepthShadow" x="-20%" y="-20%" width="140%" height="160%">
-                    <feDropShadow dx="0" dy="2" stdDeviation="0.8" flood-color="rgba(255,245,220,.08)"/>
-                    <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="rgba(0,0,0,.34)"/>
-                    <feDropShadow dx="0" dy="16" stdDeviation="9" flood-color="rgba(0,0,0,.44)"/>
-                  </filter>
-
-                  <mask id="titleMask">
-                    <rect width="100%" height="100%" fill="black"/>
-                    <text x="4" y="170" font-size="172" fill="white">PRELÚDIO</text>
-                    <text x="4" y="355" font-size="172" fill="white">JOGOS</text>
-                  </mask>
-                </defs>
-
-                <g class="titleBase">
-                  <text x="4" y="170" font-size="172" fill="url(#goldFill)">PRELÚDIO</text>
-                  <text x="4" y="355" font-size="172" fill="url(#goldFill)">JOGOS</text>
-                </g>
-
-                <g mask="url(#titleMask)">
-                  <rect class="titleShineBand" x="-560" y="0" width="240" height="420" fill="url(#shineFill)" transform="skewX(-20)"/>
-                </g>
-              </svg>
-            </div>
+            <h1 class="titleClean" aria-label="Prelúdio Jogos">
+              <span>PRELÚDIO</span>
+              <span>JOGOS</span>
+            </h1>
           </div>
 
           <p class="subtitle">
