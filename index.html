@@ -83,6 +83,7 @@
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
       contain:paint;
+      transition:filter .28s ease, opacity .28s ease;
     }
 
     .moonWrap{
@@ -99,6 +100,7 @@
       justify-content:center;
       opacity:1;
       filter:none;
+      transition:filter .28s ease, opacity .28s ease;
     }
 
     .moonGlow{ display:none; }
@@ -119,7 +121,7 @@
       top:18.5vh;
       width:min(560px, 37vw);
       min-height:96px;
-      z-index:9;
+      z-index:60;
       pointer-events:none;
       opacity:0;
       transform:translateY(12px);
@@ -181,7 +183,7 @@
       border-radius:18px;
       padding:16px 18px 14px;
       border:1px solid rgba(230,192,123,.16);
-      background:linear-gradient(180deg, rgba(20,20,24,.72), rgba(10,10,14,.62));
+      background:linear-gradient(180deg, rgba(20,20,24,.78), rgba(10,10,14,.70));
       box-shadow:
         0 0 32px rgba(230,192,123,.08),
         inset 0 0 24px rgba(255,255,255,.02);
@@ -260,6 +262,7 @@
       width:min(1200px, 100%);
       margin:0 auto;
       padding:100px 0 28px;
+      transition:filter .28s ease, opacity .28s ease;
     }
 
     .grid{
@@ -719,7 +722,7 @@
       border:1px solid rgba(255,255,255,.10);
       background:rgba(8,8,12,.88);
       box-shadow:0 18px 60px rgba(0,0,0,.45);
-      transition:opacity .25s ease, transform .25s ease;
+      transition:opacity .25s ease, transform .25s ease, filter .28s ease;
       backdrop-filter:none;
       -webkit-backdrop-filter:none;
       transform:translateZ(0);
@@ -873,14 +876,33 @@
       }
 
       #transmissionField{
-        left:4vw;
-        top:15vh;
-        width:min(72vw, 420px);
+        left:50%;
+        top:50%;
+        width:min(88vw, 440px);
+        max-width:440px;
+        min-height:104px;
+        transform:translate(-50%, calc(-50% + 12px));
+      }
+
+      #transmissionField.isActive{
+        transform:translate(-50%, -50%);
       }
 
       .tfMessage,.tfGhost{
         font-size:clamp(14px, 3.9vw, 18px);
         letter-spacing:.07em;
+      }
+
+      body.transmissionFocus #stars,
+      body.transmissionFocus .moonWrap,
+      body.transmissionFocus .wrap,
+      body.transmissionFocus .soundPanel{
+        filter:blur(8px) brightness(.46);
+        opacity:.42;
+      }
+
+      body.transmissionFocus{
+        overflow:hidden;
       }
     }
 
@@ -926,9 +948,7 @@
       }
 
       #transmissionField{
-        left:4vw;
-        top:14.5vh;
-        width:76vw;
+        width:min(90vw, 420px);
       }
 
       .tfTitle{
@@ -986,7 +1006,6 @@
         var cores = navigator.hardwareConcurrency || 0;
         var mem = navigator.deviceMemory || 0;
         var dpr = window.devicePixelRatio || 1;
-        var sw = Math.min(screen.width || innerWidth || 0, screen.height || innerHeight || 0);
         var vw = Math.min(window.innerWidth || 0, window.innerHeight || 0);
 
         var kind = "desktop";
@@ -994,73 +1013,70 @@
         else if (isTabletUA) kind = "tablet";
         else if (isTouch && vw <= 1024) kind = "tablet";
 
-        var score = 0;
-        if (kind === "desktop") score += 100;
-        if (kind === "tablet") score += 90;
-        if (kind === "mobile") score += 50;
-        if (cores >= 8) score += 26;
-        else if (cores >= 6) score += 18;
-        else if (cores >= 4) score += 8;
-        else if (cores > 0) score -= 10;
-        if (mem >= 8) score += 24;
-        else if (mem >= 6) score += 18;
-        else if (mem >= 4) score += 10;
-        else if (mem > 0) score -= 8;
-        if (dpr >= 3) score -= 8;
-        else if (dpr >= 2) score -= 4;
-        if (isIPad) score += 20;
-        if (kind === "tablet") score += 14;
-        if (kind === "desktop") score += 20;
-        if (isIPhone && sw <= 750) score -= 18;
-        if (isAndroidMobile && sw <= 412 && cores && cores <= 4) score -= 12;
-        if (prefersReduced) score -= 60;
-
         var initialTier = "balanced";
         if (kind === "desktop" || kind === "tablet") initialTier = "max";
-        else if (score >= 86) initialTier = "max";
-        else if (score <= 48) initialTier = "lite";
+        if (kind === "mobile") initialTier = "lite";
+        if (prefersReduced) initialTier = "static";
 
         window.__PRELUDIO_DEVICE__ = {
           kind: kind,
-          score: score,
-          initialTier: initialTier,
-          finalTier: initialTier,
           prefersReduced: prefersReduced,
           hardwareConcurrency: cores,
           deviceMemory: mem,
           dpr: dpr,
+          ua: ua,
+          isIPhone: isIPhone,
+          isAndroidMobile: isAndroidMobile,
+          initialTier: initialTier,
+          finalTier: initialTier,
+          forceStaticUniverse: prefersReduced,
           tested: false
         };
 
-        if (prefersReduced) return;
+        if (prefersReduced){
+          window.__PRELUDIO_DEVICE__.tested = true;
+          return;
+        }
+
+        var hardWeak =
+          (kind === "mobile" && cores > 0 && cores <= 4) ||
+          (kind === "mobile" && mem > 0 && mem <= 4) ||
+          (isIPhone && dpr >= 3);
+
+        if (hardWeak){
+          window.__PRELUDIO_DEVICE__.finalTier = "static";
+          window.__PRELUDIO_DEVICE__.forceStaticUniverse = true;
+          window.__PRELUDIO_DEVICE__.tested = true;
+          return;
+        }
 
         var samples = [];
-        var sampleCount = 10;
+        var sampleCount = 18;
         var start = performance.now();
 
         function finish(){
-          if (!window.__PRELUDIO_DEVICE__) return;
-          if (window.__PRELUDIO_DEVICE__.kind === "desktop" || window.__PRELUDIO_DEVICE__.kind === "tablet"){
-            window.__PRELUDIO_DEVICE__.finalTier = "max";
-            window.__PRELUDIO_DEVICE__.tested = true;
-            return;
+          var avg = 999;
+          if (samples.length){
+            var total = 0;
+            for (var i=0;i<samples.length;i++) total += samples[i];
+            avg = total / samples.length;
           }
 
-          if (!samples.length){
-            window.__PRELUDIO_DEVICE__.tested = true;
-            return;
-          }
+          var staticMode = false;
 
-          var total = 0;
-          for (var i=0;i<samples.length;i++) total += samples[i];
-          var avg = total / samples.length;
+          if (avg > 26) staticMode = true;
+          if (kind === "mobile" && avg > 22) staticMode = true;
+          if (isIPhone && avg > 20) staticMode = true;
 
-          if (avg <= 18 && window.__PRELUDIO_DEVICE__.score >= 72){
-            window.__PRELUDIO_DEVICE__.finalTier = "max";
-          } else if (avg <= 24 && window.__PRELUDIO_DEVICE__.score >= 52){
-            window.__PRELUDIO_DEVICE__.finalTier = "balanced";
-          } else {
+          if (staticMode){
+            window.__PRELUDIO_DEVICE__.finalTier = "static";
+            window.__PRELUDIO_DEVICE__.forceStaticUniverse = true;
+          } else if (avg > 18){
             window.__PRELUDIO_DEVICE__.finalTier = "lite";
+            window.__PRELUDIO_DEVICE__.forceStaticUniverse = false;
+          } else {
+            window.__PRELUDIO_DEVICE__.finalTier = initialTier;
+            window.__PRELUDIO_DEVICE__.forceStaticUniverse = false;
           }
 
           window.__PRELUDIO_DEVICE__.tested = true;
@@ -1070,7 +1086,7 @@
           function step(prev){
             requestAnimationFrame(function(t1){
               samples.push(t1 - prev);
-              if (samples.length >= sampleCount || (t1 - start) > 260){
+              if (samples.length >= sampleCount || (t1 - start) > 420){
                 finish();
               } else {
                 step(t1);
@@ -1082,10 +1098,10 @@
       }catch(e){
         window.__PRELUDIO_DEVICE__ = {
           kind: "desktop",
-          score: 100,
-          initialTier: "max",
-          finalTier: "max",
           prefersReduced: false,
+          initialTier: "balanced",
+          finalTier: "balanced",
+          forceStaticUniverse: false,
           tested: true
         };
       }
@@ -1279,6 +1295,18 @@
       var endTimer = null;
       var staticStopFn = null;
 
+      function isMobileFocus(){
+        return window.innerWidth <= 700;
+      }
+
+      function setBodyFocus(active){
+        if (isMobileFocus()){
+          document.body.classList.toggle("transmissionFocus", !!active);
+        } else {
+          document.body.classList.remove("transmissionFocus");
+        }
+      }
+
       function resetField(){
         clearInterval(typeTimer);
         clearTimeout(endTimer);
@@ -1291,6 +1319,7 @@
         titleEl.textContent = "";
         msgEl.textContent = "";
         ghostEl.textContent = "";
+        setBodyFocus(false);
       }
 
       function typeText(text, speed, done){
@@ -1328,6 +1357,7 @@
         msgEl.textContent = "";
         ghostEl.textContent = "";
 
+        setBodyFocus(true);
         field.classList.add("isActive");
 
         setTimeout(function(){
@@ -1347,6 +1377,14 @@
       };
 
       window.resetTransmissionField = resetField;
+
+      window.addEventListener("resize", function(){
+        if (!field.classList.contains("isActive")) {
+          document.body.classList.remove("transmissionFocus");
+        } else {
+          setBodyFocus(true);
+        }
+      }, { passive:true });
     })();
   </script>
 
@@ -1433,103 +1471,79 @@
 
         var device = window.__PRELUDIO_DEVICE__ || {
           kind: "desktop",
-          finalTier: "max",
+          finalTier: "balanced",
+          forceStaticUniverse: false,
           prefersReduced: false
         };
 
         if (device.prefersReduced) return;
 
         var tier = device.finalTier || device.initialTier || "balanced";
-        var kind = device.kind || "desktop";
+        var staticUniverse = !!device.forceStaticUniverse;
 
-        var PERF_BY_TIER = {
-          max: {
-            dprCap: kind === "tablet" ? 1.9 : 2,
-            farMul: 1,
-            midMul: 1,
-            nearMul: 1,
-            dustMul: 1,
-            rockMul: 1,
-            parLerp: 0.045,
-            tickSkip: 0,
-            meteorChanceMul: 1,
-            starCross: true,
-            flybyChance: 1
-          },
-          balanced: {
-            dprCap: kind === "tablet" ? 1.7 : 1.45,
-            farMul: 0.82,
-            midMul: 0.80,
-            nearMul: 0.84,
-            dustMul: 0.72,
-            rockMul: 0.74,
-            parLerp: 0.032,
-            tickSkip: 1,
-            meteorChanceMul: 0.82,
-            starCross: false,
-            flybyChance: 0.75
-          },
-          lite: {
-            dprCap: 1.15,
-            farMul: 0.58,
-            midMul: 0.56,
-            nearMul: 0.60,
-            dustMul: 0.42,
-            rockMul: 0.46,
-            parLerp: 0.022,
-            tickSkip: 2,
-            meteorChanceMul: 0.62,
-            starCross: false,
-            flybyChance: 0.45
-          }
-        };
-
-        var PERF = PERF_BY_TIER[tier] || PERF_BY_TIER.balanced;
-
-        var w=0,h=0,dpr=1, raf=0, t=0, frame=0;
+        var w=0,h=0,dpr=1, raf=0, frame=0;
         var par = { x:0, y:0, tx:0, ty:0 };
-        var starsFar=[], starsMid=[], starsNear=[];
-        var dust=[], rocks=[], meteors=[], flybys=[];
-        var nextMeteorAt = 0;
-        var nextFlybyAt = 0;
-        var moonMask = null;
+        var starsFar=[], starsMid=[], starsNear=[], dust=[];
+        var touchScrolling = false;
+        var scrollTimer = null;
 
         function rand(min,max){ return min + Math.random()*(max-min); }
         function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-        function lerp(a,b,t){ return a + (b-a)*t; }
 
-        var lastW=0, lastH=0;
-        function shouldResize(nw, nh){
-          if (!lastW || !lastH) return true;
-          var dw = Math.abs(nw - lastW);
-          var dh = Math.abs(nh - lastH);
-          if (dw > 2) return true;
-          if (dh < 140) return false;
-          return true;
-        }
+        function perfConf(){
+          if (staticUniverse){
+            return {
+              dprCap: 1,
+              farCountMul: 0.32,
+              midCountMul: 0.16,
+              nearCountMul: 0.08,
+              dustCountMul: 0,
+              parallax: 0,
+              tickSkip: 5
+            };
+          }
 
-        function updateMoonMask(){
-          var moonEl = document.querySelector(".moonWrap");
-          if (!moonEl) return;
-          var rect = moonEl.getBoundingClientRect();
-          moonMask = {
-            x: rect.left + rect.width * 0.5,
-            y: rect.top + rect.height * 0.5,
-            r: Math.min(rect.width, rect.height) * 0.42
+          if (tier === "lite"){
+            return {
+              dprCap: 1,
+              farCountMul: 0.55,
+              midCountMul: 0.34,
+              nearCountMul: 0.20,
+              dustCountMul: 0.08,
+              parallax: 0.012,
+              tickSkip: 3
+            };
+          }
+
+          if (tier === "balanced"){
+            return {
+              dprCap: 1.35,
+              farCountMul: 0.82,
+              midCountMul: 0.74,
+              nearCountMul: 0.62,
+              dustCountMul: 0.25,
+              parallax: 0.028,
+              tickSkip: 1
+            };
+          }
+
+          return {
+            dprCap: 1.8,
+            farCountMul: 1,
+            midCountMul: 1,
+            nearCountMul: 1,
+            dustCountMul: 0.45,
+            parallax: 0.045,
+            tickSkip: 0
           };
         }
 
-        function resize(force){
+        var PERF = perfConf();
+
+        function resize(){
           dpr = Math.max(1, Math.min(PERF.dprCap, (window.devicePixelRatio || 1)));
-          var nw = Math.floor(document.documentElement.clientWidth || window.innerWidth);
-          var nh = Math.floor(window.innerHeight);
-
-          if (!force && !shouldResize(nw, nh)) return;
-
-          lastW = nw;
-          lastH = nh;
-          w = nw;
-          h = nh;
+          w = Math.floor(document.documentElement.clientWidth || window.innerWidth);
+          h = Math.floor(window.innerHeight);
 
           canvas.width = Math.floor(w * dpr);
           canvas.height = Math.floor(h * dpr);
@@ -1538,127 +1552,53 @@
           ctx.setTransform(dpr,0,0,dpr,0,0);
 
           buildScene();
-          updateMoonMask();
+          renderFrame(true);
         }
 
-        function makeStars(count, rMin, rMax, vMin, vMax, aMin, aMax, tempBias){
+        function makeStars(count, rMin, rMax, vMin, vMax, aMin, aMax){
           var arr = [];
-          var heroChance = tier === "max" ? 0.06 : (tier === "balanced" ? 0.04 : 0.025);
-
           for (var i=0;i<count;i++){
-            var temp = rand(-1, 1) * tempBias;
-            var twBase = rand(0.002, 0.010);
-            var twAmp = rand(0.02, 0.20);
-            var hero = (Math.random() < heroChance);
-
             arr.push({
               x: Math.random()*w,
               y: Math.random()*h,
-              r: rand(rMin,rMax) * (hero ? rand(1.10, 1.60) : 1),
+              r: rand(rMin,rMax),
               v: rand(vMin,vMax),
-              a: rand(aMin,aMax) * (hero ? 1.08 : 1),
-              tw: twBase,
-              twa: twAmp,
-              ph: Math.random()*Math.PI*2,
-              hero: hero,
-              temp: temp
+              a: rand(aMin,aMax),
+              tw: rand(0.002, 0.010),
+              twa: rand(0.02, 0.12),
+              ph: Math.random()*Math.PI*2
             });
           }
           return arr;
         }
 
-        function buildRockShape(size){
-          var spikes = Math.floor(rand(9, 14));
-          var pts = [];
-          for (var k=0;k<spikes;k++){
-            var a = (Math.PI*2) * (k/spikes);
-            var rr = size * rand(0.86, 1.14);
-            pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
-          }
-          return pts;
-        }
-
-        function pickRockMode(){
-          var roll = Math.random();
-          if (roll < 0.3333) return "moon";
-          if (roll < 0.6666) return "normal";
-          return "deep";
-        }
-
-        function respawnRock(r, initial){
-          var M = 180;
-          var side = Math.floor(rand(0, 4));
-          var x,y,ang;
-
-          if (side === 0){ x = rand(-M, w+M); y = -M; ang = rand(Math.PI*0.18, Math.PI*0.82); }
-          else if (side === 1){ x = w+M; y = rand(-M, h+M); ang = rand(Math.PI*0.70, Math.PI*1.30); }
-          else if (side === 2){ x = rand(-M, w+M); y = h+M; ang = rand(Math.PI*1.18, Math.PI*1.82); }
-          else { x = -M; y = rand(-M, h+M); ang = rand(-Math.PI*0.30, Math.PI*0.30); }
-
-          var baseZ = initial ? rand(0.65, 1.08) : rand(0.88, 1.18);
-          var base = rand(0.12, 0.30) * (0.55 + baseZ);
-
-          r.x = x;
-          r.y = y;
-          r.vx = Math.cos(ang) * base;
-          r.vy = Math.sin(ang) * base;
-          r.rot = rand(0, Math.PI*2);
-          r.rv = rand(-0.006, 0.006);
-          r.ph = rand(0, Math.PI*2);
-          r.wob = rand(0.0006, 0.0018);
-
-          r.baseR = rand(4.0, 12.0);
-          r.pts = buildRockShape(r.baseR);
-          r.z = baseZ;
-          r.vz = rand(0.0010, 0.0026) * (tier === "lite" ? 0.8 : 1);
-          r.fadeBias = rand(0.78, 1.00);
-
-          r.mode = pickRockMode();
-          r.attractMoon = (r.mode === "moon");
-          r.moonPull = rand(0.0012, 0.0038);
-          r.deepDriftX = rand(-0.22, 0.22);
-          r.deepDriftY = rand(-0.22, 0.22);
-        }
-
         function buildScene(){
           var area = w*h;
 
-          var farCount  = clamp(Math.floor(area/14500 * PERF.farMul), 46, 260);
-          var midCount  = clamp(Math.floor(area/17500 * PERF.midMul), 32, 190);
-          var nearCount = clamp(Math.floor(area/23500 * PERF.nearMul), 20, 130);
+          var farCount  = clamp(Math.floor((area/14500) * PERF.farCountMul), 18, 180);
+          var midCount  = clamp(Math.floor((area/19000) * PERF.midCountMul), 8, 110);
+          var nearCount = clamp(Math.floor((area/26000) * PERF.nearCountMul), 4, 60);
 
-          starsFar  = makeStars(farCount,  0.28, 0.95, 0.016, 0.045, 0.12, 0.34, 0.08);
-          starsMid  = makeStars(midCount,  0.38, 1.20, 0.040, 0.085, 0.14, 0.46, 0.10);
-          starsNear = makeStars(nearCount, 0.52, 1.65, 0.060, 0.120, 0.18, 0.60, 0.12);
+          starsFar  = makeStars(farCount,  0.28, 0.90, 0.010, 0.030, 0.10, 0.22);
+          starsMid  = makeStars(midCount,  0.36, 1.10, 0.018, 0.050, 0.12, 0.30);
+          starsNear = makeStars(nearCount, 0.46, 1.35, 0.026, 0.070, 0.14, 0.40);
 
           dust = [];
-          var dustCount = clamp(Math.floor(area/90000 * PERF.dustMul), 4, 28);
+          var dustCount = clamp(Math.floor((area/110000) * PERF.dustCountMul), 0, 12);
           for (var i=0;i<dustCount;i++){
             dust.push({
               x: rand(-w*0.2, w*1.2),
               y: rand(-h*0.2, h*1.2),
-              r: rand(0.7, 1.8),
-              a: rand(0.01, 0.045),
-              vx: rand(0.03, 0.10),
-              vy: rand(0.008, 0.038)
+              r: rand(0.6, 1.5),
+              a: rand(0.01, 0.04),
+              vx: rand(0.02, 0.06),
+              vy: rand(0.005, 0.02)
             });
           }
-
-          rocks = [];
-          var rockCount = clamp(Math.floor(area/90000 * PERF.rockMul), 4, 34);
-          for (var j=0;j<rockCount;j++){
-            var rock = {};
-            respawnRock(rock, true);
-            rocks.push(rock);
-          }
-
-          meteors = [];
-          flybys = [];
-          nextMeteorAt = Math.floor(rand(140, 340) / PERF.meteorChanceMul);
-          nextFlybyAt = t + Math.floor(rand(260, 620) / PERF.flybyChance);
         }
 
         function onPointerMove(clientX, clientY){
+          if (staticUniverse) return;
           var nx = (clientX / w) * 2 - 1;
           var ny = (clientY / h) * 2 - 1;
           par.tx = clamp(nx, -1, 1);
@@ -1671,124 +1611,53 @@
 
         window.addEventListener("touchmove", function(e){
           if (!e.touches || !e.touches[0]) return;
+          touchScrolling = true;
+          clearTimeout(scrollTimer);
+          scrollTimer = setTimeout(function(){ touchScrolling = false; }, 140);
           onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive:true });
 
-        function starColor(temp, alpha){
-          var b = clamp(-temp, 0, 1);
-          var g = clamp(temp, 0, 1);
-          var R = 255 - Math.floor(b*18) + Math.floor(g*14);
-          var G = 255 - Math.floor(b*8)  + Math.floor(g*10);
-          var B = 255 + Math.floor(b*18) - Math.floor(g*18);
-          return "rgba(" + R + "," + G + "," + B + "," + alpha.toFixed(3) + ")";
-        }
+        window.addEventListener("touchstart", function(){
+          touchScrolling = true;
+          clearTimeout(scrollTimer);
+        }, { passive:true });
 
-        function drawStar(x,y,r,alpha,temp,phase){
-          var flick = 0.86 + 0.14 * Math.sin(phase*1.75 + x*0.012);
-          var flick2 = 0.92 + 0.08 * Math.cos(phase*2.25 + y*0.010);
-          var aNow = clamp(alpha * flick * flick2, 0, 1);
+        window.addEventListener("touchend", function(){
+          clearTimeout(scrollTimer);
+          scrollTimer = setTimeout(function(){ touchScrolling = false; }, 120);
+        }, { passive:true });
 
-          var jit = 0.08 + r*0.04;
-          x += Math.sin(phase*3.10 + x*0.006) * jit;
-          y += Math.cos(phase*2.85 + y*0.006) * jit;
-
-          var glow = r * 3.0;
-          var core = Math.max(0.55, r*0.62);
-
-          var wob = 0.45 + r*0.12;
-          var ox = Math.sin(phase*1.10) * wob;
-          var oy = Math.cos(phase*1.04) * wob;
+        function drawStar(x,y,r,alpha,phase){
+          var tw = (Math.sin(phase) * 0.5 + 0.5);
+          var aNow = alpha + (tw - 0.5) * 0.10;
 
           ctx.save();
           ctx.globalCompositeOperation = "screen";
 
+          var glow = r * 2.4;
           var g = ctx.createRadialGradient(x,y,0, x,y,glow);
-          g.addColorStop(0, starColor(temp, clamp(aNow*0.95,0,1)));
-          g.addColorStop(0.22, starColor(temp, clamp(aNow*0.30,0,1)));
+          g.addColorStop(0, "rgba(255,255,255," + clamp(aNow,0,1).toFixed(3) + ")");
           g.addColorStop(1, "rgba(0,0,0,0)");
           ctx.fillStyle = g;
           ctx.beginPath();
           ctx.arc(x,y,glow,0,Math.PI*2);
           ctx.fill();
 
-          var gr = ctx.createRadialGradient(x-ox, y-oy, 0, x-ox, y-oy, glow*0.92);
-          gr.addColorStop(0, "rgba(255,130,130," + clamp(aNow*0.12,0,1).toFixed(3) + ")");
-          gr.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = gr;
-          ctx.beginPath();
-          ctx.arc(x-ox, y-oy, glow*0.92, 0, Math.PI*2);
-          ctx.fill();
-
-          var gg = ctx.createRadialGradient(x+ox*0.55, y-oy*0.55, 0, x+ox*0.55, y-oy*0.55, glow*0.78);
-          gg.addColorStop(0, "rgba(170,255,200," + clamp(aNow*0.08,0,1).toFixed(3) + ")");
-          gg.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = gg;
-          ctx.beginPath();
-          ctx.arc(x+ox*0.55, y-oy*0.55, glow*0.78, 0, Math.PI*2);
-          ctx.fill();
-
-          var gb = ctx.createRadialGradient(x+ox, y+oy, 0, x+ox, y+oy, glow*0.92);
-          gb.addColorStop(0, "rgba(160,190,255," + clamp(aNow*0.12,0,1).toFixed(3) + ")");
-          gb.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = gb;
-          ctx.beginPath();
-          ctx.arc(x+ox, y+oy, glow*0.92, 0, Math.PI*2);
-          ctx.fill();
-
-          ctx.globalCompositeOperation = "lighter";
-          ctx.fillStyle = starColor(temp, clamp(aNow*1.05,0,1));
-          ctx.beginPath();
-          ctx.arc(x,y,core,0,Math.PI*2);
-          ctx.fill();
-
-          var strength = r * aNow;
-          if (strength > 0.46 && PERF.starCross){
-            var L = clamp(4.5 + r*4.8, 7, 14);
-            var aSp = clamp((strength - 0.36) * 1.05, 0, 0.55);
-
-            ctx.globalCompositeOperation = "screen";
-            ctx.globalAlpha = aSp;
-            ctx.lineWidth = 0.9;
-
-            function ray(angle, len, peak){
-              var dx = Math.cos(angle) * len;
-              var dy = Math.sin(angle) * len;
-              var lg = ctx.createLinearGradient(x-dx, y-dy, x+dx, y+dy);
-              lg.addColorStop(0.00, "rgba(255,255,255,0)");
-              lg.addColorStop(0.46, "rgba(255,255,255,0)");
-              lg.addColorStop(0.50, "rgba(255,255,255," + peak + ")");
-              lg.addColorStop(0.54, "rgba(255,255,255,0)");
-              lg.addColorStop(1.00, "rgba(255,255,255,0)");
-              ctx.strokeStyle = lg;
-              ctx.beginPath();
-              ctx.moveTo(x-dx, y-dy);
-              ctx.lineTo(x+dx, y+dy);
-              ctx.stroke();
-            }
-
-            ray(0, L, "0.95");
-            ray(Math.PI/2, L, "0.90");
-            ctx.globalAlpha = aSp * 0.38;
-            ray(Math.PI/4, L*0.56, "0.78");
-            ray(-Math.PI/4, L*0.56, "0.78");
-          }
-
           ctx.restore();
         }
 
-        function drawStars(arr, px, py, parScale){
+        function drawStars(arr, px, py, parScale, animate){
           for (var i=0;i<arr.length;i++){
             var s = arr[i];
 
-            s.y += s.v;
-            if (s.y > h + 12){
-              s.y = -12;
-              s.x = Math.random()*w;
+            if (animate){
+              s.y += s.v;
+              if (s.y > h + 12){
+                s.y = -12;
+                s.x = Math.random()*w;
+              }
+              s.ph += s.tw;
             }
-
-            s.ph += s.tw;
-            var tw = (Math.sin(s.ph) * 0.5 + 0.5);
-            var a = s.a + (tw - 0.5) * s.twa;
 
             var x = s.x + (px * parScale);
             var y = s.y + (py * parScale);
@@ -1796,25 +1665,24 @@
             if (x < -30) x += (w+60);
             if (x > w+30) x -= (w+60);
 
-            var chroma = (Math.sin(s.ph * 0.85 + s.x * 0.002) * 0.5 + 0.5);
-            var tempShift = (chroma - 0.5) * 0.20;
-            var tempNow = clamp(s.temp + tempShift, -1, 1);
-
-            drawStar(x, y, s.r, clamp(a,0,1), tempNow, s.ph);
+            drawStar(x, y, s.r, s.a, s.ph);
           }
         }
 
-        function drawDust(px, py){
+        function drawDust(px, py, animate){
           for (var i=0;i<dust.length;i++){
             var d = dust[i];
-            d.x += d.vx;
-            d.y += d.vy;
 
-            if (d.x > w + 80){ d.x = -80; d.y = rand(-h*0.2, h*1.2); }
-            if (d.y > h + 80){ d.y = -80; d.x = rand(-w*0.2, w*1.2); }
+            if (animate){
+              d.x += d.vx;
+              d.y += d.vy;
 
-            var x = d.x + (px * 10);
-            var y = d.y + (py * 10);
+              if (d.x > w + 80){ d.x = -80; d.y = rand(-h*0.2, h*1.2); }
+              if (d.y > h + 80){ d.y = -80; d.x = rand(-w*0.2, w*1.2); }
+            }
+
+            var x = d.x + (px * 4);
+            var y = d.y + (py * 4);
 
             ctx.fillStyle = "rgba(255,255,255," + d.a.toFixed(3) + ")";
             ctx.beginPath();
@@ -1823,300 +1691,87 @@
           }
         }
 
-        function drawRocks(px, py){
-          var moonX = moonMask ? moonMask.x : w*0.5;
-          var moonY = moonMask ? moonMask.y : h*0.18;
-          var moonR = moonMask ? moonMask.r : 40;
+        function renderFrame(forceStaticDraw){
+          var animateUniverse = !staticUniverse && !forceStaticDraw;
 
-          for (var i=0;i<rocks.length;i++){
-            var r = rocks[i];
-
-            r.ph += r.wob;
-            r.x += r.vx + (Math.cos(r.ph) * 0.03);
-            r.y += r.vy + (Math.sin(r.ph) * 0.03);
-            r.rot += r.rv;
-
-            if (r.mode === "moon"){
-              var dxm = moonX - r.x;
-              var dym = moonY - r.y;
-              r.x += dxm * r.moonPull * (1.10 - Math.min(0.95, r.z * 0.55));
-              r.y += dym * r.moonPull * (1.10 - Math.min(0.95, r.z * 0.55));
-              r.z -= r.vz * 0.40;
-            } else if (r.mode === "deep"){
-              r.x += r.deepDriftX;
-              r.y += r.deepDriftY;
-              r.z -= r.vz;
-            } else {
-              r.z -= r.vz * 0.18;
-            }
-
-            if (r.x < -260 || r.x > w + 260 || r.y < -260 || r.y > h + 260 || r.z <= 0.06){
-              respawnRock(r, false);
-            }
-
-            var depthScale = clamp(r.z, 0.03, 1.25);
-            var worldScale = Math.pow(depthScale, 1.22);
-            var rr = r.baseR * worldScale;
-
-            var P = 6.0 * depthScale;
-            var x = r.x + (px * P * 0.10);
-            var y = r.y + (py * P * 0.10);
-
-            if (rr < 0.8) continue;
-
-            var dxMoon = x - moonX;
-            var dyMoon = y - moonY;
-            var distMoon = Math.sqrt(dxMoon*dxMoon + dyMoon*dyMoon);
-
-            if (distMoon < moonR * 1.10){
-              var backFactor = clamp((moonR * 1.10 - distMoon) / (moonR * 1.10), 0, 1);
-              var shrink = lerp(1, 0.30, backFactor);
-              rr *= shrink;
-              worldScale *= shrink;
-            }
-
-            if (rr < 0.45) continue;
-
-            var alpha = clamp(depthScale * r.fadeBias, 0.08, 1);
-
-            ctx.save();
-            ctx.globalCompositeOperation = "source-over";
-            ctx.globalAlpha = alpha;
-            ctx.translate(x, y);
-            ctx.rotate(r.rot);
-
-            ctx.beginPath();
-            var pts = r.pts;
-            ctx.moveTo(pts[0].x * worldScale, pts[0].y * worldScale);
-            for (var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x * worldScale, pts[k].y * worldScale);
-            ctx.closePath();
-
-            ctx.fillStyle = "rgb(20,20,26)";
-            ctx.fill();
-
-            var g = ctx.createRadialGradient(-rr*0.35, -rr*0.35, rr*0.15, 0, 0, rr*1.25);
-            g.addColorStop(0, "rgba(255,255,255,0.10)");
-            g.addColorStop(0.45, "rgba(255,255,255,0.04)");
-            g.addColorStop(1, "rgba(0,0,0,0.65)");
-            ctx.fillStyle = g;
-            ctx.fill();
-
-            ctx.lineWidth = Math.max(0.6, 0.9 * worldScale);
-            ctx.strokeStyle = "rgba(0,0,0,0.75)";
-            ctx.stroke();
-            ctx.restore();
-          }
-        }
-
-        function spawnMeteor(){
-          var edge = Math.floor(rand(0,4));
-          var x, y, angle, speed = rand(8.5, 14.5);
-
-          if (edge === 0){
-            x = rand(-w*0.2, w*1.2); y = -60; angle = rand(0.35, 1.20);
-          } else if (edge === 1){
-            x = w + 60; y = rand(-h*0.2, h*0.8); angle = rand(2.20, 3.70);
-          } else if (edge === 2){
-            x = rand(-w*0.2, w*1.2); y = h + 60; angle = rand(3.80, 5.50);
+          if (!staticUniverse){
+            par.x += (par.tx - par.x) * PERF.parallax;
+            par.y += (par.ty - par.y) * PERF.parallax;
           } else {
-            x = -60; y = rand(-h*0.2, h*0.8); angle = rand(-0.50, 1.10);
+            par.x = 0;
+            par.y = 0;
           }
 
-          meteors.push({
-            x:x, y:y,
-            vx:Math.cos(angle) * speed,
-            vy:Math.sin(angle) * speed,
-            life:0,
-            maxLife:rand(28, 46),
-            len:rand(90, 170),
-            a:rand(0.30, 0.70),
-            w:rand(1.0, 2.2)
-          });
-        }
-
-        function drawMeteors(){
-          for (var j=meteors.length-1;j>=0;j--){
-            var m = meteors[j];
-            m.x += m.vx;
-            m.y += m.vy;
-            m.life++;
-
-            var k = Math.min(1, m.life / 7);
-            var a = m.a * k * (1 - (m.life / m.maxLife));
-
-            var norm = Math.sqrt(m.vx*m.vx + m.vy*m.vy) || 1;
-            var tx = m.x - (m.vx / norm) * m.len;
-            var ty = m.y - (m.vy / norm) * m.len;
-
-            var grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
-            grad.addColorStop(0, "rgba(255,255,255," + (a*1.6).toFixed(3) + ")");
-            grad.addColorStop(1, "rgba(255,255,255,0)");
-
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = m.w * 1.9;
-            ctx.beginPath();
-            ctx.moveTo(m.x, m.y);
-            ctx.lineTo(tx, ty);
-            ctx.stroke();
-
-            ctx.fillStyle = "rgba(255,255,255," + Math.min(1, a + 0.10).toFixed(3) + ")";
-            ctx.beginPath();
-            ctx.arc(m.x, m.y, 1.2, 0, Math.PI*2);
-            ctx.fill();
-
-            if (m.life > m.maxLife || m.x < -m.len-120 || m.x > w + m.len + 120 || m.y < -m.len-120 || m.y > h + m.len + 120){
-              meteors.splice(j,1);
-            }
-          }
-        }
-
-        function spawnFlyby(){
-          var startFromLeft = Math.random() < 0.5;
-          var y = rand(h * 0.12, h * 0.82);
-          var x = startFromLeft ? -120 : w + 120;
-          var dir = startFromLeft ? 1 : -1;
-          var vx = rand(10.5, 16.5) * dir;
-          var vy = rand(-0.8, 0.8);
-          var targetShrink = rand(0.88, 0.94);
-
-          flybys.push({
-            x:x, y:y, vx:vx, vy:vy,
-            life:0,
-            maxLife:rand(24, 34),
-            size:rand(18, 34),
-            rot:rand(0, Math.PI*2),
-            rv:rand(-0.08, 0.08),
-            a:rand(0.18, 0.34),
-            shrinkTo:targetShrink,
-            len:rand(70, 140)
-          });
-        }
-
-        function drawFlybys(px, py){
-          for (var i=flybys.length-1;i>=0;i--){
-            var f = flybys[i];
-            f.life++;
-            f.x += f.vx;
-            f.y += f.vy;
-            f.rot += f.rv;
-
-            var progress = clamp(f.life / f.maxLife, 0, 1);
-            var scale = lerp(1, f.shrinkTo, progress);
-            var alpha = f.a * (1 - progress);
-
-            var headX = f.x + px * 0.16;
-            var headY = f.y + py * 0.16;
-            var tailX = headX - f.vx * (f.len / Math.max(1, Math.abs(f.vx)));
-            var tailY = headY - f.vy * (f.len / Math.max(1, Math.abs(f.vx)));
-
-            ctx.save();
-            ctx.globalCompositeOperation = "screen";
-            ctx.globalAlpha = alpha;
-
-            var grad = ctx.createLinearGradient(headX, headY, tailX, tailY);
-            grad.addColorStop(0, "rgba(220,220,255,0.75)");
-            grad.addColorStop(0.25, "rgba(180,180,220,0.18)");
-            grad.addColorStop(1, "rgba(255,255,255,0)");
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = Math.max(1, f.size * 0.18 * scale);
-            ctx.beginPath();
-            ctx.moveTo(headX, headY);
-            ctx.lineTo(tailX, tailY);
-            ctx.stroke();
-
-            ctx.translate(headX, headY);
-            ctx.rotate(f.rot);
-            ctx.scale(scale, scale);
-
-            ctx.beginPath();
-            ctx.moveTo(-f.size*0.25, -f.size*0.10);
-            ctx.lineTo(f.size*0.38, 0);
-            ctx.lineTo(-f.size*0.22, f.size*0.12);
-            ctx.closePath();
-            ctx.fillStyle = "rgba(210,210,225,0.32)";
-            ctx.fill();
-
-            ctx.restore();
-
-            if (f.life >= f.maxLife || headX < -220 || headX > w + 220 || headY < -180 || headY > h + 180){
-              flybys.splice(i,1);
-            }
-          }
-        }
-
-        function renderFrame(){
-          par.x += (par.tx - par.x) * PERF.parLerp;
-          par.y += (par.ty - par.y) * PERF.parLerp;
-
-          var px = par.x * 18;
-          var py = par.y * 12;
+          var px = par.x * 10;
+          var py = par.y * 6;
 
           ctx.clearRect(0,0,w,h);
           ctx.fillStyle = "#000";
           ctx.fillRect(0,0,w,h);
 
-          drawStars(starsFar, px, py, 0.12);
-          drawStars(starsMid, px, py, 0.28);
-          drawStars(starsNear, px, py, 0.52);
-          drawDust(px, py);
-          drawRocks(px, py);
+          drawStars(starsFar, px, py, 0.10, animateUniverse);
+          drawStars(starsMid, px, py, 0.18, animateUniverse);
+          drawStars(starsNear, px, py, 0.26, animateUniverse);
 
-          if (t > nextMeteorAt){
-            spawnMeteor();
-            nextMeteorAt = t + Math.floor(rand(100, 260) / PERF.meteorChanceMul);
+          if (!staticUniverse){
+            drawDust(px, py, true);
+          } else {
+            drawDust(0, 0, false);
           }
-
-          if (t > nextFlybyAt){
-            spawnFlyby();
-            nextFlybyAt = t + Math.floor(rand(320, 760) / PERF.flybyChance);
-          }
-
-          drawMeteors();
-          drawFlybys(px, py);
         }
 
         function tick(){
-          t++;
           frame++;
-          if (PERF.tickSkip === 0 || frame % (PERF.tickSkip + 1) === 0){
-            renderFrame();
+
+          if (staticUniverse){
+            if (frame === 1){
+              renderFrame(true);
+            }
+            raf = window.requestAnimationFrame(tick);
+            return;
           }
+
+          if (touchScrolling && device.kind === "mobile"){
+            raf = window.requestAnimationFrame(tick);
+            return;
+          }
+
+          if (PERF.tickSkip === 0 || frame % (PERF.tickSkip + 1) === 0){
+            renderFrame(false);
+          }
+
           raf = window.requestAnimationFrame(tick);
         }
 
-        function start(force){
+        function start(){
           if (raf) window.cancelAnimationFrame(raf);
-          resize(!!force);
+          resize();
           tick();
         }
 
         var resizeTimer = 0;
-        function onResize(){
+        window.addEventListener("resize", function(){
           clearTimeout(resizeTimer);
           resizeTimer = setTimeout(function(){
-            updateMoonMask();
-            start(false);
+            start();
           }, 180);
-        }
-
-        window.addEventListener("resize", onResize, { passive:true });
-        window.addEventListener("orientationchange", function(){
-          updateMoonMask();
-          start(true);
         }, { passive:true });
+
+        window.addEventListener("orientationchange", function(){
+          start();
+        }, { passive:true });
+
         document.addEventListener("visibilitychange", function(){
           if (!document.hidden){
-            updateMoonMask();
-            start(true);
+            start();
           }
         });
 
         window.addEventListener("load", function(){
-          updateMoonMask();
-          start(true);
+          start();
         });
 
-        start(true);
+        start();
       }catch(e){}
     })();
   </script>
