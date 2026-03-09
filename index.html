@@ -1324,9 +1324,9 @@
           window.speechSynthesis.cancel();
           currentUtter = new SpeechSynthesisUtterance(text);
           currentUtter.lang = "pt-BR";
-          currentUtter.rate = 0.80;
-          currentUtter.pitch = 0.42;
-          currentUtter.volume = 0.50;
+          currentUtter.rate = 0.74;
+          currentUtter.pitch = 0.36;
+          currentUtter.volume = 0.25;
 
           var voice = findVoice();
           if (voice) currentUtter.voice = voice;
@@ -1375,7 +1375,7 @@
             msgEl.textContent = "";
             ghostEl.textContent = "";
           }, 420);
-        }, 7600);
+        }, 9800);
       };
 
       if (window.speechSynthesis){
@@ -2414,7 +2414,7 @@
           if (window.showTransmissionSequence){
             window.showTransmissionSequence(
               "UMA TRANSMISSÃO RECEBIDA",
-              "Olá, seja bem-vindo(a)"
+              "Olá... Visitante, seja bem-vindo. Você acaba de chegar a um lugar inédito e curioso. Preste muita atenção nas informações e siga em frente. Até logo..."
             );
           }
 
@@ -2440,10 +2440,10 @@
 
           var radioGain = audioCtx.createGain();
           radioGain.gain.setValueAtTime(0.00001, now);
-          radioGain.gain.exponentialRampToValueAtTime(0.36, now + 0.35);
-          radioGain.gain.linearRampToValueAtTime(0.78 + Math.random()*0.18, now + 1.6);
-          radioGain.gain.linearRampToValueAtTime(1.14 + Math.random()*0.24, now + 4.2);
-          radioGain.gain.linearRampToValueAtTime(1.44 + Math.random()*0.30, now + 5.5);
+          radioGain.gain.exponentialRampToValueAtTime(1.08, now + 0.35);
+          radioGain.gain.linearRampToValueAtTime(2.34 + Math.random()*0.18, now + 1.6);
+          radioGain.gain.linearRampToValueAtTime(3.42 + Math.random()*0.24, now + 4.2);
+          radioGain.gain.linearRampToValueAtTime(4.32 + Math.random()*0.30, now + 5.5);
           radioGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           noise.connect(hp);
