@@ -161,11 +161,6 @@
       height:100%;
       background:linear-gradient(90deg, rgba(255,255,255,0), rgba(230,192,123,.22), rgba(255,255,255,0));
       filter:blur(8px);
-      opacity:0;
-      transform:translateX(0);
-    }
-
-    #transmissionField.isScanning .tfNoise::after{
       opacity:.7;
       animation:tfSweep 1.3s linear infinite;
     }
@@ -1090,14 +1085,6 @@
     </div>
   </div>
 
-  <audio
-    id="transmissionAudio"
-    preload="auto"
-    playsinline
-    crossorigin="anonymous"
-    src="./Rua%20Coronel%20Jo%C3%A3o%20Fernandes.m4a">
-  </audio>
-
   <div class="moonWrap" aria-hidden="true">
     <div class="moonGlow"></div>
     <img src="./lua_site_transparente.png" alt="" class="moon" referrerpolicy="no-referrer">
@@ -1268,47 +1255,27 @@
       var ghostEl = document.getElementById("tfGhost");
       if (!field || !titleEl || !msgEl || !ghostEl) return;
 
-      var scanDelayMs = 5000;
       var typeTimer = null;
-      var hideTimer = null;
-      var typingDone = false;
-      var audioDone = false;
-      var started = false;
-
-      function clearTimers(){
-        clearInterval(typeTimer);
-        clearTimeout(hideTimer);
-      }
+      var endTimer = null;
+      var staticStopFn = null;
 
       function resetField(){
-        clearTimers();
+        clearInterval(typeTimer);
+        clearTimeout(endTimer);
+        if (staticStopFn) {
+          staticStopFn();
+          staticStopFn = null;
+        }
         field.classList.remove("isActive");
-        field.classList.remove("isScanning");
         titleEl.textContent = "";
         msgEl.textContent = "";
         ghostEl.textContent = "";
-        typingDone = false;
-        audioDone = false;
-        started = false;
       }
 
-      function tryClose(){
-        if (!typingDone || !audioDone) return;
-        clearTimeout(hideTimer);
-        hideTimer = setTimeout(function(){
-          field.classList.remove("isActive");
-          setTimeout(resetField, 380);
-        }, 180);
-      }
-
-      function typeText(text, totalMs){
+      function typeText(text, speed, done){
         clearInterval(typeTimer);
         msgEl.textContent = "";
         ghostEl.textContent = "";
-
-        var chars = Math.max(1, text.length);
-        var duration = Math.max(2200, totalMs || 8000);
-        var step = Math.max(22, Math.min(80, Math.floor(duration / chars)));
         var i = 0;
 
         typeTimer = setInterval(function(){
@@ -1319,49 +1286,44 @@
 
           if (i >= text.length){
             clearInterval(typeTimer);
-            typingDone = true;
-            tryClose();
+            if (typeof done === "function") done();
           }
-        }, step);
+        }, speed || 52);
       }
 
-      window.transmissionUI = {
-        play: function(opts){
-          opts = opts || {};
-          clearTimers();
-          typingDone = false;
-          audioDone = false;
-          started = false;
+      window.showTransmissionSequence = function(title, text, options){
+        options = options || {};
+        var openDelay = typeof options.openDelay === "number" ? options.openDelay : 5000;
+        var closeDelay = typeof options.closeDelay === "number" ? options.closeDelay : 3000;
+        var typingSpeed = typeof options.typingSpeed === "number" ? options.typingSpeed : 52;
+        staticStopFn = typeof options.stopStatic === "function" ? options.stopStatic : null;
 
-          var title = opts.title || "UMA TRANSMISSÃO RECEBIDA";
-          var text = opts.text || "";
-          var audioDurationMs = Math.max(1000, opts.audioDurationMs || 14530);
-          var onStart = typeof opts.onStart === "function" ? opts.onStart : function(){};
+        clearInterval(typeTimer);
+        clearTimeout(endTimer);
 
-          titleEl.textContent = title;
-          msgEl.textContent = "";
-          ghostEl.textContent = "";
+        titleEl.textContent = "";
+        msgEl.textContent = "";
+        ghostEl.textContent = "";
 
-          field.classList.add("isActive");
-          field.classList.add("isScanning");
+        field.classList.add("isActive");
 
-          hideTimer = setTimeout(function(){
-            field.classList.remove("isScanning");
-            if (!started){
-              started = true;
-              typeText(text, audioDurationMs);
-              onStart();
-            }
-          }, scanDelayMs);
-        },
+        setTimeout(function(){
+          titleEl.textContent = title || "UMA TRANSMISSÃO RECEBIDA";
+        }, 140);
 
-        audioEnded: function(){
-          audioDone = true;
-          tryClose();
-        },
-
-        forceReset: resetField
+        setTimeout(function(){
+          typeText(text || "", typingSpeed, function(){
+            endTimer = setTimeout(function(){
+              field.classList.remove("isActive");
+              setTimeout(function(){
+                resetField();
+              }, 420);
+            }, closeDelay);
+          });
+        }, openDelay);
       };
+
+      window.resetTransmissionField = resetField;
     })();
   </script>
 
@@ -2310,8 +2272,7 @@
       var btn = document.getElementById("soundBtn");
       var stateEl = document.getElementById("soundState");
       var slider = document.getElementById("volumeSlider");
-      var transmissionAudio = document.getElementById("transmissionAudio");
-      if (!btn || !stateEl || !slider || !panelEl || !transmissionAudio) return;
+      if (!btn || !stateEl || !slider || !panelEl) return;
 
       var audioCtx = null;
       var started = false;
@@ -2319,16 +2280,8 @@
       var gDrone = null;
       var airGain = null;
       var radioTimer = null;
-
-      var transmissionSource = null;
-      var transmissionReady = false;
-      var transmissionAutoPlayedThisLoad = false;
-      var activeStaticNodes = [];
-      var activeFlutterLfo = null;
-
-      var TRANSMISSION_TEXT = "Olá, visitante. Seja bem-vindo. Você acaba de chegar a um lugar inédito e curioso. Preste muita atenção nas informações e siga em frente. Até logo.";
-      var TRANSMISSION_TITLE = "UMA TRANSMISSÃO RECEBIDA";
-      var TRANSMISSION_FALLBACK_MS = 14530;
+      var transmissionPlayedThisLoad = false;
+      var activeTransmissionNodes = [];
 
       function getLS(k, fallback){
         try{
@@ -2378,25 +2331,6 @@
         return src;
       }
 
-      function clearStaticLayer(){
-        try{
-          if (activeFlutterLfo){
-            try{ activeFlutterLfo.stop(); }catch(e){}
-          }
-        }catch(e){}
-        activeFlutterLfo = null;
-
-        while (activeStaticNodes.length){
-          var node = activeStaticNodes.pop();
-          try{
-            if (node && typeof node.stop === "function") node.stop();
-          }catch(e){}
-          try{
-            if (node && typeof node.disconnect === "function") node.disconnect();
-          }catch(e){}
-        }
-      }
-
       function applyVolume(){
         if (!master || !audioCtx) return;
 
@@ -2413,251 +2347,161 @@
         }catch(e){}
       }
 
-      function ensureTransmissionGraph(){
-        if (!audioCtx || transmissionReady) return;
-        try{
-          if (!transmissionSource){
-            transmissionSource = audioCtx.createMediaElementSource(transmissionAudio);
-          }
-
-          var dryGain = audioCtx.createGain();
-          dryGain.gain.value = 0.62;
-
-          var wetHP = audioCtx.createBiquadFilter();
-          wetHP.type = "highpass";
-          wetHP.frequency.value = 120;
-          wetHP.Q.value = 0.7;
-
-          var wetBP = audioCtx.createBiquadFilter();
-          wetBP.type = "bandpass";
-          wetBP.frequency.value = 1280;
-          wetBP.Q.value = 0.7;
-
-          var wetLP = audioCtx.createBiquadFilter();
-          wetLP.type = "lowpass";
-          wetLP.frequency.value = 2200;
-          wetLP.Q.value = 0.8;
-
-          var wetPresence = audioCtx.createBiquadFilter();
-          wetPresence.type = "peaking";
-          wetPresence.frequency.value = 920;
-          wetPresence.Q.value = 0.9;
-          wetPresence.gain.value = 1.8;
-
-          var wetGain = audioCtx.createGain();
-          wetGain.gain.value = 0.82;
-
-          var voiceComp = audioCtx.createDynamicsCompressor();
-          voiceComp.threshold.value = -26;
-          voiceComp.knee.value = 18;
-          voiceComp.ratio.value = 2.4;
-          voiceComp.attack.value = 0.003;
-          voiceComp.release.value = 0.18;
-
-          transmissionSource.connect(dryGain);
-          dryGain.connect(voiceComp);
-
-          transmissionSource.connect(wetHP);
-          wetHP.connect(wetBP);
-          wetBP.connect(wetLP);
-          wetLP.connect(wetPresence);
-          wetPresence.connect(wetGain);
-          wetGain.connect(voiceComp);
-
-          voiceComp.connect(master);
-
-          transmissionReady = true;
-        }catch(e){}
+      function stopTransmissionStatic(){
+        while (activeTransmissionNodes.length){
+          var node = activeTransmissionNodes.pop();
+          try{
+            if (node && typeof node.stop === "function") node.stop();
+          }catch(e){}
+          try{
+            if (node && typeof node.disconnect === "function") node.disconnect();
+          }catch(e){}
+        }
       }
 
-      function getTransmissionDurationMs(){
-        var d = transmissionAudio.duration;
-        if (isFinite(d) && d > 0) return Math.round(d * 1000);
-        return TRANSMISSION_FALLBACK_MS;
-      }
+      function buildTransmissionStatic(totalDur){
+        if (!audioCtx || !master) return function(){};
 
-      function preloadTransmission(){
-        return new Promise(function(resolve){
-          function done(){ resolve(); }
-          if (isFinite(transmissionAudio.duration) && transmissionAudio.duration > 0){
-            resolve();
-            return;
-          }
-          transmissionAudio.addEventListener("loadedmetadata", done, { once:true });
-          transmissionAudio.addEventListener("canplaythrough", done, { once:true });
-          transmissionAudio.addEventListener("error", done, { once:true });
-          try{ transmissionAudio.load(); }catch(e){ resolve(); }
-          setTimeout(resolve, 1500);
-        });
-      }
-
-      function buildTransmissionStatic(durationSec){
-        if (!audioCtx || !master) return;
-        clearStaticLayer();
+        stopTransmissionStatic();
 
         var now = audioCtx.currentTime;
-        var totalDur = durationSec || 14.7;
+        var duration = Math.max(8, totalDur || 16);
 
         var noise = createBrownNoise(audioCtx);
+
         var hp = audioCtx.createBiquadFilter();
         hp.type = "highpass";
-        hp.frequency.setValueAtTime(220, now);
+        hp.frequency.setValueAtTime(210 + Math.random()*45, now);
         hp.Q.setValueAtTime(0.8, now);
 
         var bp = audioCtx.createBiquadFilter();
         bp.type = "bandpass";
-        bp.frequency.setValueAtTime(1320, now);
-        bp.Q.setValueAtTime(1.6, now);
+        bp.frequency.setValueAtTime(1060 + Math.random()*120, now);
+        bp.Q.setValueAtTime(1.35, now);
 
         var lp = audioCtx.createBiquadFilter();
         lp.type = "lowpass";
-        lp.frequency.setValueAtTime(2900, now);
+        lp.frequency.setValueAtTime(1850 + Math.random()*160, now);
         lp.Q.setValueAtTime(0.8, now);
 
-        var gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(0.00001, now);
-        gain.gain.exponentialRampToValueAtTime(0.48, now + 0.22);
-        gain.gain.setValueAtTime(0.48, now + 5.0);
-        gain.gain.linearRampToValueAtTime(0.16, now + 7.2);
-        gain.gain.linearRampToValueAtTime(0.11, now + Math.max(8.2, totalDur - 0.8));
-        gain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
+        var staticGain = audioCtx.createGain();
+        staticGain.gain.setValueAtTime(0.00001, now);
+        staticGain.gain.exponentialRampToValueAtTime(0.22, now + 0.25);
+        staticGain.gain.setValueAtTime(0.22, now + duration - 0.30);
+        staticGain.gain.exponentialRampToValueAtTime(0.00001, now + duration);
 
         noise.connect(hp);
         hp.connect(bp);
         bp.connect(lp);
-        lp.connect(gain);
-        gain.connect(master);
+        lp.connect(staticGain);
+        staticGain.connect(master);
 
         noise.start(now);
-        noise.stop(now + totalDur + 0.08);
+        noise.stop(now + duration + 0.05);
 
-        activeStaticNodes.push(noise, hp, bp, lp, gain);
+        activeTransmissionNodes.push(noise, hp, bp, lp, staticGain);
 
         var flutterLFO = audioCtx.createOscillator();
         flutterLFO.type = "sine";
-        flutterLFO.frequency.setValueAtTime(0.24, now);
+        flutterLFO.frequency.setValueAtTime(0.20, now);
 
         var flutterGain = audioCtx.createGain();
-        flutterGain.gain.setValueAtTime(60, now);
+        flutterGain.gain.setValueAtTime(95, now);
 
         flutterLFO.connect(flutterGain);
         flutterGain.connect(bp.frequency);
         flutterLFO.start(now);
-        flutterLFO.stop(now + totalDur);
-        activeFlutterLfo = flutterLFO;
-        activeStaticNodes.push(flutterGain);
+        flutterLFO.stop(now + duration);
 
-        var lowHum = audioCtx.createOscillator();
-        lowHum.type = "sine";
-        lowHum.frequency.setValueAtTime(74, now);
+        activeTransmissionNodes.push(flutterLFO, flutterGain);
 
-        var lowHumLP = audioCtx.createBiquadFilter();
-        lowHumLP.type = "lowpass";
-        lowHumLP.frequency.setValueAtTime(155, now);
+        var shimmerNoise = createBrownNoise(audioCtx);
+        var shimmerHP = audioCtx.createBiquadFilter();
+        shimmerHP.type = "highpass";
+        shimmerHP.frequency.setValueAtTime(1700, now);
 
-        var lowHumGain = audioCtx.createGain();
-        lowHumGain.gain.setValueAtTime(0.00001, now);
-        lowHumGain.gain.exponentialRampToValueAtTime(0.0014, now + 0.8);
-        lowHumGain.gain.setValueAtTime(0.0014, now + totalDur - 1.2);
-        lowHumGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
+        var shimmerBP = audioCtx.createBiquadFilter();
+        shimmerBP.type = "bandpass";
+        shimmerBP.frequency.setValueAtTime(2100, now);
+        shimmerBP.Q.setValueAtTime(3.1, now);
 
-        lowHum.connect(lowHumLP);
-        lowHumLP.connect(lowHumGain);
-        lowHumGain.connect(master);
-        lowHum.start(now);
-        lowHum.stop(now + totalDur);
-        activeStaticNodes.push(lowHum, lowHumLP, lowHumGain);
+        var shimmerGain = audioCtx.createGain();
+        shimmerGain.gain.setValueAtTime(0.00001, now);
+        shimmerGain.gain.exponentialRampToValueAtTime(0.040, now + 0.8);
+        shimmerGain.gain.setValueAtTime(0.040, now + duration - 0.4);
+        shimmerGain.gain.exponentialRampToValueAtTime(0.00001, now + duration);
+
+        shimmerNoise.connect(shimmerHP);
+        shimmerHP.connect(shimmerBP);
+        shimmerBP.connect(shimmerGain);
+        shimmerGain.connect(master);
+
+        shimmerNoise.start(now);
+        shimmerNoise.stop(now + duration + 0.05);
+
+        activeTransmissionNodes.push(shimmerNoise, shimmerHP, shimmerBP, shimmerGain);
 
         var clickCount = 4;
         for (var i=0;i<clickCount;i++){
-          var tt = now + 0.6 + Math.random() * Math.max(2.0, totalDur - 1.2);
+          var tt = now + 0.5 + Math.random() * Math.max(0.8, duration - 1.0);
 
           var cOsc = audioCtx.createOscillator();
           cOsc.type = "triangle";
-          cOsc.frequency.setValueAtTime(1500 + Math.random()*900, tt);
+          cOsc.frequency.setValueAtTime(1200 + Math.random()*800, tt);
 
           var cBP = audioCtx.createBiquadFilter();
           cBP.type = "bandpass";
-          cBP.frequency.setValueAtTime(1800 + Math.random()*500, tt);
+          cBP.frequency.setValueAtTime(1550 + Math.random()*500, tt);
           cBP.Q.setValueAtTime(7, tt);
 
           var cGain = audioCtx.createGain();
           cGain.gain.setValueAtTime(0.00001, tt);
-          cGain.gain.exponentialRampToValueAtTime(0.0015 + Math.random()*0.0013, tt + 0.008);
-          cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.045);
+          cGain.gain.exponentialRampToValueAtTime(0.0014 + Math.random()*0.0010, tt + 0.008);
+          cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.040);
 
           cOsc.connect(cBP);
           cBP.connect(cGain);
           cGain.connect(master);
+
           cOsc.start(tt);
           cOsc.stop(tt + 0.05);
 
-          activeStaticNodes.push(cOsc, cBP, cGain);
+          activeTransmissionNodes.push(cOsc, cBP, cGain);
+        }
+
+        return function(){
+          stopTransmissionStatic();
+        };
+      }
+
+      function playTransmissionMessageOnly(){
+        if (!audioCtx || !master || transmissionPlayedThisLoad) return;
+        transmissionPlayedThisLoad = true;
+
+        var text = "Olá, visitante. Seja bem-vindo. Você acaba de chegar a um lugar inédito e curioso. Preste muita atenção nas informações e siga em frente. Até logo.";
+        var title = "UMA TRANSMISSÃO RECEBIDA";
+        var openDelayMs = 5000;
+        var typingSpeed = 52;
+        var typingDurationMs = text.length * typingSpeed;
+        var keepOpenAfterFinishMs = 3000;
+        var totalStaticMs = openDelayMs + typingDurationMs + keepOpenAfterFinishMs + 800;
+        var stopStatic = buildTransmissionStatic(totalStaticMs / 1000);
+
+        if (window.showTransmissionSequence){
+          window.showTransmissionSequence(title, text, {
+            openDelay: openDelayMs,
+            closeDelay: keepOpenAfterFinishMs,
+            typingSpeed: typingSpeed,
+            stopStatic: stopStatic
+          });
         }
       }
-
-      function stopTransmissionAudio(){
-        try{
-          transmissionAudio.pause();
-          transmissionAudio.currentTime = 0;
-        }catch(e){}
-        clearStaticLayer();
-      }
-
-      function playTransmissionOnce(){
-        if (!audioCtx || !master) return;
-        ensureTransmissionGraph();
-
-        preloadTransmission().then(function(){
-          var durationMs = getTransmissionDurationMs();
-          var durationSec = durationMs / 1000;
-
-          if (window.transmissionUI && typeof window.transmissionUI.play === "function"){
-            window.transmissionUI.play({
-              title: TRANSMISSION_TITLE,
-              text: TRANSMISSION_TEXT,
-              audioDurationMs: durationMs,
-              onStart: function(){
-                try{
-                  stopTransmissionAudio();
-                  buildTransmissionStatic(durationSec);
-                  transmissionAudio.currentTime = 0;
-                  transmissionAudio.play().catch(function(){
-                    if (window.transmissionUI && window.transmissionUI.audioEnded){
-                      window.transmissionUI.audioEnded();
-                    }
-                  });
-                }catch(e){
-                  if (window.transmissionUI && window.transmissionUI.audioEnded){
-                    window.transmissionUI.audioEnded();
-                  }
-                }
-              }
-            });
-          }
-        });
-      }
-
-      transmissionAudio.addEventListener("ended", function(){
-        clearStaticLayer();
-        if (window.transmissionUI && window.transmissionUI.audioEnded){
-          window.transmissionUI.audioEnded();
-        }
-      });
-
-      transmissionAudio.addEventListener("pause", function(){
-        if (transmissionAudio.currentTime <= 0.05 || transmissionAudio.ended) return;
-      });
 
       function scheduleRadio(){
         clearTimeout(radioTimer);
         var next = 20000 + Math.random() * 10000;
         radioTimer = setTimeout(function(){
           if (started){
-            if (!transmissionAutoPlayedThisLoad){
-              transmissionAutoPlayedThisLoad = true;
-              playTransmissionOnce();
-            }
             scheduleRadio();
           }
         }, next);
@@ -2758,16 +2602,13 @@
           ramp(gDrone.gain, 0.30, 1.6);
           ramp(airGain.gain, 0.05, 1.8);
 
-          ensureTransmissionGraph();
-
           started = true;
           setBtn(true);
           applyVolume();
 
-          if (!transmissionAutoPlayedThisLoad){
-            transmissionAutoPlayedThisLoad = true;
-            setTimeout(playTransmissionOnce, 280);
-          }
+          setTimeout(function(){
+            playTransmissionMessageOnly();
+          }, 250);
 
           scheduleRadio();
           return true;
@@ -2779,10 +2620,10 @@
 
       function stopAudio(){
         clearTimeout(radioTimer);
-        stopTransmissionAudio();
+        stopTransmissionStatic();
 
-        if (window.transmissionUI && window.transmissionUI.forceReset){
-          window.transmissionUI.forceReset();
+        if (window.resetTransmissionField){
+          window.resetTransmissionField();
         }
 
         try{
@@ -2796,8 +2637,6 @@
         master = null;
         gDrone = null;
         airGain = null;
-        transmissionSource = null;
-        transmissionReady = false;
         setBtn(false);
       }
 
