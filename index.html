@@ -416,46 +416,89 @@
       top:-8%;
       left:-38%;
       width:26%;
-      height:116%;
-      background:linear-gradient(
-        90deg,
-        rgba(255,255,255,0) 0%,
-        rgba(255,245,220,.08) 35%,
-        rgba(255,255,255,.85) 50%,
-        rgba(255,240,190,.18) 65%,
-        rgba(255,255,255,0) 100%
-      );
-      transform:skewX(-18deg);
-      filter:blur(6px);
-      mix-blend-mode:screen;
-      animation:titleSweepSoft 5s linear infinite;
-      pointer-events:none;
-    }
+.titleClean{
+  margin:0;
+  display:inline-flex;
+  flex-direction:column;
+  gap:.02em;
+  line-height:.92;
+  text-transform:uppercase;
+  font-family:Georgia, "Times New Roman", serif;
+  font-weight:700;
+  font-size:clamp(48px, 6.2vw, 110px);
+  letter-spacing:.12em;
+}
 
-    .titleClean span:last-child::after{
-      animation-delay:.18s;
-    }
+.titleClean span{
+  position:relative;
+  display:block;
+  width:max-content;
+  color:transparent;
+  -webkit-text-fill-color:transparent;
+  background:
+    linear-gradient(
+      180deg,
+      #4c3210 0%,
+      #875d22 16%,
+      #c59144 34%,
+      #f2d488 50%,
+      #d4a65b 63%,
+      #855a22 80%,
+      #4f3514 100%
+    );
+  background-clip:text;
+  -webkit-background-clip:text;
+  text-shadow:
+    0 1px 0 rgba(255,245,220,.06),
+    0 4px 10px rgba(0,0,0,.26),
+    0 12px 24px rgba(0,0,0,.34);
+  filter:drop-shadow(0 0 10px rgba(214,171,99,.06));
+  overflow:hidden;
+  isolation:isolate;
+}
 
-    @keyframes titleSweepSoft{
-      0%{
-        left:-38%;
-        opacity:0;
-      }
-      8%{
-        opacity:.95;
-      }
-      42%{
-        opacity:.95;
-      }
-      55%{
-        left:112%;
-        opacity:0;
-      }
-      100%{
-        left:112%;
-        opacity:0;
-      }
-    }
+.titleClean span::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+
+  background:linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,245,220,0) 38%,
+    rgba(255,245,220,.10) 46%,
+    rgba(255,255,255,.92) 50%,
+    rgba(255,240,190,.16) 54%,
+    rgba(255,255,255,0) 62%,
+    rgba(255,255,255,0) 100%
+  );
+
+  background-size:220% 100%;
+  background-repeat:no-repeat;
+  background-position:-160% 50%;
+
+  -webkit-mask-image:linear-gradient(#000, #000);
+  mask-image:linear-gradient(#000, #000);
+
+  mix-blend-mode:screen;
+  filter:blur(8px);
+  opacity:.95;
+  animation:titleSweepInside 5s linear infinite;
+}
+
+.titleClean span:last-child::after{
+  animation-delay:.18s;
+}
+
+@keyframes titleSweepInside{
+  0%{
+    background-position:-160% 50%;
+  }
+  100%{
+    background-position:160% 50%;
+  }
+}
 
     .subtitle{
       margin:12px 0 0;
