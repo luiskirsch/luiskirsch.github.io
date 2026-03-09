@@ -129,31 +129,32 @@
       mix-blend-mode:normal;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
-      contain:paint;
-    }
-
-    #transmissionField::before{
-      content:"";
-      position:absolute;
-      inset:-18px -16px -18px -16px;
-      border-radius:36px;
-      pointer-events:none;
-      background:
-        radial-gradient(
-          120% 90% at 50% 50%,
-          rgba(230,192,123,.14) 0%,
-          rgba(230,192,123,.09) 34%,
-          rgba(230,192,123,.04) 58%,
-          rgba(230,192,123,0) 76%
-        );
-      filter:blur(18px);
-      opacity:0;
-      transition:opacity .35s ease;
+      contain:layout style;
     }
 
     #transmissionField.isActive{
       opacity:1;
       transform:translateY(0);
+    }
+
+    #transmissionField::before{
+      content:"";
+      position:absolute;
+      inset:-22px;
+      border-radius:40px;
+      pointer-events:none;
+      background:
+        radial-gradient(
+          120% 100% at 50% 50%,
+          rgba(230,192,123,.16) 0%,
+          rgba(230,192,123,.11) 22%,
+          rgba(230,192,123,.06) 44%,
+          rgba(230,192,123,.025) 60%,
+          rgba(230,192,123,0) 78%
+        );
+      filter:blur(22px);
+      opacity:0;
+      transition:opacity .35s ease;
     }
 
     #transmissionField.isActive::before{
@@ -162,132 +163,73 @@
 
     .tfNoise{
       position:absolute;
-      inset:-8px;
-      border-radius:24px;
+      inset:0;
+      border-radius:18px;
       overflow:hidden;
       opacity:.55;
-      clip-path:inset(0 round 24px);
-      -webkit-clip-path:inset(0 round 24px);
-      -webkit-mask-image:-webkit-radial-gradient(white, black);
-      mask-image:radial-gradient(white, black);
     }
 
-    .tfNoise::before,
-#transmissionField{
-  position:fixed;
-  left:5.6vw;
-  top:18.5vh;
-  width:min(560px, 37vw);
-  min-height:96px;
-  z-index:90;
-  pointer-events:none;
-  opacity:0;
-  transform:translateY(12px);
-  transition:opacity .35s ease, transform .35s ease;
-  mix-blend-mode:normal;
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
-  contain:layout style;
-}
+    .tfNoise::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:18px;
+      background:
+        repeating-linear-gradient(
+          180deg,
+          rgba(255,255,255,0) 0px,
+          rgba(255,255,255,0) 4px,
+          rgba(255,255,255,.055) 5px,
+          rgba(255,255,255,0) 6px
+        );
+      animation:tfFlicker .10s linear infinite;
+    }
 
-#transmissionField.isActive{
-  opacity:1;
-  transform:translateY(0);
-}
+    .tfNoise::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:18px;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(255,255,255,0) 0%,
+          rgba(230,192,123,.18) 42%,
+          rgba(255,255,255,0) 62%
+        );
+      transform:translateX(-100%);
+      filter:blur(10px);
+      opacity:.7;
+      animation:tfSweep 1.35s linear infinite;
+    }
 
-#transmissionField::before{
-  content:"";
-  position:absolute;
-  inset:-22px;
-  border-radius:40px;
-  pointer-events:none;
-  background:
-    radial-gradient(
-      120% 100% at 50% 50%,
-      rgba(230,192,123,.16) 0%,
-      rgba(230,192,123,.11) 22%,
-      rgba(230,192,123,.06) 44%,
-      rgba(230,192,123,.025) 60%,
-      rgba(230,192,123,0) 78%
-    );
-  filter:blur(22px);
-  opacity:0;
-  transition:opacity .35s ease;
-}
+    #transmissionField.isTyping .tfNoise::after{
+      animation:none !important;
+      opacity:0 !important;
+    }
 
-#transmissionField.isActive::before{
-  opacity:1;
-}
+    .tfCore{
+      position:relative;
+      border-radius:18px;
+      padding:16px 18px 14px;
+      border:1px solid rgba(230,192,123,.16);
+      background:
+        linear-gradient(180deg, rgba(20,20,24,.78), rgba(8,8,12,.72));
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.025) inset,
+        0 0 28px rgba(230,192,123,.06),
+        inset 0 0 24px rgba(255,255,255,.02);
+      overflow:hidden;
+    }
 
-.tfNoise{
-  position:absolute;
-  inset:0;
-  border-radius:18px;
-  overflow:hidden;
-  opacity:.55;
-}
-
-.tfNoise::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:18px;
-  background:
-    repeating-linear-gradient(
-      180deg,
-      rgba(255,255,255,0) 0px,
-      rgba(255,255,255,0) 4px,
-      rgba(255,255,255,.055) 5px,
-      rgba(255,255,255,0) 6px
-    );
-  animation:tfFlicker .10s linear infinite;
-}
-
-.tfNoise::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:18px;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(230,192,123,.18) 42%,
-      rgba(255,255,255,0) 62%
-    );
-  transform:translateX(-100%);
-  filter:blur(10px);
-  opacity:.7;
-  animation:tfSweep 1.35s linear infinite;
-}
-
-#transmissionField.isTyping .tfNoise::after{
-  animation:none !important;
-  opacity:0 !important;
-}
-
-.tfCore{
-  position:relative;
-  border-radius:18px;
-  padding:16px 18px 14px;
-  border:1px solid rgba(230,192,123,.16);
-  background:
-    linear-gradient(180deg, rgba(20,20,24,.78), rgba(8,8,12,.72));
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.025) inset,
-    0 0 28px rgba(230,192,123,.06),
-    inset 0 0 24px rgba(255,255,255,.02);
-  overflow:hidden;
-}
-
-.tfCore::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:18px;
-  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
-  pointer-events:none;
-}
+    .tfCore::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      pointer-events:none;
+    }
 
     .tfTitle{
       position:relative;
@@ -339,8 +281,8 @@
     }
 
     @keyframes tfSweep{
-      0%{transform:translateX(0)}
-      100%{transform:translateX(520%)}
+      0%{transform:translateX(-100%)}
+      100%{transform:translateX(100%)}
     }
 
     .wrap{
@@ -429,137 +371,83 @@
     }
 
     .title{
-  margin:0;
-  line-height:1.04;
-  padding-bottom:.06em;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  font-weight:700;
-  font-size:clamp(48px, 6.2vw, 110px);
+      position:relative;
+      margin:0;
+      line-height:1.04;
+      padding-bottom:.06em;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-weight:700;
+      font-size:clamp(48px, 6.2vw, 110px);
+      text-shadow:0 18px 50px rgba(0,0,0,.52);
+    }
 
-  color:transparent;
+    .titleBase,
+    .titleShine{
+      display:block;
+      font:inherit;
+      line-height:inherit;
+      letter-spacing:inherit;
+      text-transform:inherit;
+      white-space:normal;
+    }
 
-  background-image:
-    linear-gradient(
-      180deg,
-      #5f4318 0%,
-      #9e6f2d 18%,
-      #d6ab63 34%,
-      #f3d896 48%,
-      #d4a861 58%,
-      #956728 74%,
-      #6f4b1d 100%
-    ),
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0) 44%,
-      rgba(255,248,220,.18) 47%,
-      rgba(255,255,255,.98) 50%,
-      rgba(255,240,190,.45) 53%,
-      rgba(255,255,255,0) 56%,
-      rgba(255,255,255,0) 100%
-    );
+    .titleBase{
+      position:relative;
+      z-index:1;
+      color:transparent;
+      background-image:
+        linear-gradient(
+          180deg,
+          #4f3613 0%,
+          #8d6226 16%,
+          #c9964a 34%,
+          #f2d38a 48%,
+          #d8aa5e 60%,
+          #8a5f24 78%,
+          #533815 100%
+        );
+      -webkit-background-clip:text;
+      background-clip:text;
+      text-shadow:
+        0 1px 0 rgba(255,245,220,.10),
+        0 3px 10px rgba(0,0,0,.28),
+        0 10px 26px rgba(0,0,0,.35);
+    }
 
-  background-size:
-    100% 100%,
-    300% 100%;
+    .titleShine{
+      position:absolute;
+      inset:0;
+      z-index:2;
+      color:transparent;
+      pointer-events:none;
+      background-image:
+        linear-gradient(
+          90deg,
+          rgba(255,255,255,0) 0%,
+          rgba(255,255,255,0) 40%,
+          rgba(255,245,210,.10) 46%,
+          rgba(255,255,255,.95) 50%,
+          rgba(255,240,190,.32) 54%,
+          rgba(255,255,255,0) 60%,
+          rgba(255,255,255,0) 100%
+        );
+      background-size:220% 100%;
+      background-repeat:no-repeat;
+      background-position:-160% 50%;
+      -webkit-background-clip:text;
+      background-clip:text;
+      filter:blur(.2px);
+      opacity:.95;
+      animation:titleShineSweep 5s linear infinite;
+      will-change:background-position;
+    }
 
-  background-position:
-    0 0,
-    -220% 50%;
+    @keyframes titleShineSweep{
+      0%{ background-position:-160% 50%; }
+      100%{ background-position:160% 50%; }
+    }
 
-  background-repeat:no-repeat;
-
-  -webkit-background-clip:text;
-  background-clip:text;
-
-.title{
-  position:relative;
-  margin:0;
-  line-height:1.04;
-  padding-bottom:.06em;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  font-weight:700;
-  font-size:clamp(48px, 6.2vw, 110px);
-  text-shadow:
-    0 18px 50px rgba(0,0,0,.52);
-}
-
-.titleBase,
-.titleShine{
-  display:block;
-  font:inherit;
-  line-height:inherit;
-  letter-spacing:inherit;
-  text-transform:inherit;
-  white-space:normal;
-}
-
-.titleBase{
-  position:relative;
-  z-index:1;
-  color:transparent;
-  background-image:
-    linear-gradient(
-      180deg,
-      #4f3613 0%,
-      #8d6226 16%,
-      #c9964a 34%,
-      #f2d38a 48%,
-      #d8aa5e 60%,
-      #8a5f24 78%,
-      #533815 100%
-    );
-  -webkit-background-clip:text;
-  background-clip:text;
-  text-shadow:
-    0 1px 0 rgba(255,245,220,.10),
-    0 3px 10px rgba(0,0,0,.28),
-    0 10px 26px rgba(0,0,0,.35);
-}
-
-.titleShine{
-  position:absolute;
-  inset:0;
-  z-index:2;
-  color:transparent;
-  pointer-events:none;
-
-  background-image:
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0) 40%,
-      rgba(255,245,210,.10) 46%,
-      rgba(255,255,255,.95) 50%,
-      rgba(255,240,190,.32) 54%,
-      rgba(255,255,255,0) 60%,
-      rgba(255,255,255,0) 100%
-    );
-
-  background-size:220% 100%;
-  background-repeat:no-repeat;
-  background-position:-160% 50%;
-
-  -webkit-background-clip:text;
-  background-clip:text;
-
-  filter:blur(.2px);
-  opacity:.95;
-  animation:titleShineSweep 5s linear infinite;
-  will-change:background-position;
-}
-
-@keyframes titleShineSweep{
-  0%{
-    background-position:-160% 50%;
-  }
-  100%{
-    background-position:160% 50%;
-  }
-}
     .subtitle{
       margin:12px 0 0;
       max-width:70ch;
@@ -1074,21 +962,21 @@
       }
 
       #transmissionField{
-  left:50%;
-  top:50%;
-  width:min(88vw, 420px);
-  transform:translate(-50%, calc(-50% + 12px));
-}
+        left:50%;
+        top:50%;
+        width:min(88vw, 420px);
+        transform:translate(-50%, calc(-50% + 12px));
+      }
 
-#transmissionField.isActive{
-  transform:translate(-50%, -50%);
-}
+      #transmissionField.isActive{
+        transform:translate(-50%, -50%);
+      }
 
-#transmissionField::before{
-  inset:-18px;
-  border-radius:34px;
-  filter:blur(18px);
-}
+      #transmissionField::before{
+        inset:-18px;
+        border-radius:34px;
+        filter:blur(18px);
+      }
 
       .tfMessage,.tfGhost{
         font-size:clamp(14px, 3.9vw, 18px);
@@ -1161,7 +1049,7 @@
     }
 
     @media (prefers-reduced-motion:reduce){
-      .whisper, .title, .tfNoise::before, .tfNoise::after{ animation:none !important; }
+      .whisper, .titleShine, .tfNoise::before, .tfNoise::after{ animation:none !important; }
       #stars{ display:none; }
       .moonWrap{ filter:none; }
     }
@@ -1357,9 +1245,9 @@
           <div class="titleRow">
             <img class="titleLogo" src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" referrerpolicy="no-referrer">
             <h1 class="title" aria-label="Prelúdio Jogos">
-  <span class="titleBase">PRELÚDIO<br>JOGOS</span>
-  <span class="titleShine" aria-hidden="true">PRELÚDIO<br>JOGOS</span>
-</h1>
+              <span class="titleBase">PRELÚDIO<br>JOGOS</span>
+              <span class="titleShine" aria-hidden="true">PRELÚDIO<br>JOGOS</span>
+            </h1>
           </div>
 
           <p class="subtitle">
