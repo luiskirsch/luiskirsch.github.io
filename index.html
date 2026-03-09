@@ -370,64 +370,87 @@
       -webkit-user-drag:none;
     }
 
-    .title{
-      margin:0;
-      line-height:1.04;
-      padding-bottom:.06em;
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      font-weight:700;
-      font-size:clamp(48px, 6.2vw, 110px);
-      color:transparent;
-      background-image:
-        linear-gradient(90deg,
-          rgba(230,192,123,.60) 0%,
-          rgba(230,192,123,.92) 28%,
-          rgba(255,255,255,.92) 48%,
-          rgba(230,192,123,.92) 58%,
-          rgba(230,192,123,.60) 100%);
-      background-size:260% 100%;
-      background-position:-35% 50%;
-      -webkit-background-clip:text;
-      background-clip:text;
-      text-shadow:0 20px 70px rgba(0,0,0,.55);
-      animation:shineText 7.8s linear infinite;
-    }
+    /* ===== TÍTULO AJUSTADO ===== */
+.titleClean{
+  margin:0;
+  display:inline-flex;
+  flex-direction:column;
+  gap:0;
+  line-height:1.02;
+  text-transform:uppercase;
+  font-family:Georgia, "Times New Roman", serif;
+  font-weight:700;
+  font-size:clamp(48px, 6.2vw, 110px);
+  letter-spacing:.12em;
+}
 
-    @keyframes shineText{
-      0%{ background-position:-35% 50%; }
-      22%{ background-position:-35% 50%; }
-      58%{ background-position:135% 50%; }
-      100%{ background-position:135% 50%; }
-    }
+.titleClean span{
+  display:block;
+  width:max-content;
+  padding-bottom:.08em;
+  color:transparent;
+  -webkit-text-fill-color:transparent;
 
-    .subtitle{
-      margin:12px 0 0;
-      max-width:70ch;
-      font-size:clamp(15px, 1.6vw, 20px);
-      color:rgba(255,255,255,.86);
-      line-height:1.55;
-    }
+  background-image:
+    linear-gradient(
+      180deg,
+      #4c3210 0%,
+      #875d22 16%,
+      #c59144 34%,
+      #f2d488 50%,
+      #d4a65b 63%,
+      #855a22 80%,
+      #4f3514 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,245,220,0) 42%,
+      rgba(255,245,220,.08) 47%,
+      rgba(255,255,255,.90) 50%,
+      rgba(255,240,190,.14) 53%,
+      rgba(255,255,255,0) 58%,
+      rgba(255,255,255,0) 100%
+    );
 
-    .subtitle strong{
-      color:rgba(230,192,123,.95);
-      font-weight:700;
-    }
+  background-size:
+    100% 100%,
+    240% 100%;
 
-    .whisper{
-      margin:14px 0 0;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      font-size:12px;
-      color:rgba(255,255,255,.52);
-      opacity:.72;
-      animation:breathe 3.2s ease-in-out infinite;
-    }
+  background-repeat:no-repeat;
+  background-position:
+    0 0,
+    -180% 50%;
 
-    @keyframes breathe{
-      0%,100%{ opacity:.38; filter:blur(.35px); transform:translateY(0); }
-      50%{ opacity:.82; filter:blur(0); transform:translateY(-2px); }
-    }
+  -webkit-background-clip:text;
+  background-clip:text;
+
+  text-shadow:
+    0 1px 0 rgba(255,245,220,.06),
+    0 4px 10px rgba(0,0,0,.26),
+    0 12px 24px rgba(0,0,0,.34);
+
+  filter:drop-shadow(0 0 10px rgba(214,171,99,.06));
+  animation:titleSweepInside 5s linear infinite;
+}
+
+.titleClean span:last-child{
+  animation-delay:.18s;
+}
+
+@keyframes titleSweepInside{
+  0%{
+    background-position:
+      0 0,
+      -180% 50%;
+  }
+  100%{
+    background-position:
+      0 0,
+      180% 50%;
+  }
+}
+/* ===== FIM TÍTULO ===== */
 
     .subtitle{
       margin:12px 0 0;
@@ -1224,12 +1247,12 @@
           </div>
 
           <div class="titleRow">
-            <img class="titleLogo" src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" referrerpolicy="no-referrer">
-            <h1 class="titleClean" aria-label="Prelúdio Jogos">
-              <span>PRELÚDIO</span>
-              <span>JOGOS</span>
-            </h1>
-          </div>
+  <img class="titleLogo" src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" referrerpolicy="no-referrer">
+  <h1 class="titleClean" aria-label="Prelúdio Jogos">
+    <span>PRELÚDIO</span>
+    <span>JOGOS</span>
+  </h1>
+</div>
 
           <p class="subtitle">
             O site é a trilha: <strong>tempo</strong>, <strong>clima</strong> e <strong>silêncio</strong>.
