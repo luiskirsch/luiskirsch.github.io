@@ -140,9 +140,11 @@
     .tfNoise{
       position:absolute;
       inset:-8px;
-      border-radius:18px;
+      border-radius:26px;
       overflow:hidden;
       opacity:.55;
+      -webkit-mask-image:-webkit-radial-gradient(white, black);
+      mask-image:radial-gradient(white, black);
     }
 
     .tfNoise::before{
@@ -167,6 +169,7 @@
       top:0;
       width:30%;
       height:100%;
+      border-radius:26px;
       background:linear-gradient(90deg, rgba(255,255,255,0), rgba(230,192,123,.22), rgba(255,255,255,0));
       filter:blur(8px);
       opacity:.7;
@@ -1307,6 +1310,7 @@
 
       var typeTimer = null;
       var endTimer = null;
+      var openTimer = null;
       var staticStopFn = null;
 
       function syncFocusState(){
@@ -1315,14 +1319,19 @@
         document.body.classList.toggle("transmissionFocus", !!(isActive && isMobile));
       }
 
-      function resetField(){
-        clearInterval(typeTimer);
-        clearTimeout(endTimer);
-        field.classList.remove("isTyping");
+      function stopStaticNow(){
         if (staticStopFn) {
           staticStopFn();
           staticStopFn = null;
         }
+      }
+
+      function resetField(){
+        clearInterval(typeTimer);
+        clearTimeout(endTimer);
+        clearTimeout(openTimer);
+        field.classList.remove("isTyping");
+        stopStaticNow();
         field.classList.remove("isActive");
         titleEl.textContent = "";
         msgEl.textContent = "";
@@ -1345,6 +1354,7 @@
 
           if (i >= text.length){
             clearInterval(typeTimer);
+            field.classList.remove("isTyping");
             if (typeof done === "function") done();
           }
         }, speed || 52);
@@ -1359,6 +1369,7 @@
 
         clearInterval(typeTimer);
         clearTimeout(endTimer);
+        clearTimeout(openTimer);
 
         field.classList.remove("isTyping");
         titleEl.textContent = "";
@@ -1372,11 +1383,12 @@
           titleEl.textContent = title || "UMA TRANSMISSÃO RECEBIDA";
         }, 140);
 
-        setTimeout(function(){
+        openTimer = setTimeout(function(){
           typeText(text || "", typingSpeed, function(){
             endTimer = setTimeout(function(){
               field.classList.remove("isActive");
               syncFocusState();
+
               setTimeout(function(){
                 resetField();
               }, 420);
@@ -1386,6 +1398,7 @@
       };
 
       window.resetTransmissionField = resetField;
+      window.stopTransmissionStaticNow = stopStaticNow;
 
       window.addEventListener("resize", syncFocusState, { passive:true });
     })();
@@ -2621,9 +2634,12 @@
         var title = "UMA TRANSMISSÃO RECEBIDA";
         var openDelayMs = 5000;
         var typingSpeed = 52;
-        var typingDurationMs = text.length * typingSpeed;
         var keepOpenAfterFinishMs = 3000;
-        var totalStaticMs = openDelayMs + typingDurationMs + keepOpenAfterFinishMs + 800;
+
+        var estimatedTypingDurationMs = text.length * typingSpeed;
+        var safetyExtraMs = (window.innerWidth <= 700) ? 5000 : 1800;
+        var totalStaticMs = openDelayMs + estimatedTypingDurationMs + keepOpenAfterFinishMs + safetyExtraMs;
+
         var stopStatic = buildTransmissionStatic(totalStaticMs / 1000);
 
         if (window.showTransmissionSequence){
