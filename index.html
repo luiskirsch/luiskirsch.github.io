@@ -1257,14 +1257,45 @@
 
       var typeTimer = null;
       var leaveTimer = null;
+      var speechStartFallbackTimer = null;
       var currentUtter = null;
+      var typingDone = false;
+      var speechDone = false;
+      var textStarted = false;
+      var closeRequested = false;
 
       function clearAll(){
         clearInterval(typeTimer);
         clearTimeout(leaveTimer);
+        clearTimeout(speechStartFallbackTimer);
+        typingDone = false;
+        speechDone = false;
+        textStarted = false;
+        closeRequested = false;
         if (window.speechSynthesis){
           try{ window.speechSynthesis.cancel(); }catch(e){}
         }
+      }
+
+      function resetVisuals(){
+        titleEl.textContent = "";
+        msgEl.textContent = "";
+        ghostEl.textContent = "";
+      }
+
+      function tryClose(){
+        if (!typingDone || !speechDone || !closeRequested) return;
+        field.classList.remove("isActive");
+        setTimeout(function(){
+          resetVisuals();
+        }, 420);
+      }
+
+      function estimateSpeechMs(text){
+        var clean = String(text || "").trim();
+        if (!clean) return 2000;
+        var words = clean.split(/\s+/).length;
+        return Math.max(4500, words * 520);
       }
 
       function findVoice(){
@@ -1272,42 +1303,45 @@
         var voices = window.speechSynthesis.getVoices() || [];
         if (!voices.length) return null;
 
-        var priorityMatchers = [
-          /Antonio/i,
-          /Daniel/i,
-          /Jorge/i,
-          /Carlos/i,
-          /Ricardo/i,
-          /Felipe/i,
-          /Alex/i,
-          /Google.*portugu/i,
-          /Microsoft.*Brazil/i,
-          /Microsoft.*Portuguese/i,
-          /Portuguese.*Brazil/i,
-          /pt-BR/i
+        var maleNames = [
+          /antonio/i, /daniel/i, /jorge/i, /carlos/i, /ricardo/i, /felipe/i,
+          /alex/i, /diego/i, /gabriel/i, /marcos/i, /paulo/i, /bruno/i,
+          /lucas/i, /mateus/i, /gustavo/i, /thiago/i, /pedro/i, /henrique/i
+        ];
+
+        var femaleNames = [
+          /maria/i, /helena/i, /luciana/i, /francisca/i, /ana/i,
+          /female/i, /mulher/i, /fem/i, /victoria/i, /samantha/i, /camila/i
         ];
 
         var best = null;
-        var bestScore = -999;
+        var bestScore = -9999;
 
         for (var i=0;i<voices.length;i++){
           var v = voices[i];
-          var name = (v.name || "");
-          var lang = (v.lang || "");
+          var name = String(v.name || "");
+          var lang = String(v.lang || "");
           var score = 0;
 
-          if (/pt-BR/i.test(lang)) score += 50;
-          else if (/pt/i.test(lang)) score += 28;
+          if (/pt-BR/i.test(lang)) score += 120;
+          else if (/pt/i.test(lang)) score += 70;
+          else score -= 100;
 
-          if (/male|homem|masc|antonio|daniel|jorge|carlos|ricardo|felipe|alex|paulo|lucas|bruno/i.test(name)) score += 30;
-          if (/female|mulher|fem|maria|helena|luciana|francisca/i.test(name)) score -= 18;
+          if (/male|homem|masc/i.test(name)) score += 90;
+          if (/female|mulher|fem/i.test(name)) score -= 140;
 
-          for (var j=0;j<priorityMatchers.length;j++){
-            if (priorityMatchers[j].test(name) || priorityMatchers[j].test(lang)) score += 12 - j;
+          for (var j=0;j<maleNames.length;j++){
+            if (maleNames[j].test(name)) score += 55;
           }
 
-          if (/natural|enhanced|premium/i.test(name)) score += 4;
-          if (/compact|lite/i.test(name)) score -= 3;
+          for (var k=0;k<femaleNames.length;k++){
+            if (femaleNames[k].test(name)) score -= 90;
+          }
+
+          if (/google/i.test(name)) score += 12;
+          if (/microsoft/i.test(name)) score += 10;
+          if (/natural|enhanced|premium/i.test(name)) score += 8;
+          if (/compact|lite/i.test(name)) score -= 6;
 
           if (score > bestScore){
             bestScore = score;
@@ -1315,27 +1349,13 @@
           }
         }
 
-        return best || null;
+        return best;
       }
 
-      function speakText(text){
-        if (!window.speechSynthesis) return;
-        try{
-          window.speechSynthesis.cancel();
-          currentUtter = new SpeechSynthesisUtterance(text);
-          currentUtter.lang = "pt-BR";
-          currentUtter.rate = 0.74;
-          currentUtter.pitch = 0.36;
-          currentUtter.volume = 0.25;
+      function startTyping(text, speed){
+        if (textStarted) return;
+        textStarted = true;
 
-          var voice = findVoice();
-          if (voice) currentUtter.voice = voice;
-
-          window.speechSynthesis.speak(currentUtter);
-        }catch(e){}
-      }
-
-      function typeText(text, speed){
         clearInterval(typeTimer);
         msgEl.textContent = "";
         ghostEl.textContent = "";
@@ -1346,36 +1366,97 @@
           var slice = text.slice(0, i);
           msgEl.textContent = slice;
           ghostEl.textContent = slice;
-          if (i >= text.length) clearInterval(typeTimer);
+
+          if (i >= text.length){
+            clearInterval(typeTimer);
+            typingDone = true;
+            tryClose();
+          }
         }, speed || 64);
+      }
+
+      function speakText(text){
+        if (!window.speechSynthesis){
+          speechDone = true;
+          startTyping(text, 64);
+          tryClose();
+          return;
+        }
+
+        try{
+          window.speechSynthesis.cancel();
+
+          currentUtter = new SpeechSynthesisUtterance(text);
+          currentUtter.lang = "pt-BR";
+          currentUtter.rate = 0.70;
+          currentUtter.pitch = 0.18;
+          currentUtter.volume = 0.22;
+
+          var voice = findVoice();
+          if (voice) currentUtter.voice = voice;
+
+          currentUtter.onstart = function(){
+            clearTimeout(speechStartFallbackTimer);
+            startTyping(text, 64);
+          };
+
+          currentUtter.onend = function(){
+            speechDone = true;
+            tryClose();
+          };
+
+          currentUtter.onerror = function(){
+            speechDone = true;
+            if (!textStarted) startTyping(text, 64);
+            tryClose();
+          };
+
+          speechStartFallbackTimer = setTimeout(function(){
+            if (!textStarted){
+              startTyping(text, 64);
+            }
+          }, 900);
+
+          window.speechSynthesis.speak(currentUtter);
+
+          var fallbackEnd = estimateSpeechMs(text);
+          setTimeout(function(){
+            if (!speechDone){
+              speechDone = true;
+              tryClose();
+            }
+          }, fallbackEnd + 1200);
+        }catch(e){
+          speechDone = true;
+          startTyping(text, 64);
+          tryClose();
+        }
       }
 
       window.showTransmissionSequence = function(title, text){
         clearAll();
-
-        titleEl.textContent = "";
-        msgEl.textContent = "";
-        ghostEl.textContent = "";
+        resetVisuals();
 
         field.classList.add("isActive");
+        titleEl.textContent = title || "UMA TRANSMISSÃO RECEBIDA";
 
-        setTimeout(function(){
-          titleEl.textContent = title || "UMA TRANSMISSÃO RECEBIDA";
-        }, 140);
-
-        setTimeout(function(){
-          typeText(text || "", 64);
-          speakText(text || "");
-        }, 1000);
+        var openDelay = 5000;
+        var message = text || "";
 
         leaveTimer = setTimeout(function(){
-          field.classList.remove("isActive");
+          speakText(message);
+
+          var forceCloseMax = estimateSpeechMs(message) + openDelay + 2500;
           setTimeout(function(){
-            titleEl.textContent = "";
-            msgEl.textContent = "";
-            ghostEl.textContent = "";
-          }, 420);
-        }, 9800);
+            closeRequested = true;
+            tryClose();
+          }, forceCloseMax - openDelay);
+        }, openDelay);
+
+        setTimeout(function(){
+          closeRequested = true;
+          tryClose();
+        }, estimateSpeechMs(message) + openDelay + 1200);
       };
 
       if (window.speechSynthesis){
