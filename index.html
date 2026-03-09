@@ -115,7 +115,7 @@
       left:5.6vw;
       top:18.5vh;
       width:min(560px, 37vw);
-      min-height:104px;
+      min-height:98px;
       z-index:9;
       pointer-events:none;
       opacity:0;
@@ -165,10 +165,15 @@
       opacity:.7;
     }
 
+    #transmissionField.isTyping .tfNoise::after{
+      opacity:0 !important;
+      animation:none !important;
+    }
+
     .tfCore{
       position:relative;
       border-radius:18px;
-      padding:16px 18px 16px;
+      padding:14px 18px 14px;
       border:1px solid rgba(230,192,123,.16);
       background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.012));
       box-shadow:
@@ -191,11 +196,11 @@
       position:relative;
       z-index:2;
       font-family:"Courier New", ui-monospace, monospace;
-      font-size:11px;
-      letter-spacing:.26em;
+      font-size:10px;
+      letter-spacing:.24em;
       text-transform:uppercase;
       color:rgba(230,192,123,.84);
-      margin-bottom:10px;
+      margin-bottom:9px;
       text-shadow:0 0 8px rgba(230,192,123,.18);
       min-height:14px;
     }
@@ -203,11 +208,11 @@
     .tfMessage{
       position:relative;
       z-index:2;
-      min-height:34px;
+      min-height:32px;
       font-family:"Courier New", ui-monospace, monospace;
-      font-size:clamp(16px, 1.6vw, 24px);
-      line-height:1.45;
-      letter-spacing:.12em;
+      font-size:clamp(14px, 1.2vw, 19px);
+      line-height:1.42;
+      letter-spacing:.08em;
       color:rgba(245,245,245,.96);
       text-shadow:
         0 0 8px rgba(255,255,255,.12),
@@ -218,11 +223,11 @@
 
     .tfGhost{
       position:absolute;
-      inset:auto 18px 16px 18px;
+      inset:auto 18px 14px 18px;
       font-family:"Courier New", ui-monospace, monospace;
-      font-size:clamp(16px, 1.6vw, 24px);
-      line-height:1.45;
-      letter-spacing:.12em;
+      font-size:clamp(14px, 1.2vw, 19px);
+      line-height:1.42;
+      letter-spacing:.08em;
       color:rgba(255,255,255,.05);
       filter:blur(.65px);
       white-space:pre-wrap;
@@ -872,8 +877,8 @@
       }
 
       .tfMessage,.tfGhost{
-        font-size:clamp(15px, 4.2vw, 20px);
-        letter-spacing:.08em;
+        font-size:clamp(13px, 3.7vw, 17px);
+        letter-spacing:.06em;
       }
     }
 
@@ -925,8 +930,8 @@
       }
 
       .tfTitle{
-        font-size:10px;
-        letter-spacing:.22em;
+        font-size:9px;
+        letter-spacing:.20em;
       }
     }
 
@@ -1256,63 +1261,65 @@
       if (!field || !titleEl || !msgEl || !ghostEl) return;
 
       var typeTimer = null;
-      var leaveTimer = null;
+      var phaseTimer = null;
       var speechStartFallbackTimer = null;
-      var currentUtter = null;
-      var typingDone = false;
       var speechDone = false;
-      var textStarted = false;
-      var closeRequested = false;
+      var typingDone = false;
+      var startedTyping = false;
+      var hasEnded = false;
+      var currentRunId = 0;
 
-      function clearAll(){
+      function stopAll(){
         clearInterval(typeTimer);
-        clearTimeout(leaveTimer);
+        clearTimeout(phaseTimer);
         clearTimeout(speechStartFallbackTimer);
-        typingDone = false;
-        speechDone = false;
-        textStarted = false;
-        closeRequested = false;
         if (window.speechSynthesis){
           try{ window.speechSynthesis.cancel(); }catch(e){}
         }
       }
 
-      function resetVisuals(){
+      function resetState(){
+        speechDone = false;
+        typingDone = false;
+        startedTyping = false;
+        hasEnded = false;
+      }
+
+      function clearVisuals(){
         titleEl.textContent = "";
         msgEl.textContent = "";
         ghostEl.textContent = "";
+        field.classList.remove("isTyping");
       }
 
-      function tryClose(){
-        if (!typingDone || !speechDone || !closeRequested) return;
-        field.classList.remove("isActive");
+      function finishIfReady(runId){
+        if (runId !== currentRunId) return;
+        if (!speechDone || !typingDone || hasEnded) return;
+
+        hasEnded = true;
+
         setTimeout(function(){
-          resetVisuals();
-        }, 420);
+          if (runId !== currentRunId) return;
+          field.classList.remove("isActive");
+          field.classList.remove("isTyping");
+          setTimeout(function(){
+            if (runId !== currentRunId) return;
+            clearVisuals();
+          }, 520);
+        }, 350);
       }
 
       function estimateSpeechMs(text){
         var clean = String(text || "").trim();
-        if (!clean) return 2000;
+        if (!clean) return 3000;
         var words = clean.split(/\s+/).length;
-        return Math.max(4500, words * 520);
+        return Math.max(9000, words * 520);
       }
 
       function findVoice(){
         if (!window.speechSynthesis) return null;
         var voices = window.speechSynthesis.getVoices() || [];
         if (!voices.length) return null;
-
-        var maleNames = [
-          /antonio/i, /daniel/i, /jorge/i, /carlos/i, /ricardo/i, /felipe/i,
-          /alex/i, /diego/i, /gabriel/i, /marcos/i, /paulo/i, /bruno/i,
-          /lucas/i, /mateus/i, /gustavo/i, /thiago/i, /pedro/i, /henrique/i
-        ];
-
-        var femaleNames = [
-          /maria/i, /helena/i, /luciana/i, /francisca/i, /ana/i,
-          /female/i, /mulher/i, /fem/i, /victoria/i, /samantha/i, /camila/i
-        ];
 
         var best = null;
         var bestScore = -9999;
@@ -1327,21 +1334,16 @@
           else if (/pt/i.test(lang)) score += 70;
           else score -= 100;
 
-          if (/male|homem|masc/i.test(name)) score += 90;
-          if (/female|mulher|fem/i.test(name)) score -= 140;
+          if (/male|masc|homem/i.test(name)) score += 120;
+          if (/female|mulher|fem/i.test(name)) score -= 160;
 
-          for (var j=0;j<maleNames.length;j++){
-            if (maleNames[j].test(name)) score += 55;
-          }
+          if (/antonio|daniel|jorge|carlos|ricardo|felipe|alex|diego|gabriel|marcos|paulo|bruno|lucas|mateus|gustavo|thiago|pedro|henrique/i.test(name)) score += 80;
+          if (/maria|helena|luciana|francisca|ana|camila|victoria|samantha/i.test(name)) score -= 120;
 
-          for (var k=0;k<femaleNames.length;k++){
-            if (femaleNames[k].test(name)) score -= 90;
-          }
-
-          if (/google/i.test(name)) score += 12;
-          if (/microsoft/i.test(name)) score += 10;
-          if (/natural|enhanced|premium/i.test(name)) score += 8;
-          if (/compact|lite/i.test(name)) score -= 6;
+          if (/google/i.test(name)) score += 16;
+          if (/microsoft/i.test(name)) score += 12;
+          if (/natural|enhanced|premium/i.test(name)) score += 12;
+          if (/compact|lite/i.test(name)) score -= 8;
 
           if (score > bestScore){
             bestScore = score;
@@ -1352,16 +1354,22 @@
         return best;
       }
 
-      function startTyping(text, speed){
-        if (textStarted) return;
-        textStarted = true;
+      function startTyping(text, speed, runId){
+        if (runId !== currentRunId || startedTyping) return;
+        startedTyping = true;
+        field.classList.add("isTyping");
 
         clearInterval(typeTimer);
         msgEl.textContent = "";
         ghostEl.textContent = "";
-        var i = 0;
 
+        var i = 0;
         typeTimer = setInterval(function(){
+          if (runId !== currentRunId){
+            clearInterval(typeTimer);
+            return;
+          }
+
           i++;
           var slice = text.slice(0, i);
           msgEl.textContent = slice;
@@ -1370,93 +1378,87 @@
           if (i >= text.length){
             clearInterval(typeTimer);
             typingDone = true;
-            tryClose();
+            finishIfReady(runId);
           }
-        }, speed || 64);
+        }, speed || 58);
       }
 
-      function speakText(text){
+      function speakText(text, runId){
         if (!window.speechSynthesis){
           speechDone = true;
-          startTyping(text, 64);
-          tryClose();
+          startTyping(text, 58, runId);
+          finishIfReady(runId);
           return;
         }
 
         try{
           window.speechSynthesis.cancel();
 
-          currentUtter = new SpeechSynthesisUtterance(text);
-          currentUtter.lang = "pt-BR";
-          currentUtter.rate = 0.70;
-          currentUtter.pitch = 0.18;
-          currentUtter.volume = 0.22;
+          var utter = new SpeechSynthesisUtterance(text);
+          utter.lang = "pt-BR";
+          utter.rate = 0.86;
+          utter.pitch = 0.72;
+          utter.volume = 0.34;
 
           var voice = findVoice();
-          if (voice) currentUtter.voice = voice;
+          if (voice) utter.voice = voice;
 
-          currentUtter.onstart = function(){
+          utter.onstart = function(){
+            if (runId !== currentRunId) return;
             clearTimeout(speechStartFallbackTimer);
-            startTyping(text, 64);
+            startTyping(text, 58, runId);
           };
 
-          currentUtter.onend = function(){
+          utter.onend = function(){
+            if (runId !== currentRunId) return;
             speechDone = true;
-            tryClose();
+            finishIfReady(runId);
           };
 
-          currentUtter.onerror = function(){
+          utter.onerror = function(){
+            if (runId !== currentRunId) return;
             speechDone = true;
-            if (!textStarted) startTyping(text, 64);
-            tryClose();
+            if (!startedTyping) startTyping(text, 58, runId);
+            finishIfReady(runId);
           };
 
           speechStartFallbackTimer = setTimeout(function(){
-            if (!textStarted){
-              startTyping(text, 64);
-            }
-          }, 900);
+            if (runId !== currentRunId) return;
+            if (!startedTyping) startTyping(text, 58, runId);
+          }, 700);
 
-          window.speechSynthesis.speak(currentUtter);
+          window.speechSynthesis.speak(utter);
 
-          var fallbackEnd = estimateSpeechMs(text);
+          var fallbackMs = estimateSpeechMs(text);
           setTimeout(function(){
+            if (runId !== currentRunId) return;
             if (!speechDone){
               speechDone = true;
-              tryClose();
+              finishIfReady(runId);
             }
-          }, fallbackEnd + 1200);
+          }, fallbackMs + 2500);
         }catch(e){
           speechDone = true;
-          startTyping(text, 64);
-          tryClose();
+          startTyping(text, 58, runId);
+          finishIfReady(runId);
         }
       }
 
       window.showTransmissionSequence = function(title, text){
-        clearAll();
-        resetVisuals();
+        currentRunId++;
+        var runId = currentRunId;
+
+        stopAll();
+        resetState();
+        clearVisuals();
 
         field.classList.add("isActive");
         titleEl.textContent = title || "UMA TRANSMISSÃO RECEBIDA";
 
-        var openDelay = 5000;
-        var message = text || "";
-
-        leaveTimer = setTimeout(function(){
-          speakText(message);
-
-          var forceCloseMax = estimateSpeechMs(message) + openDelay + 2500;
-          setTimeout(function(){
-            closeRequested = true;
-            tryClose();
-          }, forceCloseMax - openDelay);
-        }, openDelay);
-
-        setTimeout(function(){
-          closeRequested = true;
-          tryClose();
-        }, estimateSpeechMs(message) + openDelay + 1200);
+        phaseTimer = setTimeout(function(){
+          if (runId !== currentRunId) return;
+          speakText(text || "", runId);
+        }, 5000);
       };
 
       if (window.speechSynthesis){
@@ -2422,7 +2424,7 @@
       var master = null;
       var gDrone = null;
       var airGain = null;
-      var radioTimer = null;
+      var introPlayedThisSession = false;
 
       function getLS(k, fallback){
         try{
@@ -2435,10 +2437,23 @@
         try{ localStorage.setItem(k, v); }catch(e){}
       }
 
+      function getSS(k, fallback){
+        try{
+          var v = sessionStorage.getItem(k);
+          return (v === null || v === undefined) ? fallback : v;
+        }catch(e){ return fallback; }
+      }
+
+      function setSS(k, v){
+        try{ sessionStorage.setItem(k, v); }catch(e){}
+      }
+
       var savedVol = parseInt(getLS("preludio_volume", "55"), 10);
       if (isNaN(savedVol)) savedVol = 55;
       savedVol = Math.max(0, Math.min(100, savedVol));
       slider.value = String(savedVol);
+
+      introPlayedThisSession = getSS("preludio_intro_once", "0") === "1";
 
       function setBtn(on){
         stateEl.textContent = on ? "ON" : "OFF";
@@ -2500,7 +2515,7 @@
           }
 
           var now = audioCtx.currentTime;
-          var totalDur = 6.0;
+          var totalDur = 6.2;
 
           var noise = createBrownNoise(audioCtx);
 
@@ -2511,20 +2526,20 @@
 
           var bp = audioCtx.createBiquadFilter();
           bp.type = "bandpass";
-          bp.frequency.setValueAtTime(980 + Math.random()*200, now);
-          bp.Q.setValueAtTime(1.3 + Math.random()*0.6, now);
+          bp.frequency.setValueAtTime(980 + Math.random()*160, now);
+          bp.Q.setValueAtTime(1.4 + Math.random()*0.5, now);
 
           var lp = audioCtx.createBiquadFilter();
           lp.type = "lowpass";
-          lp.frequency.setValueAtTime(1700 + Math.random()*220, now);
+          lp.frequency.setValueAtTime(1650 + Math.random()*180, now);
           lp.Q.setValueAtTime(0.9, now);
 
           var radioGain = audioCtx.createGain();
           radioGain.gain.setValueAtTime(0.00001, now);
-          radioGain.gain.exponentialRampToValueAtTime(1.08, now + 0.35);
-          radioGain.gain.linearRampToValueAtTime(2.34 + Math.random()*0.18, now + 1.6);
-          radioGain.gain.linearRampToValueAtTime(3.42 + Math.random()*0.24, now + 4.2);
-          radioGain.gain.linearRampToValueAtTime(4.32 + Math.random()*0.30, now + 5.5);
+          radioGain.gain.exponentialRampToValueAtTime(1.10, now + 0.35);
+          radioGain.gain.linearRampToValueAtTime(2.15 + Math.random()*0.15, now + 1.6);
+          radioGain.gain.linearRampToValueAtTime(3.10 + Math.random()*0.20, now + 4.3);
+          radioGain.gain.linearRampToValueAtTime(3.95 + Math.random()*0.20, now + 5.6);
           radioGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           noise.connect(hp);
@@ -2537,10 +2552,10 @@
 
           var flutterLFO = audioCtx.createOscillator();
           flutterLFO.type = "sine";
-          flutterLFO.frequency.setValueAtTime(0.16 + Math.random()*0.15, now);
+          flutterLFO.frequency.setValueAtTime(0.14 + Math.random()*0.08, now);
 
           var flutterGain = audioCtx.createGain();
-          flutterGain.gain.setValueAtTime(150 + Math.random()*110, now);
+          flutterGain.gain.setValueAtTime(110 + Math.random()*70, now);
 
           flutterLFO.connect(flutterGain);
           flutterGain.connect(bp.frequency);
@@ -2550,17 +2565,17 @@
           var shimmerNoise = createBrownNoise(audioCtx);
           var shimmerHP = audioCtx.createBiquadFilter();
           shimmerHP.type = "highpass";
-          shimmerHP.frequency.setValueAtTime(1650 + Math.random()*220, now);
+          shimmerHP.frequency.setValueAtTime(1550 + Math.random()*180, now);
 
           var shimmerBP = audioCtx.createBiquadFilter();
           shimmerBP.type = "bandpass";
-          shimmerBP.frequency.setValueAtTime(2050 + Math.random()*320, now);
-          shimmerBP.Q.setValueAtTime(3.2, now);
+          shimmerBP.frequency.setValueAtTime(1900 + Math.random()*260, now);
+          shimmerBP.Q.setValueAtTime(2.8, now);
 
           var shimmerGain = audioCtx.createGain();
           shimmerGain.gain.setValueAtTime(0.00001, now);
-          shimmerGain.gain.exponentialRampToValueAtTime(0.084 + Math.random()*0.028, now + 2.0);
-          shimmerGain.gain.setValueAtTime(0.084 + Math.random()*0.028, now + 5.4);
+          shimmerGain.gain.exponentialRampToValueAtTime(0.060 + Math.random()*0.020, now + 1.9);
+          shimmerGain.gain.setValueAtTime(0.060 + Math.random()*0.020, now + 5.5);
           shimmerGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           shimmerNoise.connect(shimmerHP);
@@ -2572,47 +2587,23 @@
 
           var lowHum = audioCtx.createOscillator();
           lowHum.type = "sine";
-          lowHum.frequency.setValueAtTime(66 + Math.random()*12, now);
+          lowHum.frequency.setValueAtTime(64 + Math.random()*10, now);
 
           var lowHumGain = audioCtx.createGain();
           lowHumGain.gain.setValueAtTime(0.00001, now);
-          lowHumGain.gain.exponentialRampToValueAtTime(0.0012 + Math.random()*0.0011, now + 1.4);
-          lowHumGain.gain.setValueAtTime(0.0012 + Math.random()*0.0011, now + 4.9);
+          lowHumGain.gain.exponentialRampToValueAtTime(0.0010 + Math.random()*0.0008, now + 1.4);
+          lowHumGain.gain.setValueAtTime(0.0010 + Math.random()*0.0008, now + 5.1);
           lowHumGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
 
           var lowHumLP = audioCtx.createBiquadFilter();
           lowHumLP.type = "lowpass";
-          lowHumLP.frequency.setValueAtTime(160, now);
+          lowHumLP.frequency.setValueAtTime(150, now);
 
           lowHum.connect(lowHumLP);
           lowHumLP.connect(lowHumGain);
           lowHumGain.connect(master);
           lowHum.start(now);
           lowHum.stop(now + totalDur);
-
-          var voiceBed = createBrownNoise(audioCtx);
-          var voiceBedBP = audioCtx.createBiquadFilter();
-          voiceBedBP.type = "bandpass";
-          voiceBedBP.frequency.setValueAtTime(760, now);
-          voiceBedBP.Q.setValueAtTime(1.1, now);
-
-          var voiceBedLP = audioCtx.createBiquadFilter();
-          voiceBedLP.type = "lowpass";
-          voiceBedLP.frequency.setValueAtTime(1280, now);
-          voiceBedLP.Q.setValueAtTime(0.7, now);
-
-          var voiceBedGain = audioCtx.createGain();
-          voiceBedGain.gain.setValueAtTime(0.00001, now);
-          voiceBedGain.gain.exponentialRampToValueAtTime(0.018, now + 1.0);
-          voiceBedGain.gain.setValueAtTime(0.018, now + 3.6);
-          voiceBedGain.gain.exponentialRampToValueAtTime(0.00001, now + 4.8);
-
-          voiceBed.connect(voiceBedBP);
-          voiceBedBP.connect(voiceBedLP);
-          voiceBedLP.connect(voiceBedGain);
-          voiceBedGain.connect(master);
-          voiceBed.start(now + 0.9);
-          voiceBed.stop(now + 4.9);
 
           var clickCount = 2 + Math.floor(Math.random()*3);
           for (var i=0;i<clickCount;i++){
@@ -2629,7 +2620,7 @@
 
             var cGain = audioCtx.createGain();
             cGain.gain.setValueAtTime(0.00001, tt);
-            cGain.gain.exponentialRampToValueAtTime(0.0014 + Math.random()*0.0010, tt + 0.008);
+            cGain.gain.exponentialRampToValueAtTime(0.0012 + Math.random()*0.0008, tt + 0.008);
             cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.040);
 
             cOsc.connect(cBP);
@@ -2642,20 +2633,17 @@
         }catch(e){}
       }
 
-      function scheduleRadio(){
-        clearTimeout(radioTimer);
-        var next = 20000 + Math.random() * 10000;
-        radioTimer = setTimeout(function(){
-          if (started){
-            playSpaceRadioSignal();
-            scheduleRadio();
-          }
-        }, next);
+      function maybePlayIntroOnce(){
+        if (introPlayedThisSession) return;
+        introPlayedThisSession = true;
+        setSS("preludio_intro_once", "1");
+        setTimeout(function(){
+          if (started) playSpaceRadioSignal();
+        }, 600);
       }
 
       function startAudio(){
         if (started) return true;
-        clearTimeout(radioTimer);
 
         try{
           var Ctx = window.AudioContext || window.webkitAudioContext;
@@ -2669,7 +2657,7 @@
           var comp = audioCtx.createDynamicsCompressor();
           comp.threshold.value = -34;
           comp.knee.value = 30;
-          comp.ratio.value = 2.6;
+          comp.ratio.value = 2.4;
           comp.attack.value = 0.018;
           comp.release.value = 0.32;
 
@@ -2751,7 +2739,7 @@
           started = true;
           setBtn(true);
           applyVolume();
-          scheduleRadio();
+          maybePlayIntroOnce();
           return true;
         }catch(e){
           setBtn(false);
@@ -2760,7 +2748,6 @@
       }
 
       function stopAudio(){
-        clearTimeout(radioTimer);
         try{
           if (audioCtx){
             try{ audioCtx.close(); }catch(e){}
