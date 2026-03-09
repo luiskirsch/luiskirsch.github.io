@@ -115,7 +115,7 @@
       left:5.6vw;
       top:18.5vh;
       width:min(560px, 37vw);
-      min-height:98px;
+      min-height:96px;
       z-index:9;
       pointer-events:none;
       opacity:0;
@@ -161,19 +161,19 @@
       height:100%;
       background:linear-gradient(90deg, rgba(255,255,255,0), rgba(230,192,123,.22), rgba(255,255,255,0));
       filter:blur(8px);
-      animation:tfSweep 1.3s linear infinite;
-      opacity:.7;
+      opacity:0;
+      transform:translateX(0);
     }
 
-    #transmissionField.isTyping .tfNoise::after{
-      opacity:0 !important;
-      animation:none !important;
+    #transmissionField.isScanning .tfNoise::after{
+      opacity:.7;
+      animation:tfSweep 1.3s linear infinite;
     }
 
     .tfCore{
       position:relative;
       border-radius:18px;
-      padding:14px 18px 14px;
+      padding:16px 18px 14px;
       border:1px solid rgba(230,192,123,.16);
       background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.012));
       box-shadow:
@@ -196,11 +196,11 @@
       position:relative;
       z-index:2;
       font-family:"Courier New", ui-monospace, monospace;
-      font-size:10px;
-      letter-spacing:.24em;
+      font-size:11px;
+      letter-spacing:.26em;
       text-transform:uppercase;
       color:rgba(230,192,123,.84);
-      margin-bottom:9px;
+      margin-bottom:10px;
       text-shadow:0 0 8px rgba(230,192,123,.18);
       min-height:14px;
     }
@@ -210,8 +210,8 @@
       z-index:2;
       min-height:32px;
       font-family:"Courier New", ui-monospace, monospace;
-      font-size:clamp(14px, 1.2vw, 19px);
-      line-height:1.42;
+      font-size:clamp(14px, 1.32vw, 20px);
+      line-height:1.45;
       letter-spacing:.08em;
       color:rgba(245,245,245,.96);
       text-shadow:
@@ -225,8 +225,8 @@
       position:absolute;
       inset:auto 18px 14px 18px;
       font-family:"Courier New", ui-monospace, monospace;
-      font-size:clamp(14px, 1.2vw, 19px);
-      line-height:1.42;
+      font-size:clamp(14px, 1.32vw, 20px);
+      line-height:1.45;
       letter-spacing:.08em;
       color:rgba(255,255,255,.05);
       filter:blur(.65px);
@@ -877,8 +877,8 @@
       }
 
       .tfMessage,.tfGhost{
-        font-size:clamp(13px, 3.7vw, 17px);
-        letter-spacing:.06em;
+        font-size:clamp(14px, 3.9vw, 18px);
+        letter-spacing:.07em;
       }
     }
 
@@ -930,8 +930,8 @@
       }
 
       .tfTitle{
-        font-size:9px;
-        letter-spacing:.20em;
+        font-size:10px;
+        letter-spacing:.22em;
       }
     }
 
@@ -1089,6 +1089,14 @@
       <div class="tfGhost" id="tfGhost"></div>
     </div>
   </div>
+
+  <audio
+    id="transmissionAudio"
+    preload="auto"
+    playsinline
+    crossorigin="anonymous"
+    src="./Rua%20Coronel%20Jo%C3%A3o%20Fernandes.m4a">
+  </audio>
 
   <div class="moonWrap" aria-hidden="true">
     <div class="moonGlow"></div>
@@ -1260,116 +1268,50 @@
       var ghostEl = document.getElementById("tfGhost");
       if (!field || !titleEl || !msgEl || !ghostEl) return;
 
+      var scanDelayMs = 5000;
       var typeTimer = null;
-      var phaseTimer = null;
-      var speechStartFallbackTimer = null;
-      var speechDone = false;
+      var hideTimer = null;
       var typingDone = false;
-      var startedTyping = false;
-      var hasEnded = false;
-      var currentRunId = 0;
+      var audioDone = false;
+      var started = false;
 
-      function stopAll(){
+      function clearTimers(){
         clearInterval(typeTimer);
-        clearTimeout(phaseTimer);
-        clearTimeout(speechStartFallbackTimer);
-        if (window.speechSynthesis){
-          try{ window.speechSynthesis.cancel(); }catch(e){}
-        }
+        clearTimeout(hideTimer);
       }
 
-      function resetState(){
-        speechDone = false;
-        typingDone = false;
-        startedTyping = false;
-        hasEnded = false;
-      }
-
-      function clearVisuals(){
+      function resetField(){
+        clearTimers();
+        field.classList.remove("isActive");
+        field.classList.remove("isScanning");
         titleEl.textContent = "";
         msgEl.textContent = "";
         ghostEl.textContent = "";
-        field.classList.remove("isTyping");
+        typingDone = false;
+        audioDone = false;
+        started = false;
       }
 
-      function finishIfReady(runId){
-        if (runId !== currentRunId) return;
-        if (!speechDone || !typingDone || hasEnded) return;
-
-        hasEnded = true;
-
-        setTimeout(function(){
-          if (runId !== currentRunId) return;
+      function tryClose(){
+        if (!typingDone || !audioDone) return;
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(function(){
           field.classList.remove("isActive");
-          field.classList.remove("isTyping");
-          setTimeout(function(){
-            if (runId !== currentRunId) return;
-            clearVisuals();
-          }, 520);
-        }, 350);
+          setTimeout(resetField, 380);
+        }, 180);
       }
 
-      function estimateSpeechMs(text){
-        var clean = String(text || "").trim();
-        if (!clean) return 3000;
-        var words = clean.split(/\s+/).length;
-        return Math.max(9000, words * 520);
-      }
-
-      function findVoice(){
-        if (!window.speechSynthesis) return null;
-        var voices = window.speechSynthesis.getVoices() || [];
-        if (!voices.length) return null;
-
-        var best = null;
-        var bestScore = -9999;
-
-        for (var i=0;i<voices.length;i++){
-          var v = voices[i];
-          var name = String(v.name || "");
-          var lang = String(v.lang || "");
-          var score = 0;
-
-          if (/pt-BR/i.test(lang)) score += 120;
-          else if (/pt/i.test(lang)) score += 70;
-          else score -= 100;
-
-          if (/male|masc|homem/i.test(name)) score += 120;
-          if (/female|mulher|fem/i.test(name)) score -= 160;
-
-          if (/antonio|daniel|jorge|carlos|ricardo|felipe|alex|diego|gabriel|marcos|paulo|bruno|lucas|mateus|gustavo|thiago|pedro|henrique/i.test(name)) score += 80;
-          if (/maria|helena|luciana|francisca|ana|camila|victoria|samantha/i.test(name)) score -= 120;
-
-          if (/google/i.test(name)) score += 16;
-          if (/microsoft/i.test(name)) score += 12;
-          if (/natural|enhanced|premium/i.test(name)) score += 12;
-          if (/compact|lite/i.test(name)) score -= 8;
-
-          if (score > bestScore){
-            bestScore = score;
-            best = v;
-          }
-        }
-
-        return best;
-      }
-
-      function startTyping(text, speed, runId){
-        if (runId !== currentRunId || startedTyping) return;
-        startedTyping = true;
-        field.classList.add("isTyping");
-
+      function typeText(text, totalMs){
         clearInterval(typeTimer);
         msgEl.textContent = "";
         ghostEl.textContent = "";
 
+        var chars = Math.max(1, text.length);
+        var duration = Math.max(2200, totalMs || 8000);
+        var step = Math.max(22, Math.min(80, Math.floor(duration / chars)));
         var i = 0;
-        typeTimer = setInterval(function(){
-          if (runId !== currentRunId){
-            clearInterval(typeTimer);
-            return;
-          }
 
+        typeTimer = setInterval(function(){
           i++;
           var slice = text.slice(0, i);
           msgEl.textContent = slice;
@@ -1378,97 +1320,48 @@
           if (i >= text.length){
             clearInterval(typeTimer);
             typingDone = true;
-            finishIfReady(runId);
+            tryClose();
           }
-        }, speed || 58);
+        }, step);
       }
 
-      function speakText(text, runId){
-        if (!window.speechSynthesis){
-          speechDone = true;
-          startTyping(text, 58, runId);
-          finishIfReady(runId);
-          return;
-        }
+      window.transmissionUI = {
+        play: function(opts){
+          opts = opts || {};
+          clearTimers();
+          typingDone = false;
+          audioDone = false;
+          started = false;
 
-        try{
-          window.speechSynthesis.cancel();
+          var title = opts.title || "UMA TRANSMISSÃO RECEBIDA";
+          var text = opts.text || "";
+          var audioDurationMs = Math.max(1000, opts.audioDurationMs || 14530);
+          var onStart = typeof opts.onStart === "function" ? opts.onStart : function(){};
 
-          var utter = new SpeechSynthesisUtterance(text);
-          utter.lang = "pt-BR";
-          utter.rate = 0.86;
-          utter.pitch = 0.72;
-          utter.volume = 0.34;
+          titleEl.textContent = title;
+          msgEl.textContent = "";
+          ghostEl.textContent = "";
 
-          var voice = findVoice();
-          if (voice) utter.voice = voice;
+          field.classList.add("isActive");
+          field.classList.add("isScanning");
 
-          utter.onstart = function(){
-            if (runId !== currentRunId) return;
-            clearTimeout(speechStartFallbackTimer);
-            startTyping(text, 58, runId);
-          };
-
-          utter.onend = function(){
-            if (runId !== currentRunId) return;
-            speechDone = true;
-            finishIfReady(runId);
-          };
-
-          utter.onerror = function(){
-            if (runId !== currentRunId) return;
-            speechDone = true;
-            if (!startedTyping) startTyping(text, 58, runId);
-            finishIfReady(runId);
-          };
-
-          speechStartFallbackTimer = setTimeout(function(){
-            if (runId !== currentRunId) return;
-            if (!startedTyping) startTyping(text, 58, runId);
-          }, 700);
-
-          window.speechSynthesis.speak(utter);
-
-          var fallbackMs = estimateSpeechMs(text);
-          setTimeout(function(){
-            if (runId !== currentRunId) return;
-            if (!speechDone){
-              speechDone = true;
-              finishIfReady(runId);
+          hideTimer = setTimeout(function(){
+            field.classList.remove("isScanning");
+            if (!started){
+              started = true;
+              typeText(text, audioDurationMs);
+              onStart();
             }
-          }, fallbackMs + 2500);
-        }catch(e){
-          speechDone = true;
-          startTyping(text, 58, runId);
-          finishIfReady(runId);
-        }
-      }
+          }, scanDelayMs);
+        },
 
-      window.showTransmissionSequence = function(title, text){
-        currentRunId++;
-        var runId = currentRunId;
+        audioEnded: function(){
+          audioDone = true;
+          tryClose();
+        },
 
-        stopAll();
-        resetState();
-        clearVisuals();
-
-        field.classList.add("isActive");
-        titleEl.textContent = title || "UMA TRANSMISSÃO RECEBIDA";
-
-        phaseTimer = setTimeout(function(){
-          if (runId !== currentRunId) return;
-          speakText(text || "", runId);
-        }, 5000);
+        forceReset: resetField
       };
-
-      if (window.speechSynthesis){
-        try{
-          window.speechSynthesis.getVoices();
-          window.speechSynthesis.onvoiceschanged = function(){
-            try{ window.speechSynthesis.getVoices(); }catch(e){}
-          };
-        }catch(e){}
-      }
     })();
   </script>
 
@@ -2417,14 +2310,25 @@
       var btn = document.getElementById("soundBtn");
       var stateEl = document.getElementById("soundState");
       var slider = document.getElementById("volumeSlider");
-      if (!btn || !stateEl || !slider || !panelEl) return;
+      var transmissionAudio = document.getElementById("transmissionAudio");
+      if (!btn || !stateEl || !slider || !panelEl || !transmissionAudio) return;
 
       var audioCtx = null;
       var started = false;
       var master = null;
       var gDrone = null;
       var airGain = null;
-      var introPlayedThisSession = false;
+      var radioTimer = null;
+
+      var transmissionSource = null;
+      var transmissionReady = false;
+      var transmissionAutoPlayedThisLoad = false;
+      var activeStaticNodes = [];
+      var activeFlutterLfo = null;
+
+      var TRANSMISSION_TEXT = "Olá, visitante. Seja bem-vindo. Você acaba de chegar a um lugar inédito e curioso. Preste muita atenção nas informações e siga em frente. Até logo.";
+      var TRANSMISSION_TITLE = "UMA TRANSMISSÃO RECEBIDA";
+      var TRANSMISSION_FALLBACK_MS = 14530;
 
       function getLS(k, fallback){
         try{
@@ -2437,23 +2341,10 @@
         try{ localStorage.setItem(k, v); }catch(e){}
       }
 
-      function getSS(k, fallback){
-        try{
-          var v = sessionStorage.getItem(k);
-          return (v === null || v === undefined) ? fallback : v;
-        }catch(e){ return fallback; }
-      }
-
-      function setSS(k, v){
-        try{ sessionStorage.setItem(k, v); }catch(e){}
-      }
-
       var savedVol = parseInt(getLS("preludio_volume", "55"), 10);
       if (isNaN(savedVol)) savedVol = 55;
       savedVol = Math.max(0, Math.min(100, savedVol));
       slider.value = String(savedVol);
-
-      introPlayedThisSession = getSS("preludio_intro_once", "0") === "1";
 
       function setBtn(on){
         stateEl.textContent = on ? "ON" : "OFF";
@@ -2487,6 +2378,25 @@
         return src;
       }
 
+      function clearStaticLayer(){
+        try{
+          if (activeFlutterLfo){
+            try{ activeFlutterLfo.stop(); }catch(e){}
+          }
+        }catch(e){}
+        activeFlutterLfo = null;
+
+        while (activeStaticNodes.length){
+          var node = activeStaticNodes.pop();
+          try{
+            if (node && typeof node.stop === "function") node.stop();
+          }catch(e){}
+          try{
+            if (node && typeof node.disconnect === "function") node.disconnect();
+          }catch(e){}
+        }
+      }
+
       function applyVolume(){
         if (!master || !audioCtx) return;
 
@@ -2503,147 +2413,259 @@
         }catch(e){}
       }
 
-      function playSpaceRadioSignal(){
-        if (!audioCtx || audioCtx.state === "closed" || !master) return;
-
+      function ensureTransmissionGraph(){
+        if (!audioCtx || transmissionReady) return;
         try{
-          if (window.showTransmissionSequence){
-            window.showTransmissionSequence(
-              "UMA TRANSMISSÃO RECEBIDA",
-              "Olá... Visitante, seja bem-vindo. Você acaba de chegar a um lugar inédito e curioso. Preste muita atenção nas informações e siga em frente. Até logo..."
-            );
+          if (!transmissionSource){
+            transmissionSource = audioCtx.createMediaElementSource(transmissionAudio);
           }
 
-          var now = audioCtx.currentTime;
-          var totalDur = 6.2;
+          var dryGain = audioCtx.createGain();
+          dryGain.gain.value = 0.62;
 
-          var noise = createBrownNoise(audioCtx);
+          var wetHP = audioCtx.createBiquadFilter();
+          wetHP.type = "highpass";
+          wetHP.frequency.value = 120;
+          wetHP.Q.value = 0.7;
 
-          var hp = audioCtx.createBiquadFilter();
-          hp.type = "highpass";
-          hp.frequency.setValueAtTime(210 + Math.random()*70, now);
-          hp.Q.setValueAtTime(0.8, now);
+          var wetBP = audioCtx.createBiquadFilter();
+          wetBP.type = "bandpass";
+          wetBP.frequency.value = 1280;
+          wetBP.Q.value = 0.7;
 
-          var bp = audioCtx.createBiquadFilter();
-          bp.type = "bandpass";
-          bp.frequency.setValueAtTime(980 + Math.random()*160, now);
-          bp.Q.setValueAtTime(1.4 + Math.random()*0.5, now);
+          var wetLP = audioCtx.createBiquadFilter();
+          wetLP.type = "lowpass";
+          wetLP.frequency.value = 2200;
+          wetLP.Q.value = 0.8;
 
-          var lp = audioCtx.createBiquadFilter();
-          lp.type = "lowpass";
-          lp.frequency.setValueAtTime(1650 + Math.random()*180, now);
-          lp.Q.setValueAtTime(0.9, now);
+          var wetPresence = audioCtx.createBiquadFilter();
+          wetPresence.type = "peaking";
+          wetPresence.frequency.value = 920;
+          wetPresence.Q.value = 0.9;
+          wetPresence.gain.value = 1.8;
 
-          var radioGain = audioCtx.createGain();
-          radioGain.gain.setValueAtTime(0.00001, now);
-          radioGain.gain.exponentialRampToValueAtTime(1.10, now + 0.35);
-          radioGain.gain.linearRampToValueAtTime(2.15 + Math.random()*0.15, now + 1.6);
-          radioGain.gain.linearRampToValueAtTime(3.10 + Math.random()*0.20, now + 4.3);
-          radioGain.gain.linearRampToValueAtTime(3.95 + Math.random()*0.20, now + 5.6);
-          radioGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
+          var wetGain = audioCtx.createGain();
+          wetGain.gain.value = 0.82;
 
-          noise.connect(hp);
-          hp.connect(bp);
-          bp.connect(lp);
-          lp.connect(radioGain);
-          radioGain.connect(master);
-          noise.start(now);
-          noise.stop(now + totalDur + 0.05);
+          var voiceComp = audioCtx.createDynamicsCompressor();
+          voiceComp.threshold.value = -26;
+          voiceComp.knee.value = 18;
+          voiceComp.ratio.value = 2.4;
+          voiceComp.attack.value = 0.003;
+          voiceComp.release.value = 0.18;
 
-          var flutterLFO = audioCtx.createOscillator();
-          flutterLFO.type = "sine";
-          flutterLFO.frequency.setValueAtTime(0.14 + Math.random()*0.08, now);
+          transmissionSource.connect(dryGain);
+          dryGain.connect(voiceComp);
 
-          var flutterGain = audioCtx.createGain();
-          flutterGain.gain.setValueAtTime(110 + Math.random()*70, now);
+          transmissionSource.connect(wetHP);
+          wetHP.connect(wetBP);
+          wetBP.connect(wetLP);
+          wetLP.connect(wetPresence);
+          wetPresence.connect(wetGain);
+          wetGain.connect(voiceComp);
 
-          flutterLFO.connect(flutterGain);
-          flutterGain.connect(bp.frequency);
-          flutterLFO.start(now);
-          flutterLFO.stop(now + totalDur);
+          voiceComp.connect(master);
 
-          var shimmerNoise = createBrownNoise(audioCtx);
-          var shimmerHP = audioCtx.createBiquadFilter();
-          shimmerHP.type = "highpass";
-          shimmerHP.frequency.setValueAtTime(1550 + Math.random()*180, now);
-
-          var shimmerBP = audioCtx.createBiquadFilter();
-          shimmerBP.type = "bandpass";
-          shimmerBP.frequency.setValueAtTime(1900 + Math.random()*260, now);
-          shimmerBP.Q.setValueAtTime(2.8, now);
-
-          var shimmerGain = audioCtx.createGain();
-          shimmerGain.gain.setValueAtTime(0.00001, now);
-          shimmerGain.gain.exponentialRampToValueAtTime(0.060 + Math.random()*0.020, now + 1.9);
-          shimmerGain.gain.setValueAtTime(0.060 + Math.random()*0.020, now + 5.5);
-          shimmerGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
-
-          shimmerNoise.connect(shimmerHP);
-          shimmerHP.connect(shimmerBP);
-          shimmerBP.connect(shimmerGain);
-          shimmerGain.connect(master);
-          shimmerNoise.start(now);
-          shimmerNoise.stop(now + totalDur + 0.05);
-
-          var lowHum = audioCtx.createOscillator();
-          lowHum.type = "sine";
-          lowHum.frequency.setValueAtTime(64 + Math.random()*10, now);
-
-          var lowHumGain = audioCtx.createGain();
-          lowHumGain.gain.setValueAtTime(0.00001, now);
-          lowHumGain.gain.exponentialRampToValueAtTime(0.0010 + Math.random()*0.0008, now + 1.4);
-          lowHumGain.gain.setValueAtTime(0.0010 + Math.random()*0.0008, now + 5.1);
-          lowHumGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
-
-          var lowHumLP = audioCtx.createBiquadFilter();
-          lowHumLP.type = "lowpass";
-          lowHumLP.frequency.setValueAtTime(150, now);
-
-          lowHum.connect(lowHumLP);
-          lowHumLP.connect(lowHumGain);
-          lowHumGain.connect(master);
-          lowHum.start(now);
-          lowHum.stop(now + totalDur);
-
-          var clickCount = 2 + Math.floor(Math.random()*3);
-          for (var i=0;i<clickCount;i++){
-            var tt = now + 2.0 + Math.random()*3.0;
-
-            var cOsc = audioCtx.createOscillator();
-            cOsc.type = "triangle";
-            cOsc.frequency.setValueAtTime(1200 + Math.random()*700, tt);
-
-            var cBP = audioCtx.createBiquadFilter();
-            cBP.type = "bandpass";
-            cBP.frequency.setValueAtTime(1500 + Math.random()*480, tt);
-            cBP.Q.setValueAtTime(7, tt);
-
-            var cGain = audioCtx.createGain();
-            cGain.gain.setValueAtTime(0.00001, tt);
-            cGain.gain.exponentialRampToValueAtTime(0.0012 + Math.random()*0.0008, tt + 0.008);
-            cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.040);
-
-            cOsc.connect(cBP);
-            cBP.connect(cGain);
-            cGain.connect(master);
-
-            cOsc.start(tt);
-            cOsc.stop(tt + 0.05);
-          }
+          transmissionReady = true;
         }catch(e){}
       }
 
-      function maybePlayIntroOnce(){
-        if (introPlayedThisSession) return;
-        introPlayedThisSession = true;
-        setSS("preludio_intro_once", "1");
-        setTimeout(function(){
-          if (started) playSpaceRadioSignal();
-        }, 600);
+      function getTransmissionDurationMs(){
+        var d = transmissionAudio.duration;
+        if (isFinite(d) && d > 0) return Math.round(d * 1000);
+        return TRANSMISSION_FALLBACK_MS;
+      }
+
+      function preloadTransmission(){
+        return new Promise(function(resolve){
+          function done(){ resolve(); }
+          if (isFinite(transmissionAudio.duration) && transmissionAudio.duration > 0){
+            resolve();
+            return;
+          }
+          transmissionAudio.addEventListener("loadedmetadata", done, { once:true });
+          transmissionAudio.addEventListener("canplaythrough", done, { once:true });
+          transmissionAudio.addEventListener("error", done, { once:true });
+          try{ transmissionAudio.load(); }catch(e){ resolve(); }
+          setTimeout(resolve, 1500);
+        });
+      }
+
+      function buildTransmissionStatic(durationSec){
+        if (!audioCtx || !master) return;
+        clearStaticLayer();
+
+        var now = audioCtx.currentTime;
+        var totalDur = durationSec || 14.7;
+
+        var noise = createBrownNoise(audioCtx);
+        var hp = audioCtx.createBiquadFilter();
+        hp.type = "highpass";
+        hp.frequency.setValueAtTime(220, now);
+        hp.Q.setValueAtTime(0.8, now);
+
+        var bp = audioCtx.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.frequency.setValueAtTime(1320, now);
+        bp.Q.setValueAtTime(1.6, now);
+
+        var lp = audioCtx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.setValueAtTime(2900, now);
+        lp.Q.setValueAtTime(0.8, now);
+
+        var gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.00001, now);
+        gain.gain.exponentialRampToValueAtTime(0.48, now + 0.22);
+        gain.gain.setValueAtTime(0.48, now + 5.0);
+        gain.gain.linearRampToValueAtTime(0.16, now + 7.2);
+        gain.gain.linearRampToValueAtTime(0.11, now + Math.max(8.2, totalDur - 0.8));
+        gain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
+
+        noise.connect(hp);
+        hp.connect(bp);
+        bp.connect(lp);
+        lp.connect(gain);
+        gain.connect(master);
+
+        noise.start(now);
+        noise.stop(now + totalDur + 0.08);
+
+        activeStaticNodes.push(noise, hp, bp, lp, gain);
+
+        var flutterLFO = audioCtx.createOscillator();
+        flutterLFO.type = "sine";
+        flutterLFO.frequency.setValueAtTime(0.24, now);
+
+        var flutterGain = audioCtx.createGain();
+        flutterGain.gain.setValueAtTime(60, now);
+
+        flutterLFO.connect(flutterGain);
+        flutterGain.connect(bp.frequency);
+        flutterLFO.start(now);
+        flutterLFO.stop(now + totalDur);
+        activeFlutterLfo = flutterLFO;
+        activeStaticNodes.push(flutterGain);
+
+        var lowHum = audioCtx.createOscillator();
+        lowHum.type = "sine";
+        lowHum.frequency.setValueAtTime(74, now);
+
+        var lowHumLP = audioCtx.createBiquadFilter();
+        lowHumLP.type = "lowpass";
+        lowHumLP.frequency.setValueAtTime(155, now);
+
+        var lowHumGain = audioCtx.createGain();
+        lowHumGain.gain.setValueAtTime(0.00001, now);
+        lowHumGain.gain.exponentialRampToValueAtTime(0.0014, now + 0.8);
+        lowHumGain.gain.setValueAtTime(0.0014, now + totalDur - 1.2);
+        lowHumGain.gain.exponentialRampToValueAtTime(0.00001, now + totalDur);
+
+        lowHum.connect(lowHumLP);
+        lowHumLP.connect(lowHumGain);
+        lowHumGain.connect(master);
+        lowHum.start(now);
+        lowHum.stop(now + totalDur);
+        activeStaticNodes.push(lowHum, lowHumLP, lowHumGain);
+
+        var clickCount = 4;
+        for (var i=0;i<clickCount;i++){
+          var tt = now + 0.6 + Math.random() * Math.max(2.0, totalDur - 1.2);
+
+          var cOsc = audioCtx.createOscillator();
+          cOsc.type = "triangle";
+          cOsc.frequency.setValueAtTime(1500 + Math.random()*900, tt);
+
+          var cBP = audioCtx.createBiquadFilter();
+          cBP.type = "bandpass";
+          cBP.frequency.setValueAtTime(1800 + Math.random()*500, tt);
+          cBP.Q.setValueAtTime(7, tt);
+
+          var cGain = audioCtx.createGain();
+          cGain.gain.setValueAtTime(0.00001, tt);
+          cGain.gain.exponentialRampToValueAtTime(0.0015 + Math.random()*0.0013, tt + 0.008);
+          cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.045);
+
+          cOsc.connect(cBP);
+          cBP.connect(cGain);
+          cGain.connect(master);
+          cOsc.start(tt);
+          cOsc.stop(tt + 0.05);
+
+          activeStaticNodes.push(cOsc, cBP, cGain);
+        }
+      }
+
+      function stopTransmissionAudio(){
+        try{
+          transmissionAudio.pause();
+          transmissionAudio.currentTime = 0;
+        }catch(e){}
+        clearStaticLayer();
+      }
+
+      function playTransmissionOnce(){
+        if (!audioCtx || !master) return;
+        ensureTransmissionGraph();
+
+        preloadTransmission().then(function(){
+          var durationMs = getTransmissionDurationMs();
+          var durationSec = durationMs / 1000;
+
+          if (window.transmissionUI && typeof window.transmissionUI.play === "function"){
+            window.transmissionUI.play({
+              title: TRANSMISSION_TITLE,
+              text: TRANSMISSION_TEXT,
+              audioDurationMs: durationMs,
+              onStart: function(){
+                try{
+                  stopTransmissionAudio();
+                  buildTransmissionStatic(durationSec);
+                  transmissionAudio.currentTime = 0;
+                  transmissionAudio.play().catch(function(){
+                    if (window.transmissionUI && window.transmissionUI.audioEnded){
+                      window.transmissionUI.audioEnded();
+                    }
+                  });
+                }catch(e){
+                  if (window.transmissionUI && window.transmissionUI.audioEnded){
+                    window.transmissionUI.audioEnded();
+                  }
+                }
+              }
+            });
+          }
+        });
+      }
+
+      transmissionAudio.addEventListener("ended", function(){
+        clearStaticLayer();
+        if (window.transmissionUI && window.transmissionUI.audioEnded){
+          window.transmissionUI.audioEnded();
+        }
+      });
+
+      transmissionAudio.addEventListener("pause", function(){
+        if (transmissionAudio.currentTime <= 0.05 || transmissionAudio.ended) return;
+      });
+
+      function scheduleRadio(){
+        clearTimeout(radioTimer);
+        var next = 20000 + Math.random() * 10000;
+        radioTimer = setTimeout(function(){
+          if (started){
+            if (!transmissionAutoPlayedThisLoad){
+              transmissionAutoPlayedThisLoad = true;
+              playTransmissionOnce();
+            }
+            scheduleRadio();
+          }
+        }, next);
       }
 
       function startAudio(){
         if (started) return true;
+        clearTimeout(radioTimer);
 
         try{
           var Ctx = window.AudioContext || window.webkitAudioContext;
@@ -2657,7 +2679,7 @@
           var comp = audioCtx.createDynamicsCompressor();
           comp.threshold.value = -34;
           comp.knee.value = 30;
-          comp.ratio.value = 2.4;
+          comp.ratio.value = 2.6;
           comp.attack.value = 0.018;
           comp.release.value = 0.32;
 
@@ -2736,10 +2758,18 @@
           ramp(gDrone.gain, 0.30, 1.6);
           ramp(airGain.gain, 0.05, 1.8);
 
+          ensureTransmissionGraph();
+
           started = true;
           setBtn(true);
           applyVolume();
-          maybePlayIntroOnce();
+
+          if (!transmissionAutoPlayedThisLoad){
+            transmissionAutoPlayedThisLoad = true;
+            setTimeout(playTransmissionOnce, 280);
+          }
+
+          scheduleRadio();
           return true;
         }catch(e){
           setBtn(false);
@@ -2748,21 +2778,26 @@
       }
 
       function stopAudio(){
+        clearTimeout(radioTimer);
+        stopTransmissionAudio();
+
+        if (window.transmissionUI && window.transmissionUI.forceReset){
+          window.transmissionUI.forceReset();
+        }
+
         try{
           if (audioCtx){
             try{ audioCtx.close(); }catch(e){}
           }
         }catch(e){}
 
-        if (window.speechSynthesis){
-          try{ window.speechSynthesis.cancel(); }catch(e){}
-        }
-
         audioCtx = null;
         started = false;
         master = null;
         gDrone = null;
         airGain = null;
+        transmissionSource = null;
+        transmissionReady = false;
         setBtn(false);
       }
 
