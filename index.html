@@ -140,11 +140,16 @@
     .tfNoise{
       position:absolute;
       inset:-8px;
-      border-radius:26px;
+      border-radius:28px;
       overflow:hidden;
       opacity:.55;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
       mask-image:radial-gradient(white, black);
+    }
+
+    .tfNoise::before,
+    .tfNoise::after{
+      border-radius:28px;
     }
 
     .tfNoise::before{
@@ -169,7 +174,6 @@
       top:0;
       width:30%;
       height:100%;
-      border-radius:26px;
       background:linear-gradient(90deg, rgba(255,255,255,0), rgba(230,192,123,.22), rgba(255,255,255,0));
       filter:blur(8px);
       opacity:.7;
@@ -354,25 +358,26 @@
       font-size:clamp(48px, 6.2vw, 110px);
       color:transparent;
       background-image:
-        linear-gradient(90deg,
-          rgba(230,192,123,.60) 0%,
-          rgba(230,192,123,.92) 28%,
-          rgba(255,255,255,.92) 48%,
-          rgba(230,192,123,.92) 58%,
-          rgba(230,192,123,.60) 100%);
-      background-size:260% 100%;
-      background-position:-35% 50%;
+        repeating-linear-gradient(
+          90deg,
+          rgba(230,192,123,.58) 0%,
+          rgba(230,192,123,.78) 10%,
+          rgba(255,255,255,.96) 16%,
+          rgba(230,192,123,.88) 22%,
+          rgba(230,192,123,.60) 34%
+        );
+      background-size:220% 100%;
+      background-position:0% 50%;
       -webkit-background-clip:text;
       background-clip:text;
       text-shadow:0 20px 70px rgba(0,0,0,.55);
-      animation:shineText 7.8s linear infinite;
+      animation:shineText 6.8s linear infinite;
+      will-change:background-position;
     }
 
     @keyframes shineText{
-      0%{ background-position:-35% 50%; }
-      22%{ background-position:-35% 50%; }
-      58%{ background-position:135% 50%; }
-      100%{ background-position:135% 50%; }
+      0%{ background-position:0% 50%; }
+      100%{ background-position:220% 50%; }
     }
 
     .subtitle{
@@ -2510,14 +2515,12 @@
         }
       }
 
-      function buildTransmissionStatic(totalDur){
+      function buildTransmissionStatic(){
         if (!audioCtx || !master) return function(){};
 
         stopTransmissionStatic();
 
         var now = audioCtx.currentTime;
-        var duration = Math.max(8, totalDur || 16);
-        var STATIC_MUL = 3;
 
         var noise = createBrownNoise(audioCtx);
 
@@ -2539,8 +2542,6 @@
         var staticGain = audioCtx.createGain();
         staticGain.gain.setValueAtTime(0.00001, now);
         staticGain.gain.exponentialRampToValueAtTime(0.66, now + 0.25);
-        staticGain.gain.setValueAtTime(0.66, now + duration - 0.30);
-        staticGain.gain.exponentialRampToValueAtTime(0.00001, now + duration);
 
         noise.connect(hp);
         hp.connect(bp);
@@ -2549,7 +2550,6 @@
         staticGain.connect(master);
 
         noise.start(now);
-        noise.stop(now + duration + 0.05);
 
         activeTransmissionNodes.push(noise, hp, bp, lp, staticGain);
 
@@ -2563,7 +2563,6 @@
         flutterLFO.connect(flutterGain);
         flutterGain.connect(bp.frequency);
         flutterLFO.start(now);
-        flutterLFO.stop(now + duration);
 
         activeTransmissionNodes.push(flutterLFO, flutterGain);
 
@@ -2580,8 +2579,6 @@
         var shimmerGain = audioCtx.createGain();
         shimmerGain.gain.setValueAtTime(0.00001, now);
         shimmerGain.gain.exponentialRampToValueAtTime(0.120, now + 0.8);
-        shimmerGain.gain.setValueAtTime(0.120, now + duration - 0.4);
-        shimmerGain.gain.exponentialRampToValueAtTime(0.00001, now + duration);
 
         shimmerNoise.connect(shimmerHP);
         shimmerHP.connect(shimmerBP);
@@ -2589,40 +2586,62 @@
         shimmerGain.connect(master);
 
         shimmerNoise.start(now);
-        shimmerNoise.stop(now + duration + 0.05);
 
         activeTransmissionNodes.push(shimmerNoise, shimmerHP, shimmerBP, shimmerGain);
 
-        var clickCount = 4;
-        for (var i=0;i<clickCount;i++){
-          var tt = now + 0.5 + Math.random() * Math.max(0.8, duration - 1.0);
+        var clickInterval = null;
+        clickInterval = setInterval(function(){
+          if (!audioCtx || !master) return;
+          try{
+            var tt = audioCtx.currentTime + 0.02;
 
-          var cOsc = audioCtx.createOscillator();
-          cOsc.type = "triangle";
-          cOsc.frequency.setValueAtTime(1200 + Math.random()*800, tt);
+            var cOsc = audioCtx.createOscillator();
+            cOsc.type = "triangle";
+            cOsc.frequency.setValueAtTime(1200 + Math.random()*800, tt);
 
-          var cBP = audioCtx.createBiquadFilter();
-          cBP.type = "bandpass";
-          cBP.frequency.setValueAtTime(1550 + Math.random()*500, tt);
-          cBP.Q.setValueAtTime(7, tt);
+            var cBP = audioCtx.createBiquadFilter();
+            cBP.type = "bandpass";
+            cBP.frequency.setValueAtTime(1550 + Math.random()*500, tt);
+            cBP.Q.setValueAtTime(7, tt);
 
-          var cGain = audioCtx.createGain();
-          cGain.gain.setValueAtTime(0.00001, tt);
-          cGain.gain.exponentialRampToValueAtTime((0.0014 + Math.random()*0.0010) * STATIC_MUL, tt + 0.008);
-          cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.040);
+            var cGain = audioCtx.createGain();
+            cGain.gain.setValueAtTime(0.00001, tt);
+            cGain.gain.exponentialRampToValueAtTime(0.004 + Math.random()*0.003, tt + 0.008);
+            cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.040);
 
-          cOsc.connect(cBP);
-          cBP.connect(cGain);
-          cGain.connect(master);
+            cOsc.connect(cBP);
+            cBP.connect(cGain);
+            cGain.connect(master);
 
-          cOsc.start(tt);
-          cOsc.stop(tt + 0.05);
-
-          activeTransmissionNodes.push(cOsc, cBP, cGain);
-        }
+            cOsc.start(tt);
+            cOsc.stop(tt + 0.05);
+          }catch(e){}
+        }, 700 + Math.random()*600);
 
         return function(){
-          stopTransmissionStatic();
+          try{ clearInterval(clickInterval); }catch(e){}
+
+          try{
+            if (staticGain && audioCtx){
+              var endNow = audioCtx.currentTime;
+              staticGain.gain.cancelScheduledValues(endNow);
+              staticGain.gain.setValueAtTime(Math.max(0.00001, staticGain.gain.value), endNow);
+              staticGain.gain.exponentialRampToValueAtTime(0.00001, endNow + 0.28);
+            }
+          }catch(e){}
+
+          try{
+            if (shimmerGain && audioCtx){
+              var endNow2 = audioCtx.currentTime;
+              shimmerGain.gain.cancelScheduledValues(endNow2);
+              shimmerGain.gain.setValueAtTime(Math.max(0.00001, shimmerGain.gain.value), endNow2);
+              shimmerGain.gain.exponentialRampToValueAtTime(0.00001, endNow2 + 0.22);
+            }
+          }catch(e){}
+
+          setTimeout(function(){
+            stopTransmissionStatic();
+          }, 380);
         };
       }
 
@@ -2636,11 +2655,7 @@
         var typingSpeed = 52;
         var keepOpenAfterFinishMs = 3000;
 
-        var estimatedTypingDurationMs = text.length * typingSpeed;
-        var safetyExtraMs = (window.innerWidth <= 700) ? 5000 : 1800;
-        var totalStaticMs = openDelayMs + estimatedTypingDurationMs + keepOpenAfterFinishMs + safetyExtraMs;
-
-        var stopStatic = buildTransmissionStatic(totalStaticMs / 1000);
+        var stopStatic = buildTransmissionStatic();
 
         if (window.showTransmissionSequence){
           window.showTransmissionSequence(title, text, {
