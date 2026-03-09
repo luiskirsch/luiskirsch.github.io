@@ -140,16 +140,18 @@
     .tfNoise{
       position:absolute;
       inset:-8px;
-      border-radius:28px;
+      border-radius:26px;
       overflow:hidden;
       opacity:.55;
+      clip-path:inset(0 round 26px);
+      -webkit-clip-path:inset(0 round 26px);
       -webkit-mask-image:-webkit-radial-gradient(white, black);
       mask-image:radial-gradient(white, black);
     }
 
     .tfNoise::before,
     .tfNoise::after{
-      border-radius:28px;
+      border-radius:inherit;
     }
 
     .tfNoise::before{
@@ -358,26 +360,26 @@
       font-size:clamp(48px, 6.2vw, 110px);
       color:transparent;
       background-image:
-        repeating-linear-gradient(
-          90deg,
-          rgba(230,192,123,.58) 0%,
-          rgba(230,192,123,.78) 10%,
-          rgba(255,255,255,.96) 16%,
-          rgba(230,192,123,.88) 22%,
-          rgba(230,192,123,.60) 34%
-        );
-      background-size:220% 100%;
+        linear-gradient(90deg,
+          rgba(230,192,123,.56) 0%,
+          rgba(230,192,123,.82) 18%,
+          rgba(255,255,255,.98) 33%,
+          rgba(230,192,123,.88) 48%,
+          rgba(230,192,123,.60) 64%,
+          rgba(255,255,255,.94) 78%,
+          rgba(230,192,123,.58) 100%);
+      background-size:260% 100%;
       background-position:0% 50%;
       -webkit-background-clip:text;
       background-clip:text;
       text-shadow:0 20px 70px rgba(0,0,0,.55);
-      animation:shineText 6.8s linear infinite;
+      animation:shineText 7.2s linear infinite alternate;
       will-change:background-position;
     }
 
     @keyframes shineText{
       0%{ background-position:0% 50%; }
-      100%{ background-position:220% 50%; }
+      100%{ background-position:100% 50%; }
     }
 
     .subtitle{
@@ -1316,6 +1318,7 @@
       var typeTimer = null;
       var endTimer = null;
       var openTimer = null;
+      var staticStartFn = null;
       var staticStopFn = null;
 
       function syncFocusState(){
@@ -1337,6 +1340,7 @@
         clearTimeout(openTimer);
         field.classList.remove("isTyping");
         stopStaticNow();
+        staticStartFn = null;
         field.classList.remove("isActive");
         titleEl.textContent = "";
         msgEl.textContent = "";
@@ -1370,6 +1374,8 @@
         var openDelay = typeof options.openDelay === "number" ? options.openDelay : 5000;
         var closeDelay = typeof options.closeDelay === "number" ? options.closeDelay : 3000;
         var typingSpeed = typeof options.typingSpeed === "number" ? options.typingSpeed : 52;
+
+        staticStartFn = typeof options.startStatic === "function" ? options.startStatic : null;
         staticStopFn = typeof options.stopStatic === "function" ? options.stopStatic : null;
 
         clearInterval(typeTimer);
@@ -1389,6 +1395,8 @@
         }, 140);
 
         openTimer = setTimeout(function(){
+          if (staticStartFn) staticStartFn();
+
           typeText(text || "", typingSpeed, function(){
             endTimer = setTimeout(function(){
               field.classList.remove("isActive");
@@ -2541,7 +2549,7 @@
 
         var staticGain = audioCtx.createGain();
         staticGain.gain.setValueAtTime(0.00001, now);
-        staticGain.gain.exponentialRampToValueAtTime(0.66, now + 0.25);
+        staticGain.gain.exponentialRampToValueAtTime(0.66, now + 0.20);
 
         noise.connect(hp);
         hp.connect(bp);
@@ -2578,7 +2586,7 @@
 
         var shimmerGain = audioCtx.createGain();
         shimmerGain.gain.setValueAtTime(0.00001, now);
-        shimmerGain.gain.exponentialRampToValueAtTime(0.120, now + 0.8);
+        shimmerGain.gain.exponentialRampToValueAtTime(0.120, now + 0.50);
 
         shimmerNoise.connect(shimmerHP);
         shimmerHP.connect(shimmerBP);
@@ -2589,8 +2597,7 @@
 
         activeTransmissionNodes.push(shimmerNoise, shimmerHP, shimmerBP, shimmerGain);
 
-        var clickInterval = null;
-        clickInterval = setInterval(function(){
+        var clickInterval = setInterval(function(){
           if (!audioCtx || !master) return;
           try{
             var tt = audioCtx.currentTime + 0.02;
@@ -2616,7 +2623,7 @@
             cOsc.start(tt);
             cOsc.stop(tt + 0.05);
           }catch(e){}
-        }, 700 + Math.random()*600);
+        }, 520);
 
         return function(){
           try{ clearInterval(clickInterval); }catch(e){}
@@ -2626,7 +2633,7 @@
               var endNow = audioCtx.currentTime;
               staticGain.gain.cancelScheduledValues(endNow);
               staticGain.gain.setValueAtTime(Math.max(0.00001, staticGain.gain.value), endNow);
-              staticGain.gain.exponentialRampToValueAtTime(0.00001, endNow + 0.28);
+              staticGain.gain.exponentialRampToValueAtTime(0.00001, endNow + 0.35);
             }
           }catch(e){}
 
@@ -2635,13 +2642,13 @@
               var endNow2 = audioCtx.currentTime;
               shimmerGain.gain.cancelScheduledValues(endNow2);
               shimmerGain.gain.setValueAtTime(Math.max(0.00001, shimmerGain.gain.value), endNow2);
-              shimmerGain.gain.exponentialRampToValueAtTime(0.00001, endNow2 + 0.22);
+              shimmerGain.gain.exponentialRampToValueAtTime(0.00001, endNow2 + 0.28);
             }
           }catch(e){}
 
           setTimeout(function(){
             stopTransmissionStatic();
-          }, 380);
+          }, 500);
         };
       }
 
@@ -2655,13 +2662,25 @@
         var typingSpeed = 52;
         var keepOpenAfterFinishMs = 3000;
 
-        var stopStatic = buildTransmissionStatic();
+        var transmissionStaticStopper = null;
+
+        function startStatic(){
+          if (transmissionStaticStopper) return;
+          transmissionStaticStopper = buildTransmissionStatic();
+        }
+
+        function stopStatic(){
+          if (!transmissionStaticStopper) return;
+          transmissionStaticStopper();
+          transmissionStaticStopper = null;
+        }
 
         if (window.showTransmissionSequence){
           window.showTransmissionSequence(title, text, {
             openDelay: openDelayMs,
             closeDelay: keepOpenAfterFinishMs,
             typingSpeed: typingSpeed,
+            startStatic: startStatic,
             stopStatic: stopStatic
           });
         }
