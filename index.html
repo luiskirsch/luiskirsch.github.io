@@ -44,7 +44,6 @@
     html{
       background:var(--bg);
       overscroll-behavior:none;
-      overflow-x:hidden;
     }
 
     body{
@@ -63,8 +62,6 @@
       font-family:ui-serif, Georgia, "Times New Roman", serif;
       background:#000;
       background-color:#000;
-      position:relative;
-      isolation:isolate;
     }
 
     @supports (height:100dvh){
@@ -78,25 +75,21 @@
 
     #stars{
       position:fixed;
-      left:-2px;
-      top:-2px;
-      width:calc(100vw + 4px);
-      height:calc(100vh + 4px);
+      inset:0;
       z-index:2;
       pointer-events:none;
       opacity:.88;
       transform:none;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
-      will-change:transform;
-      image-rendering:auto;
+      contain:paint;
     }
 
     .moonWrap{
       position:fixed;
       left:50%;
       top:max(44px, env(safe-area-inset-top));
-      transform:translateX(-50%) translateZ(0);
+      transform:translateX(-50%);
       z-index:4;
       width:min(280px, 34vw);
       aspect-ratio:1/1;
@@ -106,8 +99,6 @@
       justify-content:center;
       opacity:1;
       filter:none;
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
     }
 
     .moonGlow{ display:none; }
@@ -120,9 +111,6 @@
       object-fit:contain;
       opacity:1;
       filter:none;
-      transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
     }
 
     #transmissionField{
@@ -134,16 +122,17 @@
       z-index:9;
       pointer-events:none;
       opacity:0;
-      transform:translateY(12px) translateZ(0);
+      transform:translateY(12px);
       transition:opacity .35s ease, transform .35s ease;
-      mix-blend-mode:screen;
+      mix-blend-mode:normal;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
+      contain:paint;
     }
 
     #transmissionField.isActive{
       opacity:1;
-      transform:translateY(0) translateZ(0);
+      transform:translateY(0);
     }
 
     .tfNoise{
@@ -192,16 +181,15 @@
       border-radius:18px;
       padding:16px 18px 14px;
       border:1px solid rgba(230,192,123,.16);
-      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.012));
+      background:linear-gradient(180deg, rgba(20,20,24,.72), rgba(10,10,14,.62));
       box-shadow:
         0 0 32px rgba(230,192,123,.08),
         inset 0 0 24px rgba(255,255,255,.02);
-      backdrop-filter:blur(3px);
-      -webkit-backdrop-filter:blur(3px);
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
       overflow:hidden;
       transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
+      contain:paint;
     }
 
     .tfCore::before{
@@ -272,7 +260,6 @@
       width:min(1200px, 100%);
       margin:0 auto;
       padding:100px 0 28px;
-      transform:translateZ(0);
     }
 
     .grid{
@@ -285,7 +272,7 @@
 
     .card{
       border-radius:26px;
-      background:linear-gradient(180deg, var(--cardA), var(--cardB));
+      background:linear-gradient(180deg, rgba(24,24,28,.78), rgba(10,10,14,.62));
       border:1px solid rgba(255,255,255,.10);
       box-shadow:0 30px 90px rgba(0,0,0,.62);
       position:relative;
@@ -293,13 +280,7 @@
       transform:translateZ(0);
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
-    }
-
-    @supports ((backdrop-filter:blur(10px)) or (-webkit-backdrop-filter:blur(10px))){
-      .card{
-        backdrop-filter:blur(12px);
-        -webkit-backdrop-filter:blur(12px);
-      }
+      contain:paint;
     }
 
     .card::after{
@@ -354,9 +335,6 @@
       filter:drop-shadow(0 0 12px rgba(255,255,255,.08));
       user-select:none;
       -webkit-user-drag:none;
-      transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
     }
 
     .title{
@@ -445,9 +423,6 @@
       background:rgba(0,0,0,.22);
       padding:14px 14px 12px;
       box-shadow:inset 0 0 30px rgba(0,0,0,.25);
-      transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
     }
 
     .mini h3{
@@ -599,9 +574,6 @@
       background:linear-gradient(180deg, rgba(230,192,123,.08), rgba(255,255,255,.02));
       padding:18px;
       box-shadow:inset 0 0 40px rgba(0,0,0,.24), 0 24px 70px rgba(0,0,0,.42);
-      transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
     }
 
     .countdownTop{
@@ -745,24 +717,18 @@
       padding:10px 12px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.30);
+      background:rgba(8,8,12,.88);
       box-shadow:0 18px 60px rgba(0,0,0,.45);
       transition:opacity .25s ease, transform .25s ease;
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
       transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-    }
-
-    @supports ((backdrop-filter:blur(10px)) or (-webkit-backdrop-filter:blur(10px))){
-      .soundPanel{
-        backdrop-filter:blur(10px);
-        -webkit-backdrop-filter:blur(10px);
-      }
+      contain:paint;
     }
 
     .soundPanel.isHidden{
       opacity:0;
-      transform:translateY(-10px) translateZ(0);
+      transform:translateY(-10px);
       pointer-events:none;
     }
 
@@ -968,6 +934,19 @@
       .tfTitle{
         font-size:10px;
         letter-spacing:.22em;
+      }
+    }
+
+    @media (hover:none) and (pointer:coarse){
+      .card,
+      .tfCore,
+      .soundPanel{
+        backdrop-filter:none !important;
+        -webkit-backdrop-filter:none !important;
+      }
+
+      #transmissionField{
+        mix-blend-mode:normal !important;
       }
     }
 
@@ -1542,8 +1521,8 @@
 
         function resize(force){
           dpr = Math.max(1, Math.min(PERF.dprCap, (window.devicePixelRatio || 1)));
-          var nw = Math.floor((document.documentElement.clientWidth || window.innerWidth) + 4);
-          var nh = Math.floor((window.innerHeight || document.documentElement.clientHeight) + 4);
+          var nw = Math.floor(document.documentElement.clientWidth || window.innerWidth);
+          var nh = Math.floor(window.innerHeight);
 
           if (!force && !shouldResize(nw, nh)) return;
 
