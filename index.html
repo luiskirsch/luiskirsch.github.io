@@ -371,6 +371,8 @@
     }
 
     .title{
+  position:relative;
+  display:inline-block;
   margin:0;
   line-height:1.04;
   padding-bottom:.06em;
@@ -378,65 +380,74 @@
   text-transform:uppercase;
   font-weight:700;
   font-size:clamp(48px, 6.2vw, 110px);
+
   color:transparent;
+  -webkit-text-fill-color:transparent;
 
-  background-image:
-    linear-gradient(
-      180deg,
-      #4f3613 0%,
-      #8d6226 16%,
-      #c9964a 34%,
-      #f2d38a 48%,
-      #d8aa5e 60%,
-      #8a5f24 78%,
-      #533815 100%
-    ),
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0) 44%,
-      rgba(255,245,210,.00) 46%,
-      rgba(255,248,230,.38) 48%,
-      rgba(255,255,255,.98) 50%,
-      rgba(255,245,210,.42) 52%,
-      rgba(255,255,255,0) 56%,
-      rgba(255,255,255,0) 100%
-    );
-
-  background-size:
-    100% 100%,
-    320% 100%;
-
-  background-position:
-    0 0,
-    -220% 50%;
-
+  background-image:linear-gradient(
+    180deg,
+    #4c3312 0%,
+    #8b6127 16%,
+    #c99649 34%,
+    #f1d289 49%,
+    #d9aa5b 61%,
+    #8b5f24 79%,
+    #523716 100%
+  );
+  background-size:100% 100%;
   background-repeat:no-repeat;
+  background-position:0 0;
 
   -webkit-background-clip:text;
   background-clip:text;
-  -webkit-text-fill-color:transparent;
 
   text-shadow:
-    0 1px 0 rgba(255,245,220,.10),
-    0 3px 10px rgba(0,0,0,.28),
-    0 10px 26px rgba(0,0,0,.35);
+    0 1px 0 rgba(255,244,214,.08),
+    0 3px 10px rgba(0,0,0,.30),
+    0 10px 26px rgba(0,0,0,.36);
+}
 
-  animation:titleMetalSweep 5s linear infinite;
+.title::after{
+  content:attr(data-text);
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  white-space:pre-line;
+  line-height:inherit;
+  letter-spacing:inherit;
+  text-transform:inherit;
+  font-weight:inherit;
+  font-size:inherit;
+
+  color:transparent;
+  -webkit-text-fill-color:transparent;
+
+  background-image:linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0) 42%,
+    rgba(255,244,214,.00) 46%,
+    rgba(255,244,214,.30) 48%,
+    rgba(255,255,255,.98) 50%,
+    rgba(255,244,214,.34) 52%,
+    rgba(255,255,255,0) 56%,
+    rgba(255,255,255,0) 100%
+  );
+
+  background-size:260% 100%;
+  background-repeat:no-repeat;
+  background-position:-180% 50%;
+
+  -webkit-background-clip:text;
+  background-clip:text;
+
+  animation:titleSweep 5s linear infinite;
   will-change:background-position;
 }
 
-@keyframes titleMetalSweep{
-  from{
-    background-position:
-      0 0,
-      -220% 50%;
-  }
-  to{
-    background-position:
-      0 0,
-      220% 50%;
-  }
+@keyframes titleSweep{
+  from{ background-position:-180% 50%; }
+  to{ background-position:180% 50%; }
 }
 
     .subtitle{
@@ -1040,7 +1051,7 @@
     }
 
     @media (prefers-reduced-motion:reduce){
-      .whisper, .titleShine, .tfNoise::before, .tfNoise::after{ animation:none !important; }
+      .whisper, .title::after, .tfNoise::before, .tfNoise::after{ animation:none !important; }
       #stars{ display:none; }
       .moonWrap{ filter:none; }
     }
@@ -1235,7 +1246,7 @@
 
           <div class="titleRow">
             <img class="titleLogo" src="./logo_oficial_fundo_transparente.png" alt="Logo oficial Prelúdio Jogos" referrerpolicy="no-referrer">
-            <h1 class="title">PRELÚDIO<br>JOGOS</h1>
+            <h1 class="title" data-text="PRELÚDIO JOGOS">PRELÚDIO<br>JOGOS</h1>
           </div>
 
           <p class="subtitle">
