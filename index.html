@@ -165,6 +165,11 @@
       animation:tfSweep 1.3s linear infinite;
     }
 
+    #transmissionField.isTyping .tfNoise::after{
+      animation:none !important;
+      opacity:0 !important;
+    }
+
     .tfCore{
       position:relative;
       border-radius:18px;
@@ -1262,6 +1267,7 @@
       function resetField(){
         clearInterval(typeTimer);
         clearTimeout(endTimer);
+        field.classList.remove("isTyping");
         if (staticStopFn) {
           staticStopFn();
           staticStopFn = null;
@@ -1276,6 +1282,7 @@
         clearInterval(typeTimer);
         msgEl.textContent = "";
         ghostEl.textContent = "";
+        field.classList.add("isTyping");
         var i = 0;
 
         typeTimer = setInterval(function(){
@@ -1301,6 +1308,7 @@
         clearInterval(typeTimer);
         clearTimeout(endTimer);
 
+        field.classList.remove("isTyping");
         titleEl.textContent = "";
         msgEl.textContent = "";
         ghostEl.textContent = "";
@@ -2366,6 +2374,7 @@
 
         var now = audioCtx.currentTime;
         var duration = Math.max(8, totalDur || 16);
+        var STATIC_MUL = 3;
 
         var noise = createBrownNoise(audioCtx);
 
@@ -2386,8 +2395,8 @@
 
         var staticGain = audioCtx.createGain();
         staticGain.gain.setValueAtTime(0.00001, now);
-        staticGain.gain.exponentialRampToValueAtTime(0.22, now + 0.25);
-        staticGain.gain.setValueAtTime(0.22, now + duration - 0.30);
+        staticGain.gain.exponentialRampToValueAtTime(0.66, now + 0.25);
+        staticGain.gain.setValueAtTime(0.66, now + duration - 0.30);
         staticGain.gain.exponentialRampToValueAtTime(0.00001, now + duration);
 
         noise.connect(hp);
@@ -2427,8 +2436,8 @@
 
         var shimmerGain = audioCtx.createGain();
         shimmerGain.gain.setValueAtTime(0.00001, now);
-        shimmerGain.gain.exponentialRampToValueAtTime(0.040, now + 0.8);
-        shimmerGain.gain.setValueAtTime(0.040, now + duration - 0.4);
+        shimmerGain.gain.exponentialRampToValueAtTime(0.120, now + 0.8);
+        shimmerGain.gain.setValueAtTime(0.120, now + duration - 0.4);
         shimmerGain.gain.exponentialRampToValueAtTime(0.00001, now + duration);
 
         shimmerNoise.connect(shimmerHP);
@@ -2456,7 +2465,7 @@
 
           var cGain = audioCtx.createGain();
           cGain.gain.setValueAtTime(0.00001, tt);
-          cGain.gain.exponentialRampToValueAtTime(0.0014 + Math.random()*0.0010, tt + 0.008);
+          cGain.gain.exponentialRampToValueAtTime((0.0014 + Math.random()*0.0010) * STATIC_MUL, tt + 0.008);
           cGain.gain.exponentialRampToValueAtTime(0.00001, tt + 0.040);
 
           cOsc.connect(cBP);
