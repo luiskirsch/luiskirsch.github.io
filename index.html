@@ -173,66 +173,121 @@
     }
 
     .tfNoise::before,
-    .tfNoise::after{
-      border-radius:24px;
-    }
+#transmissionField{
+  position:fixed;
+  left:5.6vw;
+  top:18.5vh;
+  width:min(560px, 37vw);
+  min-height:96px;
+  z-index:90;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity .35s ease, transform .35s ease;
+  mix-blend-mode:normal;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  contain:layout style;
+}
 
-    .tfNoise::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        repeating-linear-gradient(
-          180deg,
-          rgba(255,255,255,0) 0px,
-          rgba(255,255,255,0) 4px,
-          rgba(255,255,255,.055) 5px,
-          rgba(255,255,255,0) 6px
-        );
-      animation:tfFlicker .10s linear infinite;
-    }
+#transmissionField.isActive{
+  opacity:1;
+  transform:translateY(0);
+}
 
-    .tfNoise::after{
-      content:"";
-      position:absolute;
-      left:-30%;
-      top:0;
-      width:30%;
-      height:100%;
-      background:linear-gradient(90deg, rgba(255,255,255,0), rgba(230,192,123,.22), rgba(255,255,255,0));
-      filter:blur(8px);
-      opacity:.7;
-      animation:tfSweep 1.3s linear infinite;
-    }
+#transmissionField::before{
+  content:"";
+  position:absolute;
+  inset:-22px;
+  border-radius:40px;
+  pointer-events:none;
+  background:
+    radial-gradient(
+      120% 100% at 50% 50%,
+      rgba(230,192,123,.16) 0%,
+      rgba(230,192,123,.11) 22%,
+      rgba(230,192,123,.06) 44%,
+      rgba(230,192,123,.025) 60%,
+      rgba(230,192,123,0) 78%
+    );
+  filter:blur(22px);
+  opacity:0;
+  transition:opacity .35s ease;
+}
 
-    #transmissionField.isTyping .tfNoise::after{
-      animation:none !important;
-      opacity:0 !important;
-    }
+#transmissionField.isActive::before{
+  opacity:1;
+}
 
-    .tfCore{
-      position:relative;
-      border-radius:18px;
-      padding:16px 18px 14px;
-      border:1px solid rgba(230,192,123,.16);
-      background:linear-gradient(180deg, rgba(20,20,24,.72), rgba(10,10,14,.62));
-      box-shadow:
-        0 0 32px rgba(230,192,123,.08),
-        inset 0 0 24px rgba(255,255,255,.02);
-      backdrop-filter:none;
-      -webkit-backdrop-filter:none;
-      overflow:hidden;
-      transform:translateZ(0);
-      contain:paint;
-    }
+.tfNoise{
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  overflow:hidden;
+  opacity:.55;
+}
 
-    .tfCore::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
-      pointer-events:none;
-    }
+.tfNoise::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255,255,255,0) 0px,
+      rgba(255,255,255,0) 4px,
+      rgba(255,255,255,.055) 5px,
+      rgba(255,255,255,0) 6px
+    );
+  animation:tfFlicker .10s linear infinite;
+}
+
+.tfNoise::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0) 0%,
+      rgba(230,192,123,.18) 42%,
+      rgba(255,255,255,0) 62%
+    );
+  transform:translateX(-100%);
+  filter:blur(10px);
+  opacity:.7;
+  animation:tfSweep 1.35s linear infinite;
+}
+
+#transmissionField.isTyping .tfNoise::after{
+  animation:none !important;
+  opacity:0 !important;
+}
+
+.tfCore{
+  position:relative;
+  border-radius:18px;
+  padding:16px 18px 14px;
+  border:1px solid rgba(230,192,123,.16);
+  background:
+    linear-gradient(180deg, rgba(20,20,24,.78), rgba(8,8,12,.72));
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.025) inset,
+    0 0 28px rgba(230,192,123,.06),
+    inset 0 0 24px rgba(255,255,255,.02);
+  overflow:hidden;
+}
+
+.tfCore::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+  pointer-events:none;
+}
 
     .tfTitle{
       position:relative;
@@ -374,41 +429,42 @@
     }
 
     .title{
-      margin:0;
-      line-height:1.04;
-      padding-bottom:.06em;
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      font-weight:700;
-      font-size:clamp(48px, 6.2vw, 110px);
-      color:transparent;
-      background-image:
-        linear-gradient(
-          90deg,
-          rgba(230,192,123,.42) 0%,
-          rgba(230,192,123,.62) 16%,
-          rgba(255,244,220,.96) 28%,
-          rgba(230,192,123,.88) 40%,
-          rgba(230,192,123,.50) 54%,
-          rgba(255,250,235,.98) 68%,
-          rgba(230,192,123,.76) 80%,
-          rgba(230,192,123,.42) 100%
-        );
-      background-size:320% 100%;
-      background-position:0% 50%;
-      -webkit-background-clip:text;
-      background-clip:text;
-      text-shadow:
-        0 20px 70px rgba(0,0,0,.55),
-        0 0 26px rgba(230,192,123,.10);
-      animation:shineText 12s linear infinite;
-      will-change:background-position;
-    }
+  margin:0;
+  line-height:1.04;
+  padding-bottom:.06em;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  font-weight:700;
+  font-size:clamp(48px, 6.2vw, 110px);
+  color:transparent;
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(230,192,123,.42) 0%,
+      rgba(230,192,123,.62) 14%,
+      rgba(255,244,220,.98) 22%,
+      rgba(230,192,123,.86) 30%,
+      rgba(230,192,123,.50) 42%,
+      rgba(255,248,230,.96) 52%,
+      rgba(230,192,123,.78) 64%,
+      rgba(230,192,123,.44) 100%
+    );
+  background-size:240% 100%;
+  background-repeat:repeat-x;
+  background-position:0% 50%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  text-shadow:
+    0 20px 70px rgba(0,0,0,.55),
+    0 0 18px rgba(230,192,123,.08);
+  animation:shineText 8.5s linear infinite;
+  will-change:background-position;
+}
 
-    @keyframes shineText{
-      0%{ background-position:0% 50%; }
-      100%{ background-position:320% 50%; }
-    }
+@keyframes shineText{
+  from{ background-position:0% 50%; }
+  to{ background-position:240% 50%; }
+}
 
     .subtitle{
       margin:12px 0 0;
@@ -924,21 +980,21 @@
       }
 
       #transmissionField{
-        left:50%;
-        top:50%;
-        width:min(88vw, 420px);
-        transform:translate(-50%, calc(-50% + 12px));
-      }
+  left:50%;
+  top:50%;
+  width:min(88vw, 420px);
+  transform:translate(-50%, calc(-50% + 12px));
+}
 
-      #transmissionField::before{
-        inset:-16px -14px -16px -14px;
-        border-radius:34px;
-        filter:blur(16px);
-      }
+#transmissionField.isActive{
+  transform:translate(-50%, -50%);
+}
 
-      #transmissionField.isActive{
-        transform:translate(-50%, -50%);
-      }
+#transmissionField::before{
+  inset:-18px;
+  border-radius:34px;
+  filter:blur(18px);
+}
 
       .tfMessage,.tfGhost{
         font-size:clamp(14px, 3.9vw, 18px);
