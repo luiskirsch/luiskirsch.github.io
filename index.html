@@ -1515,7 +1515,7 @@ if (!canvas || !canvas.getContext) return;
 var ctx = canvas.getContext("2d", { alpha:true });
 if (!ctx) return;
 
-var device = window.PRELUDIO_DEVICE || {
+var device = window.__PRELUDIO_DEVICE__ || {
 kind: "desktop",
 finalTier: "max",
 prefersReduced: false,
