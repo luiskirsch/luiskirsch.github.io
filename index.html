@@ -451,20 +451,49 @@
   font-weight:700;
   font-size:clamp(48px, 6.2vw, 110px);
   color:transparent;
+
   background-image:
     linear-gradient(
+      180deg,
+      #3f2b0f 0%,
+      #6e4a18 10%,
+      #b88435 24%,
+      #f0d38a 38%,
+      #fff1c8 48%,
+      #f5d98f 54%,
+      #c69242 66%,
+      #7a531d 82%,
+      #3e2a10 100%
+    ),
+    linear-gradient(
       90deg,
-      rgba(230,192,123,.60) 0%,
-      rgba(230,192,123,.92) 28%,
-      rgba(255,255,255,.92) 48%,
-      rgba(230,192,123,.92) 58%,
-      rgba(230,192,123,.60) 100%
+      rgba(255,255,255,0) 0%,
+      rgba(255,245,220,0) 42%,
+      rgba(255,248,230,.10) 47%,
+      rgba(255,255,255,.92) 50%,
+      rgba(255,244,210,.18) 53%,
+      rgba(255,255,255,0) 58%,
+      rgba(255,255,255,0) 100%
     );
-  background-size:260% 100%;
-  background-position:-35% 50%;
+
+  background-size:
+    100% 100%,
+    260% 100%;
+
+  background-repeat:no-repeat;
+  background-position:
+    0 0,
+    -35% 50%;
+
   -webkit-background-clip:text;
   background-clip:text;
-  text-shadow:0 20px 70px rgba(0,0,0,.55);
+
+  text-shadow:
+    0 1px 0 rgba(255,245,220,.10),
+    0 2px 0 rgba(60,35,10,.35),
+    0 10px 24px rgba(0,0,0,.30),
+    0 18px 50px rgba(0,0,0,.42);
+
   animation:shineText 7.8s linear infinite;
 }
 
