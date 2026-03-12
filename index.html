@@ -1,376 +1,558 @@
 <!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contagem Regressiva — MyDrugs 2.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Prelúdio Jogos — Contagem Regressiva</title>
+  <meta name="description" content="Contagem regressiva oficial da Prelúdio Jogos até 30 de junho de 2026 às 20h." />
   <style>
     :root{
-      --bg:#000000;
-      --panel:#0a0a0a;
-      --text:#f5f5f5;
-      --muted:#cfcfcf;
-      --blue-1:#b8ecff;
-      --blue-2:#76cfff;
-      --blue-3:#2ca5ff;
-      --glass:rgba(255,255,255,.12);
-      --glass-2:rgba(255,255,255,.22);
-      --shadow:0 0 30px rgba(87,175,255,.18), 0 0 80px rgba(87,175,255,.08);
+      --bg:#020304;
+      --bg-soft:#07111a;
+      --text:#f5f7fb;
+      --muted:#cfd7e3;
+      --steel-1:#f3f7ff;
+      --steel-2:#a8b4c7;
+      --steel-3:#5f6c80;
+      --steel-4:#2d3746;
+      --blue-1:#daf6ff;
+      --blue-2:#8fd9ff;
+      --blue-3:#48b7f4;
+      --blue-4:#138ad8;
+      --blue-glow:rgba(84,190,255,.26);
+      --panel-glow:rgba(56,130,255,.10);
+      --shadow:0 20px 70px rgba(0,0,0,.55);
     }*{box-sizing:border-box}
 html,body{height:100%}
 body{
   margin:0;
-  background:radial-gradient(circle at 50% 35%, #101623 0%, #040608 38%, #000 72%);
+  min-height:100vh;
   color:var(--text);
-  font-family:Inter, Arial, Helvetica, sans-serif;
-  overflow:hidden;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(45vw 45vw at 22% 48%, rgba(28,120,220,.12), transparent 60%),
+    radial-gradient(38vw 38vw at 68% 28%, rgba(20,88,180,.10), transparent 62%),
+    radial-gradient(60vw 60vw at 50% 50%, rgba(255,255,255,.02), transparent 68%),
+    linear-gradient(180deg, #030608 0%, #010203 45%, #000000 100%);
+  overflow-x:hidden;
 }
 
-.scene{
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.015), rgba(255,255,255,0) 14%, rgba(255,255,255,0) 86%, rgba(255,255,255,.015)),
+    linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0) 22%, rgba(255,255,255,0) 78%, rgba(255,255,255,.02));
+  mix-blend-mode:screen;
+  opacity:.35;
+}
+
+.page{
   min-height:100vh;
   display:grid;
-  grid-template-columns:minmax(320px, 520px) 1fr;
+  place-items:center;
+  padding:28px;
+}
+
+.hero{
+  width:min(1380px, 100%);
+  min-height:calc(100vh - 56px);
+  display:grid;
+  grid-template-columns:minmax(320px, 470px) minmax(360px, 720px);
   align-items:center;
-  gap:min(5vw,80px);
-  padding:min(5vw,56px);
+  justify-content:center;
+  gap:clamp(32px, 4vw, 72px);
+}
+
+.left,
+.right{
+  position:relative;
+  z-index:1;
 }
 
 .left{
   display:flex;
-  align-items:center;
   justify-content:center;
-  min-height:70vh;
+  align-items:center;
+}
+
+.hourglass-wrap{
+  position:relative;
+  width:min(30vw, 360px);
+  min-width:260px;
+  aspect-ratio:0.78 / 1.55;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  filter:drop-shadow(0 0 18px rgba(120,210,255,.08)) drop-shadow(0 0 44px rgba(54,123,255,.12));
+}
+
+.hourglass-wrap::before{
+  content:"";
+  position:absolute;
+  inset:11% 17%;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(91,189,255,.16), rgba(91,189,255,0) 70%);
+  filter:blur(24px);
+  transform:scale(1.1);
+  pointer-events:none;
+}
+
+.hourglass{
+  width:100%;
+  height:100%;
+  display:block;
 }
 
 .right{
   display:flex;
   flex-direction:column;
   justify-content:center;
-  gap:24px;
-  max-width:820px;
+  align-items:flex-start;
+  gap:12px;
 }
 
-.headline-top{
+.eyebrow{
   margin:0;
-  font-size:clamp(32px,4vw,72px);
+  font-size:clamp(28px, 2.6vw, 64px);
+  line-height:1;
   font-weight:800;
-  line-height:.95;
-  letter-spacing:-.04em;
+  letter-spacing:-.03em;
+  color:#ffffff;
+  text-wrap:balance;
 }
 
-.headline-main{
+.title{
   margin:0;
-  font-size:clamp(52px,8vw,124px);
-  font-weight:900;
+  font-size:clamp(56px, 7.3vw, 128px);
   line-height:.92;
+  font-weight:900;
   letter-spacing:-.06em;
+  color:#f2f5f9;
+  text-shadow:0 10px 30px rgba(0,0,0,.45);
+  text-wrap:balance;
 }
 
 .countdown{
-  display:flex;
-  gap:clamp(8px,1.2vw,18px);
-  flex-wrap:wrap;
-  align-items:flex-end;
+  margin-top:8px;
+  display:grid;
+  grid-template-columns:repeat(4, minmax(108px, 1fr));
+  gap:14px;
+  width:min(100%, 680px);
 }
 
-.unit{
-  min-width:min(18vw,150px);
+.time-box{
+  position:relative;
+  border-radius:22px;
+  padding:18px 14px 14px;
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 14px 40px rgba(0,0,0,.22);
   text-align:center;
+  backdrop-filter:blur(4px);
 }
 
-.value{
-  font-size:clamp(44px,7vw,108px);
+.time-value{
+  display:block;
+  font-size:clamp(42px, 5vw, 78px);
+  line-height:.95;
   font-weight:900;
-  line-height:.86;
   letter-spacing:-.05em;
+  color:#fbfdff;
   font-variant-numeric:tabular-nums;
+  text-shadow:0 8px 18px rgba(0,0,0,.35);
 }
 
-.dots{
-  font-size:clamp(42px,6vw,92px);
-  font-weight:900;
-  line-height:1;
-  transform:translateY(-10px);
-  opacity:.95;
-}
-
-.label{
-  margin-top:10px;
-  font-size:clamp(12px,1vw,18px);
+.time-label{
+  display:block;
+  margin-top:8px;
+  font-size:clamp(12px, .95vw, 15px);
+  letter-spacing:.26em;
+  text-transform:uppercase;
+  color:rgba(235,241,250,.78);
   font-weight:700;
-  letter-spacing:.35em;
-  color:var(--muted);
 }
 
-.coming{
-  margin:0;
-  font-size:clamp(34px,5vw,84px);
-  font-weight:800;
+.soon{
+  margin:12px 0 0;
+  font-size:clamp(34px, 4vw, 68px);
   line-height:1;
+  font-weight:900;
   letter-spacing:-.04em;
+  color:#ffffff;
+  text-shadow:0 10px 26px rgba(0,0,0,.35);
 }
 
-.date-line{
-  color:#a8b7d4;
-  font-size:clamp(14px,1.1vw,20px);
-  letter-spacing:.12em;
+.launch-line{
+  margin:8px 0 0;
+  font-size:clamp(13px, 1vw, 17px);
+  color:rgba(214,224,237,.72);
+  letter-spacing:.08em;
   text-transform:uppercase;
 }
 
-.hourglass-wrap{
-  width:min(100%,440px);
-  aspect-ratio:0.7/1.1;
-  position:relative;
-  filter:drop-shadow(0 0 30px rgba(120,200,255,.16));
+.progress{
+  margin-top:16px;
+  width:min(100%, 620px);
+  height:10px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:inset 0 0 24px rgba(0,0,0,.35);
 }
 
-.hourglass-wrap svg{
-  width:100%;
-  height:100%;
+.progress > span{
   display:block;
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:linear-gradient(90deg, rgba(143,217,255,.35), rgba(72,183,244,.95), rgba(218,246,255,.95));
+  box-shadow:0 0 20px rgba(72,183,244,.35);
+  transition:width .6s ease;
 }
 
-.glow{
+.footer-note{
+  margin-top:10px;
+  font-size:12px;
+  color:rgba(214,224,237,.54);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+
+.sr-only{
   position:absolute;
-  inset:auto 12% 12% 12%;
-  height:20%;
-  background:radial-gradient(circle, rgba(66,178,255,.24) 0%, rgba(66,178,255,.08) 40%, rgba(66,178,255,0) 72%);
-  filter:blur(18px);
-  pointer-events:none;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
 }
 
-@media (max-width:900px){
-  body{overflow:auto}
-  .scene{
+@media (max-width: 1120px){
+  .hero{
+    grid-template-columns:minmax(260px, 360px) minmax(320px, 1fr);
+    gap:40px;
+  }
+  .hourglass-wrap{ width:min(34vw, 310px); }
+  .countdown{ grid-template-columns:repeat(4, minmax(90px, 1fr)); }
+}
+
+@media (max-width: 900px){
+  .page{ padding:24px 18px; }
+  .hero{
+    min-height:auto;
     grid-template-columns:1fr;
-    gap:20px;
+    gap:26px;
     text-align:center;
   }
-  .right{align-items:center}
-  .countdown{justify-content:center}
-  .unit{min-width:90px}
-  .dots{transform:none}
-  .left{min-height:auto}
-  .hourglass-wrap{width:min(82vw,360px)}
+  .left{ order:1; }
+  .right{
+    order:2;
+    align-items:center;
+  }
+  .hourglass-wrap{
+    width:min(62vw, 280px);
+    min-width:220px;
+  }
+  .countdown{
+    width:100%;
+    max-width:560px;
+  }
+  .progress{
+    width:min(100%, 560px);
+  }
+}
+
+@media (max-width: 560px){
+  .page{ padding:20px 14px; }
+  .hero{ gap:18px; }
+  .hourglass-wrap{
+    width:min(72vw, 250px);
+    min-width:190px;
+  }
+  .eyebrow{ font-size:clamp(22px, 7vw, 34px); }
+  .title{ font-size:clamp(42px, 16vw, 78px); }
+  .countdown{
+    grid-template-columns:repeat(2, 1fr);
+    gap:10px;
+  }
+  .time-box{
+    padding:14px 10px 12px;
+    border-radius:18px;
+  }
+  .time-value{ font-size:clamp(34px, 11vw, 54px); }
+  .time-label{ font-size:11px; }
+  .soon{ font-size:clamp(30px, 11vw, 48px); }
+  .launch-line{ font-size:11px; line-height:1.5; }
+  .footer-note{ font-size:10px; letter-spacing:.14em; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .progress > span{ transition:none; }
 }
 
   </style>
 </head>
 <body>
-  <main class="scene">
-    <section class="left" aria-hidden="true">
-      <div class="hourglass-wrap">
-        <div class="glow"></div>
-        <svg viewBox="0 0 420 660" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ampulheta com contagem regressiva">
-          <defs>
-            <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#e8f1ff"/>
-              <stop offset="18%" stop-color="#7e8da8"/>
-              <stop offset="50%" stop-color="#f7fbff"/>
-              <stop offset="78%" stop-color="#6f7e98"/>
-              <stop offset="100%" stop-color="#dbe8ff"/>
-            </linearGradient>
-            <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="rgba(255,255,255,.22)"/>
-              <stop offset="100%" stop-color="rgba(255,255,255,.04)"/>
-            </linearGradient>
-            <linearGradient id="sandGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#d7f8ff"/>
-              <stop offset="40%" stop-color="#8ee0ff"/>
-              <stop offset="70%" stop-color="#4fbfff"/>
-              <stop offset="100%" stop-color="#1e8fff"/>
-            </linearGradient>
-            <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="8" result="blur"/>
-              <feMerge>
-                <feMergeNode in="blur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-            <clipPath id="topBowlClip">
-              <path d="M118 116 H302 C296 178 266 245 232 288 C225 297 219 304 210 314 C201 304 195 297 188 288 C154 245 124 178 118 116 Z"/>
-            </clipPath>
-            <clipPath id="bottomBowlClip">
-              <path d="M188 348 C195 339 201 332 210 322 C219 332 225 339 232 348 C266 391 296 458 302 520 H118 C124 458 154 391 188 348 Z"/>
-            </clipPath>
-          </defs><!-- outer frame -->
-      <g fill="none" stroke="url(#metal)">
-        <path d="M86 30 H334" stroke-width="16" stroke-linecap="round"/>
-        <path d="M78 612 H342" stroke-width="16" stroke-linecap="round"/>
-        <path d="M112 28 C106 78 106 562 112 612" stroke-width="8" opacity=".96"/>
-        <path d="M308 28 C314 78 314 562 308 612" stroke-width="8" opacity=".96"/>
-        <path d="M70 38 C72 92 72 548 70 602" stroke-width="4" opacity=".85"/>
-        <path d="M350 38 C348 92 348 548 350 602" stroke-width="4" opacity=".85"/>
-        <circle cx="112" cy="170" r="8" fill="url(#metal)"/>
-        <circle cx="308" cy="170" r="8" fill="url(#metal)"/>
-        <circle cx="112" cy="470" r="8" fill="url(#metal)"/>
-        <circle cx="308" cy="470" r="8" fill="url(#metal)"/>
-      </g>
+  <main class="page">
+    <section class="hero" aria-label="Contagem regressiva oficial">
+      <div class="left">
+        <div class="hourglass-wrap" aria-hidden="true">
+          <svg class="hourglass" viewBox="0 0 320 620" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#f4f8ff"/>
+                <stop offset="18%" stop-color="#b7c2d4"/>
+                <stop offset="46%" stop-color="#677488"/>
+                <stop offset="72%" stop-color="#f4f8ff"/>
+                <stop offset="100%" stop-color="#394658"/>
+              </linearGradient>
+              <linearGradient id="metalDark" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#dfe7f3"/>
+                <stop offset="100%" stop-color="#546175"/>
+              </linearGradient>
+              <linearGradient id="glassStroke" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="rgba(255,255,255,.95)"/>
+                <stop offset="50%" stop-color="rgba(190,220,255,.55)"/>
+                <stop offset="100%" stop-color="rgba(255,255,255,.22)"/>
+              </linearGradient>
+              <linearGradient id="sandTop" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#e7fbff"/>
+                <stop offset="22%" stop-color="#b5ebff"/>
+                <stop offset="65%" stop-color="#54bdf5"/>
+                <stop offset="100%" stop-color="#1c8fdd"/>
+              </linearGradient>
+              <linearGradient id="sandBottom" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#bfefff"/>
+                <stop offset="28%" stop-color="#73caf8"/>
+                <stop offset="100%" stop-color="#0f7fd3"/>
+              </linearGradient>
+              <radialGradient id="glassGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="rgba(170,235,255,.22)"/>
+                <stop offset="100%" stop-color="rgba(170,235,255,0)"/>
+              </radialGradient>
+              <radialGradient id="sandShine" cx="50%" cy="20%" r="70%">
+                <stop offset="0%" stop-color="rgba(255,255,255,.55)"/>
+                <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+              </radialGradient>
+              <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="10" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="tinyGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <clipPath id="topBulbClip">
+                <path d="M92 142 C105 232, 132 275, 160 305 C188 275, 215 232, 228 142 Z" />
+              </clipPath>
+              <clipPath id="bottomBulbClip">
+                <path d="M92 478 C105 388, 132 345, 160 315 C188 345, 215 388, 228 478 Z" />
+              </clipPath>
+            </defs><ellipse cx="160" cy="312" rx="88" ry="210" fill="url(#glassGlow)" opacity=".55"/>
 
-      <!-- bowls outline -->
-      <g fill="rgba(255,255,255,.02)" stroke="rgba(235,245,255,.75)" stroke-width="4">
-        <path d="M118 116 H302 C296 178 266 245 232 288 C225 297 219 304 210 314 C201 304 195 297 188 288 C154 245 124 178 118 116 Z"/>
-        <path d="M188 348 C195 339 201 332 210 322 C219 332 225 339 232 348 C266 391 296 458 302 520 H118 C124 458 154 391 188 348 Z"/>
-      </g>
+        <g opacity=".96">
+          <rect x="116" y="30" width="88" height="14" rx="7" fill="url(#metal)"/>
+          <rect x="116" y="576" width="88" height="14" rx="7" fill="url(#metal)"/>
+          <rect x="42" y="22" width="8" height="576" rx="4" fill="url(#metalDark)"/>
+          <rect x="270" y="22" width="8" height="576" rx="4" fill="url(#metalDark)"/>
+          <rect x="84" y="28" width="10" height="564" rx="5" fill="url(#metal)" opacity=".95"/>
+          <rect x="226" y="28" width="10" height="564" rx="5" fill="url(#metal)" opacity=".95"/>
+        </g>
 
-      <!-- glass reflections -->
-      <g opacity=".48" stroke="white" stroke-width="3" fill="none">
-        <path d="M140 132 C134 186 162 244 188 276"/>
-        <path d="M286 132 C292 186 264 244 238 276"/>
-        <path d="M150 510 C146 470 168 408 196 370"/>
-        <path d="M270 510 C274 470 252 408 224 370"/>
-      </g>
+        <g opacity=".9">
+          <circle cx="89" cy="152" r="10" fill="url(#metal)"/>
+          <circle cx="231" cy="152" r="10" fill="url(#metal)"/>
+          <circle cx="89" cy="468" r="10" fill="url(#metal)"/>
+          <circle cx="231" cy="468" r="10" fill="url(#metal)"/>
+        </g>
 
-      <!-- top sand -->
-      <g clip-path="url(#topBowlClip)">
-        <path id="topSand" fill="url(#sandGrad)" filter="url(#softGlow)" d="M136 190 C162 176 194 168 210 168 C226 168 258 176 284 190 L284 314 L136 314 Z"/>
-        <ellipse cx="210" cy="186" rx="76" ry="18" fill="rgba(220,250,255,.55)"/>
-      </g>
+        <g opacity=".95">
+          <path d="M100 136 H220" stroke="rgba(235,244,255,.92)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M100 484 H220" stroke="rgba(235,244,255,.92)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M92 142 C105 232, 132 275, 160 305" fill="none" stroke="rgba(235,244,255,.92)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M228 142 C215 232, 188 275, 160 305" fill="none" stroke="rgba(235,244,255,.92)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M92 478 C105 388, 132 345, 160 315" fill="none" stroke="rgba(235,244,255,.92)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M228 478 C215 388, 188 345, 160 315" fill="none" stroke="rgba(235,244,255,.92)" stroke-width="4" stroke-linecap="round"/>
+        </g>
 
-      <!-- bottom sand -->
-      <g clip-path="url(#bottomBowlClip)">
-        <path id="bottomSand" fill="url(#sandGrad)" filter="url(#softGlow)" d="M126 520 C146 505 178 498 210 498 C242 498 274 505 294 520 L294 520 L126 520 Z"/>
-        <ellipse id="bottomGlow" cx="210" cy="516" rx="82" ry="24" fill="rgba(220,250,255,.42)"/>
-      </g>
+        <g opacity=".30">
+          <path d="M122 164 C130 214, 144 252, 155 275" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+          <path d="M117 458 C124 415, 139 374, 151 348" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        </g>
 
-      <!-- falling stream -->
-      <g id="streamGroup" filter="url(#softGlow)">
-        <rect id="stream" x="206" y="300" width="8" height="118" rx="4" fill="url(#sandGrad)"/>
-        <circle id="drop1" cx="210" cy="370" r="7" fill="#a2ebff"/>
-        <circle id="drop2" cx="210" cy="404" r="5" fill="#8bdfff" opacity=".85"/>
-      </g>
+        <g clip-path="url(#topBulbClip)">
+          <rect x="88" y="120" width="144" height="190" fill="rgba(9,20,28,.42)"/>
+          <path id="topSand" d="M97 178 C126 170, 194 170, 223 178 L223 305 L97 305 Z" fill="url(#sandTop)" filter="url(#softGlow)"/>
+          <ellipse id="topSurface" cx="160" cy="178" rx="63" ry="10" fill="url(#sandShine)" opacity=".95"/>
+        </g>
 
-      <!-- center crystal accent -->
-      <g transform="translate(210 322)">
-        <path d="M0 -13 L11 0 L0 13 L-11 0 Z" fill="rgba(182,242,255,.85)" stroke="rgba(255,255,255,.92)" stroke-width="2"/>
-      </g>
-    </svg>
+        <g clip-path="url(#bottomBulbClip)">
+          <rect x="88" y="315" width="144" height="170" fill="rgba(9,20,28,.36)"/>
+          <path id="bottomSand" d="M111 476 C124 454, 141 440, 160 438 C179 440, 196 454, 209 476 L209 484 L111 484 Z" fill="url(#sandBottom)" filter="url(#softGlow)"/>
+          <ellipse id="bottomSurface" cx="160" cy="476" rx="49" ry="9" fill="rgba(225,249,255,.28)"/>
+        </g>
+
+        <g filter="url(#tinyGlow)">
+          <rect id="stream" x="157.3" y="298" width="5.4" height="122" rx="2.7" fill="url(#sandTop)" opacity=".95"/>
+          <circle id="dropA" cx="160" cy="325" r="4.5" fill="#c9f2ff"/>
+          <circle id="dropB" cx="160" cy="364" r="3.9" fill="#9fe1ff"/>
+          <circle id="dropC" cx="160" cy="404" r="5.5" fill="#61c6ff"/>
+        </g>
+
+        <ellipse cx="160" cy="520" rx="54" ry="28" fill="rgba(74,178,255,.10)" filter="url(#softGlow)"/>
+      </svg>
+    </div>
   </div>
-</section>
 
-<section class="right">
-  <p class="headline-top">Pronto para</p>
-  <h1 class="headline-main">MyDrugs 2.0?</h1>
+  <div class="right">
+    <p class="eyebrow">Pronto para</p>
+    <h1 class="title">O SextoLugar?</h1>
 
-  <div class="countdown" aria-live="polite" aria-atomic="true">
-    <div class="unit">
-      <div class="value" id="days">00</div>
-      <div class="label">D</div>
+    <div class="countdown" aria-live="polite" aria-atomic="true">
+      <div class="time-box">
+        <span class="time-value" id="days">00</span>
+        <span class="time-label">Dias</span>
+      </div>
+      <div class="time-box">
+        <span class="time-value" id="hours">00</span>
+        <span class="time-label">Horas</span>
+      </div>
+      <div class="time-box">
+        <span class="time-value" id="minutes">00</span>
+        <span class="time-label">Minutos</span>
+      </div>
+      <div class="time-box">
+        <span class="time-value" id="seconds">00</span>
+        <span class="time-label">Segundos</span>
+      </div>
     </div>
-    <div class="dots">:</div>
-    <div class="unit">
-      <div class="value" id="hours">00</div>
-      <div class="label">H</div>
-    </div>
-    <div class="dots">:</div>
-    <div class="unit">
-      <div class="value" id="minutes">00</div>
-      <div class="label">M</div>
-    </div>
-    <div class="dots">:</div>
-    <div class="unit">
-      <div class="value" id="seconds">00</div>
-      <div class="label">S</div>
-    </div>
+
+    <p class="soon" id="statusText">Em breve!</p>
+    <p class="launch-line">Lançamento em 30 de junho de 2026 às 20h</p>
+    <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+    <p class="footer-note">Prelúdio Jogos • Contagem oficial</p>
   </div>
-
-  <p class="coming" id="statusText">Em breve!</p>
-  <div class="date-line" id="dateLine">Lançamento: 30 de junho de 2026 às 20h</div>
 </section>
 
   </main>  <script>
     (function(){
-      const target = new Date('2026-06-30T20:00:00-03:00');
-      const launchStart = new Date('2026-03-12T00:00:00-03:00');
+      const TARGET = new Date('2026-06-30T20:00:00-03:00').getTime();
+      const START_REFERENCE = new Date('2026-03-12T00:00:00-03:00').getTime();
 
       const daysEl = document.getElementById('days');
       const hoursEl = document.getElementById('hours');
       const minutesEl = document.getElementById('minutes');
       const secondsEl = document.getElementById('seconds');
       const statusText = document.getElementById('statusText');
+      const progressBar = document.getElementById('progressBar');
 
       const topSand = document.getElementById('topSand');
+      const topSurface = document.getElementById('topSurface');
       const bottomSand = document.getElementById('bottomSand');
-      const bottomGlow = document.getElementById('bottomGlow');
+      const bottomSurface = document.getElementById('bottomSurface');
       const stream = document.getElementById('stream');
-      const drop1 = document.getElementById('drop1');
-      const drop2 = document.getElementById('drop2');
-      const streamGroup = document.getElementById('streamGroup');
+      const dropA = document.getElementById('dropA');
+      const dropB = document.getElementById('dropB');
+      const dropC = document.getElementById('dropC');
 
-      function pad(n){ return String(n).padStart(2, '0'); }
-      function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-      function lerp(a,b,t){ return a + (b-a)*t; }
-
-      function updateSand(progress){
-        const p = clamp(progress, 0, 1);
-        const remaining = 1 - p;
-
-        const topY = lerp(304, 166, remaining);
-        const topRx = lerp(18, 78, remaining);
-        topSand.setAttribute(
-          'd',
-          `M ${210 - topRx} ${topY + 18} C ${210 - topRx*0.72} ${topY + 4} ${210 - 28} ${topY} 210 ${topY} C ${210 + 28} ${topY} ${210 + topRx*0.72} ${topY + 4} ${210 + topRx} ${topY + 18} L ${210 + topRx} 314 L ${210 - topRx} 314 Z`
-        );
-
-        const bottomY = lerp(520, 440, p);
-        const bottomRx = lerp(0, 86, p);
-        bottomSand.setAttribute(
-          'd',
-          `M ${210 - bottomRx} 520 C ${210 - bottomRx*0.78} ${bottomY + 12} ${210 - 34} ${bottomY} 210 ${bottomY} C ${210 + 34} ${bottomY} ${210 + bottomRx*0.78} ${bottomY + 12} ${210 + bottomRx} 520 L ${210 + bottomRx} 520 L ${210 - bottomRx} 520 Z`
-        );
-        bottomGlow.setAttribute('cy', String(bottomY + 16));
-        bottomGlow.setAttribute('rx', String(lerp(8, 84, p)));
-
-        const finished = p >= 0.9999;
-        streamGroup.style.opacity = finished ? '0' : '1';
+      function pad(n){
+        return String(Math.max(0, n)).padStart(2, '0');
       }
 
-      function updateCountdown(){
-        const now = new Date();
-        let diff = target.getTime() - now.getTime();
+      function clamp(v, min, max){
+        return Math.max(min, Math.min(max, v));
+      }
+
+      function setHourglass(progress){
+        progress = clamp(progress, 0, 1);
+
+        const topY = 178 + (96 * progress);
+        const topHalfW = 63 - (41 * progress);
+        const topLeft = 160 - topHalfW;
+        const topRight = 160 + topHalfW;
+
+        topSand.setAttribute(
+          'd',
+          `M ${topLeft.toFixed(2)} ${topY.toFixed(2)} C ${(160-28).toFixed(2)} ${(topY-8).toFixed(2)}, ${(160+28).toFixed(2)} ${(topY-8).toFixed(2)}, ${topRight.toFixed(2)} ${topY.toFixed(2)} L 223 305 L 97 305 Z`
+        );
+        topSurface.setAttribute('cy', topY.toFixed(2));
+        topSurface.setAttribute('rx', Math.max(12, topHalfW).toFixed(2));
+        topSurface.style.opacity = String(0.92 - (progress * 0.45));
+
+        const pileHeight = 38 + (58 * progress);
+        const pileWidth = 36 + (20 * progress);
+        const baseY = 484;
+        const peakY = baseY - pileHeight;
+        const leftX = 160 - pileWidth;
+        const rightX = 160 + pileWidth;
+
+        bottomSand.setAttribute(
+          'd',
+          `M ${leftX.toFixed(2)} ${baseY.toFixed(2)} C ${(160-28).toFixed(2)} ${(peakY+10).toFixed(2)}, ${(160-12).toFixed(2)} ${peakY.toFixed(2)}, 160 ${peakY.toFixed(2)} C ${(160+12).toFixed(2)} ${peakY.toFixed(2)}, ${(160+28).toFixed(2)} ${(peakY+10).toFixed(2)}, ${rightX.toFixed(2)} ${baseY.toFixed(2)} Z`
+        );
+        bottomSurface.setAttribute('cy', (peakY + 4).toFixed(2));
+        bottomSurface.setAttribute('rx', Math.max(20, pileWidth - 6).toFixed(2));
+
+        const streamHeight = 128 - (progress * 18);
+        const streamY = 298;
+        stream.setAttribute('y', streamY.toFixed(2));
+        stream.setAttribute('height', Math.max(78, streamHeight).toFixed(2));
+
+        const time = Date.now() / 1000;
+        dropA.setAttribute('cy', (320 + ((time * 42) % 76)).toFixed(2));
+        dropB.setAttribute('cy', (344 + (((time + 0.38) * 42) % 74)).toFixed(2));
+        dropC.setAttribute('cy', (366 + (((time + 0.74) * 42) % 72)).toFixed(2));
+      }
+
+      function update(){
+        const now = Date.now();
+        let diff = TARGET - now;
 
         if (diff <= 0){
           daysEl.textContent = '00';
           hoursEl.textContent = '00';
           minutesEl.textContent = '00';
           secondsEl.textContent = '00';
-          statusText.textContent = 'Chegou a hora!';
-          updateSand(1);
+          statusText.textContent = 'Chegou a hora.';
+          progressBar.style.width = '100%';
+          setHourglass(1);
           return;
         }
 
-        const days = Math.floor(diff / 86400000);
-        diff -= days * 86400000;
-        const hours = Math.floor(diff / 3600000);
-        diff -= hours * 3600000;
-        const minutes = Math.floor(diff / 60000);
-        diff -= minutes * 60000;
-        const seconds = Math.floor(diff / 1000);
+        const totalSeconds = Math.floor(diff / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
 
         daysEl.textContent = pad(days);
         hoursEl.textContent = pad(hours);
         minutesEl.textContent = pad(minutes);
         secondsEl.textContent = pad(seconds);
+
         statusText.textContent = 'Em breve!';
 
-        const total = target.getTime() - launchStart.getTime();
-        const elapsed = now.getTime() - launchStart.getTime();
-        updateSand(total > 0 ? elapsed / total : 0);
+        const totalRange = TARGET - START_REFERENCE;
+        const elapsed = now - START_REFERENCE;
+        const progress = clamp(elapsed / totalRange, 0, 1);
+        progressBar.style.width = (progress * 100).toFixed(2) + '%';
+        setHourglass(progress);
       }
 
-      let t = 0;
-      function animateDrops(){
-        t += 0.03;
-        const y1 = 332 + ((Math.sin(t * 1.1) + 1) * 0.5) * 78;
-        const y2 = 352 + ((Math.sin((t + 1.9) * 1.25) + 1) * 0.5) * 58;
-        drop1.setAttribute('cy', y1.toFixed(2));
-        drop2.setAttribute('cy', y2.toFixed(2));
-        stream.setAttribute('height', (120 + Math.sin(t) * 6).toFixed(2));
-        requestAnimationFrame(animateDrops);
-      }
-
-      updateCountdown();
-      setInterval(updateCountdown, 1000);
-      animateDrops();
+      update();
+      setInterval(update, 1000);
     })();
   </script></body>
 </html>
