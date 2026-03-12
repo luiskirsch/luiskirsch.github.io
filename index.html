@@ -220,6 +220,13 @@ const progressBar=document.getElementById('progressBar');
 const statusText=document.getElementById('statusText');
 const tick=document.getElementById('tickSound');
 
+let audioEnabled=false;
+
+document.addEventListener("click",()=>{
+audioEnabled=true;
+tick.volume=0.4;
+},{once:true});
+
 function pad(n){
 return String(Math.max(0,n)).padStart(2,'0');
 }
@@ -255,8 +262,10 @@ hoursEl.textContent=pad(hours);
 minutesEl.textContent=pad(minutes);
 secondsEl.textContent=pad(seconds);
 
+if(audioEnabled){
 tick.currentTime=0;
 tick.play().catch(()=>{});
+}
 
 const totalRange=TARGET-START_REFERENCE;
 const elapsed=now-START_REFERENCE;
