@@ -259,40 +259,40 @@ body{
       const gain = audioCtx.createGain();
       const filter = audioCtx.createBiquadFilter();
 
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1450, now);
-      osc.frequency.exponentialRampToValueAtTime(920, now + 0.055);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1850, now);
+      osc.frequency.exponentialRampToValueAtTime(1320, now + 0.018);
 
       filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(1300, now);
-      filter.Q.setValueAtTime(2.2, now);
+      filter.frequency.setValueAtTime(2100, now);
+      filter.Q.setValueAtTime(5.5, now);
 
       gain.gain.setValueAtTime(0.00001, now);
-      gain.gain.exponentialRampToValueAtTime(0.099, now + 0.004);
-      gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.065);
+      gain.gain.exponentialRampToValueAtTime(0.075, now + 0.0025);
+      gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.022);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(audioCtx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.075);
+      osc.stop(now + 0.028);
     }catch(e){}
   }
 
   function pad(n){
-    return String(Math.max(0, n)).padStart(2, '0');
+    return String(Math.max(0,n)).padStart(2,'0');
   }
 
-  function clamp(v, min, max){
-    return Math.max(min, Math.min(max, v));
+  function clamp(v,min,max){
+    return Math.max(min,Math.min(max,v));
   }
 
   function update(){
     const now = Date.now();
     let diff = TARGET - now;
 
-    if (diff <= 0){
+    if(diff <= 0){
       daysEl.textContent = '00';
       hoursEl.textContent = '00';
       minutesEl.textContent = '00';
@@ -314,7 +314,7 @@ body{
     minutesEl.textContent = pad(minutes);
     secondsEl.textContent = pad(seconds);
 
-    if (lastSecondShown !== null && seconds !== lastSecondShown){
+    if(lastSecondShown !== null && seconds !== lastSecondShown){
       playTick();
     }
     lastSecondShown = seconds;
