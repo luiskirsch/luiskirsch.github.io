@@ -76,15 +76,28 @@ body{
 
 .title{
   margin:0;
-  font-size:clamp(56px,7.3vw,128px);
-  line-height:.92;
+  line-height:1.05;
   font-weight:900;
-  letter-spacing:-.06em;
+  letter-spacing:-.05em;
   text-shadow:0 10px 30px rgba(0,0,0,.45);
 }
 
+.title span{
+  display:block;
+}
+
+.title .line1{
+  font-size:clamp(40px,4vw,64px);
+  font-weight:800;
+}
+
+.title .line2{
+  font-size:clamp(56px,7vw,128px);
+  font-weight:900;
+}
+
 .countdown{
-  margin-top:8px;
+  margin-top:12px;
   display:grid;
   grid-template-columns:repeat(4,minmax(108px,1fr));
   gap:14px;
@@ -119,7 +132,7 @@ body{
 }
 
 .soon{
-  margin:12px 0 0;
+  margin:14px 0 0;
   font-size:clamp(34px,4vw,68px);
   font-weight:900;
 }
@@ -159,60 +172,76 @@ body{
 }
 
 @media (max-width:560px){
+
   .countdown{
     grid-template-columns:repeat(2,1fr);
+    gap:14px;
   }
 
-  .page{
-    padding:
-      max(20px, env(safe-area-inset-top))
-      max(14px, env(safe-area-inset-right))
-      max(20px, env(safe-area-inset-bottom))
-      max(14px, env(safe-area-inset-left));
+  .time-value{
+    font-size:42px;
   }
+
+  .title .line1{
+    font-size:38px;
+  }
+
+  .title .line2{
+    font-size:52px;
+  }
+
 }
 </style>
 </head>
 
 <body>
 <main class="page">
-  <section class="hero">
-    <div class="right">
-      <p class="eyebrow">Pronto para</p>
-      <h1 class="title">O SextoLugar?</h1>
+<section class="hero">
 
-      <div class="countdown">
-        <div class="time-box">
-          <span class="time-value" id="days">00</span>
-          <span class="time-label">DIAS</span>
-        </div>
+<div class="right">
 
-        <div class="time-box">
-          <span class="time-value" id="hours">00</span>
-          <span class="time-label">HORAS</span>
-        </div>
+<p class="eyebrow">Pronto para</p>
 
-        <div class="time-box">
-          <span class="time-value" id="minutes">00</span>
-          <span class="time-label">MINUTOS</span>
-        </div>
+<h1 class="title">
+<span class="line1">O</span>
+<span class="line2">SextoLugar?</span>
+</h1>
 
-        <div class="time-box">
-          <span class="time-value" id="seconds">00</span>
-          <span class="time-label">SEGUNDOS</span>
-        </div>
-      </div>
+<div class="countdown">
 
-      <p class="soon" id="statusText">Em breve!</p>
-      <p class="launch-line">Lançamento em 30 de junho de 2026 às 20h</p>
+<div class="time-box">
+<span class="time-value" id="days">00</span>
+<span class="time-label">DIAS</span>
+</div>
 
-      <div class="progress">
-        <span id="progressBar"></span>
-      </div>
+<div class="time-box">
+<span class="time-value" id="hours">00</span>
+<span class="time-label">HORAS</span>
+</div>
 
-      <p class="footer-note">Prelúdio Jogos • Contagem oficial</p>
-    </div>
-  </section>
+<div class="time-box">
+<span class="time-value" id="minutes">00</span>
+<span class="time-label">MINUTOS</span>
+</div>
+
+<div class="time-box">
+<span class="time-value" id="seconds">00</span>
+<span class="time-label">SEGUNDOS</span>
+</div>
+
+</div>
+
+<p class="soon" id="statusText">Em breve!</p>
+<p class="launch-line">Lançamento em 30 de junho de 2026 às 20h</p>
+
+<div class="progress">
+<span id="progressBar"></span>
+</div>
+
+<p class="footer-note">Prelúdio Jogos • Contagem oficial</p>
+
+</div>
+</section>
 </main>
 
 <script>
@@ -252,32 +281,30 @@ body{
   function playTick(){
     if (!audioEnabled || !audioCtx) return;
 
-    try{
-      const now = audioCtx.currentTime;
+    const now = audioCtx.currentTime;
 
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const filter = audioCtx.createBiquadFilter();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
 
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(1850, now);
-      osc.frequency.exponentialRampToValueAtTime(1320, now + 0.018);
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(1850, now);
+    osc.frequency.exponentialRampToValueAtTime(1320, now + 0.018);
 
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(2100, now);
-      filter.Q.setValueAtTime(5.5, now);
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(2100, now);
+    filter.Q.setValueAtTime(5.5, now);
 
-      gain.gain.setValueAtTime(0.00001, now);
-      gain.gain.exponentialRampToValueAtTime(0.075, now + 0.0025);
-      gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.022);
+    gain.gain.setValueAtTime(0.00001, now);
+    gain.gain.exponentialRampToValueAtTime(0.075, now + 0.0025);
+    gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.022);
 
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(audioCtx.destination);
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
 
-      osc.start(now);
-      osc.stop(now + 0.028);
-    }catch(e){}
+    osc.start(now);
+    osc.stop(now + 0.028);
   }
 
   function pad(n){
@@ -293,21 +320,21 @@ body{
     let diff = TARGET - now;
 
     if(diff <= 0){
-      daysEl.textContent = '00';
-      hoursEl.textContent = '00';
-      minutesEl.textContent = '00';
-      secondsEl.textContent = '00';
-      statusText.textContent = 'Chegou a hora.';
-      progressBar.style.width = '100%';
+      daysEl.textContent='00';
+      hoursEl.textContent='00';
+      minutesEl.textContent='00';
+      secondsEl.textContent='00';
+      statusText.textContent='Chegou a hora.';
+      progressBar.style.width='100%';
       return;
     }
 
-    const totalSeconds = Math.floor(diff / 1000);
+    const totalSeconds = Math.floor(diff/1000);
 
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
+    const days = Math.floor(totalSeconds/86400);
+    const hours = Math.floor((totalSeconds%86400)/3600);
+    const minutes = Math.floor((totalSeconds%3600)/60);
+    const seconds = totalSeconds%60;
 
     daysEl.textContent = pad(days);
     hoursEl.textContent = pad(hours);
@@ -321,13 +348,14 @@ body{
 
     const totalRange = TARGET - START_REFERENCE;
     const elapsed = now - START_REFERENCE;
-    const progress = clamp(elapsed / totalRange, 0, 1);
+    const progress = clamp(elapsed / totalRange,0,1);
 
-    progressBar.style.width = (progress * 100).toFixed(2) + '%';
+    progressBar.style.width=(progress*100).toFixed(2)+'%';
   }
 
   update();
-  setInterval(update, 1000);
+  setInterval(update,1000);
+
 })();
 </script>
 </body>
