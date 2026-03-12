@@ -6,281 +6,329 @@
 <title>Prelúdio Jogos — Contagem Regressiva</title>
 
 <style>
-
 :root{
---text:#f5f7fb;
+  --text:#f5f7fb;
 }
 
-*{box-sizing:border-box}
+*{ box-sizing:border-box; }
 
 html,body{
-height:100%;
-margin:0;
-overflow:hidden;
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  overscroll-behavior:none;
+  background:
+    radial-gradient(45vw 45vw at 22% 48%, rgba(28,120,220,.12), transparent 60%),
+    radial-gradient(38vw 38vw at 68% 28%, rgba(20,88,180,.10), transparent 62%),
+    radial-gradient(60vw 60vw at 50% 50%, rgba(255,255,255,.02), transparent 68%),
+    linear-gradient(180deg,#030608 0%,#010203 45%,#000000 100%);
+  background-size:cover;
+  background-repeat:no-repeat;
+  background-color:#000;
 }
 
 body{
-color:var(--text);
-font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-background:
-radial-gradient(45vw 45vw at 22% 48%, rgba(28,120,220,.12), transparent 60%),
-radial-gradient(38vw 38vw at 68% 28%, rgba(20,88,180,.10), transparent 62%),
-radial-gradient(60vw 60vw at 50% 50%, rgba(255,255,255,.02), transparent 68%),
-linear-gradient(180deg,#030608 0%,#010203 45%,#000000 100%);
-background-size:cover;
-background-repeat:no-repeat;
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  -webkit-text-size-adjust:100%;
+  -webkit-overflow-scrolling:touch;
+  position:fixed;
+  inset:0;
 }
 
 .page{
-height:100vh;
-display:grid;
-place-items:center;
-padding:28px;
+  width:100%;
+  height:100dvh;
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  padding:
+    max(28px, env(safe-area-inset-top))
+    max(18px, env(safe-area-inset-right))
+    max(28px, env(safe-area-inset-bottom))
+    max(18px, env(safe-area-inset-left));
 }
 
 .hero{
-width:min(980px,100%);
-display:flex;
-align-items:center;
-justify-content:center;
-text-align:center;
+  width:min(980px,100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
 }
 
 .right{
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:12px;
-width:100%;
-max-width:760px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  max-width:760px;
 }
 
 .eyebrow{
-margin:0;
-font-size:clamp(28px,2.6vw,64px);
-font-weight:800;
-letter-spacing:-.03em;
+  margin:0;
+  font-size:clamp(28px,2.6vw,64px);
+  font-weight:800;
+  letter-spacing:-.03em;
 }
 
 .title{
-margin:0;
-font-size:clamp(56px,7.3vw,128px);
-line-height:.92;
-font-weight:900;
-letter-spacing:-.06em;
-text-shadow:0 10px 30px rgba(0,0,0,.45);
+  margin:0;
+  font-size:clamp(56px,7.3vw,128px);
+  line-height:.92;
+  font-weight:900;
+  letter-spacing:-.06em;
+  text-shadow:0 10px 30px rgba(0,0,0,.45);
 }
 
 .countdown{
-margin-top:8px;
-display:grid;
-grid-template-columns:repeat(4,minmax(108px,1fr));
-gap:14px;
-width:min(100%,680px);
+  margin-top:8px;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(108px,1fr));
+  gap:14px;
+  width:min(100%,680px);
 }
 
 .time-box{
-border-radius:22px;
-padding:18px 14px 14px;
-background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
-border:1px solid rgba(255,255,255,.07);
-box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 14px 40px rgba(0,0,0,.22);
-text-align:center;
+  border-radius:22px;
+  padding:18px 14px 14px;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 14px 40px rgba(0,0,0,.22);
+  text-align:center;
 }
 
 .time-value{
-display:block;
-font-size:clamp(42px,5vw,78px);
-font-weight:900;
-letter-spacing:-.05em;
-font-variant-numeric:tabular-nums;
+  display:block;
+  font-size:clamp(42px,5vw,78px);
+  font-weight:900;
+  letter-spacing:-.05em;
+  font-variant-numeric:tabular-nums;
 }
 
 .time-label{
-margin-top:8px;
-font-size:12px;
-letter-spacing:.26em;
-text-transform:uppercase;
-color:rgba(235,241,250,.78);
-font-weight:700;
+  display:block;
+  margin-top:8px;
+  font-size:12px;
+  letter-spacing:.26em;
+  text-transform:uppercase;
+  color:rgba(235,241,250,.78);
+  font-weight:700;
 }
 
 .soon{
-margin:12px 0 0;
-font-size:clamp(34px,4vw,68px);
-font-weight:900;
+  margin:12px 0 0;
+  font-size:clamp(34px,4vw,68px);
+  font-weight:900;
 }
 
 .launch-line{
-margin-top:6px;
-font-size:13px;
-letter-spacing:.08em;
-text-transform:uppercase;
-color:rgba(214,224,237,.72);
+  margin-top:6px;
+  font-size:13px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:rgba(214,224,237,.72);
 }
 
 .progress{
-margin-top:16px;
-width:min(100%,620px);
-height:10px;
-border-radius:999px;
-overflow:hidden;
-background:rgba(255,255,255,.07);
-border:1px solid rgba(255,255,255,.08);
+  margin-top:16px;
+  width:min(100%,620px);
+  height:10px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.08);
 }
 
 .progress span{
-display:block;
-height:100%;
-width:0%;
-background:linear-gradient(90deg,#8fd9ff,#48b7f4,#daf6ff);
-transition:width .6s ease;
+  display:block;
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#8fd9ff,#48b7f4,#daf6ff);
+  transition:width .6s ease;
 }
 
 .footer-note{
-margin-top:10px;
-font-size:12px;
-color:rgba(214,224,237,.54);
-letter-spacing:.18em;
-text-transform:uppercase;
+  margin-top:10px;
+  font-size:12px;
+  color:rgba(214,224,237,.54);
+  letter-spacing:.18em;
+  text-transform:uppercase;
 }
 
 @media (max-width:560px){
-.countdown{
-grid-template-columns:repeat(2,1fr);
-}
-}
+  .countdown{
+    grid-template-columns:repeat(2,1fr);
+  }
 
+  .page{
+    padding:
+      max(20px, env(safe-area-inset-top))
+      max(14px, env(safe-area-inset-right))
+      max(20px, env(safe-area-inset-bottom))
+      max(14px, env(safe-area-inset-left));
+  }
+}
 </style>
 </head>
 
 <body>
-
 <main class="page">
-<section class="hero">
+  <section class="hero">
+    <div class="right">
+      <p class="eyebrow">Pronto para</p>
+      <h1 class="title">O SextoLugar?</h1>
 
-<div class="right">
+      <div class="countdown">
+        <div class="time-box">
+          <span class="time-value" id="days">00</span>
+          <span class="time-label">DIAS</span>
+        </div>
 
-<p class="eyebrow">Pronto para</p>
-<h1 class="title">O SextoLugar?</h1>
+        <div class="time-box">
+          <span class="time-value" id="hours">00</span>
+          <span class="time-label">HORAS</span>
+        </div>
 
-<div class="countdown">
+        <div class="time-box">
+          <span class="time-value" id="minutes">00</span>
+          <span class="time-label">MINUTOS</span>
+        </div>
 
-<div class="time-box">
-<span class="time-value" id="days">00</span>
-<span class="time-label">DIAS</span>
-</div>
+        <div class="time-box">
+          <span class="time-value" id="seconds">00</span>
+          <span class="time-label">SEGUNDOS</span>
+        </div>
+      </div>
 
-<div class="time-box">
-<span class="time-value" id="hours">00</span>
-<span class="time-label">HORAS</span>
-</div>
+      <p class="soon" id="statusText">Em breve!</p>
+      <p class="launch-line">Lançamento em 30 de junho de 2026 às 20h</p>
 
-<div class="time-box">
-<span class="time-value" id="minutes">00</span>
-<span class="time-label">MINUTOS</span>
-</div>
+      <div class="progress">
+        <span id="progressBar"></span>
+      </div>
 
-<div class="time-box">
-<span class="time-value" id="seconds">00</span>
-<span class="time-label">SEGUNDOS</span>
-</div>
-
-</div>
-
-<p class="soon" id="statusText">Em breve!</p>
-<p class="launch-line">Lançamento em 30 de junho de 2026 às 20h</p>
-
-<div class="progress">
-<span id="progressBar"></span>
-</div>
-
-<p class="footer-note">Prelúdio Jogos • Contagem oficial</p>
-
-</div>
-</section>
+      <p class="footer-note">Prelúdio Jogos • Contagem oficial</p>
+    </div>
+  </section>
 </main>
 
-<audio id="tickSound" preload="auto">
-<source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
-</audio>
-
 <script>
-
 (function(){
+  const TARGET = new Date('2026-06-30T20:00:00-03:00').getTime();
+  const START_REFERENCE = new Date('2026-03-12T00:00:00-03:00').getTime();
 
-const TARGET=new Date('2026-06-30T20:00:00-03:00').getTime();
-const START_REFERENCE=new Date('2026-03-12T00:00:00-03:00').getTime();
+  const daysEl = document.getElementById('days');
+  const hoursEl = document.getElementById('hours');
+  const minutesEl = document.getElementById('minutes');
+  const secondsEl = document.getElementById('seconds');
+  const progressBar = document.getElementById('progressBar');
+  const statusText = document.getElementById('statusText');
 
-const daysEl=document.getElementById('days');
-const hoursEl=document.getElementById('hours');
-const minutesEl=document.getElementById('minutes');
-const secondsEl=document.getElementById('seconds');
-const progressBar=document.getElementById('progressBar');
-const statusText=document.getElementById('statusText');
-const tick=document.getElementById('tickSound');
+  let audioCtx = null;
+  let audioEnabled = false;
+  let lastSecondShown = null;
 
-let audioEnabled=false;
+  function enableAudio(){
+    if (audioEnabled) return;
 
-document.addEventListener("click",()=>{
-audioEnabled=true;
-tick.volume=0.4;
-},{once:true});
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
 
-function pad(n){
-return String(Math.max(0,n)).padStart(2,'0');
-}
+    try{
+      audioCtx = new Ctx();
+      if (audioCtx.state === 'suspended'){
+        audioCtx.resume().catch(()=>{});
+      }
+      audioEnabled = true;
+    }catch(e){}
+  }
 
-function clamp(v,min,max){
-return Math.max(min,Math.min(max,v));
-}
+  window.addEventListener('pointerdown', enableAudio, { once:true });
+  window.addEventListener('touchstart', enableAudio, { once:true });
 
-function update(){
+  function playTick(){
+    if (!audioEnabled || !audioCtx) return;
 
-const now=Date.now();
-let diff=TARGET-now;
+    try{
+      const now = audioCtx.currentTime;
 
-if(diff<=0){
-daysEl.textContent='00';
-hoursEl.textContent='00';
-minutesEl.textContent='00';
-secondsEl.textContent='00';
-statusText.textContent='Chegou a hora.';
-progressBar.style.width='100%';
-return;
-}
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
 
-const totalSeconds=Math.floor(diff/1000);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1450, now);
+      osc.frequency.exponentialRampToValueAtTime(920, now + 0.055);
 
-const days=Math.floor(totalSeconds/86400);
-const hours=Math.floor((totalSeconds%86400)/3600);
-const minutes=Math.floor((totalSeconds%3600)/60);
-const seconds=totalSeconds%60;
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1300, now);
+      filter.Q.setValueAtTime(2.2, now);
 
-daysEl.textContent=pad(days);
-hoursEl.textContent=pad(hours);
-minutesEl.textContent=pad(minutes);
-secondsEl.textContent=pad(seconds);
+      gain.gain.setValueAtTime(0.00001, now);
+      gain.gain.exponentialRampToValueAtTime(0.025, now + 0.004);
+      gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.065);
 
-if(audioEnabled){
-tick.currentTime=0;
-tick.play().catch(()=>{});
-}
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
 
-const totalRange=TARGET-START_REFERENCE;
-const elapsed=now-START_REFERENCE;
-const progress=clamp(elapsed/totalRange,0,1);
+      osc.start(now);
+      osc.stop(now + 0.075);
+    }catch(e){}
+  }
 
-progressBar.style.width=(progress*100)+'%';
+  function pad(n){
+    return String(Math.max(0, n)).padStart(2, '0');
+  }
 
-}
+  function clamp(v, min, max){
+    return Math.max(min, Math.min(max, v));
+  }
 
-update();
-setInterval(update,1000);
+  function update(){
+    const now = Date.now();
+    let diff = TARGET - now;
 
+    if (diff <= 0){
+      daysEl.textContent = '00';
+      hoursEl.textContent = '00';
+      minutesEl.textContent = '00';
+      secondsEl.textContent = '00';
+      statusText.textContent = 'Chegou a hora.';
+      progressBar.style.width = '100%';
+      return;
+    }
+
+    const totalSeconds = Math.floor(diff / 1000);
+
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    daysEl.textContent = pad(days);
+    hoursEl.textContent = pad(hours);
+    minutesEl.textContent = pad(minutes);
+    secondsEl.textContent = pad(seconds);
+
+    if (lastSecondShown !== null && seconds !== lastSecondShown){
+      playTick();
+    }
+    lastSecondShown = seconds;
+
+    const totalRange = TARGET - START_REFERENCE;
+    const elapsed = now - START_REFERENCE;
+    const progress = clamp(elapsed / totalRange, 0, 1);
+
+    progressBar.style.width = (progress * 100).toFixed(2) + '%';
+  }
+
+  update();
+  setInterval(update, 1000);
 })();
-
 </script>
-
 </body>
 </html>
