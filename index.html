@@ -15,7 +15,7 @@
 html,body{
   margin:0;
   width:100%;
-  height:100%;
+  min-height:100%;
   overscroll-behavior:none;
   background:
     radial-gradient(45vw 45vw at 22% 48%, rgba(28,120,220,.12), transparent 60%),
@@ -31,6 +31,9 @@ body{
   color:var(--text);
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   -webkit-text-size-adjust:100%;
+  -webkit-overflow-scrolling:touch;
+  overflow-x:hidden;
+  overflow-y:auto;
 }
 
 body::before{
@@ -56,13 +59,14 @@ body::after{
 
 .page{
   width:100%;
-  min-height:100dvh;
+  min-height:100vh;
+  min-height:100svh;
   display:grid;
   place-items:center;
   padding:
     max(28px, env(safe-area-inset-top))
     max(18px, env(safe-area-inset-right))
-    max(50px, env(safe-area-inset-bottom))
+    max(56px, env(safe-area-inset-bottom))
     max(18px, env(safe-area-inset-left));
   position:relative;
   z-index:1;
@@ -83,7 +87,7 @@ body::after{
   gap:12px;
   width:100%;
   max-width:760px;
-  padding-bottom:10px;
+  padding-bottom:18px;
 }
 
 .eyebrow{
@@ -149,6 +153,7 @@ body::after{
   font-size:clamp(42px,5vw,78px);
   font-weight:900;
   letter-spacing:-.05em;
+  font-variant-numeric:tabular-nums;
 }
 
 .time-label{
@@ -195,155 +200,257 @@ body::after{
 
 .footer-note{
   margin-top:14px;
-  padding-bottom:6px;
+  padding-bottom:10px;
   font-size:12px;
-  line-height:1.4;
+  line-height:1.5;
   color:rgba(214,224,237,.54);
   letter-spacing:.18em;
   text-transform:uppercase;
 }
 
 @media (max-width:560px){
+  .page{
+    padding:
+      max(20px, env(safe-area-inset-top))
+      max(14px, env(safe-area-inset-right))
+      max(52px, env(safe-area-inset-bottom))
+      max(14px, env(safe-area-inset-left));
+  }
 
-  .countdown{
-    grid-template-columns:repeat(2,1fr);
+  .right{
+    gap:8px;
+    max-width:100%;
+    padding-bottom:22px;
+  }
+
+  .eyebrow{
+    font-size:clamp(22px, 7vw, 34px);
+    margin-bottom:0;
+  }
+
+  .title{
+    width:100%;
+  }
+
+  .title .line1{
+    font-size:clamp(34px, 8vw, 42px);
   }
 
   .title .line2{
-    font-size:clamp(54px,16vw,78px);
+    font-size:clamp(54px, 16vw, 78px);
+    line-height:.94;
+  }
+
+  .countdown{
+    margin-top:12px;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+    width:100%;
+  }
+
+  .time-box{
+    padding:16px 12px 14px;
+    border-radius:20px;
+  }
+
+  .time-value{
+    font-size:clamp(38px, 12vw, 54px);
+  }
+
+  .time-label{
+    font-size:11px;
+    letter-spacing:.22em;
+  }
+
+  .soon{
+    margin-top:6px;
+    font-size:clamp(28px, 10vw, 44px);
+  }
+
+  .launch-line{
+    margin-top:4px;
+    font-size:11px;
+    line-height:1.5;
+    max-width:320px;
   }
 
   .progress{
-    width:min(100%,320px);
+    display:block;
+    margin-top:8px;
+    width:min(100%, 320px);
     height:7px;
   }
 
   .footer-note{
+    margin-top:12px;
+    padding-bottom:14px;
     font-size:10px;
+    line-height:1.5;
     letter-spacing:.14em;
   }
-
 }
 </style>
 </head>
 
 <body>
-
 <main class="page">
-<section class="hero">
+  <section class="hero">
+    <div class="right">
+      <p class="eyebrow">Pronto para</p>
 
-<div class="right">
+      <h1 class="title">
+        <span class="line1">O</span>
+        <span class="line2">SextoLugar?</span>
+      </h1>
 
-<p class="eyebrow">Pronto para</p>
+      <div class="countdown">
+        <div class="time-box">
+          <span class="time-value" id="days">00</span>
+          <span class="time-label">DIAS</span>
+        </div>
 
-<h1 class="title">
-<span class="line1">O</span>
-<span class="line2">SextoLugar?</span>
-</h1>
+        <div class="time-box">
+          <span class="time-value" id="hours">00</span>
+          <span class="time-label">HORAS</span>
+        </div>
 
-<div class="countdown">
+        <div class="time-box">
+          <span class="time-value" id="minutes">00</span>
+          <span class="time-label">MINUTOS</span>
+        </div>
 
-<div class="time-box">
-<span class="time-value" id="days">00</span>
-<span class="time-label">DIAS</span>
-</div>
+        <div class="time-box">
+          <span class="time-value" id="seconds">00</span>
+          <span class="time-label">SEGUNDOS</span>
+        </div>
+      </div>
 
-<div class="time-box">
-<span class="time-value" id="hours">00</span>
-<span class="time-label">HORAS</span>
-</div>
+      <p class="soon" id="statusText">Em breve!</p>
+      <p class="launch-line">Lançamento em 30 de junho de 2026 às 20h</p>
 
-<div class="time-box">
-<span class="time-value" id="minutes">00</span>
-<span class="time-label">MINUTOS</span>
-</div>
+      <div class="progress">
+        <span id="progressBar"></span>
+      </div>
 
-<div class="time-box">
-<span class="time-value" id="seconds">00</span>
-<span class="time-label">SEGUNDOS</span>
-</div>
-
-</div>
-
-<p class="soon" id="statusText">Em breve!</p>
-
-<p class="launch-line">
-Lançamento em 30 de junho de 2026 às 20h
-</p>
-
-<div class="progress">
-<span id="progressBar"></span>
-</div>
-
-<p class="footer-note">
-Prelúdio Jogos • Contagem oficial
-</p>
-
-</div>
-</section>
+      <p class="footer-note">Prelúdio Jogos • Contagem oficial</p>
+    </div>
+  </section>
 </main>
 
 <script>
 (function(){
+  const TARGET = new Date('2026-06-30T20:00:00-03:00').getTime();
+  const START_REFERENCE = new Date('2026-03-12T00:00:00-03:00').getTime();
 
-const TARGET = new Date('2026-06-30T20:00:00-03:00').getTime();
-const START_REFERENCE = new Date('2026-03-12T00:00:00-03:00').getTime();
+  const daysEl = document.getElementById('days');
+  const hoursEl = document.getElementById('hours');
+  const minutesEl = document.getElementById('minutes');
+  const secondsEl = document.getElementById('seconds');
+  const progressBar = document.getElementById('progressBar');
+  const statusText = document.getElementById('statusText');
 
-const daysEl = document.getElementById('days');
-const hoursEl = document.getElementById('hours');
-const minutesEl = document.getElementById('minutes');
-const secondsEl = document.getElementById('seconds');
-const progressBar = document.getElementById('progressBar');
+  let audioCtx = null;
+  let audioEnabled = false;
+  let lastSecondShown = null;
 
-function pad(n){
-return String(Math.max(0,n)).padStart(2,'0');
-}
+  function enableAudio(){
+    if (audioEnabled) return;
 
-function clamp(v,min,max){
-return Math.max(min,Math.min(max,v));
-}
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
 
-function update(){
+    try{
+      audioCtx = new Ctx();
+      if (audioCtx.state === 'suspended'){
+        audioCtx.resume().catch(()=>{});
+      }
+      audioEnabled = true;
+    }catch(e){}
+  }
 
-const now = Date.now();
-let diff = TARGET - now;
+  window.addEventListener('pointerdown', enableAudio, { once:true });
+  window.addEventListener('touchstart', enableAudio, { once:true });
 
-if(diff <= 0){
+  function playTick(){
+    if (!audioEnabled || !audioCtx) return;
 
-daysEl.textContent='00';
-hoursEl.textContent='00';
-minutesEl.textContent='00';
-secondsEl.textContent='00';
-progressBar.style.width='100%';
-return;
+    try{
+      const now = audioCtx.currentTime;
 
-}
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
 
-const totalSeconds=Math.floor(diff/1000);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1850, now);
+      osc.frequency.exponentialRampToValueAtTime(1320, now + 0.018);
 
-const days=Math.floor(totalSeconds/86400);
-const hours=Math.floor((totalSeconds%86400)/3600);
-const minutes=Math.floor((totalSeconds%3600)/60);
-const seconds=totalSeconds%60;
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(2100, now);
+      filter.Q.setValueAtTime(5.5, now);
 
-daysEl.textContent=pad(days);
-hoursEl.textContent=pad(hours);
-minutesEl.textContent=pad(minutes);
-secondsEl.textContent=pad(seconds);
+      gain.gain.setValueAtTime(0.00001, now);
+      gain.gain.exponentialRampToValueAtTime(0.075, now + 0.0025);
+      gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.022);
 
-const totalRange = TARGET - START_REFERENCE;
-const elapsed = now - START_REFERENCE;
-const progress = clamp(elapsed / totalRange,0,1);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
 
-progressBar.style.width=(progress*100).toFixed(2)+'%';
+      osc.start(now);
+      osc.stop(now + 0.028);
+    }catch(e){}
+  }
 
-}
+  function pad(n){
+    return String(Math.max(0,n)).padStart(2,'0');
+  }
 
-update();
-setInterval(update,1000);
+  function clamp(v,min,max){
+    return Math.max(min,Math.min(max,v));
+  }
 
+  function update(){
+    const now = Date.now();
+    let diff = TARGET - now;
+
+    if(diff <= 0){
+      daysEl.textContent = '00';
+      hoursEl.textContent = '00';
+      minutesEl.textContent = '00';
+      secondsEl.textContent = '00';
+      statusText.textContent = 'Chegou a hora.';
+      progressBar.style.width = '100%';
+      return;
+    }
+
+    const totalSeconds = Math.floor(diff / 1000);
+
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    daysEl.textContent = pad(days);
+    hoursEl.textContent = pad(hours);
+    minutesEl.textContent = pad(minutes);
+    secondsEl.textContent = pad(seconds);
+
+    if(lastSecondShown !== null && seconds !== lastSecondShown){
+      playTick();
+    }
+    lastSecondShown = seconds;
+
+    const totalRange = TARGET - START_REFERENCE;
+    const elapsed = now - START_REFERENCE;
+    const progress = clamp(elapsed / totalRange, 0, 1);
+
+    progressBar.style.width = (progress * 100).toFixed(2) + '%';
+  }
+
+  update();
+  setInterval(update, 1000);
 })();
 </script>
-
 </body>
 </html>
