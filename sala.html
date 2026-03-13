@@ -12,13 +12,10 @@
   --bg-3:#000000;
   --text:#f5f7fb;
   --muted:rgba(214,224,237,.68);
-  --soft:rgba(255,255,255,.08);
-  --soft-2:rgba(255,255,255,.05);
   --line:rgba(255,255,255,.10);
   --blue-1:#daf6ff;
   --blue-2:#8fd9ff;
   --blue-3:#48b7f4;
-  --blue-4:#138ad8;
   --gold:#e6c07b;
   --ok:#82d996;
   --danger:#ff6b6b;
@@ -296,6 +293,12 @@ body::after{
   background:rgba(255,107,107,.07);
 }
 
+.btn[disabled]{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none !important;
+}
+
 .chatCard{
   display:grid;
   grid-template-rows:auto 1fr auto;
@@ -520,7 +523,7 @@ body::after{
       <div class="topMeta">
         <div class="badge">Sala: <strong id="roomName">Aguardando...</strong></div>
         <div class="badge">Código: <strong id="roomCode">----</strong></div>
-        <div class="badge"><span class="dot"></span> <span id="roomStatus">Aguardando jogadores</span></div>
+        <div class="badge"><span class="dot"></span> <span id="roomStatus">Conectando</span></div>
       </div>
     </header>
 
@@ -559,8 +562,8 @@ body::after{
 
         <div class="messages" id="messages">
           <div class="chatEmpty" id="chatEmpty">
-            A sala foi criada.<br>
-            Quando houver mensagens ou eventos do sistema, eles aparecerão aqui.
+            Conectando a sala...<br>
+            As mensagens e jogadores aparecerão em tempo real.
           </div>
         </div>
 
@@ -582,176 +585,421 @@ body::after{
     </section>
 
     <div class="footerBar">
-      <div>Jogadores na sala: <strong id="playerCount">1</strong></div>
-      <div>Status: <strong id="footerStatus">Aguardando início</strong></div>
+      <div>Jogadores na sala: <strong id="playerCount">0</strong></div>
+      <div>Status: <strong id="footerStatus">Conectando</strong></div>
     </div>
 
   </div>
 </main>
 
-<script>
-(function(){
-  const roomNameEl = document.getElementById('roomName');
-  const roomCodeEl = document.getElementById('roomCode');
-  const roomStatusEl = document.getElementById('roomStatus');
-  const playerListEl = document.getElementById('playerList');
-  const playersEmptyEl = document.getElementById('playersEmpty');
-  const playerCountEl = document.getElementById('playerCount');
-  const copyCodeBtn = document.getElementById('copyCodeBtn');
-  const leaveBtn = document.getElementById('leaveBtn');
-  const startBtn = document.getElementById('startBtn');
-  const sendBtn = document.getElementById('sendBtn');
-  const messageInput = document.getElementById('messageInput');
-  const messagesEl = document.getElementById('messages');
-  const chatEmptyEl = document.getElementById('chatEmpty');
-  const sessionLabelEl = document.getElementById('sessionLabel');
-  const footerStatusEl = document.getElementById('footerStatus');
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const params = new URLSearchParams(window.location.search);
-  const playerName = (params.get('nome') || localStorage.getItem('osl_nome') || 'Visitante').trim();
-  const roomCode = (params.get('sala') || localStorage.getItem('osl_sala') || 'SL-0001').trim();
-  const roomName = params.get('nomeSala') || localStorage.getItem('osl_nome_sala') || 'Sala de Espera';
+const firebaseConfig = {
+  apiKey: "COLE_AQUI",
+  authDomain: "COLE_AQUI",
+  projectId: "COLE_AQUI",
+  storageBucket: "COLE_AQUI",
+  messagingSenderId: "COLE_AQUI",
+  appId: "COLE_AQUI"
+};
 
-  localStorage.setItem('osl_nome', playerName);
-  localStorage.setItem('osl_sala', roomCode);
-  localStorage.setItem('osl_nome_sala', roomName);
+const HEARTBEAT_MS = 15000;
+const ACTIVE_WINDOW_MS = 40000;
 
-  let sessionStarted = false;
+const roomNameEl = document.getElementById('roomName');
+const roomCodeEl = document.getElementById('roomCode');
+const roomStatusEl = document.getElementById('roomStatus');
+const playerListEl = document.getElementById('playerList');
+const playersEmptyEl = document.getElementById('playersEmpty');
+const playerCountEl = document.getElementById('playerCount');
+const copyCodeBtn = document.getElementById('copyCodeBtn');
+const leaveBtn = document.getElementById('leaveBtn');
+const startBtn = document.getElementById('startBtn');
+const sendBtn = document.getElementById('sendBtn');
+const messageInput = document.getElementById('messageInput');
+const messagesEl = document.getElementById('messages');
+const chatEmptyEl = document.getElementById('chatEmpty');
+const sessionLabelEl = document.getElementById('sessionLabel');
+const footerStatusEl = document.getElementById('footerStatus');
 
-  const players = [
-    {
-      name: playerName,
-      role: 'Anfitrião',
-      online: true
-    }
-  ];
+const params = new URLSearchParams(window.location.search);
 
-  function initials(name){
-    const parts = String(name).trim().split(/\s+/).filter(Boolean);
-    if(parts.length === 0) return '??';
-    if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+const playerName = (params.get('nome') || localStorage.getItem('osl_nome') || 'Visitante').trim().slice(0, 40);
+const roomCode = (params.get('sala') || localStorage.getItem('osl_sala') || 'SL-0001')
+  .trim()
+  .toUpperCase()
+  .replace(/[^A-Z0-9-]/g, '')
+  .slice(0, 20);
+const roomName = (params.get('nomeSala') || localStorage.getItem('osl_nome_sala') || 'Sala de Espera')
+  .trim()
+  .slice(0, 50);
+
+localStorage.setItem('osl_nome', playerName);
+localStorage.setItem('osl_sala', roomCode);
+localStorage.setItem('osl_nome_sala', roomName);
+
+const participantId = getParticipantId();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const roomRef = doc(db, 'salas', roomCode);
+const playerRef = doc(db, 'salas', roomCode, 'players', participantId);
+const messagesRef = collection(db, 'salas', roomCode, 'messages');
+
+let isHost = false;
+let heartbeatTimer = null;
+let roomUnsub = null;
+let playersUnsub = null;
+let messagesUnsub = null;
+let leaving = false;
+
+function getParticipantId(){
+  let id = sessionStorage.getItem('osl_participant_id');
+  if(!id){
+    id = 'p_' + Math.random().toString(36).slice(2, 11);
+    sessionStorage.setItem('osl_participant_id', id);
   }
+  return id;
+}
 
-  function nowTime(){
-    const d = new Date();
-    return d.toLocaleTimeString('pt-BR', {
-      hour:'2-digit',
-      minute:'2-digit'
-    });
-  }
+function initials(name){
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if(parts.length === 0) return '??';
+  if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
 
-  function updateTop(){
-    roomNameEl.textContent = roomName;
-    roomCodeEl.textContent = roomCode;
-    playerCountEl.textContent = String(players.length);
-  }
+function nowTimeFromDate(date){
+  return date.toLocaleTimeString('pt-BR', {
+    hour:'2-digit',
+    minute:'2-digit'
+  });
+}
 
-  function renderPlayers(){
-    playerListEl.innerHTML = '';
+function escapeHtml(str){
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
 
-    players.forEach(function(player){
-      const div = document.createElement('div');
-      div.className = 'player';
-      div.innerHTML = `
-        <div class="playerLeft">
-          <div class="avatar">${initials(player.name)}</div>
-          <div>
-            <div class="playerName">${escapeHtml(player.name)}</div>
-            <div class="playerRole">${player.role}</div>
-          </div>
-        </div>
-        <div class="playerRole">${player.online ? 'Online' : 'Offline'}</div>
-      `;
-      playerListEl.appendChild(div);
-    });
+function hideChatEmpty(){
+  if(chatEmptyEl) chatEmptyEl.style.display = 'none';
+}
 
-    playersEmptyEl.style.display = players.length > 1 ? 'none' : 'block';
-    updateTop();
-  }
+function showChatEmpty(text){
+  if(!chatEmptyEl) return;
+  chatEmptyEl.style.display = 'block';
+  chatEmptyEl.innerHTML = text;
+}
 
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
-  }
+function renderPlayers(players){
+  playerListEl.innerHTML = '';
 
-  function hideChatEmpty(){
-    if(chatEmptyEl) chatEmptyEl.style.display = 'none';
-  }
-
-  function appendMessage(type, author, text){
-    hideChatEmpty();
-
+  players.forEach(function(player){
     const div = document.createElement('div');
-    div.className = 'message ' + type;
+    div.className = 'player';
+    div.innerHTML = `
+      <div class="playerLeft">
+        <div class="avatar">${initials(player.name)}</div>
+        <div>
+          <div class="playerName">${escapeHtml(player.name)}</div>
+          <div class="playerRole">${player.isHost ? 'Anfitrião' : 'Participante'}</div>
+        </div>
+      </div>
+      <div class="playerRole">Online</div>
+    `;
+    playerListEl.appendChild(div);
+  });
 
-    if(type === 'system'){
+  playerCountEl.textContent = String(players.length);
+  playersEmptyEl.style.display = players.length > 1 ? 'none' : 'block';
+}
+
+function renderMessages(docs){
+  messagesEl.innerHTML = '';
+
+  if(!docs.length){
+    showChatEmpty('A sala foi criada.<br>Quando houver mensagens ou eventos do sistema, eles aparecerão aqui.');
+    return;
+  }
+
+  hideChatEmpty();
+
+  docs.forEach(function(item){
+    const div = document.createElement('div');
+
+    if(item.type === 'system'){
+      div.className = 'message system';
       div.innerHTML = `
         <span class="meta">Sistema</span>
-        ${escapeHtml(text)}
+        ${escapeHtml(item.text)}
       `;
     }else{
+      const own = item.authorId === participantId;
+      div.className = 'message ' + (own ? 'me' : 'other');
+
+      let timeLabel = '--:--';
+      if(item.createdAt && typeof item.createdAt.toDate === 'function'){
+        timeLabel = nowTimeFromDate(item.createdAt.toDate());
+      }
+
       div.innerHTML = `
-        <span class="meta">${escapeHtml(author)} • ${nowTime()}</span>
-        ${escapeHtml(text)}
+        <span class="meta">${escapeHtml(item.authorName || 'Jogador')} • ${timeLabel}</span>
+        ${escapeHtml(item.text)}
       `;
     }
 
     messagesEl.appendChild(div);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function sendCurrentMessage(){
-    const text = messageInput.value.trim();
-    if(!text) return;
-    appendMessage('me', playerName, text);
-    messageInput.value = '';
-  }
-
-  function startSession(){
-    if(sessionStarted) return;
-    sessionStarted = true;
-
-    sessionLabelEl.textContent = 'Sessão iniciada';
-    roomStatusEl.textContent = 'Ritual em andamento';
-    footerStatusEl.textContent = 'Ritual iniciado';
-
-    appendMessage('system', '', 'O ritual foi iniciado. A sala está pronta para a próxima etapa.');
-  }
-
-  sendBtn.addEventListener('click', sendCurrentMessage);
-
-  messageInput.addEventListener('keydown', function(e){
-    if(e.key === 'Enter'){
-      e.preventDefault();
-      sendCurrentMessage();
-    }
   });
 
-  copyCodeBtn.addEventListener('click', async function(){
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+async function ensureRoom(){
+  const snap = await getDoc(roomRef);
+
+  if(!snap.exists()){
+    isHost = true;
+
+    await setDoc(roomRef, {
+      code: roomCode,
+      name: roomName,
+      status: 'waiting',
+      hostId: participantId,
+      hostName: playerName,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    await addDoc(messagesRef, {
+      type: 'system',
+      text: 'A sala foi criada. Aguardando jogadores.',
+      createdAt: serverTimestamp()
+    });
+  } else {
+    const data = snap.data();
+    isHost = data.hostId === participantId;
+  }
+}
+
+async function upsertSelf(){
+  await setDoc(playerRef, {
+    id: participantId,
+    name: playerName,
+    isHost,
+    joinedAt: serverTimestamp(),
+    lastSeen: serverTimestamp()
+  }, { merge:true });
+}
+
+function startHeartbeat(){
+  clearInterval(heartbeatTimer);
+  heartbeatTimer = setInterval(async function(){
     try{
-      await navigator.clipboard.writeText(roomCode);
-      appendMessage('system', '', 'Código da sala copiado.');
-    }catch(e){
-      appendMessage('system', '', 'Não foi possível copiar automaticamente neste navegador.');
-    }
+      await updateDoc(playerRef, {
+        lastSeen: serverTimestamp()
+      });
+    }catch(e){}
+  }, HEARTBEAT_MS);
+}
+
+function bindRoom(){
+  roomUnsub = onSnapshot(roomRef, async function(snap){
+    if(!snap.exists()) return;
+
+    const data = snap.data();
+    roomNameEl.textContent = data.name || roomName;
+    roomCodeEl.textContent = data.code || roomCode;
+
+    const started = data.status === 'started';
+    roomStatusEl.textContent = started ? 'Ritual em andamento' : 'Aguardando jogadores';
+    sessionLabelEl.textContent = started ? 'Sessão iniciada' : 'Sessão não iniciada';
+    footerStatusEl.textContent = started ? 'Ritual iniciado' : 'Aguardando início';
+
+    isHost = data.hostId === participantId;
+    startBtn.disabled = !isHost;
+    startBtn.textContent = isHost ? (started ? 'Ritual iniciado' : 'Iniciar Ritual') : 'Aguardando anfitrião';
+
+    await setDoc(playerRef, {
+      isHost
+    }, { merge:true });
+  });
+}
+
+function bindPlayers(){
+  const q = query(collection(db, 'salas', roomCode, 'players'), orderBy('joinedAt', 'asc'));
+
+  playersUnsub = onSnapshot(q, function(snapshot){
+    const now = Date.now();
+
+    const players = snapshot.docs
+      .map(function(docSnap){
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          name: data.name || 'Jogador',
+          isHost: !!data.isHost,
+          joinedAt: data.joinedAt || null,
+          lastSeen: data.lastSeen || null
+        };
+      })
+      .filter(function(player){
+        if(!player.lastSeen || typeof player.lastSeen.toMillis !== 'function') return true;
+        return (now - player.lastSeen.toMillis()) <= ACTIVE_WINDOW_MS;
+      });
+
+    renderPlayers(players);
+  });
+}
+
+function bindMessages(){
+  const q = query(messagesRef, orderBy('createdAt', 'asc'));
+
+  messagesUnsub = onSnapshot(q, function(snapshot){
+    const docs = snapshot.docs.map(function(docSnap){
+      return { id: docSnap.id, ...docSnap.data() };
+    });
+
+    renderMessages(docs);
+  });
+}
+
+async function sendMessage(){
+  const text = messageInput.value.trim();
+  if(!text) return;
+
+  messageInput.value = '';
+
+  await addDoc(messagesRef, {
+    type: 'user',
+    authorId: participantId,
+    authorName: playerName,
+    text,
+    createdAt: serverTimestamp()
   });
 
-  startBtn.addEventListener('click', startSession);
+  await updateDoc(roomRef, {
+    updatedAt: serverTimestamp()
+  });
+}
 
-  leaveBtn.addEventListener('click', function(){
-    const ok = confirm('Deseja sair da sala?');
-    if(ok){
-      window.location.href = './entrada.html';
-    }
+async function startSession(){
+  if(!isHost) return;
+
+  const snap = await getDoc(roomRef);
+  if(!snap.exists()) return;
+
+  const data = snap.data();
+  if(data.status === 'started') return;
+
+  await updateDoc(roomRef, {
+    status: 'started',
+    startedAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
   });
 
-  renderPlayers();
-  updateTop();
+  await addDoc(messagesRef, {
+    type: 'system',
+    text: 'O anfitrião iniciou o ritual. A próxima etapa pode começar.',
+    createdAt: serverTimestamp()
+  });
+}
+
+async function leaveRoom(){
+  if(leaving) return;
+  leaving = true;
+
+  try{
+    clearInterval(heartbeatTimer);
+    if(roomUnsub) roomUnsub();
+    if(playersUnsub) playersUnsub();
+    if(messagesUnsub) messagesUnsub();
+
+    await deleteDoc(playerRef);
+  }catch(e){}
+
+  window.location.href = './entrada.html';
+}
+
+copyCodeBtn.addEventListener('click', async function(){
+  try{
+    await navigator.clipboard.writeText(roomCode);
+    await addDoc(messagesRef, {
+      type: 'system',
+      text: 'O código da sala foi copiado.',
+      createdAt: serverTimestamp()
+    });
+  }catch(e){}
+});
+
+sendBtn.addEventListener('click', function(){
+  sendMessage().catch(console.error);
+});
+
+messageInput.addEventListener('keydown', function(e){
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    sendMessage().catch(console.error);
+  }
+});
+
+startBtn.addEventListener('click', function(){
+  startSession().catch(console.error);
+});
+
+leaveBtn.addEventListener('click', function(){
+  const ok = confirm('Deseja sair da sala?');
+  if(ok){
+    leaveRoom();
+  }
+});
+
+window.addEventListener('pagehide', function(){
+  leaveRoom();
+});
+
+window.addEventListener('beforeunload', function(){
+  leaveRoom();
+});
+
+(async function init(){
+  try{
+    roomNameEl.textContent = roomName;
+    roomCodeEl.textContent = roomCode;
+    roomStatusEl.textContent = 'Conectando';
+    footerStatusEl.textContent = 'Conectando';
+
+    await ensureRoom();
+    await upsertSelf();
+
+    startHeartbeat();
+    bindRoom();
+    bindPlayers();
+    bindMessages();
+  }catch(error){
+    console.error(error);
+    showChatEmpty('Não foi possível conectar à sala.<br>Verifique a configuração do Firebase.');
+    roomStatusEl.textContent = 'Erro de conexão';
+    footerStatusEl.textContent = 'Erro';
+  }
 })();
 </script>
 </body>
