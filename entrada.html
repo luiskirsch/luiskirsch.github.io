@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>O SextoLugar — Entrada</title>
-
-  <!-- FAVICON / ÍCONE DA ABA -->
   <link rel="icon" href="./favicon.png">
 
   <style>
@@ -17,6 +15,7 @@
       --line:rgba(230,192,123,.22);
       --shadow:rgba(0,0,0,.55);
       --danger:#ff4d4d;
+      --ok:#82d996;
     }
 
     *{ box-sizing:border-box; }
@@ -24,7 +23,7 @@
 
     body{
       margin:0;
-      min-height:100vh; /* fallback */
+      min-height:100vh;
       display:grid;
       place-items:center;
       padding:24px;
@@ -40,16 +39,14 @@
       color:#f2f2f2;
       font-family: ui-serif, Georgia, "Times New Roman", serif;
       overflow-x:hidden;
-      overflow-y:auto; /* importantíssimo no iPhone para não cortar */
-      -webkit-text-size-adjust: 100%;
+      overflow-y:auto;
+      -webkit-text-size-adjust:100%;
     }
 
-    /* Altura dinâmica real do celular (iOS/Safari) */
     @supports (height: 100dvh){
       body{ min-height:100dvh; }
     }
 
-    /* “brilho oscilando” — sutil */
     body::before{
       content:"";
       position:fixed;
@@ -62,6 +59,7 @@
       opacity:.75;
       animation: pulseGlow 4.8s ease-in-out infinite;
     }
+
     @keyframes pulseGlow{
       0%,100%{ opacity:.60; transform:translateY(0) scale(1); }
       50%{ opacity:.92; transform:translateY(-6px) scale(1.01); }
@@ -87,7 +85,7 @@
       color:var(--gold);
       text-transform:uppercase;
       font-size:clamp(30px, 6vw, 78px);
-      text-shadow: 0 18px 60px var(--shadow);
+      text-shadow:0 18px 60px var(--shadow);
     }
 
     .subtitle{
@@ -98,18 +96,18 @@
       color:#eaeaea;
     }
 
-    /* Frase oscilando (mantida) */
     .whisper{
       margin-top:2px;
       font-size:clamp(12px, 2vw, 16px);
       color:var(--muted);
       opacity:.78;
       letter-spacing:.06em;
-      animation: flicker 3.2s ease-in-out infinite;
+      animation:flicker 3.2s ease-in-out infinite;
     }
+
     @keyframes flicker{
-      0%,100%{ opacity:.50; filter: blur(.2px); }
-      50%{ opacity:.92; filter: blur(0); }
+      0%,100%{ opacity:.50; filter:blur(.2px); }
+      50%{ opacity:.92; filter:blur(0); }
     }
 
     .card{
@@ -117,10 +115,10 @@
       max-width:860px;
       padding:clamp(16px, 3vw, 34px);
       border-radius:20px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
       border:1px solid rgba(255,255,255,.08);
-      box-shadow: 0 28px 80px rgba(0,0,0,.55);
-      backdrop-filter: blur(10px);
+      box-shadow:0 28px 80px rgba(0,0,0,.55);
+      backdrop-filter:blur(10px);
       position:relative;
       overflow:hidden;
     }
@@ -130,7 +128,7 @@
       position:absolute;
       inset:0;
       pointer-events:none;
-      background: radial-gradient(700px 240px at 50% 0%, rgba(230,192,123,.10), transparent 60%);
+      background:radial-gradient(700px 240px at 50% 0%, rgba(230,192,123,.10), transparent 60%);
       opacity:.8;
     }
 
@@ -147,8 +145,10 @@
       text-transform:uppercase;
       margin-bottom:12px;
     }
+
     .dot{
-      width:5px; height:5px;
+      width:5px;
+      height:5px;
       background:rgba(230,192,123,.8);
       border-radius:50%;
       box-shadow:0 0 16px rgba(230,192,123,.35);
@@ -161,8 +161,9 @@
       font-size:clamp(16px, 2.8vw, 30px);
       line-height:1.45;
       color:#f3f3f3;
-      text-shadow: 0 18px 60px rgba(0,0,0,.55);
+      text-shadow:0 18px 60px rgba(0,0,0,.55);
     }
+
     .prompt em{
       color:#ffffff;
       font-style:italic;
@@ -176,12 +177,58 @@
       height:10px;
       width:min(720px, 92%);
       border-radius:999px;
-      background: linear-gradient(90deg,
+      background:linear-gradient(90deg,
         rgba(255,255,255,.06),
         rgba(230,192,123,.18),
         rgba(255,255,255,.06));
       opacity:.65;
-      filter: blur(.2px);
+      filter:blur(.2px);
+    }
+
+    .formWrap{
+      position:relative;
+      z-index:1;
+      width:min(640px, 100%);
+      margin:14px auto 0;
+      display:grid;
+      gap:12px;
+      text-align:left;
+    }
+
+    .field{
+      display:grid;
+      gap:8px;
+    }
+
+    .field label{
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(230,192,123,.82);
+    }
+
+    .field input{
+      width:100%;
+      min-height:50px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.24);
+      color:#fff;
+      padding:12px 14px;
+      outline:none;
+      font:inherit;
+      font-size:16px;
+      box-shadow:0 14px 40px rgba(0,0,0,.18);
+    }
+
+    .field input::placeholder{
+      color:rgba(255,255,255,.34);
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
     }
 
     .status{
@@ -191,7 +238,11 @@
       font-size:13px;
       color:rgba(255,255,255,.65);
       letter-spacing:.02em;
+      min-height:18px;
     }
+
+    .status.ok{ color:var(--ok); }
+    .status.err{ color:var(--danger); }
 
     .actions{
       position:relative;
@@ -205,20 +256,21 @@
 
     button{
       border:1px solid rgba(230,192,123,.22);
-      background: rgba(0,0,0,.25);
+      background:rgba(0,0,0,.25);
       color:rgba(230,192,123,.92);
       padding:12px 18px;
       border-radius:14px;
       cursor:pointer;
-      font-family: inherit;
+      font-family:inherit;
       letter-spacing:.12em;
       text-transform:uppercase;
       min-width:180px;
-      transition: transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
-      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      transition:transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+      box-shadow:0 14px 40px rgba(0,0,0,.35);
     }
-    button:hover{ transform: translateY(-1px); border-color:rgba(230,192,123,.34); }
-    button:active{ transform: translateY(0); opacity:.9; }
+
+    button:hover{ transform:translateY(-1px); border-color:rgba(230,192,123,.34); }
+    button:active{ transform:translateY(0); opacity:.9; }
 
     .hint{
       position:relative;
@@ -228,27 +280,28 @@
       color:rgba(255,255,255,.55);
     }
 
-    /* Modal */
     .modalBack{
       position:fixed;
       inset:0;
-      background: rgba(0,0,0,.72);
+      background:rgba(0,0,0,.72);
       display:none;
       align-items:center;
       justify-content:center;
       padding:22px;
       z-index:50;
     }
+
     .modal{
       width:min(860px, 100%);
       border-radius:18px;
-      background: rgba(15,15,15,.92);
+      background:rgba(15,15,15,.92);
       border:1px solid rgba(255,255,255,.08);
-      box-shadow: 0 30px 90px rgba(0,0,0,.65);
+      box-shadow:0 30px 90px rgba(0,0,0,.65);
       padding:18px;
       text-align:left;
-      backdrop-filter: blur(10px);
+      backdrop-filter:blur(10px);
     }
+
     .modalHeader{
       display:flex;
       justify-content:space-between;
@@ -256,6 +309,7 @@
       gap:10px;
       margin-bottom:10px;
     }
+
     .modalHeader h2{
       margin:0;
       font-size:15px;
@@ -263,6 +317,7 @@
       color:rgba(230,192,123,.9);
       text-transform:uppercase;
     }
+
     .close{
       border:none;
       background:transparent;
@@ -271,8 +326,11 @@
       cursor:pointer;
       padding:6px 10px;
       border-radius:10px;
+      min-width:auto;
+      box-shadow:none;
     }
-    .close:hover{ background: rgba(255,255,255,.06); }
+
+    .close:hover{ background:rgba(255,255,255,.06); }
 
     .modalBody{
       color:rgba(255,255,255,.82);
@@ -280,82 +338,29 @@
       line-height:1.6;
       padding:8px 4px 2px;
     }
+
     .ritualList{
       margin:10px 0 0;
       padding-left:18px;
     }
+
     .ritualList li{ margin:8px 0; }
+
     .warn{
       margin-top:12px;
       padding:10px 12px;
       border-left:3px solid rgba(230,192,123,.5);
-      background: rgba(230,192,123,.08);
+      background:rgba(230,192,123,.08);
       border-radius:12px;
       color:rgba(255,255,255,.86);
     }
 
-    /* Transição leve (fluida) */
-    .fadeOut{ animation: fadeOut .55s ease forwards; }
+    .fadeOut{ animation:fadeOut .55s ease forwards; }
+
     @keyframes fadeOut{
-      to{ opacity:0; transform: translateY(6px) scale(.995); filter: blur(1px); }
+      to{ opacity:0; transform:translateY(6px) scale(.995); filter:blur(1px); }
     }
 
-    /* ====== AJUSTES ESPECÍFICOS PARA CELULAR (conserta seu print) ====== */
-    @media (max-width: 430px){
-      body{ padding:14px; }
-
-      .wrap{ gap:10px; }
-
-      h1{
-        font-size: clamp(26px, 9vw, 40px); /* reduz MUITO no iPhone */
-        letter-spacing:.16em;
-      }
-
-      .subtitle{
-        font-size: 13px;
-        line-height:1.35;
-        max-width: 34ch;
-      }
-
-      .whisper{
-        font-size: 12px;
-        margin-top: 0;
-      }
-
-      .card{
-        padding: 14px 14px 16px;
-        border-radius: 18px;
-      }
-
-      .tag{ margin-bottom:10px; font-size:11px; }
-
-      .prompt{
-        font-size: 18px; /* cabe sem esmagar */
-        line-height: 1.35;
-      }
-
-      .rule{
-        margin:12px auto 8px;
-        height:9px;
-      }
-
-      /* botões em coluna e mais compactos */
-      .actions{ gap:10px; margin-top:14px; }
-      button{
-        width: min(320px, 100%);
-        min-width: 0;
-        padding: 11px 14px;
-        border-radius: 14px;
-      }
-
-      .hint{
-        font-size:11px;
-        margin-top: 8px;
-        padding-bottom: 2px;
-      }
-    }
-
-    /* ===== Direitos Autorais (sem atrapalhar no celular) ===== */
     .footer{
       width:100%;
       max-width:980px;
@@ -366,18 +371,74 @@
       text-transform:uppercase;
       color:rgba(255,255,255,.42);
       pointer-events:none;
-      padding: 0 10px;
+      padding:0 10px;
     }
+
     .footer .brand{
       color:rgba(230,192,123,.85);
       font-weight:700;
     }
 
-    /* no desktop fica “mais colado” embaixo */
-    @media (min-width: 700px){
-      .footer{
-        margin-top: 16px;
+    @media (max-width: 430px){
+      body{ padding:14px; }
+
+      .wrap{ gap:10px; }
+
+      h1{
+        font-size:clamp(26px, 9vw, 40px);
+        letter-spacing:.16em;
       }
+
+      .subtitle{
+        font-size:13px;
+        line-height:1.35;
+        max-width:34ch;
+      }
+
+      .whisper{
+        font-size:12px;
+        margin-top:0;
+      }
+
+      .card{
+        padding:14px 14px 16px;
+        border-radius:18px;
+      }
+
+      .tag{ margin-bottom:10px; font-size:11px; }
+
+      .prompt{
+        font-size:18px;
+        line-height:1.35;
+      }
+
+      .rule{
+        margin:12px auto 8px;
+        height:9px;
+      }
+
+      .row{
+        grid-template-columns:1fr;
+      }
+
+      .actions{ gap:10px; margin-top:14px; }
+
+      button{
+        width:min(320px, 100%);
+        min-width:0;
+        padding:11px 14px;
+        border-radius:14px;
+      }
+
+      .hint{
+        font-size:11px;
+        margin-top:8px;
+        padding-bottom:2px;
+      }
+    }
+
+    @media (min-width: 700px){
+      .footer{ margin-top:16px; }
     }
   </style>
 </head>
@@ -407,17 +468,36 @@
 
       <div class="rule"></div>
 
+      <div class="formWrap">
+        <div class="field">
+          <label for="nomeJogador">Seu nome</label>
+          <input id="nomeJogador" type="text" maxlength="40" placeholder="Digite como deseja aparecer na sala">
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="nomeSala">Nome da sala</label>
+            <input id="nomeSala" type="text" maxlength="40" placeholder="Ex.: Mesa Principal">
+          </div>
+
+          <div class="field">
+            <label for="codigoSala">Código da sala</label>
+            <input id="codigoSala" type="text" maxlength="20" placeholder="Ex.: SL-0001">
+          </div>
+        </div>
+      </div>
+
       <p class="status" id="status">Status: aguardando confirmação.</p>
 
       <div class="actions">
         <button id="btnRitual" type="button">Ler o ritual</button>
-        <button id="btnIniciar" type="button">Iniciar</button>
+        <button id="btnCriarSala" type="button">Criar sala</button>
+        <button id="btnEntrarSala" type="button">Entrar na sala</button>
       </div>
 
       <div class="hint">Dica: se estiver no celular, aumente o brilho só um pouco.</div>
     </section>
 
-    <!-- Direitos autorais -->
     <footer class="footer" aria-label="Direitos autorais">
       © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
     </footer>
@@ -450,19 +530,129 @@
     const modalBack = document.getElementById("modalBack");
     const btnRitual = document.getElementById("btnRitual");
     const btnClose = document.getElementById("btnClose");
+    const scene = document.getElementById("scene");
+    const statusEl = document.getElementById("status");
+
+    const nomeJogadorEl = document.getElementById("nomeJogador");
+    const nomeSalaEl = document.getElementById("nomeSala");
+    const codigoSalaEl = document.getElementById("codigoSala");
+
+    const btnCriarSala = document.getElementById("btnCriarSala");
+    const btnEntrarSala = document.getElementById("btnEntrarSala");
 
     btnRitual.addEventListener("click", () => modalBack.style.display = "flex");
     btnClose.addEventListener("click", () => modalBack.style.display = "none");
-    modalBack.addEventListener("click", (e) => { if(e.target === modalBack) modalBack.style.display = "none"; });
+    modalBack.addEventListener("click", (e) => {
+      if(e.target === modalBack) modalBack.style.display = "none";
+    });
 
-    const scene = document.getElementById("scene");
-    const btnIniciar = document.getElementById("btnIniciar");
-    const status = document.getElementById("status");
+    function setStatus(text, type){
+      statusEl.textContent = text;
+      statusEl.classList.remove("ok", "err");
+      if(type) statusEl.classList.add(type);
+    }
 
-    btnIniciar.addEventListener("click", () => {
-      status.textContent = "Status: iniciando…";
+    function normalizarCodigoSala(valor){
+      return valor
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^A-Z0-9-]/g, "")
+        .slice(0, 20);
+    }
+
+    function gerarCodigoSala(){
+      const n = Math.floor(1000 + Math.random() * 9000);
+      return "SL-" + n;
+    }
+
+    function obterNomeJogador(){
+      return nomeJogadorEl.value.trim().slice(0, 40);
+    }
+
+    function obterNomeSala(){
+      return nomeSalaEl.value.trim().slice(0, 40);
+    }
+
+    function entrarNaSala({ nomeJogador, codigoSala, nomeSala }){
+      localStorage.setItem("osl_nome", nomeJogador);
+      localStorage.setItem("osl_sala", codigoSala);
+      localStorage.setItem("osl_nome_sala", nomeSala);
+
+      const url = new URL("./sala.html", window.location.href);
+      url.searchParams.set("nome", nomeJogador);
+      url.searchParams.set("sala", codigoSala);
+      url.searchParams.set("nomeSala", nomeSala);
+
+      setStatus("Status: entrando na sala…", "ok");
       scene.classList.add("fadeOut");
-      setTimeout(() => window.location.href = "./jogo.html", 560);
+
+      setTimeout(() => {
+        window.location.href = url.toString();
+      }, 560);
+    }
+
+    btnCriarSala.addEventListener("click", () => {
+      const nomeJogador = obterNomeJogador();
+      if(!nomeJogador){
+        setStatus("Status: digite seu nome para criar a sala.", "err");
+        nomeJogadorEl.focus();
+        return;
+      }
+
+      let nomeSala = obterNomeSala();
+      if(!nomeSala){
+        nomeSala = "Sala de Espera";
+      }
+
+      const codigoSala = gerarCodigoSala();
+      codigoSalaEl.value = codigoSala;
+
+      entrarNaSala({
+        nomeJogador,
+        codigoSala,
+        nomeSala
+      });
+    });
+
+    btnEntrarSala.addEventListener("click", () => {
+      const nomeJogador = obterNomeJogador();
+      const codigoSala = normalizarCodigoSala(codigoSalaEl.value);
+      let nomeSala = obterNomeSala();
+
+      if(!nomeJogador){
+        setStatus("Status: digite seu nome para entrar na sala.", "err");
+        nomeJogadorEl.focus();
+        return;
+      }
+
+      if(!codigoSala){
+        setStatus("Status: digite o código da sala.", "err");
+        codigoSalaEl.focus();
+        return;
+      }
+
+      codigoSalaEl.value = codigoSala;
+
+      if(!nomeSala){
+        nomeSala = "Sala de Espera";
+      }
+
+      entrarNaSala({
+        nomeJogador,
+        codigoSala,
+        nomeSala
+      });
+    });
+
+    window.addEventListener("load", () => {
+      const nomeSalvo = localStorage.getItem("osl_nome") || "";
+      const salaSalva = localStorage.getItem("osl_sala") || "";
+      const nomeSalaSalva = localStorage.getItem("osl_nome_sala") || "";
+
+      if(nomeSalvo) nomeJogadorEl.value = nomeSalvo;
+      if(salaSalva) codigoSalaEl.value = salaSalva;
+      if(nomeSalaSalva) nomeSalaEl.value = nomeSalaSalva;
     });
   </script>
 </body>
