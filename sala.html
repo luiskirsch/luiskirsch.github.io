@@ -301,7 +301,7 @@ body::after{
 
 .chatCard{
   display:grid;
-  grid-template-rows:auto 1fr auto;
+  grid-template-rows:auto 1fr auto auto;
   min-height:0;
 }
 
@@ -400,6 +400,18 @@ body::after{
   background:rgba(255,255,255,.02);
   color:var(--muted);
   line-height:1.6;
+}
+
+.typingBar{
+  min-height:22px;
+  padding:0 18px 10px;
+  font-size:13px;
+  color:rgba(214,224,237,.72);
+  font-style:italic;
+}
+
+.typingBar:empty{
+  display:none;
 }
 
 .chatComposer{
@@ -567,6 +579,8 @@ body::after{
           </div>
         </div>
 
+        <div class="typingBar" id="typingBar"></div>
+
         <div class="chatComposer">
           <div class="composerRow">
             <input
@@ -598,6 +612,7 @@ import {
   getFirestore,
   doc,
   getDoc,
+  getDocs,
   setDoc,
   updateDoc,
   deleteDoc,
@@ -621,6 +636,8 @@ const firebaseConfig = {
 
 const HEARTBEAT_MS = 15000;
 const ACTIVE_WINDOW_MS = 40000;
+const MAX_PLAYERS = 5;
+const TYPING_ACTIVE_MS = 3500;
 
 const roomNameEl = document.getElementById('roomName');
 const roomCodeEl = document.getElementById('roomCode');
@@ -637,6 +654,7 @@ const messagesEl = document.getElementById('messages');
 const chatEmptyEl = document.getElementById('chatEmpty');
 const sessionLabelEl = document.getElementById('sessionLabel');
 const footerStatusEl = document.getElementById('footerStatus');
+const typingBarEl = document.getElementById('typingBar');
 
 const params = new URLSearchParams(window.location.search);
 
@@ -661,17 +679,22 @@ const db = getFirestore(app);
 const roomRef = doc(db, 'salas', roomCode);
 const playerRef = doc(db, 'salas', roomCode, 'players', participantId);
 const messagesRef = collection(db, 'salas', roomCode, 'messages');
+const typingRef = doc(db, 'salas', roomCode, 'typing', participantId);
+const typingCollectionRef = collection(db, 'salas', roomCode, 'typing');
+const playersCollectionRef = collection(db, 'salas', roomCode, 'players');
 
 let isHost = false;
 let heartbeatTimer = null;
 let roomUnsub = null;
 let playersUnsub = null;
 let messagesUnsub = null;
+let typingUnsub = null;
 let leaving = false;
 let audioCtx = null;
 let audioReady = false;
 let initialMessagesLoaded = false;
 let knownMessageIds = new Set();
+let typingTimer = null;
 
 function enableAudio(){
   if (audioReady) return;
@@ -775,6 +798,11 @@ function showChatEmpty(text){
   chatEmptyEl.innerHTML = text;
 }
 
+function isPlayerActive(player){
+  if(!player.lastSeen || typeof player.lastSeen.toMillis !== 'function') return true;
+  return (Date.now() - player.lastSeen.toMillis()) <= ACTIVE_WINDOW_MS;
+}
+
 function renderPlayers(players){
   playerListEl.innerHTML = '';
 
@@ -838,6 +866,27 @@ function renderMessages(docs){
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
+function renderTyping(names){
+  if(!typingBarEl) return;
+
+  if(!names.length){
+    typingBarEl.textContent = '';
+    return;
+  }
+
+  if(names.length === 1){
+    typingBarEl.textContent = `${names[0]} está digitando...`;
+    return;
+  }
+
+  if(names.length === 2){
+    typingBarEl.textContent = `${names[0]} e ${names[1]} estão digitando...`;
+    return;
+  }
+
+  typingBarEl.textContent = `${names[0]}, ${names[1]} e mais ${names.length - 2} estão digitando...`;
+}
+
 async function ensureRoom(){
   const snap = await getDoc(roomRef);
 
@@ -866,6 +915,18 @@ async function ensureRoom(){
 }
 
 async function upsertSelf(){
+  const playersSnap = await getDocs(playersCollectionRef);
+
+  const activePlayers = playersSnap.docs
+    .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
+    .filter(player => isPlayerActive(player));
+
+  const selfAlreadyActive = activePlayers.some(player => player.id === participantId);
+
+  if(!selfAlreadyActive && activePlayers.length >= MAX_PLAYERS){
+    throw new Error('ROOM_FULL');
+  }
+
   await setDoc(playerRef, {
     id: participantId,
     name: playerName,
@@ -873,6 +934,27 @@ async function upsertSelf(){
     joinedAt: serverTimestamp(),
     lastSeen: serverTimestamp()
   }, { merge:true });
+}
+
+async function setTyping(isTyping){
+  try{
+    if(isTyping){
+      await setDoc(typingRef, {
+        name: playerName,
+        isTyping: true,
+        updatedAt: serverTimestamp()
+      }, { merge:true });
+    }else{
+      await deleteDoc(typingRef);
+    }
+  }catch(e){}
+}
+
+function scheduleTypingStop(){
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => {
+    setTyping(false);
+  }, TYPING_ACTIVE_MS);
 }
 
 function startHeartbeat(){
@@ -910,11 +992,9 @@ function bindRoom(){
 }
 
 function bindPlayers(){
-  const q = query(collection(db, 'salas', roomCode, 'players'), orderBy('joinedAt', 'asc'));
+  const q = query(playersCollectionRef, orderBy('joinedAt', 'asc'));
 
   playersUnsub = onSnapshot(q, function(snapshot){
-    const now = Date.now();
-
     const players = snapshot.docs
       .map(function(docSnap){
         const data = docSnap.data();
@@ -926,12 +1006,23 @@ function bindPlayers(){
           lastSeen: data.lastSeen || null
         };
       })
-      .filter(function(player){
-        if(!player.lastSeen || typeof player.lastSeen.toMillis !== 'function') return true;
-        return (now - player.lastSeen.toMillis()) <= ACTIVE_WINDOW_MS;
-      });
+      .filter(isPlayerActive);
 
     renderPlayers(players);
+  });
+}
+
+function bindTyping(){
+  const q = query(typingCollectionRef, orderBy('updatedAt', 'asc'));
+
+  typingUnsub = onSnapshot(q, function(snapshot){
+    const names = snapshot.docs
+      .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
+      .filter(item => item.id !== participantId)
+      .map(item => item.name)
+      .filter(Boolean);
+
+    renderTyping(names);
   });
 }
 
@@ -975,6 +1066,8 @@ async function sendMessage(){
   if(!text) return;
 
   messageInput.value = '';
+  clearTimeout(typingTimer);
+  await setTyping(false);
 
   await addDoc(messagesRef, {
     type: 'user',
@@ -1017,9 +1110,13 @@ async function leaveRoom(){
 
   try{
     clearInterval(heartbeatTimer);
+    clearTimeout(typingTimer);
+    await setTyping(false);
+
     if(roomUnsub) roomUnsub();
     if(playersUnsub) playersUnsub();
     if(messagesUnsub) messagesUnsub();
+    if(typingUnsub) typingUnsub();
 
     await deleteDoc(playerRef);
   }catch(e){}
@@ -1040,6 +1137,21 @@ copyCodeBtn.addEventListener('click', async function(){
 
 sendBtn.addEventListener('click', function(){
   sendMessage().catch(console.error);
+});
+
+messageInput.addEventListener('input', function(){
+  if(messageInput.value.trim()){
+    setTyping(true);
+    scheduleTypingStop();
+  }else{
+    clearTimeout(typingTimer);
+    setTyping(false);
+  }
+});
+
+messageInput.addEventListener('blur', function(){
+  clearTimeout(typingTimer);
+  setTyping(false);
 });
 
 messageInput.addEventListener('keydown', function(e){
@@ -1082,8 +1194,20 @@ window.addEventListener('beforeunload', function(){
     bindRoom();
     bindPlayers();
     bindMessages();
+    bindTyping();
   }catch(error){
     console.error(error);
+
+    if (error && error.message === 'ROOM_FULL'){
+      showChatEmpty('A sala atingiu o limite de 5 jogadores.<br>Entre em outra sala ou aguarde alguém sair.');
+      roomStatusEl.textContent = 'Sala lotada';
+      footerStatusEl.textContent = 'Limite atingido';
+      startBtn.disabled = true;
+      sendBtn.disabled = true;
+      messageInput.disabled = true;
+      return;
+    }
+
     showChatEmpty('Não foi possível conectar à sala.<br>Verifique a configuração do Firebase.');
     roomStatusEl.textContent = 'Erro de conexão';
     footerStatusEl.textContent = 'Erro';
