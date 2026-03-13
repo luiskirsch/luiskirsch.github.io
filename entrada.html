@@ -9,17 +9,23 @@
   <style>
     :root{
       --bg:#050505;
+      --bg-2:#080808;
       --gold:#e6c07b;
       --muted:#a7a7a7;
-      --card:rgba(255,255,255,.045);
-      --line:rgba(230,192,123,.22);
       --shadow:rgba(0,0,0,.55);
       --danger:#ff4d4d;
       --ok:#82d996;
     }
 
     *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    html,body{ min-height:100%; }
+
+    html{
+      background:
+        radial-gradient(1000px 520px at 50% 14%, rgba(230,192,123,.08), transparent 58%),
+        linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 55%, var(--bg) 100%);
+      background-color:var(--bg);
+    }
 
     body{
       margin:0;
@@ -32,10 +38,9 @@
       padding-top:max(18px, env(safe-area-inset-top));
       padding-bottom:max(18px, env(safe-area-inset-bottom));
       background:
-        radial-gradient(1200px 700px at 50% 20%, rgba(230,192,123,.10), transparent 55%),
-        radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
-        radial-gradient(900px 560px at 82% 75%, rgba(255,255,255,.05), transparent 62%),
-        var(--bg);
+        radial-gradient(1000px 520px at 50% 14%, rgba(230,192,123,.08), transparent 58%),
+        linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 55%, var(--bg) 100%);
+      background-color:var(--bg);
       color:#f2f2f2;
       font-family: ui-serif, Georgia, "Times New Roman", serif;
       overflow-x:hidden;
@@ -50,19 +55,17 @@
     body::before{
       content:"";
       position:fixed;
-      inset:-20%;
+      inset:0;
       pointer-events:none;
       background:
-        radial-gradient(700px 360px at 50% 35%, rgba(230,192,123,.08), transparent 60%),
-        radial-gradient(900px 480px at 60% 70%, rgba(255,255,255,.05), transparent 65%);
-      filter: blur(12px);
+        radial-gradient(700px 260px at 50% 18%, rgba(230,192,123,.07), transparent 62%);
       opacity:.75;
-      animation: pulseGlow 4.8s ease-in-out infinite;
+      animation:pulseGlow 4.8s ease-in-out infinite;
     }
 
     @keyframes pulseGlow{
-      0%,100%{ opacity:.60; transform:translateY(0) scale(1); }
-      50%{ opacity:.92; transform:translateY(-6px) scale(1.01); }
+      0%,100%{ opacity:.58; transform:translateY(0) scale(1); }
+      50%{ opacity:.82; transform:translateY(-4px) scale(1.01); }
     }
 
     .wrap{
@@ -128,7 +131,7 @@
       position:absolute;
       inset:0;
       pointer-events:none;
-      background:radial-gradient(700px 240px at 50% 0%, rgba(230,192,123,.10), transparent 60%);
+      background:radial-gradient(700px 220px at 50% 0%, rgba(230,192,123,.08), transparent 60%);
       opacity:.8;
     }
 
@@ -223,6 +226,7 @@
 
     .field input::placeholder{
       color:rgba(255,255,255,.34);
+      opacity:1;
     }
 
     .row{
@@ -372,6 +376,7 @@
       color:rgba(255,255,255,.42);
       pointer-events:none;
       padding:0 10px;
+      background:transparent;
     }
 
     .footer .brand{
@@ -471,7 +476,7 @@
       <div class="formWrap">
         <div class="field">
           <label for="nomeJogador">Seu nome</label>
-          <input id="nomeJogador" type="text" maxlength="40" placeholder="Digite como deseja aparecer na sala">
+          <input id="nomeJogador" type="text" maxlength="40" placeholder="Ex.: Luis">
         </div>
 
         <div class="row">
@@ -643,16 +648,6 @@
         codigoSala,
         nomeSala
       });
-    });
-
-    window.addEventListener("load", () => {
-      const nomeSalvo = localStorage.getItem("osl_nome") || "";
-      const salaSalva = localStorage.getItem("osl_sala") || "";
-      const nomeSalaSalva = localStorage.getItem("osl_nome_sala") || "";
-
-      if(nomeSalvo) nomeJogadorEl.value = nomeSalvo;
-      if(salaSalva) codigoSalaEl.value = salaSalva;
-      if(nomeSalaSalva) nomeSalaEl.value = nomeSalaSalva;
     });
   </script>
 </body>
