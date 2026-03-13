@@ -16,7 +16,6 @@ html,body{
   margin:0;
   width:100%;
   height:100%;
-  overflow:hidden;
   overscroll-behavior:none;
   background:
     radial-gradient(45vw 45vw at 22% 48%, rgba(28,120,220,.12), transparent 60%),
@@ -32,9 +31,6 @@ body{
   color:var(--text);
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   -webkit-text-size-adjust:100%;
-  -webkit-overflow-scrolling:touch;
-  position:fixed;
-  inset:0;
 }
 
 body::before{
@@ -60,14 +56,13 @@ body::after{
 
 .page{
   width:100%;
-  height:100dvh;
   min-height:100dvh;
   display:grid;
   place-items:center;
   padding:
     max(28px, env(safe-area-inset-top))
     max(18px, env(safe-area-inset-right))
-    max(44px, env(safe-area-inset-bottom))
+    max(50px, env(safe-area-inset-bottom))
     max(18px, env(safe-area-inset-left));
   position:relative;
   z-index:1;
@@ -88,6 +83,7 @@ body::after{
   gap:12px;
   width:100%;
   max-width:760px;
+  padding-bottom:10px;
 }
 
 .eyebrow{
@@ -146,34 +142,17 @@ body::after{
     inset 0 0 30px rgba(72,183,244,.03),
     0 14px 40px rgba(0,0,0,.24);
   text-align:center;
-  overflow:hidden;
-}
-
-.time-box::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:inherit;
-  pointer-events:none;
-  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0) 40%);
-  opacity:.7;
 }
 
 .time-value{
   display:block;
-  position:relative;
-  z-index:1;
   font-size:clamp(42px,5vw,78px);
   font-weight:900;
   letter-spacing:-.05em;
-  font-variant-numeric:tabular-nums;
-  text-shadow:0 8px 18px rgba(0,0,0,.35);
 }
 
 .time-label{
   display:block;
-  position:relative;
-  z-index:1;
   margin-top:8px;
   font-size:12px;
   letter-spacing:.26em;
@@ -186,7 +165,6 @@ body::after{
   margin:12px 0 0;
   font-size:clamp(34px,4vw,68px);
   font-weight:900;
-  text-shadow:0 10px 26px rgba(0,0,0,.35);
 }
 
 .launch-line{
@@ -205,7 +183,6 @@ body::after{
   overflow:hidden;
   background:rgba(255,255,255,.07);
   border:1px solid rgba(255,255,255,.08);
-  box-shadow:inset 0 0 24px rgba(0,0,0,.35);
 }
 
 .progress span{
@@ -213,262 +190,160 @@ body::after{
   height:100%;
   width:0%;
   background:linear-gradient(90deg,#8fd9ff,#48b7f4,#daf6ff);
-  box-shadow:0 0 20px rgba(72,183,244,.35);
   transition:width .6s ease;
 }
 
 .footer-note{
   margin-top:14px;
-  padding-bottom:4px;
+  padding-bottom:6px;
   font-size:12px;
-  line-height:1.35;
+  line-height:1.4;
   color:rgba(214,224,237,.54);
   letter-spacing:.18em;
   text-transform:uppercase;
 }
 
 @media (max-width:560px){
-  .page{
-    padding:
-      max(20px, env(safe-area-inset-top))
-      max(14px, env(safe-area-inset-right))
-      max(38px, env(safe-area-inset-bottom))
-      max(14px, env(safe-area-inset-left));
-  }
 
-  .right{
-    gap:8px;
-    max-width:100%;
-  }
-
-  .eyebrow{
-    font-size:clamp(22px, 7vw, 34px);
-    margin-bottom:0;
-  }
-
-  .title{
-    width:100%;
-  }
-
-  .title .line1{
-    font-size:clamp(34px, 8vw, 42px);
+  .countdown{
+    grid-template-columns:repeat(2,1fr);
   }
 
   .title .line2{
-    font-size:clamp(54px, 16vw, 78px);
-    line-height:.94;
-  }
-
-  .countdown{
-    margin-top:12px;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
-    width:100%;
-  }
-
-  .time-box{
-    padding:16px 12px 14px;
-    border-radius:20px;
-  }
-
-  .time-value{
-    font-size:clamp(38px, 12vw, 54px);
-  }
-
-  .time-label{
-    font-size:11px;
-    letter-spacing:.22em;
-  }
-
-  .soon{
-    margin-top:6px;
-    font-size:clamp(28px, 10vw, 44px);
-  }
-
-  .launch-line{
-    margin-top:4px;
-    font-size:11px;
-    line-height:1.5;
-    max-width:320px;
+    font-size:clamp(54px,16vw,78px);
   }
 
   .progress{
-    display:block;
-    margin-top:8px;
-    width:min(100%, 320px);
+    width:min(100%,320px);
     height:7px;
   }
 
   .footer-note{
-    margin-top:12px;
-    padding-bottom:6px;
     font-size:10px;
-    line-height:1.4;
     letter-spacing:.14em;
   }
+
 }
 </style>
 </head>
 
 <body>
+
 <main class="page">
-  <section class="hero">
-    <div class="right">
-      <p class="eyebrow">Pronto para</p>
+<section class="hero">
 
-      <h1 class="title">
-        <span class="line1">O</span>
-        <span class="line2">SextoLugar?</span>
-      </h1>
+<div class="right">
 
-      <div class="countdown">
-        <div class="time-box">
-          <span class="time-value" id="days">00</span>
-          <span class="time-label">DIAS</span>
-        </div>
+<p class="eyebrow">Pronto para</p>
 
-        <div class="time-box">
-          <span class="time-value" id="hours">00</span>
-          <span class="time-label">HORAS</span>
-        </div>
+<h1 class="title">
+<span class="line1">O</span>
+<span class="line2">SextoLugar?</span>
+</h1>
 
-        <div class="time-box">
-          <span class="time-value" id="minutes">00</span>
-          <span class="time-label">MINUTOS</span>
-        </div>
+<div class="countdown">
 
-        <div class="time-box">
-          <span class="time-value" id="seconds">00</span>
-          <span class="time-label">SEGUNDOS</span>
-        </div>
-      </div>
+<div class="time-box">
+<span class="time-value" id="days">00</span>
+<span class="time-label">DIAS</span>
+</div>
 
-      <p class="soon" id="statusText">Em breve!</p>
-      <p class="launch-line">Lançamento em 30 de junho de 2026 às 20h</p>
+<div class="time-box">
+<span class="time-value" id="hours">00</span>
+<span class="time-label">HORAS</span>
+</div>
 
-      <div class="progress">
-        <span id="progressBar"></span>
-      </div>
+<div class="time-box">
+<span class="time-value" id="minutes">00</span>
+<span class="time-label">MINUTOS</span>
+</div>
 
-      <p class="footer-note">Prelúdio Jogos • Contagem oficial</p>
-    </div>
-  </section>
+<div class="time-box">
+<span class="time-value" id="seconds">00</span>
+<span class="time-label">SEGUNDOS</span>
+</div>
+
+</div>
+
+<p class="soon" id="statusText">Em breve!</p>
+
+<p class="launch-line">
+Lançamento em 30 de junho de 2026 às 20h
+</p>
+
+<div class="progress">
+<span id="progressBar"></span>
+</div>
+
+<p class="footer-note">
+Prelúdio Jogos • Contagem oficial
+</p>
+
+</div>
+</section>
 </main>
 
 <script>
 (function(){
-  const TARGET = new Date('2026-06-30T20:00:00-03:00').getTime();
-  const START_REFERENCE = new Date('2026-03-12T00:00:00-03:00').getTime();
 
-  const daysEl = document.getElementById('days');
-  const hoursEl = document.getElementById('hours');
-  const minutesEl = document.getElementById('minutes');
-  const secondsEl = document.getElementById('seconds');
-  const progressBar = document.getElementById('progressBar');
-  const statusText = document.getElementById('statusText');
+const TARGET = new Date('2026-06-30T20:00:00-03:00').getTime();
+const START_REFERENCE = new Date('2026-03-12T00:00:00-03:00').getTime();
 
-  let audioCtx = null;
-  let audioEnabled = false;
-  let lastSecondShown = null;
+const daysEl = document.getElementById('days');
+const hoursEl = document.getElementById('hours');
+const minutesEl = document.getElementById('minutes');
+const secondsEl = document.getElementById('seconds');
+const progressBar = document.getElementById('progressBar');
 
-  function enableAudio(){
-    if (audioEnabled) return;
+function pad(n){
+return String(Math.max(0,n)).padStart(2,'0');
+}
 
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return;
+function clamp(v,min,max){
+return Math.max(min,Math.min(max,v));
+}
 
-    try{
-      audioCtx = new Ctx();
-      if (audioCtx.state === 'suspended'){
-        audioCtx.resume().catch(()=>{});
-      }
-      audioEnabled = true;
-    }catch(e){}
-  }
+function update(){
 
-  window.addEventListener('pointerdown', enableAudio, { once:true });
-  window.addEventListener('touchstart', enableAudio, { once:true });
+const now = Date.now();
+let diff = TARGET - now;
 
-  function playTick(){
-    if (!audioEnabled || !audioCtx) return;
+if(diff <= 0){
 
-    try{
-      const now = audioCtx.currentTime;
+daysEl.textContent='00';
+hoursEl.textContent='00';
+minutesEl.textContent='00';
+secondsEl.textContent='00';
+progressBar.style.width='100%';
+return;
 
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const filter = audioCtx.createBiquadFilter();
+}
 
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(1850, now);
-      osc.frequency.exponentialRampToValueAtTime(1320, now + 0.018);
+const totalSeconds=Math.floor(diff/1000);
 
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(2100, now);
-      filter.Q.setValueAtTime(5.5, now);
+const days=Math.floor(totalSeconds/86400);
+const hours=Math.floor((totalSeconds%86400)/3600);
+const minutes=Math.floor((totalSeconds%3600)/60);
+const seconds=totalSeconds%60;
 
-      gain.gain.setValueAtTime(0.00001, now);
-      gain.gain.exponentialRampToValueAtTime(0.075, now + 0.0025);
-      gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.022);
+daysEl.textContent=pad(days);
+hoursEl.textContent=pad(hours);
+minutesEl.textContent=pad(minutes);
+secondsEl.textContent=pad(seconds);
 
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(audioCtx.destination);
+const totalRange = TARGET - START_REFERENCE;
+const elapsed = now - START_REFERENCE;
+const progress = clamp(elapsed / totalRange,0,1);
 
-      osc.start(now);
-      osc.stop(now + 0.028);
-    }catch(e){}
-  }
+progressBar.style.width=(progress*100).toFixed(2)+'%';
 
-  function pad(n){
-    return String(Math.max(0,n)).padStart(2,'0');
-  }
+}
 
-  function clamp(v,min,max){
-    return Math.max(min,Math.min(max,v));
-  }
+update();
+setInterval(update,1000);
 
-  function update(){
-    const now = Date.now();
-    let diff = TARGET - now;
-
-    if(diff <= 0){
-      daysEl.textContent = '00';
-      hoursEl.textContent = '00';
-      minutesEl.textContent = '00';
-      secondsEl.textContent = '00';
-      statusText.textContent = 'Chegou a hora.';
-      progressBar.style.width = '100%';
-      return;
-    }
-
-    const totalSeconds = Math.floor(diff / 1000);
-
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    daysEl.textContent = pad(days);
-    hoursEl.textContent = pad(hours);
-    minutesEl.textContent = pad(minutes);
-    secondsEl.textContent = pad(seconds);
-
-    if(lastSecondShown !== null && seconds !== lastSecondShown){
-      playTick();
-    }
-    lastSecondShown = seconds;
-
-    const totalRange = TARGET - START_REFERENCE;
-    const elapsed = now - START_REFERENCE;
-    const progress = clamp(elapsed / totalRange, 0, 1);
-
-    progressBar.style.width = (progress * 100).toFixed(2) + '%';
-  }
-
-  update();
-  setInterval(update, 1000);
 })();
 </script>
+
 </body>
 </html>
