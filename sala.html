@@ -1,597 +1,3 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>O SextoLugar — Sala</title>
-
-<style>
-:root{
-  --bg-1:#030608;
-  --bg-2:#010203;
-  --bg-3:#000000;
-  --text:#f5f7fb;
-  --muted:rgba(214,224,237,.68);
-  --line:rgba(255,255,255,.10);
-  --blue-1:#daf6ff;
-  --blue-2:#8fd9ff;
-  --blue-3:#48b7f4;
-  --gold:#e6c07b;
-  --ok:#82d996;
-  --danger:#ff6b6b;
-  --shadow:0 20px 60px rgba(0,0,0,.35);
-}
-
-*{ box-sizing:border-box; }
-
-html,body{
-  margin:0;
-  min-height:100%;
-  background:
-    radial-gradient(45vw 45vw at 22% 48%, rgba(28,120,220,.10), transparent 60%),
-    radial-gradient(38vw 38vw at 68% 28%, rgba(20,88,180,.08), transparent 62%),
-    radial-gradient(60vw 60vw at 50% 50%, rgba(255,255,255,.02), transparent 68%),
-    linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
-  background-color:#000;
-  color:var(--text);
-  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-  overflow-x:hidden;
-}
-
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:radial-gradient(circle at center, transparent 48%, rgba(0,0,0,.24) 100%);
-  opacity:.95;
-}
-
-body::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0) 20%, rgba(255,255,255,0) 80%, rgba(255,255,255,.015));
-  mix-blend-mode:screen;
-  opacity:.22;
-}
-
-.page{
-  position:relative;
-  z-index:1;
-  width:100%;
-  min-height:100vh;
-  min-height:100svh;
-  padding:
-    max(18px, env(safe-area-inset-top))
-    max(16px, env(safe-area-inset-right))
-    max(24px, env(safe-area-inset-bottom))
-    max(16px, env(safe-area-inset-left));
-}
-
-.shell{
-  width:min(1320px, 100%);
-  margin:0 auto;
-  display:grid;
-  grid-template-rows:auto 1fr auto;
-  gap:16px;
-  min-height:calc(100vh - 36px);
-  min-height:calc(100svh - 36px);
-}
-
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  padding:14px 16px;
-  border:1px solid var(--line);
-  border-radius:22px;
-  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
-  box-shadow:var(--shadow);
-  backdrop-filter:blur(6px);
-}
-
-.brandWrap{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  min-width:0;
-}
-
-.eyebrow{
-  margin:0;
-  font-size:11px;
-  letter-spacing:.22em;
-  text-transform:uppercase;
-  color:var(--muted);
-}
-
-.roomTitle{
-  margin:0;
-  font-size:clamp(22px, 3vw, 34px);
-  line-height:1;
-  font-weight:900;
-  letter-spacing:-.04em;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.topMeta{
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-  gap:10px;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  min-height:40px;
-  padding:10px 14px;
-  border-radius:999px;
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.04);
-  color:var(--text);
-  font-size:13px;
-  white-space:nowrap;
-}
-
-.badge strong{
-  color:var(--blue-2);
-}
-
-.dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--ok);
-  box-shadow:0 0 14px rgba(130,217,150,.45);
-  flex:0 0 auto;
-}
-
-.main{
-  display:grid;
-  grid-template-columns:320px minmax(0,1fr);
-  gap:16px;
-  min-height:0;
-}
-
-.card{
-  border:1px solid var(--line);
-  border-radius:26px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
-    radial-gradient(circle at top, rgba(72,183,244,.05), transparent 60%);
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  min-height:0;
-}
-
-.cardInner{
-  padding:18px;
-}
-
-.sidebar{
-  display:flex;
-  flex-direction:column;
-  min-height:0;
-}
-
-.sectionTitle{
-  margin:0 0 12px;
-  font-size:12px;
-  letter-spacing:.22em;
-  text-transform:uppercase;
-  color:var(--muted);
-}
-
-.playerList{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.player{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:12px 14px;
-  border-radius:16px;
-  background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.06);
-}
-
-.playerLeft{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-}
-
-.avatar{
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  font-size:12px;
-  font-weight:800;
-  color:#fff;
-  background:linear-gradient(180deg, #56bdf8, #1f86d9);
-  box-shadow:0 0 18px rgba(72,183,244,.28);
-  flex:0 0 auto;
-}
-
-.playerName{
-  font-size:14px;
-  font-weight:700;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.playerRole{
-  font-size:11px;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color:var(--muted);
-}
-
-.emptyState{
-  padding:14px;
-  border-radius:16px;
-  border:1px dashed rgba(255,255,255,.12);
-  background:rgba(255,255,255,.02);
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.55;
-}
-
-.sidebarActions{
-  margin-top:16px;
-  display:grid;
-  gap:10px;
-}
-
-.btn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  width:100%;
-  min-height:46px;
-  padding:12px 16px;
-  border-radius:16px;
-  font:inherit;
-  font-weight:700;
-  letter-spacing:.04em;
-  transition:transform .12s ease, opacity .15s ease, border-color .15s ease, background .15s ease;
-}
-
-.btn:hover{ transform:translateY(-1px); }
-.btn:active{ transform:translateY(0); opacity:.95; }
-
-.btnPrimary{
-  color:#07111a;
-  background:linear-gradient(180deg, var(--blue-1), var(--blue-2));
-  box-shadow:0 0 24px rgba(72,183,244,.20);
-}
-
-.btnGhost{
-  color:var(--text);
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.045);
-}
-
-.btnDanger{
-  color:#ffdede;
-  border:1px solid rgba(255,107,107,.20);
-  background:rgba(255,107,107,.07);
-}
-
-.btn[disabled]{
-  opacity:.45;
-  cursor:not-allowed;
-  transform:none !important;
-}
-
-.chatCard{
-  display:grid;
-  grid-template-rows:auto 1fr auto;
-  min-height:0;
-}
-
-.chatHeader{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:16px 18px;
-  border-bottom:1px solid var(--line);
-  background:rgba(255,255,255,.02);
-}
-
-.chatHeaderLeft h2{
-  margin:0 0 4px;
-  font-size:clamp(20px, 2vw, 28px);
-  letter-spacing:-.03em;
-}
-
-.chatHeaderLeft p{
-  margin:0;
-  font-size:13px;
-  color:var(--muted);
-}
-
-.sessionStatus{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 14px;
-  border-radius:999px;
-  background:rgba(130,217,150,.10);
-  border:1px solid rgba(130,217,150,.20);
-  color:#dff8e6;
-  font-size:12px;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  white-space:nowrap;
-}
-
-.messages{
-  min-height:0;
-  overflow:auto;
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.message{
-  max-width:min(82%, 720px);
-  padding:12px 14px;
-  border-radius:18px;
-  line-height:1.5;
-  font-size:14px;
-  box-shadow:0 8px 22px rgba(0,0,0,.18);
-}
-
-.message .meta{
-  display:block;
-  margin-bottom:6px;
-  font-size:11px;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  color:rgba(255,255,255,.60);
-}
-
-.message.system{
-  align-self:center;
-  max-width:min(92%, 760px);
-  text-align:center;
-  background:rgba(230,192,123,.08);
-  border:1px solid rgba(230,192,123,.16);
-  color:#f7ecd5;
-}
-
-.message.other{
-  align-self:flex-start;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-}
-
-.message.me{
-  align-self:flex-end;
-  background:linear-gradient(180deg, rgba(72,183,244,.20), rgba(72,183,244,.10));
-  border:1px solid rgba(72,183,244,.20);
-}
-
-.chatEmpty{
-  margin:auto;
-  width:min(100%, 520px);
-  text-align:center;
-  padding:22px 18px;
-  border-radius:18px;
-  border:1px dashed rgba(255,255,255,.10);
-  background:rgba(255,255,255,.02);
-  color:var(--muted);
-  line-height:1.6;
-}
-
-.chatComposer{
-  border-top:1px solid var(--line);
-  padding:14px 16px;
-  background:rgba(255,255,255,.02);
-}
-
-.composerRow{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 130px;
-  gap:10px;
-}
-
-.input{
-  width:100%;
-  min-height:48px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(0,0,0,.22);
-  color:var(--text);
-  padding:12px 14px;
-  outline:none;
-  font:inherit;
-}
-
-.input::placeholder{
-  color:rgba(255,255,255,.36);
-}
-
-.footerBar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:10px 6px 0;
-  color:var(--muted);
-  font-size:12px;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-
-.footerBar strong{
-  color:var(--blue-2);
-}
-
-@media (max-width:980px){
-  .main{
-    grid-template-columns:1fr;
-  }
-
-  .sidebar{
-    order:2;
-  }
-
-  .chatCard{
-    order:1;
-    min-height:540px;
-  }
-}
-
-@media (max-width:640px){
-  .page{
-    padding:
-      max(14px, env(safe-area-inset-top))
-      max(12px, env(safe-area-inset-right))
-      max(18px, env(safe-area-inset-bottom))
-      max(12px, env(safe-area-inset-left));
-  }
-
-  .shell{
-    gap:12px;
-  }
-
-  .topbar{
-    flex-direction:column;
-    align-items:flex-start;
-    padding:14px;
-  }
-
-  .topMeta{
-    width:100%;
-    justify-content:flex-start;
-  }
-
-  .cardInner{
-    padding:14px;
-  }
-
-  .chatHeader{
-    flex-direction:column;
-    align-items:flex-start;
-  }
-
-  .composerRow{
-    grid-template-columns:1fr;
-  }
-
-  .message{
-    max-width:100%;
-  }
-
-  .footerBar{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:6px;
-  }
-}
-</style>
-</head>
-<body>
-<main class="page">
-  <div class="shell">
-
-    <header class="topbar">
-      <div class="brandWrap">
-        <p class="eyebrow">Sala do Ritual</p>
-        <h1 class="roomTitle">O SextoLugar</h1>
-      </div>
-
-      <div class="topMeta">
-        <div class="badge">Sala: <strong id="roomName">Aguardando...</strong></div>
-        <div class="badge">Código: <strong id="roomCode">----</strong></div>
-        <div class="badge"><span class="dot"></span> <span id="roomStatus">Conectando</span></div>
-      </div>
-    </header>
-
-    <section class="main">
-
-      <aside class="card sidebar">
-        <div class="cardInner">
-          <h2 class="sectionTitle">Jogadores conectados</h2>
-
-          <div class="playerList" id="playerList"></div>
-
-          <div class="emptyState" id="playersEmpty">
-            Nenhum outro jogador entrou ainda. Compartilhe o código da sala para reunir o grupo.
-          </div>
-
-          <div class="sidebarActions">
-            <button class="btn btnPrimary" id="startBtn">Iniciar Ritual</button>
-            <button class="btn btnGhost" id="copyCodeBtn">Copiar código da sala</button>
-            <button class="btn btnDanger" id="leaveBtn">Sair da sala</button>
-          </div>
-        </div>
-      </aside>
-
-      <section class="card chatCard">
-        <div class="chatHeader">
-          <div class="chatHeaderLeft">
-            <h2>Chat da sala</h2>
-            <p>Conversem antes de iniciar. Depois, o clima muda.</p>
-          </div>
-
-          <div class="sessionStatus">
-            <span class="dot"></span>
-            <span id="sessionLabel">Sessão não iniciada</span>
-          </div>
-        </div>
-
-        <div class="messages" id="messages">
-          <div class="chatEmpty" id="chatEmpty">
-            Conectando a sala...<br>
-            As mensagens e jogadores aparecerão em tempo real.
-          </div>
-        </div>
-
-        <div class="chatComposer">
-          <div class="composerRow">
-            <input
-              class="input"
-              id="messageInput"
-              type="text"
-              maxlength="240"
-              placeholder="Digite uma mensagem para a sala..."
-              autocomplete="off"
-            >
-            <button class="btn btnPrimary" id="sendBtn">Enviar</button>
-          </div>
-        </div>
-      </section>
-
-    </section>
-
-    <div class="footerBar">
-      <div>Jogadores na sala: <strong id="playerCount">0</strong></div>
-      <div>Status: <strong id="footerStatus">Conectando</strong></div>
-    </div>
-
-  </div>
-</main>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
@@ -668,6 +74,75 @@ let roomUnsub = null;
 let playersUnsub = null;
 let messagesUnsub = null;
 let leaving = false;
+
+/* =========================
+   ÁUDIO DE MENSAGEM
+========================= */
+let audioCtx = null;
+let audioReady = false;
+let initialMessagesLoaded = false;
+let knownMessageIds = new Set();
+
+function enableAudio(){
+  if (audioReady) return;
+
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+
+  try{
+    audioCtx = new AudioContextClass();
+    if (audioCtx.state === 'suspended'){
+      audioCtx.resume().catch(() => {});
+    }
+    audioReady = true;
+  }catch(e){}
+}
+
+window.addEventListener('pointerdown', enableAudio, { once:true });
+window.addEventListener('touchstart', enableAudio, { once:true });
+window.addEventListener('keydown', enableAudio, { once:true });
+
+function playIncomingMessageSound(){
+  if (!audioReady || !audioCtx) return;
+
+  try{
+    const now = audioCtx.currentTime;
+
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc1.type = 'triangle';
+    osc2.type = 'sine';
+
+    osc1.frequency.setValueAtTime(920, now);
+    osc1.frequency.exponentialRampToValueAtTime(680, now + 0.08);
+
+    osc2.frequency.setValueAtTime(1320, now);
+    osc2.frequency.exponentialRampToValueAtTime(980, now + 0.08);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1800, now);
+    filter.Q.setValueAtTime(0.8, now);
+
+    gain.gain.setValueAtTime(0.00001, now);
+    gain.gain.exponentialRampToValueAtTime(0.045, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.14);
+
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+
+    osc1.stop(now + 0.15);
+    osc2.stop(now + 0.15);
+  }catch(e){}
+}
+/* ========================= */
 
 function getParticipantId(){
   let id = sessionStorage.getItem('osl_participant_id');
@@ -880,6 +355,29 @@ function bindMessages(){
     });
 
     renderMessages(docs);
+
+    const currentIds = new Set(docs.map(item => item.id));
+
+    if(!initialMessagesLoaded){
+      knownMessageIds = currentIds;
+      initialMessagesLoaded = true;
+      return;
+    }
+
+    docs.forEach(function(item){
+      if (knownMessageIds.has(item.id)) return;
+
+      const isOwnMessage = item.authorId === participantId;
+      const shouldPlay =
+        (item.type === 'system') ||
+        (item.type === 'user' && !isOwnMessage);
+
+      if (shouldPlay){
+        playIncomingMessageSound();
+      }
+    });
+
+    knownMessageIds = currentIds;
   });
 }
 
