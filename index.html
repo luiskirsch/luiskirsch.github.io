@@ -291,7 +291,10 @@ body::after{
   }
 
   .progress{
-    display:none;
+    display:block;
+    margin-top:14px;
+    width:min(100%, 320px);
+    height:8px;
   }
 
   .footer-note{
@@ -413,7 +416,7 @@ body::after{
   }
 
   function pad(n){
-    return String(Math.max(0, n)).padStart(2, '0');
+    return String(Math.max(0,n)).padStart(2,'0');
   }
 
   function clamp(v,min,max){
