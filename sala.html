@@ -79,8 +79,8 @@ body::after{
   display:grid;
   grid-template-rows:auto 1fr auto;
   gap:16px;
-  min-height:calc(100vh - 2 * 18px);
-  min-height:calc(100svh - 2 * 18px);
+  min-height:calc(100vh - 36px);
+  min-height:calc(100svh - 36px);
 }
 
 .topbar{
@@ -245,6 +245,16 @@ body::after{
   color:var(--muted);
 }
 
+.emptyState{
+  padding:14px;
+  border-radius:16px;
+  border:1px dashed rgba(255,255,255,.12);
+  background:rgba(255,255,255,.02);
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.55;
+}
+
 .sidebarActions{
   margin-top:16px;
   display:grid;
@@ -377,6 +387,18 @@ body::after{
   border:1px solid rgba(72,183,244,.20);
 }
 
+.chatEmpty{
+  margin:auto;
+  width:min(100%, 520px);
+  text-align:center;
+  padding:22px 18px;
+  border-radius:18px;
+  border:1px dashed rgba(255,255,255,.10);
+  background:rgba(255,255,255,.02);
+  color:var(--muted);
+  line-height:1.6;
+}
+
 .chatComposer{
   border-top:1px solid var(--line);
   padding:14px 16px;
@@ -496,8 +518,8 @@ body::after{
       </div>
 
       <div class="topMeta">
-        <div class="badge">Sala: <strong id="roomName">A Reunião</strong></div>
-        <div class="badge">Código: <strong id="roomCode">SL-4281</strong></div>
+        <div class="badge">Sala: <strong id="roomName">Aguardando...</strong></div>
+        <div class="badge">Código: <strong id="roomCode">----</strong></div>
         <div class="badge"><span class="dot"></span> <span id="roomStatus">Aguardando jogadores</span></div>
       </div>
     </header>
@@ -508,50 +530,10 @@ body::after{
         <div class="cardInner">
           <h2 class="sectionTitle">Jogadores conectados</h2>
 
-          <div class="playerList" id="playerList">
-            <div class="player">
-              <div class="playerLeft">
-                <div class="avatar">LK</div>
-                <div>
-                  <div class="playerName">Luis</div>
-                  <div class="playerRole">Anfitrião</div>
-                </div>
-              </div>
-              <div class="playerRole">Online</div>
-            </div>
+          <div class="playerList" id="playerList"></div>
 
-            <div class="player">
-              <div class="playerLeft">
-                <div class="avatar">AN</div>
-                <div>
-                  <div class="playerName">Ana</div>
-                  <div class="playerRole">Participante</div>
-                </div>
-              </div>
-              <div class="playerRole">Online</div>
-            </div>
-
-            <div class="player">
-              <div class="playerLeft">
-                <div class="avatar">TH</div>
-                <div>
-                  <div class="playerName">Thiago</div>
-                  <div class="playerRole">Participante</div>
-                </div>
-              </div>
-              <div class="playerRole">Online</div>
-            </div>
-
-            <div class="player">
-              <div class="playerLeft">
-                <div class="avatar">CL</div>
-                <div>
-                  <div class="playerName">Clara</div>
-                  <div class="playerRole">Participante</div>
-                </div>
-              </div>
-              <div class="playerRole">Online</div>
-            </div>
+          <div class="emptyState" id="playersEmpty">
+            Nenhum outro jogador entrou ainda. Compartilhe o código da sala para reunir o grupo.
           </div>
 
           <div class="sidebarActions">
@@ -576,24 +558,9 @@ body::after{
         </div>
 
         <div class="messages" id="messages">
-          <div class="message system">
-            <span class="meta">Sistema</span>
-            Bem-vindos à sala. Quando todos estiverem prontos, o anfitrião pode iniciar o ritual.
-          </div>
-
-          <div class="message other">
-            <span class="meta">Ana • 19:42</span>
-            Entrei. Esse clima já está estranho.
-          </div>
-
-          <div class="message other">
-            <span class="meta">Thiago • 19:42</span>
-            Quero ver até onde isso vai.
-          </div>
-
-          <div class="message me">
-            <span class="meta">Você • 19:43</span>
-            Esperando só mais um para começar.
+          <div class="chatEmpty" id="chatEmpty">
+            A sala foi criada.<br>
+            Quando houver mensagens ou eventos do sistema, eles aparecerão aqui.
           </div>
         </div>
 
@@ -615,7 +582,7 @@ body::after{
     </section>
 
     <div class="footerBar">
-      <div>Jogadores na sala: <strong id="playerCount">4</strong></div>
+      <div>Jogadores na sala: <strong id="playerCount">1</strong></div>
       <div>Status: <strong id="footerStatus">Aguardando início</strong></div>
     </div>
 
@@ -624,16 +591,47 @@ body::after{
 
 <script>
 (function(){
-  const roomCode = document.getElementById('roomCode');
+  const roomNameEl = document.getElementById('roomName');
+  const roomCodeEl = document.getElementById('roomCode');
+  const roomStatusEl = document.getElementById('roomStatus');
+  const playerListEl = document.getElementById('playerList');
+  const playersEmptyEl = document.getElementById('playersEmpty');
+  const playerCountEl = document.getElementById('playerCount');
   const copyCodeBtn = document.getElementById('copyCodeBtn');
   const leaveBtn = document.getElementById('leaveBtn');
   const startBtn = document.getElementById('startBtn');
   const sendBtn = document.getElementById('sendBtn');
   const messageInput = document.getElementById('messageInput');
-  const messages = document.getElementById('messages');
-  const sessionLabel = document.getElementById('sessionLabel');
-  const roomStatus = document.getElementById('roomStatus');
-  const footerStatus = document.getElementById('footerStatus');
+  const messagesEl = document.getElementById('messages');
+  const chatEmptyEl = document.getElementById('chatEmpty');
+  const sessionLabelEl = document.getElementById('sessionLabel');
+  const footerStatusEl = document.getElementById('footerStatus');
+
+  const params = new URLSearchParams(window.location.search);
+  const playerName = (params.get('nome') || localStorage.getItem('osl_nome') || 'Visitante').trim();
+  const roomCode = (params.get('sala') || localStorage.getItem('osl_sala') || 'SL-0001').trim();
+  const roomName = params.get('nomeSala') || localStorage.getItem('osl_nome_sala') || 'Sala de Espera';
+
+  localStorage.setItem('osl_nome', playerName);
+  localStorage.setItem('osl_sala', roomCode);
+  localStorage.setItem('osl_nome_sala', roomName);
+
+  let sessionStarted = false;
+
+  const players = [
+    {
+      name: playerName,
+      role: 'Anfitrião',
+      online: true
+    }
+  ];
+
+  function initials(name){
+    const parts = String(name).trim().split(/\s+/).filter(Boolean);
+    if(parts.length === 0) return '??';
+    if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
 
   function nowTime(){
     const d = new Date();
@@ -643,31 +641,86 @@ body::after{
     });
   }
 
+  function updateTop(){
+    roomNameEl.textContent = roomName;
+    roomCodeEl.textContent = roomCode;
+    playerCountEl.textContent = String(players.length);
+  }
+
+  function renderPlayers(){
+    playerListEl.innerHTML = '';
+
+    players.forEach(function(player){
+      const div = document.createElement('div');
+      div.className = 'player';
+      div.innerHTML = `
+        <div class="playerLeft">
+          <div class="avatar">${initials(player.name)}</div>
+          <div>
+            <div class="playerName">${escapeHtml(player.name)}</div>
+            <div class="playerRole">${player.role}</div>
+          </div>
+        </div>
+        <div class="playerRole">${player.online ? 'Online' : 'Offline'}</div>
+      `;
+      playerListEl.appendChild(div);
+    });
+
+    playersEmptyEl.style.display = players.length > 1 ? 'none' : 'block';
+    updateTop();
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function hideChatEmpty(){
+    if(chatEmptyEl) chatEmptyEl.style.display = 'none';
+  }
+
   function appendMessage(type, author, text){
+    hideChatEmpty();
+
     const div = document.createElement('div');
     div.className = 'message ' + type;
 
     if(type === 'system'){
       div.innerHTML = `
         <span class="meta">Sistema</span>
-        ${text}
+        ${escapeHtml(text)}
       `;
     }else{
       div.innerHTML = `
-        <span class="meta">${author} • ${nowTime()}</span>
-        ${text}
+        <span class="meta">${escapeHtml(author)} • ${nowTime()}</span>
+        ${escapeHtml(text)}
       `;
     }
 
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
   function sendCurrentMessage(){
     const text = messageInput.value.trim();
     if(!text) return;
-    appendMessage('me', 'Você', text);
+    appendMessage('me', playerName, text);
     messageInput.value = '';
+  }
+
+  function startSession(){
+    if(sessionStarted) return;
+    sessionStarted = true;
+
+    sessionLabelEl.textContent = 'Sessão iniciada';
+    roomStatusEl.textContent = 'Ritual em andamento';
+    footerStatusEl.textContent = 'Ritual iniciado';
+
+    appendMessage('system', '', 'O ritual foi iniciado. A sala está pronta para a próxima etapa.');
   }
 
   sendBtn.addEventListener('click', sendCurrentMessage);
@@ -680,21 +733,15 @@ body::after{
   });
 
   copyCodeBtn.addEventListener('click', async function(){
-    const text = roomCode.textContent.trim();
     try{
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(roomCode);
       appendMessage('system', '', 'Código da sala copiado.');
     }catch(e){
       appendMessage('system', '', 'Não foi possível copiar automaticamente neste navegador.');
     }
   });
 
-  startBtn.addEventListener('click', function(){
-    sessionLabel.textContent = 'Sessão iniciada';
-    roomStatus.textContent = 'Ritual em andamento';
-    footerStatus.textContent = 'Ritual iniciado';
-    appendMessage('system', '', 'O anfitrião iniciou o ritual. A próxima etapa pode começar.');
-  });
+  startBtn.addEventListener('click', startSession);
 
   leaveBtn.addEventListener('click', function(){
     const ok = confirm('Deseja sair da sala?');
@@ -702,6 +749,9 @@ body::after{
       window.location.href = './entrada.html';
     }
   });
+
+  renderPlayers();
+  updateTop();
 })();
 </script>
 </body>
