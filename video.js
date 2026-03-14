@@ -1,65 +1,42 @@
 import {
-  Room,
-  RoomEvent,
-  createLocalAudioTrack,
-  createLocalVideoTrack
-} from "https://cdn.jsdelivr.net/npm/livekit-client@2.17.3/dist/livekit-client.esm.mjs";
+  connect,
+  createLocalTracks
+} from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
 
-const TOKEN_ENDPOINT = "http://localhost:3000/getToken";
+const LIVEKIT_URL = "wss://osextolugar-eqa7qliz.livekit.cloud";
+const TOKEN_URL = "http://localhost:3000/token";
 
-const joinVideoBtn = document.getElementById("joinVideoBtn");
-const toggleMicBtn = document.getElementById("toggleMicBtn");
-const toggleCamBtn = document.getElementById("toggleCamBtn");
-const leaveVideoBtn = document.getElementById("leaveVideoBtn");
-const videoStatusEl = document.getElementById("videoStatus");
-const videoGridEl = document.getElementById("videoGrid");
-const videoEmptyEl = document.getElementById("videoEmpty");
+const joinBtn = document.getElementById("joinVideoBtn");
+const videoGrid = document.getElementById("videoGrid");
 
-let lkRoom = null;
-let localAudioTrack = null;
-let localVideoTrack = null;
-let micEnabled = true;
-let camEnabled = true;
+joinBtn.addEventListener("click", async () => {
 
-const playerName = (localStorage.getItem("osl_nome") || "Visitante").trim();
-const roomCode = (localStorage.getItem("osl_sala") || "SL-0001").trim();
-const participantId = getParticipantId();
+  const roomName = "sala1";
+  const user = "Jogador";
 
-function getParticipantId(){
-  let id = sessionStorage.getItem("osl_participant_id");
-  if(!id){
-    id = "p_" + Math.random().toString(36).slice(2, 11);
-    sessionStorage.setItem("osl_participant_id", id);
-  }
-  return id;
-}
+  const res = await fetch(`${TOKEN_URL}?room=${roomName}&user=${user}`);
+  const data = await res.json();
 
-function escapeHtml(str){
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+  const room = await connect(LIVEKIT_URL, data.token);
 
-function createVideoTile(identity, label){
-  const tile = document.createElement("div");
-  tile.className = "videoTile";
-  tile.dataset.identity = identity;
-  tile.innerHTML = `<div class="videoLabel">${escapeHtml(label)}</div>`;
-  return tile;
-}
+  const tracks = await createLocalTracks({
+    audio: true,
+    video: true
+  });
 
-function getOrCreateVideoTile(identity, label){
-  let tile = videoGridEl.querySelector(`.videoTile[data-identity="${CSS.escape(identity)}"]`);
-  if(!tile){
-    if(videoEmptyEl && videoEmptyEl.parentNode){
-      videoEmptyEl.remove();
-    }
-    tile = createVideoTile(identity, label);
-    videoGridEl.appendChild(tile);
-  }
+  tracks.forEach(track => {
+    room.localParticipant.publishTrack(track);
+    const el = track.attach();
+    videoGrid.appendChild(el);
+  });
+
+  room.on("trackSubscribed", (track) => {
+    const el = track.attach();
+    videoGrid.appendChild(el);
+  });
+
+});
+
   return tile;
 }
 
