@@ -5,8 +5,18 @@ import {
   createLocalVideoTrack
 } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
 
+/*
+  Enquanto estiver testando no seu notebook:
+  deixe localhost.
+  Quando subir o servidor para Render/Railway, troque por:
+  https://seu-servidor.onrender.com/token
+*/
 const TOKEN_ENDPOINT = "http://localhost:3000/token";
-const LIVEKIT_URL = "wss://osextolugar-eqa7q1iz.livekit.cloud";
+
+/*
+  URL do seu projeto LiveKit
+*/
+const LIVEKIT_URL = "wss://osextolugar-eqa7qliz.livekit.cloud";
 
 const joinVideoBtn = document.getElementById("joinVideoBtn");
 const leaveVideoBtn = document.getElementById("leaveVideoBtn");
@@ -40,34 +50,77 @@ let localVideoTrack = null;
 let micEnabled = true;
 let camEnabled = true;
 
-function getOrCreateVideoTile(identity, labelText) {
-  let tile = videoGridEl.querySelector(
-    `.videoTile[data-identity="${identity}"]`
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function updateVideoGridLayout() {
+  const count = videoGridEl.querySelectorAll(".videoTile").length;
+
+  videoGridEl.classList.remove(
+    "videoGrid--one",
+    "videoGrid--two",
+    "videoGrid--three",
+    "videoGrid--four",
+    "videoGrid--five"
   );
 
-  if (tile) return tile;
+  if (count <= 1) {
+    videoGridEl.classList.add("videoGrid--one");
+  } else if (count === 2) {
+    videoGridEl.classList.add("videoGrid--two");
+  } else if (count === 3) {
+    videoGridEl.classList.add("videoGrid--three");
+  } else if (count === 4) {
+    videoGridEl.classList.add("videoGrid--four");
+  } else {
+    videoGridEl.classList.add("videoGrid--five");
+  }
+}
 
-  tile = document.createElement("div");
+function createVideoTile(identity, labelText) {
+  const tile = document.createElement("div");
   tile.className = "videoTile";
   tile.dataset.identity = identity;
 
   const label = document.createElement("div");
   label.className = "videoLabel";
-  label.textContent = labelText;
+  label.innerHTML = escapeHtml(labelText);
 
   tile.appendChild(label);
+  return tile;
+}
+
+function getOrCreateVideoTile(identity, labelText) {
+  let tile = videoGridEl.querySelector(
+    `.videoTile[data-identity="${CSS.escape(identity)}"]`
+  );
+
+  if (tile) {
+    const label = tile.querySelector(".videoLabel");
+    if (label) label.innerHTML = escapeHtml(labelText);
+    return tile;
+  }
+
+  tile = createVideoTile(identity, labelText);
 
   if (videoEmptyEl && videoEmptyEl.parentNode === videoGridEl) {
     videoEmptyEl.remove();
   }
 
   videoGridEl.appendChild(tile);
+  updateVideoGridLayout();
   return tile;
 }
 
 function removeVideoTile(identity) {
   const tile = videoGridEl.querySelector(
-    `.videoTile[data-identity="${identity}"]`
+    `.videoTile[data-identity="${CSS.escape(identity)}"]`
   );
 
   if (tile) tile.remove();
@@ -75,6 +128,54 @@ function removeVideoTile(identity) {
   if (!videoGridEl.querySelector(".videoTile") && videoEmptyEl) {
     videoGridEl.appendChild(videoEmptyEl);
   }
+
+  updateVideoGridLayout();
+}
+
+function clearAllVideoTiles() {
+  videoGridEl.querySelectorAll(".videoTile").forEach((tile) => tile.remove());
+
+  if (videoEmptyEl && !videoEmptyEl.parentNode) {
+    videoGridEl.appendChild(videoEmptyEl);
+  }
+
+  updateVideoGridLayout();
+}
+
+function appendTrackToTile(tile, track) {
+  const mediaEl = track.attach();
+
+  if (track.kind === "video") {
+    mediaEl.style.width = "100%";
+    mediaEl.style.height = "100%";
+    mediaEl.style.objectFit = "cover";
+    mediaEl.playsInline = true;
+    mediaEl.autoplay = true;
+  }
+
+  if (track.kind === "audio") {
+    mediaEl.autoplay = true;
+  }
+
+  tile.appendChild(mediaEl);
+}
+
+async function requestToken() {
+  const response = await fetch(
+    `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`
+  );
+
+  if (!response.ok) {
+    throw new Error("TOKEN_REQUEST_FAILED");
+  }
+
+  const data = await response.json();
+
+  if (!data.token) {
+    throw new Error("TOKEN_INVALID");
+  }
+
+  return data.token;
 }
 
 async function joinVideoCall() {
@@ -84,19 +185,7 @@ async function joinVideoCall() {
     videoStatusEl.textContent = "Entrando na chamada...";
     joinVideoBtn.disabled = true;
 
-    const response = await fetch(
-      `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`
-    );
-
-    if (!response.ok) {
-      throw new Error("TOKEN_ERROR");
-    }
-
-    const data = await response.json();
-
-    if (!data.token) {
-      throw new Error("TOKEN_INVALID");
-    }
+    const token = await requestToken();
 
     lkRoom = new Room({
       adaptiveStream: true,
@@ -104,20 +193,14 @@ async function joinVideoCall() {
     });
 
     lkRoom.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+      if (participant.identity === participantId) return;
+
       const tile = getOrCreateVideoTile(
         participant.identity,
         participant.name || "Jogador"
       );
 
-      const mediaEl = track.attach();
-
-      if (track.kind === "video") {
-        mediaEl.style.width = "100%";
-        mediaEl.style.height = "100%";
-        mediaEl.style.objectFit = "cover";
-      }
-
-      tile.appendChild(mediaEl);
+      appendTrackToTile(tile, track);
     });
 
     lkRoom.on(RoomEvent.TrackUnsubscribed, (track) => {
@@ -128,7 +211,13 @@ async function joinVideoCall() {
       removeVideoTile(participant.identity);
     });
 
-    await lkRoom.connect(LIVEKIT_URL, data.token);
+    lkRoom.on(RoomEvent.Disconnected, () => {
+      videoStatusEl.textContent = "Desconectado da chamada.";
+    });
+
+    await lkRoom.connect(LIVEKIT_URL, token, {
+      autoSubscribe: true
+    });
 
     localAudioTrack = await createLocalAudioTrack();
     localVideoTrack = await createLocalVideoTrack();
@@ -141,11 +230,7 @@ async function joinVideoCall() {
       `${playerName} (você)`
     );
 
-    const myVideoEl = localVideoTrack.attach();
-    myVideoEl.style.width = "100%";
-    myVideoEl.style.height = "100%";
-    myVideoEl.style.objectFit = "cover";
-    myTile.appendChild(myVideoEl);
+    appendTrackToTile(myTile, localVideoTrack);
 
     for (const participant of lkRoom.remoteParticipants.values()) {
       const tile = getOrCreateVideoTile(
@@ -155,15 +240,7 @@ async function joinVideoCall() {
 
       participant.trackPublications.forEach((pub) => {
         if (pub.track) {
-          const mediaEl = pub.track.attach();
-
-          if (pub.track.kind === "video") {
-            mediaEl.style.width = "100%";
-            mediaEl.style.height = "100%";
-            mediaEl.style.objectFit = "cover";
-          }
-
-          tile.appendChild(mediaEl);
+          appendTrackToTile(tile, pub.track);
         }
       });
     }
@@ -180,10 +257,22 @@ async function joinVideoCall() {
     toggleCamBtn.textContent = "Desligar câmera";
     videoStatusEl.textContent = "Conectado à chamada.";
   } catch (error) {
-    console.error(error);
-    videoStatusEl.textContent = "Não foi possível entrar na chamada.";
+    console.error("Erro ao entrar na chamada:", error);
+
     joinVideoBtn.disabled = false;
-    alert("Erro ao entrar na chamada.");
+    toggleMicBtn.disabled = true;
+    toggleCamBtn.disabled = true;
+    leaveVideoBtn.disabled = true;
+    videoStatusEl.textContent = "Não foi possível entrar na chamada.";
+
+    let msg = "Erro ao entrar na chamada.";
+    if (error.message === "TOKEN_REQUEST_FAILED") {
+      msg = "Falha ao pedir token ao servidor.";
+    } else if (error.message === "TOKEN_INVALID") {
+      msg = "O servidor retornou um token inválido.";
+    }
+
+    alert(msg);
   }
 }
 
@@ -206,7 +295,7 @@ async function leaveVideoCall() {
       lkRoom = null;
     }
   } catch (error) {
-    console.error(error);
+    console.error("Erro ao sair da chamada:", error);
   }
 
   micEnabled = true;
@@ -217,11 +306,10 @@ async function leaveVideoCall() {
   leaveVideoBtn.disabled = true;
   joinVideoBtn.disabled = false;
 
-  videoGridEl.innerHTML = "";
-  if (videoEmptyEl) {
-    videoGridEl.appendChild(videoEmptyEl);
-  }
+  toggleMicBtn.textContent = "Mutar microfone";
+  toggleCamBtn.textContent = "Desligar câmera";
 
+  clearAllVideoTiles();
   videoStatusEl.textContent = "Vídeo desligado.";
 }
 
