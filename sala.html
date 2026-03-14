@@ -225,7 +225,30 @@ html,body{
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   overflow-x:hidden;
 }
+  
+<div id="profileModal" class="profileModal hidden">
 
+  <div class="profileCard">
+
+    <div class="profileAvatarLarge" id="profileAvatarLarge"></div>
+
+    <div class="profileName" id="profileName"></div>
+
+    <div class="profileBio" id="profileBio"></div>
+
+    <div class="profileStats">
+      <span id="profileGames">Partidas: 0</span>
+      <span id="profileWins">Vitórias: 0</span>
+    </div>
+
+    <button class="profileClose" id="closeProfileBtn">
+      Fechar perfil
+    </button>
+
+  </div>
+
+</div>
+  
 body::before{
   content:"";
   position:fixed;
