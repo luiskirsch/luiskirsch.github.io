@@ -887,7 +887,11 @@ const chatEmptyEl = document.getElementById('chatEmpty');
 const sessionLabelEl = document.getElementById('sessionLabel');
 const footerStatusEl = document.getElementById('footerStatus');
 const typingBarEl = document.getElementById('typingBar');
-
+const profileModal = document.getElementById("profileModal");
+const profileAvatarLarge = document.getElementById("profileAvatarLarge");
+const profileNameEl = document.getElementById("profileName");
+const profileBioEl = document.getElementById("profileBio");
+const closeProfileBtn = document.getElementById("closeProfileBtn");
 const params = new URLSearchParams(window.location.search);
 
 const playerName = (params.get('nome') || localStorage.getItem('osl_nome') || 'Visitante').trim().slice(0, 40);
@@ -1051,7 +1055,11 @@ function renderPlayers(players){
       </div>
       <div class="playerRole">Online</div>
     `;
-    playerListEl.appendChild(div);
+    div.addEventListener("click", ()=>{
+  openProfile(player);
+});
+
+playerListEl.appendChild(div);
   });
 
   playerCountEl.textContent = String(players.length);
@@ -1288,7 +1296,20 @@ function bindMessages(){
         playIncomingMessageSound();
       }
     });
+function openProfile(player){
 
+  profileAvatarLarge.textContent = initials(player.name);
+  profileNameEl.textContent = player.name;
+  profileBioEl.textContent = player.isHost
+    ? "Anfitrião desta sala."
+    : "Participante do ritual.";
+
+  profileModal.classList.remove("hidden");
+}
+
+closeProfileBtn.addEventListener("click", ()=>{
+  profileModal.classList.add("hidden");
+});
     knownMessageIds = currentIds;
   });
 }
