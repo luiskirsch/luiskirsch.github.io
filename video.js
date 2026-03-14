@@ -5,12 +5,7 @@ import {
   createLocalVideoTrack
 } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
 
-/*
-  Enquanto estiver testando no seu notebook:
-  deixe localhost.
-  Quando subir o servidor para Render/Railway, troque por:
-  https://seu-servidor.onrender.com/token
-*/
+
 const TOKEN_ENDPOINT = "https://osl-video-server.onrender.com/token";
 
 /*
