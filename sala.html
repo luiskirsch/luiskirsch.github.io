@@ -124,6 +124,75 @@
   .videoGrid{
     grid-template-columns:1fr;
   }
+  /* ===== PERFIL DO JOGADOR ===== */
+
+.profileModal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.78);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.profileModal.hidden{
+  display:none;
+}
+
+.profileCard{
+  width:320px;
+  background:#0a0f15;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:22px;
+  padding:26px;
+  text-align:center;
+  box-shadow:0 30px 80px rgba(0,0,0,.5);
+}
+
+.profileAvatarLarge{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-size:28px;
+  font-weight:900;
+  margin:0 auto 14px auto;
+  background:linear-gradient(180deg,#56bdf8,#1f86d9);
+}
+
+.profileName{
+  font-size:20px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.profileBio{
+  font-size:13px;
+  color:rgba(214,224,237,.75);
+  margin-bottom:14px;
+}
+
+.profileStats{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  font-size:12px;
+  color:rgba(214,224,237,.7);
+  margin-bottom:16px;
+}
+
+.profileClose{
+  width:100%;
+  border:none;
+  border-radius:12px;
+  padding:10px;
+  background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
+  color:#07111a;
+  font-weight:700;
+  cursor:pointer;
+  }
 }
 :root{
   --bg-1:#030608;
