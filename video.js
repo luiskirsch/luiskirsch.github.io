@@ -11,7 +11,7 @@ import {
   Quando subir o servidor para Render/Railway, troque por:
   https://seu-servidor.onrender.com/token
 */
-const TOKEN_ENDPOINT = "http://localhost:3000/token";
+const TOKEN_ENDPOINT = "https://osl-video-server.onrender.com/token";
 
 /*
   URL do seu projeto LiveKit
