@@ -6,7 +6,7 @@ import {
 } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
 
 const TOKEN_ENDPOINT = "http://localhost:3000/token";
-const LIVEKIT_URL = "wss://osextolugar-eqa7qliz.livekit.cloud";
+const LIVEKIT_URL = "wss://osextolugar-eqa7q1iz.livekit.cloud";
 
 const joinVideoBtn = document.getElementById("joinVideoBtn");
 const leaveVideoBtn = document.getElementById("leaveVideoBtn");
