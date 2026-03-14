@@ -11,7 +11,7 @@ const TOKEN_ENDPOINT = "https://osl-video-server.onrender.com/token";
 /*
   URL do seu projeto LiveKit
 */
-const LIVEKIT_URL = "wss://osextolugar-eqa7qliz.livekit.cloud";
+const LIVEKIT_URL = "wss://osextolugar-eqa7q1iz.livekit.cloud";
 
 const joinVideoBtn = document.getElementById("joinVideoBtn");
 const leaveVideoBtn = document.getElementById("leaveVideoBtn");
