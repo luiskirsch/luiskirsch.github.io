@@ -6,196 +6,6 @@
 <title>O SextoLugar — Sala</title>
 
 <style>
-  .videoWrap{
-  border-top:1px solid rgba(255,255,255,.10);
-  padding:16px 18px 18px;
-  background:rgba(255,255,255,.015);
-}
-
-.videoTop{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  flex-wrap:wrap;
-  margin-bottom:12px;
-}
-
-.videoTitle{
-  margin:0;
-  font-size:12px;
-  letter-spacing:.22em;
-  text-transform:uppercase;
-  color:rgba(214,224,237,.68);
-}
-
-.videoActions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.videoBtn{
-  appearance:none;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.04);
-  color:#f5f7fb;
-  min-height:42px;
-  padding:10px 14px;
-  border-radius:14px;
-  cursor:pointer;
-  font:inherit;
-  font-weight:700;
-}
-
-.videoBtn.primary{
-  background:linear-gradient(180deg, rgba(218,246,255,.95), rgba(143,217,255,.95));
-  color:#07111a;
-  border-color:transparent;
-}
-
-.videoBtn.danger{
-  color:#ffdede;
-  border-color:rgba(255,107,107,.20);
-  background:rgba(255,107,107,.08);
-}
-
-.videoBtn[disabled]{
-  opacity:.45;
-  cursor:not-allowed;
-}
-
-.videoStatus{
-  font-size:13px;
-  color:rgba(214,224,237,.72);
-  min-height:18px;
-  margin-bottom:10px;
-}
-
-.videoGrid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0,1fr));
-  gap:12px;
-}
-
-.videoTile{
-  position:relative;
-  background:#000;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:18px;
-  overflow:hidden;
-  min-height:190px;
-  aspect-ratio:16/10;
-}
-
-.videoTile video,
-.videoTile audio{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-  background:#000;
-}
-
-.videoLabel{
-  position:absolute;
-  left:10px;
-  bottom:10px;
-  padding:8px 10px;
-  border-radius:999px;
-  background:rgba(0,0,0,.55);
-  color:#fff;
-  font-size:12px;
-  letter-spacing:.04em;
-}
-
-.videoEmpty{
-  display:grid;
-  place-items:center;
-  min-height:180px;
-  border:1px dashed rgba(255,255,255,.10);
-  border-radius:18px;
-  color:rgba(214,224,237,.62);
-  text-align:center;
-  padding:20px;
-}
-
-@media (max-width:640px){
-  .videoGrid{
-    grid-template-columns:1fr;
-      }
-    }
-
-  /* ===== PERFIL DO JOGADOR ===== */
-
-.profileModal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.78);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-}
-
-.profileModal.hidden{
-  display:none;
-}
-
-.profileCard{
-  width:320px;
-  background:#0a0f15;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:22px;
-  padding:26px;
-  text-align:center;
-  box-shadow:0 30px 80px rgba(0,0,0,.5);
-}
-
-.profileAvatarLarge{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  font-size:28px;
-  font-weight:900;
-  margin:0 auto 14px auto;
-  background:linear-gradient(180deg,#56bdf8,#1f86d9);
-}
-
-.profileName{
-  font-size:20px;
-  font-weight:800;
-  margin-bottom:8px;
-}
-
-.profileBio{
-  font-size:13px;
-  color:rgba(214,224,237,.75);
-  margin-bottom:14px;
-}
-
-.profileStats{
-  display:flex;
-  justify-content:center;
-  gap:14px;
-  font-size:12px;
-  color:rgba(214,224,237,.7);
-  margin-bottom:16px;
-}
-
-.profileClose{
-  width:100%;
-  border:none;
-  border-radius:12px;
-  padding:10px;
-  background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
-  color:#07111a;
-  font-weight:700;
-  cursor:pointer;
-  }
-}
 :root{
   --bg-1:#030608;
   --bg-2:#010203;
@@ -227,30 +37,7 @@ html,body{
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   overflow-x:hidden;
 }
-  
-<div id="profileModal" class="profileModal hidden">
 
-  <div class="profileCard">
-
-    <div class="profileAvatarLarge" id="profileAvatarLarge"></div>
-
-    <div class="profileName" id="profileName"></div>
-
-    <div class="profileBio" id="profileBio"></div>
-
-    <div class="profileStats">
-      <span id="profileGames">Partidas: 0</span>
-      <span id="profileWins">Vitórias: 0</span>
-    </div>
-
-    <button class="profileClose" id="closeProfileBtn">
-      Fechar perfil
-    </button>
-
-  </div>
-
-</div>
-  
 body::before{
   content:"";
   position:fixed;
@@ -417,6 +204,14 @@ body::after{
   border-radius:16px;
   background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.06);
+  cursor:pointer;
+  transition:transform .12s ease, border-color .15s ease, background .15s ease;
+}
+
+.player:hover{
+  transform:translateY(-1px);
+  border-color:rgba(72,183,244,.20);
+  background:rgba(255,255,255,.05);
 }
 
 .playerLeft{
@@ -655,6 +450,194 @@ body::after{
   color:rgba(255,255,255,.36);
 }
 
+/* ===== VIDEO ===== */
+
+.videoWrap{
+  border-top:1px solid rgba(255,255,255,.10);
+  padding:16px 18px 18px;
+  background:rgba(255,255,255,.015);
+}
+
+.videoTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.videoTitle{
+  margin:0;
+  font-size:12px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(214,224,237,.68);
+}
+
+.videoActions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.videoBtn{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  color:#f5f7fb;
+  min-height:42px;
+  padding:10px 14px;
+  border-radius:14px;
+  cursor:pointer;
+  font:inherit;
+  font-weight:700;
+}
+
+.videoBtn.primary{
+  background:linear-gradient(180deg, rgba(218,246,255,.95), rgba(143,217,255,.95));
+  color:#07111a;
+  border-color:transparent;
+}
+
+.videoBtn.danger{
+  color:#ffdede;
+  border-color:rgba(255,107,107,.20);
+  background:rgba(255,107,107,.08);
+}
+
+.videoBtn[disabled]{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.videoStatus{
+  font-size:13px;
+  color:rgba(214,224,237,.72);
+  min-height:18px;
+  margin-bottom:10px;
+}
+
+.videoGrid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:12px;
+}
+
+.videoTile{
+  position:relative;
+  background:#000;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  overflow:hidden;
+  min-height:190px;
+  aspect-ratio:16/10;
+}
+
+.videoTile video,
+.videoTile audio{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  background:#000;
+}
+
+.videoLabel{
+  position:absolute;
+  left:10px;
+  bottom:10px;
+  padding:8px 10px;
+  border-radius:999px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  font-size:12px;
+  letter-spacing:.04em;
+}
+
+.videoEmpty{
+  display:grid;
+  place-items:center;
+  min-height:180px;
+  border:1px dashed rgba(255,255,255,.10);
+  border-radius:18px;
+  color:rgba(214,224,237,.62);
+  text-align:center;
+  padding:20px;
+}
+
+/* ===== PERFIL DO JOGADOR ===== */
+
+.profileModal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.78);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.profileModal.hidden{
+  display:none;
+}
+
+.profileCard{
+  width:min(320px, calc(100vw - 28px));
+  background:#0a0f15;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:22px;
+  padding:26px;
+  text-align:center;
+  box-shadow:0 30px 80px rgba(0,0,0,.5);
+}
+
+.profileAvatarLarge{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-size:28px;
+  font-weight:900;
+  margin:0 auto 14px auto;
+  background:linear-gradient(180deg,#56bdf8,#1f86d9);
+  color:#fff;
+}
+
+.profileName{
+  font-size:20px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.profileBio{
+  font-size:13px;
+  color:rgba(214,224,237,.75);
+  margin-bottom:14px;
+}
+
+.profileStats{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  font-size:12px;
+  color:rgba(214,224,237,.7);
+  margin-bottom:16px;
+  flex-wrap:wrap;
+}
+
+.profileClose{
+  width:100%;
+  border:none;
+  border-radius:12px;
+  padding:10px;
+  background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
+  color:#07111a;
+  font-weight:700;
+  cursor:pointer;
+}
+
 .footerBar{
   display:flex;
   align-items:center;
@@ -732,6 +715,10 @@ body::after{
     align-items:flex-start;
     gap:6px;
   }
+
+  .videoGrid{
+    grid-template-columns:1fr;
+  }
 }
 </style>
 </head>
@@ -793,26 +780,28 @@ body::after{
         </div>
 
         <div class="typingBar" id="typingBar"></div>
-<div class="videoWrap">
-  <div class="videoTop">
-    <h3 class="videoTitle">Chamada de vídeo</h3>
-    <div class="videoActions">
-      <button class="videoBtn primary" id="joinVideoBtn">Entrar na chamada</button>
-      <button class="videoBtn" id="toggleMicBtn" disabled>Mutar microfone</button>
-      <button class="videoBtn" id="toggleCamBtn" disabled>Desligar câmera</button>
-      <button class="videoBtn danger" id="leaveVideoBtn" disabled>Sair da chamada</button>
-    </div>
-  </div>
 
-  <div class="videoStatus" id="videoStatus">Vídeo desligado.</div>
+        <div class="videoWrap">
+          <div class="videoTop">
+            <h3 class="videoTitle">Chamada de vídeo</h3>
+            <div class="videoActions">
+              <button class="videoBtn primary" id="joinVideoBtn">Entrar na chamada</button>
+              <button class="videoBtn" id="toggleMicBtn" disabled>Mutar microfone</button>
+              <button class="videoBtn" id="toggleCamBtn" disabled>Desligar câmera</button>
+              <button class="videoBtn danger" id="leaveVideoBtn" disabled>Sair da chamada</button>
+            </div>
+          </div>
 
-  <div class="videoGrid" id="videoGrid">
-    <div class="videoEmpty" id="videoEmpty">
-      Entre na chamada para abrir câmera e microfone.<br>
-      Até 5 participantes podem ficar juntos aqui.
-    </div>
-  </div>
-</div>
+          <div class="videoStatus" id="videoStatus">Vídeo desligado.</div>
+
+          <div class="videoGrid" id="videoGrid">
+            <div class="videoEmpty" id="videoEmpty">
+              Entre na chamada para abrir câmera e microfone.<br>
+              Até 5 participantes podem ficar juntos aqui.
+            </div>
+          </div>
+        </div>
+
         <div class="chatComposer">
           <div class="composerRow">
             <input
@@ -837,6 +826,19 @@ body::after{
 
   </div>
 </main>
+
+<div id="profileModal" class="profileModal hidden">
+  <div class="profileCard">
+    <div class="profileAvatarLarge" id="profileAvatarLarge"></div>
+    <div class="profileName" id="profileName"></div>
+    <div class="profileBio" id="profileBio"></div>
+    <div class="profileStats">
+      <span id="profileGames">Partidas: 0</span>
+      <span id="profileWins">Vitórias: 0</span>
+    </div>
+    <button class="profileClose" id="closeProfileBtn">Fechar perfil</button>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -887,11 +889,13 @@ const chatEmptyEl = document.getElementById('chatEmpty');
 const sessionLabelEl = document.getElementById('sessionLabel');
 const footerStatusEl = document.getElementById('footerStatus');
 const typingBarEl = document.getElementById('typingBar');
+
 const profileModal = document.getElementById("profileModal");
 const profileAvatarLarge = document.getElementById("profileAvatarLarge");
 const profileNameEl = document.getElementById("profileName");
 const profileBioEl = document.getElementById("profileBio");
 const closeProfileBtn = document.getElementById("closeProfileBtn");
+
 const params = new URLSearchParams(window.location.search);
 
 const playerName = (params.get('nome') || localStorage.getItem('osl_nome') || 'Visitante').trim().slice(0, 40);
@@ -1039,6 +1043,26 @@ function isPlayerActive(player){
   return (Date.now() - player.lastSeen.toMillis()) <= ACTIVE_WINDOW_MS;
 }
 
+function openProfile(player){
+  profileAvatarLarge.textContent = initials(player.name);
+  profileNameEl.textContent = player.name;
+  profileBioEl.textContent = player.isHost
+    ? "Anfitrião desta sala."
+    : "Participante do ritual.";
+
+  profileModal.classList.remove("hidden");
+}
+
+closeProfileBtn.addEventListener("click", ()=>{
+  profileModal.classList.add("hidden");
+});
+
+profileModal.addEventListener("click", (e)=>{
+  if(e.target === profileModal){
+    profileModal.classList.add("hidden");
+  }
+});
+
 function renderPlayers(players){
   playerListEl.innerHTML = '';
 
@@ -1055,11 +1079,12 @@ function renderPlayers(players){
       </div>
       <div class="playerRole">Online</div>
     `;
-    div.addEventListener("click", ()=>{
-  openProfile(player);
-});
 
-playerListEl.appendChild(div);
+    div.addEventListener("click", ()=>{
+      openProfile(player);
+    });
+
+    playerListEl.appendChild(div);
   });
 
   playerCountEl.textContent = String(players.length);
@@ -1296,20 +1321,7 @@ function bindMessages(){
         playIncomingMessageSound();
       }
     });
-function openProfile(player){
 
-  profileAvatarLarge.textContent = initials(player.name);
-  profileNameEl.textContent = player.name;
-  profileBioEl.textContent = player.isHost
-    ? "Anfitrião desta sala."
-    : "Participante do ritual.";
-
-  profileModal.classList.remove("hidden");
-}
-
-closeProfileBtn.addEventListener("click", ()=>{
-  profileModal.classList.add("hidden");
-});
     knownMessageIds = currentIds;
   });
 }
@@ -1467,6 +1479,7 @@ window.addEventListener('beforeunload', function(){
   }
 })();
 </script>
-  <script type="module" src="video.js"></script>
+
+<script type="module" src="video.js"></script>
 </body>
 </html>
