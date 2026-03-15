@@ -913,9 +913,10 @@ localStorage.setItem('osl_sala', roomCode);
 localStorage.setItem('osl_nome_sala', roomName);
 
 const participantId = getParticipantId();
+const userId = getUserId();
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
+const userRef = doc(db, "users", userId);
 const roomRef = doc(db, 'salas', roomCode);
 const playerRef = doc(db, 'salas', roomCode, 'players', participantId);
 const messagesRef = collection(db, 'salas', roomCode, 'messages');
@@ -1004,7 +1005,16 @@ function getParticipantId(){
   }
   return id;
 }
-
+  
+function getUserId(){
+  let id = localStorage.getItem("osl_user_id");
+  if(!id){
+    id = "u_" + Math.random().toString(36).slice(2,12);
+    localStorage.setItem("osl_user_id", id);
+  }
+  return id;
+  }
+  
 function initials(name){
   const parts = String(name).trim().split(/\s+/).filter(Boolean);
   if(parts.length === 0) return '??';
@@ -1037,31 +1047,93 @@ function showChatEmpty(text){
   chatEmptyEl.style.display = 'block';
   chatEmptyEl.innerHTML = text;
 }
+  
+async function ensureUserProfile(){
+  const snap = await getDoc(userRef);
 
+  if(!snap.exists()){
+    const usernameBase = playerName
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "")
+      .slice(0,20) || "jogador";
+
+    await setDoc(userRef,{
+      userId,
+      displayName: playerName,
+      username: usernameBase,
+      bio: "Novo participante do ritual.",
+      avatarColor:"#1f86d9",
+      memberSince: serverTimestamp(),
+      lastSeen: serverTimestamp(),
+      stats:{
+        gamesPlayed:0,
+        wins:0
+      }
+    });
+
+  }else{
+
+    await updateDoc(userRef,{
+      lastSeen: serverTimestamp()
+    });
+
+  }
+  }
+  
 function isPlayerActive(player){
   if(!player.lastSeen || typeof player.lastSeen.toMillis !== 'function') return true;
   return (Date.now() - player.lastSeen.toMillis()) <= ACTIVE_WINDOW_MS;
 }
 
-function openProfile(player){
-  profileAvatarLarge.textContent = initials(player.name);
-  profileNameEl.textContent = player.name;
-  profileBioEl.textContent = player.isHost
-    ? "Anfitrião desta sala."
-    : "Participante do ritual.";
+async function openProfile(player){
 
-  profileModal.classList.remove("hidden");
-}
+  try{
 
-closeProfileBtn.addEventListener("click", ()=>{
-  profileModal.classList.add("hidden");
-});
+    if(!player.userId){
+      profileAvatarLarge.textContent = initials(player.name);
+      profileNameEl.textContent = player.name;
+      profileBioEl.textContent = player.isHost
+        ? "Anfitrião desta sala."
+        : "Participante do ritual.";
 
-profileModal.addEventListener("click", (e)=>{
-  if(e.target === profileModal){
-    profileModal.classList.add("hidden");
+      document.getElementById("profileGames").textContent = "Partidas: 0";
+      document.getElementById("profileWins").textContent = "Vitórias: 0";
+
+      profileModal.classList.remove("hidden");
+      return;
+    }
+
+    const ref = doc(db,"users",player.userId);
+    const snap = await getDoc(ref);
+
+    if(!snap.exists()){
+      profileAvatarLarge.textContent = initials(player.name);
+      profileNameEl.textContent = player.name;
+      profileBioEl.textContent = "Perfil não encontrado.";
+      profileModal.classList.remove("hidden");
+      return;
+    }
+
+    const user = snap.data();
+
+    profileAvatarLarge.textContent = initials(user.displayName || player.name);
+    profileNameEl.textContent = user.displayName || player.name;
+    profileBioEl.textContent = user.bio || "Sem descrição.";
+
+    document.getElementById("profileGames").textContent =
+      `Partidas: ${user.stats?.gamesPlayed || 0}`;
+
+    document.getElementById("profileWins").textContent =
+      `Vitórias: ${user.stats?.wins || 0}`;
+
+    profileModal.classList.remove("hidden");
+
+  }catch(error){
+    console.error(error);
   }
-});
+}
 
 function renderPlayers(players){
   playerListEl.innerHTML = '';
@@ -1204,11 +1276,14 @@ async function upsertSelf(){
 async function setTyping(isTyping){
   try{
     if(isTyping){
-      await setDoc(typingRef, {
-        name: playerName,
-        isTyping: true,
-        updatedAt: serverTimestamp()
-      }, { merge:true });
+      await setDoc(playerRef,{
+  id: participantId,
+  userId,
+  name: playerName,
+  isHost,
+  joinedAt: serverTimestamp(),
+  lastSeen: serverTimestamp()
+},{ merge:true });
     }else{
       await deleteDoc(typingRef);
     }
@@ -1452,8 +1527,9 @@ window.addEventListener('beforeunload', function(){
     roomStatusEl.textContent = 'Conectando';
     footerStatusEl.textContent = 'Conectando';
 
-    await ensureRoom();
-    await upsertSelf();
+await ensureUserProfile();
+await ensureRoom();
+await upsertSelf();
 
     startHeartbeat();
     bindRoom();
