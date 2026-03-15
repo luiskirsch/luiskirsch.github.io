@@ -636,6 +636,8 @@ body::after{
   color:#07111a;
   font-weight:700;
   cursor:pointer;
+  position:relative;
+  z-index:2;
 }
 
 .footerBar{
@@ -917,6 +919,7 @@ const userId = getUserId();
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const userRef = doc(db, "users", userId);
+
 const roomRef = doc(db, 'salas', roomCode);
 const playerRef = doc(db, 'salas', roomCode, 'players', participantId);
 const messagesRef = collection(db, 'salas', roomCode, 'messages');
@@ -1005,7 +1008,7 @@ function getParticipantId(){
   }
   return id;
 }
-  
+
 function getUserId(){
   let id = localStorage.getItem("osl_user_id");
   if(!id){
@@ -1013,8 +1016,8 @@ function getUserId(){
     localStorage.setItem("osl_user_id", id);
   }
   return id;
-  }
-  
+}
+
 function initials(name){
   const parts = String(name).trim().split(/\s+/).filter(Boolean);
   if(parts.length === 0) return '??';
@@ -1047,7 +1050,7 @@ function showChatEmpty(text){
   chatEmptyEl.style.display = 'block';
   chatEmptyEl.innerHTML = text;
 }
-  
+
 async function ensureUserProfile(){
   const snap = await getDoc(userRef);
 
@@ -1072,25 +1075,20 @@ async function ensureUserProfile(){
         wins:0
       }
     });
-
   }else{
-
     await updateDoc(userRef,{
       lastSeen: serverTimestamp()
     });
+  }
+}
 
-  }
-  }
-  
 function isPlayerActive(player){
   if(!player.lastSeen || typeof player.lastSeen.toMillis !== 'function') return true;
   return (Date.now() - player.lastSeen.toMillis()) <= ACTIVE_WINDOW_MS;
 }
 
 async function openProfile(player){
-
   try{
-
     if(!player.userId){
       profileAvatarLarge.textContent = initials(player.name);
       profileNameEl.textContent = player.name;
@@ -1112,6 +1110,8 @@ async function openProfile(player){
       profileAvatarLarge.textContent = initials(player.name);
       profileNameEl.textContent = player.name;
       profileBioEl.textContent = "Perfil não encontrado.";
+      document.getElementById("profileGames").textContent = "Partidas: 0";
+      document.getElementById("profileWins").textContent = "Vitórias: 0";
       profileModal.classList.remove("hidden");
       return;
     }
@@ -1129,11 +1129,32 @@ async function openProfile(player){
       `Vitórias: ${user.stats?.wins || 0}`;
 
     profileModal.classList.remove("hidden");
-
   }catch(error){
     console.error(error);
   }
 }
+
+function closeProfile(){
+  profileModal.classList.add("hidden");
+}
+
+closeProfileBtn.addEventListener("click", function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  closeProfile();
+});
+
+profileModal.addEventListener("click", function(e){
+  if(e.target === profileModal){
+    closeProfile();
+  }
+});
+
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape" && !profileModal.classList.contains("hidden")){
+    closeProfile();
+  }
+});
 
 function renderPlayers(players){
   playerListEl.innerHTML = '';
@@ -1266,6 +1287,7 @@ async function upsertSelf(){
 
   await setDoc(playerRef, {
     id: participantId,
+    userId,
     name: playerName,
     isHost,
     joinedAt: serverTimestamp(),
@@ -1276,14 +1298,11 @@ async function upsertSelf(){
 async function setTyping(isTyping){
   try{
     if(isTyping){
-      await setDoc(playerRef,{
-  id: participantId,
-  userId,
-  name: playerName,
-  isHost,
-  joinedAt: serverTimestamp(),
-  lastSeen: serverTimestamp()
-},{ merge:true });
+      await setDoc(typingRef, {
+        name: playerName,
+        isTyping: true,
+        updatedAt: serverTimestamp()
+      }, { merge:true });
     }else{
       await deleteDoc(typingRef);
     }
@@ -1340,6 +1359,7 @@ function bindPlayers(){
         const data = docSnap.data();
         return {
           id: docSnap.id,
+          userId: data.userId || null,
           name: data.name || 'Jogador',
           isHost: !!data.isHost,
           joinedAt: data.joinedAt || null,
@@ -1527,9 +1547,9 @@ window.addEventListener('beforeunload', function(){
     roomStatusEl.textContent = 'Conectando';
     footerStatusEl.textContent = 'Conectando';
 
-await ensureUserProfile();
-await ensureRoom();
-await upsertSelf();
+    await ensureUserProfile();
+    await ensureRoom();
+    await upsertSelf();
 
     startHeartbeat();
     bindRoom();
