@@ -520,8 +520,14 @@ body::after{
 
 .videoGrid{
   display:grid;
-  grid-template-columns:repeat(2, minmax(0,1fr));
+  grid-template-columns:repeat(auto-fit, minmax(260px,1fr));
   gap:12px;
+  align-items:stretch;
+}
+
+.videoMedia{
+  width:100%;
+  height:100%;
 }
 
 .videoTile{
@@ -532,6 +538,8 @@ body::after{
   overflow:hidden;
   min-height:190px;
   aspect-ratio:16/10;
+  transition:all .2s ease;
+  cursor:pointer;
 }
 
 .videoTile video,
@@ -541,6 +549,19 @@ body::after{
   object-fit:cover;
   display:block;
   background:#000;
+}
+
+.videoTile--focused{
+  grid-column:1 / -1;
+  min-height:420px;
+}
+
+.videoTile--mini{
+  opacity:.92;
+}
+
+.videoGrid--focus{
+  grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
 }
 
 .videoLabel{
@@ -553,6 +574,7 @@ body::after{
   color:#fff;
   font-size:12px;
   letter-spacing:.04em;
+  z-index:2;
 }
 
 .videoEmpty{
@@ -720,6 +742,10 @@ body::after{
 
   .videoGrid{
     grid-template-columns:1fr;
+  }
+
+  .videoTile--focused{
+    min-height:300px;
   }
 }
 </style>
