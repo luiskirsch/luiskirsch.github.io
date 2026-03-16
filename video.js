@@ -67,11 +67,17 @@ function updateVideoGridLayout() {
     return;
   }
 
-  if (count <= 1) videoGridEl.classList.add("videoGrid--one");
-  else if (count === 2) videoGridEl.classList.add("videoGrid--two");
-  else if (count === 3) videoGridEl.classList.add("videoGrid--three");
-  else if (count === 4) videoGridEl.classList.add("videoGrid--four");
-  else videoGridEl.classList.add("videoGrid--five");
+  if (count <= 1) {
+    videoGridEl.classList.add("videoGrid--one");
+  } else if (count === 2) {
+    videoGridEl.classList.add("videoGrid--two");
+  } else if (count === 3) {
+    videoGridEl.classList.add("videoGrid--three");
+  } else if (count === 4) {
+    videoGridEl.classList.add("videoGrid--four");
+  } else {
+    videoGridEl.classList.add("videoGrid--five");
+  }
 }
 
 function setFocusedTile(identity) {
@@ -79,18 +85,20 @@ function setFocusedTile(identity) {
 
   if (focusedIdentity === identity) {
     focusedIdentity = null;
-    tiles.forEach(tile => tile.classList.remove("videoTile--focused","videoTile--mini"));
+    tiles.forEach((tile) => {
+      tile.classList.remove("videoTile--focused", "videoTile--mini");
+    });
     updateVideoGridLayout();
     return;
   }
 
   focusedIdentity = identity;
 
-  tiles.forEach(tile=>{
-    if(tile.dataset.identity===identity){
+  tiles.forEach((tile) => {
+    if (tile.dataset.identity === identity) {
       tile.classList.add("videoTile--focused");
       tile.classList.remove("videoTile--mini");
-    }else{
+    } else {
       tile.classList.remove("videoTile--focused");
       tile.classList.add("videoTile--mini");
     }
@@ -99,49 +107,105 @@ function setFocusedTile(identity) {
   updateVideoGridLayout();
 }
 
-function createVideoTile(identity,labelText){
-  const tile=document.createElement("div");
-  tile.className="videoTile";
-  tile.dataset.identity=identity;
+function createStatusBadge(kind, text) {
+  const badge = document.createElement("div");
+  badge.className = "videoBadge";
+  badge.dataset.kind = kind;
+  badge.textContent = text;
+  return badge;
+}
 
-  const mediaWrap=document.createElement("div");
-  mediaWrap.className="videoMedia";
+function createVideoTile(identity, labelText) {
+  const tile = document.createElement("div");
+  tile.className = "videoTile";
+  tile.dataset.identity = identity;
+
+  const mediaWrap = document.createElement("div");
+  mediaWrap.className = "videoMedia";
   tile.appendChild(mediaWrap);
 
-  const label=document.createElement("div");
-  label.className="videoLabel";
-  label.innerHTML=escapeHtml(labelText);
-  tile.appendChild(label);
+  const overlay = document.createElement("div");
+  overlay.className = "videoOverlay";
 
-  tile.addEventListener("click",()=>{
+  const label = document.createElement("div");
+  label.className = "videoLabel";
+  label.innerHTML = escapeHtml(labelText);
+
+  const badgeRow = document.createElement("div");
+  badgeRow.className = "videoBadgeRow";
+
+  const micBadge = createStatusBadge("mic", "🎤");
+  const camBadge = createStatusBadge("cam", "📷");
+
+  badgeRow.appendChild(micBadge);
+  badgeRow.appendChild(camBadge);
+
+  overlay.appendChild(label);
+  overlay.appendChild(badgeRow);
+
+  tile.appendChild(overlay);
+
+  tile.addEventListener("click", () => {
     setFocusedTile(identity);
   });
 
   return tile;
 }
 
-function getMediaWrap(tile){
-  let mediaWrap=tile.querySelector(".videoMedia");
-  if(!mediaWrap){
-    mediaWrap=document.createElement("div");
-    mediaWrap.className="videoMedia";
-    tile.insertBefore(mediaWrap,tile.firstChild);
+function getMediaWrap(tile) {
+  let mediaWrap = tile.querySelector(".videoMedia");
+  if (!mediaWrap) {
+    mediaWrap = document.createElement("div");
+    mediaWrap.className = "videoMedia";
+    tile.insertBefore(mediaWrap, tile.firstChild);
   }
   return mediaWrap;
 }
 
-function getOrCreateVideoTile(identity,labelText){
-  let tile=videoGridEl.querySelector(`.videoTile[data-identity="${CSS.escape(identity)}"]`);
+function updateTileLabel(identity, labelText) {
+  const tile = videoGridEl.querySelector(
+    `.videoTile[data-identity="${CSS.escape(identity)}"]`
+  );
+  if (!tile) return;
+  const label = tile.querySelector(".videoLabel");
+  if (label) label.innerHTML = escapeHtml(labelText);
+}
 
-  if(tile){
-    const label=tile.querySelector(".videoLabel");
-    if(label)label.innerHTML=escapeHtml(labelText);
+function setTileStatus(identity, { micMuted = false, camMuted = false } = {}) {
+  const tile = videoGridEl.querySelector(
+    `.videoTile[data-identity="${CSS.escape(identity)}"]`
+  );
+  if (!tile) return;
+
+  const micBadge = tile.querySelector('.videoBadge[data-kind="mic"]');
+  const camBadge = tile.querySelector('.videoBadge[data-kind="cam"]');
+
+  if (micBadge) {
+    micBadge.classList.toggle("is-off", micMuted);
+    micBadge.textContent = micMuted ? "🔇" : "🎤";
+    micBadge.title = micMuted ? "Microfone desligado" : "Microfone ligado";
+  }
+
+  if (camBadge) {
+    camBadge.classList.toggle("is-off", camMuted);
+    camBadge.textContent = camMuted ? "📷✖" : "📷";
+    camBadge.title = camMuted ? "Câmera desligada" : "Câmera ligada";
+  }
+}
+
+function getOrCreateVideoTile(identity, labelText) {
+  let tile = videoGridEl.querySelector(
+    `.videoTile[data-identity="${CSS.escape(identity)}"]`
+  );
+
+  if (tile) {
+    updateTileLabel(identity, labelText);
     return tile;
   }
 
-  tile=createVideoTile(identity,labelText);
+  tile = createVideoTile(identity, labelText);
 
-  if(videoEmptyEl&&videoEmptyEl.parentNode===videoGridEl){
+  if (videoEmptyEl && videoEmptyEl.parentNode === videoGridEl) {
     videoEmptyEl.remove();
   }
 
@@ -150,227 +214,329 @@ function getOrCreateVideoTile(identity,labelText){
   return tile;
 }
 
-function removeVideoTile(identity){
-  const tile=videoGridEl.querySelector(`.videoTile[data-identity="${CSS.escape(identity)}"]`);
-  if(tile)tile.remove();
+function removeVideoTile(identity) {
+  const tile = videoGridEl.querySelector(
+    `.videoTile[data-identity="${CSS.escape(identity)}"]`
+  );
 
-  if(focusedIdentity===identity){
-    focusedIdentity=null;
+  if (tile) tile.remove();
+
+  if (focusedIdentity === identity) {
+    focusedIdentity = null;
   }
 
-  if(!videoGridEl.querySelector(".videoTile")&&videoEmptyEl){
+  if (!videoGridEl.querySelector(".videoTile") && videoEmptyEl) {
     videoGridEl.appendChild(videoEmptyEl);
   }
 
   updateVideoGridLayout();
 }
 
-function clearAllVideoTiles(){
-  videoGridEl.querySelectorAll(".videoTile").forEach(tile=>tile.remove());
-  focusedIdentity=null;
+function clearAllVideoTiles() {
+  videoGridEl.querySelectorAll(".videoTile").forEach((tile) => tile.remove());
+  focusedIdentity = null;
 
-  if(videoEmptyEl&&!videoEmptyEl.parentNode){
+  if (videoEmptyEl && !videoEmptyEl.parentNode) {
     videoGridEl.appendChild(videoEmptyEl);
   }
 
   updateVideoGridLayout();
 }
 
-function appendTrackToTile(tile,track,participantIdentity){
-  const mediaWrap=getMediaWrap(tile);
+function appendTrackToTile(tile, track, participantIdentity) {
+  const mediaWrap = getMediaWrap(tile);
 
-  const existing=mediaWrap.querySelector(`[data-track-sid="${track.sid}"]`);
-  if(existing)return;
+  const existing = mediaWrap.querySelector(
+    `[data-track-sid="${track.sid}"]`
+  );
+  if (existing) return;
 
-  const mediaEl=track.attach();
-  mediaEl.dataset.trackSid=track.sid;
+  const mediaEl = track.attach();
+  mediaEl.dataset.trackSid = track.sid;
+  mediaEl.dataset.participantIdentity = participantIdentity || "";
 
-  if(track.kind==="video"){
-    mediaEl.style.width="100%";
-    mediaEl.style.height="100%";
-    mediaEl.style.objectFit="cover";
-    mediaEl.playsInline=true;
-    mediaEl.autoplay=true;
+  if (track.kind === "video") {
+    mediaEl.style.width = "100%";
+    mediaEl.style.height = "100%";
+    mediaEl.style.objectFit = "cover";
+    mediaEl.playsInline = true;
+    mediaEl.autoplay = true;
+    mediaEl.muted = participantIdentity === participantId;
   }
 
-  if(track.kind==="audio"){
-    mediaEl.autoplay=true;
+  if (track.kind === "audio") {
+    mediaEl.autoplay = true;
   }
 
   mediaWrap.appendChild(mediaEl);
 }
 
-async function requestToken(){
-  const response=await fetch(
+function removeTrackFromParticipant(identity, trackSid) {
+  const tile = videoGridEl.querySelector(
+    `.videoTile[data-identity="${CSS.escape(identity)}"]`
+  );
+  if (!tile) return;
+
+  const mediaWrap = getMediaWrap(tile);
+  const mediaEl = mediaWrap.querySelector(`[data-track-sid="${trackSid}"]`);
+  if (mediaEl) mediaEl.remove();
+}
+
+function refreshParticipantVisualState(participant) {
+  if (!participant) return;
+
+  let micMuted = true;
+  let camMuted = true;
+
+  participant.trackPublications.forEach((pub) => {
+    if (pub.kind === "audio") {
+      micMuted = pub.isMuted;
+    }
+    if (pub.kind === "video") {
+      camMuted = pub.isMuted;
+    }
+  });
+
+  setTileStatus(participant.identity, { micMuted, camMuted });
+}
+
+function refreshLocalVisualState() {
+  setTileStatus(participantId, {
+    micMuted: !micEnabled,
+    camMuted: !camEnabled
+  });
+}
+
+async function requestToken() {
+  const response = await fetch(
     `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`
   );
 
-  if(!response.ok)throw new Error("TOKEN_REQUEST_FAILED");
+  if (!response.ok) throw new Error("TOKEN_REQUEST_FAILED");
 
-  const data=await response.json();
-  if(!data.token)throw new Error("TOKEN_INVALID");
+  const data = await response.json();
+  if (!data.token) throw new Error("TOKEN_INVALID");
 
   return data.token;
 }
 
-async function joinVideoCall(){
-  if(lkRoom)return;
+function renderExistingParticipantTracks(participant) {
+  const tile = getOrCreateVideoTile(
+    participant.identity,
+    participant.name || "Jogador"
+  );
 
-  try{
-    videoStatusEl.textContent="Entrando na chamada...";
-    joinVideoBtn.disabled=true;
+  participant.trackPublications.forEach((pub) => {
+    if (pub.track) {
+      appendTrackToTile(tile, pub.track, participant.identity);
+    }
+  });
 
-    const token=await requestToken();
+  refreshParticipantVisualState(participant);
+}
 
-    lkRoom=new Room({
-      adaptiveStream:true,
-      dynacast:true
+async function joinVideoCall() {
+  if (lkRoom) return;
+
+  try {
+    videoStatusEl.textContent = "Entrando na chamada...";
+    joinVideoBtn.disabled = true;
+
+    const token = await requestToken();
+
+    lkRoom = new Room({
+      adaptiveStream: true,
+      dynacast: true
     });
 
-    lkRoom.on(RoomEvent.TrackSubscribed,(track,publication,participant)=>{
-      if(participant.identity===participantId)return;
-
-      const tile=getOrCreateVideoTile(
+    lkRoom.on(RoomEvent.ParticipantConnected, (participant) => {
+      getOrCreateVideoTile(
         participant.identity,
-        participant.name||"Jogador"
+        participant.name || "Jogador"
       );
-
-      appendTrackToTile(tile,track,participant.identity);
+      refreshParticipantVisualState(participant);
       updateVideoGridLayout();
     });
 
-    lkRoom.on(RoomEvent.ParticipantDisconnected,(participant)=>{
+    lkRoom.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+      if (participant.identity === participantId) return;
+
+      const tile = getOrCreateVideoTile(
+        participant.identity,
+        participant.name || "Jogador"
+      );
+
+      appendTrackToTile(tile, track, participant.identity);
+      refreshParticipantVisualState(participant);
+      updateVideoGridLayout();
+    });
+
+    lkRoom.on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+      if (participant) {
+        removeTrackFromParticipant(participant.identity, track.sid);
+        refreshParticipantVisualState(participant);
+      }
+    });
+
+    lkRoom.on(RoomEvent.TrackMuted, (publication, participant) => {
+      if (participant) refreshParticipantVisualState(participant);
+    });
+
+    lkRoom.on(RoomEvent.TrackUnmuted, (publication, participant) => {
+      if (participant) refreshParticipantVisualState(participant);
+    });
+
+    lkRoom.on(RoomEvent.ParticipantDisconnected, (participant) => {
       removeVideoTile(participant.identity);
     });
 
-    await lkRoom.connect(LIVEKIT_URL,token,{
-      autoSubscribe:true
+    lkRoom.on(RoomEvent.Disconnected, () => {
+      videoStatusEl.textContent = "Desconectado da chamada.";
     });
 
-    localAudioTrack=await createLocalAudioTrack();
-    localVideoTrack=await createLocalVideoTrack();
+    await lkRoom.connect(LIVEKIT_URL, token, {
+      autoSubscribe: true
+    });
+
+    localAudioTrack = await createLocalAudioTrack();
+    localVideoTrack = await createLocalVideoTrack();
 
     await lkRoom.localParticipant.publishTrack(localAudioTrack);
     await lkRoom.localParticipant.publishTrack(localVideoTrack);
 
-    const myTile=getOrCreateVideoTile(
+    const myTile = getOrCreateVideoTile(
       participantId,
       `${playerName} (você)`
     );
 
-    appendTrackToTile(myTile,localVideoTrack,participantId);
+    appendTrackToTile(myTile, localVideoTrack, participantId);
+    refreshLocalVisualState();
 
-    for(const participant of lkRoom.remoteParticipants.values()){
-      const tile=getOrCreateVideoTile(
-        participant.identity,
-        participant.name||"Jogador"
-      );
-
-      participant.trackPublications.forEach(pub=>{
-        if(pub.track){
-          appendTrackToTile(tile,pub.track,participant.identity);
-        }
-      });
+    for (const participant of lkRoom.remoteParticipants.values()) {
+      renderExistingParticipantTracks(participant);
     }
 
-    toggleMicBtn.disabled=false;
-    toggleCamBtn.disabled=false;
-    leaveVideoBtn.disabled=false;
+    micEnabled = true;
+    camEnabled = true;
 
-    toggleMicBtn.textContent="Mutar microfone";
-    toggleCamBtn.textContent="Desligar câmera";
+    toggleMicBtn.disabled = false;
+    toggleCamBtn.disabled = false;
+    leaveVideoBtn.disabled = false;
+    joinVideoBtn.disabled = true;
 
-    videoStatusEl.textContent="Conectado à chamada.";
+    toggleMicBtn.textContent = "Mutar microfone";
+    toggleCamBtn.textContent = "Desligar câmera";
+    videoStatusEl.textContent = "Conectado à chamada.";
     updateVideoGridLayout();
 
-  }catch(error){
+  } catch (error) {
+    console.error("Erro ao entrar na chamada:", error);
 
-    console.error("Erro ao entrar na chamada:",error);
+    joinVideoBtn.disabled = false;
+    toggleMicBtn.disabled = true;
+    toggleCamBtn.disabled = true;
+    leaveVideoBtn.disabled = true;
+    videoStatusEl.textContent = "Não foi possível entrar na chamada.";
 
-    joinVideoBtn.disabled=false;
-    toggleMicBtn.disabled=true;
-    toggleCamBtn.disabled=true;
-    leaveVideoBtn.disabled=true;
+    let msg = "Erro ao entrar na chamada.";
+    if (error.message === "TOKEN_REQUEST_FAILED") {
+      msg = "Falha ao pedir token ao servidor.";
+    } else if (error.message === "TOKEN_INVALID") {
+      msg = "O servidor retornou um token inválido.";
+    }
 
-    videoStatusEl.textContent="Não foi possível entrar na chamada.";
-
-    alert("Erro ao entrar na chamada.");
+    alert(msg);
   }
 }
 
-async function leaveVideoCall(){
-  try{
-
-    if(localAudioTrack){
+async function leaveVideoCall() {
+  try {
+    if (localAudioTrack) {
       localAudioTrack.stop();
-      localAudioTrack.detach().forEach(el=>el.remove());
-      localAudioTrack=null;
+      localAudioTrack.detach().forEach((el) => el.remove());
+      localAudioTrack = null;
     }
 
-    if(localVideoTrack){
+    if (localVideoTrack) {
       localVideoTrack.stop();
-      localVideoTrack.detach().forEach(el=>el.remove());
-      localVideoTrack=null;
+      localVideoTrack.detach().forEach((el) => el.remove());
+      localVideoTrack = null;
     }
 
-    if(lkRoom){
+    if (lkRoom) {
       lkRoom.disconnect();
-      lkRoom=null;
+      lkRoom = null;
     }
-
-  }catch(error){
-    console.error("Erro ao sair:",error);
+  } catch (error) {
+    console.error("Erro ao sair:", error);
   }
 
-  toggleMicBtn.disabled=true;
-  toggleCamBtn.disabled=true;
-  leaveVideoBtn.disabled=true;
-  joinVideoBtn.disabled=false;
+  micEnabled = true;
+  camEnabled = true;
+  focusedIdentity = null;
+
+  toggleMicBtn.disabled = true;
+  toggleCamBtn.disabled = true;
+  leaveVideoBtn.disabled = true;
+  joinVideoBtn.disabled = false;
+
+  toggleMicBtn.textContent = "Mutar microfone";
+  toggleCamBtn.textContent = "Desligar câmera";
 
   clearAllVideoTiles();
-  videoStatusEl.textContent="Vídeo desligado.";
+  videoStatusEl.textContent = "Vídeo desligado.";
 }
 
-async function toggleMic(){
-  if(!localAudioTrack)return;
+async function toggleMic() {
+  if (!localAudioTrack) return;
 
-  micEnabled=!micEnabled;
+  micEnabled = !micEnabled;
 
-  if(micEnabled)await localAudioTrack.unmute();
-  else await localAudioTrack.mute();
+  if (micEnabled) {
+    await localAudioTrack.unmute();
+  } else {
+    await localAudioTrack.mute();
+  }
 
-  toggleMicBtn.textContent=
-    micEnabled?"Mutar microfone":"Ativar microfone";
+  toggleMicBtn.textContent =
+    micEnabled ? "Mutar microfone" : "Ativar microfone";
+
+  refreshLocalVisualState();
 }
 
-async function toggleCam(){
-  if(!localVideoTrack)return;
+async function toggleCam() {
+  if (!localVideoTrack) return;
 
-  camEnabled=!camEnabled;
+  camEnabled = !camEnabled;
 
-  if(camEnabled)await localVideoTrack.unmute();
-  else await localVideoTrack.mute();
+  if (camEnabled) {
+    await localVideoTrack.unmute();
+  } else {
+    await localVideoTrack.mute();
+  }
 
-  toggleCamBtn.textContent=
-    camEnabled?"Desligar câmera":"Ligar câmera";
+  toggleCamBtn.textContent =
+    camEnabled ? "Desligar câmera" : "Ligar câmera";
+
+  refreshLocalVisualState();
 }
 
-joinVideoBtn.addEventListener("click",()=>{
+joinVideoBtn.addEventListener("click", () => {
   joinVideoCall().catch(console.error);
 });
 
-toggleMicBtn.addEventListener("click",()=>{
+toggleMicBtn.addEventListener("click", () => {
   toggleMic().catch(console.error);
 });
 
-toggleCamBtn.addEventListener("click",()=>{
+toggleCamBtn.addEventListener("click", () => {
   toggleCam().catch(console.error);
 });
 
-leaveVideoBtn.addEventListener("click",()=>{
+leaveVideoBtn.addEventListener("click", () => {
   leaveVideoCall().catch(console.error);
 });
 
-window.addEventListener("beforeunload",()=>{
-  leaveVideoCall().catch(()=>{});
+window.addEventListener("beforeunload", () => {
+  leaveVideoCall().catch(() => {});
 });
