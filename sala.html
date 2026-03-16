@@ -518,11 +518,53 @@ body::after{
   margin-bottom:10px;
 }
 
+.videoFocusBar{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:10px;
+}
+
+.videoFocusBtn{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  color:#f5f7fb;
+  min-height:38px;
+  padding:8px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  font:inherit;
+  font-weight:700;
+}
+
 .videoGrid{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(260px,1fr));
   gap:12px;
   align-items:stretch;
+}
+
+.videoGrid.videoGrid--one{
+  grid-template-columns:minmax(0,1fr);
+}
+
+.videoGrid.videoGrid--two{
+  grid-template-columns:repeat(2, minmax(0,1fr));
+}
+
+.videoGrid.videoGrid--three{
+  grid-template-columns:repeat(2, minmax(0,1fr));
+}
+
+.videoGrid.videoGrid--four{
+  grid-template-columns:repeat(2, minmax(0,1fr));
+}
+
+.videoGrid.videoGrid--five{
+  grid-template-columns:repeat(3, minmax(0,1fr));
+}
+
+.videoGrid.videoGrid--focus{
+  grid-template-columns:repeat(4, minmax(0,1fr));
 }
 
 .videoMedia{
@@ -553,41 +595,18 @@ body::after{
 
 .videoTile--focused{
   grid-column:1 / -1;
-  min-height:420px;
+  min-height:460px;
 }
 
 .videoTile--mini{
-  opacity:.92;
+  min-height:130px;
+  aspect-ratio:16/9;
 }
 
-.videoGrid--focus{
-  grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
+.videoTile--hasNoCamera video{
+  display:none;
 }
 
-.videoLabel{
-  position:absolute;
-  left:10px;
-  bottom:10px;
-  padding:8px 10px;
-  border-radius:999px;
-  background:rgba(0,0,0,.55);
-  color:#fff;
-  font-size:12px;
-  letter-spacing:.04em;
-  z-index:2;
-}
-
-.videoEmpty{
-  display:grid;
-  place-items:center;
-  min-height:180px;
-  border:1px dashed rgba(255,255,255,.10);
-  border-radius:18px;
-  color:rgba(214,224,237,.62);
-  text-align:center;
-  padding:20px;
-}
-  
 .videoOverlay{
   position:absolute;
   inset:0;
@@ -622,7 +641,92 @@ body::after{
   background:rgba(255,107,107,.20);
   border-color:rgba(255,107,107,.35);
 }
-  
+
+.videoLabel{
+  position:absolute;
+  left:10px;
+  bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:999px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  font-size:12px;
+  letter-spacing:.04em;
+  z-index:2;
+  max-width:calc(100% - 20px);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.videoHostTag{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(230,192,123,.18);
+  color:#f6dfb0;
+  font-size:10px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  border:1px solid rgba(230,192,123,.22);
+}
+
+.videoNameText{
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.videoCameraOff{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  background:
+    radial-gradient(circle at center, rgba(72,183,244,.08), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+  color:rgba(245,247,251,.92);
+  z-index:1;
+}
+
+.videoCameraOff.hidden{
+  display:none;
+}
+
+.videoCameraOffIcon{
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  font-size:26px;
+}
+
+.videoCameraOffText{
+  font-size:13px;
+  color:rgba(214,224,237,.78);
+}
+
+.videoEmpty{
+  display:grid;
+  place-items:center;
+  min-height:180px;
+  border:1px dashed rgba(255,255,255,.10);
+  border-radius:18px;
+  color:rgba(214,224,237,.62);
+  text-align:center;
+  padding:20px;
+}
+
 /* ===== PERFIL DO JOGADOR ===== */
 
 .profileModal{
@@ -728,6 +832,17 @@ body::after{
   }
 }
 
+@media (max-width:900px){
+  .videoGrid.videoGrid--five,
+  .videoGrid.videoGrid--focus{
+    grid-template-columns:repeat(2, minmax(0,1fr));
+  }
+
+  .videoTile--focused{
+    min-height:320px;
+  }
+}
+
 @media (max-width:640px){
   .page{
     padding:
@@ -775,12 +890,18 @@ body::after{
     gap:6px;
   }
 
-  .videoGrid{
+  .videoGrid,
+  .videoGrid.videoGrid--one,
+  .videoGrid.videoGrid--two,
+  .videoGrid.videoGrid--three,
+  .videoGrid.videoGrid--four,
+  .videoGrid.videoGrid--five,
+  .videoGrid.videoGrid--focus{
     grid-template-columns:1fr;
   }
 
   .videoTile--focused{
-    min-height:300px;
+    min-height:280px;
   }
 }
 </style>
@@ -856,6 +977,10 @@ body::after{
           </div>
 
           <div class="videoStatus" id="videoStatus">Vídeo desligado.</div>
+
+          <div class="videoFocusBar" id="videoFocusBar" hidden>
+            <button class="videoFocusBtn" id="exitFocusBtn">Voltar para grade</button>
+          </div>
 
           <div class="videoGrid" id="videoGrid">
             <div class="videoEmpty" id="videoEmpty">
