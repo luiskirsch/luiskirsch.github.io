@@ -8,18 +8,24 @@
 <style>
 :root{
   --bg-1:#030608;
-  --bg-2:#010203;
-  --bg-3:#000000;
-  --text:#f5f7fb;
-  --muted:rgba(214,224,237,.68);
+  --bg-2:#060b10;
+  --bg-3:#0a1017;
+  --panel:rgba(255,255,255,.04);
+  --panel-2:rgba(255,255,255,.025);
   --line:rgba(255,255,255,.10);
+  --line-strong:rgba(255,255,255,.16);
+  --text:#f4f7fb;
+  --muted:rgba(214,224,237,.70);
   --blue-1:#daf6ff;
   --blue-2:#8fd9ff;
   --blue-3:#48b7f4;
   --gold:#e6c07b;
-  --ok:#82d996;
   --danger:#ff6b6b;
-  --shadow:0 20px 60px rgba(0,0,0,.35);
+  --ok:#82d996;
+  --shadow:0 24px 70px rgba(0,0,0,.40);
+  --radius-xl:28px;
+  --radius-lg:20px;
+  --radius-md:16px;
 }
 
 *{ box-sizing:border-box; }
@@ -28,11 +34,10 @@ html,body{
   margin:0;
   min-height:100%;
   background:
-    radial-gradient(45vw 45vw at 22% 48%, rgba(28,120,220,.10), transparent 60%),
-    radial-gradient(38vw 38vw at 68% 28%, rgba(20,88,180,.08), transparent 62%),
-    radial-gradient(60vw 60vw at 50% 50%, rgba(255,255,255,.02), transparent 68%),
-    linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
-  background-color:#000;
+    radial-gradient(45vw 45vw at 18% 22%, rgba(72,183,244,.09), transparent 60%),
+    radial-gradient(38vw 38vw at 82% 72%, rgba(230,192,123,.05), transparent 62%),
+    radial-gradient(55vw 55vw at 50% 50%, rgba(255,255,255,.02), transparent 70%),
+    linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 42%, var(--bg-3) 100%);
   color:var(--text);
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   overflow-x:hidden;
@@ -43,7 +48,7 @@ body::before{
   position:fixed;
   inset:0;
   pointer-events:none;
-  background:radial-gradient(circle at center, transparent 48%, rgba(0,0,0,.24) 100%);
+  background:radial-gradient(circle at center, transparent 48%, rgba(0,0,0,.28) 100%);
   opacity:.95;
 }
 
@@ -64,77 +69,72 @@ body::after{
   min-height:100vh;
   min-height:100svh;
   padding:
-    max(18px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-top))
     max(16px, env(safe-area-inset-right))
-    max(24px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-bottom))
     max(16px, env(safe-area-inset-left));
 }
 
 .shell{
-  width:min(1320px, 100%);
+  width:min(1440px, 100%);
   margin:0 auto;
   display:grid;
-  grid-template-rows:auto 1fr auto;
   gap:16px;
-  min-height:calc(100vh - 36px);
-  min-height:calc(100svh - 36px);
 }
+
+/* TOPO */
 
 .topbar{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:14px;
-  padding:14px 16px;
+  padding:16px 18px;
   border:1px solid var(--line);
-  border-radius:22px;
-  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+  border-radius:26px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
+    radial-gradient(circle at top, rgba(72,183,244,.06), transparent 60%);
   box-shadow:var(--shadow);
-  backdrop-filter:blur(6px);
+  backdrop-filter:blur(8px);
 }
 
 .brandWrap{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
   min-width:0;
 }
 
 .eyebrow{
-  margin:0;
+  margin:0 0 6px;
   font-size:11px;
-  letter-spacing:.22em;
+  letter-spacing:.24em;
   text-transform:uppercase;
   color:var(--muted);
 }
 
 .roomTitle{
   margin:0;
-  font-size:clamp(22px, 3vw, 34px);
+  font-size:clamp(28px, 3vw, 40px);
   line-height:1;
   font-weight:900;
-  letter-spacing:-.04em;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  letter-spacing:-.05em;
 }
 
 .topMeta{
   display:flex;
   flex-wrap:wrap;
-  justify-content:flex-end;
   gap:10px;
+  justify-content:flex-end;
 }
 
 .badge{
   display:inline-flex;
   align-items:center;
   gap:8px;
-  min-height:40px;
+  min-height:42px;
   padding:10px 14px;
   border-radius:999px;
   border:1px solid var(--line);
-  background:rgba(255,255,255,.04);
+  background:rgba(255,255,255,.045);
   color:var(--text);
   font-size:13px;
   white-space:nowrap;
@@ -153,18 +153,21 @@ body::after{
   flex:0 0 auto;
 }
 
-.main{
+/* LAYOUT */
+
+.layout{
   display:grid;
-  grid-template-columns:320px minmax(0,1fr);
+  grid-template-columns:300px minmax(0, 1fr);
   gap:16px;
-  min-height:0;
+  min-height:calc(100vh - 130px);
+  min-height:calc(100svh - 130px);
 }
 
 .card{
   border:1px solid var(--line);
-  border-radius:26px;
+  border-radius:var(--radius-xl);
   background:
-    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
     radial-gradient(circle at top, rgba(72,183,244,.05), transparent 60%);
   box-shadow:var(--shadow);
   overflow:hidden;
@@ -175,12 +178,6 @@ body::after{
   padding:18px;
 }
 
-.sidebar{
-  display:flex;
-  flex-direction:column;
-  min-height:0;
-}
-
 .sectionTitle{
   margin:0 0 12px;
   font-size:12px;
@@ -189,9 +186,16 @@ body::after{
   color:var(--muted);
 }
 
+/* SIDEBAR */
+
+.sidebar{
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  min-height:0;
+}
+
 .playerList{
-  display:flex;
-  flex-direction:column;
+  display:grid;
   gap:10px;
 }
 
@@ -204,14 +208,14 @@ body::after{
   border-radius:16px;
   background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.06);
+  transition:transform .12s ease, background .15s ease, border-color .15s ease;
   cursor:pointer;
-  transition:transform .12s ease, border-color .15s ease, background .15s ease;
 }
 
 .player:hover{
   transform:translateY(-1px);
-  border-color:rgba(72,183,244,.20);
   background:rgba(255,255,255,.05);
+  border-color:rgba(72,183,244,.22);
 }
 
 .playerLeft{
@@ -222,22 +226,26 @@ body::after{
 }
 
 .avatar{
-  width:34px;
-  height:34px;
+  width:38px;
+  height:38px;
   border-radius:50%;
   display:grid;
   place-items:center;
-  font-size:12px;
-  font-weight:800;
+  background:linear-gradient(180deg,#56bdf8,#1f86d9);
   color:#fff;
-  background:linear-gradient(180deg, #56bdf8, #1f86d9);
-  box-shadow:0 0 18px rgba(72,183,244,.28);
+  font-size:13px;
+  font-weight:800;
   flex:0 0 auto;
+  box-shadow:0 0 18px rgba(72,183,244,.24);
+}
+
+.playerMeta{
+  min-width:0;
 }
 
 .playerName{
   font-size:14px;
-  font-weight:700;
+  font-weight:800;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -250,6 +258,35 @@ body::after{
   color:var(--muted);
 }
 
+.playerRight{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.playerStatus{
+  font-size:11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.75);
+}
+
+.playerHost{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:20px;
+  padding:0 8px;
+  border-radius:999px;
+  background:rgba(230,192,123,.14);
+  border:1px solid rgba(230,192,123,.22);
+  color:#f6dfb0;
+  font-size:10px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
 .emptyState{
   padding:14px;
   border-radius:16px;
@@ -258,54 +295,214 @@ body::after{
   color:var(--muted);
   font-size:13px;
   line-height:1.55;
+  margin-top:12px;
 }
 
 .sidebarActions{
-  margin-top:16px;
   display:grid;
   gap:10px;
+  margin-top:14px;
 }
 
-.btn{
-  appearance:none;
-  border:none;
-  cursor:pointer;
-  width:100%;
-  min-height:46px;
-  padding:12px 16px;
-  border-radius:16px;
-  font:inherit;
-  font-weight:700;
-  letter-spacing:.04em;
-  transition:transform .12s ease, opacity .15s ease, border-color .15s ease, background .15s ease;
+/* MAIN AREA */
+
+.mainArea{
+  display:grid;
+  grid-template-rows:minmax(340px, 1fr) 300px;
+  gap:16px;
+  min-height:0;
 }
 
-.btn:hover{ transform:translateY(-1px); }
-.btn:active{ transform:translateY(0); opacity:.95; }
+/* TABLE */
 
-.btnPrimary{
+.tableCard{
+  display:grid;
+  grid-template-rows:auto 1fr;
+  min-height:0;
+}
+
+.tableHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 18px;
+  border-bottom:1px solid var(--line);
+  background:rgba(255,255,255,.02);
+}
+
+.tableHeadLeft h2{
+  margin:0 0 4px;
+  font-size:clamp(22px, 2vw, 30px);
+  letter-spacing:-.03em;
+}
+
+.tableHeadLeft p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.tableHeadRight{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.sessionStatus{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(130,217,150,.10);
+  border:1px solid rgba(130,217,150,.20);
+  color:#dff8e6;
+  font-size:12px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+.tableBody{
+  display:grid;
+  grid-template-columns:200px minmax(0, 1fr) 280px;
+  gap:18px;
+  padding:18px;
+  min-height:0;
+}
+
+.deckPanel,
+.historyPanel{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:22px;
+  background:rgba(255,255,255,.02);
+  min-height:0;
+}
+
+.deckPanel{
+  display:grid;
+  align-content:start;
+  justify-items:center;
+  gap:14px;
+  padding:16px;
+}
+
+.deckCard{
+  width:150px;
+  height:220px;
+  border-radius:18px;
+  background:
+    linear-gradient(180deg, rgba(218,246,255,.92), rgba(72,183,244,.92)),
+    radial-gradient(circle at top, rgba(255,255,255,.24), transparent 55%);
   color:#07111a;
-  background:linear-gradient(180deg, var(--blue-1), var(--blue-2));
-  box-shadow:0 0 24px rgba(72,183,244,.20);
+  display:grid;
+  place-items:center;
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:.22em;
+  box-shadow:0 18px 40px rgba(0,0,0,.35);
+  user-select:none;
 }
 
-.btnGhost{
-  color:var(--text);
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.045);
+.deckInfo{
+  text-align:center;
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.6;
 }
 
-.btnDanger{
-  color:#ffdede;
-  border:1px solid rgba(255,107,107,.20);
-  background:rgba(255,107,107,.07);
+.revealPanel{
+  min-height:0;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at center, rgba(72,183,244,.08), transparent 55%),
+    rgba(255,255,255,.02);
+  display:grid;
+  place-items:center;
+  padding:20px;
 }
 
-.btn[disabled]{
-  opacity:.45;
-  cursor:not-allowed;
-  transform:none !important;
+.revealCard{
+  width:min(100%, 520px);
+  min-height:320px;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  box-shadow:0 20px 50px rgba(0,0,0,.28);
+  padding:26px;
+  display:grid;
+  align-content:center;
+  gap:16px;
+  text-align:center;
 }
+
+.cardType{
+  font-size:11px;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+
+.cardTitle{
+  font-size:clamp(26px, 3vw, 38px);
+  line-height:1.06;
+  font-weight:900;
+  letter-spacing:-.05em;
+}
+
+.cardText{
+  font-size:15px;
+  line-height:1.7;
+  color:var(--muted);
+}
+
+.historyPanel{
+  padding:16px;
+  display:grid;
+  grid-template-rows:auto 1fr;
+  gap:12px;
+}
+
+.historyList{
+  overflow:auto;
+  display:grid;
+  gap:10px;
+  min-height:0;
+}
+
+.historyItem{
+  padding:12px 14px;
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.historyType{
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--blue-2);
+  margin-bottom:6px;
+}
+
+.historyText{
+  font-size:13px;
+  line-height:1.6;
+}
+
+/* BOTTOM AREA */
+
+.bottomGrid{
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:16px;
+  min-height:0;
+}
+
+/* CHAT */
 
 .chatCard{
   display:grid;
@@ -333,21 +530,6 @@ body::after{
   margin:0;
   font-size:13px;
   color:var(--muted);
-}
-
-.sessionStatus{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 14px;
-  border-radius:999px;
-  background:rgba(130,217,150,.10);
-  border:1px solid rgba(130,217,150,.20);
-  color:#dff8e6;
-  font-size:12px;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  white-space:nowrap;
 }
 
 .messages{
@@ -450,12 +632,12 @@ body::after{
   color:rgba(255,255,255,.36);
 }
 
-/* ===== VIDEO ===== */
+/* VIDEO */
 
-.videoWrap{
-  border-top:1px solid rgba(255,255,255,.10);
-  padding:16px 18px 18px;
-  background:rgba(255,255,255,.015);
+.videoCard{
+  display:grid;
+  grid-template-rows:auto auto auto 1fr;
+  min-height:0;
 }
 
 .videoTop{
@@ -464,7 +646,7 @@ body::after{
   justify-content:space-between;
   gap:12px;
   flex-wrap:wrap;
-  margin-bottom:12px;
+  padding:16px 18px 10px;
 }
 
 .videoTitle{
@@ -515,13 +697,13 @@ body::after{
   font-size:13px;
   color:rgba(214,224,237,.72);
   min-height:18px;
-  margin-bottom:10px;
+  padding:0 18px 10px;
 }
 
 .videoFocusBar{
   display:flex;
   justify-content:flex-end;
-  margin-bottom:10px;
+  padding:0 18px 10px;
 }
 
 .videoFocusBtn{
@@ -541,6 +723,9 @@ body::after{
   display:grid;
   gap:12px;
   align-items:stretch;
+  padding:0 18px 18px;
+  min-height:0;
+  overflow:auto;
 }
 
 .videoGrid.videoGrid--one{
@@ -727,7 +912,50 @@ body::after{
   padding:20px;
 }
 
-/* ===== PERFIL DO JOGADOR / AMIGOS ===== */
+/* BUTTONS */
+
+.btn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  width:100%;
+  min-height:46px;
+  padding:12px 16px;
+  border-radius:16px;
+  font:inherit;
+  font-weight:700;
+  letter-spacing:.04em;
+  transition:transform .12s ease, opacity .15s ease, border-color .15s ease, background .15s ease;
+}
+
+.btn:hover{ transform:translateY(-1px); }
+.btn:active{ transform:translateY(0); opacity:.95; }
+
+.btnPrimary{
+  color:#07111a;
+  background:linear-gradient(180deg, var(--blue-1), var(--blue-2));
+  box-shadow:0 0 24px rgba(72,183,244,.20);
+}
+
+.btnGhost{
+  color:var(--text);
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.045);
+}
+
+.btnDanger{
+  color:#ffdede;
+  border:1px solid rgba(255,107,107,.20);
+  background:rgba(255,107,107,.07);
+}
+
+.btn[disabled]{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none !important;
+}
+
+/* PROFILE / FRIENDS */
 
 .profileModal{
   position:fixed;
@@ -754,7 +982,7 @@ body::after{
 }
 
 .profileCard--large{
-  width:min(440px, calc(100vw - 28px));
+  width:min(460px, calc(100vw - 28px));
   text-align:left;
   position:relative;
 }
@@ -1077,8 +1305,18 @@ body::after{
   color:var(--blue-2);
 }
 
+@media (max-width:1180px){
+  .tableBody{
+    grid-template-columns:180px minmax(0,1fr);
+  }
+
+  .historyPanel{
+    grid-column:1 / -1;
+  }
+}
+
 @media (max-width:980px){
-  .main{
+  .layout{
     grid-template-columns:1fr;
   }
 
@@ -1086,9 +1324,9 @@ body::after{
     order:2;
   }
 
-  .chatCard{
+  .mainArea{
     order:1;
-    min-height:540px;
+    grid-template-rows:auto auto;
   }
 }
 
@@ -1100,6 +1338,30 @@ body::after{
 
   .videoTile--focused{
     min-height:320px;
+  }
+}
+
+@media (max-width:760px){
+  .topbar{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .topMeta{
+    width:100%;
+    justify-content:flex-start;
+  }
+
+  .tableBody{
+    grid-template-columns:1fr;
+  }
+
+  .bottomGrid{
+    grid-template-columns:1fr;
+  }
+
+  .composerRow{
+    grid-template-columns:1fr;
   }
 }
 
@@ -1116,17 +1378,6 @@ body::after{
     gap:12px;
   }
 
-  .topbar{
-    flex-direction:column;
-    align-items:flex-start;
-    padding:14px;
-  }
-
-  .topMeta{
-    width:100%;
-    justify-content:flex-start;
-  }
-
   .cardInner{
     padding:14px;
   }
@@ -1134,10 +1385,6 @@ body::after{
   .chatHeader{
     flex-direction:column;
     align-items:flex-start;
-  }
-
-  .composerRow{
-    grid-template-columns:1fr;
   }
 
   .message{
@@ -1192,7 +1439,7 @@ body::after{
       </div>
     </header>
 
-    <section class="main">
+    <section class="layout">
 
       <aside class="card sidebar">
         <div class="cardInner">
@@ -1213,68 +1460,128 @@ body::after{
         </div>
       </aside>
 
-      <section class="card chatCard">
-        <div class="chatHeader">
-          <div class="chatHeaderLeft">
-            <h2>Chat da sala</h2>
-            <p>Conversem antes de iniciar. Depois, o clima muda.</p>
-          </div>
+      <section class="mainArea">
 
-          <div class="sessionStatus">
-            <span class="dot"></span>
-            <span id="sessionLabel">Sessão não iniciada</span>
-          </div>
-        </div>
+        <section class="card tableCard">
+          <div class="tableHead">
+            <div class="tableHeadLeft">
+              <h2>Mesa do Ritual</h2>
+              <p>O ritual começa aqui. A carta dominará esta área quando a sessão iniciar.</p>
+            </div>
 
-        <div class="messages" id="messages">
-          <div class="chatEmpty" id="chatEmpty">
-            Conectando a sala...<br>
-            As mensagens e jogadores aparecerão em tempo real.
-          </div>
-        </div>
-
-        <div class="typingBar" id="typingBar"></div>
-
-        <div class="videoWrap">
-          <div class="videoTop">
-            <h3 class="videoTitle">Chamada de vídeo</h3>
-            <div class="videoActions">
-              <button class="videoBtn primary" id="joinVideoBtn">Entrar na chamada</button>
-              <button class="videoBtn" id="toggleMicBtn" disabled>Mutar microfone</button>
-              <button class="videoBtn" id="toggleCamBtn" disabled>Desligar câmera</button>
-              <button class="videoBtn danger" id="leaveVideoBtn" disabled>Sair da chamada</button>
+            <div class="tableHeadRight">
+              <div class="sessionStatus">
+                <span class="dot"></span>
+                <span id="sessionLabel">Sessão não iniciada</span>
+              </div>
             </div>
           </div>
 
-          <div class="videoStatus" id="videoStatus">Vídeo desligado.</div>
+          <div class="tableBody">
+            <aside class="deckPanel">
+              <div class="sectionTitle">Deck</div>
+              <div class="deckCard">RITUAL</div>
+              <div class="deckInfo">
+                Aguardando o anfitrião iniciar.<br>
+                Depois disso, a mesa se transforma.
+              </div>
+            </aside>
 
-          <div class="videoFocusBar" id="videoFocusBar" hidden>
-            <button class="videoFocusBtn" id="exitFocusBtn">Voltar para grade</button>
-          </div>
-
-          <div class="videoGrid" id="videoGrid">
-            <div class="videoEmpty" id="videoEmpty">
-              Entre na chamada para abrir câmera e microfone.<br>
-              Até 5 participantes podem ficar juntos aqui.
+            <div class="revealPanel">
+              <article class="revealCard">
+                <div class="cardType">Pré-ritual</div>
+                <div class="cardTitle">Conversem antes de começar.</div>
+                <div class="cardText">
+                  Aqui ficará a experiência central do jogo. Assim que o anfitrião iniciar o ritual, a próxima etapa poderá abrir a mesa completa com cartas, decisões e tensão em tempo real.
+                </div>
+              </article>
             </div>
-          </div>
-        </div>
 
-        <div class="chatComposer">
-          <div class="composerRow">
-            <input
-              class="input"
-              id="messageInput"
-              type="text"
-              maxlength="240"
-              placeholder="Digite uma mensagem para a sala..."
-              autocomplete="off"
-            >
-            <button class="btn btnPrimary" id="sendBtn">Enviar</button>
+            <aside class="historyPanel">
+              <div class="sectionTitle">Visão da rodada</div>
+
+              <div class="historyList">
+                <div class="historyItem">
+                  <div class="historyType">Etapa atual</div>
+                  <div class="historyText">Sala em preparação. Jogadores se reunindo e organizando o ritual.</div>
+                </div>
+
+                <div class="historyItem">
+                  <div class="historyType">Vídeo</div>
+                  <div class="historyText">A chamada permanece ativa para que todos possam se ver durante a experiência.</div>
+                </div>
+
+                <div class="historyItem">
+                  <div class="historyType">Chat</div>
+                  <div class="historyText">As mensagens seguem em tempo real abaixo, sem tirar o foco da mesa.</div>
+                </div>
+              </div>
+            </aside>
           </div>
-        </div>
+        </section>
+
+        <section class="bottomGrid">
+
+          <section class="card chatCard">
+            <div class="chatHeader">
+              <div class="chatHeaderLeft">
+                <h2>Chat da sala</h2>
+                <p>Conversem antes de iniciar. Depois, o clima muda.</p>
+              </div>
+            </div>
+
+            <div class="messages" id="messages">
+              <div class="chatEmpty" id="chatEmpty">
+                Conectando a sala...<br>
+                As mensagens e jogadores aparecerão em tempo real.
+              </div>
+            </div>
+
+            <div class="typingBar" id="typingBar"></div>
+
+            <div class="chatComposer">
+              <div class="composerRow">
+                <input
+                  class="input"
+                  id="messageInput"
+                  type="text"
+                  maxlength="240"
+                  placeholder="Digite uma mensagem para a sala..."
+                  autocomplete="off"
+                >
+                <button class="btn btnPrimary" id="sendBtn">Enviar</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="card videoCard">
+            <div class="videoTop">
+              <h3 class="videoTitle">Chamada de vídeo</h3>
+              <div class="videoActions">
+                <button class="videoBtn primary" id="joinVideoBtn">Entrar na chamada</button>
+                <button class="videoBtn" id="toggleMicBtn" disabled>Mutar microfone</button>
+                <button class="videoBtn" id="toggleCamBtn" disabled>Desligar câmera</button>
+                <button class="videoBtn danger" id="leaveVideoBtn" disabled>Sair da chamada</button>
+              </div>
+            </div>
+
+            <div class="videoStatus" id="videoStatus">Vídeo desligado.</div>
+
+            <div class="videoFocusBar" id="videoFocusBar" hidden>
+              <button class="videoFocusBtn" id="exitFocusBtn">Voltar para grade</button>
+            </div>
+
+            <div class="videoGrid" id="videoGrid">
+              <div class="videoEmpty" id="videoEmpty">
+                Entre na chamada para abrir câmera e microfone.<br>
+                Até 5 participantes podem ficar juntos aqui.
+              </div>
+            </div>
+          </section>
+
+        </section>
+
       </section>
-
     </section>
 
     <div class="footerBar">
@@ -2041,12 +2348,15 @@ function renderPlayers(players){
     div.innerHTML = `
       <div class="playerLeft">
         <div class="avatar">${initials(player.name)}</div>
-        <div>
+        <div class="playerMeta">
           <div class="playerName">${escapeHtml(player.name)}</div>
           <div class="playerRole">${player.isHost ? 'Anfitrião' : 'Participante'}</div>
         </div>
       </div>
-      <div class="playerRole">Online</div>
+      <div class="playerRight">
+        <span class="playerStatus">Online</span>
+        ${player.isHost ? '<span class="playerHost">Host</span>' : ''}
+      </div>
     `;
 
     div.addEventListener("click", ()=>{
