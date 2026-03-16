@@ -727,7 +727,7 @@ body::after{
   padding:20px;
 }
 
-/* ===== PERFIL DO JOGADOR ===== */
+/* ===== PERFIL DO JOGADOR / AMIGOS ===== */
 
 .profileModal{
   position:fixed;
@@ -841,6 +841,10 @@ body::after{
   margin-bottom:14px;
 }
 
+.profileActions.hidden{
+  display:none;
+}
+
 .profileActionBtn{
   appearance:none;
   border:1px solid rgba(255,255,255,.10);
@@ -930,6 +934,118 @@ body::after{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
+}
+
+.friendsPanel{
+  display:grid;
+  gap:12px;
+  margin-top:12px;
+}
+
+.friendsPanel.hidden{
+  display:none;
+}
+
+.friendsBlock{
+  padding:12px;
+  border-radius:14px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.friendsTitle{
+  font-size:12px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:rgba(214,224,237,.72);
+  margin-bottom:10px;
+}
+
+.friendsList{
+  display:grid;
+  gap:10px;
+}
+
+.friendItem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.friendLeft{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.friendAvatar{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  font-size:18px;
+  flex:0 0 auto;
+}
+
+.friendMeta{
+  min-width:0;
+}
+
+.friendName{
+  font-size:14px;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.friendUsername{
+  font-size:12px;
+  color:rgba(214,224,237,.68);
+}
+
+.friendActions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.friendBtn{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.05);
+  color:#f5f7fb;
+  min-height:34px;
+  padding:8px 10px;
+  border-radius:10px;
+  cursor:pointer;
+  font:inherit;
+  font-size:12px;
+  font-weight:700;
+}
+
+.friendBtn--accept{
+  background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
+  color:#07111a;
+  border-color:transparent;
+}
+
+.friendEmpty{
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.02);
+  color:rgba(214,224,237,.68);
+  font-size:13px;
+  border:1px dashed rgba(255,255,255,.08);
 }
 
 .profileClose{
@@ -1050,6 +1166,11 @@ body::after{
 
   .avatarPicker{
     grid-template-columns:repeat(4, minmax(0,1fr));
+  }
+
+  .friendItem{
+    flex-direction:column;
+    align-items:flex-start;
   }
 }
 </style>
@@ -1189,6 +1310,18 @@ body::after{
       <button class="profileActionBtn" id="addFriendBtn" hidden>Adicionar amigo</button>
     </div>
 
+    <div class="friendsPanel hidden" id="friendsPanel">
+      <div class="friendsBlock" id="friendsListBlock">
+        <div class="friendsTitle">Amigos</div>
+        <div class="friendsList" id="friendsList"></div>
+      </div>
+
+      <div class="friendsBlock" id="incomingRequestsBlock">
+        <div class="friendsTitle">Pedidos recebidos</div>
+        <div class="friendsList" id="incomingRequestsList"></div>
+      </div>
+    </div>
+
     <form class="profileEditor hidden" id="profileEditor">
       <label class="profileField">
         <span>Nome de exibição</span>
@@ -1297,10 +1430,15 @@ const cancelEditProfileBtn = document.getElementById("cancelEditProfileBtn");
 const saveProfileBtn = document.getElementById("saveProfileBtn");
 const avatarPicker = document.getElementById("avatarPicker");
 const profileActions = document.getElementById("profileActions");
+const friendsPanel = document.getElementById("friendsPanel");
+const friendsList = document.getElementById("friendsList");
+const incomingRequestsList = document.getElementById("incomingRequestsList");
+const friendsListBlock = document.getElementById("friendsListBlock");
+const incomingRequestsBlock = document.getElementById("incomingRequestsBlock");
 
 const params = new URLSearchParams(window.location.search);
 
-const playerName = (params.get('nome') || localStorage.getItem('osl_nome') || 'Visitante').trim().slice(0, 40);
+let playerName = (params.get('nome') || localStorage.getItem('osl_nome') || 'Visitante').trim().slice(0, 40);
 const roomCode = (params.get('sala') || localStorage.getItem('osl_sala') || 'SL-0001')
   .trim()
   .toUpperCase()
@@ -1455,6 +1593,159 @@ function showChatEmpty(text){
   chatEmptyEl.innerHTML = text;
 }
 
+function normalizeUsername(value){
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9_]/g, "")
+    .slice(0, 20);
+}
+
+function uniqueArray(arr){
+  return [...new Set((arr || []).filter(Boolean))];
+}
+
+function setAvatarSelection(emoji){
+  selectedAvatarEmoji = emoji || "🔮";
+  avatarPicker.querySelectorAll(".avatarOption").forEach((btn)=>{
+    btn.classList.toggle("active", btn.dataset.avatar === selectedAvatarEmoji);
+  });
+}
+
+function openEditorWithUser(user){
+  profileEditor.classList.remove("hidden");
+  profileActions.classList.add("hidden");
+
+  editDisplayName.value = user.displayName || "";
+  editUsername.value = user.username || "";
+  editBio.value = user.bio || "";
+  setAvatarSelection(user.avatarEmoji || "🔮");
+}
+
+function closeEditor(){
+  profileEditor.classList.add("hidden");
+  profileActions.classList.remove("hidden");
+}
+
+async function getUsersByIds(ids){
+  const validIds = uniqueArray(ids);
+  const users = [];
+
+  for (const id of validIds){
+    try{
+      const ref = doc(db, "users", id);
+      const snap = await getDoc(ref);
+      if (snap.exists()){
+        users.push(snap.data());
+      }
+    }catch(e){
+      console.error(e);
+    }
+  }
+
+  return users;
+}
+
+function renderFriendList(container, users, options = {}){
+  const {
+    emptyText = "Nada aqui por enquanto.",
+    mode = "friends"
+  } = options;
+
+  container.innerHTML = "";
+
+  if (!users.length){
+    const empty = document.createElement("div");
+    empty.className = "friendEmpty";
+    empty.textContent = emptyText;
+    container.appendChild(empty);
+    return;
+  }
+
+  users.forEach((user)=>{
+    const item = document.createElement("div");
+    item.className = "friendItem";
+
+    const avatar = user.avatarEmoji || "🔮";
+    const displayName = user.displayName || "Jogador";
+    const username = user.username || "jogador";
+
+    let actionsHtml = "";
+
+    if (mode === "requests"){
+      actionsHtml = `
+        <div class="friendActions">
+          <button class="friendBtn friendBtn--accept" data-action="accept" data-user-id="${user.userId}">Aceitar</button>
+          <button class="friendBtn" data-action="decline" data-user-id="${user.userId}">Recusar</button>
+        </div>
+      `;
+    }
+
+    item.innerHTML = `
+      <div class="friendLeft">
+        <div class="friendAvatar">${avatar}</div>
+        <div class="friendMeta">
+          <div class="friendName">${escapeHtml(displayName)}</div>
+          <div class="friendUsername">@${escapeHtml(username)}</div>
+        </div>
+      </div>
+      ${actionsHtml}
+    `;
+
+    container.appendChild(item);
+  });
+}
+
+async function renderFriendsSection(user, isSelfView){
+  friendsPanel.classList.remove("hidden");
+  friendsListBlock.hidden = false;
+
+  const friendsUsers = await getUsersByIds(user.friends || []);
+  renderFriendList(friendsList, friendsUsers, {
+    emptyText: isSelfView ? "Você ainda não tem amigos adicionados." : "Esse jogador ainda não possui amigos visíveis."
+  });
+
+  if (isSelfView){
+    incomingRequestsBlock.hidden = false;
+    const incomingUsers = await getUsersByIds(user.incomingRequests || []);
+    renderFriendList(incomingRequestsList, incomingUsers, {
+      emptyText: "Nenhum pedido recebido no momento.",
+      mode: "requests"
+    });
+  } else {
+    incomingRequestsBlock.hidden = true;
+    incomingRequestsList.innerHTML = "";
+  }
+}
+
+async function fillProfileUI(user, isSelfView){
+  profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
+  profileNameEl.textContent = user.displayName || "Jogador";
+  profileUsernameEl.textContent = `@${user.username || "jogador"}`;
+  profileBioEl.textContent = user.bio || "Sem descrição.";
+
+  document.getElementById("profileGames").textContent =
+    `Partidas: ${user.stats?.gamesPlayed || 0}`;
+
+  document.getElementById("profileWins").textContent =
+    `Vitórias: ${user.stats?.wins || 0}`;
+
+  editProfileBtn.hidden = !isSelfView;
+  addFriendBtn.hidden = isSelfView;
+
+  if (!isSelfView){
+    const alreadyFriend = (user.friends || []).includes(userId);
+    addFriendBtn.textContent = alreadyFriend ? "Já são amigos" : "Adicionar amigo";
+    addFriendBtn.disabled = alreadyFriend;
+  } else {
+    addFriendBtn.disabled = false;
+  }
+
+  closeEditor();
+  await renderFriendsSection(user, isSelfView);
+}
+
 async function ensureUserProfile(){
   const snap = await getDoc(userRef);
 
@@ -1490,55 +1781,6 @@ async function ensureUserProfile(){
   }
 }
 
-function normalizeUsername(value){
-  return String(value || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9_]/g, "")
-    .slice(0, 20);
-}
-
-function setAvatarSelection(emoji){
-  selectedAvatarEmoji = emoji || "🔮";
-  avatarPicker.querySelectorAll(".avatarOption").forEach((btn)=>{
-    btn.classList.toggle("active", btn.dataset.avatar === selectedAvatarEmoji);
-  });
-}
-
-function openEditorWithUser(user){
-  profileEditor.classList.remove("hidden");
-  profileActions.classList.add("hidden");
-
-  editDisplayName.value = user.displayName || "";
-  editUsername.value = user.username || "";
-  editBio.value = user.bio || "";
-  setAvatarSelection(user.avatarEmoji || "🔮");
-}
-
-function closeEditor(){
-  profileEditor.classList.add("hidden");
-  profileActions.classList.remove("hidden");
-}
-
-function fillProfileUI(user, isSelfView){
-  profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
-  profileNameEl.textContent = user.displayName || "Jogador";
-  profileUsernameEl.textContent = `@${user.username || "jogador"}`;
-  profileBioEl.textContent = user.bio || "Sem descrição.";
-
-  document.getElementById("profileGames").textContent =
-    `Partidas: ${user.stats?.gamesPlayed || 0}`;
-
-  document.getElementById("profileWins").textContent =
-    `Vitórias: ${user.stats?.wins || 0}`;
-
-  editProfileBtn.hidden = !isSelfView;
-  addFriendBtn.hidden = isSelfView;
-
-  closeEditor();
-}
-
 function isPlayerActive(player){
   if(!player.lastSeen || typeof player.lastSeen.toMillis !== 'function') return true;
   return (Date.now() - player.lastSeen.toMillis()) <= ACTIVE_WINDOW_MS;
@@ -1561,6 +1803,7 @@ async function openProfile(player){
       document.getElementById("profileWins").textContent = "Vitórias: 0";
       editProfileBtn.hidden = true;
       addFriendBtn.hidden = true;
+      friendsPanel.classList.add("hidden");
       closeEditor();
       profileModal.classList.remove("hidden");
       return;
@@ -1570,7 +1813,7 @@ async function openProfile(player){
     openedProfileData = user;
 
     const isSelfView = targetUserId === userId;
-    fillProfileUI(user, isSelfView);
+    await fillProfileUI(user, isSelfView);
 
     profileModal.classList.remove("hidden");
   }catch(error){
@@ -1582,6 +1825,7 @@ function closeProfile(){
   profileModal.classList.add("hidden");
   openedProfileUserId = null;
   openedProfileData = null;
+  friendsPanel.classList.add("hidden");
   closeEditor();
 }
 
@@ -1656,12 +1900,13 @@ if (profileEditor){
       });
 
       if (openedProfileUserId === userId){
+        playerName = displayName;
         localStorage.setItem("osl_nome", displayName);
       }
 
       const snap = await getDoc(userRef);
       openedProfileData = snap.data();
-      fillProfileUI(openedProfileData, true);
+      await fillProfileUI(openedProfileData, true);
 
       await setDoc(playerRef, {
         name: displayName
@@ -1675,8 +1920,115 @@ if (profileEditor){
 }
 
 if (addFriendBtn){
-  addFriendBtn.addEventListener("click", function(){
-    alert("Sistema de amigos será a próxima etapa.");
+  addFriendBtn.addEventListener("click", async function(){
+    try{
+      if (!openedProfileUserId || openedProfileUserId === userId) return;
+
+      const mySnap = await getDoc(userRef);
+      const targetRef = doc(db, "users", openedProfileUserId);
+      const targetSnap = await getDoc(targetRef);
+
+      if (!mySnap.exists() || !targetSnap.exists()) return;
+
+      const myUser = mySnap.data();
+      const targetUser = targetSnap.data();
+
+      const myFriends = uniqueArray(myUser.friends || []);
+      const myOutgoing = uniqueArray(myUser.outgoingRequests || []);
+      const myIncoming = uniqueArray(myUser.incomingRequests || []);
+      const targetIncoming = uniqueArray(targetUser.incomingRequests || []);
+
+      if (myFriends.includes(openedProfileUserId)){
+        alert("Vocês já são amigos.");
+        return;
+      }
+
+      if (myOutgoing.includes(openedProfileUserId)){
+        alert("Você já enviou um pedido para esse jogador.");
+        return;
+      }
+
+      if (myIncoming.includes(openedProfileUserId)){
+        alert("Esse jogador já enviou um pedido para você. Aceite no seu perfil.");
+        return;
+      }
+
+      await updateDoc(userRef, {
+        outgoingRequests: uniqueArray([...myOutgoing, openedProfileUserId])
+      });
+
+      await updateDoc(targetRef, {
+        incomingRequests: uniqueArray([...targetIncoming, userId])
+      });
+
+      alert("Pedido de amizade enviado.");
+
+      const refreshedTarget = await getDoc(targetRef);
+      openedProfileData = refreshedTarget.data();
+      await fillProfileUI(openedProfileData, false);
+
+    }catch(error){
+      console.error(error);
+      alert("Não foi possível enviar o pedido de amizade.");
+    }
+  });
+}
+
+if (incomingRequestsList){
+  incomingRequestsList.addEventListener("click", async function(e){
+    const btn = e.target.closest(".friendBtn");
+    if (!btn) return;
+
+    const action = btn.dataset.action;
+    const requesterId = btn.dataset.userId;
+    if (!requesterId) return;
+
+    try{
+      const mySnap = await getDoc(userRef);
+      const requesterRef = doc(db, "users", requesterId);
+      const requesterSnap = await getDoc(requesterRef);
+
+      if (!mySnap.exists() || !requesterSnap.exists()) return;
+
+      const myUser = mySnap.data();
+      const requester = requesterSnap.data();
+
+      const myIncoming = uniqueArray(myUser.incomingRequests || []);
+      const myFriends = uniqueArray(myUser.friends || []);
+
+      const requesterOutgoing = uniqueArray(requester.outgoingRequests || []);
+      const requesterFriends = uniqueArray(requester.friends || []);
+
+      if (action === "accept"){
+        await updateDoc(userRef, {
+          incomingRequests: myIncoming.filter(id => id !== requesterId),
+          friends: uniqueArray([...myFriends, requesterId])
+        });
+
+        await updateDoc(requesterRef, {
+          outgoingRequests: requesterOutgoing.filter(id => id !== userId),
+          friends: uniqueArray([...requesterFriends, userId])
+        });
+      }
+
+      if (action === "decline"){
+        await updateDoc(userRef, {
+          incomingRequests: myIncoming.filter(id => id !== requesterId)
+        });
+
+        await updateDoc(requesterRef, {
+          outgoingRequests: requesterOutgoing.filter(id => id !== userId)
+        });
+      }
+
+      const refreshed = await getDoc(userRef);
+      openedProfileData = refreshed.data();
+      await fillProfileUI(openedProfileData, true);
+
+    }catch(error){
+      console.error(error);
+      alert("Não foi possível atualizar o pedido.");
+    }
   });
 }
 
