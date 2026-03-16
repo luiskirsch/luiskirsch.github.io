@@ -587,7 +587,42 @@ body::after{
   text-align:center;
   padding:20px;
 }
+  
+.videoOverlay{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
 
+.videoBadgeRow{
+  position:absolute;
+  top:10px;
+  right:10px;
+  display:flex;
+  gap:8px;
+  z-index:2;
+}
+
+.videoBadge{
+  min-width:34px;
+  height:34px;
+  padding:0 10px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  font-size:14px;
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(6px);
+}
+
+.videoBadge.is-off{
+  background:rgba(255,107,107,.20);
+  border-color:rgba(255,107,107,.35);
+}
+  
 /* ===== PERFIL DO JOGADOR ===== */
 
 .profileModal{
