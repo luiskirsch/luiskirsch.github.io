@@ -15,6 +15,8 @@ const toggleCamBtn = document.getElementById("toggleCamBtn");
 const videoGridEl = document.getElementById("videoGrid");
 const videoEmptyEl = document.getElementById("videoEmpty");
 const videoStatusEl = document.getElementById("videoStatus");
+const videoFocusBarEl = document.getElementById("videoFocusBar");
+const exitFocusBtn = document.getElementById("exitFocusBtn");
 
 const params = new URLSearchParams(window.location.search);
 
@@ -50,6 +52,11 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
+function updateFocusBar() {
+  if (!videoFocusBarEl) return;
+  videoFocusBarEl.hidden = !focusedIdentity;
+}
+
 function updateVideoGridLayout() {
   const count = videoGridEl.querySelectorAll(".videoTile").length;
 
@@ -64,6 +71,7 @@ function updateVideoGridLayout() {
 
   if (focusedIdentity) {
     videoGridEl.classList.add("videoGrid--focus");
+    updateFocusBar();
     return;
   }
 
@@ -78,17 +86,23 @@ function updateVideoGridLayout() {
   } else {
     videoGridEl.classList.add("videoGrid--five");
   }
+
+  updateFocusBar();
+}
+
+function clearFocusState() {
+  focusedIdentity = null;
+  videoGridEl.querySelectorAll(".videoTile").forEach((tile) => {
+    tile.classList.remove("videoTile--focused", "videoTile--mini");
+  });
+  updateVideoGridLayout();
 }
 
 function setFocusedTile(identity) {
   const tiles = videoGridEl.querySelectorAll(".videoTile");
 
   if (focusedIdentity === identity) {
-    focusedIdentity = null;
-    tiles.forEach((tile) => {
-      tile.classList.remove("videoTile--focused", "videoTile--mini");
-    });
-    updateVideoGridLayout();
+    clearFocusState();
     return;
   }
 
@@ -115,6 +129,24 @@ function createStatusBadge(kind, text) {
   return badge;
 }
 
+function createCameraOffPlaceholder() {
+  const wrap = document.createElement("div");
+  wrap.className = "videoCameraOff hidden";
+
+  const icon = document.createElement("div");
+  icon.className = "videoCameraOffIcon";
+  icon.textContent = "📷";
+
+  const text = document.createElement("div");
+  text.className = "videoCameraOffText";
+  text.textContent = "Câmera desligada";
+
+  wrap.appendChild(icon);
+  wrap.appendChild(text);
+
+  return wrap;
+}
+
 function createVideoTile(identity, labelText) {
   const tile = document.createElement("div");
   tile.className = "videoTile";
@@ -124,12 +156,20 @@ function createVideoTile(identity, labelText) {
   mediaWrap.className = "videoMedia";
   tile.appendChild(mediaWrap);
 
+  const cameraOff = createCameraOffPlaceholder();
+  tile.appendChild(cameraOff);
+
   const overlay = document.createElement("div");
   overlay.className = "videoOverlay";
 
   const label = document.createElement("div");
   label.className = "videoLabel";
-  label.innerHTML = escapeHtml(labelText);
+
+  const nameSpan = document.createElement("span");
+  nameSpan.className = "videoNameText";
+  nameSpan.innerHTML = escapeHtml(labelText);
+
+  label.appendChild(nameSpan);
 
   const badgeRow = document.createElement("div");
   badgeRow.className = "videoBadgeRow";
@@ -167,8 +207,30 @@ function updateTileLabel(identity, labelText) {
     `.videoTile[data-identity="${CSS.escape(identity)}"]`
   );
   if (!tile) return;
+
   const label = tile.querySelector(".videoLabel");
-  if (label) label.innerHTML = escapeHtml(labelText);
+  if (!label) return;
+
+  const hostTag = label.querySelector(".videoHostTag");
+  const nameText = label.querySelector(".videoNameText");
+
+  const isHost = /anfitrião/i.test(labelText);
+  const cleanLabel = labelText.replace(/\s*\[anfitrião\]\s*/i, "").trim();
+
+  if (nameText) {
+    nameText.innerHTML = escapeHtml(cleanLabel);
+  }
+
+  if (isHost && !hostTag) {
+    const tag = document.createElement("span");
+    tag.className = "videoHostTag";
+    tag.textContent = "HOST";
+    label.insertBefore(tag, label.firstChild);
+  }
+
+  if (!isHost && hostTag) {
+    hostTag.remove();
+  }
 }
 
 function setTileStatus(identity, { micMuted = false, camMuted = false } = {}) {
@@ -179,6 +241,7 @@ function setTileStatus(identity, { micMuted = false, camMuted = false } = {}) {
 
   const micBadge = tile.querySelector('.videoBadge[data-kind="mic"]');
   const camBadge = tile.querySelector('.videoBadge[data-kind="cam"]');
+  const camOff = tile.querySelector(".videoCameraOff");
 
   if (micBadge) {
     micBadge.classList.toggle("is-off", micMuted);
@@ -190,6 +253,11 @@ function setTileStatus(identity, { micMuted = false, camMuted = false } = {}) {
     camBadge.classList.toggle("is-off", camMuted);
     camBadge.textContent = camMuted ? "📷✖" : "📷";
     camBadge.title = camMuted ? "Câmera desligada" : "Câmera ligada";
+  }
+
+  tile.classList.toggle("videoTile--hasNoCamera", camMuted);
+  if (camOff) {
+    camOff.classList.toggle("hidden", !camMuted);
   }
 }
 
@@ -210,6 +278,7 @@ function getOrCreateVideoTile(identity, labelText) {
   }
 
   videoGridEl.appendChild(tile);
+  updateTileLabel(identity, labelText);
   updateVideoGridLayout();
   return tile;
 }
@@ -222,7 +291,7 @@ function removeVideoTile(identity) {
   if (tile) tile.remove();
 
   if (focusedIdentity === identity) {
-    focusedIdentity = null;
+    clearFocusState();
   }
 
   if (!videoGridEl.querySelector(".videoTile") && videoEmptyEl) {
@@ -234,7 +303,7 @@ function removeVideoTile(identity) {
 
 function clearAllVideoTiles() {
   videoGridEl.querySelectorAll(".videoTile").forEach((tile) => tile.remove());
-  focusedIdentity = null;
+  clearFocusState();
 
   if (videoEmptyEl && !videoEmptyEl.parentNode) {
     videoGridEl.appendChild(videoEmptyEl);
@@ -246,9 +315,7 @@ function clearAllVideoTiles() {
 function appendTrackToTile(tile, track, participantIdentity) {
   const mediaWrap = getMediaWrap(tile);
 
-  const existing = mediaWrap.querySelector(
-    `[data-track-sid="${track.sid}"]`
-  );
+  const existing = mediaWrap.querySelector(`[data-track-sid="${track.sid}"]`);
   if (existing) return;
 
   const mediaEl = track.attach();
@@ -282,6 +349,12 @@ function removeTrackFromParticipant(identity, trackSid) {
   if (mediaEl) mediaEl.remove();
 }
 
+function buildParticipantLabel(participant, isSelf = false) {
+  const baseName = participant?.name || "Jogador";
+  const hostSuffix = participant?.isHost ? " [anfitrião]" : "";
+  return isSelf ? `${baseName} (você)${hostSuffix}` : `${baseName}${hostSuffix}`;
+}
+
 function refreshParticipantVisualState(participant) {
   if (!participant) return;
 
@@ -289,12 +362,8 @@ function refreshParticipantVisualState(participant) {
   let camMuted = true;
 
   participant.trackPublications.forEach((pub) => {
-    if (pub.kind === "audio") {
-      micMuted = pub.isMuted;
-    }
-    if (pub.kind === "video") {
-      camMuted = pub.isMuted;
-    }
+    if (pub.kind === "audio") micMuted = pub.isMuted;
+    if (pub.kind === "video") camMuted = pub.isMuted;
   });
 
   setTileStatus(participant.identity, { micMuted, camMuted });
@@ -323,7 +392,7 @@ async function requestToken() {
 function renderExistingParticipantTracks(participant) {
   const tile = getOrCreateVideoTile(
     participant.identity,
-    participant.name || "Jogador"
+    buildParticipantLabel(participant, false)
   );
 
   participant.trackPublications.forEach((pub) => {
@@ -352,7 +421,7 @@ async function joinVideoCall() {
     lkRoom.on(RoomEvent.ParticipantConnected, (participant) => {
       getOrCreateVideoTile(
         participant.identity,
-        participant.name || "Jogador"
+        buildParticipantLabel(participant, false)
       );
       refreshParticipantVisualState(participant);
       updateVideoGridLayout();
@@ -363,7 +432,7 @@ async function joinVideoCall() {
 
       const tile = getOrCreateVideoTile(
         participant.identity,
-        participant.name || "Jogador"
+        buildParticipantLabel(participant, false)
       );
 
       appendTrackToTile(tile, track, participant.identity);
@@ -410,14 +479,14 @@ async function joinVideoCall() {
     );
 
     appendTrackToTile(myTile, localVideoTrack, participantId);
+
+    micEnabled = true;
+    camEnabled = true;
     refreshLocalVisualState();
 
     for (const participant of lkRoom.remoteParticipants.values()) {
       renderExistingParticipantTracks(participant);
     }
-
-    micEnabled = true;
-    camEnabled = true;
 
     toggleMicBtn.disabled = false;
     toggleCamBtn.disabled = false;
@@ -428,7 +497,6 @@ async function joinVideoCall() {
     toggleCamBtn.textContent = "Desligar câmera";
     videoStatusEl.textContent = "Conectado à chamada.";
     updateVideoGridLayout();
-
   } catch (error) {
     console.error("Erro ao entrar na chamada:", error);
 
@@ -473,7 +541,6 @@ async function leaveVideoCall() {
 
   micEnabled = true;
   camEnabled = true;
-  focusedIdentity = null;
 
   toggleMicBtn.disabled = true;
   toggleCamBtn.disabled = true;
@@ -492,11 +559,8 @@ async function toggleMic() {
 
   micEnabled = !micEnabled;
 
-  if (micEnabled) {
-    await localAudioTrack.unmute();
-  } else {
-    await localAudioTrack.mute();
-  }
+  if (micEnabled) await localAudioTrack.unmute();
+  else await localAudioTrack.mute();
 
   toggleMicBtn.textContent =
     micEnabled ? "Mutar microfone" : "Ativar microfone";
@@ -509,11 +573,8 @@ async function toggleCam() {
 
   camEnabled = !camEnabled;
 
-  if (camEnabled) {
-    await localVideoTrack.unmute();
-  } else {
-    await localVideoTrack.mute();
-  }
+  if (camEnabled) await localVideoTrack.unmute();
+  else await localVideoTrack.mute();
 
   toggleCamBtn.textContent =
     camEnabled ? "Desligar câmera" : "Ligar câmera";
@@ -536,6 +597,14 @@ toggleCamBtn.addEventListener("click", () => {
 leaveVideoBtn.addEventListener("click", () => {
   leaveVideoCall().catch(console.error);
 });
+
+if (exitFocusBtn) {
+  exitFocusBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    clearFocusState();
+  });
+}
 
 window.addEventListener("beforeunload", () => {
   leaveVideoCall().catch(() => {});
