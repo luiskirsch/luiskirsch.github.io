@@ -2721,7 +2721,13 @@ function bindRoom(){
     isHost = data.hostId === participantId;
     startBtn.disabled = !isHost;
     startBtn.textContent = isHost ? (started ? 'Ritual iniciado' : 'Iniciar Ritual') : 'Aguardando anfitrião';
+if (started && !ritualStarted){
+  startRitualDeck();
+}
 
+if (!started){
+  setRitualWaitingState();
+}
     await setDoc(playerRef, {
       isHost
     }, { merge:true });
