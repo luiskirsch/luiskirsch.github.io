@@ -2060,46 +2060,84 @@ async function revealNextRitualCard(){
   updateRitualButtons();
 }
 
-function startRitualDeck(){
+async function startRitualDeck(){
   ritualStarted = true;
   ritualDeck = buildRitualDeck();
 
-  if (historyList){
-    historyList.innerHTML = "";
-  }
+  await setDoc(ritualRef, {
+    started: true,
+    remainingDeck: ritualDeck,
+    currentCard: null,
+    updatedAt: serverTimestamp(),
+    updatedBy: participantId
+  }, { merge:true });
 
-  addHistoryItem("Ritual", "O ritual foi iniciado.");
+  await addHistoryItem("Ritual", "O ritual foi iniciado.");
 
-  if (deckInfo){
-    deckInfo.innerHTML = `
-      ${ritualDeck.length} carta(s) pronta(s) para revelação.<br>
-      O anfitrião conduz a rodada.
-    `;
-  }
+  await revealNextRitualCard();
+  updateRitualButtons();
+}
 
   revealNextRitualCard();
   updateRitualButtons();
 }
 
-function resetRitualDeck(){
+async function resetRitualDeck(){
   if (!isHost) return;
 
-  ritualDeck = buildRitualDeck();
   ritualStarted = true;
+  ritualDeck = buildRitualDeck();
 
-  if (historyList){
-    historyList.innerHTML = "";
+  await setDoc(ritualRef, {
+    started: true,
+    remainingDeck: ritualDeck,
+    currentCard: null,
+    updatedAt: serverTimestamp(),
+    updatedBy: participantId
+  }, { merge:true });
+
+  await addHistoryItem("Ritual", "O ritual foi reiniciado.");
+
+  await revealNextRitualCard();
+  updateRitualButtons();
+}
+function renderRitualCardFromState(data){
+  const started = !!data?.started;
+  const currentCard = data?.currentCard || null;
+  ritualStarted = started;
+  ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
+
+  if (!started){
+    setRitualWaitingState();
+    return;
   }
 
-  addHistoryItem("Ritual", "O ritual foi reiniciado.");
+  if (currentCard){
+    ritualCardType.textContent = currentCard.type || "Ritual";
+    ritualCardTitle.textContent = currentCard.title || "Carta revelada";
+    ritualCardText.textContent = currentCard.text || "";
+  } else {
+    ritualCardType.textContent = "Ritual";
+    ritualCardTitle.textContent = "Aguardando revelação";
+    ritualCardText.textContent = "O anfitrião ainda não revelou a próxima carta.";
+  }
 
   if (deckInfo){
-    deckInfo.innerHTML = `
-      ${ritualDeck.length} carta(s) pronta(s) para revelação.<br>
-      O anfitrião conduz a rodada.
-    `;
+    if (ritualDeck.length > 0){
+      deckInfo.innerHTML = `
+        ${ritualDeck.length} carta(s) restante(s) no deck.<br>
+        O anfitrião pode revelar a próxima.
+      `;
+    } else {
+      deckInfo.innerHTML = `
+        O deck chegou ao fim.<br>
+        Reinicie o ritual para embaralhar novamente.
+      `;
+    }
   }
 
+  updateRitualButtons();
+}
   if (ritualCardType) ritualCardType.textContent = "Ritual reiniciado";
   if (ritualCardTitle) ritualCardTitle.textContent = "O deck foi embaralhado novamente.";
   if (ritualCardText) {
@@ -2109,6 +2147,42 @@ function resetRitualDeck(){
 
   updateRitualButtons();
   } 
+function bindRitual(){
+  ritualUnsub = onSnapshot(ritualRef, function(snap){
+    if (!snap.exists()){
+      setRitualWaitingState();
+      return;
+    }
+
+    renderRitualCardFromState(snap.data());
+  });
+
+  const q = query(ritualHistoryRef, orderBy('createdAt', 'desc'));
+
+  ritualHistoryUnsub = onSnapshot(q, function(snapshot){
+    if (!historyList) return;
+
+    const docs = snapshot.docs.map(docSnap => docSnap.data());
+
+    if (!docs.length){
+      historyList.innerHTML = `
+        <div class="historyItem">
+          <div class="historyType">Aguardando</div>
+          <div class="historyText">Nenhuma carta revelada ainda.</div>
+        </div>
+      `;
+      return;
+    }
+
+    historyList.innerHTML = docs.map(item => `
+      <div class="historyItem">
+        <div class="historyType">${escapeHtml(item.type || "Ritual")}</div>
+        <div class="historyText">${escapeHtml(item.text || "")}</div>
+      </div>
+    `).join("");
+  });
+}
+  
 function setAvatarSelection(emoji){
   selectedAvatarEmoji = emoji || "🔮";
   avatarPicker.querySelectorAll(".avatarOption").forEach((btn)=>{
