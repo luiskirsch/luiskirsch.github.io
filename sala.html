@@ -2909,7 +2909,20 @@ leaveBtn.addEventListener('click', function(){
     leaveRoom();
   }
 });
+if (revealCardBtn){
+  revealCardBtn.addEventListener("click", function(){
+    revealNextRitualCard();
+  });
+}
 
+if (resetRitualBtn){
+  resetRitualBtn.addEventListener("click", function(){
+    const ok = confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?");
+    if (ok){
+      resetRitualDeck();
+    }
+  });
+}
 window.addEventListener('pagehide', function(){
   leaveRoom();
 });
