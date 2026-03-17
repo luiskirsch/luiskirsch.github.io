@@ -2043,30 +2043,18 @@ async function addHistoryItem(type, text){
   }
 }
   
-function revealNextRitualCard(){
+async function revealNextRitualCard(){
   if (!ritualStarted) return;
   if (!isHost) return;
   if (!ritualDeck.length) return;
 
   const nextCard = ritualDeck.shift();
 
-  if (ritualCardType) ritualCardType.textContent = nextCard.type;
-  if (ritualCardTitle) ritualCardTitle.textContent = nextCard.title;
-  if (ritualCardText) ritualCardText.textContent = nextCard.text;
+  await saveRitualState(nextCard);
+  await addHistoryItem(nextCard.type, nextCard.title);
 
-  if (deckInfo){
-    if (ritualDeck.length > 0){
-      deckInfo.innerHTML = `
-        ${ritualDeck.length} carta(s) restante(s) no deck.<br>
-        O anfitrião pode revelar a próxima.
-      `;
-    } else {
-      deckInfo.innerHTML = `
-        O deck chegou ao fim.<br>
-        Reinicie o ritual para embaralhar novamente.
-      `;
-    }
-  }
+  updateRitualButtons();
+}
 
   addHistoryItem(nextCard.type, nextCard.title);
   updateRitualButtons();
