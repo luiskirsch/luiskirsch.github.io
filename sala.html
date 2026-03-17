@@ -2949,7 +2949,7 @@ window.addEventListener('beforeunload', function(){
     await ensureUserProfile();
     await ensureRoom();
     await upsertSelf();
-
+setRitualWaitingState();
     startHeartbeat();
     bindRoom();
     bindPlayers();
