@@ -1974,7 +1974,137 @@ function shuffleArray(array){
 
   return arr;
 }
-  
+ function updateRitualButtons(){
+  const canControl = isHost && ritualStarted;
+
+  if (revealCardBtn){
+    revealCardBtn.disabled = !canControl || ritualDeck.length === 0;
+  }
+
+  if (resetRitualBtn){
+    resetRitualBtn.disabled = !isHost;
+  }
+}
+
+function setRitualWaitingState(){
+  ritualStarted = false;
+  ritualDeck = [];
+
+  if (ritualCardType) ritualCardType.textContent = "Pré-ritual";
+  if (ritualCardTitle) ritualCardTitle.textContent = "Conversem antes de começar.";
+  if (ritualCardText) {
+    ritualCardText.textContent =
+      "Quando o anfitrião iniciar o ritual, a carta atual aparecerá aqui para todos.";
+  }
+
+  if (deckInfo){
+    deckInfo.innerHTML =
+      "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.";
+  }
+
+  if (historyList){
+    historyList.innerHTML = `
+      <div class="historyItem">
+        <div class="historyType">Aguardando</div>
+        <div class="historyText">Nenhuma carta revelada ainda.</div>
+      </div>
+    `;
+  }
+
+  updateRitualButtons();
+}
+
+function addHistoryItem(type, text){
+  if (!historyList) return;
+
+  const item = document.createElement("div");
+  item.className = "historyItem";
+  item.innerHTML = `
+    <div class="historyType">${escapeHtml(type)}</div>
+    <div class="historyText">${escapeHtml(text)}</div>
+  `;
+
+  historyList.prepend(item);
+}
+
+function revealNextRitualCard(){
+  if (!ritualStarted) return;
+  if (!isHost) return;
+  if (!ritualDeck.length) return;
+
+  const nextCard = ritualDeck.shift();
+
+  if (ritualCardType) ritualCardType.textContent = nextCard.type;
+  if (ritualCardTitle) ritualCardTitle.textContent = nextCard.title;
+  if (ritualCardText) ritualCardText.textContent = nextCard.text;
+
+  if (deckInfo){
+    if (ritualDeck.length > 0){
+      deckInfo.innerHTML = `
+        ${ritualDeck.length} carta(s) restante(s) no deck.<br>
+        O anfitrião pode revelar a próxima.
+      `;
+    } else {
+      deckInfo.innerHTML = `
+        O deck chegou ao fim.<br>
+        Reinicie o ritual para embaralhar novamente.
+      `;
+    }
+  }
+
+  addHistoryItem(nextCard.type, nextCard.title);
+  updateRitualButtons();
+}
+
+function startRitualDeck(){
+  ritualStarted = true;
+  ritualDeck = buildRitualDeck();
+
+  if (historyList){
+    historyList.innerHTML = "";
+  }
+
+  addHistoryItem("Ritual", "O ritual foi iniciado.");
+
+  if (deckInfo){
+    deckInfo.innerHTML = `
+      ${ritualDeck.length} carta(s) pronta(s) para revelação.<br>
+      O anfitrião conduz a rodada.
+    `;
+  }
+
+  revealNextRitualCard();
+  updateRitualButtons();
+}
+
+function resetRitualDeck(){
+  if (!isHost) return;
+
+  ritualDeck = buildRitualDeck();
+  ritualStarted = true;
+
+  if (historyList){
+    historyList.innerHTML = "";
+  }
+
+  addHistoryItem("Ritual", "O ritual foi reiniciado.");
+
+  if (deckInfo){
+    deckInfo.innerHTML = `
+      ${ritualDeck.length} carta(s) pronta(s) para revelação.<br>
+      O anfitrião conduz a rodada.
+    `;
+  }
+
+  if (ritualCardType) ritualCardType.textContent = "Ritual reiniciado";
+  if (ritualCardTitle) ritualCardTitle.textContent = "O deck foi embaralhado novamente.";
+  if (ritualCardText) {
+    ritualCardText.textContent =
+      "Revele a próxima carta para continuar a experiência.";
+  }
+
+  updateRitualButtons();
+  } 
 function setAvatarSelection(emoji){
   selectedAvatarEmoji = emoji || "🔮";
   avatarPicker.querySelectorAll(".avatarOption").forEach((btn)=>{
