@@ -2028,8 +2028,21 @@ async function addHistoryItem(type, text){
   }catch(error){
     console.error("Erro ao adicionar histórico do ritual:", error);
   }
-}
 
+  async function saveRitualState(card){
+  try{
+    await setDoc(ritualRef, {
+      started: ritualStarted,
+      remainingDeck: ritualDeck,
+      currentCard: card || null,
+      updatedAt: serverTimestamp(),
+      updatedBy: participantId
+    }, { merge:true });
+  }catch(error){
+    console.error("Erro ao salvar estado do ritual:", error);
+  }
+}
+  
 function revealNextRitualCard(){
   if (!ritualStarted) return;
   if (!isHost) return;
