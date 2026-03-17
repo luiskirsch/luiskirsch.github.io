@@ -1502,16 +1502,14 @@ body::after{
         <div class="ritualLine"></div>
       </div>
 
-      <div class="ritualCardNumber">CARTA 01</div>
+     <div class="ritualCardNumber" id="ritualCardType">CARTA 01</div>
 
-      <h3 class="ritualCardMainTitle">SILÊNCIO</h3>
+<h3 class="ritualCardMainTitle" id="ritualCardTitle">SILÊNCIO</h3>
 
-      <div class="ritualGoldDivider"></div>
-
-      <div class="ritualMainInstruction">
-        DURANTE 60 SEGUNDOS<br>
-        NINGUÉM PODE FALAR.
-      </div>
+<div class="ritualMainInstruction" id="ritualCardText">
+  DURANTE 60 SEGUNDOS<br>
+  NINGUÉM PODE FALAR.
+</div>
 
       <div class="ritualMidDetails">
         <div class="ritualMiniDivider">
@@ -1952,7 +1950,9 @@ let selectedAvatarEmoji = "🔮";
 ========================= */
 const revealCardBtn = document.getElementById("revealCardBtn");
 const resetRitualBtn = document.getElementById("resetRitualBtn");
-
+const ritualCardType = document.getElementById("ritualCardType");
+const ritualCardTitle = document.getElementById("ritualCardTitle");
+const ritualCardText = document.getElementById("ritualCardText");
 const historyList = document.getElementById("historyList");
 const deckInfo = document.getElementById("deckInfo");
 
