@@ -1813,7 +1813,109 @@ const roomName = (params.get('nomeSala') || localStorage.getItem('osl_nome_sala'
 localStorage.setItem('osl_nome', playerName);
 localStorage.setItem('osl_sala', roomCode);
 localStorage.setItem('osl_nome_sala', roomName);
+function getParticipantId(){
+  let id = sessionStorage.getItem('osl_participant_id');
+  if(!id){
+    id = 'p_' + Math.random().toString(36).slice(2, 11);
+    sessionStorage.setItem('osl_participant_id', id);
+  }
+  return id;
+}
 
+function getUserId(){
+  let id = localStorage.getItem("osl_user_id");
+  if(!id){
+    id = "u_" + Math.random().toString(36).slice(2, 12);
+    localStorage.setItem("osl_user_id", id);
+  }
+  return id;
+}
+
+function nowTimeFromDate(date){
+  return date.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function escapeHtml(str){
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function hideChatEmpty(){
+  if(chatEmptyEl) chatEmptyEl.style.display = 'none';
+}
+
+function showChatEmpty(text){
+  if(!chatEmptyEl) return;
+  chatEmptyEl.style.display = 'block';
+  chatEmptyEl.innerHTML = text;
+}
+
+function enableAudio(){
+  if (audioReady) return;
+
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+
+  try{
+    audioCtx = new AudioContextClass();
+    if (audioCtx.state === 'suspended'){
+      audioCtx.resume().catch(() => {});
+    }
+    audioReady = true;
+  }catch(e){}
+}
+
+window.addEventListener('pointerdown', enableAudio, { once:true });
+window.addEventListener('touchstart', enableAudio, { once:true });
+window.addEventListener('keydown', enableAudio, { once:true });
+
+function playIncomingMessageSound(){
+  if (!audioReady || !audioCtx) return;
+
+  try{
+    const now = audioCtx.currentTime;
+
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc1.type = 'triangle';
+    osc2.type = 'sine';
+
+    osc1.frequency.setValueAtTime(920, now);
+    osc1.frequency.exponentialRampToValueAtTime(680, now + 0.08);
+
+    osc2.frequency.setValueAtTime(1320, now);
+    osc2.frequency.exponentialRampToValueAtTime(980, now + 0.08);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1800, now);
+    filter.Q.setValueAtTime(0.8, now);
+
+    gain.gain.setValueAtTime(0.00001, now);
+    gain.gain.exponentialRampToValueAtTime(0.045, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.14);
+
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+
+    osc1.stop(now + 0.15);
+    osc2.stop(now + 0.15);
+  }catch(e){}
+  }
 const participantId = getParticipantId();
 const userId = getUserId();
 const app = initializeApp(firebaseConfig);
@@ -1850,10 +1952,6 @@ let selectedAvatarEmoji = "🔮";
 ========================= */
 const revealCardBtn = document.getElementById("revealCardBtn");
 const resetRitualBtn = document.getElementById("resetRitualBtn");
-
-const ritualCardType = document.getElementById("ritualCardType");
-const ritualCardTitle = document.getElementById("ritualCardTitle");
-const ritualCardText = document.getElementById("ritualCardText");
 
 const historyList = document.getElementById("historyList");
 const deckInfo = document.getElementById("deckInfo");
