@@ -1760,6 +1760,8 @@ const userRef = doc(db, "users", userId);
 const roomRef = doc(db, 'salas', roomCode);
 const playerRef = doc(db, 'salas', roomCode, 'players', participantId);
 const messagesRef = collection(db, 'salas', roomCode, 'messages');
+const ritualRef = doc(db, 'salas', roomCode, 'ritual', 'state');
+const ritualHistoryRef = collection(db, 'salas', roomCode, 'ritual', 'state', 'history');
 const typingRef = doc(db, 'salas', roomCode, 'typing', participantId);
 const typingCollectionRef = collection(db, 'salas', roomCode, 'typing');
 const playersCollectionRef = collection(db, 'salas', roomCode, 'players');
@@ -1796,6 +1798,8 @@ const deckInfo = document.getElementById("deckInfo");
 
 let ritualDeck = [];
 let ritualStarted = false;
+let ritualUnsub = null;
+let ritualHistoryUnsub = null;
 function enableAudio(){
   if (audioReady) return;
 
@@ -2014,17 +2018,16 @@ function setRitualWaitingState(){
   updateRitualButtons();
 }
 
-function addHistoryItem(type, text){
-  if (!historyList) return;
-
-  const item = document.createElement("div");
-  item.className = "historyItem";
-  item.innerHTML = `
-    <div class="historyType">${escapeHtml(type)}</div>
-    <div class="historyText">${escapeHtml(text)}</div>
-  `;
-
-  historyList.prepend(item);
+async function addHistoryItem(type, text){
+  try{
+    await addDoc(ritualHistoryRef, {
+      type,
+      text,
+      createdAt: serverTimestamp()
+    });
+  }catch(error){
+    console.error("Erro ao adicionar histórico do ritual:", error);
+  }
 }
 
 function revealNextRitualCard(){
