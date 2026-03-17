@@ -1462,66 +1462,58 @@ body::after{
 
       <section class="mainArea">
 
-        <section class="card tableCard">
-          <div class="tableHead">
-            <div class="tableHeadLeft">
-              <h2>Mesa do Ritual</h2>
-              <p>O ritual começa aqui. A carta dominará esta área quando a sessão iniciar.</p>
-            </div>
+<section class="card tableCard">
+  <div class="tableHead">
+    <div class="tableHeadLeft">
+      <h2>Mesa do Ritual</h2>
+      <p>A carta atual domina a sala. O anfitrião conduz a experiência.</p>
+    </div>
 
-            <div class="tableHeadRight">
-              <div class="sessionStatus">
-                <span class="dot"></span>
-                <span id="sessionLabel">Sessão não iniciada</span>
-              </div>
-            </div>
-          </div>
+    <div class="tableHeadRight">
+      <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar próxima carta</button>
+      <button class="videoBtn" id="resetRitualBtn" disabled>Reiniciar ritual</button>
 
-          <div class="tableBody">
-            <aside class="deckPanel">
-              <div class="sectionTitle">Deck</div>
-              <div class="deckCard">RITUAL</div>
-              <div class="deckInfo">
-                Aguardando o anfitrião iniciar.<br>
-                Depois disso, a mesa se transforma.
-              </div>
-            </aside>
+      <div class="sessionStatus">
+        <span class="dot"></span>
+        <span id="sessionLabel">Sessão não iniciada</span>
+      </div>
+    </div>
+  </div>
 
-            <div class="revealPanel">
-              <article class="revealCard">
-                <div class="cardType">Pré-ritual</div>
-                <div class="cardTitle">Conversem antes de começar.</div>
-                <div class="cardText">
-                  Aqui ficará a experiência central do jogo. Assim que o anfitrião iniciar o ritual, a próxima etapa poderá abrir a mesa completa com cartas, decisões e tensão em tempo real.
-                </div>
-              </article>
-            </div>
+  <div class="tableBody">
+    <aside class="deckPanel">
+      <div class="sectionTitle">Deck</div>
+      <div class="deckCard">RITUAL</div>
+      <div class="deckInfo" id="deckInfo">
+        Aguardando o anfitrião iniciar.<br>
+        Depois disso, a mesa se transforma.
+      </div>
+    </aside>
 
-            <aside class="historyPanel">
-              <div class="sectionTitle">Visão da rodada</div>
+    <div class="revealPanel">
+      <article class="revealCard">
+        <div class="cardType" id="ritualCardType">Pré-ritual</div>
+        <div class="cardTitle" id="ritualCardTitle">Conversem antes de começar.</div>
+        <div class="cardText" id="ritualCardText">
+          Quando o anfitrião iniciar o ritual, a carta atual aparecerá aqui para todos.
+        </div>
+      </article>
+    </div>
 
-              <div class="historyList">
-                <div class="historyItem">
-                  <div class="historyType">Etapa atual</div>
-                  <div class="historyText">Sala em preparação. Jogadores se reunindo e organizando o ritual.</div>
-                </div>
+    <aside class="historyPanel">
+      <div class="sectionTitle">Histórico do ritual</div>
 
-                <div class="historyItem">
-                  <div class="historyType">Vídeo</div>
-                  <div class="historyText">A chamada permanece ativa para que todos possam se ver durante a experiência.</div>
-                </div>
-
-                <div class="historyItem">
-                  <div class="historyType">Chat</div>
-                  <div class="historyText">As mensagens seguem em tempo real abaixo, sem tirar o foco da mesa.</div>
-                </div>
-              </div>
-            </aside>
-          </div>
-        </section>
-
+      <div class="historyList" id="historyList">
+        <div class="historyItem">
+          <div class="historyType">Aguardando</div>
+          <div class="historyText">Nenhuma carta revelada ainda.</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+        
         <section class="bottomGrid">
-
           <section class="card chatCard">
             <div class="chatHeader">
               <div class="chatHeaderLeft">
