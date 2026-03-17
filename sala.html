@@ -1785,7 +1785,6 @@ let selectedAvatarEmoji = "🔮";
 /* =========================
    MESA DO RITUAL
 ========================= */
-
 const revealCardBtn = document.getElementById("revealCardBtn");
 const resetRitualBtn = document.getElementById("resetRitualBtn");
 
@@ -1800,129 +1799,7 @@ let ritualDeck = [];
 let ritualStarted = false;
 let ritualUnsub = null;
 let ritualHistoryUnsub = null;
-function enableAudio(){
-  if (audioReady) return;
 
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContextClass) return;
-
-  try{
-    audioCtx = new AudioContextClass();
-    if (audioCtx.state === 'suspended'){
-      audioCtx.resume().catch(() => {});
-    }
-    audioReady = true;
-  }catch(e){}
-}
-
-window.addEventListener('pointerdown', enableAudio, { once:true });
-window.addEventListener('touchstart', enableAudio, { once:true });
-window.addEventListener('keydown', enableAudio, { once:true });
-
-function playIncomingMessageSound(){
-  if (!audioReady || !audioCtx) return;
-
-  try{
-    const now = audioCtx.currentTime;
-
-    const osc1 = audioCtx.createOscillator();
-    const osc2 = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    const filter = audioCtx.createBiquadFilter();
-
-    osc1.type = 'triangle';
-    osc2.type = 'sine';
-
-    osc1.frequency.setValueAtTime(920, now);
-    osc1.frequency.exponentialRampToValueAtTime(680, now + 0.08);
-
-    osc2.frequency.setValueAtTime(1320, now);
-    osc2.frequency.exponentialRampToValueAtTime(980, now + 0.08);
-
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(1800, now);
-    filter.Q.setValueAtTime(0.8, now);
-
-    gain.gain.setValueAtTime(0.00001, now);
-    gain.gain.exponentialRampToValueAtTime(0.045, now + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.14);
-
-    osc1.connect(filter);
-    osc2.connect(filter);
-    filter.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc1.start(now);
-    osc2.start(now);
-
-    osc1.stop(now + 0.15);
-    osc2.stop(now + 0.15);
-  }catch(e){}
-}
-
-function getParticipantId(){
-  let id = sessionStorage.getItem('osl_participant_id');
-  if(!id){
-    id = 'p_' + Math.random().toString(36).slice(2, 11);
-    sessionStorage.setItem('osl_participant_id', id);
-  }
-  return id;
-}
-
-function getUserId(){
-  let id = localStorage.getItem("osl_user_id");
-  if(!id){
-    id = "u_" + Math.random().toString(36).slice(2,12);
-    localStorage.setItem("osl_user_id", id);
-  }
-  return id;
-}
-
-function initials(name){
-  const parts = String(name).trim().split(/\s+/).filter(Boolean);
-  if(parts.length === 0) return '??';
-  if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
-}
-
-function nowTimeFromDate(date){
-  return date.toLocaleTimeString('pt-BR', {
-    hour:'2-digit',
-    minute:'2-digit'
-  });
-}
-
-function escapeHtml(str){
-  return String(str)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
-function hideChatEmpty(){
-  if(chatEmptyEl) chatEmptyEl.style.display = 'none';
-}
-
-function showChatEmpty(text){
-  if(!chatEmptyEl) return;
-  chatEmptyEl.style.display = 'block';
-  chatEmptyEl.innerHTML = text;
-}
-
-function normalizeUsername(value){
-  return String(value || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9_]/g, "")
-    .slice(0, 20);
-}
-
-function uniqueArray(arr){
-  return [...new Set((arr || []).filter(Boolean))];
-}
 function buildRitualDeck(){
   return shuffleArray([
     {
@@ -1978,7 +1855,8 @@ function shuffleArray(array){
 
   return arr;
 }
- function updateRitualButtons(){
+
+function updateRitualButtons(){
   const canControl = isHost && ritualStarted;
 
   if (revealCardBtn){
@@ -2028,8 +1906,9 @@ async function addHistoryItem(type, text){
   }catch(error){
     console.error("Erro ao adicionar histórico do ritual:", error);
   }
+}
 
-  async function saveRitualState(card){
+async function saveRitualState(card){
   try{
     await setDoc(ritualRef, {
       started: ritualStarted,
@@ -2042,7 +1921,7 @@ async function addHistoryItem(type, text){
     console.error("Erro ao salvar estado do ritual:", error);
   }
 }
-  
+
 async function revealNextRitualCard(){
   if (!ritualStarted) return;
   if (!isHost) return;
@@ -2053,10 +1932,6 @@ async function revealNextRitualCard(){
   await saveRitualState(nextCard);
   await addHistoryItem(nextCard.type, nextCard.title);
 
-  updateRitualButtons();
-}
-
-  addHistoryItem(nextCard.type, nextCard.title);
   updateRitualButtons();
 }
 
@@ -2075,10 +1950,6 @@ async function startRitualDeck(){
   await addHistoryItem("Ritual", "O ritual foi iniciado.");
 
   await revealNextRitualCard();
-  updateRitualButtons();
-}
-
-  revealNextRitualCard();
   updateRitualButtons();
 }
 
@@ -2101,6 +1972,7 @@ async function resetRitualDeck(){
   await revealNextRitualCard();
   updateRitualButtons();
 }
+
 function renderRitualCardFromState(data){
   const started = !!data?.started;
   const currentCard = data?.currentCard || null;
@@ -2138,15 +2010,161 @@ function renderRitualCardFromState(data){
 
   updateRitualButtons();
 }
-  if (ritualCardType) ritualCardType.textContent = "Ritual reiniciado";
-  if (ritualCardTitle) ritualCardTitle.textContent = "O deck foi embaralhado novamente.";
-  if (ritualCardText) {
-    ritualCardText.textContent =
-      "Revele a próxima carta para continuar a experiência.";
+
+function bindRitual(){
+  ritualUnsub = onSnapshot(ritualRef, function(snap){
+    if (!snap.exists()){
+      setRitualWaitingState();
+      return;
+    }
+
+    renderRitualCardFromState(snap.data());
+  });
+
+  const q = query(ritualHistoryRef, orderBy('createdAt', 'desc'));
+
+  ritualHistoryUnsub = onSnapshot(q, function(snapshot){
+    if (!historyList) return;
+
+    const docs = snapshot.docs.map(docSnap => docSnap.data());
+
+    if (!docs.length){
+      historyList.innerHTML = `
+        <div class="historyItem">
+          <div class="historyType">Aguardando</div>
+          <div class="historyText">Nenhuma carta revelada ainda.</div>
+        </div>
+      `;
+      return;
+    }
+
+    historyList.innerHTML = docs.map(item => `
+      <div class="historyItem">
+        <div class="historyType">${escapeHtml(item.type || "Ritual")}</div>
+        <div class="historyText">${escapeHtml(item.text || "")}</div>
+      </div>
+    `).join("");
+  });
+}
+
+  updateRitualButtons();
+}
+
+async function addHistoryItem(type, text){
+  try{
+    await addDoc(ritualHistoryRef, {
+      type,
+      text,
+      createdAt: serverTimestamp()
+    });
+  }catch(error){
+    console.error("Erro ao adicionar histórico do ritual:", error);
+  }
+}
+
+async function saveRitualState(card){
+  try{
+    await setDoc(ritualRef, {
+      started: ritualStarted,
+      remainingDeck: ritualDeck,
+      currentCard: card || null,
+      updatedAt: serverTimestamp(),
+      updatedBy: participantId
+    }, { merge:true });
+  }catch(error){
+    console.error("Erro ao salvar estado do ritual:", error);
+  }
+}
+  
+async function revealNextRitualCard(){
+  if (!ritualStarted) return;
+  if (!isHost) return;
+  if (!ritualDeck.length) return;
+
+  const nextCard = ritualDeck.shift();
+
+  await saveRitualState(nextCard);
+  await addHistoryItem(nextCard.type, nextCard.title);
+
+  updateRitualButtons();
+}
+
+async function startRitualDeck(){
+  ritualStarted = true;
+  ritualDeck = buildRitualDeck();
+
+  await setDoc(ritualRef, {
+    started: true,
+    remainingDeck: ritualDeck,
+    currentCard: null,
+    updatedAt: serverTimestamp(),
+    updatedBy: participantId
+  }, { merge:true });
+
+  await addHistoryItem("Ritual", "O ritual foi iniciado.");
+
+  await revealNextRitualCard();
+  updateRitualButtons();
+}
+
+async function resetRitualDeck(){
+  if (!isHost) return;
+
+  ritualStarted = true;
+  ritualDeck = buildRitualDeck();
+
+  await setDoc(ritualRef, {
+    started: true,
+    remainingDeck: ritualDeck,
+    currentCard: null,
+    updatedAt: serverTimestamp(),
+    updatedBy: participantId
+  }, { merge:true });
+
+  await addHistoryItem("Ritual", "O ritual foi reiniciado.");
+
+  await revealNextRitualCard();
+  updateRitualButtons();
+}
+  
+function renderRitualCardFromState(data){
+  const started = !!data?.started;
+  const currentCard = data?.currentCard || null;
+  ritualStarted = started;
+  ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
+
+  if (!started){
+    setRitualWaitingState();
+    return;
+  }
+
+  if (currentCard){
+    ritualCardType.textContent = currentCard.type || "Ritual";
+    ritualCardTitle.textContent = currentCard.title || "Carta revelada";
+    ritualCardText.textContent = currentCard.text || "";
+  } else {
+    ritualCardType.textContent = "Ritual";
+    ritualCardTitle.textContent = "Aguardando revelação";
+    ritualCardText.textContent = "O anfitrião ainda não revelou a próxima carta.";
+  }
+
+  if (deckInfo){
+    if (ritualDeck.length > 0){
+      deckInfo.innerHTML = `
+        ${ritualDeck.length} carta(s) restante(s) no deck.<br>
+        O anfitrião pode revelar a próxima.
+      `;
+    } else {
+      deckInfo.innerHTML = `
+        O deck chegou ao fim.<br>
+        Reinicie o ritual para embaralhar novamente.
+      `;
+    }
   }
 
   updateRitualButtons();
-  } 
+}
+  
 function bindRitual(){
   ritualUnsub = onSnapshot(ritualRef, function(snap){
     if (!snap.exists()){
@@ -2799,13 +2817,7 @@ function bindRoom(){
     isHost = data.hostId === participantId;
     startBtn.disabled = !isHost;
     startBtn.textContent = isHost ? (started ? 'Ritual iniciado' : 'Iniciar Ritual') : 'Aguardando anfitrião';
-if (started && !ritualStarted){
-  startRitualDeck();
-}
 
-if (!started){
-  setRitualWaitingState();
-}
     await setDoc(playerRef, {
       isHost
     }, { merge:true });
