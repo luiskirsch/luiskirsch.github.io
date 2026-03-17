@@ -1920,7 +1920,62 @@ function normalizeUsername(value){
 function uniqueArray(arr){
   return [...new Set((arr || []).filter(Boolean))];
 }
+function buildRitualDeck(){
+  return shuffleArray([
+    {
+      type: "Terror psicológico",
+      title: "A presença percebeu alguém fraco.",
+      text: "Todos observam em silêncio. O jogador à sua esquerda escolhe quem parece mais vulnerável neste momento e explica o motivo."
+    },
+    {
+      type: "Discussão",
+      title: "Ninguém está dizendo toda a verdade.",
+      text: "Durante 1 minuto, o grupo deve discutir quem parece estar escondendo algo. Todos precisam opinar."
+    },
+    {
+      type: "Decisão",
+      title: "O grupo precisa fazer uma escolha.",
+      text: "Decidam juntos: revelar um segredo agora ou seguir o ritual sem respostas. O anfitrião define a decisão final se houver empate."
+    },
+    {
+      type: "Confissão",
+      title: "Fale antes que a casa fale por você.",
+      text: "Um jogador voluntário deve contar algo real, desconfortável ou estranho que nunca contou para o grupo."
+    },
+    {
+      type: "Suspeita",
+      title: "Alguém trouxe algo ruim para esta sala.",
+      text: "Cada participante aponta quem mais mudou de comportamento desde o início da chamada."
+    },
+    {
+      type: "Pressão",
+      title: "Você tem 30 segundos.",
+      text: "O anfitrião escolhe um jogador. Esse jogador deve responder uma pergunta direta do grupo sem fugir."
+    },
+    {
+      type: "Vínculo",
+      title: "Duas pessoas estão conectadas.",
+      text: "O grupo escolhe duas pessoas da sala. Elas devem decidir juntas a próxima atitude do ritual."
+    },
+    {
+      type: "Ruptura",
+      title: "A confiança foi quebrada.",
+      text: "Cada jogador diz em quem menos confiaria para conduzir o ritual até o final."
+    }
+  ]);
+}
 
+function shuffleArray(array){
+  const arr = [...array];
+
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  return arr;
+}
+  
 function setAvatarSelection(emoji){
   selectedAvatarEmoji = emoji || "🔮";
   avatarPicker.querySelectorAll(".avatarOption").forEach((btn)=>{
