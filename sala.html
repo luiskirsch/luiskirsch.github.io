@@ -2925,7 +2925,7 @@ async function startSession(){
     createdAt: serverTimestamp()
   });
 
-  startRitualDeck();
+  await startRitualDeck();
 }
 
 async function leaveRoom(){
@@ -2938,9 +2938,11 @@ async function leaveRoom(){
     await setTyping(false);
 
     if(roomUnsub) roomUnsub();
-    if(playersUnsub) playersUnsub();
-    if(messagesUnsub) messagesUnsub();
-    if(typingUnsub) typingUnsub();
+if(playersUnsub) playersUnsub();
+if(messagesUnsub) messagesUnsub();
+if(typingUnsub) typingUnsub();
+if(ritualUnsub) ritualUnsub();
+if(ritualHistoryUnsub) ritualHistoryUnsub();
 
     await deleteDoc(playerRef);
   }catch(e){}
@@ -2997,7 +2999,7 @@ leaveBtn.addEventListener('click', function(){
 });
 if (revealCardBtn){
   revealCardBtn.addEventListener("click", function(){
-    revealNextRitualCard();
+    revealNextRitualCard().catch(console.error);
   });
 }
 
@@ -3005,7 +3007,7 @@ if (resetRitualBtn){
   resetRitualBtn.addEventListener("click", function(){
     const ok = confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?");
     if (ok){
-      resetRitualDeck();
+      resetRitualDeck().catch(console.error);
     }
   });
 }
@@ -3033,6 +3035,7 @@ setRitualWaitingState();
     bindPlayers();
     bindMessages();
     bindTyping();
+    bindRitual();
   }catch(error){
     console.error(error);
 
