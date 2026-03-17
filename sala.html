@@ -1780,7 +1780,23 @@ let typingTimer = null;
 let openedProfileUserId = null;
 let openedProfileData = null;
 let selectedAvatarEmoji = "🔮";
+/* =========================
+   MESA DO RITUAL
+========================= */
 
+const revealCardBtn = document.getElementById("revealCardBtn");
+const resetRitualBtn = document.getElementById("resetRitualBtn");
+
+const ritualCardType = document.getElementById("ritualCardType");
+const ritualCardTitle = document.getElementById("ritualCardTitle");
+const ritualCardText = document.getElementById("ritualCardText");
+
+const historyList = document.getElementById("historyList");
+const sessionLabel = document.getElementById("sessionLabel");
+const deckInfo = document.getElementById("deckInfo");
+
+let ritualDeck = [];
+let ritualStarted = false;
 function enableAudio(){
   if (audioReady) return;
 
