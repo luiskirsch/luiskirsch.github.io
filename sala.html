@@ -1511,15 +1511,15 @@ body::after{
 }
 
 .ritualCardMainTitle{
-  margin:0;
-  font-family:"Times New Roman", Georgia, serif;
-  font-size:54px;
-  line-height:1;
-  letter-spacing:.03em;
-  font-weight:700;
-  color:#fffdf8;
-  text-transform:uppercase;
-  text-shadow:0 0 20px rgba(255,255,255,.05);
+  margin: 10px 0 12px;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: .95;
+  font-weight: 700;
+  letter-spacing: .01em;
+  text-align: center;
+  color: #f7f2e8;
+  text-transform: uppercase;
+  word-break: break-word;
 }
 
 .ritualGoldDivider{
@@ -1531,13 +1531,11 @@ body::after{
 }
 
 .ritualMainInstruction{
-  font-family:"Times New Roman", Georgia, serif;
-  font-size:28px;
-  line-height:1.35;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:#f4efe7;
-  margin-bottom:30px;
+  margin: 10px 0 0;
+  font-size: clamp(14px, 1.5vw, 20px);
+  line-height: 1.35;
+  text-align: center;
+  color: rgba(255,255,255,.88);
 }
 
 .ritualMidDetails{
@@ -2270,47 +2268,46 @@ let ritualHistoryUnsub = null;
 
 function buildRitualDeck(){
   return shuffleArray([
-    {
-      type: "Terror psicológico",
-      title: "A presença percebeu alguém fraco.",
-      text: "Todos observam em silêncio. O jogador à sua esquerda escolhe quem parece mais vulnerável neste momento e explica o motivo."
-    },
-    {
-      type: "Discussão",
-      title: "Ninguém está dizendo toda a verdade.",
-      text: "Durante 1 minuto, o grupo deve discutir quem parece estar escondendo algo. Todos precisam opinar."
-    },
-    {
-      type: "Decisão",
-      title: "O grupo precisa fazer uma escolha.",
-      text: "Decidam juntos: revelar um segredo agora ou seguir o ritual sem respostas. O anfitrião define a decisão final se houver empate."
-    },
-    {
-      type: "Confissão",
-      title: "Fale antes que a casa fale por você.",
-      text: "Um jogador voluntário deve contar algo real, desconfortável ou estranho que nunca contou para o grupo."
-    },
-    {
-      type: "Suspeita",
-      title: "Alguém trouxe algo ruim para esta sala.",
-      text: "Cada participante aponta quem mais mudou de comportamento desde o início da chamada."
-    },
-    {
-      type: "Pressão",
-      title: "Você tem 30 segundos.",
-      text: "O anfitrião escolhe um jogador. Esse jogador deve responder uma pergunta direta do grupo sem fugir."
-    },
-    {
-      type: "Vínculo",
-      title: "Duas pessoas estão conectadas.",
-      text: "O grupo escolhe duas pessoas da sala. Elas devem decidir juntas a próxima atitude do ritual."
-    },
-    {
-      type: "Ruptura",
-      title: "A confiança foi quebrada.",
-      text: "Cada jogador diz em quem menos confiaria para conduzir o ritual até o final."
-    }
-  ]);
+   
+      {
+  type: "Terror psicológico",
+  title: "Presença fraca",
+  text: "Todos observam em silêncio. O jogador à sua esquerda escolhe quem parece mais vulnerável neste momento e explica o motivo."
+},
+{
+  type: "Discussão",
+  title: "Verdade oculta",
+  text: "Durante 1 minuto, o grupo deve discutir quem parece estar escondendo algo. Todos precisam opinar."
+},
+{
+  type: "Decisão",
+  title: "Escolha do grupo",
+  text: "Decidam juntos: revelar um segredo agora ou seguir o ritual sem respostas. O anfitrião define a decisão final se houver empate."
+},
+{
+  type: "Confissão",
+  title: "Fale agora",
+  text: "Um jogador voluntário deve contar algo real, desconfortável ou estranho que nunca contou para o grupo."
+},
+{
+  type: "Suspeita",
+  title: "Algo ruim",
+  text: "Alguém trouxe algo ruim para esta sala. Cada participante aponta quem mais mudou de comportamento desde o início da chamada."
+},
+{
+  type: "Pressão",
+  title: "30 segundos",
+  text: "O anfitrião escolhe um jogador. Esse jogador deve responder uma pergunta direta do grupo sem fugir."
+},
+{
+  type: "Vínculo",
+  title: "Conexão",
+  text: "O grupo escolhe duas pessoas da sala. Elas devem decidir juntas a próxima atitude do ritual."
+},
+{
+  type: "Ruptura",
+  title: "Confiança quebrada",
+  text: "Cada jogador diz em quem menos confiaria para conduzir o ritual até o final."
 }
 
 function shuffleArray(array){
@@ -2452,9 +2449,16 @@ function renderRitualCardFromState(data){
   }
 
   if (currentCard){
-    if (ritualCardType) ritualCardType.textContent = currentCard.type || "Ritual";
-    if (ritualCardTitle) ritualCardTitle.textContent = currentCard.title || "Carta revelada";
-    if (ritualCardText) ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
+  if (ritualCardType) ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
+
+  if (ritualCardTitle){
+    ritualCardTitle.textContent = currentCard.title || "Carta revelada";
+  }
+
+  if (ritualCardText){
+    ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
+  }
+}
   } else {
     if (ritualCardType) ritualCardType.textContent = "Ritual";
     if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
