@@ -3,67 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pagamento Aprovado | O SextoLugar</title>
-
+<title>Pagamento aprovado | O SextoLugar</title>
 <style>
 body{
   margin:0;
-  font-family:"Segoe UI",sans-serif;
-  background:#0b0b0f;
-  color:#fff;
+  min-height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
-  height:100vh;
+  background:#0b0b0f;
+  color:#fff;
+  font-family:"Segoe UI",sans-serif;
+  padding:24px;
 }
-
 .box{
+  width:min(560px, 100%);
   background:#12121a;
-  padding:40px;
-  border-radius:14px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:32px 24px;
   text-align:center;
-  box-shadow:0 0 40px rgba(0,0,0,.6);
-  border:1px solid rgba(255,255,255,.05);
-  max-width:400px;
+  box-shadow:0 0 40px rgba(0,0,0,.45);
 }
-
 h1{
-  margin-bottom:15px;
+  margin:0 0 12px;
+  font-size:30px;
 }
-
 p{
-  color:rgba(255,255,255,.7);
-  margin-bottom:25px;
+  color:rgba(255,255,255,.75);
+  line-height:1.6;
 }
-
+.status{
+  margin-top:18px;
+  font-size:15px;
+  color:rgba(255,255,255,.88);
+  min-height:22px;
+}
+.code{
+  margin-top:18px;
+  padding:14px;
+  border-radius:12px;
+  background:#1b1b24;
+  border:1px solid rgba(255,255,255,.08);
+  font-size:14px;
+  color:#e6c07b;
+  word-break:break-word;
+}
 button{
-  padding:14px 20px;
+  margin-top:18px;
+  padding:14px 18px;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
   background:linear-gradient(135deg,#e6c07b,#c99c4a);
   color:#000;
-  font-weight:bold;
+  font-weight:700;
   cursor:pointer;
+  font-size:16px;
+}
+button[disabled]{
+  opacity:.6;
+  cursor:not-allowed;
 }
 </style>
 </head>
-
 <body>
 
 <div class="box">
   <h1>Pagamento aprovado</h1>
-  <p>O ritual foi desbloqueado. Você já pode acessar a experiência completa.</p>
+  <p>Estamos emitindo sua licença e preparando seu acesso ao jogo.</p>
 
-  <button onclick="entrar()">Entrar no jogo</button>
+  <div class="status" id="status">Validando pagamento...</div>
+  <div class="code" id="licenseBox" style="display:none;"></div>
+
+  <button id="continueBtn" style="display:none;">Entrar no jogo</button>
 </div>
 
 <script>
-localStorage.setItem("osl_acesso_pago", "true");
-localStorage.setItem("osl_acesso_pago_em", new Date().toISOString());
+(async function () {
+  const statusEl = document.getElementById("status");
+  const licenseBox = document.getElementById("licenseBox");
+  const continueBtn = document.getElementById("continueBtn");
 
-function entrar(){
-  window.location.href = "/entrada.html";
-}
+  const params = new URLSearchParams(window.location.search);
+  const paymentId = params.get("payment_id");
+  const status = params.get("status");
+
+  if (!paymentId) {
+    statusEl.textContent = "Não foi possível identificar o pagamento.";
+    return;
+  }
+
+  if (status && status !== "approved") {
+    statusEl.textContent = "O pagamento ainda não foi aprovado.";
+    return;
+  }
+
+  try {
+    statusEl.textContent = "Emitindo licença...";
+
+    const licRes = await fetch("https://osl-video-server.onrender.com/emitir-licenca", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ paymentId })
+    });
+
+    const licData = await licRes.json();
+
+    if (!licRes.ok || !licData.licenseToken) {
+      console.error(licData);
+      statusEl.textContent = "Não foi possível emitir sua licença.";
+      return;
+    }
+
+    localStorage.setItem("osl_license_token", licData.licenseToken);
+    localStorage.setItem("osl_license_code", licData.licenseCode || "");
+    localStorage.setItem("osl_license_email", licData.email || "");
+
+    statusEl.textContent = "Gerando seu acesso...";
+
+    const accessRes = await fetch("https://osl-video-server.onrender.com/emitir-acesso", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ licenseToken: licData.licenseToken })
+    });
+
+    const accessData = await accessRes.json();
+
+    if (!accessRes.ok || !accessData.accessToken) {
+      console.error(accessData);
+      statusEl.textContent = "A licença foi emitida, mas o acesso não pôde ser preparado.";
+      return;
+    }
+
+    localStorage.setItem("osl_access_token", accessData.accessToken);
+
+    licenseBox.style.display = "block";
+    licenseBox.innerHTML = `
+      <strong>Licença emitida com sucesso</strong><br><br>
+      Código: ${licData.licenseCode || "indisponível"}<br>
+      E-mail: ${licData.email || "indisponível"}
+    `;
+
+    statusEl.textContent = "Tudo pronto. Seu acesso foi liberado.";
+    continueBtn.style.display = "inline-block";
+
+    continueBtn.addEventListener("click", function () {
+      window.location.href = "./entrada.html";
+    });
+  } catch (error) {
+    console.error(error);
+    statusEl.textContent = "Erro ao finalizar sua liberação.";
+  }
+})();
 </script>
 
 </body>
