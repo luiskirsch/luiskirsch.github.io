@@ -1673,7 +1673,67 @@ body::after{
 .ritualBottomSet.right span:nth-child(1){ width:100%; }
 .ritualBottomSet.right span:nth-child(2){ width:74%; }
 .ritualBottomSet.right span:nth-child(3){ width:55%; }
+}
 
+  .ritualBody{
+  width:100%;
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 0 10px;
+}
+
+.ritualMainInstruction{
+  margin:0;
+  width:100%;
+  font-size:clamp(14px, 1.45vw, 18px);
+  line-height:1.45;
+  text-align:center;
+  color:rgba(255,255,255,.9);
+  white-space:normal;
+  word-break:break-word;
+}
+
+.ritualCardMainTitle{
+  margin:8px 0 14px;
+  font-size:clamp(26px, 3vw, 34px);
+  line-height:1.02;
+  font-weight:800;
+  letter-spacing:.01em;
+  text-align:center;
+  color:#f7f2e8;
+  text-transform:uppercase;
+  word-break:break-word;
+  max-width:100%;
+}
+
+.ritualCardNumber{
+  font-size:15px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#ebe2cf;
+  margin-bottom:14px;
+}
+
+.ritualCardFrame{
+  position:relative;
+  z-index:1;
+  height:100%;
+  padding:24px 22px 18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  color:#f7f3ea;
+}
+
+.ritualVisualCard{
+  width:min(100%, 340px);
+  aspect-ratio:3 / 5;
+  min-height:auto;
+}
+  
 @media (max-width: 640px){
   .ritualVisualCard{
     min-height:560px;
@@ -1791,56 +1851,21 @@ body::after{
 
 <h3 class="ritualCardMainTitle" id="ritualCardTitle">SILÊNCIO</h3>
 
-<div class="ritualMainInstruction" id="ritualCardText">
-  DURANTE 60 SEGUNDOS<br>
-  NINGUÉM PODE FALAR.
+      <div class="ritualBody">
+  <div class="ritualMainInstruction" id="ritualCardText">
+    DURANTE 60 SEGUNDOS<br>
+    NINGUÉM PODE FALAR.
+  </div>
 </div>
 
-      <div class="ritualMidDetails">
-        <div class="ritualMiniDivider">
-          <span></span><i></i><span></span>
-        </div>
-
-        <p class="ritualRuleText">
-          Se alguém quebrar o silêncio:<br>
-          <strong>MARQUE 1 PONTO DE INFLUÊNCIA.</strong>
-        </p>
-
-        <div class="ritualMiniDivider">
-          <span></span><i></i><span></span>
-        </div>
-
-        <p class="ritualRuleText subtle">
-          Se ninguém quebrar...<br>
-          OBSERVE QUEM PARECEU<br>
-          MAIS <strong class="goldText">DESCONFORTÁVEL.</strong>
-        </p>
-      </div>
-
-      <div class="ritualWhiteDivider"></div>
-
-      <p class="ritualFinalPhrase">
-        A SESSÃO REAGE AO DESCONFORTO,<br>
-        NÃO ÀS PALAVRAS.
-      </p>
-
-      <div class="ritualFingerprint">
-        <div class="finger finger1"></div>
-        <div class="finger finger2"></div>
-        <div class="finger finger3"></div>
-        <div class="finger finger4"></div>
-        <div class="finger finger5"></div>
-        <div class="finger finger6"></div>
-      </div>
-
-      <div class="ritualBottomOrnaments">
-        <div class="ritualBottomSet left">
-          <span></span><span></span><span></span>
-        </div>
-        <div class="ritualBottomSet right">
-          <span></span><span></span><span></span>
-        </div>
-      </div>
+<div class="ritualBottomOrnaments">
+  <div class="ritualBottomSet left">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="ritualBottomSet right">
+    <span></span><span></span><span></span>
+  </div>
+</div>
 
     </div>
   </article>
@@ -2455,10 +2480,10 @@ function renderRitualCardFromState(data){
   if (ritualCardTitle) ritualCardTitle.textContent = currentCard.title || "Carta revelada";
   if (ritualCardText) ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
 } else {
-    if (ritualCardType) ritualCardType.textContent = "Ritual";
-    if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
-    if (ritualCardText) ritualCardText.innerHTML = "O anfitrião ainda não revelou a próxima carta.";
-  }
+  if (ritualCardType) ritualCardType.textContent = "RITUAL";
+  if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
+  if (ritualCardText) ritualCardText.innerHTML = "O anfitrião ainda não revelou a próxima carta.";
+}
 
   if (deckInfo){
     if (ritualDeck.length > 0){
