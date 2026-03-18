@@ -6,7 +6,10 @@ import {
 } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
 
 const TOKEN_ENDPOINT = "https://osl-video-server.onrender.com/token";
+const VERIFY_ACCESS_ENDPOINT = "https://osl-video-server.onrender.com/verificar-acesso";
 const LIVEKIT_URL = "wss://osextolugar-eqa7q1iz.livekit.cloud";
+
+const SALES_PAGE_URL = "./vendas.html";
 
 const joinVideoBtn = document.getElementById("joinVideoBtn");
 const leaveVideoBtn = document.getElementById("leaveVideoBtn");
@@ -50,6 +53,52 @@ function escapeHtml(str) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function clearStoredAccess() {
+  localStorage.removeItem("osl_access_token");
+}
+
+function redirectToSales(message) {
+  if (message) alert(message);
+  window.location.href = SALES_PAGE_URL;
+}
+
+async function ensureValidGameAccess() {
+  const accessToken = localStorage.getItem("osl_access_token");
+
+  if (!accessToken) {
+    redirectToSales("Acesso não autorizado. Faça a compra para entrar.");
+    throw new Error("NO_ACCESS_TOKEN");
+  }
+
+  try {
+    const response = await fetch(VERIFY_ACCESS_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ accessToken })
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.liberado) {
+      clearStoredAccess();
+      redirectToSales("Seu acesso é inválido ou expirou. Faça uma nova liberação.");
+      throw new Error("ACCESS_INVALID");
+    }
+
+    return accessToken;
+  } catch (error) {
+    if (error.message === "ACCESS_INVALID" || error.message === "NO_ACCESS_TOKEN") {
+      throw error;
+    }
+
+    console.error("Erro ao validar acesso:", error);
+    redirectToSales("Não foi possível validar seu acesso agora.");
+    throw new Error("ACCESS_CHECK_FAILED");
+  }
 }
 
 function updateFocusBar() {
@@ -377,13 +426,7 @@ function refreshLocalVisualState() {
 }
 
 async function requestToken() {
-  const accessToken = localStorage.getItem("osl_access_token");
-
-  if (!accessToken) {
-    alert("Acesso não autorizado. Faça a compra para entrar.");
-    window.location.href = "./vendas.html";
-    throw new Error("NO_ACCESS_TOKEN");
-  }
+  const accessToken = await ensureValidGameAccess();
 
   const response = await fetch(
     `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`,
@@ -394,23 +437,23 @@ async function requestToken() {
     }
   );
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+  const data = await response.json().catch(() => ({}));
 
-    console.error("Erro ao obter token:", errorData);
+  if (!response.ok) {
+    console.error("Erro ao obter token:", data);
 
     if (response.status === 401) {
-      alert("Seu acesso expirou ou é inválido.");
-      localStorage.removeItem("osl_access_token");
-      window.location.href = "./vendas.html";
+      clearStoredAccess();
+      redirectToSales("Seu acesso expirou ou é inválido.");
+      throw new Error("TOKEN_UNAUTHORIZED");
     }
 
     throw new Error("TOKEN_REQUEST_FAILED");
   }
 
-  const data = await response.json();
-
-  if (!data.token) throw new Error("TOKEN_INVALID");
+  if (!data.token) {
+    throw new Error("TOKEN_INVALID");
+  }
 
   return data.token;
 }
@@ -532,14 +575,21 @@ async function joinVideoCall() {
     leaveVideoBtn.disabled = true;
     videoStatusEl.textContent = "Não foi possível entrar na chamada.";
 
-    let msg = "Erro ao entrar na chamada.";
-    if (error.message === "TOKEN_REQUEST_FAILED") {
-      msg = "Falha ao pedir token ao servidor.";
-    } else if (error.message === "TOKEN_INVALID") {
-      msg = "O servidor retornou um token inválido.";
-    }
+    if (
+      error.message !== "TOKEN_UNAUTHORIZED" &&
+      error.message !== "NO_ACCESS_TOKEN" &&
+      error.message !== "ACCESS_INVALID" &&
+      error.message !== "ACCESS_CHECK_FAILED"
+    ) {
+      let msg = "Erro ao entrar na chamada.";
+      if (error.message === "TOKEN_REQUEST_FAILED") {
+        msg = "Falha ao pedir token ao servidor.";
+      } else if (error.message === "TOKEN_INVALID") {
+        msg = "O servidor retornou um token inválido.";
+      }
 
-    alert(msg);
+      alert(msg);
+    }
   }
 }
 
