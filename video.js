@@ -377,13 +377,39 @@ function refreshLocalVisualState() {
 }
 
 async function requestToken() {
+  const accessToken = localStorage.getItem("osl_access_token");
+
+  if (!accessToken) {
+    alert("Acesso não autorizado. Faça a compra para entrar.");
+    window.location.href = "./vendas.html";
+    throw new Error("NO_ACCESS_TOKEN");
+  }
+
   const response = await fetch(
-    `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`
+    `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    }
   );
 
-  if (!response.ok) throw new Error("TOKEN_REQUEST_FAILED");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+
+    console.error("Erro ao obter token:", errorData);
+
+    if (response.status === 401) {
+      alert("Seu acesso expirou ou é inválido.");
+      localStorage.removeItem("osl_access_token");
+      window.location.href = "./vendas.html";
+    }
+
+    throw new Error("TOKEN_REQUEST_FAILED");
+  }
 
   const data = await response.json();
+
   if (!data.token) throw new Error("TOKEN_INVALID");
 
   return data.token;
