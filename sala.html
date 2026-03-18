@@ -2417,50 +2417,52 @@ async function resetRitualDeck(){
   updateRitualButtons();  
 }  
     
-function renderRitualCardFromState(data){  
-  const started = !!data?.started;  
-  const currentCard = data?.currentCard || null;  
-  ritualStarted = started;  
-  ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];  
-  
-  if (!started){  
-    setRitualWaitingState();  
-    return;  
-  }  
-  
-  if (currentCard){  
-  if (ritualCardType) ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();  
-  
-  if (ritualCardTitle){  
-    ritualCardTitle.textContent = currentCard.title || "Carta revelada";  
-  }  
-  
-  if (ritualCardText){  
-    ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");  
-  }  
-}  
-  } else {  
-    if (ritualCardType) ritualCardType.textContent = "Ritual";  
-    if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";  
-    if (ritualCardText) ritualCardText.innerHTML = "O anfitrião ainda não revelou a próxima carta.";  
-  }  
-  
-  if (deckInfo){  
-    if (ritualDeck.length > 0){  
-      deckInfo.innerHTML = `  
-        ${ritualDeck.length} carta(s) restante(s) no deck.<br>  
-        O anfitrião pode revelar a próxima.  
-      `;  
-    } else {  
-      deckInfo.innerHTML = `  
-        O deck chegou ao fim.<br>  
-        Reinicie o ritual para embaralhar novamente.  
-      `;  
-    }  
-  }  
-  
-  updateRitualButtons();  
-}  
+
+    function renderRitualCardFromState(data){
+  const started = !!data?.started;
+  const currentCard = data?.currentCard || null;
+  ritualStarted = started;
+  ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
+
+  if (!started){
+    setRitualWaitingState();
+    return;
+  }
+
+  if (currentCard){
+    if (ritualCardType) {
+      ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
+    }
+
+    if (ritualCardTitle){
+      ritualCardTitle.textContent = currentCard.title || "Carta revelada";
+    }
+
+    if (ritualCardText){
+      ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
+    }
+  } else {
+    if (ritualCardType) ritualCardType.textContent = "Ritual";
+    if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
+    if (ritualCardText) ritualCardText.innerHTML = "O anfitrião ainda não revelou a próxima carta.";
+  }
+
+  if (deckInfo){
+    if (ritualDeck.length > 0){
+      deckInfo.innerHTML = `
+        ${ritualDeck.length} carta(s) restante(s) no deck.<br>
+        O anfitrião pode revelar a próxima.
+      `;
+    } else {
+      deckInfo.innerHTML = `
+        O deck chegou ao fim.<br>
+        Reinicie o ritual para embaralhar novamente.
+      `;
+    }
+  }
+
+  updateRitualButtons();
+}
     
 function bindRitual(){  
   ritualUnsub = onSnapshot(ritualRef, function(snap){  
