@@ -1,165 +1,273 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pagamento aprovado | O SextoLugar</title>
-<style>
-body{
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#0b0b0f;
-  color:#fff;
-  font-family:"Segoe UI",sans-serif;
-  padding:24px;
-}
-.box{
-  width:min(560px, 100%);
-  background:#12121a;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;
-  padding:32px 24px;
-  text-align:center;
-  box-shadow:0 0 40px rgba(0,0,0,.45);
-}
-h1{
-  margin:0 0 12px;
-  font-size:30px;
-}
-p{
-  color:rgba(255,255,255,.75);
-  line-height:1.6;
-}
-.status{
-  margin-top:18px;
-  font-size:15px;
-  color:rgba(255,255,255,.88);
-  min-height:22px;
-}
-.code{
-  margin-top:18px;
-  padding:14px;
-  border-radius:12px;
-  background:#1b1b24;
-  border:1px solid rgba(255,255,255,.08);
-  font-size:14px;
-  color:#e6c07b;
-  word-break:break-word;
-}
-button{
-  margin-top:18px;
-  padding:14px 18px;
-  border:none;
-  border-radius:10px;
-  background:linear-gradient(135deg,#e6c07b,#c99c4a);
-  color:#000;
-  font-weight:700;
-  cursor:pointer;
-  font-size:16px;
-}
-button[disabled]{
-  opacity:.6;
-  cursor:not-allowed;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <title>Pagamento aprovado | O SextoLugar</title>
+
+  <style>
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#0b0b0f;
+      color:#fff;
+      font-family:"Segoe UI",sans-serif;
+      padding:24px;
+    }
+
+    .box{
+      width:min(560px, 100%);
+      background:#12121a;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      padding:32px 24px;
+      text-align:center;
+      box-shadow:0 0 40px rgba(0,0,0,.45);
+    }
+
+    h1{
+      margin:0 0 12px;
+      font-size:30px;
+    }
+
+    p{
+      color:rgba(255,255,255,.75);
+      line-height:1.6;
+      margin:0;
+    }
+
+    .status{
+      margin-top:18px;
+      font-size:15px;
+      color:rgba(255,255,255,.88);
+      min-height:22px;
+      line-height:1.5;
+    }
+
+    .code{
+      margin-top:18px;
+      padding:14px;
+      border-radius:12px;
+      background:#1b1b24;
+      border:1px solid rgba(255,255,255,.08);
+      font-size:14px;
+      color:#e6c07b;
+      word-break:break-word;
+      text-align:left;
+      line-height:1.7;
+    }
+
+    button{
+      margin-top:18px;
+      padding:14px 18px;
+      border:none;
+      border-radius:10px;
+      background:linear-gradient(135deg,#e6c07b,#c99c4a);
+      color:#000;
+      font-weight:700;
+      cursor:pointer;
+      font-size:16px;
+      min-width:220px;
+      transition:transform .15s ease, opacity .15s ease;
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+    }
+
+    button:active{
+      transform:translateY(0);
+    }
+
+    button[disabled]{
+      opacity:.6;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .small{
+      margin-top:14px;
+      font-size:12px;
+      color:rgba(255,255,255,.48);
+      line-height:1.5;
+    }
+  </style>
 </head>
 <body>
 
-<div class="box">
-  <h1>Pagamento aprovado</h1>
-  <p>Estamos emitindo sua licença e preparando seu acesso ao jogo.</p>
+  <div class="box">
+    <h1>Pagamento aprovado</h1>
+    <p>Estamos validando seu pagamento e preparando sua liberação.</p>
 
-  <div class="status" id="status">Validando pagamento...</div>
-  <div class="code" id="licenseBox" style="display:none;"></div>
+    <div class="status" id="status">Validando pagamento...</div>
+    <div class="code" id="licenseBox" style="display:none;"></div>
 
-  <button id="continueBtn" style="display:none;">Entrar no jogo</button>
-</div>
+    <button id="continueBtn" style="display:none;" disabled>Entrar no jogo</button>
 
-<script>
-(async function () {
-  const statusEl = document.getElementById("status");
-  const licenseBox = document.getElementById("licenseBox");
-  const continueBtn = document.getElementById("continueBtn");
+    <div class="small">
+      Esta página libera seu acesso automaticamente após a confirmação.
+    </div>
+  </div>
 
-  const params = new URLSearchParams(window.location.search);
-  const paymentId = params.get("payment_id");
-  const status = params.get("status");
+  <script>
+    (async function () {
+      const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+      const NEXT_PAGE_URL = "./entrada.html";
 
-  if (!paymentId) {
-    statusEl.textContent = "Não foi possível identificar o pagamento.";
-    return;
-  }
+      const statusEl = document.getElementById("status");
+      const licenseBox = document.getElementById("licenseBox");
+      const continueBtn = document.getElementById("continueBtn");
 
-  if (status && status !== "approved") {
-    statusEl.textContent = "O pagamento ainda não foi aprovado.";
-    return;
-  }
+      let flowFinished = false;
+      let continueBound = false;
 
-  try {
-    statusEl.textContent = "Emitindo licença...";
+      function setStatus(text, isError = false) {
+        statusEl.textContent = text;
+        statusEl.style.color = isError
+          ? "rgba(255,120,120,.95)"
+          : "rgba(255,255,255,.88)";
+      }
 
-    const licRes = await fetch("https://osl-video-server.onrender.com/emitir-licenca", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ paymentId })
-    });
+      function safeSetLocalStorage(key, value) {
+        try {
+          localStorage.setItem(key, value);
+          return true;
+        } catch (error) {
+          console.error("Erro ao salvar no localStorage:", key, error);
+          return false;
+        }
+      }
 
-    const licData = await licRes.json();
+      function showContinue() {
+        continueBtn.style.display = "inline-block";
+        continueBtn.disabled = false;
 
-    if (!licRes.ok || !licData.licenseToken) {
-      console.error(licData);
-      statusEl.textContent = "Não foi possível emitir sua licença.";
-      return;
-    }
+        if (!continueBound) {
+          continueBound = true;
+          continueBtn.addEventListener("click", function () {
+            window.location.href = NEXT_PAGE_URL;
+          });
+        }
+      }
 
-    localStorage.setItem("osl_license_token", licData.licenseToken);
-    localStorage.setItem("osl_license_code", licData.licenseCode || "");
-    localStorage.setItem("osl_license_email", licData.email || "");
+      const params = new URLSearchParams(window.location.search);
+      const paymentId = String(params.get("payment_id") || "").trim();
+      const paymentStatus = String(params.get("status") || "").trim().toLowerCase();
+      const collectionStatus = String(params.get("collection_status") || "").trim().toLowerCase();
+      const externalReference = String(params.get("external_reference") || "").trim();
 
-    statusEl.textContent = "Gerando seu acesso...";
+      console.log("sucesso.html params:", {
+        paymentId,
+        paymentStatus,
+        collectionStatus,
+        externalReference
+      });
 
-    const accessRes = await fetch("https://osl-video-server.onrender.com/emitir-acesso", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ licenseToken: licData.licenseToken })
-    });
+      if (!paymentId) {
+        setStatus("Não foi possível identificar o pagamento.", true);
+        return;
+      }
 
-    const accessData = await accessRes.json();
+      if (paymentStatus && paymentStatus !== "approved" && paymentStatus !== "success") {
+        setStatus("O pagamento ainda não foi aprovado.", true);
+        return;
+      }
 
-    if (!accessRes.ok || !accessData.accessToken) {
-      console.error(accessData);
-      statusEl.textContent = "A licença foi emitida, mas o acesso não pôde ser preparado.";
-      return;
-    }
+      if (
+        collectionStatus &&
+        collectionStatus !== "approved" &&
+        collectionStatus !== "success"
+      ) {
+        setStatus("O pagamento ainda não foi confirmado.", true);
+        return;
+      }
 
-    localStorage.setItem("osl_access_token", accessData.accessToken);
+      if (flowFinished) return;
 
-    licenseBox.style.display = "block";
-    licenseBox.innerHTML = `
-      <strong>Licença emitida com sucesso</strong><br><br>
-      Código: ${licData.licenseCode || "indisponível"}<br>
-      E-mail: ${licData.email || "indisponível"}
-    `;
+      try {
+        setStatus("Emitindo licença...");
 
-    statusEl.textContent = "Tudo pronto. Seu acesso foi liberado.";
-    continueBtn.style.display = "inline-block";
+        const licRes = await fetch(`${BACKEND_BASE_URL}/emitir-licenca`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ paymentId })
+        });
 
-    continueBtn.addEventListener("click", function () {
-      window.location.href = "./entrada.html";
-    });
-  } catch (error) {
-    console.error(error);
-    statusEl.textContent = "Erro ao finalizar sua liberação.";
-  }
-})();
-</script>
+        const licData = await licRes.json().catch(() => ({}));
+        console.log("emitir-licenca:", licData);
+
+        if (!licRes.ok || !licData.licenseToken || !licData.licenseCode) {
+          setStatus("Não foi possível emitir sua licença.", true);
+          console.error("Falha em /emitir-licenca:", licData);
+          return;
+        }
+
+        safeSetLocalStorage("osl_license_token", licData.licenseToken);
+        safeSetLocalStorage("osl_license_code", licData.licenseCode || "");
+        safeSetLocalStorage("osl_license_email", licData.email || "");
+        safeSetLocalStorage("osl_payment_id", paymentId);
+        safeSetLocalStorage("osl_payment_ref", licData.ref || externalReference || "");
+
+        setStatus("Gerando seu acesso...");
+
+        const accessRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            licenseToken: licData.licenseToken
+          })
+        });
+
+        const accessData = await accessRes.json().catch(() => ({}));
+        console.log("emitir-acesso:", accessData);
+
+        if (!accessRes.ok || !accessData.accessToken) {
+          setStatus("A licença foi emitida, mas o acesso não pôde ser preparado.", true);
+          console.error("Falha em /emitir-acesso:", accessData);
+          return;
+        }
+
+        const savedAccess = safeSetLocalStorage("osl_access_token", accessData.accessToken);
+        safeSetLocalStorage("osl_access_expires_at", String(accessData.expiresAt || ""));
+        safeSetLocalStorage("osl_has_access", "true");
+
+        if (!savedAccess || !localStorage.getItem("osl_access_token")) {
+          setStatus("Seu acesso foi criado, mas não pôde ser salvo neste navegador.", true);
+          return;
+        }
+
+        flowFinished = true;
+
+        licenseBox.style.display = "block";
+        licenseBox.innerHTML = `
+          <strong>Licença emitida com sucesso</strong><br><br>
+          Código: ${licData.licenseCode || "indisponível"}<br>
+          E-mail: ${licData.email || "indisponível"}<br>
+          Referência: ${licData.ref || externalReference || "indisponível"}
+        `;
+
+        setStatus("Tudo pronto. Seu acesso foi liberado.");
+        showContinue();
+      } catch (error) {
+        console.error("Erro ao finalizar liberação:", error);
+        setStatus("Erro ao finalizar sua liberação.", true);
+      }
+    })();
+  </script>
 
 </body>
 </html>
