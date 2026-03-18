@@ -2308,6 +2308,8 @@ function buildRitualDeck(){
   type: "Ruptura",
   title: "Confiança quebrada",
   text: "Cada jogador diz em quem menos confiaria para conduzir o ritual até o final."
+    }
+  });
 }
 
 function shuffleArray(array){
@@ -2449,10 +2451,10 @@ function renderRitualCardFromState(data){
   }
 
   if (currentCard){
-    if (ritualCardType) ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
-    if (ritualCardTitle) ritualCardTitle.textContent = currentCard.title || "Carta revelada";
-    if (ritualCardText) ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
-  } else {
+  if (ritualCardType) ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
+  if (ritualCardTitle) ritualCardTitle.textContent = currentCard.title || "Carta revelada";
+  if (ritualCardText) ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
+} else {
     if (ritualCardType) ritualCardType.textContent = "Ritual";
     if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
     if (ritualCardText) ritualCardText.innerHTML = "O anfitrião ainda não revelou a próxima carta.";
