@@ -3,6 +3,57 @@
 <head>
   <style>
   body{
+    <script>
+(async function protegerEntrada() {
+  try {
+    let accessToken = localStorage.getItem("osl_access_token");
+    const licenseToken = localStorage.getItem("osl_license_token");
+
+    if (!accessToken && licenseToken) {
+      const renewRes = await fetch("https://osl-video-server.onrender.com/emitir-acesso", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ licenseToken })
+      });
+
+      const renewData = await renewRes.json();
+
+      if (renewRes.ok && renewData.accessToken) {
+        localStorage.setItem("osl_access_token", renewData.accessToken);
+        accessToken = renewData.accessToken;
+      }
+    }
+
+    if (!accessToken) {
+      window.location.href = "./vendas.html";
+      return;
+    }
+
+    const res = await fetch("https://osl-video-server.onrender.com/verificar-acesso", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ accessToken })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.liberado) {
+      localStorage.removeItem("osl_access_token");
+      window.location.href = "./vendas.html";
+      return;
+    }
+
+    document.body.classList.add("osl-ready");
+  } catch (error) {
+    console.error("Erro ao validar acesso:", error);
+    window.location.href = "./vendas.html";
+  }
+})();
+</script>
     visibility:hidden;
   }
   body.osl-ready{
