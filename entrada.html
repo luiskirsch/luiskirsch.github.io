@@ -1,71 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <style>
-  body{
-    <script>
-(async function protegerEntrada() {
-  try {
-    let accessToken = localStorage.getItem("osl_access_token");
-    const licenseToken = localStorage.getItem("osl_license_token");
-
-    if (!accessToken && licenseToken) {
-      const renewRes = await fetch("https://osl-video-server.onrender.com/emitir-acesso", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ licenseToken })
-      });
-
-      const renewData = await renewRes.json();
-
-      if (renewRes.ok && renewData.accessToken) {
-        localStorage.setItem("osl_access_token", renewData.accessToken);
-        accessToken = renewData.accessToken;
-      }
-    }
-
-    if (!accessToken) {
-      window.location.href = "./vendas.html";
-      return;
-    }
-
-    const res = await fetch("https://osl-video-server.onrender.com/verificar-acesso", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ accessToken })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.liberado) {
-      localStorage.removeItem("osl_access_token");
-      window.location.href = "./vendas.html";
-      return;
-    }
-
-    document.body.classList.add("osl-ready");
-  } catch (error) {
-    console.error("Erro ao validar acesso:", error);
-    window.location.href = "./vendas.html";
-  }
-})();
-</script>
-    visibility:hidden;
-  }
-  body.osl-ready{
-    visibility:visible;
-  }
-  </style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>O SextoLugar — Entrada</title>
   <link rel="icon" href="./favicon.png">
 
   <style>
+    body{
+      visibility:hidden;
+    }
+    body.osl-ready{
+      visibility:visible;
+    }
+
     :root{
       --bg:#050505;
       --bg-2:#080808;
@@ -505,16 +453,69 @@
       .footer{ margin-top:16px; }
     }
   </style>
-</head>
-<script>
-(function(){
-  const acessoPago = localStorage.getItem("osl_acesso_pago");
 
-  if (acessoPago !== "true") {
-    window.location.href = "/vendas.html";
-  }
-})();
-</script>
+  <script>
+    (async function protegerEntrada() {
+      const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+
+      try {
+        let accessToken = localStorage.getItem("osl_access_token");
+        const licenseToken = localStorage.getItem("osl_license_token");
+
+        if (!accessToken && licenseToken) {
+          const renewRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ licenseToken })
+          });
+
+          const renewData = await renewRes.json().catch(() => ({}));
+
+          if (renewRes.ok && renewData.accessToken) {
+            localStorage.setItem("osl_access_token", renewData.accessToken);
+
+            if (renewData.expiresAt) {
+              localStorage.setItem("osl_access_expires_at", String(renewData.expiresAt));
+            }
+
+            accessToken = renewData.accessToken;
+          }
+        }
+
+        if (!accessToken) {
+          window.location.href = "./vendas.html";
+          return;
+        }
+
+        const res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ accessToken })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.liberado) {
+          localStorage.removeItem("osl_access_token");
+          window.location.href = "./vendas.html";
+          return;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+          document.body.classList.add("osl-ready");
+        });
+      } catch (error) {
+        console.error("Erro ao validar acesso:", error);
+        window.location.href = "./vendas.html";
+      }
+    })();
+  </script>
+</head>
+
 <body>
   <main class="wrap" id="scene">
     <h1>O SextoLugar</h1>
