@@ -199,10 +199,6 @@ body{
           R$ 29,90 <span>pagamento único</span>
         </div>
 
-        <button class="seu-botao" onclick="comprar()">
-  Desbloquear agora
-</button>
-
         <div class="security">
           Pagamento seguro • Acesso imediato após confirmação
         </div>
@@ -224,20 +220,28 @@ body{
   </div>
 <script>
 async function comprar() {
-  const res = await fetch("http://localhost:3000/criar-pagamento", {
-    method: "POST"
-  });
+  try {
+    const res = await fetch("http://localhost:3000/criar-pagamento", {
+      method: "POST"
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  window.location.href = data.url;
-}
-</script>
-</div>
+    if (!res.ok) {
+      alert(data.error || "Erro ao iniciar pagamento.");
+      return;
+    }
 
-<script>
-function comprar(){
-  alert("Aqui você integrará o pagamento (Stripe, Mercado Pago, etc)");
+    if (!data.url) {
+      alert("A URL de pagamento não foi retornada.");
+      return;
+    }
+
+    window.location.href = data.url;
+  } catch (error) {
+    alert("Não foi possível conectar ao servidor de pagamento.");
+    console.error(error);
+  }
 }
 </script>
 
