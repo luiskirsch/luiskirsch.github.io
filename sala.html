@@ -2449,16 +2449,9 @@ function renderRitualCardFromState(data){
   }
 
   if (currentCard){
-  if (ritualCardType) ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
-
-  if (ritualCardTitle){
-    ritualCardTitle.textContent = currentCard.title || "Carta revelada";
-  }
-
-  if (ritualCardText){
-    ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
-  }
-}
+    if (ritualCardType) ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
+    if (ritualCardTitle) ritualCardTitle.textContent = currentCard.title || "Carta revelada";
+    if (ritualCardText) ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
   } else {
     if (ritualCardType) ritualCardType.textContent = "Ritual";
     if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
