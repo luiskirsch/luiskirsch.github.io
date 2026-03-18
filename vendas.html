@@ -196,12 +196,12 @@ body{
         </ul>
 
         <div class="price">
-          R$ 19,90 <span>pagamento único</span>
+          R$ 29,90 <span>pagamento único</span>
         </div>
 
-        <button class="buyBtn" onclick="comprar()">
-          Desbloquear agora
-        </button>
+        <button class="seu-botao" onclick="comprar()">
+  Desbloquear agora
+</button>
 
         <div class="security">
           Pagamento seguro • Acesso imediato após confirmação
@@ -222,7 +222,17 @@ body{
       <div class="card">Atualizações contínuas</div>
     </div>
   </div>
+<script>
+async function comprar() {
+  const res = await fetch("http://localhost:3000/criar-pagamento", {
+    method: "POST"
+  });
 
+  const data = await res.json();
+
+  window.location.href = data.url;
+}
+</script>
 </div>
 
 <script>
