@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desbloquear a Experiência | O SextoLugar</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+body{
+  background:#0b0b0f;
+  color:#fff;
+}
+
+/* CONTAINER */
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  padding:40px 20px;
+}
+
+/* HERO */
+.hero{
+  text-align:center;
+  margin-bottom:50px;
+}
+
+.hero h1{
+  font-size:38px;
+  margin-bottom:15px;
+}
+
+.hero p{
+  color:rgba(255,255,255,.7);
+  font-size:16px;
+}
+
+/* CARD PRINCIPAL */
+.productCard{
+  background:#12121a;
+  border-radius:14px;
+  padding:30px;
+  box-shadow:0 0 40px rgba(0,0,0,.6);
+  border:1px solid rgba(255,255,255,.05);
+}
+
+/* GRID */
+.productGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:30px;
+}
+
+@media(max-width:800px){
+  .productGrid{
+    grid-template-columns:1fr;
+  }
+}
+
+/* IMAGEM */
+.productImage{
+  background:linear-gradient(145deg,#1a1a25,#0d0d12);
+  border-radius:12px;
+  height:320px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  color:rgba(255,255,255,.4);
+}
+
+/* DETALHES */
+.productDetails h2{
+  font-size:26px;
+  margin-bottom:15px;
+}
+
+.productDetails p{
+  color:rgba(255,255,255,.75);
+  line-height:1.6;
+  margin-bottom:20px;
+}
+
+/* BENEFÍCIOS */
+.features{
+  margin-bottom:25px;
+}
+
+.features li{
+  margin-bottom:10px;
+  color:rgba(255,255,255,.85);
+}
+
+/* PREÇO */
+.price{
+  font-size:32px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.price span{
+  font-size:16px;
+  color:rgba(255,255,255,.6);
+}
+
+/* BOTÃO */
+.buyBtn{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  background:linear-gradient(135deg,#e6c07b,#c99c4a);
+  color:#000;
+  transition:.2s;
+}
+
+.buyBtn:hover{
+  transform:scale(1.02);
+}
+
+/* SEGURANÇA */
+.security{
+  margin-top:15px;
+  font-size:13px;
+  color:rgba(255,255,255,.5);
+  text-align:center;
+}
+
+/* SEÇÃO EXTRA */
+.section{
+  margin-top:60px;
+}
+
+.section h3{
+  margin-bottom:20px;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:#151520;
+  padding:20px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.05);
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>Desbloqueie a Experiência Completa</h1>
+    <p>O SextoLugar não é apenas um jogo. É uma experiência psicológica compartilhada.</p>
+  </div>
+
+  <!-- PRODUTO -->
+  <div class="productCard">
+    <div class="productGrid">
+
+      <!-- IMAGEM -->
+      <div class="productImage">
+        Visual do jogo aqui
+      </div>
+
+      <!-- DETALHES -->
+      <div class="productDetails">
+        <h2>O SextoLugar — Ritual Completo</h2>
+
+        <p>
+          Entre em uma experiência onde decisões, silêncio e tensão moldam o destino da sessão.
+          Cada partida é única. Cada escolha tem peso.
+        </p>
+
+        <ul class="features">
+          <li>✔ Sistema de cartas psicológico</li>
+          <li>✔ Sala interativa com vídeo</li>
+          <li>✔ Experiência imersiva em grupo</li>
+          <li>✔ Atualizações futuras incluídas</li>
+        </ul>
+
+        <div class="price">
+          R$ 19,90 <span>pagamento único</span>
+        </div>
+
+        <button class="buyBtn" onclick="comprar()">
+          Desbloquear agora
+        </button>
+
+        <div class="security">
+          Pagamento seguro • Acesso imediato após confirmação
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- BENEFÍCIOS -->
+  <div class="section">
+    <h3>O que você desbloqueia</h3>
+
+    <div class="cards">
+      <div class="card">Acesso total à sala de jogo</div>
+      <div class="card">Todas as cartas liberadas</div>
+      <div class="card">Experiência sem limitações</div>
+      <div class="card">Atualizações contínuas</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function comprar(){
+  alert("Aqui você integrará o pagamento (Stripe, Mercado Pago, etc)");
+}
+</script>
+
+</body>
+</html>
