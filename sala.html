@@ -3,17 +3,71 @@
 <html lang="pt-BR">    
 <head>    
 <script>
-(function(){
-  const acessoPago = localStorage.getItem("osl_acesso_pago");
+(async function protegerSala() {
+  const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
 
-  if (acessoPago !== "true") {
-    window.location.href = "/vendas.html";
+  try {
+    document.documentElement.style.visibility = "hidden";
+
+    let accessToken = localStorage.getItem("osl_access_token");
+    const licenseToken = localStorage.getItem("osl_license_token");
+
+    if (!accessToken && licenseToken) {
+      const renewRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ licenseToken })
+      });
+
+      const renewData = await renewRes.json().catch(() => ({}));
+
+      if (renewRes.ok && renewData.accessToken) {
+        localStorage.setItem("osl_access_token", renewData.accessToken);
+
+        if (renewData.expiresAt) {
+          localStorage.setItem("osl_access_expires_at", String(renewData.expiresAt));
+        }
+
+        accessToken = renewData.accessToken;
+      }
+    }
+
+    if (!accessToken) {
+      window.location.href = "./vendas.html";
+      return;
+    }
+
+    const res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ accessToken })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.liberado) {
+      localStorage.removeItem("osl_access_token");
+      window.location.href = "./vendas.html";
+      return;
+    }
+
+    document.documentElement.style.visibility = "visible";
+  } catch (error) {
+    console.error("Erro ao validar acesso da sala:", error);
+    window.location.href = "./vendas.html";
   }
 })();
 </script>
 <meta charset="UTF-8">    
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    
 <title>O SextoLugar — Sala</title>  <style>    
+  html{
+  visibility:hidden;
+  }
 :root{    
   --bg-1:#030608;    
   --bg-2:#060b10;    
@@ -2058,12 +2112,12 @@ minute: '2-digit'
 }
 
 function escapeHtml(str){
-return String(str)
-.replaceAll('&', '&')
-.replaceAll('<', '<')
-.replaceAll('>', '>')
-.replaceAll('"', '"')
-.replaceAll("'", ''');
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 
 function hideChatEmpty(){
@@ -2269,7 +2323,12 @@ deckInfo.innerHTML =
 }
 
 if (historyList){
-historyList.innerHTML =     <div class="historyItem">     <div class="historyType">Aguardando</div>     <div class="historyText">Nenhuma carta revelada ainda.</div>     </div>    ;
+  historyList.innerHTML = `
+    <div class="historyItem">
+      <div class="historyType">Aguardando</div>
+      <div class="historyText">Nenhuma carta revelada ainda.</div>
+    </div>
+  `;
 }
 
 updateRitualButtons();
@@ -2353,42 +2412,46 @@ updateRitualButtons();
 }
 
 function renderRitualCardFromState(data){
+  const started = !!data?.started;
+  const currentCard = data?.currentCard || null;
+  ritualStarted = started;
+  ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
 
-const started = !!data?.started;
-const currentCard = data?.currentCard || null;
-ritualStarted = started;
-ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
+  if (!started){
+    setRitualWaitingState();
+    return;
+  }
 
-if (!started){
-setRitualWaitingState();
-return;
-}
+  if (currentCard){
+    if (ritualCardType) {
+      ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
+    }
 
-if (currentCard){
-if (ritualCardType) {
-ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
-}
+    if (ritualCardTitle){
+      ritualCardTitle.textContent = currentCard.title || "Carta revelada";
+    }
 
-if (ritualCardTitle){  
-  ritualCardTitle.textContent = currentCard.title || "Carta revelada";  
-}  
-
-if (ritualCardText){  
-  ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");  
-}
-
-} else {
-if (ritualCardType) ritualCardType.textContent = "Ritual";
-if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
-if (ritualCardText) ritualCardText.innerHTML = "O anfitrião ainda não revelou a próxima carta.";
+    if (ritualCardText){
+      ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
+    }
+  } else {
+    if (ritualCardType) ritualCardType.textContent = "Ritual";
+    if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
+    if (ritualCardText
 }
 
 if (deckInfo){
-if (ritualDeck.length > 0){
-deckInfo.innerHTML =   ${ritualDeck.length} carta(s) restante(s) no deck.<br>   O anfitrião pode revelar a próxima.  ;
-} else {
-deckInfo.innerHTML =   O deck chegou ao fim.<br>   Reinicie o ritual para embaralhar novamente.  ;
-}
+  if (ritualDeck.length > 0){
+    deckInfo.innerHTML = `
+      ${ritualDeck.length} carta(s) restante(s) no deck.<br>
+      O anfitrião pode revelar a próxima.
+    `;
+  } else {
+    deckInfo.innerHTML = `
+      O deck chegou ao fim.<br>
+      Reinicie o ritual para embaralhar novamente.
+    `;
+  }
 }
 
 updateRitualButtons();
@@ -2547,30 +2610,30 @@ incomingRequestsList.innerHTML = "";
 }
 
 async function fillProfileUI(user, isSelfView){
-profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
-profileNameEl.textContent = user.displayName || "Jogador";
-profileUsernameEl.textContent = @${user.username || "jogador"};
-profileBioEl.textContent = user.bio || "Sem descrição.";
+  profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
+  profileNameEl.textContent = user.displayName || "Jogador";
+  profileUsernameEl.textContent = `@${user.username || "jogador"}`;
+  profileBioEl.textContent = user.bio || "Sem descrição.";
 
-document.getElementById("profileGames").textContent =
-Partidas: ${user.stats?.gamesPlayed || 0};
+  document.getElementById("profileGames").textContent =
+    `Partidas: ${user.stats?.gamesPlayed || 0}`;
 
-document.getElementById("profileWins").textContent =
-Vitórias: ${user.stats?.wins || 0};
+  document.getElementById("profileWins").textContent =
+    `Vitórias: ${user.stats?.wins || 0}`;
 
-editProfileBtn.hidden = !isSelfView;
-addFriendBtn.hidden = isSelfView;
+  editProfileBtn.hidden = !isSelfView;
+  addFriendBtn.hidden = isSelfView;
 
-if (!isSelfView){
-const alreadyFriend = (user.friends || []).includes(userId);
-addFriendBtn.textContent = alreadyFriend ? "Já são amigos" : "Adicionar amigo";
-addFriendBtn.disabled = alreadyFriend;
-} else {
-addFriendBtn.disabled = false;
-}
+  if (!isSelfView){
+    const alreadyFriend = (user.friends || []).includes(userId);
+    addFriendBtn.textContent = alreadyFriend ? "Já são amigos" : "Adicionar amigo";
+    addFriendBtn.disabled = alreadyFriend;
+  } else {
+    addFriendBtn.disabled = false;
+  }
 
-closeEditor();
-await renderFriendsSection(user, isSelfView);
+  closeEditor();
+  await renderFriendsSection(user, isSelfView);
 }
 
 async function ensureUserProfile(){
@@ -2865,23 +2928,34 @@ try{
 }
 
 function renderPlayers(players){
-playerListEl.innerHTML = '';
+  playerListEl.innerHTML = '';
 
-players.forEach(function(player){
-const div = document.createElement('div');
-div.className = 'player';
-div.innerHTML =     <div class="playerLeft">     <div class="avatar">${initials(player.name)}</div>     <div class="playerMeta">     <div class="playerName">${escapeHtml(player.name)}</div>     <div class="playerRole">${player.isHost ? 'Anfitrião' : 'Participante'}</div>     </div>     </div>     <div class="playerRight">     <span class="playerStatus">Online</span>     ${player.isHost ? '<span class="playerHost">Host</span>' : ''}     </div>    ;
+  players.forEach(function(player){
+    const div = document.createElement('div');
+    div.className = 'player';
+    div.innerHTML = `
+      <div class="playerLeft">
+        <div class="avatar">${initials(player.name)}</div>
+        <div class="playerMeta">
+          <div class="playerName">${escapeHtml(player.name)}</div>
+          <div class="playerRole">${player.isHost ? 'Anfitrião' : 'Participante'}</div>
+        </div>
+      </div>
+      <div class="playerRight">
+        <span class="playerStatus">Online</span>
+        ${player.isHost ? '<span class="playerHost">Host</span>' : ''}
+      </div>
+    `;
 
-div.addEventListener("click", ()=>{    
-  openProfile(player);    
-});    
+    div.addEventListener("click", ()=>{
+      openProfile(player);
+    });
 
-playerListEl.appendChild(div);
+    playerListEl.appendChild(div);
+  });
 
-});
-
-playerCountEl.textContent = String(players.length);
-playersEmptyEl.style.display = players.length > 1 ? 'none' : 'block';
+  playerCountEl.textContent = String(players.length);
+  playersEmptyEl.style.display = players.length > 1 ? 'none' : 'block';
 }
 
 function renderMessages(docs){
@@ -2926,24 +3000,24 @@ messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 function renderTyping(names){
-if(!typingBarEl) return;
+  if(!typingBarEl) return;
 
-if(!names.length){
-typingBarEl.textContent = '';
-return;
-}
+  if(!names.length){
+    typingBarEl.textContent = '';
+    return;
+  }
 
-if(names.length === 1){
-typingBarEl.textContent = ${names[0]} está digitando...;
-return;
-}
+  if(names.length === 1){
+    typingBarEl.textContent = `${names[0]} está digitando...`;
+    return;
+  }
 
-if(names.length === 2){
-typingBarEl.textContent = ${names[0]} e ${names[1]} estão digitando...;
-return;
-}
+  if(names.length === 2){
+    typingBarEl.textContent = `${names[0]} e ${names[1]} estão digitando...`;
+    return;
+  }
 
-typingBarEl.textContent = ${names[0]}, ${names[1]} e mais ${names.length - 2} estão digitando...;
+  typingBarEl.textContent = `${names[0]}, ${names[1]} e mais ${names.length - 2} estão digitando...`;
 }
 
 async function ensureRoom(){
