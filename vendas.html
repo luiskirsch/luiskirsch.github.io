@@ -61,11 +61,13 @@ body{
 .productImage{
   background:linear-gradient(145deg,#1a1a25,#0d0d12);
   border-radius:12px;
-  height:320px;
+  min-height:320px;
   display:flex;
   align-items:center;
   justify-content:center;
   color:rgba(255,255,255,.4);
+  padding:20px;
+  text-align:center;
 }
 
 .productDetails h2{
@@ -77,6 +79,11 @@ body{
   color:rgba(255,255,255,.75);
   margin-bottom:20px;
   line-height:1.6;
+}
+
+.features{
+  margin-bottom:18px;
+  padding-left:18px;
 }
 
 .features li{
@@ -92,6 +99,33 @@ body{
 .price span{
   font-size:16px;
   color:rgba(255,255,255,.6);
+}
+
+.formGrid{
+  display:grid;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.field{
+  display:grid;
+  gap:8px;
+}
+
+.field label{
+  font-size:13px;
+  color:rgba(255,255,255,.75);
+}
+
+.field input{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:#1a1a24;
+  color:#fff;
+  outline:none;
+  border:1px solid rgba(255,255,255,.08);
 }
 
 .buyBtn{
@@ -111,11 +145,25 @@ body{
   transform:scale(1.02);
 }
 
+.buyBtn:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+  transform:none;
+}
+
 .security{
   margin-top:15px;
   font-size:13px;
   color:rgba(255,255,255,.5);
   text-align:center;
+}
+
+.status{
+  margin-top:14px;
+  text-align:center;
+  font-size:14px;
+  color:rgba(255,255,255,.75);
+  min-height:20px;
 }
 </style>
 </head>
@@ -154,14 +202,27 @@ body{
           R$ 29,90 <span>pagamento único</span>
         </div>
 
-        <button class="buyBtn" onclick="comprar()">
+        <div class="formGrid">
+          <div class="field">
+            <label for="nome">Seu nome</label>
+            <input id="nome" type="text" maxlength="80" placeholder="Digite seu nome">
+          </div>
+
+          <div class="field">
+            <label for="email">Seu e-mail</label>
+            <input id="email" type="email" maxlength="160" placeholder="Digite seu e-mail">
+          </div>
+        </div>
+
+        <button class="buyBtn" id="buyBtn" onclick="comprar()">
           Desbloquear agora
         </button>
 
         <div class="security">
-          Pagamento seguro • Liberação automática após confirmação
+          Pagamento seguro • Licença assinada • Liberação automática após confirmação
         </div>
 
+        <div class="status" id="status"></div>
       </div>
     </div>
   </div>
@@ -170,32 +231,51 @@ body{
 
 <script>
 async function comprar() {
+  const nome = document.getElementById("nome").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const status = document.getElementById("status");
+  const btn = document.getElementById("buyBtn");
+
+  if (!nome) {
+    status.textContent = "Digite seu nome.";
+    return;
+  }
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    status.textContent = "Digite um e-mail válido.";
+    return;
+  }
+
   try {
+    btn.disabled = true;
+    status.textContent = "Criando pagamento...";
+
     const res = await fetch("https://osl-video-server.onrender.com/criar-pagamento", {
-      method: "POST"
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ nome, email })
     });
 
     const data = await res.json();
 
-    if (!res.ok) {
-      alert("Erro ao iniciar pagamento.");
+    if (!res.ok || !data.url || !data.ref) {
+      console.error(data);
+      status.textContent = "Não foi possível iniciar o pagamento.";
+      btn.disabled = false;
       return;
     }
 
-    if (!data.url || !data.ref) {
-      alert("Erro inesperado no pagamento.");
-      return;
-    }
+    localStorage.setItem("osl_checkout_nome", nome);
+    localStorage.setItem("osl_checkout_email", email);
+    localStorage.setItem("osl_checkout_ref", data.ref);
 
-    // 🔥 salva referência da compra
-    localStorage.setItem("osl_ref", data.ref);
-
-    // redireciona pro Mercado Pago
     window.location.href = data.url;
-
   } catch (error) {
     console.error(error);
-    alert("Erro ao conectar com servidor.");
+    status.textContent = "Erro ao conectar com o servidor.";
+    btn.disabled = false;
   }
 }
 </script>
