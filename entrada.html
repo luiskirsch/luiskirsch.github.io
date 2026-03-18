@@ -447,7 +447,15 @@
     }
   </style>
 </head>
+<script>
+(function(){
+  const acessoPago = localStorage.getItem("osl_acesso_pago");
 
+  if (acessoPago !== "true") {
+    window.location.href = "/vendas.html";
+  }
+})();
+</script>
 <body>
   <main class="wrap" id="scene">
     <h1>O SextoLugar</h1>
