@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Entrar | O SextoLugar</title>
+  <link rel="icon" href="./favicon.png" />
+
+  <style>
+    :root{
+      --bg:#050507;
+      --panel:rgba(255,255,255,.05);
+      --line:rgba(255,255,255,.08);
+      --gold:#e6c07b;
+      --text:#f4f4f6;
+      --muted:rgba(255,255,255,.66);
+      --danger:#ff6b6b;
+      --ok:#82d996;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(900px 420px at 50% 10%, rgba(230,192,123,.08), transparent 58%),
+        linear-gradient(180deg, #09090d 0%, #050507 100%);
+      color:var(--text);
+      font-family:"Segoe UI",system-ui;
+      padding:20px;
+    }
+
+    .card{
+      width:100%;
+      max-width:420px;
+      padding:26px;
+      border-radius:24px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      box-shadow:0 30px 90px rgba(0,0,0,.5);
+    }
+
+    h1{
+      margin:0 0 6px;
+      font-size:28px;
+    }
+
+    p{
+      margin:0 0 20px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .field{
+      display:grid;
+      gap:6px;
+      margin-bottom:14px;
+    }
+
+    .field label{
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--gold);
+    }
+
+    .field input{
+      min-height:50px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.25);
+      color:#fff;
+      padding:12px;
+      font-size:15px;
+    }
+
+    button{
+      width:100%;
+      height:52px;
+      border-radius:14px;
+      border:none;
+      font-weight:700;
+      background:linear-gradient(135deg,#e6c07b,#c99c4a);
+      color:#000;
+      cursor:pointer;
+      margin-top:6px;
+    }
+
+    button:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .status{
+      margin-top:10px;
+      font-size:13px;
+      text-align:center;
+    }
+
+    .status.err{ color:var(--danger); }
+    .status.ok{ color:var(--ok); }
+
+    .links{
+      margin-top:16px;
+      text-align:center;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .links a{
+      color:var(--gold);
+      text-decoration:none;
+      font-weight:600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Entrar</h1>
+    <p>Acesse sua conta para continuar o ritual.</p>
+
+    <div class="field">
+      <label>Email</label>
+      <input id="email" type="email" placeholder="Seu e-mail">
+    </div>
+
+    <div class="field">
+      <label>Senha</label>
+      <input id="password" type="password" placeholder="Sua senha">
+    </div>
+
+    <button id="loginBtn">Entrar</button>
+
+    <div class="status" id="status"></div>
+
+    <div class="links">
+      Não tem conta? <a href="./cadastro.html">Criar conta</a><br>
+      <a href="#" id="forgot">Esqueci minha senha</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      sendPasswordResetEmail,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSy...",
+      authDomain: "osextolugar-game.firebaseapp.com",
+      projectId: "osextolugar-game"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const emailEl = document.getElementById("email");
+    const passwordEl = document.getElementById("password");
+    const loginBtn = document.getElementById("loginBtn");
+    const statusEl = document.getElementById("status");
+    const forgotBtn = document.getElementById("forgot");
+
+    function setStatus(text, type=""){
+      statusEl.textContent = text;
+      statusEl.className = "status " + type;
+    }
+
+    onAuthStateChanged(auth, user => {
+      if(user){
+        window.location.href = "./painel.html";
+      }
+    });
+
+    loginBtn.addEventListener("click", async () => {
+      const email = emailEl.value.trim();
+      const password = passwordEl.value;
+
+      if(!email || !password){
+        setStatus("Preencha todos os campos.", "err");
+        return;
+      }
+
+      try{
+        loginBtn.disabled = true;
+        setStatus("Entrando...");
+
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+
+        const userRef = doc(db, "users", cred.user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if(userSnap.exists()){
+          const data = userSnap.data();
+
+          localStorage.setItem("osl_nome", data.displayName || "");
+          localStorage.setItem("osl_license_code", data.licenseCode || "");
+        }
+
+        setStatus("Acesso liberado.", "ok");
+
+        setTimeout(() => {
+          window.location.href = "./painel.html";
+        }, 500);
+
+      }catch(err){
+        console.error(err);
+
+        let msg = "Erro ao entrar.";
+
+        if(err.code === "auth/user-not-found"){
+          msg = "Conta não encontrada.";
+        }else if(err.code === "auth/wrong-password"){
+          msg = "Senha incorreta.";
+        }else if(err.code === "auth/invalid-email"){
+          msg = "E-mail inválido.";
+        }
+
+        setStatus(msg, "err");
+        loginBtn.disabled = false;
+      }
+    });
+
+    forgotBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      const email = emailEl.value.trim();
+
+      if(!email){
+        setStatus("Digite seu e-mail para recuperar.", "err");
+        return;
+      }
+
+      try{
+        await sendPasswordResetEmail(auth, email);
+        setStatus("E-mail de recuperação enviado.", "ok");
+      }catch{
+        setStatus("Erro ao enviar recuperação.", "err");
+      }
+    });
+  </script>
+
+</body>
+</html>
