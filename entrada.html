@@ -455,65 +455,74 @@
   </style>
 
   <script>
-    (async function protegerEntrada() {
-      const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+  (async function protegerEntrada() {
+    const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
 
-      try {
-        let accessToken = localStorage.getItem("osl_access_token");
-        const licenseToken = localStorage.getItem("osl_license_token");
+    function liberarPagina() {
+      if (document.body) {
+        document.body.classList.add("osl-ready");
+      } else {
+        window.addEventListener("DOMContentLoaded", function () {
+          document.body.classList.add("osl-ready");
+        }, { once: true });
+      }
+    }
 
-        if (!accessToken && licenseToken) {
-          const renewRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ licenseToken })
-          });
+    try {
+      let accessToken = localStorage.getItem("osl_access_token");
+      const licenseToken = localStorage.getItem("osl_license_token");
 
-          const renewData = await renewRes.json().catch(() => ({}));
-
-          if (renewRes.ok && renewData.accessToken) {
-            localStorage.setItem("osl_access_token", renewData.accessToken);
-
-            if (renewData.expiresAt) {
-              localStorage.setItem("osl_access_expires_at", String(renewData.expiresAt));
-            }
-
-            accessToken = renewData.accessToken;
-          }
-        }
-
-        if (!accessToken) {
-          window.location.href = "./vendas.html";
-          return;
-        }
-
-        const res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
+      if (!accessToken && licenseToken) {
+        const renewRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ accessToken })
+          body: JSON.stringify({ licenseToken })
         });
 
-        const data = await res.json().catch(() => ({}));
+        const renewData = await renewRes.json().catch(() => ({}));
 
-        if (!res.ok || !data.liberado) {
-          localStorage.removeItem("osl_access_token");
-          window.location.href = "./vendas.html";
-          return;
+        if (renewRes.ok && renewData.accessToken) {
+          localStorage.setItem("osl_access_token", renewData.accessToken);
+
+          if (renewData.expiresAt) {
+            localStorage.setItem("osl_access_expires_at", String(renewData.expiresAt));
+          }
+
+          accessToken = renewData.accessToken;
         }
-
-        document.addEventListener("DOMContentLoaded", function () {
-          document.body.classList.add("osl-ready");
-        });
-      } catch (error) {
-        console.error("Erro ao validar acesso:", error);
-        window.location.href = "./vendas.html";
       }
-    })();
-  </script>
+
+      if (!accessToken) {
+        window.location.href = "./vendas.html";
+        return;
+      }
+
+      const res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ accessToken })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.liberado) {
+        localStorage.removeItem("osl_access_token");
+        localStorage.removeItem("osl_access_expires_at");
+        window.location.href = "./vendas.html";
+        return;
+      }
+
+      liberarPagina();
+    } catch (error) {
+      console.error("Erro ao validar acesso:", error);
+      window.location.href = "./vendas.html";
+    }
+  })();
+</script>
 </head>
 
 <body>
