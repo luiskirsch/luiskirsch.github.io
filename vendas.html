@@ -850,11 +850,22 @@ async function comprar() {
     const data = await res.json();
 
     if (!res.ok || !data.url || !data.ref) {
-      console.error(data);
-      status.textContent = "Não foi possível iniciar o pagamento.";
-      btn.disabled = false;
-      return;
-    }
+  console.error(data);
+
+  let erro = "Não foi possível iniciar o pagamento.";
+
+  if (typeof data?.error === "string") {
+    erro = data.error;
+  } else if (typeof data?.message === "string") {
+    erro = data.message;
+  } else if (data?.details) {
+    erro = JSON.stringify(data.details);
+  }
+
+  status.textContent = erro;
+  btn.disabled = false;
+  return;
+}
 
     localStorage.setItem("osl_checkout_nome", nome);
     localStorage.setItem("osl_checkout_email", email);
