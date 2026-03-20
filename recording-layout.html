@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <title>Recording Layout | O SextoLugar</title>
+
+  <style>
+    :root{
+      --bg-1:#040506;
+      --bg-2:#0a0d10;
+      --gold:#e6c07b;
+      --gold-soft:rgba(230,192,123,.18);
+      --line:rgba(255,255,255,.08);
+      --text:#f6f7fb;
+      --muted:rgba(255,255,255,.70);
+      --panel:rgba(255,255,255,.04);
+      --shadow:0 30px 80px rgba(0,0,0,.45);
+      --radius-xl:28px;
+      --radius-lg:22px;
+      --radius-md:16px;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html,body{
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:
+        radial-gradient(1000px 420px at 50% 8%, rgba(230,192,123,.07), transparent 60%),
+        radial-gradient(600px 280px at 14% 80%, rgba(72,183,244,.06), transparent 60%),
+        linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
+      color:var(--text);
+      font-family:Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.018), transparent 14%, transparent 86%, rgba(255,255,255,.015)),
+        radial-gradient(circle at center, transparent 52%, rgba(0,0,0,.24) 100%);
+      opacity:.95;
+    }
+
+    .frame{
+      position:relative;
+      z-index:1;
+      width:100%;
+      height:100%;
+      padding:28px;
+      display:grid;
+      grid-template-rows: 380px 1fr;
+      gap:20px;
+    }
+
+    .topArea{
+      display:grid;
+      grid-template-columns: 1.15fr 320px;
+      gap:20px;
+      min-height:0;
+    }
+
+    .cardPanel,
+    .metaPanel,
+    .videoPanel{
+      position:relative;
+      border:1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .cardPanel::before,
+    .metaPanel::before,
+    .videoPanel::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(700px 220px at 50% 0%, rgba(230,192,123,.08), transparent 60%);
+      opacity:.8;
+    }
+
+    .cardPanel{
+      border-radius:var(--radius-xl);
+      padding:26px 28px;
+      display:grid;
+      grid-template-rows:auto auto 1fr auto;
+      gap:16px;
+      background:
+        radial-gradient(circle at top, rgba(230,192,123,.07), transparent 30%),
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018));
+    }
+
+    .cardTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .ritualBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--gold);
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .ritualBadge::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--gold);
+      box-shadow:0 0 14px rgba(230,192,123,.45);
+    }
+
+    .cardNumber{
+      font-size:13px;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.64);
+      white-space:nowrap;
+    }
+
+    .cardType{
+      color:var(--gold);
+      font-size:13px;
+      letter-spacing:.26em;
+      text-transform:uppercase;
+      font-weight:800;
+    }
+
+    .cardTitle{
+      font-size:64px;
+      line-height:.94;
+      letter-spacing:-.06em;
+      font-weight:900;
+      max-width:10ch;
+      text-transform:uppercase;
+      text-shadow:0 16px 40px rgba(0,0,0,.32);
+    }
+
+    .cardTextWrap{
+      display:grid;
+      align-content:center;
+      min-height:0;
+    }
+
+    .cardText{
+      font-size:28px;
+      line-height:1.45;
+      color:rgba(255,255,255,.88);
+      max-width:30ch;
+    }
+
+    .cardFooter{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:20px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .cardFooterLeft{
+      display:grid;
+      gap:8px;
+    }
+
+    .footerRule{
+      width:180px;
+      height:2px;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(230,192,123,.95), transparent);
+      box-shadow:0 0 10px rgba(230,192,123,.18);
+    }
+
+    .metaPanel{
+      border-radius:var(--radius-xl);
+      padding:24px 22px;
+      display:grid;
+      grid-template-rows:auto auto 1fr auto;
+      gap:16px;
+    }
+
+    .brandSmall{
+      color:var(--gold);
+      font-size:12px;
+      letter-spacing:.2em;
+      text-transform:uppercase;
+      font-weight:700;
+    }
+
+    .brandTitle{
+      font-size:34px;
+      letter-spacing:-.05em;
+      line-height:.95;
+      font-weight:900;
+    }
+
+    .roomInfo{
+      display:grid;
+      gap:10px;
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      min-height:48px;
+      padding:12px 14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.07);
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .pill strong{
+      color:#fff;
+      font-size:14px;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .liveStatus{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.07);
+      color:#fff;
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    .liveStatus::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#ff6464;
+      box-shadow:0 0 14px rgba(255,100,100,.55);
+    }
+
+    .metaBottom{
+      color:rgba(255,255,255,.62);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .videoPanel{
+      border-radius:var(--radius-xl);
+      padding:18px;
+      display:grid;
+      min-height:0;
+    }
+
+    .videoGrid{
+      width:100%;
+      height:100%;
+      display:grid;
+      gap:14px;
+      align-items:stretch;
+      justify-items:stretch;
+      min-height:0;
+    }
+
+    .videoGrid.grid-1{
+      grid-template-columns:1fr;
+      grid-template-rows:1fr;
+    }
+
+    .videoGrid.grid-2{
+      grid-template-columns:repeat(2,1fr);
+      grid-template-rows:1fr;
+    }
+
+    .videoGrid.grid-3,
+    .videoGrid.grid-4{
+      grid-template-columns:repeat(2,1fr);
+      grid-template-rows:repeat(2,1fr);
+    }
+
+    .videoGrid.grid-5,
+    .videoGrid.grid-6{
+      grid-template-columns:repeat(3,1fr);
+      grid-template-rows:repeat(2,1fr);
+    }
+
+    .videoTile{
+      position:relative;
+      overflow:hidden;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at center, rgba(72,183,244,.06), transparent 55%),
+        #05070a;
+      min-height:0;
+    }
+
+    .videoTile video{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      background:#000;
+    }
+
+    .videoTileLabel{
+      position:absolute;
+      left:12px;
+      bottom:12px;
+      max-width:calc(100% - 24px);
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(6px);
+      color:#fff;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.04em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .videoEmpty{
+      width:100%;
+      height:100%;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:24px;
+      border-radius:22px;
+      border:1px dashed rgba(255,255,255,.10);
+      color:rgba(255,255,255,.62);
+      font-size:16px;
+      line-height:1.6;
+      background:rgba(255,255,255,.02);
+    }
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <section class="topArea">
+      <section class="cardPanel">
+        <div class="cardTop">
+          <div class="ritualBadge">O SextoLugar</div>
+          <div class="cardNumber" id="cardNumber">Carta 01</div>
+        </div>
+
+        <div class="cardType" id="cardType">Ritual</div>
+
+        <h1 class="cardTitle" id="cardTitle">Silêncio</h1>
+
+        <div class="cardTextWrap">
+          <div class="cardText" id="cardText">
+            Durante 60 segundos, ninguém pode falar.
+          </div>
+        </div>
+
+        <div class="cardFooter">
+          <div class="cardFooterLeft">
+            <div class="footerRule"></div>
+            <div>A sessão reage ao desconforto, não às palavras.</div>
+          </div>
+          <div id="updatedAtText">Ao vivo</div>
+        </div>
+      </section>
+
+      <aside class="metaPanel">
+        <div class="brandSmall">Recording Layout</div>
+        <div class="brandTitle">O SextoLugar</div>
+
+        <div class="roomInfo">
+          <div class="pill">
+            <span>Sala</span>
+            <strong id="roomName">Carregando</strong>
+          </div>
+
+          <div class="pill">
+            <span>Código</span>
+            <strong id="roomCode">----</strong>
+          </div>
+
+          <div class="pill">
+            <span>Jogadores</span>
+            <strong id="participantCount">0</strong>
+          </div>
+        </div>
+
+        <div class="liveStatus">Gravação ativa</div>
+
+        <div class="metaBottom">
+          Layout oficial de captura da sessão com carta em destaque e reações do grupo em tempo real.
+        </div>
+      </aside>
+    </section>
+
+    <section class="videoPanel">
+      <div class="videoGrid grid-1" id="videoGrid">
+        <div class="videoEmpty" id="videoEmpty">
+          Aguardando participantes entrarem na chamada.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    import {
+      Room,
+      RoomEvent
+    } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC8sSvA7_1HPYRFGfgdgzstkP_yQHadY-c",
+      authDomain: "osextolugar-game.firebaseapp.com",
+      projectId: "osextolugar-game",
+      storageBucket: "osextolugar-game.firebasestorage.app",
+      messagingSenderId: "947922328721",
+      appId: "1:947922328721:web:989522c99e16ab449f3330",
+      measurementId: "G-D6HG779ZFR"
+    };
+
+    const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+    const LIVEKIT_URL = "wss://osextolugar-eqa7q1iz.livekit.cloud";
+
+    const params = new URLSearchParams(window.location.search);
+    const roomCode =
+      params.get("room") ||
+      params.get("sala") ||
+      "SL-0001";
+
+    const roomName =
+      params.get("nomeSala") ||
+      "Sala do Ritual";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const roomNameEl = document.getElementById("roomName");
+    const roomCodeEl = document.getElementById("roomCode");
+    const participantCountEl = document.getElementById("participantCount");
+
+    const cardTypeEl = document.getElementById("cardType");
+    const cardTitleEl = document.getElementById("cardTitle");
+    const cardTextEl = document.getElementById("cardText");
+    const cardNumberEl = document.getElementById("cardNumber");
+    const updatedAtTextEl = document.getElementById("updatedAtText");
+
+    const videoGridEl = document.getElementById("videoGrid");
+    const videoEmptyEl = document.getElementById("videoEmpty");
+
+    roomNameEl.textContent = roomName;
+    roomCodeEl.textContent = roomCode;
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function applyGridClass(count) {
+      videoGridEl.className = "videoGrid";
+
+      if (count <= 1) videoGridEl.classList.add("grid-1");
+      else if (count === 2) videoGridEl.classList.add("grid-2");
+      else if (count <= 4) videoGridEl.classList.add("grid-4");
+      else videoGridEl.classList.add("grid-6");
+    }
+
+    function updateParticipantCount() {
+      const count = videoGridEl.querySelectorAll(".videoTile").length;
+      participantCountEl.textContent = String(count);
+      applyGridClass(count || 1);
+
+      if (count === 0 && videoEmptyEl && !videoEmptyEl.parentNode) {
+        videoGridEl.appendChild(videoEmptyEl);
+      }
+
+      if (count > 0 && videoEmptyEl && videoEmptyEl.parentNode === videoGridEl) {
+        videoEmptyEl.remove();
+      }
+    }
+
+    function getTile(identity) {
+      return videoGridEl.querySelector(`.videoTile[data-identity="${CSS.escape(identity)}"]`);
+    }
+
+    function createTile(identity, label) {
+      const tile = document.createElement("div");
+      tile.className = "videoTile";
+      tile.dataset.identity = identity;
+
+      const mediaWrap = document.createElement("div");
+      mediaWrap.className = "videoMedia";
+
+      const labelEl = document.createElement("div");
+      labelEl.className = "videoTileLabel";
+      labelEl.innerHTML = escapeHtml(label || "Jogador");
+
+      tile.appendChild(mediaWrap);
+      tile.appendChild(labelEl);
+
+      return tile;
+    }
+
+    function ensureTile(identity, label) {
+      let tile = getTile(identity);
+      if (tile) {
+        const labelEl = tile.querySelector(".videoTileLabel");
+        if (labelEl) labelEl.innerHTML = escapeHtml(label || "Jogador");
+        return tile;
+      }
+
+      tile = createTile(identity, label);
+      videoGridEl.appendChild(tile);
+      updateParticipantCount();
+      return tile;
+    }
+
+    function removeTile(identity) {
+      const tile = getTile(identity);
+      if (tile) tile.remove();
+      updateParticipantCount();
+    }
+
+    function attachTrack(identity, track, label) {
+      const tile = ensureTile(identity, label);
+      const mediaWrap = tile.querySelector(".videoMedia");
+      if (!mediaWrap) return;
+
+      const existing = mediaWrap.querySelector(`[data-track-sid="${track.sid}"]`);
+      if (existing) return;
+
+      const el = track.attach();
+      el.dataset.trackSid = track.sid;
+
+      if (track.kind === "video") {
+        el.autoplay = true;
+        el.playsInline = true;
+        el.muted = true;
+      }
+
+      if (track.kind === "audio") {
+        el.autoplay = true;
+      }
+
+      mediaWrap.appendChild(el);
+    }
+
+    async function getRecordingToken() {
+      const identity = `recording_bot_${Math.random().toString(36).slice(2, 10)}`;
+
+      const accessToken = localStorage.getItem("osl_access_token");
+
+      const res = await fetch(
+        `${BACKEND_BASE_URL}/token?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(identity)}`,
+        {
+          headers: accessToken
+            ? { Authorization: `Bearer ${accessToken}` }
+            : {}
+        }
+      );
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.token) {
+        throw new Error(data?.error || "TOKEN_RECORDING_INVALIDO");
+      }
+
+      return data.token;
+    }
+
+    async function connectRoom() {
+      const token = await getRecordingToken();
+
+      const room = new Room({
+        adaptiveStream: true,
+        dynacast: true
+      });
+
+      room.on(RoomEvent.ParticipantConnected, (participant) => {
+        ensureTile(
+          participant.identity,
+          participant.name || "Jogador"
+        );
+      });
+
+      room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+        attachTrack(
+          participant.identity,
+          track,
+          participant.name || "Jogador"
+        );
+      });
+
+      room.on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+        const tile = getTile(participant.identity);
+        if (!tile) return;
+
+        const mediaWrap = tile.querySelector(".videoMedia");
+        const mediaEl = mediaWrap?.querySelector(`[data-track-sid="${track.sid}"]`);
+        if (mediaEl) mediaEl.remove();
+      });
+
+      room.on(RoomEvent.ParticipantDisconnected, (participant) => {
+        removeTile(participant.identity);
+      });
+
+      await room.connect(LIVEKIT_URL, token, { autoSubscribe: true });
+
+      for (const participant of room.remoteParticipants.values()) {
+        ensureTile(participant.identity, participant.name || "Jogador");
+
+        participant.trackPublications.forEach((pub) => {
+          if (pub.track) {
+            attachTrack(
+              participant.identity,
+              pub.track,
+              participant.name || "Jogador"
+            );
+          }
+        });
+      }
+
+      updateParticipantCount();
+    }
+
+    function bindCard() {
+      const ritualRef = doc(db, "salas", roomCode, "ritual", "state");
+
+      onSnapshot(ritualRef, (snap) => {
+        if (!snap.exists()) {
+          cardTypeEl.textContent = "Ritual";
+          cardTitleEl.textContent = "Aguardando";
+          cardTextEl.innerHTML = "A sessão ainda não iniciou.";
+          cardNumberEl.textContent = "Carta 01";
+          updatedAtTextEl.textContent = "Ao vivo";
+          return;
+        }
+
+        const data = snap.data();
+        const card = data.currentCard || null;
+
+        if (!card) {
+          cardTypeEl.textContent = "Ritual";
+          cardTitleEl.textContent = "Aguardando revelação";
+          cardTextEl.innerHTML = "O anfitrião ainda não revelou a próxima carta.";
+          cardNumberEl.textContent = "Carta 01";
+        } else {
+          cardTypeEl.textContent = card.type || "Ritual";
+          cardTitleEl.textContent = card.title || "Carta revelada";
+          cardTextEl.innerHTML = String(card.text || "").replace(/\n/g, "<br>");
+          cardNumberEl.textContent = card.number
+            ? `Carta ${String(card.number).padStart(2, "0")}`
+            : "Carta Ritual";
+        }
+
+        updatedAtTextEl.textContent = "Ao vivo";
+      });
+    }
+
+    bindCard();
+    connectRoom().catch((error) => {
+      console.error("Erro ao conectar recording layout:", error);
+      if (videoEmptyEl) {
+        videoEmptyEl.innerHTML = "Não foi possível conectar à sala de gravação.";
+      }
+    });
+  </script>
+</body>
+          </html>
