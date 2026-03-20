@@ -854,10 +854,10 @@ async function comprar() {
 
   let erro = "Não foi possível iniciar o pagamento.";
 
-  if (typeof data?.error === "string") {
-    erro = data.error;
-  } else if (typeof data?.message === "string") {
+  if (typeof data?.message === "string" && data.message.trim()) {
     erro = data.message;
+  } else if (typeof data?.error === "string" && data.error.trim()) {
+    erro = data.error;
   } else if (data?.details) {
     erro = JSON.stringify(data.details);
   }
