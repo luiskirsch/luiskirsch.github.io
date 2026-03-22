@@ -430,7 +430,6 @@
       </div>
     </section>
   </main>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import {
@@ -473,11 +472,9 @@
   const goLoginBtn = document.getElementById("goLoginBtn");
   const statusEl = document.getElementById("status");
 
-  let isCreatingAccount = false;
-
   function setStatus(text, type = "") {
     statusEl.textContent = text;
-    statusEl.classList.remove("ok", "err");
+    statusEl.className = "status";
     if (type) statusEl.classList.add(type);
   }
 
@@ -505,6 +502,7 @@
 
     await setDoc(userRef, {
       uid: user.uid,
+      userId: user.uid,
       email,
       displayName,
       username,
@@ -530,6 +528,7 @@
     const usernameRef = doc(db, "usernames", username);
     await setDoc(usernameRef, {
       uid: user.uid,
+      userId: user.uid,
       username,
       createdAt: serverTimestamp()
     }, { merge: true });
@@ -539,10 +538,7 @@
     const licenseToken = getLicenseToken();
 
     if (!licenseToken) {
-      return {
-        ok: true,
-        linked: false
-      };
+      return { ok: true, linked: false };
     }
 
     const res = await fetch(`${BACKEND_BASE_URL}/verificar-licenca`, {
@@ -556,10 +552,7 @@
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || !data.valid) {
-      return {
-        ok: false,
-        linked: false
-      };
+      return { ok: false, linked: false };
     }
 
     localStorage.setItem("osl_license_code", data.licenseCode || "");
@@ -576,170 +569,84 @@
       updatedAt: serverTimestamp()
     }, { merge: true });
 
-    return {
-      ok: true,
-      linked: true
-    };
+    return { ok: true, linked: true };
   }
 
-  const savedCheckoutEmail =
-    localStorage.getItem("osl_checkout_email") ||
-    localStorage.getItem("osl_license_email") ||
-    "";
+  function humanizeSignupError(error) {
+    const code = error?.code || "";
 
-  if (savedCheckoutEmail) {
-    emailEl.value = savedCheckoutEmail;
-  }
-
-  displayNameEl.addEventListener("input", () => {
-    if (!usernameEl.dataset.editedManually) {
-      usernameEl.value = normalizeUsername(displayNameEl.value);
+    if (code === "auth/email-already-in-use") {
+      return "Este e-mail já está cadastrado.";
     }
-  });
+    if (code === "auth/invalid-email") {
+      return "O e-mail informado é inválido.";
+    }
+    if (code === "auth/weak-password") {
+      return "Sua senha é fraca demais.";
+    }
+    if (code === "auth/network-request-failed") {
+      return "Erro de conexão. Tente novamente.";
+    }
+    if (code === "auth/operation-not-allowed") {
+      return "O cadastro por e-mail e senha não está habilitado no Firebase.";
+    }
+    if (code === "permission-denied") {
+      return "O Firestore recusou salvar o perfil.";
+    }
 
-  usernameEl.addEventListener("input", () => {
-    usernameEl.dataset.editedManually = "true";
-  });
+    return `Erro ao criar conta: ${code || "desconhecido"}`;
+  }
 
   onAuthStateChanged(auth, (user) => {
-    if (user && !isCreatingAccount) {
+    if (user) {
       window.location.href = "./painel.html";
     }
   });
-function humanizeSignupError(error) {
-  const code = error?.code || "";
 
-  if (code === "auth/email-already-in-use") {
-    return "Este e-mail já está cadastrado.";
-  }
-
-  if (code === "auth/invalid-email") {
-    return "O e-mail informado é inválido.";
-  }
-
-  if (code === "auth/weak-password") {
-    return "Sua senha é fraca demais.";
-  }
-
-  if (code === "auth/network-request-failed") {
-    return "Erro de conexão. Tente novamente.";
-  }
-
-  if (code === "auth/operation-not-allowed") {
-    return "O cadastro por e-mail e senha não está habilitado no Firebase.";
-  }
-
-  if (code === "auth/configuration-not-found") {
-    return "A configuração do Firebase Auth está incompleta.";
-  }
-
-  if (code === "permission-denied") {
-    return "O Firestore recusou salvar o perfil. Verifique as regras.";
-  }
-
-  return `Erro ao criar conta: ${code || "desconhecido"}`;
-    }
   cadastroForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const displayName = displayNameEl.value.trim().slice(0, 40);
-  const email = emailEl.value.trim().toLowerCase().slice(0, 160);
-  const username = normalizeUsername(usernameEl.value);
-  const password = passwordEl.value;
-  const confirmPassword = confirmPasswordEl.value;
+    const displayName = displayNameEl.value.trim().slice(0, 40);
+    const email = emailEl.value.trim().toLowerCase().slice(0, 160);
+    const username = normalizeUsername(usernameEl.value);
+    const password = passwordEl.value;
+    const confirmPassword = confirmPasswordEl.value;
 
-  if (!displayName) {
-    setStatus("Digite seu nome de exibição.", "err");
-    displayNameEl.focus();
-    return;
-  }
+    if (!displayName) {
+      setStatus("Digite seu nome de exibição.", "err");
+      displayNameEl.focus();
+      return;
+    }
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    setStatus("Digite um e-mail válido.", "err");
-    emailEl.focus();
-    return;
-  }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setStatus("Digite um e-mail válido.", "err");
+      emailEl.focus();
+      return;
+    }
 
-  if (!username || username.length < 3) {
-    setStatus("Escolha um usuário com pelo menos 3 caracteres.", "err");
-    usernameEl.focus();
-    return;
-  }
-
-  if (password.length < 6) {
-    setStatus("A senha precisa ter pelo menos 6 caracteres.", "err");
-    passwordEl.focus();
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    setStatus("As senhas não coincidem.", "err");
-    confirmPasswordEl.focus();
-    return;
-  }
-
-  let createdUser = null;
-
-  try {
-    submitBtn.disabled = true;
-    goLoginBtn.disabled = true;
-
-    setStatus("Verificando disponibilidade do usuário...");
-
-    if (await usernameExists(username)) {
-      setStatus("Esse usuário já está em uso.", "err");
-      submitBtn.disabled = false;
-      goLoginBtn.disabled = false;
+    if (!username || username.length < 3) {
+      setStatus("Escolha um usuário com pelo menos 3 caracteres.", "err");
       usernameEl.focus();
       return;
     }
 
-    setStatus("Criando sua conta...");
-
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    createdUser = cred.user;
-
-    await updateProfile(createdUser, {
-      displayName
-    });
-
-    setStatus("Salvando seu perfil...");
-
-    await saveUserProfile(createdUser, displayName, username, email);
-
-    setStatus("Vinculando seu acesso...");
-
-    await tryLinkLicenseAfterSignup(createdUser.uid);
-
-    localStorage.setItem("osl_nome", displayName);
-    localStorage.setItem("osl_username", username);
-    localStorage.setItem("osl_auth_uid", createdUser.uid);
-
-    setStatus("Conta criada com sucesso. Entrando no painel...", "ok");
-
-    setTimeout(() => {
-      window.location.href = "./painel.html";
-    }, 600);
-
-  } catch (error) {
-    console.error("ERRO COMPLETO NO CADASTRO:", error);
-    console.error("error.code:", error?.code);
-    console.error("error.message:", error?.message);
-
-    // Se criou no Auth mas falhou depois, remove o usuário para não deixar cadastro quebrado
-    try {
-      if (createdUser) {
-        await createdUser.delete();
-      }
-    } catch (deleteError) {
-      console.error("Não foi possível remover usuário parcial:", deleteError);
+    if (password.length < 6) {
+      setStatus("A senha precisa ter pelo menos 6 caracteres.", "err");
+      passwordEl.focus();
+      return;
     }
 
-    setStatus(humanizeSignupError(error), "err");
-    submitBtn.disabled = false;
-    goLoginBtn.disabled = false;
-  }
-});
+    if (password !== confirmPassword) {
+      setStatus("As senhas não coincidem.", "err");
+      confirmPasswordEl.focus();
+      return;
+    }
+
+    let createdUser = null;
+
+    try {
+      submitBtn.disabled = true;
+      goLoginBtn.disabled = true;
 
       setStatus("Verificando disponibilidade do usuário...");
 
@@ -747,7 +654,6 @@ function humanizeSignupError(error) {
         setStatus("Esse usuário já está em uso.", "err");
         submitBtn.disabled = false;
         goLoginBtn.disabled = false;
-        isCreatingAccount = false;
         usernameEl.focus();
         return;
       }
@@ -755,50 +661,40 @@ function humanizeSignupError(error) {
       setStatus("Criando sua conta...");
 
       const cred = await createUserWithEmailAndPassword(auth, email, password);
+      createdUser = cred.user;
 
-      await updateProfile(cred.user, {
-        displayName
-      });
+      await updateProfile(createdUser, { displayName });
 
-      await saveUserProfile(cred.user, displayName, username, email);
+      setStatus("Salvando seu perfil...");
+      await saveUserProfile(createdUser, displayName, username, email);
 
-      setStatus("Vinculando seu acesso...", "ok");
-
-      await tryLinkLicenseAfterSignup(cred.user.uid);
+      setStatus("Vinculando seu acesso...");
+      await tryLinkLicenseAfterSignup(createdUser.uid);
 
       localStorage.setItem("osl_nome", displayName);
       localStorage.setItem("osl_username", username);
-      localStorage.setItem("osl_auth_uid", cred.user.uid);
+      localStorage.setItem("osl_auth_uid", createdUser.uid);
 
       setStatus("Conta criada com sucesso. Entrando no painel...", "ok");
 
       setTimeout(() => {
         window.location.href = "./painel.html";
-      }, 700);
+      }, 600);
+
     } catch (error) {
-      console.error(error);
+      console.error("ERRO COMPLETO NO CADASTRO:", error);
+      console.error("error.code:", error?.code);
+      console.error("error.message:", error?.message);
 
-      let msg = "Não foi possível criar sua conta.";
-
-      if (error.code === "auth/email-already-in-use") {
-        msg = "Este e-mail já está cadastrado.";
-      } else if (error.code === "auth/invalid-email") {
-        msg = "O e-mail informado é inválido.";
-      } else if (error.code === "auth/weak-password") {
-        msg = "Sua senha é fraca demais.";
-      } else if (error.code === "auth/network-request-failed") {
-        msg = "Erro de conexão. Tente novamente.";
-      }
-
-      setStatus(msg, "err");
+      setStatus(humanizeSignupError(error), "err");
       submitBtn.disabled = false;
       goLoginBtn.disabled = false;
-      isCreatingAccount = false;
     }
   });
 
   goLoginBtn.addEventListener("click", () => {
     window.location.href = "./login.html";
   });
+
+  setStatus("Sistema carregado.");
 </script>
-            
