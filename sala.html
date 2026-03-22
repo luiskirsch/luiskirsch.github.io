@@ -1,3394 +1,2289 @@
 <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <script>
+    (async function protegerSala() {
+      const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
 
-<html lang="pt-BR">    
-<head>    
+      try {
+        document.documentElement.style.visibility = "hidden";
 
-<script>
-(async function protegerSala() {
-  const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+        let accessToken = localStorage.getItem("osl_access_token");
+        const licenseToken = localStorage.getItem("osl_license_token");
 
-  try {
-    document.documentElement.style.visibility = "hidden";
+        if (!accessToken && licenseToken) {
+          const renewRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ licenseToken })
+          });
 
-    let accessToken = localStorage.getItem("osl_access_token");
-    const licenseToken = localStorage.getItem("osl_license_token");
+          const renewData = await renewRes.json().catch(() => ({}));
 
-    if (!accessToken && licenseToken) {
-      const renewRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ licenseToken })
-      });
+          if (renewRes.ok && renewData.accessToken) {
+            localStorage.setItem("osl_access_token", renewData.accessToken);
 
-      const renewData = await renewRes.json().catch(() => ({}));
+            if (renewData.expiresAt) {
+              localStorage.setItem("osl_access_expires_at", String(renewData.expiresAt));
+            }
 
-      if (renewRes.ok && renewData.accessToken) {
-        localStorage.setItem("osl_access_token", renewData.accessToken);
-
-        if (renewData.expiresAt) {
-          localStorage.setItem("osl_access_expires_at", String(renewData.expiresAt));
+            accessToken = renewData.accessToken;
+          }
         }
 
-        accessToken = renewData.accessToken;
+        if (!accessToken) {
+          window.location.href = "./vendas.html";
+          return;
+        }
+
+        const res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ accessToken })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.liberado) {
+          localStorage.removeItem("osl_access_token");
+          localStorage.removeItem("osl_access_expires_at");
+          window.location.href = "./vendas.html";
+          return;
+        }
+
+        document.documentElement.style.visibility = "visible";
+      } catch (error) {
+        console.error("Erro ao validar acesso da sala:", error);
+        window.location.href = "./vendas.html";
+      }
+    })();
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>O SextoLugar — Sala</title>
+
+  <style>
+    html{
+      visibility:visible;
+    }
+
+    :root{
+      --bg:#0b0908;
+      --bg-2:#14100e;
+      --bg-3:#1c1713;
+      --panel:#181412;
+      --panel-2:#221b17;
+      --panel-3:#120f0d;
+      --gold:#d7b06b;
+      --gold-2:#b8863c;
+      --gold-soft:rgba(215,176,107,.18);
+      --line:rgba(215,176,107,.18);
+      --line-strong:rgba(215,176,107,.34);
+      --text:#f3ede5;
+      --muted:rgba(243,237,229,.64);
+      --ok:#54d06d;
+      --danger:#ff6b6b;
+      --shadow:0 24px 70px rgba(0,0,0,.45);
+      --radius-xl:24px;
+      --radius-lg:18px;
+      --radius-md:14px;
+    }
+
+    *{ box-sizing:border-box; }
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      color:var(--text);
+      font-family:Georgia, "Times New Roman", serif;
+      overflow-x:hidden;
+      background:
+        radial-gradient(80vw 60vh at 50% 0%, rgba(215,176,107,.07), transparent 55%),
+        radial-gradient(55vw 45vh at 10% 30%, rgba(255,255,255,.03), transparent 60%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 52%, var(--bg-3) 100%);
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at center, transparent 55%, rgba(0,0,0,.34) 100%),
+        linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0) 18%, rgba(255,255,255,0) 82%, rgba(255,255,255,.015));
+      opacity:.95;
+      mix-blend-mode:screen;
+    }
+
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.14;
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 38px 38px;
+    }
+
+    .page{
+      position:relative;
+      z-index:1;
+      width:100%;
+      min-height:100vh;
+      min-height:100svh;
+      padding:
+        max(14px, env(safe-area-inset-top))
+        max(14px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(14px, env(safe-area-inset-left));
+    }
+
+    .shell{
+      width:min(1520px, 100%);
+      margin:0 auto;
+      display:grid;
+      gap:14px;
+    }
+
+    /* TOPO */
+    .topbar{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      align-items:center;
+      gap:16px;
+      padding:14px 18px;
+      border:1px solid var(--line-strong);
+      border-radius:20px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015)),
+        radial-gradient(circle at top, rgba(215,176,107,.10), transparent 62%),
+        linear-gradient(180deg, rgba(25,20,16,.92), rgba(17,14,12,.95));
+      box-shadow:var(--shadow), inset 0 0 0 1px rgba(255,255,255,.02);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .topbar::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(90deg, transparent, rgba(215,176,107,.16), transparent);
+      opacity:.25;
+    }
+
+    .brandWrap{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+
+    .eyebrow{
+      margin:0;
+      font-size:10px;
+      letter-spacing:.28em;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .roomTitle{
+      margin:0;
+      font-size:clamp(28px, 3vw, 42px);
+      line-height:1;
+      font-weight:700;
+      letter-spacing:-.04em;
+      color:#f6efe4;
+    }
+
+    .topCenterMeta{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+      font-family:Inter, system-ui, sans-serif;
+      font-size:15px;
+      color:#efe5d6;
+    }
+
+    .topCenterMeta strong{
+      color:var(--gold);
+      font-weight:800;
+    }
+
+    .topActions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .topActionBtn{
+      appearance:none;
+      border:1px solid var(--line-strong);
+      background:rgba(255,255,255,.02);
+      color:#f6efe4;
+      min-height:46px;
+      padding:12px 16px;
+      border-radius:12px;
+      cursor:pointer;
+      font:inherit;
+      font-weight:700;
+      font-family:Inter, system-ui, sans-serif;
+      transition:transform .12s ease, background .15s ease, border-color .15s ease;
+    }
+
+    .topActionBtn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(215,176,107,.42);
+      background:rgba(255,255,255,.04);
+    }
+
+    .topActionBtn.primary{
+      color:#1a140d;
+      background:linear-gradient(180deg, #e7c58a, #c99a4b);
+      border-color:transparent;
+    }
+
+    .topActionBtn.iconOnly{
+      min-width:46px;
+      width:46px;
+      padding:0;
+      display:grid;
+      place-items:center;
+    }
+
+    /* LAYOUT */
+    .layout{
+      display:grid;
+      grid-template-columns:290px minmax(0, 1fr) 360px;
+      gap:14px;
+      min-height:calc(100vh - 116px);
+      min-height:calc(100svh - 116px);
+    }
+
+    .card{
+      border:1px solid var(--line-strong);
+      border-radius:20px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.012)),
+        linear-gradient(180deg, rgba(31,24,20,.92), rgba(18,14,12,.95));
+      box-shadow:var(--shadow), inset 0 0 0 1px rgba(255,255,255,.015);
+      overflow:hidden;
+      min-height:0;
+      position:relative;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(600px 180px at 50% 0%, rgba(215,176,107,.10), transparent 62%);
+      opacity:.55;
+    }
+
+    .cardInner{
+      position:relative;
+      z-index:1;
+      padding:14px;
+    }
+
+    .sectionTitle{
+      margin:0 0 12px;
+      font-size:11px;
+      letter-spacing:.25em;
+      text-transform:uppercase;
+      color:var(--gold);
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    /* COLUNA ESQUERDA */
+    .sidebar{
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      gap:14px;
+      min-height:0;
+    }
+
+    .playerPanel{
+      min-height:0;
+    }
+
+    .playerPanel .cardInner{
+      display:grid;
+      grid-template-rows:auto 1fr;
+      min-height:0;
+    }
+
+    .playerList{
+      display:grid;
+      gap:10px;
+      align-content:start;
+    }
+
+    .player{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px;
+      border-radius:12px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border:1px solid rgba(215,176,107,.20);
+      cursor:pointer;
+      transition:transform .12s ease, border-color .15s ease, background .15s ease;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .player:hover{
+      transform:translateY(-1px);
+      border-color:rgba(215,176,107,.34);
+      background:rgba(255,255,255,.05);
+    }
+
+    .playerLeft{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .avatar{
+      width:44px;
+      height:44px;
+      border-radius:10px;
+      display:grid;
+      place-items:center;
+      background:
+        linear-gradient(180deg, #6e5832, #2e2417);
+      border:1px solid rgba(215,176,107,.35);
+      color:#fff;
+      font-size:14px;
+      font-weight:800;
+      flex:0 0 auto;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .playerMeta{
+      min-width:0;
+    }
+
+    .playerName{
+      font-size:15px;
+      font-weight:800;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      color:#f5ede1;
+    }
+
+    .playerRole{
+      font-size:11px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .playerRight{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .playerStatus{
+      font-size:11px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:#8ae994;
+    }
+
+    .playerHost{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:22px;
+      padding:0 8px;
+      border-radius:999px;
+      background:rgba(215,176,107,.14);
+      border:1px solid rgba(215,176,107,.24);
+      color:#f1d8aa;
+      font-size:10px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    .emptyState{
+      padding:12px;
+      border-radius:12px;
+      border:1px dashed rgba(215,176,107,.18);
+      background:rgba(255,255,255,.02);
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+      font-family:Inter, system-ui, sans-serif;
+      margin-top:10px;
+    }
+
+    .sidebarActions{
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      width:100%;
+      min-height:46px;
+      padding:12px 16px;
+      border-radius:12px;
+      font:inherit;
+      font-weight:700;
+      font-family:Inter, system-ui, sans-serif;
+      transition:transform .12s ease, opacity .15s ease, border-color .15s ease, background .15s ease;
+    }
+
+    .btn:hover{ transform:translateY(-1px); }
+    .btn:active{ transform:translateY(0); opacity:.95; }
+
+    .btnPrimary{
+      color:#1a140d;
+      background:linear-gradient(180deg, #e7c58a, #c99a4b);
+      box-shadow:0 0 24px rgba(215,176,107,.18);
+    }
+
+    .btnGhost{
+      color:#f5ede1;
+      border:1px solid var(--line-strong);
+      background:rgba(255,255,255,.03);
+    }
+
+    .btnDanger{
+      color:#ffdede;
+      border:1px solid rgba(255,107,107,.20);
+      background:rgba(255,107,107,.08);
+    }
+
+    .btn[disabled]{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none !important;
+    }
+
+    /* CENTRO */
+    .centerColumn{
+      display:grid;
+      grid-template-rows:minmax(360px, 1fr) 220px;
+      gap:14px;
+      min-height:0;
+    }
+
+    .tableCard{
+      display:grid;
+      grid-template-rows:auto 1fr;
+      min-height:0;
+    }
+
+    .tableHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+      position:relative;
+      z-index:1;
+    }
+
+    .tableHeadLeft h2{
+      margin:0 0 4px;
+      font-size:clamp(26px, 2vw, 40px);
+      letter-spacing:-.03em;
+      color:#f6efe4;
+    }
+
+    .tableHeadLeft p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .tableHeadRight{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .sessionStatus{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(84,208,109,.10);
+      border:1px solid rgba(84,208,109,.20);
+      color:#dff8e6;
+      font-size:12px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      white-space:nowrap;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--ok);
+      box-shadow:0 0 14px rgba(84,208,109,.45);
+      flex:0 0 auto;
+    }
+
+    .tableBody{
+      display:grid;
+      grid-template-columns:180px minmax(0, 1fr);
+      gap:18px;
+      padding:18px;
+      min-height:0;
+      position:relative;
+      z-index:1;
+    }
+
+    .deckPanel{
+      display:grid;
+      align-content:start;
+      justify-items:center;
+      gap:14px;
+      padding:12px 8px;
+      border:1px solid rgba(215,176,107,.14);
+      border-radius:18px;
+      background:rgba(255,255,255,.02);
+      min-height:0;
+    }
+
+    .deckStack{
+      position:relative;
+      width:120px;
+      height:150px;
+      margin-top:6px;
+    }
+
+    .deckStack .cardBack{
+      position:absolute;
+      width:100px;
+      height:138px;
+      border-radius:12px;
+      border:1px solid rgba(215,176,107,.34);
+      background:
+        linear-gradient(180deg, rgba(38,29,24,.98), rgba(17,13,10,.98));
+      box-shadow:0 12px 28px rgba(0,0,0,.35);
+    }
+
+    .deckStack .cardBack:nth-child(1){ left:0; top:8px; opacity:.8; }
+    .deckStack .cardBack:nth-child(2){ left:10px; top:4px; opacity:.9; }
+    .deckStack .cardBack:nth-child(3){ left:20px; top:0; }
+
+    .deckLabel{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      color:#f1e6d6;
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:.06em;
+    }
+
+    .deckInfo{
+      text-align:center;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.6;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .revealPanel{
+      min-height:0;
+      border:1px solid rgba(215,176,107,.16);
+      border-radius:20px;
+      background:
+        radial-gradient(circle at center, rgba(215,176,107,.09), transparent 58%),
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      display:grid;
+      place-items:center;
+      padding:20px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .revealPanel::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(500px 200px at 50% 12%, rgba(215,176,107,.13), transparent 60%);
+      opacity:.7;
+    }
+
+    .revealStage{
+      width:100%;
+      display:grid;
+      justify-items:center;
+      gap:18px;
+      position:relative;
+      z-index:1;
+    }
+
+    .ritualVisualCard{
+      width:min(100%, 260px);
+      aspect-ratio:3/5;
+      position:relative;
+      border-radius:22px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255,255,255,.08), transparent 26%),
+        radial-gradient(circle at 50% 50%, rgba(215,176,107,.06), transparent 60%),
+        linear-gradient(180deg, #1b1511 0%, #120f0d 45%, #0e0c0a 100%);
+      border:1.5px solid rgba(215,176,107,.40);
+      box-shadow:
+        0 28px 80px rgba(0,0,0,.55),
+        inset 0 0 0 1px rgba(255,255,255,.03),
+        inset 0 0 80px rgba(215,176,107,.04);
+    }
+
+    .ritualVisualCard::before{
+      content:"";
+      position:absolute;
+      inset:10px;
+      border-radius:16px;
+      border:1px solid rgba(215,176,107,.45);
+      pointer-events:none;
+    }
+
+    .ritualCardFrame{
+      position:relative;
+      z-index:1;
+      height:100%;
+      padding:20px 18px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      color:#f7f3ea;
+    }
+
+    .ritualTopOrnaments{
+      width:100%;
+      display:grid;
+      grid-template-columns:1fr auto auto auto 1fr;
+      align-items:center;
+      gap:10px;
+      margin-bottom:18px;
+    }
+
+    .ritualLine{
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(215,176,107,.9), transparent);
+    }
+
+    .ritualStars{
+      color:#f3eee3;
+      font-size:12px;
+      letter-spacing:.24em;
+      white-space:nowrap;
+      opacity:.95;
+    }
+
+    .ritualSigil{
+      color:#f4efe5;
+      font-size:26px;
+      line-height:1;
+      text-shadow:0 0 18px rgba(255,255,255,.18);
+      transform:translateY(-2px);
+    }
+
+    .ritualCardNumber{
+      font-size:13px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:#ebe2cf;
+      margin-bottom:12px;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .ritualCardMainTitle{
+      margin:8px 0 10px;
+      font-size:clamp(22px, 2vw, 34px);
+      line-height:.95;
+      font-weight:700;
+      letter-spacing:.01em;
+      text-align:center;
+      color:#f7f2e8;
+      text-transform:uppercase;
+      word-break:break-word;
+    }
+
+    .ritualMainInstruction{
+      margin:10px 0 0;
+      font-size:clamp(13px, 1.2vw, 18px);
+      line-height:1.35;
+      text-align:center;
+      color:rgba(255,255,255,.88);
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .ritualMidDetails{
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+      margin:18px 0 0;
+    }
+
+    .ritualMiniDivider{
+      width:76%;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .ritualMiniDivider span{
+      flex:1;
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(215,176,107,.9), transparent);
+    }
+
+    .ritualMiniDivider i{
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      display:block;
+      background:radial-gradient(circle, #fff 0%, #ddd 35%, rgba(215,176,107,.7) 55%, transparent 75%);
+      box-shadow:0 0 12px rgba(255,255,255,.35);
+    }
+
+    .ritualRuleText{
+      margin:0;
+      font-size:14px;
+      line-height:1.35;
+      color:#f5f2ea;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .ritualRuleText strong{
+      display:inline-block;
+      margin-top:4px;
+      font-size:15px;
+      letter-spacing:.02em;
+      color:#fff;
+    }
+
+    .ritualRuleText.subtle{
+      font-size:13px;
+      line-height:1.42;
+    }
+
+    .goldText{
+      color:#e7c57f !important;
+    }
+
+    .ritualWhiteDivider{
+      width:82%;
+      height:2px;
+      margin:10px 0 16px;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+      opacity:.9;
+    }
+
+    .ritualFinalPhrase{
+      margin:0 0 16px;
+      font-size:13px;
+      line-height:1.45;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color:#efe9dc;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .ritualFingerprint{
+      position:relative;
+      width:84px;
+      height:84px;
+      margin:0 auto 12px;
+      opacity:.92;
+    }
+
+    .ritualFingerprint .finger{
+      position:absolute;
+      inset:0;
+      border:2px solid rgba(255,255,255,.92);
+      border-color:rgba(255,255,255,.92) transparent transparent rgba(255,255,255,.92);
+      border-radius:58% 42% 60% 40% / 50% 46% 54% 50%;
+      transform-origin:center;
+    }
+
+    .ritualFingerprint .finger1{ inset:4px; }
+    .ritualFingerprint .finger2{ inset:10px; }
+    .ritualFingerprint .finger3{ inset:16px; }
+    .ritualFingerprint .finger4{ inset:22px; }
+    .ritualFingerprint .finger5{ inset:28px; }
+    .ritualFingerprint .finger6{ inset:34px; }
+
+    .ritualBottomOrnaments{
+      margin-top:auto;
+      width:100%;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:18px;
+    }
+
+    .ritualBottomSet{
+      width:38%;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .ritualBottomSet span{
+      display:block;
+      height:2px;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(215,176,107,.95), transparent);
+    }
+
+    .ritualBottomSet.left span:nth-child(1){ width:100%; }
+    .ritualBottomSet.left span:nth-child(2){ width:74%; }
+    .ritualBottomSet.left span:nth-child(3){ width:55%; }
+
+    .ritualBottomSet.right{
+      align-items:flex-end;
+    }
+
+    .ritualBottomSet.right span{
+      background:linear-gradient(90deg, transparent, rgba(215,176,107,.95));
+    }
+
+    .ritualBottomSet.right span:nth-child(1){ width:100%; }
+    .ritualBottomSet.right span:nth-child(2){ width:74%; }
+    .ritualBottomSet.right span:nth-child(3){ width:55%; }
+
+    .revealActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+
+    .videoBtn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:#f5f7fb;
+      min-height:42px;
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font:inherit;
+      font-weight:700;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .videoBtn.primary{
+      background:linear-gradient(180deg, #e7c58a, #c99a4b);
+      color:#1a140d;
+      border-color:transparent;
+    }
+
+    .videoBtn.danger{
+      color:#ffdede;
+      border-color:rgba(255,107,107,.20);
+      background:rgba(255,107,107,.08);
+    }
+
+    .videoBtn[disabled]{
+      opacity:.45;
+      cursor:not-allowed;
+    }
+
+    .historyCard{
+      display:grid;
+      grid-template-rows:auto 1fr;
+      min-height:0;
+    }
+
+    .historyHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+      position:relative;
+      z-index:1;
+    }
+
+    .historyHead h3{
+      margin:0;
+      font-size:clamp(22px, 2vw, 34px);
+      letter-spacing:-.03em;
+      color:#f5ede1;
+    }
+
+    .historyHead .ornament{
+      height:1px;
+      flex:1;
+      background:linear-gradient(90deg, transparent, rgba(215,176,107,.7), transparent);
+      max-width:140px;
+    }
+
+    .historyBody{
+      display:grid;
+      grid-template-columns:160px minmax(0,1fr);
+      gap:18px;
+      padding:18px;
+      min-height:0;
+      position:relative;
+      z-index:1;
+    }
+
+    .historyDeckMini{
+      display:grid;
+      place-items:center;
+      align-content:start;
+      gap:12px;
+      padding-top:4px;
+    }
+
+    .historyDeckMini .deckStack{
+      width:120px;
+      height:120px;
+    }
+
+    .historyDeckMini .cardBack{
+      width:76px;
+      height:104px;
+      border-radius:10px;
+    }
+
+    .historyList{
+      overflow:auto;
+      display:grid;
+      gap:10px;
+      min-height:0;
+      align-content:start;
+    }
+
+    .historyItem{
+      padding:12px 14px;
+      border-radius:12px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(215,176,107,.12);
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .historyType{
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--gold);
+      margin-bottom:6px;
+    }
+
+    .historyText{
+      font-size:14px;
+      line-height:1.6;
+      color:#f0e6d8;
+    }
+
+    /* COLUNA DIREITA */
+    .rightColumn{
+      display:grid;
+      grid-template-rows:1fr 320px;
+      gap:14px;
+      min-height:0;
+    }
+
+    .videoCard{
+      display:grid;
+      grid-template-rows:auto auto auto 1fr;
+      min-height:0;
+    }
+
+    .videoTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:16px 18px 10px;
+      position:relative;
+      z-index:1;
+    }
+
+    .videoTitle{
+      margin:0;
+      font-size:clamp(22px, 2vw, 34px);
+      letter-spacing:-.03em;
+      color:#f5ede1;
+    }
+
+    .videoActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .videoStatus{
+      font-size:13px;
+      color:var(--muted);
+      min-height:18px;
+      padding:0 18px 10px;
+      position:relative;
+      z-index:1;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .videoFocusBar{
+      display:flex;
+      justify-content:flex-end;
+      padding:0 18px 10px;
+      position:relative;
+      z-index:1;
+    }
+
+    .videoFocusBtn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05);
+      color:#f5f7fb;
+      min-height:38px;
+      padding:8px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font:inherit;
+      font-weight:700;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .videoGrid{
+      display:grid;
+      gap:10px;
+      align-items:stretch;
+      padding:0 18px 18px;
+      min-height:0;
+      overflow:auto;
+      position:relative;
+      z-index:1;
+    }
+
+    .videoGrid.videoGrid--one{
+      grid-template-columns:minmax(0,1fr);
+    }
+
+    .videoGrid.videoGrid--two{
+      grid-template-columns:repeat(2, minmax(0,1fr));
+    }
+
+    .videoGrid.videoGrid--three{
+      grid-template-columns:repeat(2, minmax(0,1fr));
+    }
+
+    .videoGrid.videoGrid--four{
+      grid-template-columns:repeat(2, minmax(0,1fr));
+    }
+
+    .videoGrid.videoGrid--five{
+      grid-template-columns:repeat(2, minmax(0,1fr));
+    }
+
+    .videoGrid.videoGrid--focus{
+      grid-template-columns:repeat(2, minmax(0,1fr));
+    }
+
+    .videoMedia{
+      width:100%;
+      height:100%;
+    }
+
+    .videoTile{
+      position:relative;
+      background:#000;
+      border:1px solid rgba(215,176,107,.18);
+      border-radius:12px;
+      overflow:hidden;
+      min-height:150px;
+      aspect-ratio:16/10;
+      transition:all .2s ease;
+      cursor:pointer;
+      box-shadow:0 12px 28px rgba(0,0,0,.25);
+    }
+
+    .videoTile video,
+    .videoTile audio{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      background:#000;
+    }
+
+    .videoTile--focused{
+      grid-column:1 / -1;
+      min-height:320px;
+    }
+
+    .videoTile--mini{
+      min-height:120px;
+      aspect-ratio:16/9;
+    }
+
+    .videoTile--hasNoCamera video{
+      display:none;
+    }
+
+    .videoOverlay{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+    }
+
+    .videoBadgeRow{
+      position:absolute;
+      top:10px;
+      right:10px;
+      display:flex;
+      gap:8px;
+      z-index:2;
+    }
+
+    .videoBadge{
+      min-width:34px;
+      height:34px;
+      padding:0 10px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.55);
+      color:#fff;
+      font-size:14px;
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(6px);
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .videoBadge.is-off{
+      background:rgba(255,107,107,.20);
+      border-color:rgba(255,107,107,.35);
+    }
+
+    .videoLabel{
+      position:absolute;
+      left:10px;
+      bottom:10px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      background:rgba(0,0,0,.55);
+      color:#fff;
+      font-size:12px;
+      letter-spacing:.04em;
+      z-index:2;
+      max-width:calc(100% - 20px);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .videoHostTag{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(215,176,107,.18);
+      color:#f6dfb0;
+      font-size:10px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      border:1px solid rgba(215,176,107,.22);
+    }
+
+    .videoNameText{
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .videoCameraOff{
+      position:absolute;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      background:
+        radial-gradient(circle at center, rgba(215,176,107,.08), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      color:rgba(245,247,251,.92);
+      z-index:1;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .videoCameraOff.hidden{
+      display:none;
+    }
+
+    .videoCameraOffIcon{
+      width:60px;
+      height:60px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      font-size:24px;
+    }
+
+    .videoCameraOffText{
+      font-size:13px;
+      color:rgba(214,224,237,.78);
+    }
+
+    .videoEmpty{
+      display:grid;
+      place-items:center;
+      min-height:180px;
+      border:1px dashed rgba(215,176,107,.18);
+      border-radius:14px;
+      color:var(--muted);
+      text-align:center;
+      padding:20px;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    /* CHAT DIREITA EMBAIXO */
+    .chatCard{
+      display:grid;
+      grid-template-rows:auto 1fr auto auto;
+      min-height:0;
+    }
+
+    .chatHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+      position:relative;
+      z-index:1;
+    }
+
+    .chatHeaderLeft h2{
+      margin:0 0 4px;
+      font-size:clamp(22px, 2vw, 34px);
+      letter-spacing:-.03em;
+      color:#f5ede1;
+    }
+
+    .chatHeaderLeft p{
+      margin:0;
+      font-size:13px;
+      color:var(--muted);
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .messages{
+      min-height:0;
+      overflow:auto;
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      position:relative;
+      z-index:1;
+    }
+
+    .message{
+      max-width:min(82%, 720px);
+      padding:12px 14px;
+      border-radius:14px;
+      line-height:1.5;
+      font-size:14px;
+      box-shadow:0 8px 22px rgba(0,0,0,.18);
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .message .meta{
+      display:block;
+      margin-bottom:6px;
+      font-size:11px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.60);
+    }
+
+    .message.system{
+      align-self:center;
+      max-width:min(92%, 760px);
+      text-align:center;
+      background:rgba(215,176,107,.08);
+      border:1px solid rgba(215,176,107,.16);
+      color:#f7ecd5;
+    }
+
+    .message.other{
+      align-self:flex-start;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .message.me{
+      align-self:flex-end;
+      background:linear-gradient(180deg, rgba(215,176,107,.16), rgba(215,176,107,.08));
+      border:1px solid rgba(215,176,107,.16);
+    }
+
+    .chatEmpty{
+      margin:auto;
+      width:min(100%, 520px);
+      text-align:center;
+      padding:22px 18px;
+      border-radius:14px;
+      border:1px dashed rgba(215,176,107,.18);
+      background:rgba(255,255,255,.02);
+      color:var(--muted);
+      line-height:1.6;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .typingBar{
+      min-height:22px;
+      padding:0 18px 10px;
+      font-size:13px;
+      color:rgba(214,224,237,.72);
+      font-style:italic;
+      font-family:Inter, system-ui, sans-serif;
+      position:relative;
+      z-index:1;
+    }
+
+    .typingBar:empty{
+      display:none;
+    }
+
+    .chatComposer{
+      border-top:1px solid var(--line);
+      padding:14px 16px;
+      background:rgba(255,255,255,.02);
+      position:relative;
+      z-index:1;
+    }
+
+    .composerRow{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 120px;
+      gap:10px;
+    }
+
+    .input{
+      width:100%;
+      min-height:48px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      padding:12px 14px;
+      outline:none;
+      font:inherit;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .input::placeholder{
+      color:rgba(255,255,255,.36);
+    }
+
+    .footerBar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:8px 6px 0;
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .footerBar strong{
+      color:var(--gold);
+    }
+
+    /* PROFILE / FRIENDS */
+    .profileModal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.78);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      padding:16px;
+    }
+
+    .profileModal.hidden{
+      display:none;
+    }
+
+    .profileCard{
+      width:min(320px, calc(100vw - 28px));
+      background:#0f0d0c;
+      border:1px solid rgba(215,176,107,.18);
+      border-radius:20px;
+      padding:24px;
+      text-align:center;
+      box-shadow:0 30px 80px rgba(0,0,0,.5);
+      color:#f5ede1;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .profileCard--large{
+      width:min(460px, calc(100vw - 28px));
+      text-align:left;
+      position:relative;
+    }
+
+    .profileX{
+      position:absolute;
+      top:12px;
+      right:12px;
+      width:34px;
+      height:34px;
+      border:none;
+      border-radius:50%;
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      cursor:pointer;
+      font-size:22px;
+      line-height:1;
+    }
+
+    .profileHeader{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      margin-bottom:14px;
+    }
+
+    .profileIdentity{
+      min-width:0;
+    }
+
+    .profileAvatarLarge{
+      width:90px;
+      height:90px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      font-size:28px;
+      font-weight:900;
+      margin:0 auto 14px auto;
+      background:linear-gradient(180deg,#7c6338,#342718);
+      color:#fff;
+      border:1px solid rgba(215,176,107,.30);
+    }
+
+    .profileCard--large .profileAvatarLarge{
+      margin:0;
+    }
+
+    .profileName{
+      font-size:20px;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    .profileUsername{
+      font-size:13px;
+      color:rgba(214,224,237,.72);
+      margin-top:4px;
+    }
+
+    .profileBio{
+      font-size:13px;
+      color:rgba(214,224,237,.75);
+      margin-bottom:14px;
+    }
+
+    .profileStats{
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      font-size:12px;
+      color:rgba(214,224,237,.7);
+      margin-bottom:16px;
+      flex-wrap:wrap;
+    }
+
+    .profileCard--large .profileStats{
+      justify-content:flex-start;
+    }
+
+    .profileActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .profileActions.hidden{
+      display:none;
+    }
+
+    .profileActionBtn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+      color:#f5f7fb;
+      min-height:40px;
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font:inherit;
+      font-weight:700;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .profileActionBtn--primary{
+      background:linear-gradient(180deg,#e7c58a,#c99a4b);
+      color:#1a140d;
+      border-color:transparent;
+    }
+
+    .profileEditor{
+      display:grid;
+      gap:12px;
+      margin:16px 0;
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .profileEditor.hidden{
+      display:none;
+    }
+
+    .profileField{
+      display:grid;
+      gap:8px;
+    }
+
+    .profileField span{
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:rgba(214,224,237,.72);
+    }
+
+    .profileInput,
+    .profileTextarea{
+      width:100%;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      padding:12px 14px;
+      font:inherit;
+      font-family:Inter, system-ui, sans-serif;
+      outline:none;
+    }
+
+    .profileTextarea{
+      min-height:100px;
+      resize:vertical;
+    }
+
+    .avatarPicker{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:10px;
+    }
+
+    .avatarOption{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:#fff;
+      min-height:56px;
+      border-radius:14px;
+      cursor:pointer;
+      font-size:24px;
+    }
+
+    .avatarOption.active{
+      border-color:rgba(215,176,107,.45);
+      background:rgba(215,176,107,.14);
+      box-shadow:0 0 0 1px rgba(215,176,107,.18) inset;
+    }
+
+    .profileEditorActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .friendsPanel{
+      display:grid;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .friendsPanel.hidden{
+      display:none;
+    }
+
+    .friendsBlock{
+      padding:12px;
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .friendsTitle{
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:rgba(214,224,237,.72);
+      margin-bottom:10px;
+    }
+
+    .friendsList{
+      display:grid;
+      gap:10px;
+    }
+
+    .friendItem{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.06);
+    }
+
+    .friendLeft{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .friendAvatar{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      font-size:18px;
+      flex:0 0 auto;
+    }
+
+    .friendMeta{
+      min-width:0;
+    }
+
+    .friendName{
+      font-size:14px;
+      font-weight:700;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .friendUsername{
+      font-size:12px;
+      color:rgba(214,224,237,.68);
+    }
+
+    .friendActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .friendBtn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+      color:#f5f7fb;
+      min-height:34px;
+      padding:8px 10px;
+      border-radius:10px;
+      cursor:pointer;
+      font:inherit;
+      font-size:12px;
+      font-weight:700;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    .friendBtn--accept{
+      background:linear-gradient(180deg,#e7c58a,#c99a4b);
+      color:#1a140d;
+      border-color:transparent;
+    }
+
+    .friendEmpty{
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(255,255,255,.02);
+      color:rgba(214,224,237,.68);
+      font-size:13px;
+      border:1px dashed rgba(255,255,255,.08);
+    }
+
+    .profileClose{
+      width:100%;
+      border:none;
+      border-radius:12px;
+      padding:10px;
+      background:linear-gradient(180deg,#e7c58a,#c99a4b);
+      color:#1a140d;
+      font-weight:700;
+      cursor:pointer;
+      position:relative;
+      z-index:2;
+      font-family:Inter, system-ui, sans-serif;
+    }
+
+    @media (max-width:1280px){
+      .layout{
+        grid-template-columns:270px minmax(0, 1fr) 320px;
       }
     }
 
-    if (!accessToken) {
-      window.location.href = "./vendas.html";
-      return;
+    @media (max-width:1120px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+
+      .sidebar{ order:2; }
+      .centerColumn{ order:1; }
+      .rightColumn{ order:3; }
+
+      .rightColumn{
+        grid-template-rows:420px 320px;
+      }
     }
 
-    const res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ accessToken })
-    });
+    @media (max-width:860px){
+      .topbar{
+        grid-template-columns:1fr;
+        justify-items:start;
+      }
 
-    const data = await res.json().catch(() => ({}));
+      .topCenterMeta{
+        justify-content:flex-start;
+      }
 
-    if (!res.ok || !data.liberado) {
-      localStorage.removeItem("osl_access_token");
-      localStorage.removeItem("osl_access_expires_at");
-      window.location.href = "./vendas.html";
-      return;
+      .topActions{
+        justify-content:flex-start;
+      }
+
+      .tableBody,
+      .historyBody{
+        grid-template-columns:1fr;
+      }
+
+      .deckPanel,
+      .historyDeckMini{
+        justify-items:center;
+      }
+
+      .centerColumn{
+        grid-template-rows:auto auto;
+      }
     }
 
-    document.documentElement.style.visibility = "visible";
-  } catch (error) {
-    console.error("Erro ao validar acesso da sala:", error);
-    window.location.href = "./vendas.html";
-  }
-})();
-</script>
-      
-<meta charset="UTF-8">    
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    
-<title>O SextoLugar — Sala</title>  <style>    
-  html{
-  visibility:visible;
-}
-:root{    
-  --bg-1:#030608;    
-  --bg-2:#060b10;    
-  --bg-3:#0a1017;    
-  --panel:rgba(255,255,255,.04);    
-  --panel-2:rgba(255,255,255,.025);    
-  --line:rgba(255,255,255,.10);    
-  --line-strong:rgba(255,255,255,.16);    
-  --text:#f4f7fb;    
-  --muted:rgba(214,224,237,.70);    
-  --blue-1:#daf6ff;    
-  --blue-2:#8fd9ff;    
-  --blue-3:#48b7f4;    
-  --gold:#e6c07b;    
-  --danger:#ff6b6b;    
-  --ok:#82d996;    
-  --shadow:0 24px 70px rgba(0,0,0,.40);    
-  --radius-xl:28px;    
-  --radius-lg:20px;    
-  --radius-md:16px;    
-}    *{ box-sizing:border-box; }
-
-html,body{
-margin:0;
-min-height:100%;
-background:
-radial-gradient(45vw 45vw at 18% 22%, rgba(72,183,244,.09), transparent 60%),
-radial-gradient(38vw 38vw at 82% 72%, rgba(230,192,123,.05), transparent 62%),
-radial-gradient(55vw 55vw at 50% 50%, rgba(255,255,255,.02), transparent 70%),
-linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 42%, var(--bg-3) 100%);
-color:var(--text);
-font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-overflow-x:hidden;
-}
-
-body::before{
-content:"";
-position:fixed;
-inset:0;
-pointer-events:none;
-background:radial-gradient(circle at center, transparent 48%, rgba(0,0,0,.28) 100%);
-opacity:.95;
-}
-
-body::after{
-content:"";
-position:fixed;
-inset:0;
-pointer-events:none;
-background:linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0) 20%, rgba(255,255,255,0) 80%, rgba(255,255,255,.015));
-mix-blend-mode:screen;
-opacity:.22;
-}
-
-.page{
-position:relative;
-z-index:1;
-width:100%;
-min-height:100vh;
-min-height:100svh;
-padding:
-max(16px, env(safe-area-inset-top))
-max(16px, env(safe-area-inset-right))
-max(20px, env(safe-area-inset-bottom))
-max(16px, env(safe-area-inset-left));
-}
-
-.shell{
-width:min(1440px, 100%);
-margin:0 auto;
-display:grid;
-gap:16px;
-}
-
-/* TOPO */
-
-.topbar{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:14px;
-padding:16px 18px;
-border:1px solid var(--line);
-border-radius:26px;
-background:
-linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
-radial-gradient(circle at top, rgba(72,183,244,.06), transparent 60%);
-box-shadow:var(--shadow);
-backdrop-filter:blur(8px);
-}
-
-.brandWrap{
-min-width:0;
-}
-
-.eyebrow{
-margin:0 0 6px;
-font-size:11px;
-letter-spacing:.24em;
-text-transform:uppercase;
-color:var(--muted);
-}
-
-.roomTitle{
-margin:0;
-font-size:clamp(28px, 3vw, 40px);
-line-height:1;
-font-weight:900;
-letter-spacing:-.05em;
-}
-
-.topMeta{
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-justify-content:flex-end;
-}
-
-.badge{
-display:inline-flex;
-align-items:center;
-gap:8px;
-min-height:42px;
-padding:10px 14px;
-border-radius:999px;
-border:1px solid var(--line);
-background:rgba(255,255,255,.045);
-color:var(--text);
-font-size:13px;
-white-space:nowrap;
-}
-
-.badge strong{
-color:var(--blue-2);
-}
-
-.dot{
-width:8px;
-height:8px;
-border-radius:50%;
-background:var(--ok);
-box-shadow:0 0 14px rgba(130,217,150,.45);
-flex:0 0 auto;
-}
-
-/* LAYOUT */
-
-.layout{
-display:grid;
-grid-template-columns:300px minmax(0, 1fr);
-gap:16px;
-min-height:calc(100vh - 130px);
-min-height:calc(100svh - 130px);
-}
-
-.card{
-border:1px solid var(--line);
-border-radius:var(--radius-xl);
-background:
-linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
-radial-gradient(circle at top, rgba(72,183,244,.05), transparent 60%);
-box-shadow:var(--shadow);
-overflow:hidden;
-min-height:0;
-}
-
-.cardInner{
-padding:18px;
-}
-
-.sectionTitle{
-margin:0 0 12px;
-font-size:12px;
-letter-spacing:.22em;
-text-transform:uppercase;
-color:var(--muted);
-}
-
-/* SIDEBAR */
-
-.sidebar{
-display:grid;
-grid-template-rows:auto 1fr auto;
-min-height:0;
-}
-
-.playerList{
-display:grid;
-gap:10px;
-}
-
-.player{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:12px;
-padding:12px 14px;
-border-radius:16px;
-background:rgba(255,255,255,.035);
-border:1px solid rgba(255,255,255,.06);
-transition:transform .12s ease, background .15s ease, border-color .15s ease;
-cursor:pointer;
-}
-
-.player:hover{
-transform:translateY(-1px);
-background:rgba(255,255,255,.05);
-border-color:rgba(72,183,244,.22);
-}
-
-.playerLeft{
-display:flex;
-align-items:center;
-gap:10px;
-min-width:0;
-}
-
-.avatar{
-width:38px;
-height:38px;
-border-radius:50%;
-display:grid;
-place-items:center;
-background:linear-gradient(180deg,#56bdf8,#1f86d9);
-color:#fff;
-font-size:13px;
-font-weight:800;
-flex:0 0 auto;
-box-shadow:0 0 18px rgba(72,183,244,.24);
-}
-
-.playerMeta{
-min-width:0;
-}
-
-.playerName{
-font-size:14px;
-font-weight:800;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-.playerRole{
-font-size:11px;
-letter-spacing:.14em;
-text-transform:uppercase;
-color:var(--muted);
-}
-
-.playerRight{
-display:flex;
-align-items:center;
-gap:8px;
-flex-wrap:wrap;
-}
-
-.playerStatus{
-font-size:11px;
-letter-spacing:.12em;
-text-transform:uppercase;
-color:rgba(255,255,255,.75);
-}
-
-.playerHost{
-display:inline-flex;
-align-items:center;
-justify-content:center;
-min-height:20px;
-padding:0 8px;
-border-radius:999px;
-background:rgba(230,192,123,.14);
-border:1px solid rgba(230,192,123,.22);
-color:#f6dfb0;
-font-size:10px;
-letter-spacing:.12em;
-text-transform:uppercase;
-}
-
-.emptyState{
-padding:14px;
-border-radius:16px;
-border:1px dashed rgba(255,255,255,.12);
-background:rgba(255,255,255,.02);
-color:var(--muted);
-font-size:13px;
-line-height:1.55;
-margin-top:12px;
-}
-
-.sidebarActions{
-display:grid;
-gap:10px;
-margin-top:14px;
-}
-
-/* MAIN AREA */
-
-.mainArea{
-display:grid;
-grid-template-rows:minmax(340px, 1fr) 300px;
-gap:16px;
-min-height:0;
-}
-
-/* TABLE */
-
-.tableCard{
-display:grid;
-grid-template-rows:auto 1fr;
-min-height:0;
-}
-
-.tableHead{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:12px;
-padding:16px 18px;
-border-bottom:1px solid var(--line);
-background:rgba(255,255,255,.02);
-}
-
-.tableHeadLeft h2{
-margin:0 0 4px;
-font-size:clamp(22px, 2vw, 30px);
-letter-spacing:-.03em;
-}
-
-.tableHeadLeft p{
-margin:0;
-color:var(--muted);
-font-size:13px;
-}
-
-.tableHeadRight{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-}
-
-.sessionStatus{
-display:inline-flex;
-align-items:center;
-gap:8px;
-padding:10px 14px;
-border-radius:999px;
-background:rgba(130,217,150,.10);
-border:1px solid rgba(130,217,150,.20);
-color:#dff8e6;
-font-size:12px;
-letter-spacing:.12em;
-text-transform:uppercase;
-white-space:nowrap;
-}
-
-.tableBody{
-display:grid;
-grid-template-columns:200px minmax(0, 1fr) 280px;
-gap:18px;
-padding:18px;
-min-height:0;
-}
-
-.deckPanel,
-.historyPanel{
-border:1px solid rgba(255,255,255,.08);
-border-radius:22px;
-background:rgba(255,255,255,.02);
-min-height:0;
-}
-
-.deckPanel{
-display:grid;
-align-content:start;
-justify-items:center;
-gap:14px;
-padding:16px;
-}
-
-.deckCard{
-width:150px;
-height:220px;
-border-radius:18px;
-background:
-linear-gradient(180deg, rgba(218,246,255,.92), rgba(72,183,244,.92)),
-radial-gradient(circle at top, rgba(255,255,255,.24), transparent 55%);
-color:#07111a;
-display:grid;
-place-items:center;
-font-size:18px;
-font-weight:900;
-letter-spacing:.22em;
-box-shadow:0 18px 40px rgba(0,0,0,.35);
-user-select:none;
-}
-
-.deckInfo{
-text-align:center;
-font-size:13px;
-color:var(--muted);
-line-height:1.6;
-}
-
-.revealPanel{
-min-height:0;
-border:1px solid rgba(255,255,255,.08);
-border-radius:24px;
-background:
-radial-gradient(circle at center, rgba(72,183,244,.08), transparent 55%),
-rgba(255,255,255,.02);
-display:grid;
-place-items:center;
-padding:20px;
-}
-
-.revealCard{
-width:min(100%, 520px);
-min-height:320px;
-border-radius:24px;
-border:1px solid rgba(255,255,255,.10);
-background:
-linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-box-shadow:0 20px 50px rgba(0,0,0,.28);
-padding:26px;
-display:grid;
-align-content:center;
-gap:16px;
-text-align:center;
-}
-
-.cardType{
-font-size:11px;
-letter-spacing:.24em;
-text-transform:uppercase;
-color:var(--gold);
-}
-
-.cardTitle{
-font-size:clamp(26px, 3vw, 38px);
-line-height:1.06;
-font-weight:900;
-letter-spacing:-.05em;
-}
-
-.cardText{
-font-size:15px;
-line-height:1.7;
-color:var(--muted);
-}
-
-.historyPanel{
-padding:16px;
-display:grid;
-grid-template-rows:auto 1fr;
-gap:12px;
-}
-
-.historyList{
-overflow:auto;
-display:grid;
-gap:10px;
-min-height:0;
-}
-
-.historyItem{
-padding:12px 14px;
-border-radius:14px;
-background:rgba(255,255,255,.035);
-border:1px solid rgba(255,255,255,.06);
-}
-
-.historyType{
-font-size:11px;
-letter-spacing:.14em;
-text-transform:uppercase;
-color:var(--blue-2);
-margin-bottom:6px;
-}
-
-.historyText{
-font-size:13px;
-line-height:1.6;
-}
-
-/* BOTTOM AREA */
-
-.bottomGrid{
-display:grid;
-grid-template-columns:1.05fr .95fr;
-gap:16px;
-min-height:0;
-}
-
-/* CHAT */
-
-.chatCard{
-display:grid;
-grid-template-rows:auto 1fr auto auto;
-min-height:0;
-}
-
-.chatHeader{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:12px;
-padding:16px 18px;
-border-bottom:1px solid var(--line);
-background:rgba(255,255,255,.02);
-}
-
-.chatHeaderLeft h2{
-margin:0 0 4px;
-font-size:clamp(20px, 2vw, 28px);
-letter-spacing:-.03em;
-}
-
-.chatHeaderLeft p{
-margin:0;
-font-size:13px;
-color:var(--muted);
-}
-
-.messages{
-min-height:0;
-overflow:auto;
-padding:18px;
-display:flex;
-flex-direction:column;
-gap:12px;
-}
-
-.message{
-max-width:min(82%, 720px);
-padding:12px 14px;
-border-radius:18px;
-line-height:1.5;
-font-size:14px;
-box-shadow:0 8px 22px rgba(0,0,0,.18);
-}
-
-.message .meta{
-display:block;
-margin-bottom:6px;
-font-size:11px;
-letter-spacing:.12em;
-text-transform:uppercase;
-color:rgba(255,255,255,.60);
-}
-
-.message.system{
-align-self:center;
-max-width:min(92%, 760px);
-text-align:center;
-background:rgba(230,192,123,.08);
-border:1px solid rgba(230,192,123,.16);
-color:#f7ecd5;
-}
-
-.message.other{
-align-self:flex-start;
-background:rgba(255,255,255,.05);
-border:1px solid rgba(255,255,255,.08);
-}
-
-.message.me{
-align-self:flex-end;
-background:linear-gradient(180deg, rgba(72,183,244,.20), rgba(72,183,244,.10));
-border:1px solid rgba(72,183,244,.20);
-}
-
-.chatEmpty{
-margin:auto;
-width:min(100%, 520px);
-text-align:center;
-padding:22px 18px;
-border-radius:18px;
-border:1px dashed rgba(255,255,255,.10);
-background:rgba(255,255,255,.02);
-color:var(--muted);
-line-height:1.6;
-}
-
-.typingBar{
-min-height:22px;
-padding:0 18px 10px;
-font-size:13px;
-color:rgba(214,224,237,.72);
-font-style:italic;
-}
-
-.typingBar:empty{
-display:none;
-}
-
-.chatComposer{
-border-top:1px solid var(--line);
-padding:14px 16px;
-background:rgba(255,255,255,.02);
-}
-
-.composerRow{
-display:grid;
-grid-template-columns:minmax(0,1fr) 130px;
-gap:10px;
-}
-
-.input{
-width:100%;
-min-height:48px;
-border-radius:16px;
-border:1px solid rgba(255,255,255,.10);
-background:rgba(0,0,0,.22);
-color:var(--text);
-padding:12px 14px;
-outline:none;
-font:inherit;
-}
-
-.input::placeholder{
-color:rgba(255,255,255,.36);
-}
-
-/* VIDEO */
-
-.videoCard{
-display:grid;
-grid-template-rows:auto auto auto 1fr;
-min-height:0;
-}
-
-.videoTop{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:12px;
-flex-wrap:wrap;
-padding:16px 18px 10px;
-}
-
-.videoTitle{
-margin:0;
-font-size:12px;
-letter-spacing:.22em;
-text-transform:uppercase;
-color:rgba(214,224,237,.68);
-}
-
-.videoActions{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-}
-
-.videoBtn{
-appearance:none;
-border:1px solid rgba(255,255,255,.10);
-background:rgba(255,255,255,.04);
-color:#f5f7fb;
-min-height:42px;
-padding:10px 14px;
-border-radius:14px;
-cursor:pointer;
-font:inherit;
-font-weight:700;
-}
-
-.videoBtn.primary{
-background:linear-gradient(180deg, rgba(218,246,255,.95), rgba(143,217,255,.95));
-color:#07111a;
-border-color:transparent;
-}
-
-.videoBtn.danger{
-color:#ffdede;
-border-color:rgba(255,107,107,.20);
-background:rgba(255,107,107,.08);
-}
-
-.videoBtn[disabled]{
-opacity:.45;
-cursor:not-allowed;
-}
-
-.videoStatus{
-font-size:13px;
-color:rgba(214,224,237,.72);
-min-height:18px;
-padding:0 18px 10px;
-}
-
-.videoFocusBar{
-display:flex;
-justify-content:flex-end;
-padding:0 18px 10px;
-}
-
-.videoFocusBtn{
-appearance:none;
-border:1px solid rgba(255,255,255,.12);
-background:rgba(255,255,255,.05);
-color:#f5f7fb;
-min-height:38px;
-padding:8px 14px;
-border-radius:12px;
-cursor:pointer;
-font:inherit;
-font-weight:700;
-}
-
-.videoGrid{
-display:grid;
-gap:12px;
-align-items:stretch;
-padding:0 18px 18px;
-min-height:0;
-overflow:auto;
-}
-
-.videoGrid.videoGrid--one{
-grid-template-columns:minmax(0,1fr);
-}
-
-.videoGrid.videoGrid--two{
-grid-template-columns:repeat(2, minmax(0,1fr));
-}
-
-.videoGrid.videoGrid--three{
-grid-template-columns:repeat(2, minmax(0,1fr));
-}
-
-.videoGrid.videoGrid--four{
-grid-template-columns:repeat(2, minmax(0,1fr));
-}
-
-.videoGrid.videoGrid--five{
-grid-template-columns:repeat(3, minmax(0,1fr));
-}
-
-.videoGrid.videoGrid--focus{
-grid-template-columns:repeat(4, minmax(0,1fr));
-}
-
-.videoMedia{
-width:100%;
-height:100%;
-}
-
-.videoTile{
-position:relative;
-background:#000;
-border:1px solid rgba(255,255,255,.08);
-border-radius:18px;
-overflow:hidden;
-min-height:190px;
-aspect-ratio:16/10;
-transition:all .2s ease;
-cursor:pointer;
-}
-
-.videoTile video,
-.videoTile audio{
-width:100%;
-height:100%;
-object-fit:cover;
-display:block;
-background:#000;
-}
-
-.videoTile--focused{
-grid-column:1 / -1;
-min-height:460px;
-}
-
-.videoTile--mini{
-min-height:130px;
-aspect-ratio:16/9;
-}
-
-.videoTile--hasNoCamera video{
-display:none;
-}
-
-.videoOverlay{
-position:absolute;
-inset:0;
-pointer-events:none;
-}
-
-.videoBadgeRow{
-position:absolute;
-top:10px;
-right:10px;
-display:flex;
-gap:8px;
-z-index:2;
-}
-
-.videoBadge{
-min-width:34px;
-height:34px;
-padding:0 10px;
-border-radius:999px;
-display:flex;
-align-items:center;
-justify-content:center;
-background:rgba(0,0,0,.55);
-color:#fff;
-font-size:14px;
-border:1px solid rgba(255,255,255,.12);
-backdrop-filter:blur(6px);
-}
-
-.videoBadge.is-off{
-background:rgba(255,107,107,.20);
-border-color:rgba(255,107,107,.35);
-}
-
-.videoLabel{
-position:absolute;
-left:10px;
-bottom:10px;
-display:flex;
-align-items:center;
-gap:8px;
-padding:8px 10px;
-border-radius:999px;
-background:rgba(0,0,0,.55);
-color:#fff;
-font-size:12px;
-letter-spacing:.04em;
-z-index:2;
-max-width:calc(100% - 20px);
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-.videoHostTag{
-display:inline-flex;
-align-items:center;
-justify-content:center;
-padding:4px 8px;
-border-radius:999px;
-background:rgba(230,192,123,.18);
-color:#f6dfb0;
-font-size:10px;
-letter-spacing:.12em;
-text-transform:uppercase;
-border:1px solid rgba(230,192,123,.22);
-}
-
-.videoNameText{
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-.videoCameraOff{
-position:absolute;
-inset:0;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-gap:10px;
-background:
-radial-gradient(circle at center, rgba(72,183,244,.08), transparent 55%),
-linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
-color:rgba(245,247,251,.92);
-z-index:1;
-}
-
-.videoCameraOff.hidden{
-display:none;
-}
-
-.videoCameraOffIcon{
-width:64px;
-height:64px;
-border-radius:50%;
-display:grid;
-place-items:center;
-background:rgba(255,255,255,.06);
-border:1px solid rgba(255,255,255,.10);
-font-size:26px;
-}
-
-.videoCameraOffText{
-font-size:13px;
-color:rgba(214,224,237,.78);
-}
-
-.videoEmpty{
-display:grid;
-place-items:center;
-min-height:180px;
-border:1px dashed rgba(255,255,255,.10);
-border-radius:18px;
-color:rgba(214,224,237,.62);
-text-align:center;
-padding:20px;
-}
-
-/* BUTTONS */
-
-.btn{
-appearance:none;
-border:none;
-cursor:pointer;
-width:100%;
-min-height:46px;
-padding:12px 16px;
-border-radius:16px;
-font:inherit;
-font-weight:700;
-letter-spacing:.04em;
-transition:transform .12s ease, opacity .15s ease, border-color .15s ease, background .15s ease;
-}
-
-.btn:hover{ transform:translateY(-1px); }
-.btn:active{ transform:translateY(0); opacity:.95; }
-
-.btnPrimary{
-color:#07111a;
-background:linear-gradient(180deg, var(--blue-1), var(--blue-2));
-box-shadow:0 0 24px rgba(72,183,244,.20);
-}
-
-.btnGhost{
-color:var(--text);
-border:1px solid var(--line);
-background:rgba(255,255,255,.045);
-}
-
-.btnDanger{
-color:#ffdede;
-border:1px solid rgba(255,107,107,.20);
-background:rgba(255,107,107,.07);
-}
-
-.btn[disabled]{
-opacity:.45;
-cursor:not-allowed;
-transform:none !important;
-}
-
-/* PROFILE / FRIENDS */
-
-.profileModal{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.78);
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:9999;
-}
-
-.profileModal.hidden{
-display:none;
-}
-
-.profileCard{
-width:min(320px, calc(100vw - 28px));
-background:#0a0f15;
-border:1px solid rgba(255,255,255,.08);
-border-radius:22px;
-padding:26px;
-text-align:center;
-box-shadow:0 30px 80px rgba(0,0,0,.5);
-}
-
-.profileCard--large{
-width:min(460px, calc(100vw - 28px));
-text-align:left;
-position:relative;
-}
-
-.profileX{
-position:absolute;
-top:12px;
-right:12px;
-width:34px;
-height:34px;
-border:none;
-border-radius:50%;
-background:rgba(255,255,255,.06);
-color:#fff;
-cursor:pointer;
-font-size:22px;
-line-height:1;
-}
-
-.profileHeader{
-display:flex;
-align-items:center;
-gap:16px;
-margin-bottom:14px;
-}
-
-.profileIdentity{
-min-width:0;
-}
-
-.profileAvatarLarge{
-width:90px;
-height:90px;
-border-radius:50%;
-display:grid;
-place-items:center;
-font-size:28px;
-font-weight:900;
-margin:0 auto 14px auto;
-background:linear-gradient(180deg,#56bdf8,#1f86d9);
-color:#fff;
-}
-
-.profileCard--large .profileAvatarLarge{
-margin:0;
-}
-
-.profileName{
-font-size:20px;
-font-weight:800;
-margin-bottom:8px;
-}
-
-.profileUsername{
-font-size:13px;
-color:rgba(214,224,237,.72);
-margin-top:4px;
-}
-
-.profileBio{
-font-size:13px;
-color:rgba(214,224,237,.75);
-margin-bottom:14px;
-}
-
-.profileStats{
-display:flex;
-justify-content:center;
-gap:14px;
-font-size:12px;
-color:rgba(214,224,237,.7);
-margin-bottom:16px;
-flex-wrap:wrap;
-}
-
-.profileCard--large .profileStats{
-justify-content:flex-start;
-}
-
-.profileActions{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-margin-bottom:14px;
-}
-
-.profileActions.hidden{
-display:none;
-}
-
-.profileActionBtn{
-appearance:none;
-border:1px solid rgba(255,255,255,.10);
-background:rgba(255,255,255,.05);
-color:#f5f7fb;
-min-height:40px;
-padding:10px 14px;
-border-radius:12px;
-cursor:pointer;
-font:inherit;
-font-weight:700;
-}
-
-.profileActionBtn--primary{
-background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
-color:#07111a;
-border-color:transparent;
-}
-
-.profileEditor{
-display:grid;
-gap:12px;
-margin:16px 0;
-padding:14px;
-border-radius:16px;
-background:rgba(255,255,255,.03);
-border:1px solid rgba(255,255,255,.08);
-}
-
-.profileEditor.hidden{
-display:none;
-}
-
-.profileField{
-display:grid;
-gap:8px;
-}
-
-.profileField span{
-font-size:12px;
-letter-spacing:.08em;
-text-transform:uppercase;
-color:rgba(214,224,237,.72);
-}
-
-.profileInput,
-.profileTextarea{
-width:100%;
-border-radius:12px;
-border:1px solid rgba(255,255,255,.10);
-background:rgba(0,0,0,.22);
-color:var(--text);
-padding:12px 14px;
-font:inherit;
-outline:none;
-}
-
-.profileTextarea{
-min-height:100px;
-resize:vertical;
-}
-
-.avatarPicker{
-display:grid;
-grid-template-columns:repeat(4, minmax(0,1fr));
-gap:10px;
-}
-
-.avatarOption{
-appearance:none;
-border:1px solid rgba(255,255,255,.10);
-background:rgba(255,255,255,.04);
-color:#fff;
-min-height:56px;
-border-radius:14px;
-cursor:pointer;
-font-size:24px;
-}
-
-.avatarOption.active{
-border-color:rgba(72,183,244,.45);
-background:rgba(72,183,244,.14);
-box-shadow:0 0 0 1px rgba(72,183,244,.18) inset;
-}
-
-.profileEditorActions{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-}
-
-.friendsPanel{
-display:grid;
-gap:12px;
-margin-top:12px;
-}
-
-.friendsPanel.hidden{
-display:none;
-}
-
-.friendsBlock{
-padding:12px;
-border-radius:14px;
-background:rgba(255,255,255,.03);
-border:1px solid rgba(255,255,255,.08);
-}
-
-.friendsTitle{
-font-size:12px;
-letter-spacing:.08em;
-text-transform:uppercase;
-color:rgba(214,224,237,.72);
-margin-bottom:10px;
-}
-
-.friendsList{
-display:grid;
-gap:10px;
-}
-
-.friendItem{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:10px;
-padding:10px 12px;
-border-radius:12px;
-background:rgba(255,255,255,.035);
-border:1px solid rgba(255,255,255,.06);
-}
-
-.friendLeft{
-display:flex;
-align-items:center;
-gap:10px;
-min-width:0;
-}
-
-.friendAvatar{
-width:34px;
-height:34px;
-border-radius:50%;
-display:grid;
-place-items:center;
-background:rgba(255,255,255,.06);
-border:1px solid rgba(255,255,255,.08);
-font-size:18px;
-flex:0 0 auto;
-}
-
-.friendMeta{
-min-width:0;
-}
-
-.friendName{
-font-size:14px;
-font-weight:700;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-.friendUsername{
-font-size:12px;
-color:rgba(214,224,237,.68);
-}
-
-.friendActions{
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-}
-
-.friendBtn{
-appearance:none;
-border:1px solid rgba(255,255,255,.10);
-background:rgba(255,255,255,.05);
-color:#f5f7fb;
-min-height:34px;
-padding:8px 10px;
-border-radius:10px;
-cursor:pointer;
-font:inherit;
-font-size:12px;
-font-weight:700;
-}
-
-.friendBtn--accept{
-background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
-color:#07111a;
-border-color:transparent;
-}
-
-.friendEmpty{
-padding:10px 12px;
-border-radius:12px;
-background:rgba(255,255,255,.02);
-color:rgba(214,224,237,.68);
-font-size:13px;
-border:1px dashed rgba(255,255,255,.08);
-}
-
-.profileClose{
-width:100%;
-border:none;
-border-radius:12px;
-padding:10px;
-background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
-color:#07111a;
-font-weight:700;
-cursor:pointer;
-position:relative;
-z-index:2;
-}
-
-.footerBar{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:12px;
-padding:10px 6px 0;
-color:var(--muted);
-font-size:12px;
-letter-spacing:.08em;
-text-transform:uppercase;
-}
-
-.footerBar strong{
-color:var(--blue-2);
-}
-
-@media (max-width:1180px){
-.tableBody{
-grid-template-columns:180px minmax(0,1fr);
-}
-
-.historyPanel{
-grid-column:1 / -1;
-}
-}
-
-@media (max-width:980px){
-.layout{
-grid-template-columns:1fr;
-}
-
-.sidebar{
-order:2;
-}
-
-.mainArea{
-order:1;
-grid-template-rows:auto auto;
-}
-}
-
-@media (max-width:900px){
-.videoGrid.videoGrid--five,
-.videoGrid.videoGrid--focus{
-grid-template-columns:repeat(2, minmax(0,1fr));
-}
-
-.videoTile--focused{
-min-height:320px;
-}
-}
-
-@media (max-width:760px){
-.topbar{
-flex-direction:column;
-align-items:flex-start;
-}
-
-.topMeta{
-width:100%;
-justify-content:flex-start;
-}
-
-.tableBody{
-grid-template-columns:1fr;
-}
-
-.bottomGrid{
-grid-template-columns:1fr;
-}
-
-.composerRow{
-grid-template-columns:1fr;
-}
-}
-
-@media (max-width:640px){
-.page{
-padding:
-max(14px, env(safe-area-inset-top))
-max(12px, env(safe-area-inset-right))
-max(18px, env(safe-area-inset-bottom))
-max(12px, env(safe-area-inset-left));
-}
-
-.shell{
-gap:12px;
-}
-
-.cardInner{
-padding:14px;
-}
-
-.chatHeader{
-flex-direction:column;
-align-items:flex-start;
-}
-
-.message{
-max-width:100%;
-}
-
-.footerBar{
-flex-direction:column;
-align-items:flex-start;
-gap:6px;
-}
-
-.videoGrid,
-.videoGrid.videoGrid--one,
-.videoGrid.videoGrid--two,
-.videoGrid.videoGrid--three,
-.videoGrid.videoGrid--four,
-.videoGrid.videoGrid--five,
-.videoGrid.videoGrid--focus{
-grid-template-columns:1fr;
-}
-
-.videoTile--focused{
-min-height:280px;
-}
-
-.avatarPicker{
-grid-template-columns:repeat(4, minmax(0,1fr));
-}
-
-.friendItem{
-flex-direction:column;
-align-items:flex-start;
-}
-}
-/* ===== CARTA VISUAL DO RITUAL ===== */
-
-.ritualVisualCard{
-width:min(100%, 340px);
-aspect-ratio: 3 / 5;
-position:relative;
-border-radius:30px;
-overflow:hidden;
-background:
-radial-gradient(circle at 50% 12%, rgba(255,255,255,.08), transparent 26%),
-radial-gradient(circle at 50% 50%, rgba(230,192,123,.05), transparent 60%),
-linear-gradient(180deg, #0b0a08 0%, #070707 45%, #090909 100%);
-border:1.5px solid rgba(230,192,123,.40);
-box-shadow:
-0 28px 80px rgba(0,0,0,.55),
-inset 0 0 0 1px rgba(255,255,255,.03),
-inset 0 0 80px rgba(230,192,123,.04);
-}
-
-.ritualVisualCard::before{
-content:"";
-position:absolute;
-inset:10px;
-border-radius:24px;
-border:1px solid rgba(230,192,123,.45);
-pointer-events:none;
-}
-
-.ritualVisualCard::after{
-content:"";
-position:absolute;
-inset:0;
-background:
-linear-gradient(180deg, rgba(255,255,255,.03), transparent 12%, transparent 88%, rgba(255,255,255,.02)),
-radial-gradient(circle at 20% 15%, rgba(255,255,255,.03), transparent 18%),
-radial-gradient(circle at 78% 82%, rgba(230,192,123,.04), transparent 20%);
-mix-blend-mode:screen;
-pointer-events:none;
-}
-
-.ritualCardFrame{
-position:relative;
-z-index:1;
-height:100%;
-padding:24px 22px 20px;
-display:flex;
-flex-direction:column;
-align-items:center;
-text-align:center;
-color:#f7f3ea;
-}
-
-.ritualTopOrnaments{
-width:100%;
-display:grid;
-grid-template-columns:1fr auto auto auto 1fr;
-align-items:center;
-gap:10px;
-margin-bottom:28px;
-}
-
-.ritualLine{
-height:1px;
-background:linear-gradient(90deg, transparent, rgba(230,192,123,.9), transparent);
-}
-
-.ritualStars{
-color:#f3eee3;
-font-size:16px;
-letter-spacing:.28em;
-white-space:nowrap;
-opacity:.95;
-}
-
-.ritualSigil{
-color:#f4efe5;
-font-size:34px;
-line-height:1;
-text-shadow:0 0 18px rgba(255,255,255,.18);
-transform:translateY(-2px);
-}
-
-.ritualCardNumber{
-font-size:16px;
-letter-spacing:.12em;
-text-transform:uppercase;
-color:#ebe2cf;
-margin-bottom:16px;
-}
-
-.ritualCardMainTitle{
-margin: 10px 0 12px;
-font-size: clamp(28px, 4vw, 44px);
-line-height: .95;
-font-weight: 700;
-letter-spacing: .01em;
-text-align: center;
-color: #f7f2e8;
-text-transform: uppercase;
-word-break: break-word;
-}
-
-.ritualGoldDivider{
-width:78%;
-height:2px;
-margin:26px 0 28px;
-background:linear-gradient(90deg, transparent, #8f6a24 15%, #f0d78f 50%, #8f6a24 85%, transparent);
-box-shadow:0 0 10px rgba(230,192,123,.18);
-}
-
-.ritualMainInstruction{
-margin: 10px 0 0;
-font-size: clamp(14px, 1.5vw, 20px);
-line-height: 1.35;
-text-align: center;
-color: rgba(255,255,255,.88);
-}
-
-.ritualMidDetails{
-width:100%;
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:18px;
-margin-bottom:24px;
-}
-
-.ritualMiniDivider{
-width:76%;
-display:flex;
-align-items:center;
-gap:12px;
-}
-
-.ritualMiniDivider span{
-flex:1;
-height:1px;
-background:linear-gradient(90deg, transparent, rgba(230,192,123,.9), transparent);
-}
-
-.ritualMiniDivider i{
-width:14px;
-height:14px;
-border-radius:50%;
-display:block;
-background:radial-gradient(circle, #fff 0%, #ddd 35%, rgba(230,192,123,.7) 55%, transparent 75%);
-box-shadow:0 0 12px rgba(255,255,255,.35);
-}
-
-.ritualRuleText{
-margin:0;
-font-size:20px;
-line-height:1.35;
-color:#f5f2ea;
-}
-
-.ritualRuleText strong{
-display:inline-block;
-margin-top:4px;
-font-size:23px;
-letter-spacing:.02em;
-color:#fff;
-}
-
-.ritualRuleText.subtle{
-font-size:18px;
-line-height:1.42;
-}
-
-.goldText{
-color:#e7c57f !important;
-}
-
-.ritualWhiteDivider{
-width:82%;
-height:2px;
-margin:4px 0 22px;
-background:linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
-opacity:.9;
-}
-
-.ritualFinalPhrase{
-margin:0 0 30px;
-font-family:"Times New Roman", Georgia, serif;
-font-size:20px;
-line-height:1.45;
-letter-spacing:.12em;
-text-transform:uppercase;
-color:#efe9dc;
-}
-
-.ritualFingerprint{
-position:relative;
-width:120px;
-height:120px;
-margin:0 auto 26px;
-opacity:.95;
-}
-
-.ritualFingerprint .finger{
-position:absolute;
-inset:0;
-border:3px solid rgba(255,255,255,.92);
-border-color:rgba(255,255,255,.92) transparent transparent rgba(255,255,255,.92);
-border-radius:58% 42% 60% 40% / 50% 46% 54% 50%;
-transform-origin:center;
-}
-
-.ritualFingerprint .finger1{ inset:4px; }
-.ritualFingerprint .finger2{ inset:12px; }
-.ritualFingerprint .finger3{ inset:20px; }
-.ritualFingerprint .finger4{ inset:28px; }
-.ritualFingerprint .finger5{ inset:36px; }
-.ritualFingerprint .finger6{ inset:44px; }
-
-.ritualBottomOrnaments{
-margin-top:auto;
-width:100%;
-display:flex;
-justify-content:space-between;
-align-items:flex-end;
-gap:18px;
-}
-
-.ritualBottomSet{
-width:38%;
-display:flex;
-flex-direction:column;
-gap:8px;
-}
-
-.ritualBottomSet span{
-display:block;
-height:2px;
-border-radius:999px;
-background:linear-gradient(90deg, rgba(230,192,123,.95), transparent);
-}
-
-.ritualBottomSet.left span:nth-child(1){ width:100%; }
-.ritualBottomSet.left span:nth-child(2){ width:74%; }
-.ritualBottomSet.left span:nth-child(3){ width:55%; }
-
-.ritualBottomSet.right{
-align-items:flex-end;
-}
-
-.ritualBottomSet.right span{
-background:linear-gradient(90deg, transparent, rgba(230,192,123,.95));
-}
-
-.ritualBottomSet.right span:nth-child(1){ width:100%; }
-.ritualBottomSet.right span:nth-child(2){ width:74%; }
-.ritualBottomSet.right span:nth-child(3){ width:55%; }
-
-@media (max-width: 640px){
-.ritualVisualCard{
-min-height:560px;
-}
-
-.ritualCardFrame{
-min-height:560px;
-padding:24px 22px 24px;
-}
-
-.ritualCardMainTitle{
-font-size:42px;
-}
-
-.ritualMainInstruction{
-font-size:22px;
-}
-
-.ritualRuleText{
-font-size:18px;
-}
-
-.ritualRuleText strong{
-font-size:20px;
-}
-
-.ritualFinalPhrase{
-font-size:16px;
-}
-}
-</style>  </head>
-
-<body>    
-<main class="page">    
-  <div class="shell">  <header class="topbar">    
-  <div class="brandWrap">    
-    <p class="eyebrow">Sala do Ritual</p>    
-    <h1 class="roomTitle">O SextoLugar</h1>    
-  </div>      <div class="topMeta">    
-    <div class="badge">Sala: <strong id="roomName">Aguardando...</strong></div>    
-    <div class="badge">Código: <strong id="roomCode">----</strong></div>    
-    <div class="badge"><span class="dot"></span> <span id="roomStatus">Conectando</span></div>    
-  </div>    
-</header>    <section class="layout">      <aside class="card sidebar">    
-    <div class="cardInner">    
-      <h2 class="sectionTitle">Jogadores conectados</h2>    <div class="playerList" id="playerList"></div>    
-
-  <div class="emptyState" id="playersEmpty">    
-    Nenhum outro jogador entrou ainda. Compartilhe o código da sala para reunir o grupo.    
-  </div>    
-
-  <div class="sidebarActions">    
-    <button class="btn btnGhost" id="myProfileBtn">Meu perfil</button>    
-    <button class="btn btnPrimary" id="startBtn">Iniciar Ritual</button>    
-    <button class="btn btnGhost" id="copyCodeBtn">Copiar código da sala</button>    
-    <button class="btn btnDanger" id="leaveBtn">Sair da sala</button>    
-  </div>    
-</div>
-
-  </aside>      <section class="mainArea">  <section class="card tableCard">    
-  <div class="tableHead">    
-    <div class="tableHeadLeft">    
-      <h2>Mesa do Ritual</h2>    
-      <p>A carta atual domina a sala. O anfitrião conduz a experiência.</p>    
-    </div>  <div class="tableHeadRight">    
-  <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar próxima carta</button>    
-  <button class="videoBtn" id="resetRitualBtn" disabled>Reiniciar ritual</button>      <div class="sessionStatus">    
-    <span class="dot"></span>    
-    <span id="sessionLabel">Sessão não iniciada</span>    
-  </div>    
-</div>    </div>    <div class="tableBody">    
-    <aside class="deckPanel">    
-      <div class="sectionTitle">Deck</div>    
-      <div class="deckCard">RITUAL</div>    
-      <div class="deckInfo" id="deckInfo">    
-        Aguardando o anfitrião iniciar.<br>    
-        Depois disso, a mesa se transforma.    
-      </div>    
-    </aside>  <div class="revealPanel">    <article class="ritualVisualCard silenceCard">    
-    <div class="ritualCardFrame">  <div class="ritualTopOrnaments">    
-    <div class="ritualLine"></div>    
-    <div class="ritualStars">✦ ✦ ✦</div>    
-    <div class="ritualSigil">△</div>    
-    <div class="ritualStars">✦ ✦ ✦</div>    
-    <div class="ritualLine"></div>    
-  </div>     <div class="ritualCardNumber" id="ritualCardType">CARTA 01</div>  <h3 class="ritualCardMainTitle" id="ritualCardTitle">SILÊNCIO</h3>  <div class="ritualMainInstruction" id="ritualCardText">    
-  DURANTE 60 SEGUNDOS<br>    
-  NINGUÉM PODE FALAR.    
-</div>  <div class="ritualMidDetails">    
-    <div class="ritualMiniDivider">    
-      <span></span><i></i><span></span>    
-    </div>    <p class="ritualRuleText">    
-  Se alguém quebrar o silêncio:<br>    
-  <strong>MARQUE 1 PONTO DE INFLUÊNCIA.</strong>    
-</p>    
-
-<div class="ritualMiniDivider">    
-  <span></span><i></i><span></span>    
-</div>    
-
-<p class="ritualRuleText subtle">    
-  Se ninguém quebrar...<br>    
-  OBSERVE QUEM PARECEU<br>    
-  MAIS <strong class="goldText">DESCONFORTÁVEL.</strong>    
-</p>
-
-  </div>      <div class="ritualWhiteDivider"></div>      <p class="ritualFinalPhrase">    
-    A SESSÃO REAGE AO DESCONFORTO,<br>    
-    NÃO ÀS PALAVRAS.    
-  </p>      <div class="ritualFingerprint">    
-    <div class="finger finger1"></div>    
-    <div class="finger finger2"></div>    
-    <div class="finger finger3"></div>    
-    <div class="finger finger4"></div>    
-    <div class="finger finger5"></div>    
-    <div class="finger finger6"></div>    
-  </div>      <div class="ritualBottomOrnaments">    
-    <div class="ritualBottomSet left">    
-      <span></span><span></span><span></span>    
-    </div>    
-    <div class="ritualBottomSet right">    
-      <span></span><span></span><span></span>    
-    </div>    
-  </div>    </div>    </article>    
-</div>  <aside class="historyPanel">    
-  <div class="sectionTitle">Histórico do ritual</div>      <div class="historyList" id="historyList">    
-    <div class="historyItem">    
-      <div class="historyType">Aguardando</div>    
-      <div class="historyText">Nenhuma carta revelada ainda.</div>    
-    </div>    
-  </div>    
-</aside>    </div>    
-</section>  <section class="bottomGrid">    
-      <section class="card chatCard">    
-        <div class="chatHeader">    
-          <div class="chatHeaderLeft">    
-            <h2>Chat da sala</h2>    
-            <p>Conversem antes de iniciar. Depois, o clima muda.</p>    
-          </div>    
-        </div>    <div class="messages" id="messages">    
-      <div class="chatEmpty" id="chatEmpty">    
-        Conectando a sala...<br>    
-        As mensagens e jogadores aparecerão em tempo real.    
-      </div>    
-    </div>    
-
-    <div class="typingBar" id="typingBar"></div>    
-
-    <div class="chatComposer">    
-      <div class="composerRow">    
-        <input    
-          class="input"    
-          id="messageInput"    
-          type="text"    
-          maxlength="240"    
-          placeholder="Digite uma mensagem para a sala..."    
-          autocomplete="off"    
-        >    
-        <button class="btn btnPrimary" id="sendBtn">Enviar</button>    
-      </div>    
-    </div>    
-  </section>    
-
-  <section class="card videoCard">    
-    <div class="videoTop">    
-      <h3 class="videoTitle">Chamada de vídeo</h3>    
-      <div class="videoActions">    
-        <button class="videoBtn primary" id="joinVideoBtn">Entrar na chamada</button>    
-        <button class="videoBtn" id="toggleMicBtn" disabled>Mutar microfone</button>    
-        <button class="videoBtn" id="toggleCamBtn" disabled>Desligar câmera</button>    
-        <button class="videoBtn danger" id="leaveVideoBtn" disabled>Sair da chamada</button>    
-      </div>    
-    </div>    
-
-    <div class="videoStatus" id="videoStatus">Vídeo desligado.</div>    
-
-    <div class="videoFocusBar" id="videoFocusBar" hidden>    
-      <button class="videoFocusBtn" id="exitFocusBtn">Voltar para grade</button>    
-    </div>    
-
-    <div class="videoGrid" id="videoGrid">    
-      <div class="videoEmpty" id="videoEmpty">    
-        Entre na chamada para abrir câmera e microfone.<br>    
-        Até 5 participantes podem ficar juntos aqui.    
-      </div>    
-    </div>    
-  </section>    
-
-</section>
-
-  </section>    
-</section>    <div class="footerBar">    
-  <div>Jogadores na sala: <strong id="playerCount">0</strong></div>    
-  <div>Status: <strong id="footerStatus">Conectando</strong></div>    
-</div>    </div>    
-</main>  <div id="profileModal" class="profileModal hidden">    
-  <div class="profileCard profileCard--large">    
-    <button class="profileX" id="closeProfileXBtn" aria-label="Fechar perfil">×</button>  <div class="profileHeader">    
-  <div class="profileAvatarLarge" id="profileAvatarLarge">🔮</div>      <div class="profileIdentity">    
-    <div class="profileName" id="profileName">Jogador</div>    
-    <div class="profileUsername" id="profileUsername">@jogador</div>    
-  </div>    
-</div>    <div class="profileBio" id="profileBio">Sem descrição.</div>    <div class="profileStats">    
-  <span id="profileGames">Partidas: 0</span>    
-  <span id="profileWins">Vitórias: 0</span>    
-</div>    <div class="profileActions" id="profileActions">    
-  <button class="profileActionBtn profileActionBtn--primary" id="editProfileBtn">Editar perfil</button>    
-  <button class="profileActionBtn" id="addFriendBtn" hidden>Adicionar amigo</button>    
-</div>    <div class="friendsPanel hidden" id="friendsPanel">    
-  <div class="friendsBlock" id="friendsListBlock">    
-    <div class="friendsTitle">Amigos</div>    
-    <div class="friendsList" id="friendsList"></div>    
-  </div>      <div class="friendsBlock" id="incomingRequestsBlock">    
-    <div class="friendsTitle">Pedidos recebidos</div>    
-    <div class="friendsList" id="incomingRequestsList"></div>    
-  </div>    
-</div>    <form class="profileEditor hidden" id="profileEditor">    
-  <label class="profileField">    
-    <span>Nome de exibição</span>    
-    <input class="profileInput" id="editDisplayName" maxlength="40" type="text" />    
-  </label>      <label class="profileField">    
-    <span>@usuário</span>    
-    <input class="profileInput" id="editUsername" maxlength="20" type="text" />    
-  </label>      <label class="profileField">    
-    <span>Bio</span>    
-    <textarea class="profileTextarea" id="editBio" maxlength="180"></textarea>    
-  </label>      <div class="profileField">    
-    <span>Avatar</span>    
-    <div class="avatarPicker" id="avatarPicker">    
-      <button type="button" class="avatarOption" data-avatar="🔮">🔮</button>    
-      <button type="button" class="avatarOption" data-avatar="🕯️">🕯️</button>    
-      <button type="button" class="avatarOption" data-avatar="👁️">👁️</button>    
-      <button type="button" class="avatarOption" data-avatar="🎭">🎭</button>    
-      <button type="button" class="avatarOption" data-avatar="🐺">🐺</button>    
-      <button type="button" class="avatarOption" data-avatar="🌙">🌙</button>    
-      <button type="button" class="avatarOption" data-avatar="🦉">🦉</button>    
-      <button type="button" class="avatarOption" data-avatar="⚡">⚡</button>    
-    </div>    
-  </div>      <div class="profileEditorActions">    
-    <button type="button" class="profileActionBtn" id="cancelEditProfileBtn">Cancelar</button>    
-    <button type="submit" class="profileActionBtn profileActionBtn--primary" id="saveProfileBtn">Salvar perfil</button>    
-  </div>    
-</form>    <button class="profileClose" id="closeProfileBtn">Fechar perfil</button>
-
-  </div>    
-</div>  <script type="module">    
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";    
-import {    
-  getFirestore,    
-  doc,    
-  getDoc,    
-  getDocs,    
-  setDoc,    
-  updateDoc,    
-  deleteDoc,    
-  collection,    
-  addDoc,    
-  onSnapshot,    
-  query,    
-  orderBy,    
-  serverTimestamp    
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";    const firebaseConfig = {
-apiKey: "AIzaSyC8sSvA7_1HPYRFGfgdgzstkP_yQHadY-c",
-authDomain: "osextolugar-game.firebaseapp.com",
-projectId: "osextolugar-game",
-storageBucket: "osextolugar-game.firebasestorage.app",
-messagingSenderId: "947922328721",
-appId: "1:947922328721:web:989522c99e16ab449f3330",
-measurementId: "G-D6HG779ZFR"
-};
-
-const HEARTBEAT_MS = 15000;
-const ACTIVE_WINDOW_MS = 40000;
-const MAX_PLAYERS = 5;
-const TYPING_ACTIVE_MS = 3500;
-
-const roomNameEl = document.getElementById('roomName');
-const roomCodeEl = document.getElementById('roomCode');
-const roomStatusEl = document.getElementById('roomStatus');
-const playerListEl = document.getElementById('playerList');
-const playersEmptyEl = document.getElementById('playersEmpty');
-const playerCountEl = document.getElementById('playerCount');
-const copyCodeBtn = document.getElementById('copyCodeBtn');
-const leaveBtn = document.getElementById('leaveBtn');
-const startBtn = document.getElementById('startBtn');
-const sendBtn = document.getElementById('sendBtn');
-const messageInput = document.getElementById('messageInput');
-const messagesEl = document.getElementById('messages');
-const chatEmptyEl = document.getElementById('chatEmpty');
-const sessionLabelEl = document.getElementById('sessionLabel');
-const footerStatusEl = document.getElementById('footerStatus');
-const typingBarEl = document.getElementById('typingBar');
-
-const profileModal = document.getElementById("profileModal");
-const profileAvatarLarge = document.getElementById("profileAvatarLarge");
-const profileNameEl = document.getElementById("profileName");
-const profileBioEl = document.getElementById("profileBio");
-const closeProfileBtn = document.getElementById("closeProfileBtn");
-const closeProfileXBtn = document.getElementById("closeProfileXBtn");
-const profileUsernameEl = document.getElementById("profileUsername");
-const editProfileBtn = document.getElementById("editProfileBtn");
-const addFriendBtn = document.getElementById("addFriendBtn");
-const myProfileBtn = document.getElementById("myProfileBtn");
-const profileEditor = document.getElementById("profileEditor");
-const editDisplayName = document.getElementById("editDisplayName");
-const editUsername = document.getElementById("editUsername");
-const editBio = document.getElementById("editBio");
-const cancelEditProfileBtn = document.getElementById("cancelEditProfileBtn");
-const saveProfileBtn = document.getElementById("saveProfileBtn");
-const avatarPicker = document.getElementById("avatarPicker");
-const profileActions = document.getElementById("profileActions");
-const friendsPanel = document.getElementById("friendsPanel");
-const friendsList = document.getElementById("friendsList");
-const incomingRequestsList = document.getElementById("incomingRequestsList");
-const friendsListBlock = document.getElementById("friendsListBlock");
-const incomingRequestsBlock = document.getElementById("incomingRequestsBlock");
-
-const params = new URLSearchParams(window.location.search);
-
-let playerName = (params.get('nome') || localStorage.getItem('osl_nome') || 'Visitante').trim().slice(0, 40);
-const roomCode = (params.get('sala') || localStorage.getItem('osl_sala') || 'SL-0001')
-.trim()
-.toUpperCase()
-.replace(/[^A-Z0-9-]/g, '')
-.slice(0, 20);
-const roomName = (params.get('nomeSala') || localStorage.getItem('osl_nome_sala') || 'Sala de Espera')
-.trim()
-.slice(0, 50);
-
-localStorage.setItem('osl_nome', playerName);
-localStorage.setItem('osl_sala', roomCode);
-localStorage.setItem('osl_nome_sala', roomName);
-function getParticipantId(){
-let id = sessionStorage.getItem('osl_participant_id');
-if(!id){
-id = 'p_' + Math.random().toString(36).slice(2, 11);
-sessionStorage.setItem('osl_participant_id', id);
-}
-return id;
-}
-
-function getUserId(){
-let id = localStorage.getItem("osl_user_id");
-if(!id){
-id = "u_" + Math.random().toString(36).slice(2, 12);
-localStorage.setItem("osl_user_id", id);
-}
-return id;
-}
-
-function initials(name){
-const parts = String(name).trim().split(/\s+/).filter(Boolean);
-if(parts.length === 0) return '??';
-if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-return (parts[0][0] + parts[1][0]).toUpperCase();
-}
-
-function normalizeUsername(value){
-return String(value || "")
-.toLowerCase()
-.normalize("NFD")
-.replace(/[\u0300-\u036f]/g, "")
-.replace(/[^a-z0-9_]/g, "")
-.slice(0, 20);
-}
-
-function uniqueArray(arr){
-return [...new Set((arr || []).filter(Boolean))];
-}
-
-function nowTimeFromDate(date){
-return date.toLocaleTimeString('pt-BR', {
-hour: '2-digit',
-minute: '2-digit'
-});
-}
-
-function escapeHtml(str){
-  return String(str)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
-function hideChatEmpty(){
-if(chatEmptyEl) chatEmptyEl.style.display = 'none';
-}
-
-function showChatEmpty(text){
-if(!chatEmptyEl) return;
-chatEmptyEl.style.display = 'block';
-chatEmptyEl.innerHTML = text;
-}
-
-function enableAudio(){
-if (audioReady) return;
-
-const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-if (!AudioContextClass) return;
-
-try{
-audioCtx = new AudioContextClass();
-if (audioCtx.state === 'suspended'){
-audioCtx.resume().catch(() => {});
-}
-audioReady = true;
-}catch(e){}
-}
-
-window.addEventListener('pointerdown', enableAudio, { once:true });
-window.addEventListener('touchstart', enableAudio, { once:true });
-window.addEventListener('keydown', enableAudio, { once:true });
-
-function playIncomingMessageSound(){
-if (!audioReady || !audioCtx) return;
-
-try{
-const now = audioCtx.currentTime;
-
-const osc1 = audioCtx.createOscillator();    
-const osc2 = audioCtx.createOscillator();    
-const gain = audioCtx.createGain();    
-const filter = audioCtx.createBiquadFilter();    
-
-osc1.type = 'triangle';    
-osc2.type = 'sine';    
-
-osc1.frequency.setValueAtTime(920, now);    
-osc1.frequency.exponentialRampToValueAtTime(680, now + 0.08);    
-
-osc2.frequency.setValueAtTime(1320, now);    
-osc2.frequency.exponentialRampToValueAtTime(980, now + 0.08);    
-
-filter.type = 'lowpass';    
-filter.frequency.setValueAtTime(1800, now);    
-filter.Q.setValueAtTime(0.8, now);    
-
-gain.gain.setValueAtTime(0.00001, now);    
-gain.gain.exponentialRampToValueAtTime(0.045, now + 0.01);    
-gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.14);    
-
-osc1.connect(filter);    
-osc2.connect(filter);    
-filter.connect(gain);    
-gain.connect(audioCtx.destination);    
-
-osc1.start(now);    
-osc2.start(now);    
-
-osc1.stop(now + 0.15);    
-osc2.stop(now + 0.15);
-
-}catch(e){}
-}
-const participantId = getParticipantId();
-const userId = getUserId();
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const userRef = doc(db, "users", userId);
-
-const roomRef = doc(db, 'salas', roomCode);
-const playerRef = doc(db, 'salas', roomCode, 'players', participantId);
-const messagesRef = collection(db, 'salas', roomCode, 'messages');
-const ritualRef = doc(db, 'salas', roomCode, 'ritual', 'state');
-const ritualHistoryRef = collection(db, 'salas', roomCode, 'ritual', 'state', 'history');
-const typingRef = doc(db, 'salas', roomCode, 'typing', participantId);
-const typingCollectionRef = collection(db, 'salas', roomCode, 'typing');
-const playersCollectionRef = collection(db, 'salas', roomCode, 'players');
-
-let isHost = false;
-let heartbeatTimer = null;
-let roomUnsub = null;
-let playersUnsub = null;
-let messagesUnsub = null;
-let typingUnsub = null;
-let leaving = false;
-let audioCtx = null;
-let audioReady = false;
-let initialMessagesLoaded = false;
-let knownMessageIds = new Set();
-let typingTimer = null;
-
-let openedProfileUserId = null;
-let openedProfileData = null;
-let selectedAvatarEmoji = "🔮";
-/* =========================
-MESA DO RITUAL
-========================= */
-const revealCardBtn = document.getElementById("revealCardBtn");
-const resetRitualBtn = document.getElementById("resetRitualBtn");
-const ritualCardType = document.getElementById("ritualCardType");
-const ritualCardTitle = document.getElementById("ritualCardTitle");
-const ritualCardText = document.getElementById("ritualCardText");
-const historyList = document.getElementById("historyList");
-const deckInfo = document.getElementById("deckInfo");
-
-let ritualDeck = [];
-let ritualStarted = false;
-let ritualUnsub = null;
-let ritualHistoryUnsub = null;
-
-function buildRitualDeck(){
-return shuffleArray([
-
-{
-
-type: "Terror psicológico",
-title: "Presença fraca",
-text: "Todos observam em silêncio. O jogador à sua esquerda escolhe quem parece mais vulnerável neste momento e explica o motivo."
-},
-{
-type: "Discussão",
-title: "Verdade oculta",
-text: "Durante 1 minuto, o grupo deve discutir quem parece estar escondendo algo. Todos precisam opinar."
-},
-{
-type: "Decisão",
-title: "Escolha do grupo",
-text: "Decidam juntos: revelar um segredo agora ou seguir o ritual sem respostas. O anfitrião define a decisão final se houver empate."
-},
-{
-type: "Confissão",
-title: "Fale agora",
-text: "Um jogador voluntário deve contar algo real, desconfortável ou estranho que nunca contou para o grupo."
-},
-{
-type: "Suspeita",
-title: "Algo ruim",
-text: "Alguém trouxe algo ruim para esta sala. Cada participante aponta quem mais mudou de comportamento desde o início da chamada."
-},
-{
-type: "Pressão",
-title: "30 segundos",
-text: "O anfitrião escolhe um jogador. Esse jogador deve responder uma pergunta direta do grupo sem fugir."
-},
-{
-type: "Vínculo",
-title: "Conexão",
-text: "O grupo escolhe duas pessoas da sala. Elas devem decidir juntas a próxima atitude do ritual."
-},
-{
-type: "Ruptura",
-title: "Confiança quebrada",
-text: "Cada jogador diz em quem menos confiaria para conduzir o ritual até o final."
-}
-]);
-}
-
-function shuffleArray(array){
-const arr = [...array];
-
-for(let i = arr.length - 1; i > 0; i--){
-const j = Math.floor(Math.random() * (i + 1));
-[arr[i], arr[j]] = [arr[j], arr[i]];
-}
-
-return arr;
-}
-
-function updateRitualButtons(){
-const canControl = isHost && ritualStarted;
-
-if (revealCardBtn){
-revealCardBtn.disabled = !canControl || ritualDeck.length === 0;
-}
-
-if (resetRitualBtn){
-resetRitualBtn.disabled = !isHost;
-}
-}
-
-function setRitualWaitingState(){
-ritualStarted = false;
-ritualDeck = [];
-
-if (ritualCardType) ritualCardType.textContent = "CARTA 01";
-if (ritualCardTitle) ritualCardTitle.textContent = "SILÊNCIO";
-if (ritualCardText) {
-ritualCardText.innerHTML = "DURANTE 60 SEGUNDOS<br>NINGUÉM PODE FALAR.";
-}
-
-if (deckInfo){
-deckInfo.innerHTML =
-"Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.";
-}
-
-if (historyList){
-  historyList.innerHTML = `
-    <div class="historyItem">
-      <div class="historyType">Aguardando</div>
-      <div class="historyText">Nenhuma carta revelada ainda.</div>
+    @media (max-width:640px){
+      .page{
+        padding:
+          max(10px, env(safe-area-inset-top))
+          max(10px, env(safe-area-inset-right))
+          max(14px, env(safe-area-inset-bottom))
+          max(10px, env(safe-area-inset-left));
+      }
+
+      .topbar,
+      .card{
+        border-radius:16px;
+      }
+
+      .roomTitle{
+        font-size:34px;
+      }
+
+      .composerRow{
+        grid-template-columns:1fr;
+      }
+
+      .videoGrid,
+      .videoGrid.videoGrid--one,
+      .videoGrid.videoGrid--two,
+      .videoGrid.videoGrid--three,
+      .videoGrid.videoGrid--four,
+      .videoGrid.videoGrid--five,
+      .videoGrid.videoGrid--focus{
+        grid-template-columns:1fr;
+      }
+
+      .videoTile--focused{
+        min-height:240px;
+      }
+
+      .footerBar{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:6px;
+      }
+
+      .friendItem{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .avatarPicker{
+        grid-template-columns:repeat(4, minmax(0,1fr));
+      }
+
+      .rightColumn{
+        grid-template-rows:380px 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <div class="shell">
+
+      <header class="topbar">
+        <div class="brandWrap">
+          <p class="eyebrow">Sala do Ritual</p>
+          <h1 class="roomTitle">O SextoLugar</h1>
+        </div>
+
+        <div class="topCenterMeta">
+          <span>Sala: <strong id="roomCode">----</strong></span>
+          <span>|</span>
+          <span>Jogadores: <strong id="playerCount">0</strong></span>
+          <span>|</span>
+          <span>Modo: <strong>Ritual</strong></span>
+        </div>
+
+        <div class="topActions">
+          <button class="topActionBtn primary" id="copyCodeBtn">Convidar Amigos</button>
+          <button class="topActionBtn" id="myProfileBtn">Configurações</button>
+          <button class="topActionBtn iconOnly" id="leaveBtn" aria-label="Sair da sala">⇢</button>
+        </div>
+      </header>
+
+      <section class="layout">
+
+        <!-- ESQUERDA -->
+        <aside class="sidebar">
+          <section class="card playerPanel">
+            <div class="cardInner">
+              <h2 class="sectionTitle">Jogadores</h2>
+              <div class="playerList" id="playerList"></div>
+
+              <div class="emptyState" id="playersEmpty">
+                Nenhum outro jogador entrou ainda. Compartilhe o código da sala para reunir o grupo.
+              </div>
+
+              <div class="sidebarActions">
+                <button class="btn btnPrimary" id="startBtn">Iniciar Ritual</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="card chatCard">
+            <div class="chatHeader">
+              <div class="chatHeaderLeft">
+                <h2>Chat</h2>
+                <p>Conversem antes do ritual começar.</p>
+              </div>
+            </div>
+
+            <div class="messages" id="messages">
+              <div class="chatEmpty" id="chatEmpty">
+                Conectando a sala...<br>
+                As mensagens e jogadores aparecerão em tempo real.
+              </div>
+            </div>
+
+            <div class="typingBar" id="typingBar"></div>
+
+            <div class="chatComposer">
+              <div class="composerRow">
+                <input
+                  class="input"
+                  id="messageInput"
+                  type="text"
+                  maxlength="240"
+                  placeholder="Digite uma mensagem..."
+                  autocomplete="off"
+                >
+                <button class="btn btnGhost" id="sendBtn">Enviar</button>
+              </div>
+            </div>
+          </section>
+        </aside>
+
+        <!-- CENTRO -->
+        <section class="centerColumn">
+          <section class="card tableCard">
+            <div class="tableHead">
+              <div class="tableHeadLeft">
+                <h2>Carta Atual</h2>
+                <p>A carta atual domina a sala. O anfitrião conduz a experiência.</p>
+              </div>
+
+              <div class="tableHeadRight">
+                <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar Próxima Carta</button>
+                <button class="videoBtn" id="resetRitualBtn" disabled>Reiniciar ritual</button>
+                <div class="sessionStatus">
+                  <span class="dot"></span>
+                  <span id="sessionLabel">Sessão não iniciada</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="tableBody">
+              <aside class="deckPanel">
+                <div class="sectionTitle">Deck</div>
+
+                <div class="deckStack" aria-hidden="true">
+                  <div class="cardBack"></div>
+                  <div class="cardBack"></div>
+                  <div class="cardBack">
+                    <div class="deckLabel">DECK</div>
+                  </div>
+                </div>
+
+                <div class="deckInfo" id="deckInfo">
+                  Aguardando o anfitrião iniciar.<br>
+                  Depois disso, a mesa se transforma.
+                </div>
+              </aside>
+
+              <div class="revealPanel">
+                <div class="revealStage">
+                  <article class="ritualVisualCard silenceCard">
+                    <div class="ritualCardFrame">
+                      <div class="ritualTopOrnaments">
+                        <div class="ritualLine"></div>
+                        <div class="ritualStars">✦ ✦ ✦</div>
+                        <div class="ritualSigil">△</div>
+                        <div class="ritualStars">✦ ✦ ✦</div>
+                        <div class="ritualLine"></div>
+                      </div>
+
+                      <div class="ritualCardNumber" id="ritualCardType">CARTA 01</div>
+                      <h3 class="ritualCardMainTitle" id="ritualCardTitle">SILÊNCIO</h3>
+
+                      <div class="ritualMainInstruction" id="ritualCardText">
+                        DURANTE 60 SEGUNDOS<br>
+                        NINGUÉM PODE FALAR.
+                      </div>
+
+                      <div class="ritualMidDetails">
+                        <div class="ritualMiniDivider">
+                          <span></span><i></i><span></span>
+                        </div>
+
+                        <p class="ritualRuleText">
+                          Se alguém quebrar o silêncio:<br>
+                          <strong>MARQUE 1 PONTO DE INFLUÊNCIA.</strong>
+                        </p>
+
+                        <div class="ritualMiniDivider">
+                          <span></span><i></i><span></span>
+                        </div>
+
+                        <p class="ritualRuleText subtle">
+                          Se ninguém quebrar...<br>
+                          OBSERVE QUEM PARECEU<br>
+                          MAIS <strong class="goldText">DESCONFORTÁVEL.</strong>
+                        </p>
+                      </div>
+
+                      <div class="ritualWhiteDivider"></div>
+
+                      <p class="ritualFinalPhrase">
+                        A SESSÃO REAGE AO DESCONFORTO,<br>
+                        NÃO ÀS PALAVRAS.
+                      </p>
+
+                      <div class="ritualFingerprint">
+                        <div class="finger finger1"></div>
+                        <div class="finger finger2"></div>
+                        <div class="finger finger3"></div>
+                        <div class="finger finger4"></div>
+                        <div class="finger finger5"></div>
+                        <div class="finger finger6"></div>
+                      </div>
+
+                      <div class="ritualBottomOrnaments">
+                        <div class="ritualBottomSet left">
+                          <span></span><span></span><span></span>
+                        </div>
+                        <div class="ritualBottomSet right">
+                          <span></span><span></span><span></span>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card historyCard">
+            <div class="historyHead">
+              <div class="ornament"></div>
+              <h3>Histórico</h3>
+              <div class="ornament"></div>
+            </div>
+
+            <div class="historyBody">
+              <aside class="historyDeckMini">
+                <div class="deckStack" aria-hidden="true">
+                  <div class="cardBack"></div>
+                  <div class="cardBack"></div>
+                  <div class="cardBack">
+                    <div class="deckLabel">DECK</div>
+                  </div>
+                </div>
+              </aside>
+
+              <div class="historyList" id="historyList">
+                <div class="historyItem">
+                  <div class="historyType">Aguardando</div>
+                  <div class="historyText">Nenhuma carta revelada ainda.</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- DIREITA -->
+        <section class="rightColumn">
+          <section class="card videoCard">
+            <div class="videoTop">
+              <h3 class="videoTitle">Vídeo</h3>
+
+              <div class="videoActions">
+                <button class="videoBtn primary" id="joinVideoBtn">Entrar na chamada</button>
+                <button class="videoBtn" id="toggleMicBtn" disabled>Mutar microfone</button>
+                <button class="videoBtn" id="toggleCamBtn" disabled>Desligar câmera</button>
+                <button class="videoBtn danger" id="leaveVideoBtn" disabled>Sair da chamada</button>
+              </div>
+            </div>
+
+            <div class="videoStatus" id="videoStatus">Vídeo desligado.</div>
+
+            <div class="videoFocusBar" id="videoFocusBar" hidden>
+              <button class="videoFocusBtn" id="exitFocusBtn">Voltar para grade</button>
+            </div>
+
+            <div class="videoGrid" id="videoGrid">
+              <div class="videoEmpty" id="videoEmpty">
+                Entre na chamada para abrir câmera e microfone.<br>
+                Até 5 participantes podem ficar juntos aqui.
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="cardInner">
+              <h2 class="sectionTitle">Estado da sala</h2>
+
+              <div class="emptyState" style="margin-top:0;">
+                <div style="margin-bottom:8px;">Sala: <strong id="roomName">Aguardando...</strong></div>
+                <div style="margin-bottom:8px;">Status: <strong id="roomStatus">Conectando</strong></div>
+                <div>Status global: <strong id="footerStatus">Conectando</strong></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+      </section>
+
+      <div class="footerBar">
+        <div>Jogadores na sala: <strong id="playerCountFooterMirror">0</strong></div>
+        <div>Status: <strong id="footerStatusMirror">Conectando</strong></div>
+      </div>
     </div>
-  `;
-}
-
-updateRitualButtons();
-}
-
-async function addHistoryItem(type, text){
-try{
-await addDoc(ritualHistoryRef, {
-type,
-text,
-createdAt: serverTimestamp()
-});
-}catch(error){
-console.error("Erro ao adicionar histórico do ritual:", error);
-}
-}
-
-async function saveRitualState(card){
-try{
-await setDoc(ritualRef, {
-started: ritualStarted,
-remainingDeck: ritualDeck,
-currentCard: card || null,
-updatedAt: serverTimestamp(),
-updatedBy: participantId
-}, { merge:true });
-}catch(error){
-console.error("Erro ao salvar estado do ritual:", error);
-}
-}
-
-async function revealNextRitualCard(){
-if (!ritualStarted) return;
-if (!isHost) return;
-if (!ritualDeck.length) return;
-
-const nextCard = ritualDeck.shift();
-
-await saveRitualState(nextCard);
-await addHistoryItem(nextCard.type, nextCard.title);
-
-updateRitualButtons();
-}
-
-async function startRitualDeck(){
-ritualStarted = true;
-ritualDeck = buildRitualDeck();
-
-await setDoc(ritualRef, {
-started: true,
-remainingDeck: ritualDeck,
-currentCard: null,
-updatedAt: serverTimestamp(),
-updatedBy: participantId
-}, { merge:true });
-
-await addHistoryItem("Ritual", "O ritual foi iniciado.");
-
-await revealNextRitualCard();
-updateRitualButtons();
-}
-
-async function resetRitualDeck(){
-if (!isHost) return;
-
-ritualStarted = true;
-ritualDeck = buildRitualDeck();
-
-await setDoc(ritualRef, {
-started: true,
-remainingDeck: ritualDeck,
-currentCard: null,
-updatedAt: serverTimestamp(),
-updatedBy: participantId
-}, { merge:true });
-
-await addHistoryItem("Ritual", "O ritual foi reiniciado.");
-
-await revealNextRitualCard();
-updateRitualButtons();
-}
-
-
-    function renderRitualCardFromState(data){
-  const started = !!data?.started;
-  const currentCard = data?.currentCard || null;
-  ritualStarted = started;
-  ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
-
-  if (!started){
-    setRitualWaitingState();
-    return;
-  }
-
-  if (currentCard){
-    if (ritualCardType) {
-      ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
-    }
-
-    if (ritualCardTitle){
-      ritualCardTitle.textContent = currentCard.title || "Carta revelada";
-    }
-
-    if (ritualCardText){
-      ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
-    }
-  } else {
-    if (ritualCardType) ritualCardType.textContent = "RITUAL";
-    if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
-    if (ritualCardText) {
-      ritualCardText.innerHTML = "O anfitrião ainda não revelou a próxima carta.";
-    }
-  }
-
-  if (deckInfo){
-    if (ritualDeck.length > 0){
-      deckInfo.innerHTML = `
-        ${ritualDeck.length} carta(s) restante(s) no deck.<br>
-        O anfitrião pode revelar a próxima.
-      `;
-    } else {
-      deckInfo.innerHTML = `
-        O deck chegou ao fim.<br>
-        Reinicie o ritual para embaralhar novamente.
-      `;
-    }
-  }
-
-  updateRitualButtons();
-}
-
-function bindRitual(){
-ritualUnsub = onSnapshot(ritualRef, function(snap){
-if (!snap.exists()){
-setRitualWaitingState();
-return;
-}
-
-renderRitualCardFromState(snap.data());
-
-});
-
-const q = query(ritualHistoryRef, orderBy('createdAt', 'desc'));
-
-ritualHistoryUnsub = onSnapshot(q, function(snapshot){
-if (!historyList) return;
-
-const docs = snapshot.docs.map(docSnap => docSnap.data());    
-
-if (!docs.length){    
-  historyList.innerHTML = `    
-    <div class="historyItem">    
-      <div class="historyType">Aguardando</div>    
-      <div class="historyText">Nenhuma carta revelada ainda.</div>    
-    </div>    
-  `;    
-  return;    
-}    
-
-historyList.innerHTML = docs.map(item => `    
-  <div class="historyItem">    
-    <div class="historyType">${escapeHtml(item.type || "Ritual")}</div>    
-    <div class="historyText">${escapeHtml(item.text || "")}</div>    
-  </div>    
-`).join("");
-
-});
-}
-
-function setAvatarSelection(emoji){
-selectedAvatarEmoji = emoji || "🔮";
-avatarPicker.querySelectorAll(".avatarOption").forEach((btn)=>{
-btn.classList.toggle("active", btn.dataset.avatar === selectedAvatarEmoji);
-});
-}
-
-function openEditorWithUser(user){
-profileEditor.classList.remove("hidden");
-profileActions.classList.add("hidden");
-
-editDisplayName.value = user.displayName || "";
-editUsername.value = user.username || "";
-editBio.value = user.bio || "";
-setAvatarSelection(user.avatarEmoji || "🔮");
-}
-
-function closeEditor(){
-profileEditor.classList.add("hidden");
-profileActions.classList.remove("hidden");
-}
-
-async function getUsersByIds(ids){
-const validIds = uniqueArray(ids);
-const users = [];
-
-for (const id of validIds){
-try{
-const ref = doc(db, "users", id);
-const snap = await getDoc(ref);
-if (snap.exists()){
-users.push(snap.data());
-}
-}catch(e){
-console.error(e);
-}
-}
-
-return users;
-}
-
-function renderFriendList(container, users, options = {}){
-const {
-emptyText = "Nada aqui por enquanto.",
-mode = "friends"
-} = options;
-
-container.innerHTML = "";
-
-if (!users.length){
-const empty = document.createElement("div");
-empty.className = "friendEmpty";
-empty.textContent = emptyText;
-container.appendChild(empty);
-return;
-}
-
-users.forEach((user)=>{
-const item = document.createElement("div");
-item.className = "friendItem";
-
-const avatar = user.avatarEmoji || "🔮";    
-const displayName = user.displayName || "Jogador";    
-const username = user.username || "jogador";    
-
-let actionsHtml = "";    
-
-if (mode === "requests"){    
-  actionsHtml = `    
-    <div class="friendActions">    
-      <button class="friendBtn friendBtn--accept" data-action="accept" data-user-id="${user.userId}">Aceitar</button>    
-      <button class="friendBtn" data-action="decline" data-user-id="${user.userId}">Recusar</button>    
-    </div>    
-  `;    
-}    
-
-item.innerHTML = `    
-  <div class="friendLeft">    
-    <div class="friendAvatar">${avatar}</div>    
-    <div class="friendMeta">    
-      <div class="friendName">${escapeHtml(displayName)}</div>    
-      <div class="friendUsername">@${escapeHtml(username)}</div>    
-    </div>    
-  </div>    
-  ${actionsHtml}    
-`;    
-
-container.appendChild(item);
-
-});
-}
-
-async function renderFriendsSection(user, isSelfView){
-friendsPanel.classList.remove("hidden");
-friendsListBlock.hidden = false;
-
-const friendsUsers = await getUsersByIds(user.friends || []);
-renderFriendList(friendsList, friendsUsers, {
-emptyText: isSelfView ? "Você ainda não tem amigos adicionados." : "Esse jogador ainda não possui amigos visíveis."
-});
-
-if (isSelfView){
-incomingRequestsBlock.hidden = false;
-const incomingUsers = await getUsersByIds(user.incomingRequests || []);
-renderFriendList(incomingRequestsList, incomingUsers, {
-emptyText: "Nenhum pedido recebido no momento.",
-mode: "requests"
-});
-} else {
-incomingRequestsBlock.hidden = true;
-incomingRequestsList.innerHTML = "";
-}
-}
-
-async function fillProfileUI(user, isSelfView){
-  profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
-  profileNameEl.textContent = user.displayName || "Jogador";
-  profileUsernameEl.textContent = `@${user.username || "jogador"}`;
-  profileBioEl.textContent = user.bio || "Sem descrição.";
-
-  document.getElementById("profileGames").textContent =
-    `Partidas: ${user.stats?.gamesPlayed || 0}`;
-
-  document.getElementById("profileWins").textContent =
-    `Vitórias: ${user.stats?.wins || 0}`;
-
-  editProfileBtn.hidden = !isSelfView;
-  addFriendBtn.hidden = isSelfView;
-
-  if (!isSelfView){
-    const alreadyFriend = (user.friends || []).includes(userId);
-    addFriendBtn.textContent = alreadyFriend ? "Já são amigos" : "Adicionar amigo";
-    addFriendBtn.disabled = alreadyFriend;
-  } else {
-    addFriendBtn.disabled = false;
-  }
-
-  closeEditor();
-  await renderFriendsSection(user, isSelfView);
-}
-
-async function ensureUserProfile(){
-const snap = await getDoc(userRef);
-
-if(!snap.exists()){
-const usernameBase = (playerName || "jogador")
-.toLowerCase()
-.normalize("NFD")
-.replace(/[\u0300-\u036f]/g, "")
-.replace(/[^a-z0-9]/g, "")
-.slice(0,20) || "jogador";
-
-await setDoc(userRef,{    
-  userId,    
-  displayName: playerName,    
-  username: usernameBase,    
-  bio: "Novo participante do ritual.",    
-  avatarEmoji: "🔮",    
-  avatarColor:"#1f86d9",    
-  memberSince: serverTimestamp(),    
-  lastSeen: serverTimestamp(),    
-  friends: [],    
-  incomingRequests: [],    
-  outgoingRequests: [],    
-  stats:{    
-    gamesPlayed:0,    
-    wins:0    
-  }    
-});
-
-}else{
-await updateDoc(userRef,{
-lastSeen: serverTimestamp()
-});
-}
-}
-
-function isPlayerActive(player){
-if(!player.lastSeen || typeof player.lastSeen.toMillis !== 'function') return true;
-return (Date.now() - player.lastSeen.toMillis()) <= ACTIVE_WINDOW_MS;
-}
-
-async function openProfile(player){
-try{
-const targetUserId = player?.userId || userId;
-openedProfileUserId = targetUserId;
-
-const ref = doc(db, "users", targetUserId);    
-const snap = await getDoc(ref);    
-
-if(!snap.exists()){    
-  profileAvatarLarge.textContent = initials(player?.name || playerName);    
-  profileNameEl.textContent = player?.name || playerName;    
-  profileUsernameEl.textContent = "@jogador";    
-  profileBioEl.textContent = "Perfil não encontrado.";    
-  document.getElementById("profileGames").textContent = "Partidas: 0";    
-  document.getElementById("profileWins").textContent = "Vitórias: 0";    
-  editProfileBtn.hidden = true;    
-  addFriendBtn.hidden = true;    
-  friendsPanel.classList.add("hidden");    
-  closeEditor();    
-  profileModal.classList.remove("hidden");    
-  return;    
-}    
-
-const user = snap.data();    
-openedProfileData = user;    
-
-const isSelfView = targetUserId === userId;    
-await fillProfileUI(user, isSelfView);    
-
-profileModal.classList.remove("hidden");
-
-}catch(error){
-console.error(error);
-}
-}
-
-function closeProfile(){
-profileModal.classList.add("hidden");
-openedProfileUserId = null;
-openedProfileData = null;
-friendsPanel.classList.add("hidden");
-closeEditor();
-}
-
-closeProfileBtn.addEventListener("click", function(e){
-e.preventDefault();
-e.stopPropagation();
-closeProfile();
-});
-
-if (closeProfileXBtn){
-closeProfileXBtn.addEventListener("click", function(e){
-e.preventDefault();
-e.stopPropagation();
-closeProfile();
-});
-}
-
-profileModal.addEventListener("click", function(e){
-if(e.target === profileModal){
-closeProfile();
-}
-});
-
-document.addEventListener("keydown", function(e){
-if(e.key === "Escape" && !profileModal.classList.contains("hidden")){
-closeProfile();
-}
-});
-
-if (myProfileBtn){
-myProfileBtn.addEventListener("click", function(){
-openProfile({ userId, name: playerName, isHost });
-});
-}
-
-if (editProfileBtn){
-editProfileBtn.addEventListener("click", function(){
-if (!openedProfileData) return;
-openEditorWithUser(openedProfileData);
-});
-}
-
-if (cancelEditProfileBtn){
-cancelEditProfileBtn.addEventListener("click", function(){
-closeEditor();
-});
-}
-
-if (avatarPicker){
-avatarPicker.addEventListener("click", function(e){
-const btn = e.target.closest(".avatarOption");
-if (!btn) return;
-setAvatarSelection(btn.dataset.avatar);
-});
-}
-
-if (profileEditor){
-profileEditor.addEventListener("submit", async function(e){
-e.preventDefault();
-
-try{    
-  const displayName = editDisplayName.value.trim().slice(0, 40) || "Jogador";    
-  const username = normalizeUsername(editUsername.value) || "jogador";    
-  const bio = editBio.value.trim().slice(0, 180);    
-
-  await updateDoc(userRef, {    
-    displayName,    
-    username,    
-    bio,    
-    avatarEmoji: selectedAvatarEmoji,    
-    lastSeen: serverTimestamp()    
-  });    
-
-  if (openedProfileUserId === userId){    
-    playerName = displayName;    
-    localStorage.setItem("osl_nome", displayName);    
-  }    
-
-  const snap = await getDoc(userRef);    
-  openedProfileData = snap.data();    
-  await fillProfileUI(openedProfileData, true);    
-
-  await setDoc(playerRef, {    
-    name: displayName    
-  }, { merge:true });    
-
-}catch(error){    
-  console.error(error);    
-  alert("Não foi possível salvar o perfil.");    
-}
-
-});
-}
-
-if (addFriendBtn){
-addFriendBtn.addEventListener("click", async function(){
-try{
-if (!openedProfileUserId || openedProfileUserId === userId) return;
-
-const mySnap = await getDoc(userRef);    
-  const targetRef = doc(db, "users", openedProfileUserId);    
-  const targetSnap = await getDoc(targetRef);    
-
-  if (!mySnap.exists() || !targetSnap.exists()) return;    
-
-  const myUser = mySnap.data();    
-  const targetUser = targetSnap.data();    
-
-  const myFriends = uniqueArray(myUser.friends || []);    
-  const myOutgoing = uniqueArray(myUser.outgoingRequests || []);    
-  const myIncoming = uniqueArray(myUser.incomingRequests || []);    
-  const targetIncoming = uniqueArray(targetUser.incomingRequests || []);    
-
-  if (myFriends.includes(openedProfileUserId)){    
-    alert("Vocês já são amigos.");    
-    return;    
-  }    
-
-  if (myOutgoing.includes(openedProfileUserId)){    
-    alert("Você já enviou um pedido para esse jogador.");    
-    return;    
-  }    
-
-  if (myIncoming.includes(openedProfileUserId)){    
-    alert("Esse jogador já enviou um pedido para você. Aceite no seu perfil.");    
-    return;    
-  }    
-
-  await updateDoc(userRef, {    
-    outgoingRequests: uniqueArray([...myOutgoing, openedProfileUserId])    
-  });    
-
-  await updateDoc(targetRef, {    
-    incomingRequests: uniqueArray([...targetIncoming, userId])    
-  });    
-
-  alert("Pedido de amizade enviado.");    
-
-  const refreshedTarget = await getDoc(targetRef);    
-  openedProfileData = refreshedTarget.data();    
-  await fillProfileUI(openedProfileData, false);    
-
-}catch(error){    
-  console.error(error);    
-  alert("Não foi possível enviar o pedido de amizade.");    
-}
-
-});
-}
-
-if (incomingRequestsList){
-incomingRequestsList.addEventListener("click", async function(e){
-const btn = e.target.closest(".friendBtn");
-if (!btn) return;
-
-const action = btn.dataset.action;    
-const requesterId = btn.dataset.userId;    
-if (!requesterId) return;    
-
-try{    
-  const mySnap = await getDoc(userRef);    
-  const requesterRef = doc(db, "users", requesterId);    
-  const requesterSnap = await getDoc(requesterRef);    
-
-  if (!mySnap.exists() || !requesterSnap.exists()) return;    
-
-  const myUser = mySnap.data();    
-  const requester = requesterSnap.data();    
-
-  const myIncoming = uniqueArray(myUser.incomingRequests || []);    
-  const myFriends = uniqueArray(myUser.friends || []);    
-
-  const requesterOutgoing = uniqueArray(requester.outgoingRequests || []);    
-  const requesterFriends = uniqueArray(requester.friends || []);    
-
-  if (action === "accept"){    
-    await updateDoc(userRef, {    
-      incomingRequests: myIncoming.filter(id => id !== requesterId),    
-      friends: uniqueArray([...myFriends, requesterId])    
-    });    
-
-    await updateDoc(requesterRef, {    
-      outgoingRequests: requesterOutgoing.filter(id => id !== userId),    
-      friends: uniqueArray([...requesterFriends, userId])    
-    });    
-  }    
-
-  if (action === "decline"){    
-    await updateDoc(userRef, {    
-      incomingRequests: myIncoming.filter(id => id !== requesterId)    
-    });    
-
-    await updateDoc(requesterRef, {    
-      outgoingRequests: requesterOutgoing.filter(id => id !== userId)    
-    });    
-  }    
-
-  const refreshed = await getDoc(userRef);    
-  openedProfileData = refreshed.data();    
-  await fillProfileUI(openedProfileData, true);    
-
-}catch(error){    
-  console.error(error);    
-  alert("Não foi possível atualizar o pedido.");    
-}
-
-});
-}
-
-function renderPlayers(players){
-  playerListEl.innerHTML = '';
-
-  players.forEach(function(player){
-    const div = document.createElement('div');
-    div.className = 'player';
-    div.innerHTML = `
-      <div class="playerLeft">
-        <div class="avatar">${initials(player.name)}</div>
-        <div class="playerMeta">
-          <div class="playerName">${escapeHtml(player.name)}</div>
-          <div class="playerRole">${player.isHost ? 'Anfitrião' : 'Participante'}</div>
+  </main>
+
+  <!-- PERFIL / AMIGOS -->
+  <div id="profileModal" class="profileModal hidden">
+    <div class="profileCard profileCard--large">
+      <button class="profileX" id="closeProfileXBtn" aria-label="Fechar perfil">×</button>
+
+      <div class="profileHeader">
+        <div class="profileAvatarLarge" id="profileAvatarLarge">🔮</div>
+        <div class="profileIdentity">
+          <div class="profileName" id="profileName">Jogador</div>
+          <div class="profileUsername" id="profileUsername">@jogador</div>
         </div>
       </div>
-      <div class="playerRight">
-        <span class="playerStatus">Online</span>
-        ${player.isHost ? '<span class="playerHost">Host</span>' : ''}
+
+      <div class="profileBio" id="profileBio">Sem descrição.</div>
+
+      <div class="profileStats">
+        <span id="profileGames">Partidas: 0</span>
+        <span id="profileWins">Vitórias: 0</span>
       </div>
-    `;
-
-    div.addEventListener("click", ()=>{
-      openProfile(player);
-    });
-
-    playerListEl.appendChild(div);
-  });
-
-  playerCountEl.textContent = String(players.length);
-  playersEmptyEl.style.display = players.length > 1 ? 'none' : 'block';
-}
-
-function renderMessages(docs){
-messagesEl.innerHTML = '';
-
-if(!docs.length){
-showChatEmpty('A sala foi criada.<br>Quando houver mensagens ou eventos do sistema, eles aparecerão aqui.');
-return;
-}
-
-hideChatEmpty();
-
-docs.forEach(function(item){
-const div = document.createElement('div');
-
-if(item.type === 'system'){    
-  div.className = 'message system';    
-  div.innerHTML = `    
-    <span class="meta">Sistema</span>    
-    ${escapeHtml(item.text)}    
-  `;    
-}else{    
-  const own = item.authorId === participantId;    
-  div.className = 'message ' + (own ? 'me' : 'other');    
-
-  let timeLabel = '--:--';    
-  if(item.createdAt && typeof item.createdAt.toDate === 'function'){    
-    timeLabel = nowTimeFromDate(item.createdAt.toDate());    
-  }    
-
-  div.innerHTML = `    
-    <span class="meta">${escapeHtml(item.authorName || 'Jogador')} • ${timeLabel}</span>    
-    ${escapeHtml(item.text)}    
-  `;    
-}    
-
-messagesEl.appendChild(div);
-
-});
-
-messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-function renderTyping(names){
-  if(!typingBarEl) return;
-
-  if(!names.length){
-    typingBarEl.textContent = '';
-    return;
-  }
-
-  if(names.length === 1){
-    typingBarEl.textContent = `${names[0]} está digitando...`;
-    return;
-  }
-
-  if(names.length === 2){
-    typingBarEl.textContent = `${names[0]} e ${names[1]} estão digitando...`;
-    return;
-  }
-
-  typingBarEl.textContent = `${names[0]}, ${names[1]} e mais ${names.length - 2} estão digitando...`;
-}
-
-async function ensureRoom(){
-const snap = await getDoc(roomRef);
-
-if(!snap.exists()){
-isHost = true;
-
-await setDoc(roomRef, {    
-  code: roomCode,    
-  name: roomName,    
-  status: 'waiting',    
-  hostId: participantId,    
-  hostName: playerName,    
-  createdAt: serverTimestamp(),    
-  updatedAt: serverTimestamp()    
-});    
-
-await addDoc(messagesRef, {    
-  type: 'system',    
-  text: 'A sala foi criada. Aguardando jogadores.',    
-  createdAt: serverTimestamp()    
-});
-
-} else {
-const data = snap.data();
-isHost = data.hostId === participantId;
-}
-}
-
-async function upsertSelf(){
-const playersSnap = await getDocs(playersCollectionRef);
-
-const activePlayers = playersSnap.docs
-.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
-.filter(player => isPlayerActive(player));
-
-const selfAlreadyActive = activePlayers.some(player => player.id === participantId);
-
-if(!selfAlreadyActive && activePlayers.length >= MAX_PLAYERS){
-throw new Error('ROOM_FULL');
-}
-
-await setDoc(playerRef, {
-id: participantId,
-userId,
-name: playerName,
-isHost,
-joinedAt: serverTimestamp(),
-lastSeen: serverTimestamp()
-}, { merge:true });
-}
-
-async function setTyping(isTyping){
-try{
-if(isTyping){
-await setDoc(typingRef, {
-name: playerName,
-isTyping: true,
-updatedAt: serverTimestamp()
-}, { merge:true });
-}else{
-await deleteDoc(typingRef);
-}
-}catch(e){}
-}
-
-function scheduleTypingStop(){
-clearTimeout(typingTimer);
-typingTimer = setTimeout(() => {
-setTyping(false);
-}, TYPING_ACTIVE_MS);
-}
-
-function startHeartbeat(){
-clearInterval(heartbeatTimer);
-heartbeatTimer = setInterval(async function(){
-try{
-await updateDoc(playerRef, {
-lastSeen: serverTimestamp()
-});
-}catch(e){}
-}, HEARTBEAT_MS);
-}
-
-function bindRoom(){
-roomUnsub = onSnapshot(roomRef, async function(snap){
-if(!snap.exists()) return;
-
-const data = snap.data();    
-roomNameEl.textContent = data.name || roomName;    
-roomCodeEl.textContent = data.code || roomCode;    
-
-const started = data.status === 'started';    
-roomStatusEl.textContent = started ? 'Ritual em andamento' : 'Aguardando jogadores';    
-sessionLabelEl.textContent = started ? 'Sessão iniciada' : 'Sessão não iniciada';    
-footerStatusEl.textContent = started ? 'Ritual iniciado' : 'Aguardando início';    
-
-isHost = data.hostId === participantId;    
-startBtn.disabled = !isHost;    
-startBtn.textContent = isHost ? (started ? 'Ritual iniciado' : 'Iniciar Ritual') : 'Aguardando anfitrião';
-
-if (started && !ritualStarted){
-bindRitual();
-}
-
-if (!started){
-setRitualWaitingState();
-}
-await setDoc(playerRef, {
-isHost
-}, { merge:true });
-});
-}
-
-function bindPlayers(){
-const q = query(playersCollectionRef, orderBy('joinedAt', 'asc'));
-
-playersUnsub = onSnapshot(q, function(snapshot){
-const players = snapshot.docs
-.map(function(docSnap){
-const data = docSnap.data();
-return {
-id: docSnap.id,
-userId: data.userId || null,
-name: data.name || 'Jogador',
-isHost: !!data.isHost,
-joinedAt: data.joinedAt || null,
-lastSeen: data.lastSeen || null
-};
-})
-.filter(isPlayerActive);
-
-renderPlayers(players);
-
-});
-}
-
-function bindTyping(){
-const q = query(typingCollectionRef, orderBy('updatedAt', 'asc'));
-
-typingUnsub = onSnapshot(q, function(snapshot){
-const names = snapshot.docs
-.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
-.filter(item => item.id !== participantId)
-.map(item => item.name)
-.filter(Boolean);
-
-renderTyping(names);
-
-});
-}
-
-function bindMessages(){
-const q = query(messagesRef, orderBy('createdAt', 'asc'));
-
-messagesUnsub = onSnapshot(q, function(snapshot){
-const docs = snapshot.docs.map(function(docSnap){
-return { id: docSnap.id, ...docSnap.data() };
-});
-
-renderMessages(docs);    
-
-const currentIds = new Set(docs.map(item => item.id));    
-
-if(!initialMessagesLoaded){    
-  knownMessageIds = currentIds;    
-  initialMessagesLoaded = true;    
-  return;    
-}    
-
-docs.forEach(function(item){    
-  if (knownMessageIds.has(item.id)) return;    
-
-  const isOwnMessage = item.authorId === participantId;    
-  const shouldPlay =    
-    (item.type === 'system') ||    
-    (item.type === 'user' && !isOwnMessage);    
-
-  if (shouldPlay){    
-    playIncomingMessageSound();    
-  }    
-});    
-
-knownMessageIds = currentIds;
-
-});
-}
-
-async function sendMessage(){
-const text = messageInput.value.trim();
-if(!text) return;
-
-messageInput.value = '';
-clearTimeout(typingTimer);
-await setTyping(false);
-
-await addDoc(messagesRef, {
-type: 'user',
-authorId: participantId,
-authorName: playerName,
-text,
-createdAt: serverTimestamp()
-});
-
-await updateDoc(roomRef, {
-updatedAt: serverTimestamp()
-});
-}
-
-async function startSession(){
-if(!isHost) return;
-
-const snap = await getDoc(roomRef);
-if(!snap.exists()) return;
-
-const data = snap.data();
-if(data.status === 'started') return;
-
-await updateDoc(roomRef, {
-status: 'started',
-startedAt: serverTimestamp(),
-updatedAt: serverTimestamp()
-});
-
-await addDoc(messagesRef, {
-type: 'system',
-text: 'O anfitrião iniciou o ritual. A próxima etapa pode começar.',
-createdAt: serverTimestamp()
-});
-
-await startRitualDeck();
-}
-
-async function leaveRoom(){
-if(leaving) return;
-leaving = true;
-
-try{
-clearInterval(heartbeatTimer);
-clearTimeout(typingTimer);
-await setTyping(false);
-
-if(roomUnsub) roomUnsub();
-
-if(playersUnsub) playersUnsub();
-if(messagesUnsub) messagesUnsub();
-if(typingUnsub) typingUnsub();
-if(ritualUnsub) ritualUnsub();
-if(ritualHistoryUnsub) ritualHistoryUnsub();
-
-await deleteDoc(playerRef);
-
-}catch(e){}
-
-window.location.href = './entrada.html';
-}
-
-copyCodeBtn.addEventListener('click', async function(){
-try{
-await navigator.clipboard.writeText(roomCode);
-await addDoc(messagesRef, {
-type: 'system',
-text: 'O código da sala foi copiado.',
-createdAt: serverTimestamp()
-});
-}catch(e){}
-});
-
-sendBtn.addEventListener('click', function(){
-sendMessage().catch(console.error);
-});
-
-messageInput.addEventListener('input', function(){
-if(messageInput.value.trim()){
-setTyping(true);
-scheduleTypingStop();
-}else{
-clearTimeout(typingTimer);
-setTyping(false);
-}
-});
-
-messageInput.addEventListener('blur', function(){
-clearTimeout(typingTimer);
-setTyping(false);
-});
-
-messageInput.addEventListener('keydown', function(e){
-if(e.key === 'Enter'){
-e.preventDefault();
-sendMessage().catch(console.error);
-}
-});
-
-startBtn.addEventListener('click', function(){
-startSession().catch(console.error);
-});
-
-leaveBtn.addEventListener('click', function(){
-const ok = confirm('Deseja sair da sala?');
-if(ok){
-leaveRoom();
-}
-});
-if (revealCardBtn){
-revealCardBtn.addEventListener("click", function(){
-revealNextRitualCard().catch(console.error);
-});
-}
-
-if (resetRitualBtn){
-resetRitualBtn.addEventListener("click", function(){
-const ok = confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?");
-if (ok){
-resetRitualDeck().catch(console.error);
-}
-});
-}
-window.addEventListener('pagehide', function(){
-leaveRoom();
-});
-
-window.addEventListener('beforeunload', function(){
-leaveRoom();
-});
-
-(async function init(){
-try{
-roomNameEl.textContent = roomName;
-roomCodeEl.textContent = roomCode;
-roomStatusEl.textContent = 'Conectando';
-footerStatusEl.textContent = 'Conectando';
-
-await ensureUserProfile();
-
-await ensureRoom();
-await upsertSelf();
-setRitualWaitingState();
-startHeartbeat();
-bindRoom();
-bindPlayers();
-bindMessages();
-bindTyping();
-bindRitual();
-
-}catch(error){
-console.error(error);
-
-if (error && error.message === 'ROOM_FULL'){    
-  showChatEmpty('A sala atingiu o limite de 5 jogadores.<br>Entre em outra sala ou aguarde alguém sair.');    
-  roomStatusEl.textContent = 'Sala lotada';    
-  footerStatusEl.textContent = 'Limite atingido';    
-  startBtn.disabled = true;    
-  sendBtn.disabled = true;    
-  messageInput.disabled = true;    
-  return;    
-}    
-
-showChatEmpty('Não foi possível conectar à sala.<br>Verifique a configuração do Firebase.');    
-roomStatusEl.textContent = 'Erro de conexão';    
-footerStatusEl.textContent = 'Erro';
-
-}
-})();
-</script>  <script type="module" src="video.js"></script>  </body>
 
+      <div class="profileActions" id="profileActions">
+        <button class="profileActionBtn profileActionBtn--primary" id="editProfileBtn">Editar perfil</button>
+        <button class="profileActionBtn" id="addFriendBtn" hidden>Adicionar amigo</button>
+      </div>
+
+      <div class="friendsPanel hidden" id="friendsPanel">
+        <div class="friendsBlock" id="friendsListBlock">
+          <div class="friendsTitle">Amigos</div>
+          <div class="friendsList" id="friendsList"></div>
+        </div>
+
+        <div class="friendsBlock" id="incomingRequestsBlock">
+          <div class="friendsTitle">Pedidos recebidos</div>
+          <div class="friendsList" id="incomingRequestsList"></div>
+        </div>
+      </div>
+
+      <form class="profileEditor hidden" id="profileEditor">
+        <label class="profileField">
+          <span>Nome de exibição</span>
+          <input class="profileInput" id="editDisplayName" maxlength="40" type="text" />
+        </label>
+
+        <label class="profileField">
+          <span>@usuário</span>
+          <input class="profileInput" id="editUsername" maxlength="20" type="text" />
+        </label>
+
+        <label class="profileField">
+          <span>Bio</span>
+          <textarea class="profileTextarea" id="editBio" maxlength="180"></textarea>
+        </label>
+
+        <div class="profileField">
+          <span>Avatar</span>
+          <div class="avatarPicker" id="avatarPicker">
+            <button type="button" class="avatarOption" data-avatar="🔮">🔮</button>
+            <button type="button" class="avatarOption" data-avatar="🕯️">🕯️</button>
+            <button type="button" class="avatarOption" data-avatar="👁️">👁️</button>
+            <button type="button" class="avatarOption" data-avatar="🎭">🎭</button>
+            <button type="button" class="avatarOption" data-avatar="🐺">🐺</button>
+            <button type="button" class="avatarOption" data-avatar="🌙">🌙</button>
+            <button type="button" class="avatarOption" data-avatar="🦉">🦉</button>
+            <button type="button" class="avatarOption" data-avatar="⚡">⚡</button>
+          </div>
+        </div>
+
+        <div class="profileEditorActions">
+          <button type="button" class="profileActionBtn" id="cancelEditProfileBtn">Cancelar</button>
+          <button type="submit" class="profileActionBtn profileActionBtn--primary" id="saveProfileBtn">Salvar perfil</button>
+        </div>
+      </form>
+
+      <button class="profileClose" id="closeProfileBtn">Fechar perfil</button>
+    </div>
+  </div>
+
+  <!--
+    COLE AQUI, EXATAMENTE COMO ESTÁ NO SEU ARQUIVO ATUAL,
+    TODO O SEU BLOCO:
+    <script type="module"> ... </script>
+
+    Não altere a lógica.
+    Só cole o script inteiro abaixo.
+  -->
+
+  <script type="module">
+    /* IMPORTANTE:
+       SUBSTITUA ESTE BLOCO PELO SEU SCRIPT ATUAL COMPLETO.
+       O layout acima já está preparado para manter os mesmos IDs.
+    */
+  </script>
+
+  <script>
+    /* Pequeno espelhamento visual dos contadores do rodapé,
+       sem interferir na sua lógica. */
+    const syncMirrorFooter = () => {
+      const playerCountSource = document.getElementById("playerCount");
+      const footerStatusSource = document.getElementById("footerStatus");
+      const playerCountMirror = document.getElementById("playerCountFooterMirror");
+      const footerStatusMirror = document.getElementById("footerStatusMirror");
+
+      if (playerCountSource && playerCountMirror) {
+        const obs1 = new MutationObserver(() => {
+          playerCountMirror.textContent = playerCountSource.textContent || "0";
+        });
+        obs1.observe(playerCountSource, { childList:true, subtree:true, characterData:true });
+        playerCountMirror.textContent = playerCountSource.textContent || "0";
+      }
+
+      if (footerStatusSource && footerStatusMirror) {
+        const obs2 = new MutationObserver(() => {
+          footerStatusMirror.textContent = footerStatusSource.textContent || "Conectando";
+        });
+        obs2.observe(footerStatusSource, { childList:true, subtree:true, characterData:true });
+        footerStatusMirror.textContent = footerStatusSource.textContent || "Conectando";
+      }
+    };
+
+    syncMirrorFooter();
+  </script>
+
+  <script type="module" src="video.js"></script>
+</body>
 </html>
