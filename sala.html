@@ -1855,149 +1855,256 @@ body::after{
 </style>  </head>
 
 <body>      
-<main class="page">      
-  <div class="shell">  <header class="topbar">      
-  <div class="brandWrap">      
-    <p class="eyebrow">Sala do Ritual</p>      
-    <h1 class="roomTitle">O SextoLugar</h1>      
-  </div>      <div class="topMeta">      
-    <div class="badge">Sala: <strong id="roomName">Aguardando...</strong></div>      
-    <div class="badge">Código: <strong id="roomCode">----</strong></div>      
-    <div class="badge"><span class="dot"></span> <span id="roomStatus">Conectando</span></div>      
-  </div>      
-</header>    <section class="layout">      <aside class="card sidebar">      
-    <div class="cardInner">      
-      <h2 class="sectionTitle">Jogadores conectados</h2>    <div class="playerList" id="playerList"></div>        <div class="emptyState" id="playersEmpty">      
-    Nenhum outro jogador entrou ainda. Compartilhe o código da sala para reunir o grupo.      
-  </div>        <div class="sidebarActions">      
-    <button class="btn btnGhost" id="myProfileBtn">Meu perfil</button>      
-    <button class="btn btnPrimary" id="startBtn">Iniciar Ritual</button>      
-    <button class="btn btnGhost" id="copyCodeBtn">Copiar código da sala</button>      
-    <button class="btn btnDanger" id="leaveBtn">Sair da sala</button>      
-  </div>      
-</div>    </aside>      <section class="mainArea">  <section class="card tableCard">      
-  <div class="tableHead">      
-    <div class="tableHeadLeft">      
-      <h2>Mesa do Ritual</h2>      
-      <p>A carta atual domina a sala. O anfitrião conduz a experiência.</p>      
-    </div>  <div class="tableHeadRight">      
-  <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar próxima carta</button>      
-  <button class="videoBtn" id="resetRitualBtn" disabled>Reiniciar ritual</button>      <div class="sessionStatus">      
-    <span class="dot"></span>      
-    <span id="sessionLabel">Sessão não iniciada</span>      
-  </div>      
-</div>    </div>    <div class="tableBody">      
-    <aside class="deckPanel">      
-      <div class="sectionTitle">Deck</div>      
-      <div class="deckCard">RITUAL</div>      
-      <div class="deckInfo" id="deckInfo">      
-        Aguardando o anfitrião iniciar.<br>      
-        Depois disso, a mesa se transforma.      
-      </div>      
-    </aside>  <div class="revealPanel">    <article class="ritualVisualCard silenceCard">      
-    <div class="ritualCardFrame">  <div class="ritualTopOrnaments">      
-    <div class="ritualLine"></div>      
-    <div class="ritualStars">✦ ✦ ✦</div>      
-    <div class="ritualSigil">△</div>      
-    <div class="ritualStars">✦ ✦ ✦</div>      
-    <div class="ritualLine"></div>      
-  </div>     <div class="ritualCardNumber" id="ritualCardType">CARTA 01</div>  <h3 class="ritualCardMainTitle" id="ritualCardTitle">SILÊNCIO</h3>  <div class="ritualMainInstruction" id="ritualCardText">      
-  DURANTE 60 SEGUNDOS<br>      
-  NINGUÉM PODE FALAR.      
-</div>  <div class="ritualMidDetails">      
-    <div class="ritualMiniDivider">      
-      <span></span><i></i><span></span>      
-    </div>    <p class="ritualRuleText">      
-  Se alguém quebrar o silêncio:<br>      
-  <strong>MARQUE 1 PONTO DE INFLUÊNCIA.</strong>      
-</p>      <div class="ritualMiniDivider">      
-  <span></span><i></i><span></span>      
-</div>      <p class="ritualRuleText subtle">      
-  Se ninguém quebrar...<br>      
-  OBSERVE QUEM PARECEU<br>      
-  MAIS <strong class="goldText">DESCONFORTÁVEL.</strong>      
-</p>    </div>      <div class="ritualWhiteDivider"></div>      <p class="ritualFinalPhrase">      
-    A SESSÃO REAGE AO DESCONFORTO,<br>      
-    NÃO ÀS PALAVRAS.      
-  </p>      <div class="ritualFingerprint">      
-    <div class="finger finger1"></div>      
-    <div class="finger finger2"></div>      
-    <div class="finger finger3"></div>      
-    <div class="finger finger4"></div>      
-    <div class="finger finger5"></div>      
-    <div class="finger finger6"></div>      
-  </div>      <div class="ritualBottomOrnaments">      
-    <div class="ritualBottomSet left">      
-      <span></span><span></span><span></span>      
-    </div>      
-    <div class="ritualBottomSet right">      
-      <span></span><span></span><span></span>      
-    </div>      
-  </div>    </div>    </article>      
-</div>  <aside class="historyPanel">      
-  <div class="sectionTitle">Histórico do ritual</div>      <div class="historyList" id="historyList">      
-    <div class="historyItem">      
-      <div class="historyType">Aguardando</div>      
-      <div class="historyText">Nenhuma carta revelada ainda.</div>      
-    </div>      
-  </div>      
-</aside>    </div>      
-</section>  <section class="bottomGrid">      
-      <section class="card chatCard">      
-        <div class="chatHeader">      
-          <div class="chatHeaderLeft">      
-            <h2>Chat da sala</h2>      
-            <p>Conversem antes de iniciar. Depois, o clima muda.</p>      
-          </div>      
-        </div>    <div class="messages" id="messages">      
-      <div class="chatEmpty" id="chatEmpty">      
-        Conectando a sala...<br>      
-        As mensagens e jogadores aparecerão em tempo real.      
-      </div>      
-    </div>      <div class="typingBar" id="typingBar"></div>      
+<main class="page">
+  <div class="shell">
 
-<div class="chatComposer">      
-  <div class="composerRow">      
-    <input      
-      class="input"      
-      id="messageInput"      
-      type="text"      
-      maxlength="240"      
-      placeholder="Digite uma mensagem para a sala..."      
-      autocomplete="off"      
-    >      
-    <button class="btn btnPrimary" id="sendBtn">Enviar</button>      
-  </div>      
-</div>
+    <header class="topbar">
+      <div class="brandWrap">
+        <p class="eyebrow">Sala do Ritual · <span id="roomName">Aguardando...</span></p>
+        <h1 class="roomTitle">O SextoLugar</h1>
+      </div>
 
-  </section>        <section class="card videoCard">      
-    <div class="videoTop">      
-      <h3 class="videoTitle">Chamada de vídeo</h3>      
-      <div class="videoActions">      
-        <button class="videoBtn primary" id="joinVideoBtn">Entrar na chamada</button>      
-        <button class="videoBtn" id="toggleMicBtn" disabled>Mutar microfone</button>      
-        <button class="videoBtn" id="toggleCamBtn" disabled>Desligar câmera</button>      
-        <button class="videoBtn danger" id="leaveVideoBtn" disabled>Sair da chamada</button>      
-      </div>      
-    </div>      <div class="videoStatus" id="videoStatus">Vídeo desligado.</div>      
+      <div class="topCenterMeta">
+        <span>Sala: <strong id="roomCode">----</strong></span>
+        <span>|</span>
+        <span>Jogadores: <strong id="playerCount">0</strong></span>
+        <span>|</span>
+        <span>Modo: <strong>Ritual</strong></span>
+      </div>
 
-<div class="videoFocusBar" id="videoFocusBar" hidden>      
-  <button class="videoFocusBtn" id="exitFocusBtn">Voltar para grade</button>      
-</div>      
+      <div class="topActions">
+        <button class="topActionBtn primary" id="copyCodeBtn">Convidar Amigos</button>
+        <button class="topActionBtn" id="myProfileBtn">Configurações</button>
+        <button class="topActionBtn iconOnly" id="leaveBtn" aria-label="Sair da sala">⇢</button>
+      </div>
+    </header>
 
-<div class="videoGrid" id="videoGrid">      
-  <div class="videoEmpty" id="videoEmpty">      
-    Entre na chamada para abrir câmera e microfone.<br>      
-    Até 5 participantes podem ficar juntos aqui.      
-  </div>      
-</div>
+    <section class="layout">
 
-  </section>      </section>    </section>      
-</section>    <div class="footerBar">      
-  <div>Jogadores na sala: <strong id="playerCount">0</strong></div>      
-  <div>Status: <strong id="footerStatus">Conectando</strong></div>      
-</div>    </div>      
-</main>  <div id="profileModal" class="profileModal hidden">      
+      <aside class="sidebar">
+        <section class="card playerPanel">
+          <div class="cardInner">
+            <h2 class="sectionTitle">Jogadores</h2>
+
+            <div class="playerList" id="playerList"></div>
+
+            <div class="emptyState" id="playersEmpty">
+              Nenhum outro jogador entrou ainda. Compartilhe o código da sala para reunir o grupo.
+            </div>
+
+            <div class="sidebarActions">
+              <button class="btn btnPrimary" id="startBtn">Iniciar Ritual</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card chatCard">
+          <div class="chatHeader">
+            <div class="chatHeaderLeft">
+              <h2>Chat</h2>
+              <p>Conversem antes de iniciar. Depois, o clima muda.</p>
+            </div>
+          </div>
+
+          <div class="messages" id="messages">
+            <div class="chatEmpty" id="chatEmpty">
+              Conectando a sala...<br>
+              As mensagens e jogadores aparecerão em tempo real.
+            </div>
+          </div>
+
+          <div class="typingBar" id="typingBar"></div>
+
+          <div class="chatComposer">
+            <div class="composerRow">
+              <input
+                class="input"
+                id="messageInput"
+                type="text"
+                maxlength="240"
+                placeholder="Digite uma mensagem..."
+                autocomplete="off"
+              >
+              <button class="btn btnPrimary" id="sendBtn">Enviar</button>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="mainArea">
+        <section class="card tableCard">
+          <div class="tableHead">
+            <div class="tableHeadLeft">
+              <h2>Carta Atual</h2>
+              <p>A carta atual domina a sala. O anfitrião conduz a experiência.</p>
+            </div>
+
+            <div class="tableHeadRight">
+              <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar Próxima Carta</button>
+              <button class="videoBtn" id="resetRitualBtn" disabled>Reiniciar ritual</button>
+
+              <div class="sessionStatus">
+                <span class="dot"></span>
+                <span id="sessionLabel">Sessão não iniciada</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tableBody">
+            <aside class="deckPanel">
+              <div class="sectionTitle">Deck</div>
+
+              <div class="deckStack" aria-hidden="true">
+                <div class="cardBack"></div>
+                <div class="cardBack"></div>
+                <div class="cardBack">
+                  <div class="deckLabel">DECK</div>
+                </div>
+              </div>
+
+              <div class="deckInfo" id="deckInfo">
+                Aguardando o anfitrião iniciar.<br>
+                Depois disso, a mesa se transforma.
+              </div>
+            </aside>
+
+            <div class="revealPanel">
+              <div class="revealStage">
+                <article class="ritualVisualCard silenceCard">
+                  <div class="ritualCardFrame">
+                    <div class="ritualTopOrnaments">
+                      <div class="ritualLine"></div>
+                      <div class="ritualStars">✦ ✦ ✦</div>
+                      <div class="ritualSigil">△</div>
+                      <div class="ritualStars">✦ ✦ ✦</div>
+                      <div class="ritualLine"></div>
+                    </div>
+
+                    <div class="ritualCardNumber" id="ritualCardType">CARTA 01</div>
+                    <h3 class="ritualCardMainTitle" id="ritualCardTitle">SILÊNCIO</h3>
+
+                    <div class="ritualMainInstruction" id="ritualCardText">
+                      DURANTE 60 SEGUNDOS<br>
+                      NINGUÉM PODE FALAR.
+                    </div>
+
+                    <div class="ritualMidDetails">
+                      <div class="ritualMiniDivider">
+                        <span></span><i></i><span></span>
+                      </div>
+
+                      <p class="ritualRuleText">
+                        Se alguém quebrar o silêncio:<br>
+                        <strong>MARQUE 1 PONTO DE INFLUÊNCIA.</strong>
+                      </p>
+
+                      <div class="ritualMiniDivider">
+                        <span></span><i></i><span></span>
+                      </div>
+
+                      <p class="ritualRuleText subtle">
+                        Se ninguém quebrar...<br>
+                        OBSERVE QUEM PARECEU<br>
+                        MAIS <strong class="goldText">DESCONFORTÁVEL.</strong>
+                      </p>
+                    </div>
+
+                    <div class="ritualWhiteDivider"></div>
+
+                    <p class="ritualFinalPhrase">
+                      A SESSÃO REAGE AO DESCONFORTO,<br>
+                      NÃO ÀS PALAVRAS.
+                    </p>
+
+                    <div class="ritualFingerprint">
+                      <div class="finger finger1"></div>
+                      <div class="finger finger2"></div>
+                      <div class="finger finger3"></div>
+                      <div class="finger finger4"></div>
+                      <div class="finger finger5"></div>
+                      <div class="finger finger6"></div>
+                    </div>
+
+                    <div class="ritualBottomOrnaments">
+                      <div class="ritualBottomSet left">
+                        <span></span><span></span><span></span>
+                      </div>
+                      <div class="ritualBottomSet right">
+                        <span></span><span></span><span></span>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card historyCard">
+          <div class="historyHead">
+            <div class="ornament"></div>
+            <h3>Histórico</h3>
+            <div class="ornament"></div>
+          </div>
+
+          <div class="historyBody">
+            <aside class="historyDeckMini">
+              <div class="deckStack" aria-hidden="true">
+                <div class="cardBack"></div>
+                <div class="cardBack"></div>
+                <div class="cardBack">
+                  <div class="deckLabel">DECK</div>
+                </div>
+              </div>
+            </aside>
+
+            <div class="historyList" id="historyList">
+              <div class="historyItem">
+                <div class="historyType">Aguardando</div>
+                <div class="historyText">Nenhuma carta revelada ainda.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="rightColumn">
+        <section class="card videoCard">
+          <div class="videoTop">
+            <h3 class="videoTitle">Vídeo</h3>
+
+            <div class="videoActions">
+              <button class="videoBtn primary" id="joinVideoBtn">Entrar na chamada</button>
+              <button class="videoBtn" id="toggleMicBtn" disabled>Mutar microfone</button>
+              <button class="videoBtn" id="toggleCamBtn" disabled>Desligar câmera</button>
+              <button class="videoBtn danger" id="leaveVideoBtn" disabled>Sair da chamada</button>
+            </div>
+          </div>
+
+          <div class="videoStatus" id="videoStatus">Vídeo desligado.</div>
+
+          <div class="videoFocusBar" id="videoFocusBar" hidden>
+            <button class="videoFocusBtn" id="exitFocusBtn">Voltar para grade</button>
+          </div>
+
+          <div class="videoGrid" id="videoGrid">
+            <div class="videoEmpty" id="videoEmpty">
+              Entre na chamada para abrir câmera e microfone.<br>
+              Até 5 participantes podem ficar juntos aqui.
+            </div>
+          </div>
+        </section>
+      </section>
+
+    </section>
+
+    <div class="footerBar">
+      <div>Status da sala: <strong id="roomStatus">Conectando</strong></div>
+      <div>Status geral: <strong id="footerStatus">Conectando</strong></div>
+    </div>
+  </div>
+</main>
+   <div id="profileModal" class="profileModal hidden">      
   <div class="profileCard profileCard--large">      
     <button class="profileX" id="closeProfileXBtn" aria-label="Fechar perfil">×</button>  <div class="profileHeader">      
   <div class="profileAvatarLarge" id="profileAvatarLarge">🔮</div>      <div class="profileIdentity">      
