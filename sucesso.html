@@ -26,7 +26,7 @@
     }
 
     .box{
-      width:min(560px, 100%);
+      width:min(620px, 100%);
       background:#12121a;
       border:1px solid rgba(255,255,255,.08);
       border-radius:16px;
@@ -67,8 +67,15 @@
       line-height:1.7;
     }
 
-    button{
+    .actions{
       margin-top:18px;
+      display:none;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    button{
       padding:14px 18px;
       border:none;
       border-radius:10px;
@@ -95,11 +102,25 @@
       transform:none;
     }
 
+    .secondary{
+      background:#1b1b24;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
     .small{
       margin-top:14px;
       font-size:12px;
       color:rgba(255,255,255,.48);
       line-height:1.5;
+    }
+
+    .nextInfo{
+      margin-top:18px;
+      font-size:14px;
+      color:rgba(255,255,255,.74);
+      line-height:1.6;
+      display:none;
     }
   </style>
 </head>
@@ -112,7 +133,14 @@
     <div class="status" id="status">Validando pagamento...</div>
     <div class="code" id="licenseBox" style="display:none;"></div>
 
-    <button id="continueBtn" style="display:none;" disabled>Entrar no jogo</button>
+    <div class="nextInfo" id="nextInfo">
+      Seu acesso já foi liberado. Agora falta apenas vincular esta compra à sua conta.
+    </div>
+
+    <div class="actions" id="actions">
+      <button id="createAccountBtn">Criar conta</button>
+      <button id="loginBtn" class="secondary">Já tenho conta</button>
+    </div>
 
     <div class="small">
       Esta página libera seu acesso automaticamente após a confirmação.
@@ -122,14 +150,18 @@
   <script>
     (async function () {
       const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
-      const NEXT_PAGE_URL = "./entrada.html";
+      const CREATE_ACCOUNT_URL = "./cadastro.html";
+      const LOGIN_URL = "./login.html";
 
       const statusEl = document.getElementById("status");
       const licenseBox = document.getElementById("licenseBox");
-      const continueBtn = document.getElementById("continueBtn");
+      const actionsEl = document.getElementById("actions");
+      const nextInfoEl = document.getElementById("nextInfo");
+
+      const createAccountBtn = document.getElementById("createAccountBtn");
+      const loginBtn = document.getElementById("loginBtn");
 
       let flowFinished = false;
-      let continueBound = false;
 
       function setStatus(text, isError = false) {
         statusEl.textContent = text;
@@ -148,17 +180,18 @@
         }
       }
 
-      function showContinue() {
-        continueBtn.style.display = "inline-block";
-        continueBtn.disabled = false;
-
-        if (!continueBound) {
-          continueBound = true;
-          continueBtn.addEventListener("click", function () {
-            window.location.href = NEXT_PAGE_URL;
-          });
-        }
+      function showNextStep() {
+        actionsEl.style.display = "flex";
+        nextInfoEl.style.display = "block";
       }
+
+      createAccountBtn.addEventListener("click", function () {
+        window.location.href = CREATE_ACCOUNT_URL;
+      });
+
+      loginBtn.addEventListener("click", function () {
+        window.location.href = LOGIN_URL;
+      });
 
       const params = new URLSearchParams(window.location.search);
       const paymentId = String(params.get("payment_id") || "").trim();
@@ -219,6 +252,8 @@
         safeSetLocalStorage("osl_license_email", licData.email || "");
         safeSetLocalStorage("osl_payment_id", paymentId);
         safeSetLocalStorage("osl_payment_ref", licData.ref || externalReference || "");
+        safeSetLocalStorage("osl_checkout_email", licData.email || "");
+        safeSetLocalStorage("osl_checkout_ref", licData.ref || externalReference || "");
 
         setStatus("Gerando seu acesso...");
 
@@ -261,7 +296,7 @@
         `;
 
         setStatus("Tudo pronto. Seu acesso foi liberado.");
-        showContinue();
+        showNextStep();
       } catch (error) {
         console.error("Erro ao finalizar liberação:", error);
         setStatus("Erro ao finalizar sua liberação.", true);
