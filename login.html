@@ -75,6 +75,11 @@
       color:#fff;
       padding:12px;
       font-size:15px;
+      outline:none;
+    }
+
+    .field input::placeholder{
+      color:rgba(255,255,255,.34);
     }
 
     button{
@@ -87,6 +92,7 @@
       color:#000;
       cursor:pointer;
       margin-top:6px;
+      font-size:15px;
     }
 
     button:disabled{
@@ -98,6 +104,8 @@
       margin-top:10px;
       font-size:13px;
       text-align:center;
+      min-height:18px;
+      color:rgba(255,255,255,.72);
     }
 
     .status.err{ color:var(--danger); }
@@ -108,6 +116,7 @@
       text-align:center;
       font-size:13px;
       color:var(--muted);
+      line-height:1.7;
     }
 
     .links a{
@@ -124,13 +133,13 @@
     <p>Acesse sua conta para continuar o ritual.</p>
 
     <div class="field">
-      <label>Email</label>
-      <input id="email" type="email" placeholder="Seu e-mail">
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="Seu e-mail" autocomplete="email">
     </div>
 
     <div class="field">
-      <label>Senha</label>
-      <input id="password" type="password" placeholder="Sua senha">
+      <label for="password">Senha</label>
+      <input id="password" type="password" placeholder="Sua senha" autocomplete="current-password">
     </div>
 
     <button id="loginBtn">Entrar</button>
@@ -158,9 +167,13 @@
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSy...",
+      apiKey: "AIzaSyC8sSvA7_1HPYRFGfgdgzstkP_yQHadY-c",
       authDomain: "osextolugar-game.firebaseapp.com",
-      projectId: "osextolugar-game"
+      projectId: "osextolugar-game",
+      storageBucket: "osextolugar-game.firebasestorage.app",
+      messagingSenderId: "947922328721",
+      appId: "1:947922328721:web:989522c99e16ab449f3330",
+      measurementId: "G-D6HG779ZFR"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -173,27 +186,40 @@
     const statusEl = document.getElementById("status");
     const forgotBtn = document.getElementById("forgot");
 
-    function setStatus(text, type=""){
+    let isLoggingIn = false;
+
+    function setStatus(text, type = "") {
       statusEl.textContent = text;
-      statusEl.className = "status " + type;
+      statusEl.className = "status";
+      if (type) statusEl.classList.add(type);
     }
 
-    onAuthStateChanged(auth, user => {
-      if(user){
+    const savedEmail =
+      localStorage.getItem("osl_checkout_email") ||
+      localStorage.getItem("osl_license_email") ||
+      "";
+
+    if (savedEmail) {
+      emailEl.value = savedEmail;
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && !isLoggingIn) {
         window.location.href = "./painel.html";
       }
     });
 
     loginBtn.addEventListener("click", async () => {
-      const email = emailEl.value.trim();
+      const email = emailEl.value.trim().toLowerCase();
       const password = passwordEl.value;
 
-      if(!email || !password){
+      if (!email || !password) {
         setStatus("Preencha todos os campos.", "err");
         return;
       }
 
-      try{
+      try {
+        isLoggingIn = true;
         loginBtn.disabled = true;
         setStatus("Entrando...");
 
@@ -202,11 +228,14 @@
         const userRef = doc(db, "users", cred.user.uid);
         const userSnap = await getDoc(userRef);
 
-        if(userSnap.exists()){
+        if (userSnap.exists()) {
           const data = userSnap.data();
 
           localStorage.setItem("osl_nome", data.displayName || "");
+          localStorage.setItem("osl_username", data.username || "");
+          localStorage.setItem("osl_auth_uid", cred.user.uid);
           localStorage.setItem("osl_license_code", data.licenseCode || "");
+          localStorage.setItem("osl_license_email", data.email || email);
         }
 
         setStatus("Acesso liberado.", "ok");
@@ -215,38 +244,44 @@
           window.location.href = "./painel.html";
         }, 500);
 
-      }catch(err){
+      } catch (err) {
         console.error(err);
 
         let msg = "Erro ao entrar.";
 
-        if(err.code === "auth/user-not-found"){
-          msg = "Conta não encontrada.";
-        }else if(err.code === "auth/wrong-password"){
+        if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
+          msg = "Conta não encontrada ou credenciais inválidas.";
+        } else if (err.code === "auth/wrong-password") {
           msg = "Senha incorreta.";
-        }else if(err.code === "auth/invalid-email"){
+        } else if (err.code === "auth/invalid-email") {
           msg = "E-mail inválido.";
+        } else if (err.code === "auth/too-many-requests") {
+          msg = "Muitas tentativas. Tente novamente mais tarde.";
+        } else if (err.code === "auth/network-request-failed") {
+          msg = "Erro de conexão. Tente novamente.";
         }
 
         setStatus(msg, "err");
         loginBtn.disabled = false;
+        isLoggingIn = false;
       }
     });
 
     forgotBtn.addEventListener("click", async (e) => {
       e.preventDefault();
 
-      const email = emailEl.value.trim();
+      const email = emailEl.value.trim().toLowerCase();
 
-      if(!email){
+      if (!email) {
         setStatus("Digite seu e-mail para recuperar.", "err");
         return;
       }
 
-      try{
+      try {
         await sendPasswordResetEmail(auth, email);
         setStatus("E-mail de recuperação enviado.", "ok");
-      }catch{
+      } catch (err) {
+        console.error(err);
         setStatus("Erro ao enviar recuperação.", "err");
       }
     });
