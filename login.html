@@ -268,23 +268,40 @@
     });
 
     forgotBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
+  e.preventDefault();
 
-      const email = emailEl.value.trim().toLowerCase();
+  const email = emailEl.value.trim().toLowerCase();
 
-      if (!email) {
-        setStatus("Digite seu e-mail para recuperar.", "err");
-        return;
-      }
+  if (!email) {
+    setStatus("Digite seu e-mail para recuperar.", "err");
+    return;
+  }
 
-      try {
-        await sendPasswordResetEmail(auth, email);
-        setStatus("E-mail de recuperação enviado.", "ok");
-      } catch (err) {
-        console.error(err);
-        setStatus("Erro ao enviar recuperação.", "err");
-      }
-    });
+  try {
+    await sendPasswordResetEmail(auth, email);
+    setStatus("E-mail de recuperação enviado.", "ok");
+  } catch (err) {
+    console.error(err);
+
+    let msg = "Erro ao enviar recuperação.";
+
+    if (err.code === "auth/invalid-email") {
+      msg = "O e-mail informado é inválido.";
+    } else if (err.code === "auth/user-not-found") {
+      msg = "Não existe conta com esse e-mail.";
+    } else if (err.code === "auth/missing-email") {
+      msg = "Digite seu e-mail para recuperar.";
+    } else if (err.code === "auth/too-many-requests") {
+      msg = "Muitas tentativas. Tente novamente mais tarde.";
+    } else if (err.code === "auth/network-request-failed") {
+      msg = "Erro de conexão. Tente novamente.";
+    } else if (err.code === "auth/unauthorized-domain") {
+      msg = "Este domínio não está autorizado no Firebase.";
+    }
+
+    setStatus(msg, "err");
+  }
+});
   </script>
 
 </body>
