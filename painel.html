@@ -182,9 +182,9 @@
     </div>
 
     <div class="licenseSection">
-      <h2 class="licenseTitle">Vincular licença</h2>
+      <h2 class="licenseTitle">Restaurar licença</h2>
       <p class="licenseText">
-        Cole o código da sua licença ou use o que foi salvo automaticamente após a compra.
+        Se você comprou neste navegador, o acesso pode ser restaurado automaticamente usando a licença salva.
       </p>
 
       <div class="field">
@@ -194,13 +194,14 @@
           type="text"
           placeholder="Ex.: OSL-XXXX-XXXX-XXXX-XXXX-XXXX"
           autocomplete="off"
+          readonly
         />
       </div>
 
-      <button id="linkLicenseBtn">Vincular licença</button>
+      <button id="linkLicenseBtn">Restaurar acesso</button>
 
       <div class="helper" id="licenseHelper">
-        Se você acabou de comprar neste navegador, o código pode já aparecer preenchido aqui.
+        Este painel usa a licença salva no navegador após a compra.
       </div>
     </div>
 
@@ -210,252 +211,257 @@
     <button class="logout" id="logoutBtn">Sair</button>
   </div>
 
-      <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
-  authDomain: "osextolugar-game.firebaseapp.com",
-  projectId: "osextolugar-game",
-  storageBucket: "osextolugar-game.firebasestorage.app",
-  messagingSenderId: "947922328721",
-  appId: "1:947922328721:web:989522c99e16ab449f3330",
-  measurementId: "G-D6HG779ZFR"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+      authDomain: "osextolugar-game.firebaseapp.com",
+      projectId: "osextolugar-game",
+      storageBucket: "osextolugar-game.firebasestorage.app",
+      messagingSenderId: "947922328721",
+      appId: "1:947922328721:web:989522c99e16ab449f3330",
+      measurementId: "G-D6HG779ZFR"
+    };
 
-const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+    const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-const nomeEl = document.getElementById("nome");
-const usernameEl = document.getElementById("username");
-const emailEl = document.getElementById("email");
-const licenseEl = document.getElementById("license");
-const statusEl = document.getElementById("status");
-const playBtn = document.getElementById("playBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const linkLicenseBtn = document.getElementById("linkLicenseBtn");
-const licenseInput = document.getElementById("licenseInput");
-const licenseHelper = document.getElementById("licenseHelper");
+    const nomeEl = document.getElementById("nome");
+    const usernameEl = document.getElementById("username");
+    const emailEl = document.getElementById("email");
+    const licenseEl = document.getElementById("license");
+    const statusEl = document.getElementById("status");
+    const playBtn = document.getElementById("playBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const linkLicenseBtn = document.getElementById("linkLicenseBtn");
+    const licenseInput = document.getElementById("licenseInput");
+    const licenseHelper = document.getElementById("licenseHelper");
 
-let currentUser = null;
-let currentProfile = null;
+    let currentUser = null;
+    let currentProfile = null;
+    let isRestoring = false;
 
-function setStatus(text, type = "") {
-  statusEl.textContent = text;
-  statusEl.className = "status";
-  if (type) statusEl.classList.add(type);
-}
+    function setStatus(text, type = "") {
+      statusEl.textContent = text;
+      statusEl.className = "status";
+      if (type) statusEl.classList.add(type);
+    }
 
-function normalizeLicenseCode(value) {
-  return String(value || "")
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, "")
-    .replace(/[^A-Z0-9-]/g, "");
-}
+    function getLocalLicenseCode() {
+      return localStorage.getItem("osl_license_code") || "";
+    }
 
-function getLocalLicenseCode() {
-  return localStorage.getItem("osl_license_code") || "";
-}
+    function getLocalLicenseToken() {
+      return localStorage.getItem("osl_license_token") || "";
+    }
 
-function getLocalLicenseToken() {
-  return localStorage.getItem("osl_license_token") || "";
-}
+    function getLocalAccessToken() {
+      return localStorage.getItem("osl_access_token") || "";
+    }
 
-function getLocalAccessToken() {
-  return localStorage.getItem("osl_access_token") || "";
-}
+    function getLocalLicenseEmail() {
+      return localStorage.getItem("osl_license_email") || "";
+    }
 
-function canEnterGame(profileData) {
-  return !!profileData?.access?.active && !!getLocalAccessToken();
-}
+    function clearLocalAccessOnly() {
+      localStorage.removeItem("osl_access_token");
+      localStorage.removeItem("osl_access_expires_at");
+    }
 
-function syncLicenseInput(profileData = null) {
-  const code =
-    profileData?.licenseCode ||
-    getLocalLicenseCode() ||
-    "";
+    function canEnterGame(profileData) {
+      return !!profileData?.access?.active && !!getLocalAccessToken();
+    }
 
-  licenseInput.value = code;
-}
+    function syncLicenseInput(profileData = null) {
+      const code = profileData?.licenseCode || getLocalLicenseCode() || "";
+      licenseInput.value = code;
+    }
 
-function refreshUI(profileData, firebaseUser) {
-  currentProfile = profileData;
+    function refreshUI(profileData, firebaseUser) {
+      currentProfile = profileData;
 
-  nomeEl.textContent = profileData?.displayName || localStorage.getItem("osl_nome") || "-";
-  usernameEl.textContent = profileData?.username
-    ? "@" + profileData.username
-    : (localStorage.getItem("osl_username") ? "@" + localStorage.getItem("osl_username") : "-");
-  emailEl.textContent = profileData?.email || firebaseUser?.email || localStorage.getItem("osl_license_email") || "-";
-  licenseEl.textContent = profileData?.licenseCode || getLocalLicenseCode() || "Não vinculada";
+      nomeEl.textContent =
+        profileData?.displayName ||
+        localStorage.getItem("osl_nome") ||
+        firebaseUser?.displayName ||
+        "-";
 
-  syncLicenseInput(profileData);
+      usernameEl.textContent = profileData?.username
+        ? "@" + profileData.username
+        : (localStorage.getItem("osl_username")
+            ? "@" + localStorage.getItem("osl_username")
+            : "-");
 
-  if (canEnterGame(profileData)) {
-    setStatus("Acesso liberado.", "ok");
-    playBtn.disabled = false;
-    linkLicenseBtn.disabled = false;
-    linkLicenseBtn.textContent = "Atualizar licença";
-    licenseHelper.textContent = "Sua conta já está liberada.";
-    return;
-  }
+      emailEl.textContent =
+        profileData?.email ||
+        firebaseUser?.email ||
+        getLocalLicenseEmail() ||
+        "-";
 
-  if (profileData?.licenseLinked && !getLocalAccessToken()) {
-    setStatus("Sua conta tem licença vinculada, mas este navegador ainda não possui acesso salvo.", "err");
-    playBtn.disabled = true;
-    linkLicenseBtn.disabled = false;
-    linkLicenseBtn.textContent = "Restaurar acesso";
-    licenseHelper.textContent = "Clique para restaurar o acesso.";
-    return;
-  }
+      licenseEl.textContent =
+        profileData?.licenseCode ||
+        getLocalLicenseCode() ||
+        "Não vinculada";
 
-  setStatus("Sem acesso ativo.", "err");
-  playBtn.disabled = true;
-  linkLicenseBtn.disabled = false;
-  linkLicenseBtn.textContent = "Vincular licença";
-  licenseHelper.textContent = "Se a compra foi feita neste navegador, o token salvo será usado automaticamente.";
-}
+      syncLicenseInput(profileData);
 
-async function ensureUserProfile(user) {
-  const userRef = doc(db, "users", user.uid);
-  const snap = await getDoc(userRef);
+      if (canEnterGame(profileData)) {
+        setStatus("Acesso liberado.", "ok");
+        playBtn.disabled = false;
+        linkLicenseBtn.disabled = false;
+        linkLicenseBtn.textContent = "Restaurar acesso";
+        licenseHelper.textContent = "Sua conta já está liberada neste navegador.";
+        return;
+      }
 
-  if (snap.exists()) return snap.data();
+      if (profileData?.licenseLinked && !getLocalAccessToken()) {
+        setStatus("Conta com licença vinculada, mas sem acesso salvo neste navegador.", "err");
+        playBtn.disabled = true;
+        linkLicenseBtn.disabled = false;
+        linkLicenseBtn.textContent = "Restaurar acesso";
+        licenseHelper.textContent = "Use o botão para tentar restaurar com a licença salva localmente.";
+        return;
+      }
 
-  const displayName =
-    localStorage.getItem("osl_nome") ||
-    user.displayName ||
-    "Jogador";
+      setStatus("Sem acesso ativo.", "err");
+      playBtn.disabled = true;
+      linkLicenseBtn.disabled = false;
+      linkLicenseBtn.textContent = "Restaurar acesso";
+      licenseHelper.textContent = "A restauração depende da licença salva no navegador após a compra.";
+    }
 
-  const email =
-    user.email ||
-    localStorage.getItem("osl_license_email") ||
-    "";
+    async function ensureUserProfile(user) {
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
 
-  const username =
-    localStorage.getItem("osl_username") ||
-    String(email).split("@")[0] ||
-    "jogador";
+      if (snap.exists()) return snap.data();
 
-  const profileData = {
-    uid: user.uid,
-    userId: user.uid,
-    email,
-    displayName,
-    username,
-    avatarEmoji: "🔮",
-    bio: "Novo participante do ritual.",
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    licenseLinked: false,
-    licenseCode: "",
-    product: "",
-    access: {
-      active: false
-    },
-    stats: {
-      gamesPlayed: 0,
-      wins: 0
-    },
-    friends: [],
-    incomingRequests: [],
-    outgoingRequests: []
-  };
+      const displayName =
+        localStorage.getItem("osl_nome") ||
+        user.displayName ||
+        "Jogador";
 
-  await setDoc(userRef, profileData, { merge: true });
+      const email =
+        user.email ||
+        getLocalLicenseEmail() ||
+        "";
 
-  return {
-    ...profileData,
-    createdAt: null,
-    updatedAt: null
-  };
-}
+      const username =
+        localStorage.getItem("osl_username") ||
+        String(email).split("@")[0] ||
+        "jogador";
 
-async function loadProfile(user) {
-  const profile = await ensureUserProfile(user);
-  refreshUI(profile, user);
-}
-
-async function salvarLicencaNoPerfil({ user, licenseCode, email, product }) {
-  const userRef = doc(db, "users", user.uid);
-
-  await setDoc(userRef, {
-    email: email || user.email || "",
-    licenseLinked: true,
-    licenseCode: licenseCode || "",
-    product: product || "osl_ritual_completo",
-    access: {
-      active: true
-    },
-    updatedAt: serverTimestamp()
-  }, { merge: true });
-
-  const refreshedSnap = await getDoc(userRef);
-  if (refreshedSnap.exists()) {
-    refreshUI(refreshedSnap.data(), user);
-  }
-}
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "./login.html";
-    return;
-  }
-
-  currentUser = user;
-
-  try {
-    await loadProfile(user);
-  } catch (err) {
-    console.error(err);
-    setStatus("Erro ao carregar perfil.", "err");
-    playBtn.disabled = true;
-  }
-});
-
-linkLicenseBtn.addEventListener("click", async () => {
-  if (!currentUser) return;
-
-  const localLicenseToken = getLocalLicenseToken();
-  const typedLicenseCode = normalizeLicenseCode(licenseInput.value || getLocalLicenseCode());
-
-  try {
-    linkLicenseBtn.disabled = true;
-    playBtn.disabled = true;
-
-    if (localLicenseToken) {
-      setStatus("Validando licença salva neste navegador...");
-
-      const verifyRes = await fetch(`${BACKEND_BASE_URL}/verificar-licenca`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
+      const profileData = {
+        uid: user.uid,
+        userId: user.uid,
+        email,
+        displayName,
+        username,
+        avatarEmoji: "🔮",
+        bio: "Novo participante do ritual.",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        licenseLinked: false,
+        licenseCode: "",
+        product: "",
+        access: {
+          active: false
         },
-        body: JSON.stringify({ licenseToken: localLicenseToken })
-      });
+        stats: {
+          gamesPlayed: 0,
+          wins: 0
+        },
+        friends: [],
+        incomingRequests: [],
+        outgoingRequests: []
+      };
 
-      const verifyData = await verifyRes.json().catch(() => ({}));
+      await setDoc(userRef, profileData, { merge: true });
 
-      if (!verifyRes.ok || !verifyData.valid) {
-        localStorage.removeItem("osl_license_token");
-      } else {
-        setStatus("Emitindo acesso...");
+      return {
+        ...profileData,
+        createdAt: null,
+        updatedAt: null
+      };
+    }
+
+    async function saveProfileAccess(user, payload) {
+      const userRef = doc(db, "users", user.uid);
+
+      await setDoc(userRef, {
+        email: payload.email || user.email || "",
+        licenseLinked: true,
+        licenseCode: payload.licenseCode || "",
+        product: payload.product || "osl_ritual_completo",
+        access: {
+          active: true
+        },
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      const refreshedSnap = await getDoc(userRef);
+      if (refreshedSnap.exists()) {
+        refreshUI(refreshedSnap.data(), user);
+      }
+    }
+
+    async function restoreAccessFromLocalLicense(user, silent = false) {
+      if (isRestoring) return false;
+
+      const localLicenseToken = getLocalLicenseToken();
+
+      if (!localLicenseToken) {
+        if (!silent) {
+          setStatus("Nenhuma licença salva neste navegador.", "err");
+        }
+        return false;
+      }
+
+      try {
+        isRestoring = true;
+        linkLicenseBtn.disabled = true;
+        playBtn.disabled = true;
+
+        if (!silent) setStatus("Validando licença salva...");
+
+        const verifyRes = await fetch(`${BACKEND_BASE_URL}/verificar-licenca`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ licenseToken: localLicenseToken })
+        });
+
+        const verifyData = await verifyRes.json().catch(() => ({}));
+
+        if (!verifyRes.ok || !verifyData.valid) {
+          clearLocalAccessOnly();
+          localStorage.removeItem("osl_license_token");
+
+          if (!silent) {
+            setStatus("A licença salva neste navegador não é válida.", "err");
+          }
+          return false;
+        }
+
+        if (!silent) setStatus("Emitindo acesso...");
 
         const accessRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
           method: "POST",
@@ -468,100 +474,92 @@ linkLicenseBtn.addEventListener("click", async () => {
         const accessData = await accessRes.json().catch(() => ({}));
 
         if (!accessRes.ok || !accessData.accessToken) {
-          setStatus("Não foi possível restaurar o acesso com a licença salva.", "err");
-          return;
+          clearLocalAccessOnly();
+
+          if (!silent) {
+            setStatus("Não foi possível restaurar o acesso agora.", "err");
+          }
+          return false;
         }
 
         localStorage.setItem("osl_access_token", accessData.accessToken);
         localStorage.setItem("osl_access_expires_at", String(accessData.expiresAt || ""));
         localStorage.setItem("osl_license_code", verifyData.licenseCode || "");
-        localStorage.setItem("osl_license_email", verifyData.email || currentUser.email || "");
+        localStorage.setItem("osl_license_email", verifyData.email || user.email || "");
 
-        await salvarLicencaNoPerfil({
-          user: currentUser,
+        await saveProfileAccess(user, {
           licenseCode: verifyData.licenseCode || "",
-          email: verifyData.email || currentUser.email || "",
+          email: verifyData.email || user.email || "",
           product: verifyData.product || "osl_ritual_completo"
         });
 
-        setStatus("Licença restaurada com sucesso. Acesso liberado.", "ok");
-        return;
+        if (!silent) {
+          setStatus("Licença restaurada com sucesso. Acesso liberado.", "ok");
+        }
+
+        return true;
+      } catch (err) {
+        console.error(err);
+        if (!silent) {
+          setStatus("Erro ao restaurar licença.", "err");
+        }
+        return false;
+      } finally {
+        isRestoring = false;
+        linkLicenseBtn.disabled = false;
       }
     }
 
-    if (!typedLicenseCode) {
-      setStatus("Digite ou cole o código da licença.", "err");
-      return;
+    async function loadProfile(user) {
+      const profile = await ensureUserProfile(user);
+      refreshUI(profile, user);
     }
 
-    setStatus("Validando código da licença...");
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "./login.html";
+        return;
+      }
 
-    const verifyRes = await fetch(`${BACKEND_BASE_URL}/validar-codigo-licenca`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ licenseCode: typedLicenseCode })
+      currentUser = user;
+
+      try {
+        await loadProfile(user);
+
+        if (!getLocalAccessToken() && getLocalLicenseToken()) {
+          await restoreAccessFromLocalLicense(user, true);
+        } else if (currentProfile && canEnterGame(currentProfile)) {
+          setStatus("Acesso liberado.", "ok");
+        }
+      } catch (err) {
+        console.error(err);
+        setStatus("Erro ao carregar perfil.", "err");
+        playBtn.disabled = true;
+      }
     });
 
-    const verifyData = await verifyRes.json().catch(() => ({}));
-
-    if (!verifyRes.ok || !verifyData.valid) {
-      setStatus("Código de licença inválido ou não encontrado.", "err");
-      return;
-    }
-
-    setStatus("Emitindo acesso...");
-
-    const accessRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso-por-codigo`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ licenseCode: typedLicenseCode })
+    linkLicenseBtn.addEventListener("click", async () => {
+      if (!currentUser) return;
+      await restoreAccessFromLocalLicense(currentUser, false);
     });
 
-    const accessData = await accessRes.json().catch(() => ({}));
+    playBtn.addEventListener("click", () => {
+      if (!currentProfile || !canEnterGame(currentProfile)) {
+        setStatus("Restaure sua licença antes de entrar no jogo.", "err");
+        return;
+      }
 
-    if (!accessRes.ok || !accessData.accessToken) {
-      setStatus("Não foi possível emitir o acesso com essa licença.", "err");
-      return;
-    }
-
-    localStorage.setItem("osl_access_token", accessData.accessToken);
-    localStorage.setItem("osl_access_expires_at", String(accessData.expiresAt || ""));
-    localStorage.setItem("osl_license_code", verifyData.licenseCode || typedLicenseCode);
-    localStorage.setItem("osl_license_email", verifyData.email || currentUser.email || "");
-
-    await salvarLicencaNoPerfil({
-      user: currentUser,
-      licenseCode: verifyData.licenseCode || typedLicenseCode,
-      email: verifyData.email || currentUser.email || "",
-      product: verifyData.product || "osl_ritual_completo"
+      window.location.href = "./entrada.html";
     });
 
-    setStatus("Licença vinculada com sucesso. Acesso liberado.", "ok");
-  } catch (err) {
-    console.error(err);
-    setStatus("Erro ao vincular licença.", "err");
-  } finally {
-    linkLicenseBtn.disabled = false;
-  }
-});
-
-playBtn.addEventListener("click", () => {
-  if (!currentProfile || !canEnterGame(currentProfile)) {
-    setStatus("Vincule sua licença antes de entrar no jogo.", "err");
-    return;
-  }
-
-  window.location.href = "./entrada.html";
-});
-
-logoutBtn.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "./login.html";
-});
-</script>
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+      } catch (err) {
+        console.error(err);
+      }
+      window.location.href = "./login.html";
+    });
+  </script>
 </body>
 </html>
