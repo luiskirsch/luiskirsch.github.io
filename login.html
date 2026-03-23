@@ -195,11 +195,11 @@
       emailEl.value = savedEmail;  
     }  
   
-    onAuthStateChanged(auth, (user) => {  
-      if (user && !isLoggingIn) {  
-        window.location.href = "./painel.html";  
-      }  
-    });  
+    onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("Usuário já autenticado:", user.uid);
+  }
+});
   
     loginBtn.addEventListener("click", async () => {  
       const email = emailEl.value.trim().toLowerCase();  
