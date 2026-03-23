@@ -152,11 +152,14 @@
       sendPasswordResetEmail,  
       onAuthStateChanged  
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";  
-    import {  
-      getFirestore,  
-      doc,  
-      getDoc  
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";  
+    import {
+  getAuth,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   
     const firebaseConfig = {
   apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
@@ -215,7 +218,8 @@
         loginBtn.disabled = true;  
         setStatus("Entrando...");  
   
-        const cred = await signInWithEmailAndPassword(auth, email, password);  
+        await setPersistence(auth, browserLocalPersistence);
+const cred = await signInWithEmailAndPassword(auth, email, password);
   
         const userRef = doc(db, "users", cred.user.uid);  
         const userSnap = await getDoc(userRef);  
