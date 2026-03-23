@@ -780,10 +780,9 @@ transform:translateY(-10px);
 pointer-events:none;
 }
 
-.accountBadge svg{
+.accountBadge{
 width:25px;
 height:25px;
-opacity:.9;
 border-radius:50%;
 display:flex;
 align-items:center;
@@ -791,10 +790,14 @@ justify-content:center;
 background:linear-gradient(135deg, rgba(230,192,123,.22), rgba(201,156,74,.18));
 border:1px solid rgba(230,192,123,.22);
 color:#e6c07b;
-font-weight:700;
-font-size:13px;
-letter-spacing:.04em;
 flex:0 0 auto;
+}
+
+.accountBadge svg{
+width:19px;
+height:19px;
+opacity:.92;
+display:block;
 }
 
 .accountMeta{
@@ -3040,10 +3043,7 @@ window.addEventListener("touchcancel", onEnd, { passive:true });
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
@@ -3063,16 +3063,13 @@ const accountBadge = document.getElementById("accountBadge");
 const accountLabel = document.getElementById("accountLabel");
 const accountName = document.getElementById("accountName");
 
-function getInitials(text) {
-  const raw = String(text || "").trim();
-  if (!raw) return "OS";
-
-  const parts = raw.split(/\s+/).filter(Boolean);
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-
-  return (parts[0][0] + parts[1][0]).toUpperCase();
+function renderUserIcon() {
+  accountBadge.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 12c2.761 0 5-2.686 5-6s-2.239-6-5-6-5 2.686-5 6 2.239 6 5 6Z" fill="currentColor"/>
+      <path d="M21 22c0-4.418-4.03-8-9-8s-9 3.582-9 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  `;
 }
 
 function getPreferredName(user) {
@@ -3088,48 +3085,20 @@ function getPreferredName(user) {
 function updateAccountUI(user) {
   if (!accountPanel || !accountBadge || !accountLabel || !accountName) return;
 
-  accountBadge.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M12 12c2.761 0 5-2.686 5-6s-2.239-6-5-6-5 2.686-5 6 2.239 6 5 6Z" fill="currentColor"/>
-      <path d="M21 22c0-4.418-4.03-8-9-8s-9 3.582-9 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-  `;
+  renderUserIcon();
 
   if (user) {
-    const preferredName = getPreferredName(user);
-
     accountLabel.textContent = "Conta conectada";
-    accountName.textContent = preferredName;
-
+    accountName.textContent = getPreferredName(user);
     accountPanel.onclick = function () {
       window.location.href = "./painel.html";
     };
-
     return;
   }
 
   accountLabel.textContent = "Acesso";
   accountName.textContent = "Entrar ou acessar painel";
-
   accountPanel.onclick = function () {
-    window.location.href = "./login.html";
-  };
-}
-
-    return;
-  }
-
-  accountLabel.textContent = "Acesso";
-  accountName.textContent = "Entrar ou acessar painel";
-  accountBadge.textContent = "OS";
-  accountBtn.textContent = "Entrar";
-
-  accountBtn.onclick = function () {
-    window.location.href = "./login.html";
-  };
-
-  accountPanel.onclick = function (event) {
-    if (event.target === accountBtn) return;
     window.location.href = "./login.html";
   };
 }
@@ -3137,11 +3106,6 @@ function updateAccountUI(user) {
 onAuthStateChanged(auth, (user) => {
   updateAccountUI(user);
 });
-
-</script>
-
-<script type="module">
-  // firebase aqui
 </script>
 </body>
 </html>
