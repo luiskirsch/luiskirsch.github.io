@@ -748,6 +748,108 @@ transform:translateZ(0);
 contain:paint;
 }
 
+.accountPanel{
+position:fixed;
+left:max(14px, env(safe-area-inset-left));
+top:max(14px, env(safe-area-inset-top));
+z-index:41;
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px 12px;
+border-radius:999px;
+border:1px solid rgba(255,255,255,.10);
+background:rgba(8,8,12,.88);
+box-shadow:0 18px 60px rgba(0,0,0,.45);
+transition:opacity .25s ease, transform .25s ease, filter .35s ease;
+transform:translateZ(0);
+contain:paint;
+max-width:min(82vw, 360px);
+}
+
+.accountPanel.isHidden{
+opacity:0;
+transform:translateY(-10px);
+pointer-events:none;
+}
+
+.accountBadge{
+width:34px;
+height:34px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+background:linear-gradient(135deg, rgba(230,192,123,.22), rgba(201,156,74,.22));
+border:1px solid rgba(230,192,123,.22);
+color:rgba(230,192,123,.95);
+font-size:13px;
+font-weight:700;
+letter-spacing:.04em;
+flex:0 0 auto;
+}
+
+.accountMeta{
+min-width:0;
+display:flex;
+flex-direction:column;
+gap:2px;
+}
+
+.accountLabel{
+font-size:10px;
+letter-spacing:.18em;
+text-transform:uppercase;
+color:rgba(255,255,255,.46);
+white-space:nowrap;
+}
+
+.accountName{
+font-size:13px;
+color:rgba(255,255,255,.86);
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+max-width:min(42vw, 180px);
+}
+
+.accountBtn{
+margin:0 0 0 4px;
+min-width:auto;
+height:38px;
+padding:0 14px;
+border-radius:999px;
+font-size:11px;
+letter-spacing:.14em;
+flex:0 0 auto;
+}
+
+@media (max-width:700px){
+  .accountPanel{
+    left:10px;
+    top:max(10px, env(safe-area-inset-top));
+    padding:8px 10px;
+    gap:8px;
+    max-width:calc(100vw - 20px);
+  }
+
+  .accountBadge{
+    width:30px;
+    height:30px;
+    font-size:12px;
+  }
+
+  .accountName{
+    max-width:34vw;
+    font-size:12px;
+  }
+
+  .accountBtn{
+    height:34px;
+    padding:0 12px;
+    font-size:10px;
+  }
+    
 .soundPanel.isHidden{
 opacity:0;
 transform:translateY(-10px);
@@ -1206,7 +1308,17 @@ tested: true
 </div>    </div>    <div class="moonWrap" aria-hidden="true">      
     <div class="moonGlow"></div>      
     <img src="./lua_site_transparente.png" alt="" class="moon" referrerpolicy="no-referrer">      
-  </div>    <div class="soundPanel" id="soundPanel" aria-label="Controle de som">      
+  </div>    <div class="soundPanel" id="soundPanel" aria-label="Controle de som">   
+    <div class="accountPanel" id="accountPanel" aria-label="Acesso à conta">
+  <div class="accountBadge" id="accountBadge">OS</div>
+
+  <div class="accountMeta">
+    <div class="accountLabel" id="accountLabel">Conta</div>
+    <div class="accountName" id="accountName">Entrar ou acessar painel</div>
+  </div>
+
+  <button type="button" class="accountBtn" id="accountBtn">Entrar</button>
+    </div>
     <button class="soundToggle" id="soundBtn" type="button" aria-label="Ativar ou desativar som">      
       SOM: <strong id="soundState">OFF</strong>      
     </button>      
@@ -2934,6 +3046,104 @@ window.addEventListener("touchend", onEnd, { passive:true });
 window.addEventListener("touchcancel", onEnd, { passive:true });
 })();
 
+ <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+  authDomain: "osextolugar-game.firebaseapp.com",
+  projectId: "osextolugar-game",
+  storageBucket: "osextolugar-game.firebasestorage.app",
+  messagingSenderId: "947922328721",
+  appId: "1:947922328721:web:989522c99e16ab449f3330",
+  measurementId: "G-D6HG779ZFR"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const accountPanel = document.getElementById("accountPanel");
+const accountBadge = document.getElementById("accountBadge");
+const accountLabel = document.getElementById("accountLabel");
+const accountName = document.getElementById("accountName");
+const accountBtn = document.getElementById("accountBtn");
+
+function getInitials(text) {
+  const raw = String(text || "").trim();
+  if (!raw) return "OS";
+
+  const parts = raw.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+function getPreferredName(user) {
+  const displayName = String(user?.displayName || "").trim();
+  if (displayName) return displayName;
+
+  const email = String(user?.email || "").trim();
+  if (email) return email;
+
+  return "Minha conta";
+}
+
+function updateAccountUI(user) {
+  if (user) {
+    const preferredName = getPreferredName(user);
+
+    accountLabel.textContent = "Conta conectada";
+    accountName.textContent = preferredName;
+    accountBadge.textContent = getInitials(preferredName);
+    accountBtn.textContent = "Painel";
+
+    accountBtn.onclick = function () {
+      window.location.href = "./painel.html";
+    };
+
+    accountPanel.onclick = function (event) {
+      if (event.target === accountBtn) return;
+      window.location.href = "./painel.html";
+    };
+
+    return;
+  }
+
+  accountLabel.textContent = "Acesso";
+  accountName.textContent = "Entrar ou acessar painel";
+  accountBadge.textContent = "OS";
+  accountBtn.textContent = "Entrar";
+
+  accountBtn.onclick = function () {
+    window.location.href = "./login.html";
+  };
+
+  accountPanel.onclick = function (event) {
+    if (event.target === accountBtn) return;
+    window.location.href = "./login.html";
+  };
+}
+
+onAuthStateChanged(auth, (user) => {
+  updateAccountUI(user);
+});
+
+(function handlePanelVisibility(){
+  function updateVisibility(){
+    const y = window.scrollY || 0;
+    if (y <= 10) accountPanel.classList.remove("isHidden");
+    else accountPanel.classList.add("isHidden");
+  }
+
+  window.addEventListener("scroll", updateVisibility, { passive:true });
+  updateVisibility();
+})();
 </script>  </body>
 
 </html>
