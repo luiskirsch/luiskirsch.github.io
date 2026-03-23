@@ -220,15 +220,17 @@
         const userRef = doc(db, "users", cred.user.uid);  
         const userSnap = await getDoc(userRef);  
   
-        if (userSnap.exists()) {  
-          const data = userSnap.data();  
-  
-          localStorage.setItem("osl_nome", data.displayName || "");  
-          localStorage.setItem("osl_username", data.username || "");  
-          localStorage.setItem("osl_auth_uid", cred.user.uid);  
-          localStorage.setItem("osl_license_code", data.licenseCode || "");  
-          localStorage.setItem("osl_license_email", data.email || email);  
-        }  
+        localStorage.setItem("osl_auth_uid", cred.user.uid);
+localStorage.setItem("osl_license_email", email);
+
+if (userSnap.exists()) {
+  const data = userSnap.data();
+
+  localStorage.setItem("osl_nome", data.displayName || "");
+  localStorage.setItem("osl_username", data.username || "");
+  localStorage.setItem("osl_license_code", data.licenseCode || "");
+  localStorage.setItem("osl_license_email", data.email || email);
+}
   
         sessionStorage.setItem("osl_login_redirect", "1");
         setStatus("Acesso liberado.", "ok");
