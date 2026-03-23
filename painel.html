@@ -185,8 +185,7 @@
     <div class="licenseSection">
       <h2 class="licenseTitle">Restaurar ou vincular licença</h2>
       <p class="licenseText">
-        Se você comprou neste navegador, o acesso pode ser restaurado automaticamente.
-        Se estiver em outro dispositivo, cole o código da licença.
+        Cole o código da sua licença para vincular esta conta e liberar o acesso.
       </p>
 
       <div class="field">
@@ -199,10 +198,10 @@
         />
       </div>
 
-      <button id="linkLicenseBtn">Restaurar acesso</button>
+      <button id="linkLicenseBtn">Vincular licença</button>
 
       <div class="helper" id="licenseHelper">
-        Primeiro tentamos a licença salva neste navegador. Se não houver, usamos o código digitado ou o código salvo no seu perfil.
+        Esta licença ficará vinculada à conta logada e não poderá ser usada por outra conta.
       </div>
     </div>
 
@@ -277,10 +276,6 @@
       return localStorage.getItem("osl_license_code") || "";
     }
 
-    function getLocalLicenseToken() {
-      return localStorage.getItem("osl_license_token") || "";
-    }
-
     function getLocalAccessToken() {
       return localStorage.getItem("osl_access_token") || "";
     }
@@ -289,16 +284,12 @@
       return localStorage.getItem("osl_license_email") || "";
     }
 
-    function clearLocalAccessOnly() {
+    function clearLocalSessionTokens() {
       localStorage.removeItem("osl_access_token");
       localStorage.removeItem("osl_access_expires_at");
-    }
-
-    function clearInvalidLocalLicense() {
       localStorage.removeItem("osl_license_token");
       localStorage.removeItem("osl_license_code");
       localStorage.removeItem("osl_license_email");
-      clearLocalAccessOnly();
     }
 
     function canEnterGame(profileData) {
@@ -346,24 +337,24 @@
         playBtn.disabled = false;
         linkLicenseBtn.disabled = false;
         linkLicenseBtn.textContent = "Atualizar acesso";
-        licenseHelper.textContent = "Sua conta já está liberada.";
+        licenseHelper.textContent = "Sua conta já está liberada e a licença está vinculada a ela.";
         return;
       }
 
       if (profileData?.licenseLinked && !getLocalAccessToken()) {
-        setStatus("Conta com licença vinculada, mas sem acesso salvo neste navegador.", "err");
+        setStatus("Conta com licença vinculada, mas sem acesso ativo neste navegador.", "err");
         playBtn.disabled = true;
         linkLicenseBtn.disabled = false;
         linkLicenseBtn.textContent = "Restaurar acesso";
-        licenseHelper.textContent = "Use a licença salva neste navegador, o código digitado ou o código salvo no seu perfil.";
+        licenseHelper.textContent = "Use o código da licença da própria conta para restaurar o acesso neste navegador.";
         return;
       }
 
       setStatus("Sem acesso ativo.", "err");
       playBtn.disabled = true;
       linkLicenseBtn.disabled = false;
-      linkLicenseBtn.textContent = "Restaurar acesso";
-      licenseHelper.textContent = "Tentaremos a licença salva no navegador. Se não houver, usamos o código digitado ou o salvo no perfil.";
+      linkLicenseBtn.textContent = "Vincular licença";
+      licenseHelper.textContent = "A licença será vinculada de forma exclusiva à conta logada.";
     }
 
     async function ensureUserProfile(user) {
@@ -457,7 +448,7 @@
       }
     }
 
-    async function validateCurrentAccessToken() {
+    async function validateCurrentAccessTokenForUser(user) {
       const accessToken = getLocalAccessToken();
       if (!accessToken) return false;
 
@@ -471,64 +462,14 @@
         });
 
         const data = await res.json().catch(() => ({}));
-        return !!(res.ok && data.liberado);
+
+        if (!res.ok || !data.liberado) return false;
+
+        return data.uid && data.uid === user.uid;
       } catch (err) {
         console.error("Erro ao verificar access token:", err);
         return false;
       }
-    }
-
-    async function tryRestoreWithLocalToken(user) {
-      const localToken = getLocalLicenseToken();
-      if (!localToken) return false;
-
-      setStatus("Validando licença salva...");
-
-      const verifyRes = await fetch(`${BACKEND_BASE_URL}/verificar-licenca`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ licenseToken: localToken })
-      });
-
-      const verifyData = await verifyRes.json().catch(() => ({}));
-
-      if (!verifyRes.ok || !verifyData.valid) {
-        clearInvalidLocalLicense();
-        return false;
-      }
-
-      setStatus("Emitindo acesso...");
-
-      const accessRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ licenseToken: localToken })
-      });
-
-      const accessData = await accessRes.json().catch(() => ({}));
-
-      if (!accessRes.ok || !accessData.accessToken) {
-        clearLocalAccessOnly();
-        return false;
-      }
-
-      localStorage.setItem("osl_access_token", accessData.accessToken);
-      localStorage.setItem("osl_access_expires_at", String(accessData.expiresAt || ""));
-      localStorage.setItem("osl_license_code", verifyData.licenseCode || "");
-      localStorage.setItem("osl_license_email", verifyData.email || user.email || "");
-
-      await saveProfileAccess(user, {
-        licenseCode: verifyData.licenseCode || "",
-        email: verifyData.email || user.email || "",
-        product: verifyData.product || "osl_ritual_completo"
-      });
-
-      setStatus("Acesso restaurado com sucesso.", "ok");
-      return true;
     }
 
     async function tryRestoreWithCode(user, rawCode) {
@@ -612,9 +553,6 @@
         linkLicenseBtn.disabled = true;
         playBtn.disabled = true;
 
-        const restoredByToken = await tryRestoreWithLocalToken(user);
-        if (restoredByToken) return;
-
         const typedCode = normalizeLicenseCode(licenseInput.value);
         if (typedCode) {
           const restoredByTypedCode = await tryRestoreWithCode(user, typedCode);
@@ -628,7 +566,7 @@
         }
 
         if (!silent) {
-          setStatus("Nenhuma licença válida foi encontrada. Cole o código da licença para continuar.", "err");
+          setStatus("Nenhuma licença válida foi encontrada para esta conta. Cole o código da licença para continuar.", "err");
         }
       } catch (err) {
         console.error(err);
@@ -655,9 +593,9 @@
       try {
         await loadProfile(user);
 
-        const currentAccessIsValid = await validateCurrentAccessToken();
+        const currentAccessIsValidForThisUser = await validateCurrentAccessTokenForUser(user);
 
-        if (currentAccessIsValid) {
+        if (currentAccessIsValidForThisUser) {
           if (currentProfile && !currentProfile?.access?.active) {
             await saveProfileAccess(user, {
               licenseCode: currentProfile?.licenseCode || getLocalLicenseCode() || "",
@@ -672,24 +610,13 @@
           return;
         }
 
-        if (getLocalAccessToken()) {
-          clearLocalAccessOnly();
-        }
+        clearLocalSessionTokens();
 
         if (currentProfile?.access?.active) {
           await markProfileWithoutAccess(user);
         }
 
-        const hasSomethingToRestore =
-          !!getLocalLicenseToken() ||
-          !!normalizeLicenseCode(licenseInput.value) ||
-          !!normalizeLicenseCode(currentProfile?.licenseCode || "");
-
-        if (hasSomethingToRestore) {
-          await restoreAccess(user, true);
-        } else {
-          refreshUI(currentProfile, user);
-        }
+        refreshUI(currentProfile, user);
       } catch (err) {
         console.error(err);
         setStatus("Erro ao carregar perfil.", "err");
@@ -708,11 +635,12 @@
         return;
       }
 
-      const stillValid = await validateCurrentAccessToken();
-      if (!stillValid) {
-        clearLocalAccessOnly();
+      const stillValidForThisUser = await validateCurrentAccessTokenForUser(currentUser);
+
+      if (!stillValidForThisUser) {
+        clearLocalSessionTokens();
         await markProfileWithoutAccess(currentUser);
-        setStatus("Seu acesso expirou neste navegador. Restaure a licença antes de entrar.", "err");
+        setStatus("Seu acesso não pertence a esta conta neste navegador. Vincule a licença antes de entrar.", "err");
         return;
       }
 
@@ -721,6 +649,7 @@
 
     logoutBtn.addEventListener("click", async () => {
       try {
+        clearLocalSessionTokens();
         await signOut(auth);
       } catch (err) {
         console.error(err);
