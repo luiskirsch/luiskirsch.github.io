@@ -128,13 +128,13 @@
 
   <div class="box">
     <h1>Pagamento aprovado</h1>
-    <p>Estamos validando seu pagamento e preparando sua liberação.</p>
+    <p>Estamos validando seu pagamento e preparando sua licença.</p>
 
     <div class="status" id="status">Validando pagamento...</div>
     <div class="code" id="licenseBox" style="display:none;"></div>
 
     <div class="nextInfo" id="nextInfo">
-      Seu acesso já foi liberado. Agora falta apenas vincular esta compra à sua conta.
+      Sua licença foi emitida com sucesso. Agora faça login ou crie sua conta para vinculá-la no painel.
     </div>
 
     <div class="actions" id="actions">
@@ -143,7 +143,7 @@
     </div>
 
     <div class="small">
-      Esta página libera seu acesso automaticamente após a confirmação.
+      Esta página salva sua licença neste navegador para que ela seja vinculada à sua conta no próximo passo.
     </div>
   </div>
 
@@ -199,13 +199,6 @@
       const collectionStatus = String(params.get("collection_status") || "").trim().toLowerCase();
       const externalReference = String(params.get("external_reference") || "").trim();
 
-      console.log("sucesso.html params:", {
-        paymentId,
-        paymentStatus,
-        collectionStatus,
-        externalReference
-      });
-
       if (!paymentId) {
         setStatus("Não foi possível identificar o pagamento.", true);
         return;
@@ -239,7 +232,6 @@
         });
 
         const licData = await licRes.json().catch(() => ({}));
-        console.log("emitir-licenca:", licData);
 
         if (!licRes.ok || !licData.licenseToken || !licData.licenseCode) {
           setStatus("Não foi possível emitir sua licença.", true);
@@ -255,36 +247,6 @@
         safeSetLocalStorage("osl_checkout_email", licData.email || "");
         safeSetLocalStorage("osl_checkout_ref", licData.ref || externalReference || "");
 
-        setStatus("Gerando seu acesso...");
-
-        const accessRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            licenseToken: licData.licenseToken
-          })
-        });
-
-        const accessData = await accessRes.json().catch(() => ({}));
-        console.log("emitir-acesso:", accessData);
-
-        if (!accessRes.ok || !accessData.accessToken) {
-          setStatus("A licença foi emitida, mas o acesso não pôde ser preparado.", true);
-          console.error("Falha em /emitir-acesso:", accessData);
-          return;
-        }
-
-        const savedAccess = safeSetLocalStorage("osl_access_token", accessData.accessToken);
-        safeSetLocalStorage("osl_access_expires_at", String(accessData.expiresAt || ""));
-        safeSetLocalStorage("osl_has_access", "true");
-
-        if (!savedAccess || !localStorage.getItem("osl_access_token")) {
-          setStatus("Seu acesso foi criado, mas não pôde ser salvo neste navegador.", true);
-          return;
-        }
-
         flowFinished = true;
 
         licenseBox.style.display = "block";
@@ -295,11 +257,11 @@
           Referência: ${licData.ref || externalReference || "indisponível"}
         `;
 
-        setStatus("Tudo pronto. Seu acesso foi liberado.");
+        setStatus("Tudo pronto. Sua licença foi salva neste navegador.");
         showNextStep();
       } catch (error) {
-        console.error("Erro ao finalizar liberação:", error);
-        setStatus("Erro ao finalizar sua liberação.", true);
+        console.error("Erro ao finalizar licença:", error);
+        setStatus("Erro ao finalizar sua licença.", true);
       }
     })();
   </script>
