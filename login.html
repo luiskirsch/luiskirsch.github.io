@@ -167,14 +167,14 @@
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyC8sSvA7_1HPYRFGfgdgzstkP_yQHadY-c",
-  authDomain: "osextolugar-game.firebaseapp.com",
-  projectId: "osextolugar-game",
-  storageBucket: "osextolugar-game.firebasestorage.app",
-  messagingSenderId: "947922328721",
-  appId: "1:947922328721:web:989522c99e16ab449f3330",
-  measurementId: "G-D6HG779ZFR"
-};
+      apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+      authDomain: "osextolugar-game.firebaseapp.com",
+      projectId: "osextolugar-game",
+      storageBucket: "osextolugar-game.firebasestorage.app",
+      messagingSenderId: "947922328721",
+      appId: "1:947922328721:web:989522c99e16ab449f3330",
+      measurementId: "G-D6HG779ZFR"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -194,22 +194,7 @@
       if (type) statusEl.classList.add(type);
     }
 
-    const savedEmail =
-      localStorage.getItem("osl_checkout_email") ||
-      localStorage.getItem("osl_license_email") ||
-      "";
-
-    if (savedEmail) {
-      emailEl.value = savedEmail;
-    }
-
-    onAuthStateChanged(auth, (user) => {
-      if (user && !isLoggingIn) {
-        window.location.href = "./painel.html";
-      }
-    });
-
-    loginBtn.addEventListener("click", async () => {
+    async function doLogin() {
       const email = emailEl.value.trim().toLowerCase();
       const password = passwordEl.value;
 
@@ -236,6 +221,9 @@
           localStorage.setItem("osl_auth_uid", cred.user.uid);
           localStorage.setItem("osl_license_code", data.licenseCode || "");
           localStorage.setItem("osl_license_email", data.email || email);
+        } else {
+          localStorage.setItem("osl_auth_uid", cred.user.uid);
+          localStorage.setItem("osl_license_email", email);
         }
 
         setStatus("Acesso liberado.", "ok");
@@ -265,43 +253,69 @@
         loginBtn.disabled = false;
         isLoggingIn = false;
       }
+    }
+
+    const savedEmail =
+      localStorage.getItem("osl_checkout_email") ||
+      localStorage.getItem("osl_license_email") ||
+      "";
+
+    if (savedEmail) {
+      emailEl.value = savedEmail;
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && !isLoggingIn) {
+        window.location.href = "./painel.html";
+      }
+    });
+
+    loginBtn.addEventListener("click", doLogin);
+
+    [emailEl, passwordEl].forEach((input) => {
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          doLogin();
+        }
+      });
     });
 
     forgotBtn.addEventListener("click", async (e) => {
-  e.preventDefault();
+      e.preventDefault();
 
-  const email = emailEl.value.trim().toLowerCase();
+      const email = emailEl.value.trim().toLowerCase();
 
-  if (!email) {
-    setStatus("Digite seu e-mail para recuperar.", "err");
-    return;
-  }
+      if (!email) {
+        setStatus("Digite seu e-mail para recuperar.", "err");
+        return;
+      }
 
-  try {
-    await sendPasswordResetEmail(auth, email);
-    setStatus("E-mail de recuperação enviado.", "ok");
-  } catch (err) {
-    console.error(err);
+      try {
+        await sendPasswordResetEmail(auth, email);
+        setStatus("E-mail de recuperação enviado.", "ok");
+      } catch (err) {
+        console.error(err);
 
-    let msg = "Erro ao enviar recuperação.";
+        let msg = "Erro ao enviar recuperação.";
 
-    if (err.code === "auth/invalid-email") {
-      msg = "O e-mail informado é inválido.";
-    } else if (err.code === "auth/user-not-found") {
-      msg = "Não existe conta com esse e-mail.";
-    } else if (err.code === "auth/missing-email") {
-      msg = "Digite seu e-mail para recuperar.";
-    } else if (err.code === "auth/too-many-requests") {
-      msg = "Muitas tentativas. Tente novamente mais tarde.";
-    } else if (err.code === "auth/network-request-failed") {
-      msg = "Erro de conexão. Tente novamente.";
-    } else if (err.code === "auth/unauthorized-domain") {
-      msg = "Este domínio não está autorizado no Firebase.";
-    }
+        if (err.code === "auth/invalid-email") {
+          msg = "O e-mail informado é inválido.";
+        } else if (err.code === "auth/user-not-found") {
+          msg = "Não existe conta com esse e-mail.";
+        } else if (err.code === "auth/missing-email") {
+          msg = "Digite seu e-mail para recuperar.";
+        } else if (err.code === "auth/too-many-requests") {
+          msg = "Muitas tentativas. Tente novamente mais tarde.";
+        } else if (err.code === "auth/network-request-failed") {
+          msg = "Erro de conexão. Tente novamente.";
+        } else if (err.code === "auth/unauthorized-domain") {
+          msg = "Este domínio não está autorizado no Firebase.";
+        }
 
-    setStatus(msg, "err");
-  }
-});
+        setStatus(msg, "err");
+      }
+    });
   </script>
 
 </body>
