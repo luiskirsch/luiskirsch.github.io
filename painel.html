@@ -546,13 +546,21 @@
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ licenseCode: typedCode })
+        body: JSON.stringify({
+          licenseCode: typedCode,
+          uid: user.uid,
+          email: user.email || ""
+        })
       });
 
       const verifyData = await verifyRes.json().catch(() => ({}));
 
       if (!verifyRes.ok || !verifyData.valid) {
-        setStatus("Código de licença inválido ou não encontrado.", "err");
+        if (verifyData?.error === "LICENCA_JA_VINCULADA_A_OUTRA_CONTA") {
+          setStatus("Esta licença já está vinculada a outra conta.", "err");
+        } else {
+          setStatus("Código de licença inválido ou não encontrado.", "err");
+        }
         return false;
       }
 
@@ -563,13 +571,21 @@
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ licenseCode: typedCode })
+        body: JSON.stringify({
+          licenseCode: typedCode,
+          uid: user.uid,
+          email: user.email || ""
+        })
       });
 
       const accessData = await accessRes.json().catch(() => ({}));
 
       if (!accessRes.ok || !accessData.accessToken) {
-        setStatus("Não foi possível emitir o acesso com essa licença.", "err");
+        if (accessData?.error === "LICENCA_JA_VINCULADA_A_OUTRA_CONTA") {
+          setStatus("Esta licença já está vinculada a outra conta.", "err");
+        } else {
+          setStatus("Não foi possível emitir o acesso com essa licença.", "err");
+        }
         return false;
       }
 
