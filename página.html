@@ -1270,9 +1270,10 @@ tested: true
 <div class="tfTitle" id="tfTitle"></div>  
 <div class="tfMessage" id="tfMessage"></div>  
 <div class="tfGhost" id="tfGhost"></div>  
-</div>    </div>    <div class="moonWrap" aria-hidden="true">      
-    <div class="moonGlow"></div>      
-    <img src="./lua_site_transparente.png" alt="" class="moon" referrerpolicy="no-referrer">      
+</div>    </div>   <div class="moonWrap" aria-hidden="true">
+  <div class="moonGlow"></div>
+  <img src="./lua_site_transparente.png" alt="" class="moon" referrerpolicy="no-referrer">
+</div>       
   <!-- PAINEL DE CONTA (ESQUERDA) -->
 <div class="accountPanel" id="accountPanel" aria-label="Acesso à conta">
   <div class="accountBadge" id="accountBadge">OS</div>
@@ -3014,8 +3015,9 @@ window.addEventListener("touchmove", onMove, { passive:false });
 window.addEventListener("touchend", onEnd, { passive:true });
 window.addEventListener("touchcancel", onEnd, { passive:true });
 })();
+</script>
 
- <script type="module">
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getAuth,
@@ -3113,6 +3115,6 @@ onAuthStateChanged(auth, (user) => {
   window.addEventListener("scroll", updateVisibility, { passive:true });
   updateVisibility();
 })();
-</script>  </body>
+</script>
 
-</html>
+<script type="module">
