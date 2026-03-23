@@ -66,6 +66,7 @@
       margin-top:12px;
       font-size:14px;
       min-height:20px;
+      line-height:1.45;
     }
 
     .ok{ color:#82d996; }
@@ -184,7 +185,8 @@
     <div class="licenseSection">
       <h2 class="licenseTitle">Restaurar ou vincular licença</h2>
       <p class="licenseText">
-        Se você comprou neste navegador, o acesso pode ser restaurado automaticamente. Se estiver em outro dispositivo, cole o código da licença.
+        Se você comprou neste navegador, o acesso pode ser restaurado automaticamente.
+        Se estiver em outro dispositivo, cole o código da licença.
       </p>
 
       <div class="field">
@@ -200,7 +202,7 @@
       <button id="linkLicenseBtn">Restaurar acesso</button>
 
       <div class="helper" id="licenseHelper">
-        Primeiro tentamos a licença salva neste navegador. Se não houver, usamos o código digitado.
+        Primeiro tentamos a licença salva neste navegador. Se não houver, usamos o código digitado ou o código salvo no seu perfil.
       </div>
     </div>
 
@@ -292,6 +294,13 @@
       localStorage.removeItem("osl_access_expires_at");
     }
 
+    function clearInvalidLocalLicense() {
+      localStorage.removeItem("osl_license_token");
+      localStorage.removeItem("osl_license_code");
+      localStorage.removeItem("osl_license_email");
+      clearLocalAccessOnly();
+    }
+
     function canEnterGame(profileData) {
       return !!profileData?.access?.active && !!getLocalAccessToken();
     }
@@ -346,7 +355,7 @@
         playBtn.disabled = true;
         linkLicenseBtn.disabled = false;
         linkLicenseBtn.textContent = "Restaurar acesso";
-        licenseHelper.textContent = "Use a licença salva ou cole o código manualmente.";
+        licenseHelper.textContent = "Use a licença salva neste navegador, o código digitado ou o código salvo no seu perfil.";
         return;
       }
 
@@ -354,7 +363,7 @@
       playBtn.disabled = true;
       linkLicenseBtn.disabled = false;
       linkLicenseBtn.textContent = "Restaurar acesso";
-      licenseHelper.textContent = "Tentaremos a licença salva no navegador. Se não houver, usamos o código digitado.";
+      licenseHelper.textContent = "Tentaremos a licença salva no navegador. Se não houver, usamos o código digitado ou o salvo no perfil.";
     }
 
     async function ensureUserProfile(user) {
@@ -432,6 +441,43 @@
       }
     }
 
+    async function markProfileWithoutAccess(user) {
+      const userRef = doc(db, "users", user.uid);
+
+      await setDoc(userRef, {
+        access: {
+          active: false
+        },
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      const refreshedSnap = await getDoc(userRef);
+      if (refreshedSnap.exists()) {
+        refreshUI(refreshedSnap.data(), user);
+      }
+    }
+
+    async function validateCurrentAccessToken() {
+      const accessToken = getLocalAccessToken();
+      if (!accessToken) return false;
+
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ accessToken })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        return !!(res.ok && data.liberado);
+      } catch (err) {
+        console.error("Erro ao verificar access token:", err);
+        return false;
+      }
+    }
+
     async function tryRestoreWithLocalToken(user) {
       const localToken = getLocalLicenseToken();
       if (!localToken) return false;
@@ -449,8 +495,7 @@
       const verifyData = await verifyRes.json().catch(() => ({}));
 
       if (!verifyRes.ok || !verifyData.valid) {
-        localStorage.removeItem("osl_license_token");
-        clearLocalAccessOnly();
+        clearInvalidLocalLicense();
         return false;
       }
 
@@ -486,8 +531,8 @@
       return true;
     }
 
-    async function tryRestoreWithTypedCode(user) {
-      const typedCode = normalizeLicenseCode(licenseInput.value);
+    async function tryRestoreWithCode(user, rawCode) {
+      const typedCode = normalizeLicenseCode(rawCode);
 
       if (!typedCode) {
         setStatus("Digite o código da licença.", "err");
@@ -554,12 +599,21 @@
         const restoredByToken = await tryRestoreWithLocalToken(user);
         if (restoredByToken) return;
 
-        if (silent) {
-          refreshUI(currentProfile, user);
-          return;
+        const typedCode = normalizeLicenseCode(licenseInput.value);
+        if (typedCode) {
+          const restoredByTypedCode = await tryRestoreWithCode(user, typedCode);
+          if (restoredByTypedCode) return;
         }
 
-        await tryRestoreWithTypedCode(user);
+        const profileCode = normalizeLicenseCode(currentProfile?.licenseCode || "");
+        if (profileCode && profileCode !== typedCode) {
+          const restoredByProfileCode = await tryRestoreWithCode(user, profileCode);
+          if (restoredByProfileCode) return;
+        }
+
+        if (!silent) {
+          setStatus("Nenhuma licença válida foi encontrada. Cole o código da licença para continuar.", "err");
+        }
       } catch (err) {
         console.error(err);
         setStatus("Erro ao restaurar licença.", "err");
@@ -585,10 +639,40 @@
       try {
         await loadProfile(user);
 
-        if (!getLocalAccessToken() && getLocalLicenseToken()) {
+        const currentAccessIsValid = await validateCurrentAccessToken();
+
+        if (currentAccessIsValid) {
+          if (currentProfile && !currentProfile?.access?.active) {
+            await saveProfileAccess(user, {
+              licenseCode: currentProfile?.licenseCode || getLocalLicenseCode() || "",
+              email: currentProfile?.email || user.email || "",
+              product: currentProfile?.product || "osl_ritual_completo"
+            });
+          } else {
+            refreshUI(currentProfile, user);
+            setStatus("Acesso liberado.", "ok");
+            playBtn.disabled = false;
+          }
+          return;
+        }
+
+        if (getLocalAccessToken()) {
+          clearLocalAccessOnly();
+        }
+
+        if (currentProfile?.access?.active) {
+          await markProfileWithoutAccess(user);
+        }
+
+        const hasSomethingToRestore =
+          !!getLocalLicenseToken() ||
+          !!normalizeLicenseCode(licenseInput.value) ||
+          !!normalizeLicenseCode(currentProfile?.licenseCode || "");
+
+        if (hasSomethingToRestore) {
           await restoreAccess(user, true);
-        } else if (currentProfile && canEnterGame(currentProfile)) {
-          setStatus("Acesso liberado.", "ok");
+        } else {
+          refreshUI(currentProfile, user);
         }
       } catch (err) {
         console.error(err);
@@ -602,9 +686,17 @@
       await restoreAccess(currentUser, false);
     });
 
-    playBtn.addEventListener("click", () => {
-      if (!currentProfile || !canEnterGame(currentProfile)) {
-        setStatus("Vincule ou restaure sua licença antes de entrar no jogo.", "err");
+    playBtn.addEventListener("click", async () => {
+      if (!currentProfile) {
+        setStatus("Perfil ainda não carregado.", "err");
+        return;
+      }
+
+      const stillValid = await validateCurrentAccessToken();
+      if (!stillValid) {
+        clearLocalAccessOnly();
+        await markProfileWithoutAccess(currentUser);
+        setStatus("Seu acesso expirou neste navegador. Restaure a licença antes de entrar.", "err");
         return;
       }
 
