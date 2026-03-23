@@ -194,7 +194,22 @@
       if (type) statusEl.classList.add(type);
     }
 
-    async function doLogin() {
+    const savedEmail =
+      localStorage.getItem("osl_checkout_email") ||
+      localStorage.getItem("osl_license_email") ||
+      "";
+
+    if (savedEmail) {
+      emailEl.value = savedEmail;
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && !isLoggingIn) {
+        window.location.href = "./painel.html";
+      }
+    });
+
+    loginBtn.addEventListener("click", async () => {
       const email = emailEl.value.trim().toLowerCase();
       const password = passwordEl.value;
 
@@ -221,9 +236,6 @@
           localStorage.setItem("osl_auth_uid", cred.user.uid);
           localStorage.setItem("osl_license_code", data.licenseCode || "");
           localStorage.setItem("osl_license_email", data.email || email);
-        } else {
-          localStorage.setItem("osl_auth_uid", cred.user.uid);
-          localStorage.setItem("osl_license_email", email);
         }
 
         setStatus("Acesso liberado.", "ok");
@@ -253,32 +265,6 @@
         loginBtn.disabled = false;
         isLoggingIn = false;
       }
-    }
-
-    const savedEmail =
-      localStorage.getItem("osl_checkout_email") ||
-      localStorage.getItem("osl_license_email") ||
-      "";
-
-    if (savedEmail) {
-      emailEl.value = savedEmail;
-    }
-
-    onAuthStateChanged(auth, (user) => {
-      if (user && !isLoggingIn) {
-        window.location.href = "./painel.html";
-      }
-    });
-
-    loginBtn.addEventListener("click", doLogin);
-
-    [emailEl, passwordEl].forEach((input) => {
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          doLogin();
-        }
-      });
     });
 
     forgotBtn.addEventListener("click", async (e) => {
