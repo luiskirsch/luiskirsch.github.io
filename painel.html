@@ -1,215 +1,3 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Painel | O SextoLugar</title>
-
-<style>
-  body{
-    margin:0;
-    background:#050507;
-    color:#fff;
-    font-family:"Segoe UI",system-ui;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
-    padding:20px;
-    box-sizing:border-box;
-  }
-
-  .card{
-    width:100%;
-    max-width:560px;
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:20px;
-    padding:28px;
-    box-shadow:0 30px 80px rgba(0,0,0,.6);
-  }
-
-  h1{
-    margin:0 0 6px;
-    font-size:26px;
-  }
-
-  .muted{
-    color:rgba(255,255,255,.6);
-    font-size:14px;
-    margin-bottom:20px;
-  }
-
-  .box{
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:14px;
-    padding:14px;
-    margin-bottom:12px;
-  }
-
-  .label{
-    font-size:11px;
-    color:#e6c07b;
-    text-transform:uppercase;
-    letter-spacing:.12em;
-  }
-
-  .value{
-    margin-top:4px;
-    font-size:15px;
-    word-break:break-word;
-  }
-
-  .status{
-    margin-top:12px;
-    font-size:14px;
-    min-height:20px;
-  }
-
-  .ok{ color:#82d996; }
-  .err{ color:#ff6b6b; }
-
-  .licenseSection{
-    margin-top:16px;
-    padding:16px;
-    border-radius:16px;
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
-  }
-
-  .licenseTitle{
-    margin:0 0 8px;
-    font-size:15px;
-    color:#e6c07b;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-  }
-
-  .licenseText{
-    margin:0 0 12px;
-    font-size:13px;
-    color:rgba(255,255,255,.68);
-    line-height:1.6;
-  }
-
-  .field{
-    display:grid;
-    gap:8px;
-    margin-bottom:12px;
-  }
-
-  .field label{
-    font-size:11px;
-    letter-spacing:.14em;
-    text-transform:uppercase;
-    color:#e6c07b;
-  }
-
-  .field input{
-    min-height:50px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,.08);
-    background:rgba(0,0,0,.25);
-    color:#fff;
-    padding:12px;
-    font-size:15px;
-    outline:none;
-    width:100%;
-    box-sizing:border-box;
-  }
-
-  .field input::placeholder{
-    color:rgba(255,255,255,.34);
-  }
-
-  button{
-    width:100%;
-    height:52px;
-    border:none;
-    border-radius:14px;
-    margin-top:12px;
-    background:linear-gradient(135deg,#e6c07b,#c99c4a);
-    font-weight:700;
-    cursor:pointer;
-    font-size:15px;
-  }
-
-  button[disabled]{
-    opacity:.6;
-    cursor:not-allowed;
-  }
-
-  .logout{
-    margin-top:10px;
-    background:rgba(255,255,255,.06);
-    color:#fff;
-  }
-
-  .helper{
-    margin-top:8px;
-    font-size:12px;
-    color:rgba(255,255,255,.52);
-    line-height:1.5;
-  }
-</style>
-</head>
-
-<body>
-
-<div class="card">
-  <h1>Seu acesso</h1>
-  <div class="muted">Painel do O SextoLugar</div>
-
-  <div class="box">
-    <div class="label">Nome</div>
-    <div class="value" id="nome">...</div>
-  </div>
-
-  <div class="box">
-    <div class="label">Usuário</div>
-    <div class="value" id="username">...</div>
-  </div>
-
-  <div class="box">
-    <div class="label">Email</div>
-    <div class="value" id="email">...</div>
-  </div>
-
-  <div class="box">
-    <div class="label">Licença atual</div>
-    <div class="value" id="license">Não vinculada</div>
-  </div>
-
-  <div class="licenseSection">
-    <h2 class="licenseTitle">Vincular licença</h2>
-    <p class="licenseText">
-      Cole o código da sua licença ou use o que foi salvo automaticamente após a compra.
-    </p>
-
-    <div class="field">
-      <label for="licenseInput">Código da licença</label>
-      <input
-        id="licenseInput"
-        type="text"
-        placeholder="Ex.: OSL-XXXX-XXXX-XXXX-XXXX-XXXX"
-        autocomplete="off"
-      />
-    </div>
-
-    <button id="linkLicenseBtn">Vincular licença</button>
-
-    <div class="helper" id="licenseHelper">
-      Se você acabou de comprar neste navegador, o código pode já aparecer preenchido aqui.
-    </div>
-  </div>
-
-  <div class="status" id="status"></div>
-
-  <button id="playBtn" disabled>Entrar no jogo</button>
-  <button class="logout" id="logoutBtn">Sair</button>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
@@ -262,12 +50,8 @@ function setStatus(text, type = "") {
   if (type) statusEl.classList.add(type);
 }
 
-function normalizeLicenseCode(value) {
-  return String(value || "")
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, "")
-    .replace(/[^A-Z0-9-]/g, "");
+function getLocalLicenseToken() {
+  return localStorage.getItem("osl_license_token") || "";
 }
 
 function getLocalLicenseCode() {
@@ -283,23 +67,35 @@ function canEnterGame(profileData) {
 }
 
 function syncLicenseInput(profileData = null) {
-  const code =
-    profileData?.licenseCode ||
-    getLocalLicenseCode() ||
-    "";
-
+  const code = profileData?.licenseCode || getLocalLicenseCode() || "";
   licenseInput.value = code;
 }
 
 function refreshUI(profileData, firebaseUser) {
   currentProfile = profileData;
 
-  nomeEl.textContent = profileData?.displayName || localStorage.getItem("osl_nome") || "-";
+  nomeEl.textContent =
+    profileData?.displayName ||
+    localStorage.getItem("osl_nome") ||
+    firebaseUser?.displayName ||
+    "-";
+
   usernameEl.textContent = profileData?.username
     ? "@" + profileData.username
-    : (localStorage.getItem("osl_username") ? "@" + localStorage.getItem("osl_username") : "-");
-  emailEl.textContent = profileData?.email || firebaseUser?.email || localStorage.getItem("osl_license_email") || "-";
-  licenseEl.textContent = profileData?.licenseCode || getLocalLicenseCode() || "Não vinculada";
+    : (localStorage.getItem("osl_username")
+        ? "@" + localStorage.getItem("osl_username")
+        : "-");
+
+  emailEl.textContent =
+    profileData?.email ||
+    firebaseUser?.email ||
+    localStorage.getItem("osl_license_email") ||
+    "-";
+
+  licenseEl.textContent =
+    profileData?.licenseCode ||
+    getLocalLicenseCode() ||
+    "Não vinculada";
 
   syncLicenseInput(profileData);
 
@@ -307,17 +103,19 @@ function refreshUI(profileData, firebaseUser) {
     setStatus("Acesso liberado.", "ok");
     playBtn.disabled = false;
     linkLicenseBtn.disabled = false;
-    linkLicenseBtn.textContent = "Atualizar licença";
-    licenseHelper.textContent = "Sua conta já está liberada. Você também pode atualizar a licença se quiser.";
+    linkLicenseBtn.textContent = "Restaurar acesso";
+    licenseHelper.textContent =
+      "Sua licença já está vinculada e este navegador possui acesso ativo.";
     return;
   }
 
   if (profileData?.licenseLinked && !getLocalAccessToken()) {
-    setStatus("Sua conta tem licença vinculada, mas este navegador ainda não possui acesso liberado.", "err");
+    setStatus("Sua licença está vinculada, mas este navegador ainda não possui acesso ativo.", "err");
     playBtn.disabled = true;
     linkLicenseBtn.disabled = false;
     linkLicenseBtn.textContent = "Restaurar acesso";
-    licenseHelper.textContent = "Clique para restaurar o acesso usando o código da licença.";
+    licenseHelper.textContent =
+      "Clique no botão para restaurar o acesso usando a licença salva neste navegador.";
     return;
   }
 
@@ -325,14 +123,17 @@ function refreshUI(profileData, firebaseUser) {
   playBtn.disabled = true;
   linkLicenseBtn.disabled = false;
   linkLicenseBtn.textContent = "Vincular licença";
-  licenseHelper.textContent = "Cole o código da licença e clique em Vincular licença.";
+  licenseHelper.textContent =
+    "Depois da compra, volte primeiro para a página de sucesso neste mesmo navegador.";
 }
 
 async function ensureUserProfile(user) {
   const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
 
-  if (snap.exists()) return snap.data();
+  if (snap.exists()) {
+    return snap.data();
+  }
 
   const displayName =
     localStorage.getItem("osl_nome") ||
@@ -375,6 +176,7 @@ async function ensureUserProfile(user) {
   };
 
   await setDoc(userRef, profileData, { merge: true });
+
   return {
     ...profileData,
     createdAt: null,
@@ -385,6 +187,86 @@ async function ensureUserProfile(user) {
 async function loadProfile(user) {
   const profile = await ensureUserProfile(user);
   refreshUI(profile, user);
+}
+
+async function restoreAccessWithSavedLicense() {
+  const licenseToken = getLocalLicenseToken();
+
+  if (!licenseToken) {
+    setStatus("Nenhuma licença salva neste navegador. Volte à página de sucesso após a compra.", "err");
+    return;
+  }
+
+  try {
+    linkLicenseBtn.disabled = true;
+    playBtn.disabled = true;
+
+    setStatus("Validando licença...");
+
+    const verifyRes = await fetch(`${BACKEND_BASE_URL}/verificar-licenca`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ licenseToken })
+    });
+
+    const verifyData = await verifyRes.json().catch(() => ({}));
+
+    if (!verifyRes.ok || !verifyData.valid) {
+      setStatus("A licença salva neste navegador é inválida ou expirou.", "err");
+      linkLicenseBtn.disabled = false;
+      return;
+    }
+
+    setStatus("Emitindo acesso...");
+
+    const accessRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ licenseToken })
+    });
+
+    const accessData = await accessRes.json().catch(() => ({}));
+
+    if (!accessRes.ok || !accessData.accessToken) {
+      setStatus("Não foi possível restaurar o acesso.", "err");
+      linkLicenseBtn.disabled = false;
+      return;
+    }
+
+    localStorage.setItem("osl_access_token", accessData.accessToken);
+    localStorage.setItem("osl_access_expires_at", String(accessData.expiresAt || ""));
+    localStorage.setItem("osl_license_code", verifyData.licenseCode || "");
+    localStorage.setItem("osl_license_email", verifyData.email || "");
+
+    const userRef = doc(db, "users", currentUser.uid);
+
+    await setDoc(userRef, {
+      email: currentUser.email || verifyData.email || "",
+      licenseLinked: true,
+      licenseCode: verifyData.licenseCode || "",
+      product: verifyData.product || "osl_ritual_completo",
+      access: {
+        active: true
+      },
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    const refreshedSnap = await getDoc(userRef);
+    if (refreshedSnap.exists()) {
+      refreshUI(refreshedSnap.data(), currentUser);
+    }
+
+    setStatus("Licença vinculada com sucesso. Acesso liberado.", "ok");
+  } catch (err) {
+    console.error(err);
+    setStatus("Erro ao vincular licença.", "err");
+  } finally {
+    linkLicenseBtn.disabled = false;
+  }
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -406,83 +288,7 @@ onAuthStateChanged(auth, async (user) => {
 
 linkLicenseBtn.addEventListener("click", async () => {
   if (!currentUser) return;
-
-  const licenseCode = normalizeLicenseCode(licenseInput.value || getLocalLicenseCode());
-
-  if (!licenseCode) {
-    setStatus("Digite ou cole o código da licença.", "err");
-    return;
-  }
-
-  try {
-    linkLicenseBtn.disabled = true;
-    playBtn.disabled = true;
-    setStatus("Validando código da licença...");
-
-    const verifyRes = await fetch(`${BACKEND_BASE_URL}/validar-codigo-licenca`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ licenseCode })
-    });
-
-    const verifyData = await verifyRes.json().catch(() => ({}));
-
-    if (!verifyRes.ok || !verifyData.valid) {
-      setStatus("Código de licença inválido ou não encontrado.", "err");
-      linkLicenseBtn.disabled = false;
-      return;
-    }
-
-    setStatus("Emitindo acesso...");
-
-    const accessRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso-por-codigo`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ licenseCode })
-    });
-
-    const accessData = await accessRes.json().catch(() => ({}));
-
-    if (!accessRes.ok || !accessData.accessToken) {
-      setStatus("Não foi possível emitir o acesso com essa licença.", "err");
-      linkLicenseBtn.disabled = false;
-      return;
-    }
-
-    localStorage.setItem("osl_access_token", accessData.accessToken);
-    localStorage.setItem("osl_access_expires_at", String(accessData.expiresAt || ""));
-    localStorage.setItem("osl_license_code", verifyData.licenseCode || licenseCode);
-    localStorage.setItem("osl_license_email", verifyData.email || currentUser.email || "");
-
-    const userRef = doc(db, "users", currentUser.uid);
-
-    await setDoc(userRef, {
-      email: currentUser.email || verifyData.email || "",
-      licenseLinked: true,
-      licenseCode: verifyData.licenseCode || licenseCode,
-      product: verifyData.product || "osl_ritual_completo",
-      access: {
-        active: true
-      },
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-
-    const refreshedSnap = await getDoc(userRef);
-    if (refreshedSnap.exists()) {
-      refreshUI(refreshedSnap.data(), currentUser);
-    }
-
-    setStatus("Licença vinculada com sucesso. Acesso liberado.", "ok");
-  } catch (err) {
-    console.error(err);
-    setStatus("Erro ao vincular licença.", "err");
-  } finally {
-    linkLicenseBtn.disabled = false;
-  }
+  await restoreAccessWithSavedLicense();
 });
 
 playBtn.addEventListener("click", () => {
@@ -499,6 +305,3 @@ logoutBtn.addEventListener("click", async () => {
   window.location.href = "./login.html";
 });
 </script>
-
-</body>
-</html>
