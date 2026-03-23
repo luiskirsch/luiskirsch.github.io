@@ -9,9 +9,7 @@
   <title>Pagamento aprovado | O SextoLugar</title>
 
   <style>
-    *{
-      box-sizing:border-box;
-    }
+    *{ box-sizing:border-box; }
 
     body{
       margin:0;
@@ -85,21 +83,6 @@
       cursor:pointer;
       font-size:16px;
       min-width:220px;
-      transition:transform .15s ease, opacity .15s ease;
-    }
-
-    button:hover{
-      transform:translateY(-1px);
-    }
-
-    button:active{
-      transform:translateY(0);
-    }
-
-    button[disabled]{
-      opacity:.6;
-      cursor:not-allowed;
-      transform:none;
     }
 
     .secondary{
@@ -134,7 +117,7 @@
     <div class="code" id="licenseBox" style="display:none;"></div>
 
     <div class="nextInfo" id="nextInfo">
-      Sua licença foi emitida com sucesso. Agora faça login ou crie sua conta para vinculá-la no painel.
+      Sua licença foi emitida e salva. Agora faça login ou crie sua conta para vinculá-la no painel.
     </div>
 
     <div class="actions" id="actions">
@@ -143,7 +126,7 @@
     </div>
 
     <div class="small">
-      Esta página salva sua licença neste navegador para que ela seja vinculada à sua conta no próximo passo.
+      Guarde seu código de licença. Agora ele também fica salvo no servidor e pode ser usado depois no painel.
     </div>
   </div>
 
@@ -161,23 +144,11 @@
       const createAccountBtn = document.getElementById("createAccountBtn");
       const loginBtn = document.getElementById("loginBtn");
 
-      let flowFinished = false;
-
       function setStatus(text, isError = false) {
         statusEl.textContent = text;
         statusEl.style.color = isError
           ? "rgba(255,120,120,.95)"
           : "rgba(255,255,255,.88)";
-      }
-
-      function safeSetLocalStorage(key, value) {
-        try {
-          localStorage.setItem(key, value);
-          return true;
-        } catch (error) {
-          console.error("Erro ao salvar no localStorage:", key, error);
-          return false;
-        }
       }
 
       function showNextStep() {
@@ -218,8 +189,6 @@
         return;
       }
 
-      if (flowFinished) return;
-
       try {
         setStatus("Emitindo licença...");
 
@@ -239,15 +208,13 @@
           return;
         }
 
-        safeSetLocalStorage("osl_license_token", licData.licenseToken);
-        safeSetLocalStorage("osl_license_code", licData.licenseCode || "");
-        safeSetLocalStorage("osl_license_email", licData.email || "");
-        safeSetLocalStorage("osl_payment_id", paymentId);
-        safeSetLocalStorage("osl_payment_ref", licData.ref || externalReference || "");
-        safeSetLocalStorage("osl_checkout_email", licData.email || "");
-        safeSetLocalStorage("osl_checkout_ref", licData.ref || externalReference || "");
-
-        flowFinished = true;
+        localStorage.setItem("osl_license_token", licData.licenseToken);
+        localStorage.setItem("osl_license_code", licData.licenseCode || "");
+        localStorage.setItem("osl_license_email", licData.email || "");
+        localStorage.setItem("osl_payment_id", paymentId);
+        localStorage.setItem("osl_payment_ref", licData.ref || externalReference || "");
+        localStorage.setItem("osl_checkout_email", licData.email || "");
+        localStorage.setItem("osl_checkout_ref", licData.ref || externalReference || "");
 
         licenseBox.style.display = "block";
         licenseBox.innerHTML = `
@@ -257,7 +224,7 @@
           Referência: ${licData.ref || externalReference || "indisponível"}
         `;
 
-        setStatus("Tudo pronto. Sua licença foi salva neste navegador.");
+        setStatus("Tudo pronto. Sua licença foi emitida.");
         showNextStep();
       } catch (error) {
         console.error("Erro ao finalizar licença:", error);
