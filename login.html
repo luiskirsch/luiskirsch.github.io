@@ -203,11 +203,23 @@
       emailEl.value = savedEmail;
     }
 
-    onAuthStateChanged(auth, (user) => {
-      if (user && !isLoggingIn) {
-        window.location.href = "./painel.html";
-      }
-    });
+  onAuthStateChanged(auth, async (user) => {
+  if (!user || isLoggingIn) return;
+
+  try {
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      window.location.href = "./painel.html";
+    } else {
+      setStatus("Sua conta está logada, mas o perfil ainda não foi criado no banco.", "err");
+    }
+  } catch (err) {
+    console.error(err);
+    setStatus("Erro ao verificar perfil.", "err");
+  }
+});  
 
     loginBtn.addEventListener("click", async () => {
       const email = emailEl.value.trim().toLowerCase();
