@@ -430,14 +430,12 @@
       </div>
     </section>
   </main>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import {
     getAuth,
     createUserWithEmailAndPassword,
-    updateProfile,
-    onAuthStateChanged
+    updateProfile
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     getFirestore,
@@ -461,6 +459,8 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+
   const cadastroForm = document.getElementById("cadastroForm");
   const displayNameEl = document.getElementById("displayName");
   const emailEl = document.getElementById("email");
@@ -471,10 +471,18 @@
   const goLoginBtn = document.getElementById("goLoginBtn");
   const statusEl = document.getElementById("status");
 
+  let isSubmitting = false;
+
   function setStatus(text, type = "") {
     statusEl.textContent = text;
     statusEl.className = "status";
     if (type) statusEl.classList.add(type);
+  }
+
+  function setLoading(loading) {
+    isSubmitting = loading;
+    submitBtn.disabled = loading;
+    goLoginBtn.disabled = loading;
   }
 
   function normalizeUsername(value) {
@@ -484,6 +492,10 @@
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9_]/g, "")
       .slice(0, 20);
+  }
+
+  function getLicenseToken() {
+    return localStorage.getItem("osl_license_token") || "";
   }
 
   async function usernameExists(username) {
@@ -529,6 +541,49 @@
     }, { merge: true });
   }
 
+  async function tryLinkLicenseAfterSignup(uid) {
+    const licenseToken = getLicenseToken();
+
+    if (!licenseToken) {
+      return { ok: true, linked: false };
+    }
+
+    try {
+      const res = await fetch(`${BACKEND_BASE_URL}/verificar-licenca`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ licenseToken })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.valid) {
+        return { ok: false, linked: false };
+      }
+
+      localStorage.setItem("osl_license_code", data.licenseCode || "");
+      localStorage.setItem("osl_license_email", data.email || "");
+
+      const userRef = doc(db, "users", uid);
+      await setDoc(userRef, {
+        licenseLinked: true,
+        licenseCode: data.licenseCode || "",
+        product: data.product || "osl_ritual_completo",
+        access: {
+          active: true
+        },
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      return { ok: true, linked: true };
+    } catch (error) {
+      console.error("Erro ao vincular licença após cadastro:", error);
+      return { ok: false, linked: false };
+    }
+  }
+
   function humanizeSignupError(error) {
     const code = error?.code || "";
 
@@ -551,4 +606,97 @@
       return "O Firestore recusou salvar o perfil.";
     }
 
-    return `Erro ao criar conta:
+    return `Erro ao criar conta: ${code || "desconhecido"}`;
+  }
+
+  cadastroForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    const displayName = displayNameEl.value.trim().slice(0, 40);
+    const email = emailEl.value.trim().toLowerCase().slice(0, 160);
+    const username = normalizeUsername(usernameEl.value);
+    const password = passwordEl.value;
+    const confirmPassword = confirmPasswordEl.value;
+
+    if (!displayName) {
+      setStatus("Digite seu nome de exibição.", "err");
+      displayNameEl.focus();
+      return;
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setStatus("Digite um e-mail válido.", "err");
+      emailEl.focus();
+      return;
+    }
+
+    if (!username || username.length < 3) {
+      setStatus("Escolha um usuário com pelo menos 3 caracteres.", "err");
+      usernameEl.focus();
+      return;
+    }
+
+    if (password.length < 6) {
+      setStatus("A senha precisa ter pelo menos 6 caracteres.", "err");
+      passwordEl.focus();
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setStatus("As senhas não coincidem.", "err");
+      confirmPasswordEl.focus();
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setStatus("Verificando disponibilidade do usuário...");
+
+      if (await usernameExists(username)) {
+        setStatus("Esse usuário já está em uso.", "err");
+        usernameEl.focus();
+        setLoading(false);
+        return;
+      }
+
+      setStatus("Criando sua conta...");
+
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const createdUser = cred.user;
+
+      await updateProfile(createdUser, { displayName });
+
+      setStatus("Salvando seu perfil...");
+      await saveUserProfile(createdUser, displayName, username, email);
+
+      setStatus("Vinculando seu acesso...");
+      await tryLinkLicenseAfterSignup(createdUser.uid);
+
+      localStorage.setItem("osl_nome", displayName);
+      localStorage.setItem("osl_username", username);
+      localStorage.setItem("osl_auth_uid", createdUser.uid);
+      localStorage.setItem("osl_license_email", email);
+
+      setStatus("Conta criada com sucesso. Indo para o login...", "ok");
+
+      setTimeout(() => {
+        window.location.href = "./login.html";
+      }, 700);
+
+    } catch (error) {
+      console.error("ERRO COMPLETO NO CADASTRO:", error);
+      console.error("error.code:", error?.code);
+      console.error("error.message:", error?.message);
+
+      setStatus(humanizeSignupError(error), "err");
+      setLoading(false);
+    }
+  });
+
+  goLoginBtn.addEventListener("click", () => {
+    window.location.href = "./login.html";
+  });
+
+  setStatus("Sistema carregado.");
+</script>
