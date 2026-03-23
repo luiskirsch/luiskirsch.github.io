@@ -4,21 +4,21 @@
   <meta http-equiv="Pragma" content="no-cache" />      
   <meta http-equiv="Expires" content="0" />      
   <meta name="referrer" content="no-referrer">      
-  <meta http-equiv="Content-Security-Policy" content="      
-    default-src 'self';      
-    base-uri 'self';      
-    object-src 'none';      
-    frame-ancestors 'none';      
-    form-action 'self' mailto:;      
-    img-src 'self' data: blob:;      
-    media-src 'self' data: blob:;      
-    connect-src 'self';      
-    font-src 'self' data:;      
-    style-src 'self' 'unsafe-inline';      
-    script-src 'self' 'unsafe-inline';      
-    upgrade-insecure-requests;      
-    block-all-mixed-content;      
-  ">      
+ <meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  base-uri 'self';
+  object-src 'none';
+  frame-ancestors 'none';
+  form-action 'self' mailto:;
+  img-src 'self' data: blob:;
+  media-src 'self' data: blob:;
+  connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com;
+  font-src 'self' data:;
+  style-src 'self' 'unsafe-inline';
+  script-src 'self' 'unsafe-inline' https://www.gstatic.com;
+  upgrade-insecure-requests;
+  block-all-mixed-content;
+">
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=(), bluetooth=(), magnetometer=(), gyroscope=(), accelerometer=(), midi=(), clipboard-read=(), clipboard-write=()">    <style>      
     :root{      
       --bg:#000006;      
@@ -3086,12 +3086,20 @@ function getPreferredName(user) {
 }
 
 function updateAccountUI(user) {
+  if (!accountPanel || !accountBadge || !accountLabel || !accountName) return;
+
+  accountBadge.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M12 12c2.761 0 5-2.686 5-6s-2.239-6-5-6-5 2.686-5 6 2.239 6 5 6Z" fill="currentColor"/>
+      <path d="M21 22c0-4.418-4.03-8-9-8s-9 3.582-9 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  `;
+
   if (user) {
     const preferredName = getPreferredName(user);
 
     accountLabel.textContent = "Conta conectada";
     accountName.textContent = preferredName;
-    accountBadge.textContent = getInitials(preferredName);
 
     accountPanel.onclick = function () {
       window.location.href = "./painel.html";
@@ -3102,7 +3110,6 @@ function updateAccountUI(user) {
 
   accountLabel.textContent = "Acesso";
   accountName.textContent = "Entrar ou acessar painel";
-  accountBadge.textContent = "OS";
 
   accountPanel.onclick = function () {
     window.location.href = "./login.html";
