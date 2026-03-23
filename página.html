@@ -2974,9 +2974,16 @@ applyVolume();
 });
 
 function updatePanelVisibility(){
-var y = window.scrollY || 0;
-if (y <= 10) panelEl.classList.remove("isHidden");
-else panelEl.classList.add("isHidden");
+  var y = window.scrollY || 0;
+  var shouldShow = y <= 10;
+
+  if (shouldShow) {
+    panelEl.classList.remove("isHidden");
+    if (accountPanelEl) accountPanelEl.classList.remove("isHidden");
+  } else {
+    panelEl.classList.add("isHidden");
+    if (accountPanelEl) accountPanelEl.classList.add("isHidden");
+  }
 }
 
 window.addEventListener("scroll", updatePanelVisibility, { passive:true });
@@ -3124,16 +3131,6 @@ onAuthStateChanged(auth, (user) => {
   updateAccountUI(user);
 });
 
-(function handlePanelVisibility(){
-  function updateVisibility(){
-    const y = window.scrollY || 0;
-    if (y <= 10) accountPanel.classList.remove("isHidden");
-    else accountPanel.classList.add("isHidden");
-  }
-
-  window.addEventListener("scroll", updateVisibility, { passive:true });
-  updateVisibility();
-})();
 </script>
 
 <script type="module">
