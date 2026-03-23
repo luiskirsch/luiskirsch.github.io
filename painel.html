@@ -121,13 +121,46 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getAuth,
-  onAuthStateChanged(auth, async (user) => {
-  try {
-    if (!user) {
-      window.location.href = "./login.html";
-      return;
-    }
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
+import {
+  getFirestore,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+  authDomain: "osextolugar-game.firebaseapp.com",
+  projectId: "osextolugar-game",
+  storageBucket: "osextolugar-game.firebasestorage.app",
+  messagingSenderId: "947922328721",
+  appId: "1:947922328721:web:989522c99e16ab449f3330",
+  measurementId: "G-D6HG779ZFR"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const nomeEl = document.getElementById("nome");
+const usernameEl = document.getElementById("username");
+const emailEl = document.getElementById("email");
+const licenseEl = document.getElementById("license");
+const statusEl = document.getElementById("status");
+
+const playBtn = document.getElementById("playBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "./login.html";
+    return;
+  }
+
+  try {
     const ref = doc(db, "users", user.uid);
     const snap = await getDoc(ref);
 
@@ -136,13 +169,10 @@ import {
       usernameEl.textContent = localStorage.getItem("osl_username")
         ? "@" + localStorage.getItem("osl_username")
         : "-";
-      emailEl.textContent =
-        localStorage.getItem("osl_license_email") || user.email || "-";
-      licenseEl.textContent =
-        localStorage.getItem("osl_license_code") || "Não vinculada";
-
-      statusEl.textContent = "Perfil não encontrado no banco, mas login ativo.";
-      statusEl.className = "status ok";
+      emailEl.textContent = localStorage.getItem("osl_license_email") || user.email || "-";
+      licenseEl.textContent = localStorage.getItem("osl_license_code") || "Não vinculada";
+      statusEl.textContent = "Perfil não encontrado no banco.";
+      statusEl.className = "status err";
       return;
     }
 
@@ -160,9 +190,9 @@ import {
       statusEl.textContent = "Sem acesso ativo.";
       statusEl.className = "status err";
     }
-  } catch (error) {
-    console.error(error);
-    statusEl.textContent = "Erro ao carregar painel.";
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "Erro ao carregar perfil.";
     statusEl.className = "status err";
   }
 });
