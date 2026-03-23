@@ -140,12 +140,6 @@
     cursor:not-allowed;
   }
 
-  .ghostBtn{
-    background:rgba(255,255,255,.06);
-    color:#fff;
-    border:1px solid rgba(255,255,255,.08);
-  }
-
   .logout{
     margin-top:10px;
     background:rgba(255,255,255,.06);
@@ -190,7 +184,7 @@
   <div class="licenseSection">
     <h2 class="licenseTitle">Vincular licença</h2>
     <p class="licenseText">
-      Depois da compra, sua licença fica salva neste navegador. Clique no botão abaixo para vinculá-la à sua conta.
+      Cole o código da sua licença ou use o que foi salvo automaticamente após a compra.
     </p>
 
     <div class="field">
@@ -198,7 +192,7 @@
       <input
         id="licenseInput"
         type="text"
-        placeholder="Sua licença aparecerá aqui após a compra"
+        placeholder="Ex.: OSL-XXXX-XXXX-XXXX-XXXX-XXXX"
         autocomplete="off"
       />
     </div>
@@ -206,7 +200,7 @@
     <button id="linkLicenseBtn">Vincular licença</button>
 
     <div class="helper" id="licenseHelper">
-      Se você acabou de comprar, volte primeiro para a página de sucesso neste mesmo navegador.
+      Se você acabou de comprar neste navegador, o código pode já aparecer preenchido aqui.
     </div>
   </div>
 
@@ -216,7 +210,7 @@
   <button class="logout" id="logoutBtn">Sair</button>
 </div>
 
-         <script type="module">
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getAuth,
@@ -242,6 +236,8 @@ const firebaseConfig = {
   measurementId: "G-D6HG779ZFR"
 };
 
+const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -251,9 +247,14 @@ const usernameEl = document.getElementById("username");
 const emailEl = document.getElementById("email");
 const licenseEl = document.getElementById("license");
 const statusEl = document.getElementById("status");
-
 const playBtn = document.getElementById("playBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const linkLicenseBtn = document.getElementById("linkLicenseBtn");
+const licenseInput = document.getElementById("licenseInput");
+const licenseHelper = document.getElementById("licenseHelper");
+
+let currentUser = null;
+let currentProfile = null;
 
 function setStatus(text, type = "") {
   statusEl.textContent = text;
@@ -261,31 +262,77 @@ function setStatus(text, type = "") {
   if (type) statusEl.classList.add(type);
 }
 
-function normalizeUsername(value) {
+function normalizeLicenseCode(value) {
   return String(value || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9_]/g, "")
-    .slice(0, 20);
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .replace(/[^A-Z0-9-]/g, "");
 }
 
-function buildFallbackUsername(email) {
-  const baseFromStorage = localStorage.getItem("osl_username") || "";
-  if (baseFromStorage) return normalizeUsername(baseFromStorage);
+function getLocalLicenseCode() {
+  return localStorage.getItem("osl_license_code") || "";
+}
 
-  const fromEmail = String(email || "").split("@")[0] || "jogador";
-  const normalized = normalizeUsername(fromEmail);
-  return normalized || "jogador";
+function getLocalAccessToken() {
+  return localStorage.getItem("osl_access_token") || "";
+}
+
+function canEnterGame(profileData) {
+  return !!profileData?.access?.active && !!getLocalAccessToken();
+}
+
+function syncLicenseInput(profileData = null) {
+  const code =
+    profileData?.licenseCode ||
+    getLocalLicenseCode() ||
+    "";
+
+  licenseInput.value = code;
+}
+
+function refreshUI(profileData, firebaseUser) {
+  currentProfile = profileData;
+
+  nomeEl.textContent = profileData?.displayName || localStorage.getItem("osl_nome") || "-";
+  usernameEl.textContent = profileData?.username
+    ? "@" + profileData.username
+    : (localStorage.getItem("osl_username") ? "@" + localStorage.getItem("osl_username") : "-");
+  emailEl.textContent = profileData?.email || firebaseUser?.email || localStorage.getItem("osl_license_email") || "-";
+  licenseEl.textContent = profileData?.licenseCode || getLocalLicenseCode() || "Não vinculada";
+
+  syncLicenseInput(profileData);
+
+  if (canEnterGame(profileData)) {
+    setStatus("Acesso liberado.", "ok");
+    playBtn.disabled = false;
+    linkLicenseBtn.disabled = false;
+    linkLicenseBtn.textContent = "Atualizar licença";
+    licenseHelper.textContent = "Sua conta já está liberada. Você também pode atualizar a licença se quiser.";
+    return;
+  }
+
+  if (profileData?.licenseLinked && !getLocalAccessToken()) {
+    setStatus("Sua conta tem licença vinculada, mas este navegador ainda não possui acesso liberado.", "err");
+    playBtn.disabled = true;
+    linkLicenseBtn.disabled = false;
+    linkLicenseBtn.textContent = "Restaurar acesso";
+    licenseHelper.textContent = "Clique para restaurar o acesso usando o código da licença.";
+    return;
+  }
+
+  setStatus("Sem acesso ativo.", "err");
+  playBtn.disabled = true;
+  linkLicenseBtn.disabled = false;
+  linkLicenseBtn.textContent = "Vincular licença";
+  licenseHelper.textContent = "Cole o código da licença e clique em Vincular licença.";
 }
 
 async function ensureUserProfile(user) {
   const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
 
-  if (snap.exists()) {
-    return snap.data();
-  }
+  if (snap.exists()) return snap.data();
 
   const displayName =
     localStorage.getItem("osl_nome") ||
@@ -297,7 +344,10 @@ async function ensureUserProfile(user) {
     localStorage.getItem("osl_license_email") ||
     "";
 
-  const username = buildFallbackUsername(email);
+  const username =
+    localStorage.getItem("osl_username") ||
+    String(email).split("@")[0] ||
+    "jogador";
 
   const profileData = {
     uid: user.uid,
@@ -310,7 +360,7 @@ async function ensureUserProfile(user) {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     licenseLinked: false,
-    licenseCode: localStorage.getItem("osl_license_code") || "",
+    licenseCode: "",
     product: "",
     access: {
       active: false
@@ -325,26 +375,16 @@ async function ensureUserProfile(user) {
   };
 
   await setDoc(userRef, profileData, { merge: true });
-  return { ...profileData, createdAt: null, updatedAt: null };
+  return {
+    ...profileData,
+    createdAt: null,
+    updatedAt: null
+  };
 }
 
-function renderProfile(data, user) {
-  nomeEl.textContent = data.displayName || "-";
-  usernameEl.textContent = data.username ? "@" + data.username : "-";
-  emailEl.textContent = data.email || user.email || "-";
-  licenseEl.textContent = data.licenseCode || "Não vinculada";
-
-  localStorage.setItem("osl_nome", data.displayName || "");
-  localStorage.setItem("osl_username", data.username || "");
-  localStorage.setItem("osl_auth_uid", user.uid);
-  localStorage.setItem("osl_license_email", data.email || user.email || "");
-  localStorage.setItem("osl_license_code", data.licenseCode || "");
-
-  if (data.access?.active) {
-    setStatus("Acesso liberado.", "ok");
-  } else {
-    setStatus("Sem acesso ativo.", "err");
-  }
+async function loadProfile(user) {
+  const profile = await ensureUserProfile(user);
+  refreshUI(profile, user);
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -353,16 +393,104 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  currentUser = user;
+
   try {
-    const profile = await ensureUserProfile(user);
-    renderProfile(profile, user);
+    await loadProfile(user);
   } catch (err) {
     console.error(err);
     setStatus("Erro ao carregar perfil.", "err");
+    playBtn.disabled = true;
+  }
+});
+
+linkLicenseBtn.addEventListener("click", async () => {
+  if (!currentUser) return;
+
+  const licenseCode = normalizeLicenseCode(licenseInput.value || getLocalLicenseCode());
+
+  if (!licenseCode) {
+    setStatus("Digite ou cole o código da licença.", "err");
+    return;
+  }
+
+  try {
+    linkLicenseBtn.disabled = true;
+    playBtn.disabled = true;
+    setStatus("Validando código da licença...");
+
+    const verifyRes = await fetch(`${BACKEND_BASE_URL}/validar-codigo-licenca`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ licenseCode })
+    });
+
+    const verifyData = await verifyRes.json().catch(() => ({}));
+
+    if (!verifyRes.ok || !verifyData.valid) {
+      setStatus("Código de licença inválido ou não encontrado.", "err");
+      linkLicenseBtn.disabled = false;
+      return;
+    }
+
+    setStatus("Emitindo acesso...");
+
+    const accessRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso-por-codigo`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ licenseCode })
+    });
+
+    const accessData = await accessRes.json().catch(() => ({}));
+
+    if (!accessRes.ok || !accessData.accessToken) {
+      setStatus("Não foi possível emitir o acesso com essa licença.", "err");
+      linkLicenseBtn.disabled = false;
+      return;
+    }
+
+    localStorage.setItem("osl_access_token", accessData.accessToken);
+    localStorage.setItem("osl_access_expires_at", String(accessData.expiresAt || ""));
+    localStorage.setItem("osl_license_code", verifyData.licenseCode || licenseCode);
+    localStorage.setItem("osl_license_email", verifyData.email || currentUser.email || "");
+
+    const userRef = doc(db, "users", currentUser.uid);
+
+    await setDoc(userRef, {
+      email: currentUser.email || verifyData.email || "",
+      licenseLinked: true,
+      licenseCode: verifyData.licenseCode || licenseCode,
+      product: verifyData.product || "osl_ritual_completo",
+      access: {
+        active: true
+      },
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    const refreshedSnap = await getDoc(userRef);
+    if (refreshedSnap.exists()) {
+      refreshUI(refreshedSnap.data(), currentUser);
+    }
+
+    setStatus("Licença vinculada com sucesso. Acesso liberado.", "ok");
+  } catch (err) {
+    console.error(err);
+    setStatus("Erro ao vincular licença.", "err");
+  } finally {
+    linkLicenseBtn.disabled = false;
   }
 });
 
 playBtn.addEventListener("click", () => {
+  if (!currentProfile || !canEnterGame(currentProfile)) {
+    setStatus("Vincule sua licença antes de entrar no jogo.", "err");
+    return;
+  }
+
   window.location.href = "./entrada.html";
 });
 
@@ -370,7 +498,7 @@ logoutBtn.addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "./login.html";
 });
-</script> 
+</script>
 
 </body>
 </html>
