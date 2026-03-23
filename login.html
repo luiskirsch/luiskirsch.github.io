@@ -230,11 +230,10 @@
           localStorage.setItem("osl_license_email", data.email || email);  
         }  
   
-        setStatus("Acesso liberado.", "ok");  
-  
-        setTimeout(() => {  
-          window.location.href = "./painel.html";  
-        }, 500);  
+        sessionStorage.setItem("osl_login_redirect", "1");
+        setStatus("Acesso liberado.", "ok");
+
+        window.location.href = "./painel.html";
   
       } catch (err) {  
         console.error(err);  
