@@ -425,11 +425,12 @@
         <div class="bottom">
           Ao continuar, sua conta será criada no ambiente oficial do jogo.
           <br />
-          Já comprou? Depois do cadastro, vamos vincular sua licença ao seu perfil.
+          Depois disso, sua licença será vinculada manualmente no painel.
         </div>
       </div>
     </section>
   </main>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import {
@@ -447,20 +448,18 @@
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const firebaseConfig = {
-  apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
-  authDomain: "osextolugar-game.firebaseapp.com",
-  projectId: "osextolugar-game",
-  storageBucket: "osextolugar-game.firebasestorage.app",
-  messagingSenderId: "947922328721",
-  appId: "1:947922328721:web:989522c99e16ab449f3330",
-  measurementId: "G-D6HG779ZFR"
-};
+    apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+    authDomain: "osextolugar-game.firebaseapp.com",
+    projectId: "osextolugar-game",
+    storageBucket: "osextolugar-game.firebasestorage.app",
+    messagingSenderId: "947922328721",
+    appId: "1:947922328721:web:989522c99e16ab449f3330",
+    measurementId: "G-D6HG779ZFR"
+  };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-
-  const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
 
   const cadastroForm = document.getElementById("cadastroForm");
   const displayNameEl = document.getElementById("displayName");
@@ -485,10 +484,6 @@
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9_]/g, "")
       .slice(0, 20);
-  }
-
-  function getLicenseToken() {
-    return localStorage.getItem("osl_license_token") || "";
   }
 
   async function usernameExists(username) {
@@ -534,44 +529,6 @@
     }, { merge: true });
   }
 
-  async function tryLinkLicenseAfterSignup(uid) {
-    const licenseToken = getLicenseToken();
-
-    if (!licenseToken) {
-      return { ok: true, linked: false };
-    }
-
-    const res = await fetch(`${BACKEND_BASE_URL}/verificar-licenca`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ licenseToken })
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || !data.valid) {
-      return { ok: false, linked: false };
-    }
-
-    localStorage.setItem("osl_license_code", data.licenseCode || "");
-    localStorage.setItem("osl_license_email", data.email || "");
-
-    const userRef = doc(db, "users", uid);
-    await setDoc(userRef, {
-      licenseLinked: true,
-      licenseCode: data.licenseCode || "",
-      product: data.product || "osl_ritual_completo",
-      access: {
-        active: true
-      },
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-
-    return { ok: true, linked: true };
-  }
-
   function humanizeSignupError(error) {
     const code = error?.code || "";
 
@@ -594,107 +551,4 @@
       return "O Firestore recusou salvar o perfil.";
     }
 
-    return `Erro ao criar conta: ${code || "desconhecido"}`;
-  }
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      window.location.href = "./painel.html";
-    }
-  });
-
-  cadastroForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const displayName = displayNameEl.value.trim().slice(0, 40);
-    const email = emailEl.value.trim().toLowerCase().slice(0, 160);
-    const username = normalizeUsername(usernameEl.value);
-    const password = passwordEl.value;
-    const confirmPassword = confirmPasswordEl.value;
-
-    if (!displayName) {
-      setStatus("Digite seu nome de exibição.", "err");
-      displayNameEl.focus();
-      return;
-    }
-
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setStatus("Digite um e-mail válido.", "err");
-      emailEl.focus();
-      return;
-    }
-
-    if (!username || username.length < 3) {
-      setStatus("Escolha um usuário com pelo menos 3 caracteres.", "err");
-      usernameEl.focus();
-      return;
-    }
-
-    if (password.length < 6) {
-      setStatus("A senha precisa ter pelo menos 6 caracteres.", "err");
-      passwordEl.focus();
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setStatus("As senhas não coincidem.", "err");
-      confirmPasswordEl.focus();
-      return;
-    }
-
-    let createdUser = null;
-
-    try {
-      submitBtn.disabled = true;
-      goLoginBtn.disabled = true;
-
-      setStatus("Verificando disponibilidade do usuário...");
-
-      if (await usernameExists(username)) {
-        setStatus("Esse usuário já está em uso.", "err");
-        submitBtn.disabled = false;
-        goLoginBtn.disabled = false;
-        usernameEl.focus();
-        return;
-      }
-
-      setStatus("Criando sua conta...");
-
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      createdUser = cred.user;
-
-      await updateProfile(createdUser, { displayName });
-
-      setStatus("Salvando seu perfil...");
-      await saveUserProfile(createdUser, displayName, username, email);
-
-      setStatus("Vinculando seu acesso...");
-      await tryLinkLicenseAfterSignup(createdUser.uid);
-
-      localStorage.setItem("osl_nome", displayName);
-      localStorage.setItem("osl_username", username);
-      localStorage.setItem("osl_auth_uid", createdUser.uid);
-
-      setStatus("Conta criada com sucesso. Entrando no painel...", "ok");
-
-      setTimeout(() => {
-        window.location.href = "./painel.html";
-      }, 600);
-
-    } catch (error) {
-      console.error("ERRO COMPLETO NO CADASTRO:", error);
-      console.error("error.code:", error?.code);
-      console.error("error.message:", error?.message);
-
-      setStatus(humanizeSignupError(error), "err");
-      submitBtn.disabled = false;
-      goLoginBtn.disabled = false;
-    }
-  });
-
-  goLoginBtn.addEventListener("click", () => {
-    window.location.href = "./login.html";
-  });
-
-  setStatus("Sistema carregado.");
-</script>
+    return `Erro ao criar conta:
