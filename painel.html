@@ -8,42 +8,80 @@
   <style>
     *{ box-sizing:border-box; }
 
+    :root{
+      --bg:#050507;
+      --panel:rgba(255,255,255,.05);
+      --panel-2:rgba(255,255,255,.04);
+      --line:rgba(255,255,255,.08);
+      --gold:#e6c07b;
+      --text:#fff;
+      --muted:rgba(255,255,255,.6);
+      --ok:#82d996;
+      --err:#ff6b6b;
+    }
+
     body{
       margin:0;
-      background:#050507;
-      color:#fff;
+      background:
+        radial-gradient(700px 320px at 50% 0%, rgba(230,192,123,.08), transparent 60%),
+        #050507;
+      color:var(--text);
       font-family:"Segoe UI",system-ui,sans-serif;
-      display:flex;
-      justify-content:center;
-      align-items:center;
       min-height:100vh;
-      padding:20px;
+      padding:28px 16px;
     }
 
-    .card{
+    .wrap{
       width:100%;
-      max-width:560px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:20px;
-      padding:28px;
-      box-shadow:0 30px 80px rgba(0,0,0,.6);
+      max-width:1120px;
+      margin:0 auto;
+      display:grid;
+      gap:18px;
     }
 
-    h1{
-      margin:0 0 6px;
-      font-size:26px;
+    .hero{
+      padding:22px;
+      border-radius:24px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      box-shadow:0 30px 80px rgba(0,0,0,.55);
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:30px;
     }
 
     .muted{
-      color:rgba(255,255,255,.6);
+      color:var(--muted);
       font-size:14px;
-      margin-bottom:20px;
+      line-height:1.5;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:0 30px 80px rgba(0,0,0,.45);
+    }
+
+    .sectionTitle{
+      margin:0 0 16px;
+      font-size:18px;
+      color:var(--gold);
+      letter-spacing:.04em;
     }
 
     .box{
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
+      background:var(--panel-2);
+      border:1px solid var(--line);
       border-radius:14px;
       padding:14px;
       margin-bottom:12px;
@@ -51,49 +89,27 @@
 
     .label{
       font-size:11px;
-      color:#e6c07b;
+      color:var(--gold);
       text-transform:uppercase;
       letter-spacing:.12em;
     }
 
     .value{
-      margin-top:4px;
+      margin-top:6px;
       font-size:15px;
       word-break:break-word;
+      line-height:1.5;
     }
 
     .status{
-      margin-top:12px;
+      margin-top:14px;
       font-size:14px;
-      min-height:20px;
-      line-height:1.45;
+      min-height:22px;
+      line-height:1.5;
     }
 
-    .ok{ color:#82d996; }
-    .err{ color:#ff6b6b; }
-
-    .licenseSection{
-      margin-top:16px;
-      padding:16px;
-      border-radius:16px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-    }
-
-    .licenseTitle{
-      margin:0 0 8px;
-      font-size:15px;
-      color:#e6c07b;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-
-    .licenseText{
-      margin:0 0 12px;
-      font-size:13px;
-      color:rgba(255,255,255,.68);
-      line-height:1.6;
-    }
+    .ok{ color:var(--ok); }
+    .err{ color:var(--err); }
 
     .field{
       display:grid;
@@ -105,13 +121,13 @@
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
-      color:#e6c07b;
+      color:var(--gold);
     }
 
     .field input{
       min-height:50px;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.08);
+      border:1px solid var(--line);
       background:rgba(0,0,0,.25);
       color:#fff;
       padding:12px;
@@ -124,17 +140,36 @@
       color:rgba(255,255,255,.34);
     }
 
+    .btnRow{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+
     button{
       width:100%;
-      height:52px;
+      min-height:50px;
       border:none;
       border-radius:14px;
-      margin-top:12px;
       background:linear-gradient(135deg,#e6c07b,#c99c4a);
       font-weight:700;
       cursor:pointer;
       font-size:15px;
       color:#000;
+      padding:0 14px;
+    }
+
+    button.secondary{
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      border:1px solid var(--line);
+    }
+
+    button.danger{
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      border:1px solid var(--line);
     }
 
     button[disabled]{
@@ -142,73 +177,200 @@
       cursor:not-allowed;
     }
 
-    .logout{
-      margin-top:10px;
-      background:rgba(255,255,255,.06);
-      color:#fff;
-    }
-
     .helper{
       margin-top:8px;
       font-size:12px;
       color:rgba(255,255,255,.52);
-      line-height:1.5;
+      line-height:1.55;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .stat{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .stat .number{
+      font-size:24px;
+      font-weight:800;
+      margin-top:4px;
+    }
+
+    .full{
+      grid-column:1 / -1;
+    }
+
+    @media (max-width: 860px){
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .btnRow{
+        grid-template-columns:1fr;
+      }
+
+      .stats{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (max-width: 520px){
+      .stats{
+        grid-template-columns:1fr;
+      }
+
+      .hero h1{
+        font-size:26px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h1>Seu acesso</h1>
-    <div class="muted">Painel do O SextoLugar</div>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Seu painel</h1>
+      <div class="muted">
+        Gerencie sua conta, sua licença e sua área de afiliado do <strong style="color:#e6c07b;">O SextoLugar</strong>.
+      </div>
+    </section>
 
-    <div class="box">
-      <div class="label">Nome</div>
-      <div class="value" id="nome">Carregando...</div>
-    </div>
+    <section class="grid">
+      <div class="card">
+        <h2 class="sectionTitle">Conta e acesso</h2>
 
-    <div class="box">
-      <div class="label">Usuário</div>
-      <div class="value" id="username">Carregando...</div>
-    </div>
+        <div class="box">
+          <div class="label">Nome</div>
+          <div class="value" id="nome">Carregando...</div>
+        </div>
 
-    <div class="box">
-      <div class="label">Email</div>
-      <div class="value" id="email">Carregando...</div>
-    </div>
+        <div class="box">
+          <div class="label">Usuário</div>
+          <div class="value" id="username">Carregando...</div>
+        </div>
 
-    <div class="box">
-      <div class="label">Licença atual</div>
-      <div class="value" id="license">Não vinculada</div>
-    </div>
+        <div class="box">
+          <div class="label">Email</div>
+          <div class="value" id="email">Carregando...</div>
+        </div>
 
-    <div class="licenseSection">
-      <h2 class="licenseTitle">Restaurar ou vincular licença</h2>
-      <p class="licenseText">
-        Cole o código da sua licença para vincular esta conta e liberar o acesso.
-      </p>
+        <div class="box">
+          <div class="label">Licença atual</div>
+          <div class="value" id="license">Não vinculada</div>
+        </div>
 
-      <div class="field">
-        <label for="licenseInput">Código da licença</label>
-        <input
-          id="licenseInput"
-          type="text"
-          placeholder="Ex.: OSL-XXXX-XXXX-XXXX-XXXX-XXXX"
-          autocomplete="off"
-        />
+        <div class="field">
+          <label for="licenseInput">Código da licença</label>
+          <input
+            id="licenseInput"
+            type="text"
+            placeholder="Ex.: OSL-XXXX-XXXX-XXXX-XXXX-XXXX"
+            autocomplete="off"
+          />
+        </div>
+
+        <button id="linkLicenseBtn">Vincular licença</button>
+
+        <div class="helper" id="licenseHelper">
+          Esta licença ficará vinculada à conta logada e não poderá ser usada por outra conta.
+        </div>
+
+        <div class="status" id="status">Carregando painel...</div>
+
+        <div class="btnRow">
+          <button id="playBtn" disabled>Entrar no jogo</button>
+          <button class="secondary" id="refreshBtn">Atualizar painel</button>
+        </div>
+
+        <button class="danger" id="logoutBtn" style="margin-top:10px;">Sair</button>
       </div>
 
-      <button id="linkLicenseBtn">Vincular licença</button>
+      <div class="card">
+        <h2 class="sectionTitle">Afiliado</h2>
 
-      <div class="helper" id="licenseHelper">
-        Esta licença ficará vinculada à conta logada e não poderá ser usada por outra conta.
+        <div class="stats">
+          <div class="stat">
+            <div class="label">Moedas</div>
+            <div class="number" id="coins">0</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Moedas sacáveis</div>
+            <div class="number" id="withdrawableCoins">0</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Indicações aprovadas</div>
+            <div class="number" id="referralsApproved">0</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Indicações pendentes</div>
+            <div class="number" id="referralsPending">0</div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div class="label">Seu código</div>
+          <div class="value" id="refCode">Carregando...</div>
+        </div>
+
+        <div class="box">
+          <div class="label">Seu link de indicação</div>
+          <div class="value" id="refLink">Carregando...</div>
+        </div>
+
+        <div class="box">
+          <div class="label">Comissão aprovada</div>
+          <div class="value" id="commissionApproved">R$ 0,00</div>
+        </div>
+
+        <div class="box">
+          <div class="label">Total já pago</div>
+          <div class="value" id="totalPaidOut">R$ 0,00</div>
+        </div>
+
+        <div class="field">
+          <label for="pixKeyInput">Chave Pix</label>
+          <input
+            id="pixKeyInput"
+            type="text"
+            placeholder="Digite sua chave Pix"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="btnRow">
+          <button id="savePixBtn">Salvar Pix</button>
+          <button class="secondary" id="copyLinkBtn">Copiar link</button>
+        </div>
+
+        <button id="withdrawBtn" style="margin-top:10px;">Solicitar saque de R$ 90,00</button>
+
+        <div class="helper">
+          Você ganha <strong style="color:#e6c07b;">10 moedas</strong> por venda aprovada pelo seu link.
+          Ao atingir <strong style="color:#e6c07b;">100 moedas</strong>, pode solicitar <strong style="color:#e6c07b;">R$ 90,00 via Pix</strong>.
+        </div>
+
+        <div class="status" id="affiliateStatus"></div>
       </div>
-    </div>
 
-    <div class="status" id="status">Carregando painel...</div>
-
-    <button id="playBtn" disabled>Entrar no jogo</button>
-    <button class="logout" id="logoutBtn">Sair</button>
+      <div class="card full">
+        <h2 class="sectionTitle">Resumo</h2>
+        <div class="muted" style="margin-bottom:0;">
+          Sua conta pode ter uma licença vinculada e, além disso, participar do sistema de indicação.
+          O acesso ao jogo é liberado quando a licença é validada e o token desta conta está ativo neste navegador.
+        </div>
+      </div>
+    </section>
   </div>
 
   <script type="module">
@@ -250,18 +412,47 @@
     const statusEl = document.getElementById("status");
     const playBtn = document.getElementById("playBtn");
     const logoutBtn = document.getElementById("logoutBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
     const linkLicenseBtn = document.getElementById("linkLicenseBtn");
     const licenseInput = document.getElementById("licenseInput");
     const licenseHelper = document.getElementById("licenseHelper");
 
+    const coinsEl = document.getElementById("coins");
+    const withdrawableCoinsEl = document.getElementById("withdrawableCoins");
+    const referralsApprovedEl = document.getElementById("referralsApproved");
+    const referralsPendingEl = document.getElementById("referralsPending");
+    const refCodeEl = document.getElementById("refCode");
+    const refLinkEl = document.getElementById("refLink");
+    const commissionApprovedEl = document.getElementById("commissionApproved");
+    const totalPaidOutEl = document.getElementById("totalPaidOut");
+    const pixKeyInput = document.getElementById("pixKeyInput");
+    const savePixBtn = document.getElementById("savePixBtn");
+    const copyLinkBtn = document.getElementById("copyLinkBtn");
+    const withdrawBtn = document.getElementById("withdrawBtn");
+    const affiliateStatusEl = document.getElementById("affiliateStatus");
+
     let currentUser = null;
     let currentProfile = null;
+    let currentAffiliate = null;
     let isProcessing = false;
 
     function setStatus(text, type = "") {
       statusEl.textContent = text;
       statusEl.className = "status";
       if (type) statusEl.classList.add(type);
+    }
+
+    function setAffiliateStatus(text, type = "") {
+      affiliateStatusEl.textContent = text;
+      affiliateStatusEl.className = "status";
+      if (type) affiliateStatusEl.classList.add(type);
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      }).format(Number(value || 0));
     }
 
     function normalizeLicenseCode(value) {
@@ -355,6 +546,35 @@
       linkLicenseBtn.disabled = false;
       linkLicenseBtn.textContent = "Vincular licença";
       licenseHelper.textContent = "A licença será vinculada de forma exclusiva à conta logada.";
+    }
+
+    function refreshAffiliateUI(affiliate) {
+      currentAffiliate = affiliate || null;
+
+      if (!affiliate) {
+        coinsEl.textContent = "0";
+        withdrawableCoinsEl.textContent = "0";
+        referralsApprovedEl.textContent = "0";
+        referralsPendingEl.textContent = "0";
+        refCodeEl.textContent = "-";
+        refLinkEl.textContent = "-";
+        commissionApprovedEl.textContent = formatMoney(0);
+        totalPaidOutEl.textContent = formatMoney(0);
+        pixKeyInput.value = "";
+        withdrawBtn.disabled = true;
+        return;
+      }
+
+      coinsEl.textContent = String(Number(affiliate.coins || 0));
+      withdrawableCoinsEl.textContent = String(Number(affiliate.withdrawableCoins || 0));
+      referralsApprovedEl.textContent = String(Number(affiliate.referralsApproved || 0));
+      referralsPendingEl.textContent = String(Number(affiliate.referralsPending || 0));
+      refCodeEl.textContent = affiliate.refCode || "-";
+      refLinkEl.textContent = affiliate.referralLink || "-";
+      commissionApprovedEl.textContent = formatMoney(affiliate.commissionApproved || 0);
+      totalPaidOutEl.textContent = formatMoney(affiliate.totalPaidOutBRL || 0);
+      pixKeyInput.value = affiliate.pixKey || "";
+      withdrawBtn.disabled = Number(affiliate.withdrawableCoins || 0) < 100 || !String(affiliate.pixKey || "").trim();
     }
 
     async function ensureUserProfile(user) {
@@ -577,9 +797,41 @@
       }
     }
 
-    async function loadProfile(user) {
+    async function loadAffiliate(user) {
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}/afiliado/garantir`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            uid: user.uid,
+            email: user.email || "",
+            nome: currentProfile?.displayName || user.displayName || "Jogador"
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.affiliate) {
+          setAffiliateStatus("Não foi possível carregar a área de afiliado.", "err");
+          refreshAffiliateUI(null);
+          return;
+        }
+
+        refreshAffiliateUI(data.affiliate);
+        setAffiliateStatus("Área de afiliado carregada.", "ok");
+      } catch (err) {
+        console.error(err);
+        setAffiliateStatus("Erro ao carregar área de afiliado.", "err");
+        refreshAffiliateUI(null);
+      }
+    }
+
+    async function loadAll(user) {
       const profile = await ensureUserProfile(user);
       refreshUI(profile, user);
+      await loadAffiliate(user);
     }
 
     onAuthStateChanged(auth, async (user) => {
@@ -591,7 +843,7 @@
       currentUser = user;
 
       try {
-        await loadProfile(user);
+        await loadAll(user);
 
         const currentAccessIsValidForThisUser = await validateCurrentAccessTokenForUser(user);
 
@@ -629,6 +881,19 @@
       await restoreAccess(currentUser, false);
     });
 
+    refreshBtn.addEventListener("click", async () => {
+      if (!currentUser) return;
+      try {
+        setStatus("Atualizando painel...");
+        setAffiliateStatus("Atualizando área de afiliado...");
+        await loadAll(currentUser);
+        setStatus("Painel atualizado.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus("Erro ao atualizar painel.", "err");
+      }
+    });
+
     playBtn.addEventListener("click", async () => {
       if (!currentProfile) {
         setStatus("Perfil ainda não carregado.", "err");
@@ -645,6 +910,103 @@
       }
 
       window.location.href = "./entrada.html";
+    });
+
+    copyLinkBtn.addEventListener("click", async () => {
+      if (!currentAffiliate?.referralLink) {
+        setAffiliateStatus("Seu link ainda não está disponível.", "err");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(currentAffiliate.referralLink);
+        setAffiliateStatus("Link de indicação copiado.", "ok");
+      } catch (err) {
+        console.error(err);
+        setAffiliateStatus("Não foi possível copiar o link.", "err");
+      }
+    });
+
+    savePixBtn.addEventListener("click", async () => {
+      if (!currentUser) return;
+
+      const pixKey = String(pixKeyInput.value || "").trim();
+
+      if (!pixKey) {
+        setAffiliateStatus("Digite sua chave Pix.", "err");
+        return;
+      }
+
+      try {
+        savePixBtn.disabled = true;
+        setAffiliateStatus("Salvando chave Pix...");
+
+        const res = await fetch(`${BACKEND_BASE_URL}/afiliado/pix`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            uid: currentUser.uid,
+            pixKey
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          setAffiliateStatus("Não foi possível salvar a chave Pix.", "err");
+          return;
+        }
+
+        await loadAffiliate(currentUser);
+        setAffiliateStatus("Chave Pix salva com sucesso.", "ok");
+      } catch (err) {
+        console.error(err);
+        setAffiliateStatus("Erro ao salvar a chave Pix.", "err");
+      } finally {
+        savePixBtn.disabled = false;
+      }
+    });
+
+    withdrawBtn.addEventListener("click", async () => {
+      if (!currentUser) return;
+
+      try {
+        withdrawBtn.disabled = true;
+        setAffiliateStatus("Solicitando saque...");
+
+        const res = await fetch(`${BACKEND_BASE_URL}/afiliado/solicitar-saque`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            uid: currentUser.uid
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          if (data?.error === "PIX_NAO_CADASTRADO") {
+            setAffiliateStatus("Cadastre sua chave Pix antes de solicitar saque.", "err");
+          } else if (data?.error === "SALDO_INSUFICIENTE") {
+            setAffiliateStatus("Você ainda não tem 100 moedas disponíveis para saque.", "err");
+          } else {
+            setAffiliateStatus("Não foi possível solicitar o saque.", "err");
+          }
+          return;
+        }
+
+        await loadAffiliate(currentUser);
+        setAffiliateStatus("Solicitação de saque criada com sucesso.", "ok");
+      } catch (err) {
+        console.error(err);
+        setAffiliateStatus("Erro ao solicitar saque.", "err");
+      } finally {
+        withdrawBtn.disabled = false;
+      }
     });
 
     logoutBtn.addEventListener("click", async () => {
