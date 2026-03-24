@@ -427,6 +427,13 @@
       </div>
 
       <div class="card full">
+        <h2 class="sectionTitle">Histórico de saques</h2>
+        <div class="historyList" id="withdrawList">
+          <div class="historyEmpty">Carregando saques...</div>
+        </div>
+      </div>
+
+      <div class="card full">
         <h2 class="sectionTitle">Resumo</h2>
         <div class="muted" style="margin-bottom:0;">
           Sua conta pode ter uma licença vinculada e, além disso, participar do sistema de indicação.
@@ -494,6 +501,7 @@
     const withdrawBtn = document.getElementById("withdrawBtn");
     const affiliateStatusEl = document.getElementById("affiliateStatus");
     const historyListEl = document.getElementById("historyList");
+    const withdrawListEl = document.getElementById("withdrawList");
 
     let currentUser = null;
     let currentProfile = null;
@@ -666,28 +674,67 @@
       }
 
       historyListEl.innerHTML = items.map((item) => {
-        const type = String(item.type || item.status || "ganho");
-        const createdAt = item.createdAt || item.approvedAt || item.date || null;
+        const createdAt = item.approvedAt || item.createdAt || item.updatedAt || null;
         const buyerEmail = item.buyerEmail || "";
-        const coins = Number(item.coinsAwarded || item.coins || 0);
-        const amountBRL = Number(item.commissionAmount || item.amountBRL || 0);
+        const buyerName = item.buyerName || "";
+        const coins = Number(item.coinsAwarded || 0);
+        const amountBRL = Number(item.commissionAmount || 0);
+        const status = String(item.status || "pending").toUpperCase();
         const externalReference = item.externalReference || item.referralId || "-";
 
         return `
           <div class="historyItem">
             <div class="historyTop">
-              <div class="historyType">${type}</div>
+              <div class="historyType">Ganho • ${status}</div>
               <div class="historyDate">${formatDateTime(createdAt)}</div>
             </div>
 
             <div class="historyMain">
-              ${coins > 0 ? `+${coins} moedas` : formatMoney(amountBRL)}
+              +${coins} moedas
             </div>
 
             <div class="historyMeta">
-              ${buyerEmail ? `Comprador: ${buyerEmail}<br>` : ""}
-              ${amountBRL > 0 ? `Comissão: ${formatMoney(amountBRL)}<br>` : ""}
+              ${buyerName ? `Comprador: ${buyerName}<br>` : ""}
+              ${buyerEmail ? `E-mail: ${buyerEmail}<br>` : ""}
+              Comissão: ${formatMoney(amountBRL)}<br>
               Referência: ${externalReference}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderWithdrawals(items) {
+      if (!Array.isArray(items) || !items.length) {
+        withdrawListEl.innerHTML = `
+          <div class="historyEmpty">
+            Ainda não há saques solicitados na sua conta.
+          </div>
+        `;
+        return;
+      }
+
+      withdrawListEl.innerHTML = items.map((item) => {
+        const createdAt = item.createdAt || item.updatedAt || null;
+        const amountBRL = Number(item.amountBRL || 0);
+        const coinsUsed = Number(item.coinsUsed || 0);
+        const status = String(item.status || "pending").toUpperCase();
+        const pixKey = item.pixKey || "-";
+
+        return `
+          <div class="historyItem">
+            <div class="historyTop">
+              <div class="historyType">Saque • ${status}</div>
+              <div class="historyDate">${formatDateTime(createdAt)}</div>
+            </div>
+
+            <div class="historyMain">
+              ${formatMoney(amountBRL)}
+            </div>
+
+            <div class="historyMeta">
+              Moedas usadas: ${coinsUsed}<br>
+              Chave Pix: ${pixKey}
             </div>
           </div>
         `;
@@ -710,6 +757,25 @@
       } catch (err) {
         console.error(err);
         renderHistory([]);
+      }
+    }
+
+    async function loadWithdrawHistory(user) {
+      if (!user) return;
+
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}/afiliado/saques/${user.uid}`);
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok || !Array.isArray(data.withdrawals)) {
+          renderWithdrawals([]);
+          return;
+        }
+
+        renderWithdrawals(data.withdrawals);
+      } catch (err) {
+        console.error(err);
+        renderWithdrawals([]);
       }
     }
 
@@ -968,6 +1034,7 @@
       refreshUI(profile, user);
       await loadAffiliate(user);
       await loadAffiliateHistory(user);
+      await loadWithdrawHistory(user);
     }
 
     async function copyText(text) {
@@ -1137,6 +1204,7 @@
         }
 
         await loadAffiliate(currentUser);
+        await loadWithdrawHistory(currentUser);
         setAffiliateStatus("Chave Pix salva com sucesso.", "ok");
       } catch (err) {
         console.error(err);
@@ -1180,6 +1248,7 @@
 
         await loadAffiliate(currentUser);
         await loadAffiliateHistory(currentUser);
+        await loadWithdrawHistory(currentUser);
         setAffiliateStatus("Solicitação de saque criada com sucesso.", "ok");
       } catch (err) {
         console.error(err);
