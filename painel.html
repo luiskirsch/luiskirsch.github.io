@@ -208,6 +208,62 @@
       grid-column:1 / -1;
     }
 
+    .historyList{
+      display:grid;
+      gap:12px;
+      margin-top:8px;
+    }
+
+    .historyItem{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .historyTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:8px;
+      flex-wrap:wrap;
+    }
+
+    .historyType{
+      font-size:11px;
+      color:var(--gold);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+
+    .historyDate{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .historyMain{
+      font-size:15px;
+      line-height:1.55;
+    }
+
+    .historyMeta{
+      margin-top:8px;
+      font-size:13px;
+      color:rgba(255,255,255,.72);
+      line-height:1.5;
+    }
+
+    .historyEmpty{
+      background:var(--panel-2);
+      border:1px dashed var(--line);
+      border-radius:14px;
+      padding:16px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+
     @media (max-width: 860px){
       .grid{
         grid-template-columns:1fr;
@@ -364,6 +420,13 @@
       </div>
 
       <div class="card full">
+        <h2 class="sectionTitle">Histórico de ganhos</h2>
+        <div class="historyList" id="historyList">
+          <div class="historyEmpty">Carregando histórico...</div>
+        </div>
+      </div>
+
+      <div class="card full">
         <h2 class="sectionTitle">Resumo</h2>
         <div class="muted" style="margin-bottom:0;">
           Sua conta pode ter uma licença vinculada e, além disso, participar do sistema de indicação.
@@ -430,11 +493,13 @@
     const copyLinkBtn = document.getElementById("copyLinkBtn");
     const withdrawBtn = document.getElementById("withdrawBtn");
     const affiliateStatusEl = document.getElementById("affiliateStatus");
+    const historyListEl = document.getElementById("historyList");
 
     let currentUser = null;
     let currentProfile = null;
     let currentAffiliate = null;
-    let isProcessing = false;
+    let isProcessingLicense = false;
+    let isProcessingAffiliate = false;
 
     function setStatus(text, type = "") {
       statusEl.textContent = text;
@@ -453,6 +518,17 @@
         style: "currency",
         currency: "BRL"
       }).format(Number(value || 0));
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "-";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "-";
+
+      return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short"
+      }).format(d);
     }
 
     function normalizeLicenseCode(value) {
@@ -574,7 +650,67 @@
       commissionApprovedEl.textContent = formatMoney(affiliate.commissionApproved || 0);
       totalPaidOutEl.textContent = formatMoney(affiliate.totalPaidOutBRL || 0);
       pixKeyInput.value = affiliate.pixKey || "";
-      withdrawBtn.disabled = Number(affiliate.withdrawableCoins || 0) < 100 || !String(affiliate.pixKey || "").trim();
+      withdrawBtn.disabled =
+        Number(affiliate.withdrawableCoins || 0) < 100 ||
+        !String(affiliate.pixKey || "").trim();
+    }
+
+    function renderHistory(items) {
+      if (!Array.isArray(items) || !items.length) {
+        historyListEl.innerHTML = `
+          <div class="historyEmpty">
+            Ainda não há ganhos registrados na sua conta.
+          </div>
+        `;
+        return;
+      }
+
+      historyListEl.innerHTML = items.map((item) => {
+        const type = String(item.type || item.status || "ganho");
+        const createdAt = item.createdAt || item.approvedAt || item.date || null;
+        const buyerEmail = item.buyerEmail || "";
+        const coins = Number(item.coinsAwarded || item.coins || 0);
+        const amountBRL = Number(item.commissionAmount || item.amountBRL || 0);
+        const externalReference = item.externalReference || item.referralId || "-";
+
+        return `
+          <div class="historyItem">
+            <div class="historyTop">
+              <div class="historyType">${type}</div>
+              <div class="historyDate">${formatDateTime(createdAt)}</div>
+            </div>
+
+            <div class="historyMain">
+              ${coins > 0 ? `+${coins} moedas` : formatMoney(amountBRL)}
+            </div>
+
+            <div class="historyMeta">
+              ${buyerEmail ? `Comprador: ${buyerEmail}<br>` : ""}
+              ${amountBRL > 0 ? `Comissão: ${formatMoney(amountBRL)}<br>` : ""}
+              Referência: ${externalReference}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadAffiliateHistory(user) {
+      if (!user) return;
+
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}/afiliado/historico/${user.uid}`);
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok || !Array.isArray(data.history)) {
+          renderHistory([]);
+          return;
+        }
+
+        renderHistory(data.history);
+      } catch (err) {
+        console.error(err);
+        renderHistory([]);
+      }
     }
 
     async function ensureUserProfile(user) {
@@ -684,7 +820,6 @@
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok || !data.liberado) return false;
-
         return data.uid && data.uid === user.uid;
       } catch (err) {
         console.error("Erro ao verificar access token:", err);
@@ -766,8 +901,8 @@
     }
 
     async function restoreAccess(user, silent = false) {
-      if (isProcessing) return;
-      isProcessing = true;
+      if (isProcessingLicense) return;
+      isProcessingLicense = true;
 
       try {
         linkLicenseBtn.disabled = true;
@@ -792,7 +927,7 @@
         console.error(err);
         setStatus("Erro ao restaurar licença.", "err");
       } finally {
-        isProcessing = false;
+        isProcessingLicense = false;
         linkLicenseBtn.disabled = false;
       }
     }
@@ -832,6 +967,32 @@
       const profile = await ensureUserProfile(user);
       refreshUI(profile, user);
       await loadAffiliate(user);
+      await loadAffiliateHistory(user);
+    }
+
+    async function copyText(text) {
+      if (!text) return false;
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        return ok;
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
     }
 
     onAuthStateChanged(auth, async (user) => {
@@ -884,18 +1045,34 @@
     refreshBtn.addEventListener("click", async () => {
       if (!currentUser) return;
       try {
+        refreshBtn.disabled = true;
         setStatus("Atualizando painel...");
         setAffiliateStatus("Atualizando área de afiliado...");
+
         await loadAll(currentUser);
-        setStatus("Painel atualizado.", "ok");
+
+        const stillValid = await validateCurrentAccessTokenForUser(currentUser);
+
+        if (stillValid) {
+          setStatus("Painel atualizado.", "ok");
+          playBtn.disabled = false;
+        } else {
+          clearLocalSessionTokens();
+          if (currentProfile?.access?.active) {
+            await markProfileWithoutAccess(currentUser);
+          }
+          setStatus("Painel atualizado. Acesso não ativo neste navegador.", "err");
+        }
       } catch (err) {
         console.error(err);
         setStatus("Erro ao atualizar painel.", "err");
+      } finally {
+        refreshBtn.disabled = false;
       }
     });
 
     playBtn.addEventListener("click", async () => {
-      if (!currentProfile) {
+      if (!currentProfile || !currentUser) {
         setStatus("Perfil ainda não carregado.", "err");
         return;
       }
@@ -918,17 +1095,16 @@
         return;
       }
 
-      try {
-        await navigator.clipboard.writeText(currentAffiliate.referralLink);
+      const ok = await copyText(currentAffiliate.referralLink);
+      if (ok) {
         setAffiliateStatus("Link de indicação copiado.", "ok");
-      } catch (err) {
-        console.error(err);
+      } else {
         setAffiliateStatus("Não foi possível copiar o link.", "err");
       }
     });
 
     savePixBtn.addEventListener("click", async () => {
-      if (!currentUser) return;
+      if (!currentUser || isProcessingAffiliate) return;
 
       const pixKey = String(pixKeyInput.value || "").trim();
 
@@ -938,6 +1114,7 @@
       }
 
       try {
+        isProcessingAffiliate = true;
         savePixBtn.disabled = true;
         setAffiliateStatus("Salvando chave Pix...");
 
@@ -965,14 +1142,16 @@
         console.error(err);
         setAffiliateStatus("Erro ao salvar a chave Pix.", "err");
       } finally {
+        isProcessingAffiliate = false;
         savePixBtn.disabled = false;
       }
     });
 
     withdrawBtn.addEventListener("click", async () => {
-      if (!currentUser) return;
+      if (!currentUser || isProcessingAffiliate) return;
 
       try {
+        isProcessingAffiliate = true;
         withdrawBtn.disabled = true;
         setAffiliateStatus("Solicitando saque...");
 
@@ -1000,11 +1179,13 @@
         }
 
         await loadAffiliate(currentUser);
+        await loadAffiliateHistory(currentUser);
         setAffiliateStatus("Solicitação de saque criada com sucesso.", "ok");
       } catch (err) {
         console.error(err);
         setAffiliateStatus("Erro ao solicitar saque.", "err");
       } finally {
+        isProcessingAffiliate = false;
         withdrawBtn.disabled = false;
       }
     });
