@@ -2152,51 +2152,55 @@ body::after{
     <button type="submit" class="profileActionBtn profileActionBtn--primary" id="saveProfileBtn">Salvar perfil</button>      
   </div>      
 </form>    <button class="profileClose" id="closeProfileBtn">Fechar perfil</button>    </div>      
-</div>  <script type="module">      
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";      
-import {      
-  getFirestore,      
-  doc,      
-  getDoc,      
-  getDocs,      
-  setDoc,      
-  updateDoc,      
-  deleteDoc,      
-  collection,      
-  addDoc,      
-  onSnapshot,      
-  query,      
-  orderBy,      
-  serverTimestamp      
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";    const firebaseConfig = {  
-apiKey: "AIzaSyC8sSvA7_1HPYRFGfgdgzstkP_yQHadY-c",  
-authDomain: "osextolugar-game.firebaseapp.com",  
-projectId: "osextolugar-game",  
-storageBucket: "osextolugar-game.firebasestorage.app",  
-messagingSenderId: "947922328721",  
-appId: "1:947922328721:web:989522c99e16ab449f3330",  
-measurementId: "G-D6HG779ZFR"  
-};  const HEARTBEAT_MS = 15000;
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+  authDomain: "osextolugar-game.firebaseapp.com",
+  projectId: "osextolugar-game",
+  storageBucket: "osextolugar-game.firebasestorage.app",
+  messagingSenderId: "947922328721",
+  appId: "1:947922328721:web:989522c99e16ab449f3330",
+  measurementId: "G-D6HG779ZFR"
+};
+
+const HEARTBEAT_MS = 15000;
 const ACTIVE_WINDOW_MS = 40000;
 const MAX_PLAYERS = 5;
 const TYPING_ACTIVE_MS = 3500;
 
-const roomNameEl = document.getElementById('roomName');
-const roomCodeEl = document.getElementById('roomCode');
-const roomStatusEl = document.getElementById('roomStatus');
-const playerListEl = document.getElementById('playerList');
-const playersEmptyEl = document.getElementById('playersEmpty');
-const playerCountEl = document.getElementById('playerCount');
-const copyCodeBtn = document.getElementById('copyCodeBtn');
-const leaveBtn = document.getElementById('leaveBtn');
-const startBtn = document.getElementById('startBtn');
-const sendBtn = document.getElementById('sendBtn');
-const messageInput = document.getElementById('messageInput');
-const messagesEl = document.getElementById('messages');
-const chatEmptyEl = document.getElementById('chatEmpty');
-const sessionLabelEl = document.getElementById('sessionLabel');
-const footerStatusEl = document.getElementById('footerStatus');
-const typingBarEl = document.getElementById('typingBar');
+const roomNameEl = document.getElementById("roomName");
+const roomCodeEl = document.getElementById("roomCode");
+const roomStatusEl = document.getElementById("roomStatus");
+const playerListEl = document.getElementById("playerList");
+const playersEmptyEl = document.getElementById("playersEmpty");
+const playerCountEl = document.getElementById("playerCount");
+const copyCodeBtn = document.getElementById("copyCodeBtn");
+const leaveBtn = document.getElementById("leaveBtn");
+const startBtn = document.getElementById("startBtn");
+const sendBtn = document.getElementById("sendBtn");
+const messageInput = document.getElementById("messageInput");
+const messagesEl = document.getElementById("messages");
+const chatEmptyEl = document.getElementById("chatEmpty");
+const sessionLabelEl = document.getElementById("sessionLabel");
+const footerStatusEl = document.getElementById("footerStatus");
+const typingBarEl = document.getElementById("typingBar");
 
 const profileModal = document.getElementById("profileModal");
 const profileAvatarLarge = document.getElementById("profileAvatarLarge");
@@ -2213,7 +2217,6 @@ const editDisplayName = document.getElementById("editDisplayName");
 const editUsername = document.getElementById("editUsername");
 const editBio = document.getElementById("editBio");
 const cancelEditProfileBtn = document.getElementById("cancelEditProfileBtn");
-const saveProfileBtn = document.getElementById("saveProfileBtn");
 const avatarPicker = document.getElementById("avatarPicker");
 const profileActions = document.getElementById("profileActions");
 const friendsPanel = document.getElementById("friendsPanel");
@@ -2222,179 +2225,6 @@ const incomingRequestsList = document.getElementById("incomingRequestsList");
 const friendsListBlock = document.getElementById("friendsListBlock");
 const incomingRequestsBlock = document.getElementById("incomingRequestsBlock");
 
-const params = new URLSearchParams(window.location.search);
-
-let playerName = (params.get('nome') || localStorage.getItem('osl_nome') || 'Visitante').trim().slice(0, 40);
-const roomCode = (params.get('sala') || localStorage.getItem('osl_sala') || 'SL-0001')
-.trim()
-.toUpperCase()
-.replace(/[^A-Z0-9-]/g, '')
-.slice(0, 20);
-const roomName = (params.get('nomeSala') || localStorage.getItem('osl_nome_sala') || 'Sala de Espera')
-.trim()
-.slice(0, 50);
-
-localStorage.setItem('osl_nome', playerName);
-localStorage.setItem('osl_sala', roomCode);
-localStorage.setItem('osl_nome_sala', roomName);
-function getParticipantId(){
-let id = sessionStorage.getItem('osl_participant_id');
-if(!id){
-id = 'p_' + Math.random().toString(36).slice(2, 11);
-sessionStorage.setItem('osl_participant_id', id);
-}
-return id;
-}
-
-function getUserId(){
-let id = localStorage.getItem("osl_user_id");
-if(!id){
-id = "u_" + Math.random().toString(36).slice(2, 12);
-localStorage.setItem("osl_user_id", id);
-}
-return id;
-}
-
-function initials(name){
-const parts = String(name).trim().split(/\s+/).filter(Boolean);
-if(parts.length === 0) return '??';
-if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-return (parts[0][0] + parts[1][0]).toUpperCase();
-}
-
-function normalizeUsername(value){
-return String(value || "")
-.toLowerCase()
-.normalize("NFD")
-.replace(/[\u0300-\u036f]/g, "")
-.replace(/[^a-z0-9_]/g, "")
-.slice(0, 20);
-}
-
-function uniqueArray(arr){
-return [...new Set((arr || []).filter(Boolean))];
-}
-
-function nowTimeFromDate(date){
-return date.toLocaleTimeString('pt-BR', {
-hour: '2-digit',
-minute: '2-digit'
-});
-}
-
-function escapeHtml(str){
-return String(str)
-.replaceAll('&', '&')
-.replaceAll('<', '<')
-.replaceAll('>', '>')
-.replaceAll('"', '"')
-.replaceAll("'", ''');
-}
-
-function hideChatEmpty(){
-if(chatEmptyEl) chatEmptyEl.style.display = 'none';
-}
-
-function showChatEmpty(text){
-if(!chatEmptyEl) return;
-chatEmptyEl.style.display = 'block';
-chatEmptyEl.innerHTML = text;
-}
-
-function enableAudio(){
-if (audioReady) return;
-
-const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-if (!AudioContextClass) return;
-
-try{
-audioCtx = new AudioContextClass();
-if (audioCtx.state === 'suspended'){
-audioCtx.resume().catch(() => {});
-}
-audioReady = true;
-}catch(e){}
-}
-
-window.addEventListener('pointerdown', enableAudio, { once:true });
-window.addEventListener('touchstart', enableAudio, { once:true });
-window.addEventListener('keydown', enableAudio, { once:true });
-
-function playIncomingMessageSound(){
-if (!audioReady || !audioCtx) return;
-
-try{
-const now = audioCtx.currentTime;
-
-const osc1 = audioCtx.createOscillator();
-const osc2 = audioCtx.createOscillator();
-const gain = audioCtx.createGain();
-const filter = audioCtx.createBiquadFilter();
-
-osc1.type = 'triangle';
-osc2.type = 'sine';
-
-osc1.frequency.setValueAtTime(920, now);
-osc1.frequency.exponentialRampToValueAtTime(680, now + 0.08);
-
-osc2.frequency.setValueAtTime(1320, now);
-osc2.frequency.exponentialRampToValueAtTime(980, now + 0.08);
-
-filter.type = 'lowpass';
-filter.frequency.setValueAtTime(1800, now);
-filter.Q.setValueAtTime(0.8, now);
-
-gain.gain.setValueAtTime(0.00001, now);
-gain.gain.exponentialRampToValueAtTime(0.045, now + 0.01);
-gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.14);
-
-osc1.connect(filter);
-osc2.connect(filter);
-filter.connect(gain);
-gain.connect(audioCtx.destination);
-
-osc1.start(now);
-osc2.start(now);
-
-osc1.stop(now + 0.15);
-osc2.stop(now + 0.15);
-
-}catch(e){}
-}
-const participantId = getParticipantId();
-const userId = getUserId();
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const userRef = doc(db, "users", userId);
-
-const roomRef = doc(db, 'salas', roomCode);
-const playerRef = doc(db, 'salas', roomCode, 'players', participantId);
-const messagesRef = collection(db, 'salas', roomCode, 'messages');
-const ritualRef = doc(db, 'salas', roomCode, 'ritual', 'state');
-const ritualHistoryRef = collection(db, 'salas', roomCode, 'ritual', 'state', 'history');
-const typingRef = doc(db, 'salas', roomCode, 'typing', participantId);
-const typingCollectionRef = collection(db, 'salas', roomCode, 'typing');
-const playersCollectionRef = collection(db, 'salas', roomCode, 'players');
-
-let isHost = false;
-let heartbeatTimer = null;
-let roomUnsub = null;
-let playersUnsub = null;
-let messagesUnsub = null;
-let typingUnsub = null;
-let leaving = false;
-let audioCtx = null;
-let audioReady = false;
-let initialMessagesLoaded = false;
-let knownMessageIds = new Set();
-let typingTimer = null;
-
-let openedProfileUserId = null;
-let openedProfileData = null;
-let selectedAvatarEmoji = "🔮";
-/* =========================
-MESA DO RITUAL
-========================= */
 const revealCardBtn = document.getElementById("revealCardBtn");
 const resetRitualBtn = document.getElementById("resetRitualBtn");
 const ritualCardType = document.getElementById("ritualCardType");
@@ -2403,1123 +2233,1267 @@ const ritualCardText = document.getElementById("ritualCardText");
 const historyList = document.getElementById("historyList");
 const deckInfo = document.getElementById("deckInfo");
 
+const params = new URLSearchParams(window.location.search);
+
+let playerName = (params.get("nome") || localStorage.getItem("osl_nome") || "Visitante")
+  .trim()
+  .slice(0, 40);
+
+const roomCode = (params.get("sala") || localStorage.getItem("osl_sala") || "SL-0001")
+  .trim()
+  .toUpperCase()
+  .replace(/[^A-Z0-9-]/g, "")
+  .slice(0, 20);
+
+const roomName = (params.get("nomeSala") || localStorage.getItem("osl_nome_sala") || "Sala de Espera")
+  .trim()
+  .slice(0, 50);
+
+localStorage.setItem("osl_nome", playerName);
+localStorage.setItem("osl_sala", roomCode);
+localStorage.setItem("osl_nome_sala", roomName);
+
+function getParticipantId() {
+  let id = sessionStorage.getItem("osl_participant_id");
+  if (!id) {
+    id = "p_" + Math.random().toString(36).slice(2, 11);
+    sessionStorage.setItem("osl_participant_id", id);
+  }
+  return id;
+}
+
+function getUserId() {
+  let id = localStorage.getItem("osl_user_id");
+  if (!id) {
+    id = "u_" + Math.random().toString(36).slice(2, 12);
+    localStorage.setItem("osl_user_id", id);
+  }
+  return id;
+}
+
+function initials(name) {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "??";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+function normalizeUsername(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9_]/g, "")
+    .slice(0, 20);
+}
+
+function uniqueArray(arr) {
+  return [...new Set((arr || []).filter(Boolean))];
+}
+
+function nowTimeFromDate(date) {
+  return date.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function hideChatEmpty() {
+  if (chatEmptyEl) chatEmptyEl.style.display = "none";
+}
+
+function showChatEmpty(text) {
+  if (!chatEmptyEl) return;
+  chatEmptyEl.style.display = "block";
+  chatEmptyEl.innerHTML = text;
+}
+
+let audioCtx = null;
+let audioReady = false;
+
+function enableAudio() {
+  if (audioReady) return;
+
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+
+  try {
+    audioCtx = new AudioContextClass();
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume().catch(() => {});
+    }
+    audioReady = true;
+  } catch (e) {}
+}
+
+window.addEventListener("pointerdown", enableAudio, { once: true });
+window.addEventListener("touchstart", enableAudio, { once: true });
+window.addEventListener("keydown", enableAudio, { once: true });
+
+function playIncomingMessageSound() {
+  if (!audioReady || !audioCtx) return;
+
+  try {
+    const now = audioCtx.currentTime;
+
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc1.type = "triangle";
+    osc2.type = "sine";
+
+    osc1.frequency.setValueAtTime(920, now);
+    osc1.frequency.exponentialRampToValueAtTime(680, now + 0.08);
+
+    osc2.frequency.setValueAtTime(1320, now);
+    osc2.frequency.exponentialRampToValueAtTime(980, now + 0.08);
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(1800, now);
+    filter.Q.setValueAtTime(0.8, now);
+
+    gain.gain.setValueAtTime(0.00001, now);
+    gain.gain.exponentialRampToValueAtTime(0.045, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.14);
+
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + 0.15);
+    osc2.stop(now + 0.15);
+  } catch (e) {}
+}
+
+const participantId = getParticipantId();
+const userId = getUserId();
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const userRef = doc(db, "users", userId);
+const roomRef = doc(db, "salas", roomCode);
+const playerRef = doc(db, "salas", roomCode, "players", participantId);
+const messagesRef = collection(db, "salas", roomCode, "messages");
+const ritualRef = doc(db, "salas", roomCode, "ritual", "state");
+const ritualHistoryRef = collection(db, "salas", roomCode, "ritual", "state", "history");
+const typingRef = doc(db, "salas", roomCode, "typing", participantId);
+const typingCollectionRef = collection(db, "salas", roomCode, "typing");
+const playersCollectionRef = collection(db, "salas", roomCode, "players");
+
+let isHost = false;
+let heartbeatTimer = null;
+let roomUnsub = null;
+let playersUnsub = null;
+let messagesUnsub = null;
+let typingUnsub = null;
+let leaving = false;
+let initialMessagesLoaded = false;
+let knownMessageIds = new Set();
+let typingTimer = null;
+
+let openedProfileUserId = null;
+let openedProfileData = null;
+let selectedAvatarEmoji = "🔮";
+
 let ritualDeck = [];
 let ritualStarted = false;
 let ritualUnsub = null;
 let ritualHistoryUnsub = null;
 
-function buildRitualDeck(){
-return shuffleArray([
-
-{
-
-type: "Terror psicológico",
-title: "Presença fraca",
-text: "Todos observam em silêncio. O jogador à sua esquerda escolhe quem parece mais vulnerável neste momento e explica o motivo."
-},
-{
-type: "Discussão",
-title: "Verdade oculta",
-text: "Durante 1 minuto, o grupo deve discutir quem parece estar escondendo algo. Todos precisam opinar."
-},
-{
-type: "Decisão",
-title: "Escolha do grupo",
-text: "Decidam juntos: revelar um segredo agora ou seguir o ritual sem respostas. O anfitrião define a decisão final se houver empate."
-},
-{
-type: "Confissão",
-title: "Fale agora",
-text: "Um jogador voluntário deve contar algo real, desconfortável ou estranho que nunca contou para o grupo."
-},
-{
-type: "Suspeita",
-title: "Algo ruim",
-text: "Alguém trouxe algo ruim para esta sala. Cada participante aponta quem mais mudou de comportamento desde o início da chamada."
-},
-{
-type: "Pressão",
-title: "30 segundos",
-text: "O anfitrião escolhe um jogador. Esse jogador deve responder uma pergunta direta do grupo sem fugir."
-},
-{
-type: "Vínculo",
-title: "Conexão",
-text: "O grupo escolhe duas pessoas da sala. Elas devem decidir juntas a próxima atitude do ritual."
-},
-{
-type: "Ruptura",
-title: "Confiança quebrada",
-text: "Cada jogador diz em quem menos confiaria para conduzir o ritual até o final."
-}
-]);
+function buildRitualDeck() {
+  return shuffleArray([
+    {
+      type: "Terror psicológico",
+      title: "Presença fraca",
+      text: "Todos observam em silêncio. O jogador à sua esquerda escolhe quem parece mais vulnerável neste momento e explica o motivo."
+    },
+    {
+      type: "Discussão",
+      title: "Verdade oculta",
+      text: "Durante 1 minuto, o grupo deve discutir quem parece estar escondendo algo. Todos precisam opinar."
+    },
+    {
+      type: "Decisão",
+      title: "Escolha do grupo",
+      text: "Decidam juntos: revelar um segredo agora ou seguir o ritual sem respostas. O anfitrião define a decisão final se houver empate."
+    },
+    {
+      type: "Confissão",
+      title: "Fale agora",
+      text: "Um jogador voluntário deve contar algo real, desconfortável ou estranho que nunca contou para o grupo."
+    },
+    {
+      type: "Suspeita",
+      title: "Algo ruim",
+      text: "Alguém trouxe algo ruim para esta sala. Cada participante aponta quem mais mudou de comportamento desde o início da chamada."
+    },
+    {
+      type: "Pressão",
+      title: "30 segundos",
+      text: "O anfitrião escolhe um jogador. Esse jogador deve responder uma pergunta direta do grupo sem fugir."
+    },
+    {
+      type: "Vínculo",
+      title: "Conexão",
+      text: "O grupo escolhe duas pessoas da sala. Elas devem decidir juntas a próxima atitude do ritual."
+    },
+    {
+      type: "Ruptura",
+      title: "Confiança quebrada",
+      text: "Cada jogador diz em quem menos confiaria para conduzir o ritual até o final."
+    }
+  ]);
 }
 
-function shuffleArray(array){
-const arr = [...array];
-
-for(let i = arr.length - 1; i > 0; i--){
-const j = Math.floor(Math.random() * (i + 1));
-[arr[i], arr[j]] = [arr[j], arr[i]];
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
-return arr;
+function updateRitualButtons() {
+  const canControl = isHost && ritualStarted;
+  if (revealCardBtn) revealCardBtn.disabled = !canControl || ritualDeck.length === 0;
+  if (resetRitualBtn) resetRitualBtn.disabled = !isHost;
 }
 
-function updateRitualButtons(){
-const canControl = isHost && ritualStarted;
+function setRitualWaitingState() {
+  ritualStarted = false;
+  ritualDeck = [];
 
-if (revealCardBtn){
-revealCardBtn.disabled = !canControl || ritualDeck.length === 0;
+  if (ritualCardType) ritualCardType.textContent = "CARTA 01";
+  if (ritualCardTitle) ritualCardTitle.textContent = "SILÊNCIO";
+  if (ritualCardText) ritualCardText.innerHTML = "DURANTE 60 SEGUNDOS<br>NINGUÉM PODE FALAR.";
+
+  if (deckInfo) {
+    deckInfo.innerHTML = "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.";
+  }
+
+  if (historyList) {
+    historyList.innerHTML = `
+      <div class="historyItem">
+        <div class="historyType">Aguardando</div>
+        <div class="historyText">Nenhuma carta revelada ainda.</div>
+      </div>
+    `;
+  }
+
+  updateRitualButtons();
 }
 
-if (resetRitualBtn){
-resetRitualBtn.disabled = !isHost;
-}
-}
-
-function setRitualWaitingState(){
-ritualStarted = false;
-ritualDeck = [];
-
-if (ritualCardType) ritualCardType.textContent = "CARTA 01";
-if (ritualCardTitle) ritualCardTitle.textContent = "SILÊNCIO";
-if (ritualCardText) {
-ritualCardText.innerHTML = "DURANTE 60 SEGUNDOS<br>NINGUÉM PODE FALAR.";
+async function addHistoryItem(type, text) {
+  try {
+    await addDoc(ritualHistoryRef, {
+      type,
+      text,
+      createdAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error("Erro ao adicionar histórico do ritual:", error);
+  }
 }
 
-if (deckInfo){
-deckInfo.innerHTML =
-"Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.";
+async function saveRitualState(card) {
+  try {
+    await setDoc(ritualRef, {
+      started: ritualStarted,
+      remainingDeck: ritualDeck,
+      currentCard: card || null,
+      updatedAt: serverTimestamp(),
+      updatedBy: participantId
+    }, { merge: true });
+  } catch (error) {
+    console.error("Erro ao salvar estado do ritual:", error);
+  }
 }
 
-if (historyList){
-historyList.innerHTML =   <div class="historyItem">   <div class="historyType">Aguardando</div>   <div class="historyText">Nenhuma carta revelada ainda.</div>   </div>  ;
+async function revealNextRitualCard() {
+  if (!ritualStarted || !isHost || !ritualDeck.length) return;
+
+  const nextCard = ritualDeck.shift();
+  await saveRitualState(nextCard);
+  await addHistoryItem(nextCard.type, nextCard.title);
+  updateRitualButtons();
 }
 
-updateRitualButtons();
+async function startRitualDeck() {
+  ritualStarted = true;
+  ritualDeck = buildRitualDeck();
+
+  await setDoc(ritualRef, {
+    started: true,
+    remainingDeck: ritualDeck,
+    currentCard: null,
+    updatedAt: serverTimestamp(),
+    updatedBy: participantId
+  }, { merge: true });
+
+  await addHistoryItem("Ritual", "O ritual foi iniciado.");
+  await revealNextRitualCard();
+  updateRitualButtons();
 }
 
-async function addHistoryItem(type, text){
-try{
-await addDoc(ritualHistoryRef, {
-type,
-text,
-createdAt: serverTimestamp()
-});
-}catch(error){
-console.error("Erro ao adicionar histórico do ritual:", error);
-}
-}
+async function resetRitualDeck() {
+  if (!isHost) return;
 
-async function saveRitualState(card){
-try{
-await setDoc(ritualRef, {
-started: ritualStarted,
-remainingDeck: ritualDeck,
-currentCard: card || null,
-updatedAt: serverTimestamp(),
-updatedBy: participantId
-}, { merge:true });
-}catch(error){
-console.error("Erro ao salvar estado do ritual:", error);
-}
+  ritualStarted = true;
+  ritualDeck = buildRitualDeck();
+
+  await setDoc(ritualRef, {
+    started: true,
+    remainingDeck: ritualDeck,
+    currentCard: null,
+    updatedAt: serverTimestamp(),
+    updatedBy: participantId
+  }, { merge: true });
+
+  await addHistoryItem("Ritual", "O ritual foi reiniciado.");
+  await revealNextRitualCard();
+  updateRitualButtons();
 }
 
-async function revealNextRitualCard(){
-if (!ritualStarted) return;
-if (!isHost) return;
-if (!ritualDeck.length) return;
+function renderRitualCardFromState(data) {
+  const started = !!data?.started;
+  const currentCard = data?.currentCard || null;
 
-const nextCard = ritualDeck.shift();
+  ritualStarted = started;
+  ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
 
-await saveRitualState(nextCard);
-await addHistoryItem(nextCard.type, nextCard.title);
+  if (!started) {
+    setRitualWaitingState();
+    return;
+  }
 
-updateRitualButtons();
+  if (currentCard) {
+    if (ritualCardType) ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
+    if (ritualCardTitle) ritualCardTitle.textContent = currentCard.title || "Carta revelada";
+    if (ritualCardText) ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");
+  } else {
+    if (ritualCardType) ritualCardType.textContent = "RITUAL";
+    if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
+    if (ritualCardText) ritualCardText.innerHTML = "O anfitrião ainda não revelou a próxima carta.";
+  }
+
+  if (deckInfo) {
+    if (ritualDeck.length > 0) {
+      deckInfo.innerHTML = `
+        ${ritualDeck.length} carta(s) restante(s) no deck.<br>
+        O anfitrião pode revelar a próxima.
+      `;
+    } else {
+      deckInfo.innerHTML = `
+        O deck chegou ao fim.<br>
+        Reinicie o ritual para embaralhar novamente.
+      `;
+    }
+  }
+
+  updateRitualButtons();
 }
 
-async function startRitualDeck(){
-ritualStarted = true;
-ritualDeck = buildRitualDeck();
+function bindRitual() {
+  if (ritualUnsub) ritualUnsub();
+  if (ritualHistoryUnsub) ritualHistoryUnsub();
 
-await setDoc(ritualRef, {
-started: true,
-remainingDeck: ritualDeck,
-currentCard: null,
-updatedAt: serverTimestamp(),
-updatedBy: participantId
-}, { merge:true });
+  ritualUnsub = onSnapshot(ritualRef, (snap) => {
+    if (!snap.exists()) {
+      setRitualWaitingState();
+      return;
+    }
+    renderRitualCardFromState(snap.data());
+  });
 
-await addHistoryItem("Ritual", "O ritual foi iniciado.");
+  const q = query(ritualHistoryRef, orderBy("createdAt", "desc"));
 
-await revealNextRitualCard();
-updateRitualButtons();
+  ritualHistoryUnsub = onSnapshot(q, (snapshot) => {
+    if (!historyList) return;
+
+    const docs = snapshot.docs.map((docSnap) => docSnap.data());
+
+    if (!docs.length) {
+      historyList.innerHTML = `
+        <div class="historyItem">
+          <div class="historyType">Aguardando</div>
+          <div class="historyText">Nenhuma carta revelada ainda.</div>
+        </div>
+      `;
+      return;
+    }
+
+    historyList.innerHTML = docs.map((item) => `
+      <div class="historyItem">
+        <div class="historyType">${escapeHtml(item.type || "Ritual")}</div>
+        <div class="historyText">${escapeHtml(item.text || "")}</div>
+      </div>
+    `).join("");
+  });
 }
 
-async function resetRitualDeck(){
-if (!isHost) return;
-
-ritualStarted = true;
-ritualDeck = buildRitualDeck();
-
-await setDoc(ritualRef, {
-started: true,
-remainingDeck: ritualDeck,
-currentCard: null,
-updatedAt: serverTimestamp(),
-updatedBy: participantId
-}, { merge:true });
-
-await addHistoryItem("Ritual", "O ritual foi reiniciado.");
-
-await revealNextRitualCard();
-updateRitualButtons();
+function setAvatarSelection(emoji) {
+  selectedAvatarEmoji = emoji || "🔮";
+  avatarPicker.querySelectorAll(".avatarOption").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.avatar === selectedAvatarEmoji);
+  });
 }
 
-function renderRitualCardFromState(data){
-
-const started = !!data?.started;
-const currentCard = data?.currentCard || null;
-ritualStarted = started;
-ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
-
-if (!started){
-setRitualWaitingState();
-return;
+function openEditorWithUser(user) {
+  profileEditor.classList.remove("hidden");
+  profileActions.classList.add("hidden");
+  editDisplayName.value = user.displayName || "";
+  editUsername.value = user.username || "";
+  editBio.value = user.bio || "";
+  setAvatarSelection(user.avatarEmoji || "🔮");
 }
 
-if (currentCard){
-if (ritualCardType) {
-ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
+function closeEditor() {
+  profileEditor.classList.add("hidden");
+  profileActions.classList.remove("hidden");
 }
 
-if (ritualCardTitle){  
-  ritualCardTitle.textContent = currentCard.title || "Carta revelada";  
-}  
+async function getUsersByIds(ids) {
+  const validIds = uniqueArray(ids);
+  const users = [];
 
-if (ritualCardText){  
-  ritualCardText.innerHTML = (currentCard.text || "").replace(/\n/g, "<br>");  
+  for (const id of validIds) {
+    try {
+      const ref = doc(db, "users", id);
+      const snap = await getDoc(ref);
+      if (snap.exists()) users.push(snap.data());
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  return users;
 }
 
-} else {
-if (ritualCardType) ritualCardType.textContent = "RITUAL";
-if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
-if (ritualCardText) {
-ritualCardText.innerHTML = "O anfitrião ainda não revelou a próxima carta.";
-}
-}
+function renderFriendList(container, users, options = {}) {
+  const {
+    emptyText = "Nada aqui por enquanto.",
+    mode = "friends"
+  } = options;
 
-if (deckInfo){
-if (ritualDeck.length > 0){
-deckInfo.innerHTML =   ${ritualDeck.length} carta(s) restante(s) no deck.<br>   O anfitrião pode revelar a próxima.  ;
-} else {
-deckInfo.innerHTML =   O deck chegou ao fim.<br>   Reinicie o ritual para embaralhar novamente.  ;
-}
-}
+  container.innerHTML = "";
 
-updateRitualButtons();
-}
+  if (!users.length) {
+    const empty = document.createElement("div");
+    empty.className = "friendEmpty";
+    empty.textContent = emptyText;
+    container.appendChild(empty);
+    return;
+  }
 
-function bindRitual(){
-ritualUnsub = onSnapshot(ritualRef, function(snap){
-if (!snap.exists()){
-setRitualWaitingState();
-return;
-}
+  users.forEach((user) => {
+    const item = document.createElement("div");
+    item.className = "friendItem";
 
-renderRitualCardFromState(snap.data());
+    const avatar = user.avatarEmoji || "🔮";
+    const displayName = user.displayName || "Jogador";
+    const username = user.username || "jogador";
 
-});
+    let actionsHtml = "";
 
-const q = query(ritualHistoryRef, orderBy('createdAt', 'desc'));
+    if (mode === "requests") {
+      actionsHtml = `
+        <div class="friendActions">
+          <button class="friendBtn friendBtn--accept" data-action="accept" data-user-id="${user.userId}">Aceitar</button>
+          <button class="friendBtn" data-action="decline" data-user-id="${user.userId}">Recusar</button>
+        </div>
+      `;
+    }
 
-ritualHistoryUnsub = onSnapshot(q, function(snapshot){
-if (!historyList) return;
+    item.innerHTML = `
+      <div class="friendLeft">
+        <div class="friendAvatar">${avatar}</div>
+        <div class="friendMeta">
+          <div class="friendName">${escapeHtml(displayName)}</div>
+          <div class="friendUsername">@${escapeHtml(username)}</div>
+        </div>
+      </div>
+      ${actionsHtml}
+    `;
 
-const docs = snapshot.docs.map(docSnap => docSnap.data());
-
-if (!docs.length){
-historyList.innerHTML =       <div class="historyItem">       <div class="historyType">Aguardando</div>       <div class="historyText">Nenhuma carta revelada ainda.</div>       </div>      ;
-return;
-}
-
-historyList.innerHTML = docs.map(item => `
-
-  <div class="historyItem">      
-    <div class="historyType">${escapeHtml(item.type || "Ritual")}</div>      
-    <div class="historyText">${escapeHtml(item.text || "")}</div>      
-  </div>      
-`).join("");  });
-}
-
-function setAvatarSelection(emoji){
-selectedAvatarEmoji = emoji || "🔮";
-avatarPicker.querySelectorAll(".avatarOption").forEach((btn)=>{
-btn.classList.toggle("active", btn.dataset.avatar === selectedAvatarEmoji);
-});
+    container.appendChild(item);
+  });
 }
 
-function openEditorWithUser(user){
-profileEditor.classList.remove("hidden");
-profileActions.classList.add("hidden");
+async function renderFriendsSection(user, isSelfView) {
+  friendsPanel.classList.remove("hidden");
+  friendsListBlock.hidden = false;
 
-editDisplayName.value = user.displayName || "";
-editUsername.value = user.username || "";
-editBio.value = user.bio || "";
-setAvatarSelection(user.avatarEmoji || "🔮");
+  const friendsUsers = await getUsersByIds(user.friends || []);
+  renderFriendList(friendsList, friendsUsers, {
+    emptyText: isSelfView
+      ? "Você ainda não tem amigos adicionados."
+      : "Esse jogador ainda não possui amigos visíveis."
+  });
+
+  if (isSelfView) {
+    incomingRequestsBlock.hidden = false;
+    const incomingUsers = await getUsersByIds(user.incomingRequests || []);
+    renderFriendList(incomingRequestsList, incomingUsers, {
+      emptyText: "Nenhum pedido recebido no momento.",
+      mode: "requests"
+    });
+  } else {
+    incomingRequestsBlock.hidden = true;
+    incomingRequestsList.innerHTML = "";
+  }
 }
 
-function closeEditor(){
-profileEditor.classList.add("hidden");
-profileActions.classList.remove("hidden");
+async function fillProfileUI(user, isSelfView) {
+  profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
+  profileNameEl.textContent = user.displayName || "Jogador";
+  profileUsernameEl.textContent = `@${user.username || "jogador"}`;
+  profileBioEl.textContent = user.bio || "Sem descrição.";
+
+  document.getElementById("profileGames").textContent = `Partidas: ${user.stats?.gamesPlayed || 0}`;
+  document.getElementById("profileWins").textContent = `Vitórias: ${user.stats?.wins || 0}`;
+
+  editProfileBtn.hidden = !isSelfView;
+  addFriendBtn.hidden = isSelfView;
+
+  if (!isSelfView) {
+    const alreadyFriend = (user.friends || []).includes(userId);
+    addFriendBtn.textContent = alreadyFriend ? "Já são amigos" : "Adicionar amigo";
+    addFriendBtn.disabled = alreadyFriend;
+  } else {
+    addFriendBtn.disabled = false;
+  }
+
+  closeEditor();
+  await renderFriendsSection(user, isSelfView);
 }
 
-async function getUsersByIds(ids){
-const validIds = uniqueArray(ids);
-const users = [];
+async function ensureUserProfile() {
+  const snap = await getDoc(userRef);
 
-for (const id of validIds){
-try{
-const ref = doc(db, "users", id);
-const snap = await getDoc(ref);
-if (snap.exists()){
-users.push(snap.data());
-}
-}catch(e){
-console.error(e);
-}
-}
+  if (!snap.exists()) {
+    const usernameBase = (playerName || "jogador")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "")
+      .slice(0, 20) || "jogador";
 
-return users;
-}
-
-function renderFriendList(container, users, options = {}){
-const {
-emptyText = "Nada aqui por enquanto.",
-mode = "friends"
-} = options;
-
-container.innerHTML = "";
-
-if (!users.length){
-const empty = document.createElement("div");
-empty.className = "friendEmpty";
-empty.textContent = emptyText;
-container.appendChild(empty);
-return;
-}
-
-users.forEach((user)=>{
-const item = document.createElement("div");
-item.className = "friendItem";
-
-const avatar = user.avatarEmoji || "🔮";
-const displayName = user.displayName || "Jogador";
-const username = user.username || "jogador";
-
-let actionsHtml = "";
-
-if (mode === "requests"){
-actionsHtml =       <div class="friendActions">       <button class="friendBtn friendBtn--accept" data-action="accept" data-user-id="${user.userId}">Aceitar</button>       <button class="friendBtn" data-action="decline" data-user-id="${user.userId}">Recusar</button>       </div>      ;
+    await setDoc(userRef, {
+      userId,
+      displayName: playerName,
+      username: usernameBase,
+      bio: "Novo participante do ritual.",
+      avatarEmoji: "🔮",
+      avatarColor: "#1f86d9",
+      memberSince: serverTimestamp(),
+      lastSeen: serverTimestamp(),
+      friends: [],
+      incomingRequests: [],
+      outgoingRequests: [],
+      stats: {
+        gamesPlayed: 0,
+        wins: 0
+      }
+    });
+  } else {
+    await updateDoc(userRef, {
+      lastSeen: serverTimestamp()
+    });
+  }
 }
 
-item.innerHTML = `
-
-  <div class="friendLeft">      
-    <div class="friendAvatar">${avatar}</div>      
-    <div class="friendMeta">      
-      <div class="friendName">${escapeHtml(displayName)}</div>      
-      <div class="friendUsername">@${escapeHtml(username)}</div>      
-    </div>      
-  </div>      
-  ${actionsHtml}      
-`;      container.appendChild(item);
-
-});
+function isPlayerActive(player) {
+  if (!player.lastSeen || typeof player.lastSeen.toMillis !== "function") return true;
+  return (Date.now() - player.lastSeen.toMillis()) <= ACTIVE_WINDOW_MS;
 }
 
-async function renderFriendsSection(user, isSelfView){
-friendsPanel.classList.remove("hidden");
-friendsListBlock.hidden = false;
+async function openProfile(player) {
+  try {
+    const targetUserId = player?.userId || userId;
+    openedProfileUserId = targetUserId;
 
-const friendsUsers = await getUsersByIds(user.friends || []);
-renderFriendList(friendsList, friendsUsers, {
-emptyText: isSelfView ? "Você ainda não tem amigos adicionados." : "Esse jogador ainda não possui amigos visíveis."
-});
+    const ref = doc(db, "users", targetUserId);
+    const snap = await getDoc(ref);
 
-if (isSelfView){
-incomingRequestsBlock.hidden = false;
-const incomingUsers = await getUsersByIds(user.incomingRequests || []);
-renderFriendList(incomingRequestsList, incomingUsers, {
-emptyText: "Nenhum pedido recebido no momento.",
-mode: "requests"
-});
-} else {
-incomingRequestsBlock.hidden = true;
-incomingRequestsList.innerHTML = "";
-}
-}
+    if (!snap.exists()) {
+      profileAvatarLarge.textContent = initials(player?.name || playerName);
+      profileNameEl.textContent = player?.name || playerName;
+      profileUsernameEl.textContent = "@jogador";
+      profileBioEl.textContent = "Perfil não encontrado.";
+      document.getElementById("profileGames").textContent = "Partidas: 0";
+      document.getElementById("profileWins").textContent = "Vitórias: 0";
+      editProfileBtn.hidden = true;
+      addFriendBtn.hidden = true;
+      friendsPanel.classList.add("hidden");
+      closeEditor();
+      profileModal.classList.remove("hidden");
+      return;
+    }
 
-async function fillProfileUI(user, isSelfView){
-profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
-profileNameEl.textContent = user.displayName || "Jogador";
-profileUsernameEl.textContent = @${user.username || "jogador"};
-profileBioEl.textContent = user.bio || "Sem descrição.";
+    const user = snap.data();
+    openedProfileData = user;
 
-document.getElementById("profileGames").textContent =
-Partidas: ${user.stats?.gamesPlayed || 0};
+    const isSelfView = targetUserId === userId;
+    await fillProfileUI(user, isSelfView);
 
-document.getElementById("profileWins").textContent =
-Vitórias: ${user.stats?.wins || 0};
-
-editProfileBtn.hidden = !isSelfView;
-addFriendBtn.hidden = isSelfView;
-
-if (!isSelfView){
-const alreadyFriend = (user.friends || []).includes(userId);
-addFriendBtn.textContent = alreadyFriend ? "Já são amigos" : "Adicionar amigo";
-addFriendBtn.disabled = alreadyFriend;
-} else {
-addFriendBtn.disabled = false;
+    profileModal.classList.remove("hidden");
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-closeEditor();
-await renderFriendsSection(user, isSelfView);
+function closeProfile() {
+  profileModal.classList.add("hidden");
+  openedProfileUserId = null;
+  openedProfileData = null;
+  friendsPanel.classList.add("hidden");
+  closeEditor();
 }
 
-async function ensureUserProfile(){
-const snap = await getDoc(userRef);
-
-if(!snap.exists()){
-const usernameBase = (playerName || "jogador")
-.toLowerCase()
-.normalize("NFD")
-.replace(/[\u0300-\u036f]/g, "")
-.replace(/[^a-z0-9]/g, "")
-.slice(0,20) || "jogador";
-
-await setDoc(userRef,{
-userId,
-displayName: playerName,
-username: usernameBase,
-bio: "Novo participante do ritual.",
-avatarEmoji: "🔮",
-avatarColor:"#1f86d9",
-memberSince: serverTimestamp(),
-lastSeen: serverTimestamp(),
-friends: [],
-incomingRequests: [],
-outgoingRequests: [],
-stats:{
-gamesPlayed:0,
-wins:0
-}
-});
-
-}else{
-await updateDoc(userRef,{
-lastSeen: serverTimestamp()
-});
-}
-}
-
-function isPlayerActive(player){
-if(!player.lastSeen || typeof player.lastSeen.toMillis !== 'function') return true;
-return (Date.now() - player.lastSeen.toMillis()) <= ACTIVE_WINDOW_MS;
-}
-
-async function openProfile(player){
-try{
-const targetUserId = player?.userId || userId;
-openedProfileUserId = targetUserId;
-
-const ref = doc(db, "users", targetUserId);
-const snap = await getDoc(ref);
-
-if(!snap.exists()){
-profileAvatarLarge.textContent = initials(player?.name || playerName);
-profileNameEl.textContent = player?.name || playerName;
-profileUsernameEl.textContent = "@jogador";
-profileBioEl.textContent = "Perfil não encontrado.";
-document.getElementById("profileGames").textContent = "Partidas: 0";
-document.getElementById("profileWins").textContent = "Vitórias: 0";
-editProfileBtn.hidden = true;
-addFriendBtn.hidden = true;
-friendsPanel.classList.add("hidden");
-closeEditor();
-profileModal.classList.remove("hidden");
-return;
-}
-
-const user = snap.data();
-openedProfileData = user;
-
-const isSelfView = targetUserId === userId;
-await fillProfileUI(user, isSelfView);
-
-profileModal.classList.remove("hidden");
-
-}catch(error){
-console.error(error);
-}
-}
-
-function closeProfile(){
-profileModal.classList.add("hidden");
-openedProfileUserId = null;
-openedProfileData = null;
-friendsPanel.classList.add("hidden");
-closeEditor();
-}
-
-closeProfileBtn.addEventListener("click", function(e){
-e.preventDefault();
-e.stopPropagation();
-closeProfile();
+closeProfileBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  closeProfile();
 });
 
-if (closeProfileXBtn){
-closeProfileXBtn.addEventListener("click", function(e){
-e.preventDefault();
-e.stopPropagation();
-closeProfile();
-});
+if (closeProfileXBtn) {
+  closeProfileXBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeProfile();
+  });
 }
 
-profileModal.addEventListener("click", function(e){
-if(e.target === profileModal){
-closeProfile();
-}
+profileModal.addEventListener("click", (e) => {
+  if (e.target === profileModal) closeProfile();
 });
 
-document.addEventListener("keydown", function(e){
-if(e.key === "Escape" && !profileModal.classList.contains("hidden")){
-closeProfile();
-}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !profileModal.classList.contains("hidden")) {
+    closeProfile();
+  }
 });
 
-if (myProfileBtn){
-myProfileBtn.addEventListener("click", function(){
-openProfile({ userId, name: playerName, isHost });
-});
+if (myProfileBtn) {
+  myProfileBtn.addEventListener("click", () => {
+    openProfile({ userId, name: playerName, isHost });
+  });
 }
 
-if (editProfileBtn){
-editProfileBtn.addEventListener("click", function(){
-if (!openedProfileData) return;
-openEditorWithUser(openedProfileData);
-});
+if (editProfileBtn) {
+  editProfileBtn.addEventListener("click", () => {
+    if (!openedProfileData) return;
+    openEditorWithUser(openedProfileData);
+  });
 }
 
-if (cancelEditProfileBtn){
-cancelEditProfileBtn.addEventListener("click", function(){
-closeEditor();
-});
+if (cancelEditProfileBtn) {
+  cancelEditProfileBtn.addEventListener("click", () => {
+    closeEditor();
+  });
 }
 
-if (avatarPicker){
-avatarPicker.addEventListener("click", function(e){
-const btn = e.target.closest(".avatarOption");
-if (!btn) return;
-setAvatarSelection(btn.dataset.avatar);
-});
+if (avatarPicker) {
+  avatarPicker.addEventListener("click", (e) => {
+    const btn = e.target.closest(".avatarOption");
+    if (!btn) return;
+    setAvatarSelection(btn.dataset.avatar);
+  });
 }
 
-if (profileEditor){
-profileEditor.addEventListener("submit", async function(e){
-e.preventDefault();
+if (profileEditor) {
+  profileEditor.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-try{
-const displayName = editDisplayName.value.trim().slice(0, 40) || "Jogador";
-const username = normalizeUsername(editUsername.value) || "jogador";
-const bio = editBio.value.trim().slice(0, 180);
+    try {
+      const displayName = editDisplayName.value.trim().slice(0, 40) || "Jogador";
+      const username = normalizeUsername(editUsername.value) || "jogador";
+      const bio = editBio.value.trim().slice(0, 180);
 
-await updateDoc(userRef, {
-displayName,
-username,
-bio,
-avatarEmoji: selectedAvatarEmoji,
-lastSeen: serverTimestamp()
-});
+      await updateDoc(userRef, {
+        displayName,
+        username,
+        bio,
+        avatarEmoji: selectedAvatarEmoji,
+        lastSeen: serverTimestamp()
+      });
 
-if (openedProfileUserId === userId){
-playerName = displayName;
-localStorage.setItem("osl_nome", displayName);
+      if (openedProfileUserId === userId) {
+        playerName = displayName;
+        localStorage.setItem("osl_nome", displayName);
+      }
+
+      const snap = await getDoc(userRef);
+      openedProfileData = snap.data();
+      await fillProfileUI(openedProfileData, true);
+
+      await setDoc(playerRef, { name: displayName }, { merge: true });
+    } catch (error) {
+      console.error(error);
+      alert("Não foi possível salvar o perfil.");
+    }
+  });
 }
 
-const snap = await getDoc(userRef);
-openedProfileData = snap.data();
-await fillProfileUI(openedProfileData, true);
+if (addFriendBtn) {
+  addFriendBtn.addEventListener("click", async () => {
+    try {
+      if (!openedProfileUserId || openedProfileUserId === userId) return;
 
-await setDoc(playerRef, {
-name: displayName
-}, { merge:true });
+      const mySnap = await getDoc(userRef);
+      const targetRef = doc(db, "users", openedProfileUserId);
+      const targetSnap = await getDoc(targetRef);
 
-}catch(error){
-console.error(error);
-alert("Não foi possível salvar o perfil.");
+      if (!mySnap.exists() || !targetSnap.exists()) return;
+
+      const myUser = mySnap.data();
+      const targetUser = targetSnap.data();
+
+      const myFriends = uniqueArray(myUser.friends || []);
+      const myOutgoing = uniqueArray(myUser.outgoingRequests || []);
+      const myIncoming = uniqueArray(myUser.incomingRequests || []);
+      const targetIncoming = uniqueArray(targetUser.incomingRequests || []);
+
+      if (myFriends.includes(openedProfileUserId)) {
+        alert("Vocês já são amigos.");
+        return;
+      }
+
+      if (myOutgoing.includes(openedProfileUserId)) {
+        alert("Você já enviou um pedido para esse jogador.");
+        return;
+      }
+
+      if (myIncoming.includes(openedProfileUserId)) {
+        alert("Esse jogador já enviou um pedido para você. Aceite no seu perfil.");
+        return;
+      }
+
+      await updateDoc(userRef, {
+        outgoingRequests: uniqueArray([...myOutgoing, openedProfileUserId])
+      });
+
+      await updateDoc(targetRef, {
+        incomingRequests: uniqueArray([...targetIncoming, userId])
+      });
+
+      alert("Pedido de amizade enviado.");
+
+      const refreshedTarget = await getDoc(targetRef);
+      openedProfileData = refreshedTarget.data();
+      await fillProfileUI(openedProfileData, false);
+    } catch (error) {
+      console.error(error);
+      alert("Não foi possível enviar o pedido de amizade.");
+    }
+  });
 }
 
-});
+if (incomingRequestsList) {
+  incomingRequestsList.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".friendBtn");
+    if (!btn) return;
+
+    const action = btn.dataset.action;
+    const requesterId = btn.dataset.userId;
+    if (!requesterId) return;
+
+    try {
+      const mySnap = await getDoc(userRef);
+      const requesterRef = doc(db, "users", requesterId);
+      const requesterSnap = await getDoc(requesterRef);
+
+      if (!mySnap.exists() || !requesterSnap.exists()) return;
+
+      const myUser = mySnap.data();
+      const requester = requesterSnap.data();
+
+      const myIncoming = uniqueArray(myUser.incomingRequests || []);
+      const myFriends = uniqueArray(myUser.friends || []);
+      const requesterOutgoing = uniqueArray(requester.outgoingRequests || []);
+      const requesterFriends = uniqueArray(requester.friends || []);
+
+      if (action === "accept") {
+        await updateDoc(userRef, {
+          incomingRequests: myIncoming.filter((id) => id !== requesterId),
+          friends: uniqueArray([...myFriends, requesterId])
+        });
+
+        await updateDoc(requesterRef, {
+          outgoingRequests: requesterOutgoing.filter((id) => id !== userId),
+          friends: uniqueArray([...requesterFriends, userId])
+        });
+      }
+
+      if (action === "decline") {
+        await updateDoc(userRef, {
+          incomingRequests: myIncoming.filter((id) => id !== requesterId)
+        });
+
+        await updateDoc(requesterRef, {
+          outgoingRequests: requesterOutgoing.filter((id) => id !== userId)
+        });
+      }
+
+      const refreshed = await getDoc(userRef);
+      openedProfileData = refreshed.data();
+      await fillProfileUI(openedProfileData, true);
+    } catch (error) {
+      console.error(error);
+      alert("Não foi possível atualizar o pedido.");
+    }
+  });
 }
 
-if (addFriendBtn){
-addFriendBtn.addEventListener("click", async function(){
-try{
-if (!openedProfileUserId || openedProfileUserId === userId) return;
+function renderPlayers(players) {
+  playerListEl.innerHTML = "";
 
-const mySnap = await getDoc(userRef);
-const targetRef = doc(db, "users", openedProfileUserId);
-const targetSnap = await getDoc(targetRef);
+  players.forEach((player) => {
+    const div = document.createElement("div");
+    div.className = "player";
+    div.innerHTML = `
+      <div class="playerLeft">
+        <div class="avatar">${initials(player.name)}</div>
+        <div class="playerMeta">
+          <div class="playerName">${escapeHtml(player.name)}</div>
+          <div class="playerRole">${player.isHost ? "Anfitrião" : "Participante"}</div>
+        </div>
+      </div>
+      <div class="playerRight">
+        <span class="playerStatus">Online</span>
+        ${player.isHost ? '<span class="playerHost">Host</span>' : ""}
+      </div>
+    `;
 
-if (!mySnap.exists() || !targetSnap.exists()) return;
+    div.addEventListener("click", () => {
+      openProfile(player);
+    });
 
-const myUser = mySnap.data();
-const targetUser = targetSnap.data();
+    playerListEl.appendChild(div);
+  });
 
-const myFriends = uniqueArray(myUser.friends || []);
-const myOutgoing = uniqueArray(myUser.outgoingRequests || []);
-const myIncoming = uniqueArray(myUser.incomingRequests || []);
-const targetIncoming = uniqueArray(targetUser.incomingRequests || []);
-
-if (myFriends.includes(openedProfileUserId)){
-alert("Vocês já são amigos.");
-return;
+  playerCountEl.textContent = String(players.length);
+  playersEmptyEl.style.display = players.length > 1 ? "none" : "block";
 }
 
-if (myOutgoing.includes(openedProfileUserId)){
-alert("Você já enviou um pedido para esse jogador.");
-return;
+function renderMessages(docs) {
+  messagesEl.innerHTML = "";
+
+  if (!docs.length) {
+    showChatEmpty("A sala foi criada.<br>Quando houver mensagens ou eventos do sistema, eles aparecerão aqui.");
+    return;
+  }
+
+  hideChatEmpty();
+
+  docs.forEach((item) => {
+    const div = document.createElement("div");
+
+    if (item.type === "system") {
+      div.className = "message system";
+      div.innerHTML = `
+        <span class="meta">Sistema</span>
+        ${escapeHtml(item.text)}
+      `;
+    } else {
+      const own = item.authorId === participantId;
+      div.className = "message " + (own ? "me" : "other");
+
+      let timeLabel = "--:--";
+      if (item.createdAt && typeof item.createdAt.toDate === "function") {
+        timeLabel = nowTimeFromDate(item.createdAt.toDate());
+      }
+
+      div.innerHTML = `
+        <span class="meta">${escapeHtml(item.authorName || "Jogador")} • ${timeLabel}</span>
+        ${escapeHtml(item.text)}
+      `;
+    }
+
+    messagesEl.appendChild(div);
+  });
+
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-if (myIncoming.includes(openedProfileUserId)){
-alert("Esse jogador já enviou um pedido para você. Aceite no seu perfil.");
-return;
+function renderTyping(names) {
+  if (!typingBarEl) return;
+
+  if (!names.length) {
+    typingBarEl.textContent = "";
+    return;
+  }
+
+  if (names.length === 1) {
+    typingBarEl.textContent = `${names[0]} está digitando...`;
+    return;
+  }
+
+  if (names.length === 2) {
+    typingBarEl.textContent = `${names[0]} e ${names[1]} estão digitando...`;
+    return;
+  }
+
+  typingBarEl.textContent = `${names[0]}, ${names[1]} e mais ${names.length - 2} estão digitando...`;
 }
 
-await updateDoc(userRef, {
-outgoingRequests: uniqueArray([...myOutgoing, openedProfileUserId])
-});
+async function ensureRoom() {
+  const snap = await getDoc(roomRef);
 
-await updateDoc(targetRef, {
-incomingRequests: uniqueArray([...targetIncoming, userId])
-});
+  if (!snap.exists()) {
+    isHost = true;
 
-alert("Pedido de amizade enviado.");
+    await setDoc(roomRef, {
+      code: roomCode,
+      name: roomName,
+      status: "waiting",
+      hostId: participantId,
+      hostName: playerName,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
 
-const refreshedTarget = await getDoc(targetRef);
-openedProfileData = refreshedTarget.data();
-await fillProfileUI(openedProfileData, false);
-
-}catch(error){
-console.error(error);
-alert("Não foi possível enviar o pedido de amizade.");
+    await addDoc(messagesRef, {
+      type: "system",
+      text: "A sala foi criada. Aguardando jogadores.",
+      createdAt: serverTimestamp()
+    });
+  } else {
+    const data = snap.data();
+    isHost = data.hostId === participantId;
+  }
 }
 
-});
+async function upsertSelf() {
+  const playersSnap = await getDocs(playersCollectionRef);
+
+  const activePlayers = playersSnap.docs
+    .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+    .filter((player) => isPlayerActive(player));
+
+  const selfAlreadyActive = activePlayers.some((player) => player.id === participantId);
+
+  if (!selfAlreadyActive && activePlayers.length >= MAX_PLAYERS) {
+    throw new Error("ROOM_FULL");
+  }
+
+  await setDoc(playerRef, {
+    id: participantId,
+    userId,
+    name: playerName,
+    isHost,
+    joinedAt: serverTimestamp(),
+    lastSeen: serverTimestamp()
+  }, { merge: true });
 }
 
-if (incomingRequestsList){
-incomingRequestsList.addEventListener("click", async function(e){
-const btn = e.target.closest(".friendBtn");
-if (!btn) return;
-
-const action = btn.dataset.action;
-const requesterId = btn.dataset.userId;
-if (!requesterId) return;
-
-try{
-const mySnap = await getDoc(userRef);
-const requesterRef = doc(db, "users", requesterId);
-const requesterSnap = await getDoc(requesterRef);
-
-if (!mySnap.exists() || !requesterSnap.exists()) return;
-
-const myUser = mySnap.data();
-const requester = requesterSnap.data();
-
-const myIncoming = uniqueArray(myUser.incomingRequests || []);
-const myFriends = uniqueArray(myUser.friends || []);
-
-const requesterOutgoing = uniqueArray(requester.outgoingRequests || []);
-const requesterFriends = uniqueArray(requester.friends || []);
-
-if (action === "accept"){
-await updateDoc(userRef, {
-incomingRequests: myIncoming.filter(id => id !== requesterId),
-friends: uniqueArray([...myFriends, requesterId])
-});
-
-await updateDoc(requesterRef, {      
-  outgoingRequests: requesterOutgoing.filter(id => id !== userId),      
-  friends: uniqueArray([...requesterFriends, userId])      
-});
-
+async function setTyping(isTyping) {
+  try {
+    if (isTyping) {
+      await setDoc(typingRef, {
+        name: playerName,
+        isTyping: true,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } else {
+      await deleteDoc(typingRef);
+    }
+  } catch (e) {}
 }
 
-if (action === "decline"){
-await updateDoc(userRef, {
-incomingRequests: myIncoming.filter(id => id !== requesterId)
-});
-
-await updateDoc(requesterRef, {      
-  outgoingRequests: requesterOutgoing.filter(id => id !== userId)      
-});
-
+function scheduleTypingStop() {
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => {
+    setTyping(false);
+  }, TYPING_ACTIVE_MS);
 }
 
-const refreshed = await getDoc(userRef);
-openedProfileData = refreshed.data();
-await fillProfileUI(openedProfileData, true);
-
-}catch(error){
-console.error(error);
-alert("Não foi possível atualizar o pedido.");
+function startHeartbeat() {
+  clearInterval(heartbeatTimer);
+  heartbeatTimer = setInterval(async () => {
+    try {
+      await updateDoc(playerRef, {
+        lastSeen: serverTimestamp()
+      });
+    } catch (e) {}
+  }, HEARTBEAT_MS);
 }
 
-});
+function bindRoom() {
+  roomUnsub = onSnapshot(roomRef, async (snap) => {
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+    roomNameEl.textContent = data.name || roomName;
+    roomCodeEl.textContent = data.code || roomCode;
+
+    const started = data.status === "started";
+    roomStatusEl.textContent = started ? "Ritual em andamento" : "Aguardando jogadores";
+    sessionLabelEl.textContent = started ? "Sessão iniciada" : "Sessão não iniciada";
+    footerStatusEl.textContent = started ? "Ritual iniciado" : "Aguardando início";
+
+    isHost = data.hostId === participantId;
+    startBtn.disabled = !isHost;
+    startBtn.textContent = isHost ? (started ? "Ritual iniciado" : "Iniciar Ritual") : "Aguardando anfitrião";
+
+    if (!started) {
+      setRitualWaitingState();
+    }
+
+    await setDoc(playerRef, { isHost }, { merge: true });
+  });
 }
 
-function renderPlayers(players){
-playerListEl.innerHTML = '';
+function bindPlayers() {
+  const q = query(playersCollectionRef, orderBy("joinedAt", "asc"));
 
-players.forEach(function(player){
-const div = document.createElement('div');
-div.className = 'player';
-div.innerHTML =   <div class="playerLeft">   <div class="avatar">${initials(player.name)}</div>   <div class="playerMeta">   <div class="playerName">${escapeHtml(player.name)}</div>   <div class="playerRole">${player.isHost ? 'Anfitrião' : 'Participante'}</div>   </div>   </div>   <div class="playerRight">   <span class="playerStatus">Online</span>   ${player.isHost ? '<span class="playerHost">Host</span>' : ''}   </div>  ;
+  playersUnsub = onSnapshot(q, (snapshot) => {
+    const players = snapshot.docs
+      .map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          userId: data.userId || null,
+          name: data.name || "Jogador",
+          isHost: !!data.isHost,
+          joinedAt: data.joinedAt || null,
+          lastSeen: data.lastSeen || null
+        };
+      })
+      .filter(isPlayerActive);
 
-div.addEventListener("click", ()=>{  
-  openProfile(player);  
-});  
-
-playerListEl.appendChild(div);
-
-});
-
-playerCountEl.textContent = String(players.length);
-playersEmptyEl.style.display = players.length > 1 ? 'none' : 'block';
+    renderPlayers(players);
+  });
 }
 
-function renderMessages(docs){
-messagesEl.innerHTML = '';
+function bindTyping() {
+  const q = query(typingCollectionRef, orderBy("updatedAt", "asc"));
 
-if(!docs.length){
-showChatEmpty('A sala foi criada.<br>Quando houver mensagens ou eventos do sistema, eles aparecerão aqui.');
-return;
+  typingUnsub = onSnapshot(q, (snapshot) => {
+    const names = snapshot.docs
+      .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+      .filter((item) => item.id !== participantId)
+      .map((item) => item.name)
+      .filter(Boolean);
+
+    renderTyping(names);
+  });
 }
 
-hideChatEmpty();
+function bindMessages() {
+  const q = query(messagesRef, orderBy("createdAt", "asc"));
 
-docs.forEach(function(item){
-const div = document.createElement('div');
+  messagesUnsub = onSnapshot(q, (snapshot) => {
+    const docs = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
 
-if(item.type === 'system'){
-div.className = 'message system';
-div.innerHTML =       <span class="meta">Sistema</span>       ${escapeHtml(item.text)}      ;
-}else{
-const own = item.authorId === participantId;
-div.className = 'message ' + (own ? 'me' : 'other');
+    renderMessages(docs);
 
-let timeLabel = '--:--';
-if(item.createdAt && typeof item.createdAt.toDate === 'function'){
-timeLabel = nowTimeFromDate(item.createdAt.toDate());
+    const currentIds = new Set(docs.map((item) => item.id));
+
+    if (!initialMessagesLoaded) {
+      knownMessageIds = currentIds;
+      initialMessagesLoaded = true;
+      return;
+    }
+
+    docs.forEach((item) => {
+      if (knownMessageIds.has(item.id)) return;
+
+      const isOwnMessage = item.authorId === participantId;
+      const shouldPlay = item.type === "system" || (item.type === "user" && !isOwnMessage);
+
+      if (shouldPlay) playIncomingMessageSound();
+    });
+
+    knownMessageIds = currentIds;
+  });
 }
 
-div.innerHTML =       <span class="meta">${escapeHtml(item.authorName || 'Jogador')} • ${timeLabel}</span>       ${escapeHtml(item.text)}      ;
+async function sendMessage() {
+  const text = messageInput.value.trim();
+  if (!text) return;
+
+  messageInput.value = "";
+  clearTimeout(typingTimer);
+  await setTyping(false);
+
+  await addDoc(messagesRef, {
+    type: "user",
+    authorId: participantId,
+    authorName: playerName,
+    text,
+    createdAt: serverTimestamp()
+  });
+
+  await updateDoc(roomRef, {
+    updatedAt: serverTimestamp()
+  });
 }
 
-messagesEl.appendChild(div);
+async function startSession() {
+  if (!isHost) return;
 
-});
+  const snap = await getDoc(roomRef);
+  if (!snap.exists()) return;
 
-messagesEl.scrollTop = messagesEl.scrollHeight;
+  const data = snap.data();
+  if (data.status === "started") return;
+
+  await updateDoc(roomRef, {
+    status: "started",
+    startedAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+
+  await addDoc(messagesRef, {
+    type: "system",
+    text: "O anfitrião iniciou o ritual. A próxima etapa pode começar.",
+    createdAt: serverTimestamp()
+  });
+
+  await startRitualDeck();
 }
 
-function renderTyping(names){
-if(!typingBarEl) return;
+async function leaveRoom() {
+  if (leaving) return;
+  leaving = true;
 
-if(!names.length){
-typingBarEl.textContent = '';
-return;
+  try {
+    clearInterval(heartbeatTimer);
+    clearTimeout(typingTimer);
+    await setTyping(false);
+
+    if (roomUnsub) roomUnsub();
+    if (playersUnsub) playersUnsub();
+    if (messagesUnsub) messagesUnsub();
+    if (typingUnsub) typingUnsub();
+    if (ritualUnsub) ritualUnsub();
+    if (ritualHistoryUnsub) ritualHistoryUnsub();
+
+    await deleteDoc(playerRef);
+  } catch (e) {}
+
+  window.location.href = "./entrada.html";
 }
 
-if(names.length === 1){
-typingBarEl.textContent = ${names[0]} está digitando...;
-return;
-}
-
-if(names.length === 2){
-typingBarEl.textContent = ${names[0]} e ${names[1]} estão digitando...;
-return;
-}
-
-typingBarEl.textContent = ${names[0]}, ${names[1]} e mais ${names.length - 2} estão digitando...;
-}
-
-async function ensureRoom(){
-const snap = await getDoc(roomRef);
-
-if(!snap.exists()){
-isHost = true;
-
-await setDoc(roomRef, {
-code: roomCode,
-name: roomName,
-status: 'waiting',
-hostId: participantId,
-hostName: playerName,
-createdAt: serverTimestamp(),
-updatedAt: serverTimestamp()
-});
-
-await addDoc(messagesRef, {
-type: 'system',
-text: 'A sala foi criada. Aguardando jogadores.',
-createdAt: serverTimestamp()
-});
-
-} else {
-const data = snap.data();
-isHost = data.hostId === participantId;
-}
-}
-
-async function upsertSelf(){
-const playersSnap = await getDocs(playersCollectionRef);
-
-const activePlayers = playersSnap.docs
-.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
-.filter(player => isPlayerActive(player));
-
-const selfAlreadyActive = activePlayers.some(player => player.id === participantId);
-
-if(!selfAlreadyActive && activePlayers.length >= MAX_PLAYERS){
-throw new Error('ROOM_FULL');
-}
-
-await setDoc(playerRef, {
-id: participantId,
-userId,
-name: playerName,
-isHost,
-joinedAt: serverTimestamp(),
-lastSeen: serverTimestamp()
-}, { merge:true });
-}
-
-async function setTyping(isTyping){
-try{
-if(isTyping){
-await setDoc(typingRef, {
-name: playerName,
-isTyping: true,
-updatedAt: serverTimestamp()
-}, { merge:true });
-}else{
-await deleteDoc(typingRef);
-}
-}catch(e){}
-}
-
-function scheduleTypingStop(){
-clearTimeout(typingTimer);
-typingTimer = setTimeout(() => {
-setTyping(false);
-}, TYPING_ACTIVE_MS);
-}
-
-function startHeartbeat(){
-clearInterval(heartbeatTimer);
-heartbeatTimer = setInterval(async function(){
-try{
-await updateDoc(playerRef, {
-lastSeen: serverTimestamp()
-});
-}catch(e){}
-}, HEARTBEAT_MS);
-}
-
-function bindRoom(){
-roomUnsub = onSnapshot(roomRef, async function(snap){
-if(!snap.exists()) return;
-
-const data = snap.data();
-roomNameEl.textContent = data.name || roomName;
-roomCodeEl.textContent = data.code || roomCode;
-
-const started = data.status === 'started';
-roomStatusEl.textContent = started ? 'Ritual em andamento' : 'Aguardando jogadores';
-sessionLabelEl.textContent = started ? 'Sessão iniciada' : 'Sessão não iniciada';
-footerStatusEl.textContent = started ? 'Ritual iniciado' : 'Aguardando início';
-
-isHost = data.hostId === participantId;
-startBtn.disabled = !isHost;
-startBtn.textContent = isHost ? (started ? 'Ritual iniciado' : 'Iniciar Ritual') : 'Aguardando anfitrião';
-
-if (started && !ritualStarted){
-bindRitual();
-}
-
-if (!started){
-setRitualWaitingState();
-}
-await setDoc(playerRef, {
-isHost
-}, { merge:true });
-});
-}
-
-function bindPlayers(){
-const q = query(playersCollectionRef, orderBy('joinedAt', 'asc'));
-
-playersUnsub = onSnapshot(q, function(snapshot){
-const players = snapshot.docs
-.map(function(docSnap){
-const data = docSnap.data();
-return {
-id: docSnap.id,
-userId: data.userId || null,
-name: data.name || 'Jogador',
-isHost: !!data.isHost,
-joinedAt: data.joinedAt || null,
-lastSeen: data.lastSeen || null
-};
-})
-.filter(isPlayerActive);
-
-renderPlayers(players);
-
-});
-}
-
-function bindTyping(){
-const q = query(typingCollectionRef, orderBy('updatedAt', 'asc'));
-
-typingUnsub = onSnapshot(q, function(snapshot){
-const names = snapshot.docs
-.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
-.filter(item => item.id !== participantId)
-.map(item => item.name)
-.filter(Boolean);
-
-renderTyping(names);
-
-});
-}
-
-function bindMessages(){
-const q = query(messagesRef, orderBy('createdAt', 'asc'));
-
-messagesUnsub = onSnapshot(q, function(snapshot){
-const docs = snapshot.docs.map(function(docSnap){
-return { id: docSnap.id, ...docSnap.data() };
-});
-
-renderMessages(docs);
-
-const currentIds = new Set(docs.map(item => item.id));
-
-if(!initialMessagesLoaded){
-knownMessageIds = currentIds;
-initialMessagesLoaded = true;
-return;
-}
-
-docs.forEach(function(item){
-if (knownMessageIds.has(item.id)) return;
-
-const isOwnMessage = item.authorId === participantId;
-const shouldPlay =
-(item.type === 'system') ||
-(item.type === 'user' && !isOwnMessage);
-
-if (shouldPlay){
-playIncomingMessageSound();
-}
-});
-
-knownMessageIds = currentIds;
-
-});
-}
-
-async function sendMessage(){
-const text = messageInput.value.trim();
-if(!text) return;
-
-messageInput.value = '';
-clearTimeout(typingTimer);
-await setTyping(false);
-
-await addDoc(messagesRef, {
-type: 'user',
-authorId: participantId,
-authorName: playerName,
-text,
-createdAt: serverTimestamp()
-});
-
-await updateDoc(roomRef, {
-updatedAt: serverTimestamp()
-});
-}
-
-async function startSession(){
-if(!isHost) return;
-
-const snap = await getDoc(roomRef);
-if(!snap.exists()) return;
-
-const data = snap.data();
-if(data.status === 'started') return;
-
-await updateDoc(roomRef, {
-status: 'started',
-startedAt: serverTimestamp(),
-updatedAt: serverTimestamp()
-});
-
-await addDoc(messagesRef, {
-type: 'system',
-text: 'O anfitrião iniciou o ritual. A próxima etapa pode começar.',
-createdAt: serverTimestamp()
-});
-
-await startRitualDeck();
-}
-
-async function leaveRoom(){
-if(leaving) return;
-leaving = true;
-
-try{
-clearInterval(heartbeatTimer);
-clearTimeout(typingTimer);
-await setTyping(false);
-
-if(roomUnsub) roomUnsub();
-
-if(playersUnsub) playersUnsub();
-if(messagesUnsub) messagesUnsub();
-if(typingUnsub) typingUnsub();
-if(ritualUnsub) ritualUnsub();
-if(ritualHistoryUnsub) ritualHistoryUnsub();
-
-await deleteDoc(playerRef);
-
-}catch(e){}
-
-window.location.href = './entrada.html';
-}
-
-copyCodeBtn.addEventListener('click', async function(){
-try{
-await navigator.clipboard.writeText(roomCode);
-await addDoc(messagesRef, {
-type: 'system',
-text: 'O código da sala foi copiado.',
-createdAt: serverTimestamp()
-});
-}catch(e){}
+copyCodeBtn.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(roomCode);
+    await addDoc(messagesRef, {
+      type: "system",
+      text: "O código da sala foi copiado.",
+      createdAt: serverTimestamp()
+    });
+  } catch (e) {}
 });
 
-sendBtn.addEventListener('click', function(){
-sendMessage().catch(console.error);
+sendBtn.addEventListener("click", () => {
+  sendMessage().catch(console.error);
 });
 
-messageInput.addEventListener('input', function(){
-if(messageInput.value.trim()){
-setTyping(true);
-scheduleTypingStop();
-}else{
-clearTimeout(typingTimer);
-setTyping(false);
-}
+messageInput.addEventListener("input", () => {
+  if (messageInput.value.trim()) {
+    setTyping(true);
+    scheduleTypingStop();
+  } else {
+    clearTimeout(typingTimer);
+    setTyping(false);
+  }
 });
 
-messageInput.addEventListener('blur', function(){
-clearTimeout(typingTimer);
-setTyping(false);
+messageInput.addEventListener("blur", () => {
+  clearTimeout(typingTimer);
+  setTyping(false);
 });
 
-messageInput.addEventListener('keydown', function(e){
-if(e.key === 'Enter'){
-e.preventDefault();
-sendMessage().catch(console.error);
-}
+messageInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendMessage().catch(console.error);
+  }
 });
 
-startBtn.addEventListener('click', function(){
-startSession().catch(console.error);
+startBtn.addEventListener("click", () => {
+  startSession().catch(console.error);
 });
 
-leaveBtn.addEventListener('click', function(){
-const ok = confirm('Deseja sair da sala?');
-if(ok){
-leaveRoom();
-}
-});
-if (revealCardBtn){
-revealCardBtn.addEventListener("click", function(){
-revealNextRitualCard().catch(console.error);
-});
-}
-
-if (resetRitualBtn){
-resetRitualBtn.addEventListener("click", function(){
-const ok = confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?");
-if (ok){
-resetRitualDeck().catch(console.error);
-}
-});
-}
-window.addEventListener('pagehide', function(){
-leaveRoom();
+leaveBtn.addEventListener("click", () => {
+  const ok = confirm("Deseja sair da sala?");
+  if (ok) leaveRoom();
 });
 
-window.addEventListener('beforeunload', function(){
-leaveRoom();
-});
-
-(async function init(){
-try{
-roomNameEl.textContent = roomName;
-roomCodeEl.textContent = roomCode;
-roomStatusEl.textContent = 'Conectando';
-footerStatusEl.textContent = 'Conectando';
-
-await ensureUserProfile();
-
-await ensureRoom();
-await upsertSelf();
-setRitualWaitingState();
-startHeartbeat();
-bindRoom();
-bindPlayers();
-bindMessages();
-bindTyping();
-bindRitual();
-
-}catch(error){
-console.error(error);
-
-if (error && error.message === 'ROOM_FULL'){
-showChatEmpty('A sala atingiu o limite de 5 jogadores.<br>Entre em outra sala ou aguarde alguém sair.');
-roomStatusEl.textContent = 'Sala lotada';
-footerStatusEl.textContent = 'Limite atingido';
-startBtn.disabled = true;
-sendBtn.disabled = true;
-messageInput.disabled = true;
-return;
+if (revealCardBtn) {
+  revealCardBtn.addEventListener("click", () => {
+    revealNextRitualCard().catch(console.error);
+  });
 }
 
-showChatEmpty('Não foi possível conectar à sala.<br>Verifique a configuração do Firebase.');
-roomStatusEl.textContent = 'Erro de conexão';
-footerStatusEl.textContent = 'Erro';
-
+if (resetRitualBtn) {
+  resetRitualBtn.addEventListener("click", () => {
+    const ok = confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?");
+    if (ok) resetRitualDeck().catch(console.error);
+  });
 }
+
+window.addEventListener("pagehide", () => {
+  leaveRoom();
+});
+
+window.addEventListener("beforeunload", () => {
+  leaveRoom();
+});
+
+(async function init() {
+  try {
+    roomNameEl.textContent = roomName;
+    roomCodeEl.textContent = roomCode;
+    roomStatusEl.textContent = "Conectando";
+    footerStatusEl.textContent = "Conectando";
+
+    await ensureUserProfile();
+    await ensureRoom();
+    await upsertSelf();
+
+    setRitualWaitingState();
+    startHeartbeat();
+    bindRoom();
+    bindPlayers();
+    bindMessages();
+    bindTyping();
+    bindRitual();
+  } catch (error) {
+    console.error(error);
+
+    if (error && error.message === "ROOM_FULL") {
+      showChatEmpty("A sala atingiu o limite de 5 jogadores.<br>Entre em outra sala ou aguarde alguém sair.");
+      roomStatusEl.textContent = "Sala lotada";
+      footerStatusEl.textContent = "Limite atingido";
+      startBtn.disabled = true;
+      sendBtn.disabled = true;
+      messageInput.disabled = true;
+      return;
+    }
+
+    showChatEmpty("Não foi possível conectar à sala.<br>Verifique a configuração do Firebase.");
+    roomStatusEl.textContent = "Erro de conexão";
+    footerStatusEl.textContent = "Erro";
+  }
 })();
-</script>  <script type="module" src="video.js"></script>  </body>
+</script>
 
-</html>
