@@ -10,79 +10,185 @@
 
     :root{
       --bg:#050507;
+      --bg-soft:#0b0b10;
       --panel:rgba(255,255,255,.05);
       --panel-2:rgba(255,255,255,.04);
+      --panel-3:rgba(255,255,255,.03);
       --line:rgba(255,255,255,.08);
+      --line-strong:rgba(230,192,123,.16);
       --gold:#e6c07b;
+      --gold-2:#c99c4a;
       --text:#fff;
-      --muted:rgba(255,255,255,.6);
+      --muted:rgba(255,255,255,.62);
       --ok:#82d996;
       --err:#ff6b6b;
+      --shadow:0 30px 80px rgba(0,0,0,.45);
+      --shadow-strong:0 30px 100px rgba(0,0,0,.58);
+      --radius-xl:26px;
+      --radius-lg:20px;
+      --radius-md:16px;
+      --radius-sm:14px;
+    }
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      background:
+        radial-gradient(900px 360px at 50% 0%, rgba(230,192,123,.09), transparent 60%),
+        radial-gradient(700px 320px at 10% 20%, rgba(255,255,255,.03), transparent 60%),
+        linear-gradient(180deg,#08080b 0%, #050507 100%);
+      color:var(--text);
+      font-family:"Segoe UI",system-ui,sans-serif;
     }
 
     body{
-      margin:0;
-      background:
-        radial-gradient(700px 320px at 50% 0%, rgba(230,192,123,.08), transparent 60%),
-        #050507;
-      color:var(--text);
-      font-family:"Segoe UI",system-ui,sans-serif;
-      min-height:100vh;
-      padding:28px 16px;
+      padding:28px 16px 40px;
     }
 
     .wrap{
       width:100%;
-      max-width:1120px;
+      max-width:1220px;
       margin:0 auto;
       display:grid;
       gap:18px;
     }
 
     .hero{
-      padding:22px;
-      border-radius:24px;
-      background:var(--panel);
+      position:relative;
+      overflow:hidden;
+      padding:24px;
+      border-radius:var(--radius-xl);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)),
+        radial-gradient(700px 240px at 50% 0%, rgba(230,192,123,.12), transparent 60%);
       border:1px solid var(--line);
-      box-shadow:0 30px 80px rgba(0,0,0,.55);
+      box-shadow:var(--shadow-strong);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:linear-gradient(90deg, transparent, rgba(230,192,123,.08), transparent);
+      opacity:.35;
+    }
+
+    .heroTop{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      flex-wrap:wrap;
     }
 
     .hero h1{
       margin:0 0 8px;
-      font-size:30px;
+      font-size:32px;
+      letter-spacing:-.03em;
     }
 
     .muted{
       color:var(--muted);
       font-size:14px;
-      line-height:1.5;
+      line-height:1.6;
+    }
+
+    .heroBadges{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .heroBadge{
+      min-height:38px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color:#f3e2be;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+
+    .heroBadge.active{
+      border-color:rgba(130,217,150,.22);
+      color:#dffbe7;
+      background:rgba(130,217,150,.10);
+    }
+
+    .heroBadge.inactive{
+      border-color:rgba(255,107,107,.18);
+      color:#ffd9d9;
+      background:rgba(255,107,107,.08);
     }
 
     .grid{
       display:grid;
-      grid-template-columns:1fr 1fr;
+      grid-template-columns:1.02fr 1fr;
       gap:18px;
     }
 
+    .stack{
+      display:grid;
+      gap:18px;
+      min-width:0;
+    }
+
     .card{
-      background:var(--panel);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025)),
+        rgba(255,255,255,.02);
       border:1px solid var(--line);
-      border-radius:22px;
+      border-radius:var(--radius-lg);
       padding:22px;
-      box-shadow:0 30px 80px rgba(0,0,0,.45);
+      box-shadow:var(--shadow);
+      min-width:0;
+    }
+
+    .card.premium{
+      border-color:var(--line-strong);
+      background:
+        radial-gradient(500px 180px at 50% 0%, rgba(230,192,123,.08), transparent 65%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)),
+        rgba(255,255,255,.02);
+    }
+
+    .sectionHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      margin-bottom:16px;
+      flex-wrap:wrap;
     }
 
     .sectionTitle{
-      margin:0 0 16px;
-      font-size:18px;
+      margin:0;
+      font-size:19px;
       color:var(--gold);
-      letter-spacing:.04em;
+      letter-spacing:.03em;
+    }
+
+    .sectionSub{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
     }
 
     .box{
       background:var(--panel-2);
       border:1px solid var(--line);
-      border-radius:14px;
+      border-radius:var(--radius-sm);
       padding:14px;
       margin-bottom:12px;
     }
@@ -98,7 +204,7 @@
       margin-top:6px;
       font-size:15px;
       word-break:break-word;
-      line-height:1.5;
+      line-height:1.55;
     }
 
     .status{
@@ -125,15 +231,22 @@
     }
 
     .field input{
-      min-height:50px;
+      min-height:52px;
       border-radius:14px;
       border:1px solid var(--line);
-      background:rgba(0,0,0,.25);
+      background:rgba(0,0,0,.28);
       color:#fff;
-      padding:12px;
+      padding:12px 14px;
       font-size:15px;
       outline:none;
       width:100%;
+      transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .field input:focus{
+      border-color:rgba(230,192,123,.30);
+      box-shadow:0 0 0 3px rgba(230,192,123,.08);
+      background:rgba(0,0,0,.34);
     }
 
     .field input::placeholder{
@@ -149,32 +262,41 @@
 
     button{
       width:100%;
-      min-height:50px;
+      min-height:52px;
       border:none;
       border-radius:14px;
       background:linear-gradient(135deg,#e6c07b,#c99c4a);
-      font-weight:700;
+      font-weight:800;
       cursor:pointer;
       font-size:15px;
       color:#000;
       padding:0 14px;
+      transition:transform .12s ease, opacity .18s ease, box-shadow .18s ease;
+      box-shadow:0 12px 32px rgba(201,156,74,.22);
+    }
+
+    button:hover{
+      transform:translateY(-1px);
     }
 
     button.secondary{
       background:rgba(255,255,255,.06);
       color:#fff;
       border:1px solid var(--line);
+      box-shadow:none;
     }
 
     button.danger{
       background:rgba(255,255,255,.06);
       color:#fff;
       border:1px solid var(--line);
+      box-shadow:none;
     }
 
     button[disabled]{
       opacity:.6;
       cursor:not-allowed;
+      transform:none;
     }
 
     .helper{
@@ -184,28 +306,159 @@
       line-height:1.55;
     }
 
-    .stats{
+    .licenseBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:36px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color:#fff;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+
+    .licenseBadge.active{
+      background:rgba(130,217,150,.10);
+      border-color:rgba(130,217,150,.20);
+      color:#dcfae5;
+    }
+
+    .licenseBadge.inactive{
+      background:rgba(255,107,107,.08);
+      border-color:rgba(255,107,107,.16);
+      color:#ffd7d7;
+    }
+
+    .balanceHero{
       display:grid;
-      grid-template-columns:repeat(2, 1fr);
+      grid-template-columns:1.1fr .9fr;
+      gap:14px;
+      margin-bottom:16px;
+    }
+
+    .balanceCard{
+      background:
+        radial-gradient(320px 120px at 50% 0%, rgba(230,192,123,.12), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)),
+        rgba(255,255,255,.02);
+      border:1px solid rgba(230,192,123,.14);
+      border-radius:18px;
+      padding:18px;
+      min-width:0;
+    }
+
+    .balanceLabel{
+      font-size:11px;
+      color:var(--gold);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+    }
+
+    .balanceValue{
+      margin-top:8px;
+      font-size:38px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1;
+    }
+
+    .balanceHint{
+      margin-top:10px;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .miniStatGrid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
       gap:12px;
       margin-bottom:14px;
     }
 
-    .stat{
+    .miniStat{
       background:var(--panel-2);
       border:1px solid var(--line);
       border-radius:14px;
       padding:14px;
+      min-width:0;
     }
 
-    .stat .number{
+    .miniStat .number{
       font-size:24px;
       font-weight:800;
-      margin-top:4px;
+      margin-top:6px;
     }
 
-    .full{
-      grid-column:1 / -1;
+    .progressWrap{
+      margin:14px 0 4px;
+      display:grid;
+      gap:8px;
+    }
+
+    .progressTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      font-size:13px;
+      color:var(--muted);
+      flex-wrap:wrap;
+    }
+
+    .progressBar{
+      height:14px;
+      border-radius:999px;
+      overflow:hidden;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      position:relative;
+    }
+
+    .progressFill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background:linear-gradient(90deg,#c99c4a,#e6c07b,#f0d6a0);
+      box-shadow:0 0 18px rgba(230,192,123,.28);
+      transition:width .25s ease;
+    }
+
+    .highlightBox{
+      background:
+        radial-gradient(260px 100px at 50% 0%, rgba(230,192,123,.08), transparent 60%),
+        rgba(255,255,255,.03);
+      border:1px solid rgba(230,192,123,.12);
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:12px;
+    }
+
+    .linkRow{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 180px;
+      gap:10px;
+      align-items:stretch;
+    }
+
+    .linkBox{
+      min-height:52px;
+      display:flex;
+      align-items:center;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.24);
+      overflow:hidden;
+      font-size:14px;
+      color:#fff;
+      word-break:break-all;
     }
 
     .historyList{
@@ -217,7 +470,7 @@
     .historyItem{
       background:var(--panel-2);
       border:1px solid var(--line);
-      border-radius:14px;
+      border-radius:16px;
       padding:14px;
     }
 
@@ -226,7 +479,7 @@
       justify-content:space-between;
       align-items:flex-start;
       gap:12px;
-      margin-bottom:8px;
+      margin-bottom:10px;
       flex-wrap:wrap;
     }
 
@@ -243,48 +496,83 @@
     }
 
     .historyMain{
-      font-size:15px;
-      line-height:1.55;
+      font-size:17px;
+      line-height:1.45;
+      font-weight:800;
     }
 
     .historyMeta{
       margin-top:8px;
       font-size:13px;
       color:rgba(255,255,255,.72);
-      line-height:1.5;
+      line-height:1.55;
     }
 
     .historyEmpty{
       background:var(--panel-2);
       border:1px dashed var(--line);
-      border-radius:14px;
-      padding:16px;
+      border-radius:16px;
+      padding:18px;
       color:var(--muted);
       font-size:14px;
       line-height:1.6;
     }
 
-    @media (max-width: 860px){
+    .summaryText{
+      line-height:1.7;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .summaryText strong{
+      color:#fff;
+    }
+
+    @media (max-width: 980px){
       .grid{
         grid-template-columns:1fr;
       }
 
+      .balanceHero{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 720px){
       .btnRow{
         grid-template-columns:1fr;
       }
 
-      .stats{
+      .miniStatGrid{
         grid-template-columns:1fr 1fr;
+      }
+
+      .linkRow{
+        grid-template-columns:1fr;
+      }
+
+      .heroTop{
+        flex-direction:column;
+        align-items:flex-start;
       }
     }
 
     @media (max-width: 520px){
-      .stats{
+      .miniStatGrid{
         grid-template-columns:1fr;
       }
 
       .hero h1{
         font-size:26px;
+      }
+
+      .balanceValue{
+        font-size:32px;
+      }
+
+      .card,
+      .hero{
+        padding:18px;
       }
     }
   </style>
@@ -293,151 +581,191 @@
 
   <div class="wrap">
     <section class="hero">
-      <h1>Seu painel</h1>
-      <div class="muted">
-        Gerencie sua conta, sua licença e sua área de afiliado do <strong style="color:#e6c07b;">O SextoLugar</strong>.
+      <div class="heroTop">
+        <div>
+          <h1>Seu painel</h1>
+          <div class="muted">
+            Gerencie sua conta, sua licença e sua área de afiliado do
+            <strong style="color:#e6c07b;">O SextoLugar</strong>.
+          </div>
+        </div>
+
+        <div class="heroBadges">
+          <div class="heroBadge" id="heroUserBadge">Conta conectada</div>
+          <div class="heroBadge inactive" id="heroAccessBadge">Sem acesso</div>
+        </div>
       </div>
     </section>
 
     <section class="grid">
-      <div class="card">
-        <h2 class="sectionTitle">Conta e acesso</h2>
+      <div class="stack">
+        <div class="card premium">
+          <div class="sectionHeader">
+            <div>
+              <h2 class="sectionTitle">Conta e acesso</h2>
+              <div class="sectionSub">Seu vínculo de licença e a liberação do jogo são gerenciados aqui.</div>
+            </div>
 
-        <div class="box">
-          <div class="label">Nome</div>
-          <div class="value" id="nome">Carregando...</div>
-        </div>
-
-        <div class="box">
-          <div class="label">Usuário</div>
-          <div class="value" id="username">Carregando...</div>
-        </div>
-
-        <div class="box">
-          <div class="label">Email</div>
-          <div class="value" id="email">Carregando...</div>
-        </div>
-
-        <div class="box">
-          <div class="label">Licença atual</div>
-          <div class="value" id="license">Não vinculada</div>
-        </div>
-
-        <div class="field">
-          <label for="licenseInput">Código da licença</label>
-          <input
-            id="licenseInput"
-            type="text"
-            placeholder="Ex.: OSL-XXXX-XXXX-XXXX-XXXX-XXXX"
-            autocomplete="off"
-          />
-        </div>
-
-        <button id="linkLicenseBtn">Vincular licença</button>
-
-        <div class="helper" id="licenseHelper">
-          Esta licença ficará vinculada à conta logada e não poderá ser usada por outra conta.
-        </div>
-
-        <div class="status" id="status">Carregando painel...</div>
-
-        <div class="btnRow">
-          <button id="playBtn" disabled>Entrar no jogo</button>
-          <button class="secondary" id="refreshBtn">Atualizar painel</button>
-        </div>
-
-        <button class="danger" id="logoutBtn" style="margin-top:10px;">Sair</button>
-      </div>
-
-      <div class="card">
-        <h2 class="sectionTitle">Afiliado</h2>
-
-        <div class="stats">
-          <div class="stat">
-            <div class="label">Moedas</div>
-            <div class="number" id="coins">0</div>
+            <div class="licenseBadge inactive" id="licenseBadge">Licença inativa</div>
           </div>
 
-          <div class="stat">
-            <div class="label">Moedas sacáveis</div>
-            <div class="number" id="withdrawableCoins">0</div>
+          <div class="box">
+            <div class="label">Nome</div>
+            <div class="value" id="nome">Carregando...</div>
           </div>
 
-          <div class="stat">
-            <div class="label">Indicações aprovadas</div>
-            <div class="number" id="referralsApproved">0</div>
+          <div class="box">
+            <div class="label">Usuário</div>
+            <div class="value" id="username">Carregando...</div>
           </div>
 
-          <div class="stat">
-            <div class="label">Indicações pendentes</div>
-            <div class="number" id="referralsPending">0</div>
+          <div class="box">
+            <div class="label">Email</div>
+            <div class="value" id="email">Carregando...</div>
           </div>
+
+          <div class="box">
+            <div class="label">Licença atual</div>
+            <div class="value" id="license">Não vinculada</div>
+          </div>
+
+          <div class="field">
+            <label for="licenseInput">Código da licença</label>
+            <input
+              id="licenseInput"
+              type="text"
+              placeholder="Ex.: OSL-XXXX-XXXX-XXXX-XXXX-XXXX"
+              autocomplete="off"
+            />
+          </div>
+
+          <button id="linkLicenseBtn">Vincular licença</button>
+
+          <div class="helper" id="licenseHelper">
+            Esta licença ficará vinculada à conta logada e não poderá ser usada por outra conta.
+          </div>
+
+          <div class="status" id="status">Carregando painel...</div>
+
+          <div class="btnRow">
+            <button id="playBtn" disabled>Entrar no jogo</button>
+            <button class="secondary" id="refreshBtn">Atualizar painel</button>
+          </div>
+
+          <button class="danger" id="logoutBtn" style="margin-top:10px;">Sair</button>
         </div>
 
-        <div class="box">
-          <div class="label">Seu código</div>
-          <div class="value" id="refCode">Carregando...</div>
-        </div>
-
-        <div class="box">
-          <div class="label">Seu link de indicação</div>
-          <div class="value" id="refLink">Carregando...</div>
-        </div>
-
-        <div class="box">
-          <div class="label">Comissão aprovada</div>
-          <div class="value" id="commissionApproved">R$ 0,00</div>
-        </div>
-
-        <div class="box">
-          <div class="label">Total já pago</div>
-          <div class="value" id="totalPaidOut">R$ 0,00</div>
-        </div>
-
-        <div class="field">
-          <label for="pixKeyInput">Chave Pix</label>
-          <input
-            id="pixKeyInput"
-            type="text"
-            placeholder="Digite sua chave Pix"
-            autocomplete="off"
-          />
-        </div>
-
-        <div class="btnRow">
-          <button id="savePixBtn">Salvar Pix</button>
-          <button class="secondary" id="copyLinkBtn">Copiar link</button>
-        </div>
-
-        <button id="withdrawBtn" style="margin-top:10px;">Solicitar saque de R$ 90,00</button>
-
-        <div class="helper">
-          Você ganha <strong style="color:#e6c07b;">10 moedas</strong> por venda aprovada pelo seu link.
-          Ao atingir <strong style="color:#e6c07b;">100 moedas</strong>, pode solicitar <strong style="color:#e6c07b;">R$ 90,00 via Pix</strong>.
-        </div>
-
-        <div class="status" id="affiliateStatus"></div>
-      </div>
-
-      <div class="card full">
-        <h2 class="sectionTitle">Histórico de ganhos</h2>
-        <div class="historyList" id="historyList">
-          <div class="historyEmpty">Carregando histórico...</div>
+        <div class="card">
+          <h2 class="sectionTitle">Histórico de ganhos</h2>
+          <div class="historyList" id="historyList">
+            <div class="historyEmpty">Carregando histórico...</div>
+          </div>
         </div>
       </div>
 
-      <div class="card full">
-        <h2 class="sectionTitle">Histórico de saques</h2>
-        <div class="historyList" id="withdrawList">
-          <div class="historyEmpty">Carregando saques...</div>
-        </div>
-      </div>
+      <div class="stack">
+        <div class="card premium">
+          <div class="sectionHeader">
+            <div>
+              <h2 class="sectionTitle">Afiliado</h2>
+              <div class="sectionSub">Compartilhe seu link, acumule moedas e solicite saques.</div>
+            </div>
+          </div>
 
-      <div class="card full">
-        <h2 class="sectionTitle">Resumo</h2>
-        <div class="muted" style="margin-bottom:0;">
-          Sua conta pode ter uma licença vinculada e, além disso, participar do sistema de indicação.
-          O acesso ao jogo é liberado quando a licença é validada e o token desta conta está ativo neste navegador.
+          <div class="balanceHero">
+            <div class="balanceCard">
+              <div class="balanceLabel">Saldo em moedas</div>
+              <div class="balanceValue" id="coins">0</div>
+              <div class="balanceHint">
+                Você recebe <strong style="color:#e6c07b;">10 moedas</strong> por venda aprovada pelo seu link.
+              </div>
+            </div>
+
+            <div class="balanceCard">
+              <div class="balanceLabel">Saldo sacável</div>
+              <div class="balanceValue" id="withdrawableCoins">0</div>
+              <div class="balanceHint">
+                Com <strong style="color:#e6c07b;">100 moedas</strong>, você pode solicitar
+                <strong style="color:#e6c07b;">R$ 90,00</strong> via Pix.
+              </div>
+            </div>
+          </div>
+
+          <div class="progressWrap">
+            <div class="progressTop">
+              <span>Progresso para saque</span>
+              <span id="progressText">0 / 100 moedas</span>
+            </div>
+            <div class="progressBar">
+              <div class="progressFill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <div class="miniStatGrid">
+            <div class="miniStat">
+              <div class="label">Indicações aprovadas</div>
+              <div class="number" id="referralsApproved">0</div>
+            </div>
+
+            <div class="miniStat">
+              <div class="label">Indicações pendentes</div>
+              <div class="number" id="referralsPending">0</div>
+            </div>
+          </div>
+
+          <div class="highlightBox">
+            <div class="box" style="margin-bottom:12px;">
+              <div class="label">Seu código</div>
+              <div class="value" id="refCode">Carregando...</div>
+            </div>
+
+            <div class="label" style="margin-bottom:8px;">Seu link de indicação</div>
+            <div class="linkRow">
+              <div class="linkBox" id="refLink">Carregando...</div>
+              <button class="secondary" id="copyLinkBtn">Copiar link</button>
+            </div>
+          </div>
+
+          <div class="box">
+            <div class="label">Comissão aprovada</div>
+            <div class="value" id="commissionApproved">R$ 0,00</div>
+          </div>
+
+          <div class="box">
+            <div class="label">Total já pago</div>
+            <div class="value" id="totalPaidOut">R$ 0,00</div>
+          </div>
+
+          <div class="field">
+            <label for="pixKeyInput">Chave Pix</label>
+            <input
+              id="pixKeyInput"
+              type="text"
+              placeholder="Digite sua chave Pix"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="btnRow">
+            <button id="savePixBtn">Salvar Pix</button>
+            <button id="withdrawBtn">Solicitar saque de R$ 90,00</button>
+          </div>
+
+          <div class="helper">
+            O saque fica disponível quando você atingir o mínimo de
+            <strong style="color:#e6c07b;">100 moedas sacáveis</strong> e tiver uma chave Pix cadastrada.
+          </div>
+
+          <div class="status" id="affiliateStatus"></div>
+        </div>
+
+        <div class="card">
+          <h2 class="sectionTitle">Resumo</h2>
+          <div class="summaryText">
+            Sua conta pode ter uma <strong>licença vinculada</strong> e também participar do
+            <strong>sistema de indicação</strong>. O acesso ao jogo é liberado quando a licença é validada
+            e o token desta conta está ativo neste navegador.
+          </div>
         </div>
       </div>
     </section>
@@ -486,6 +814,9 @@
     const linkLicenseBtn = document.getElementById("linkLicenseBtn");
     const licenseInput = document.getElementById("licenseInput");
     const licenseHelper = document.getElementById("licenseHelper");
+    const licenseBadgeEl = document.getElementById("licenseBadge");
+    const heroAccessBadgeEl = document.getElementById("heroAccessBadge");
+    const heroUserBadgeEl = document.getElementById("heroUserBadge");
 
     const coinsEl = document.getElementById("coins");
     const withdrawableCoinsEl = document.getElementById("withdrawableCoins");
@@ -501,7 +832,8 @@
     const withdrawBtn = document.getElementById("withdrawBtn");
     const affiliateStatusEl = document.getElementById("affiliateStatus");
     const historyListEl = document.getElementById("historyList");
-    const withdrawListEl = document.getElementById("withdrawList");
+    const progressFillEl = document.getElementById("progressFill");
+    const progressTextEl = document.getElementById("progressText");
 
     let currentUser = null;
     let currentProfile = null;
@@ -530,13 +862,23 @@
 
     function formatDateTime(value) {
       if (!value) return "-";
-      const d = new Date(value);
-      if (Number.isNaN(d.getTime())) return "-";
+
+      let dateValue = null;
+
+      if (typeof value === "string" || typeof value === "number") {
+        dateValue = new Date(value);
+      } else if (value?.seconds) {
+        dateValue = new Date(value.seconds * 1000);
+      } else if (typeof value?.toDate === "function") {
+        dateValue = value.toDate();
+      }
+
+      if (!dateValue || Number.isNaN(dateValue.getTime())) return "-";
 
       return new Intl.DateTimeFormat("pt-BR", {
         dateStyle: "short",
         timeStyle: "short"
-      }).format(d);
+      }).format(dateValue);
     }
 
     function normalizeLicenseCode(value) {
@@ -579,6 +921,27 @@
       licenseInput.value = code;
     }
 
+    function updateAccessBadges(profileData, firebaseUser) {
+      const hasAccess = canEnterGame(profileData);
+
+      heroUserBadgeEl.textContent = firebaseUser?.email ? "Conta conectada" : "Conta";
+      heroUserBadgeEl.className = "heroBadge";
+
+      if (hasAccess) {
+        heroAccessBadgeEl.textContent = "Acesso liberado";
+        heroAccessBadgeEl.className = "heroBadge active";
+
+        licenseBadgeEl.textContent = "Licença ativa";
+        licenseBadgeEl.className = "licenseBadge active";
+      } else {
+        heroAccessBadgeEl.textContent = "Sem acesso";
+        heroAccessBadgeEl.className = "heroBadge inactive";
+
+        licenseBadgeEl.textContent = "Licença inativa";
+        licenseBadgeEl.className = "licenseBadge inactive";
+      }
+    }
+
     function refreshUI(profileData, firebaseUser) {
       currentProfile = profileData;
 
@@ -606,6 +969,7 @@
         "Não vinculada";
 
       syncLicenseInput(profileData);
+      updateAccessBadges(profileData, firebaseUser);
 
       if (canEnterGame(profileData)) {
         setStatus("Acesso liberado.", "ok");
@@ -645,21 +1009,32 @@
         commissionApprovedEl.textContent = formatMoney(0);
         totalPaidOutEl.textContent = formatMoney(0);
         pixKeyInput.value = "";
+        progressFillEl.style.width = "0%";
+        progressTextEl.textContent = "0 / 100 moedas";
         withdrawBtn.disabled = true;
         return;
       }
 
-      coinsEl.textContent = String(Number(affiliate.coins || 0));
-      withdrawableCoinsEl.textContent = String(Number(affiliate.withdrawableCoins || 0));
-      referralsApprovedEl.textContent = String(Number(affiliate.referralsApproved || 0));
-      referralsPendingEl.textContent = String(Number(affiliate.referralsPending || 0));
+      const coins = Number(affiliate.coins || 0);
+      const withdrawableCoins = Number(affiliate.withdrawableCoins || 0);
+      const referralsApproved = Number(affiliate.referralsApproved || 0);
+      const referralsPending = Number(affiliate.referralsPending || 0);
+      const progress = Math.max(0, Math.min(100, withdrawableCoins));
+
+      coinsEl.textContent = String(coins);
+      withdrawableCoinsEl.textContent = String(withdrawableCoins);
+      referralsApprovedEl.textContent = String(referralsApproved);
+      referralsPendingEl.textContent = String(referralsPending);
       refCodeEl.textContent = affiliate.refCode || "-";
       refLinkEl.textContent = affiliate.referralLink || "-";
       commissionApprovedEl.textContent = formatMoney(affiliate.commissionApproved || 0);
       totalPaidOutEl.textContent = formatMoney(affiliate.totalPaidOutBRL || 0);
       pixKeyInput.value = affiliate.pixKey || "";
+      progressFillEl.style.width = progress + "%";
+      progressTextEl.textContent = `${withdrawableCoins} / 100 moedas`;
+
       withdrawBtn.disabled =
-        Number(affiliate.withdrawableCoins || 0) < 100 ||
+        withdrawableCoins < 100 ||
         !String(affiliate.pixKey || "").trim();
     }
 
@@ -674,67 +1049,28 @@
       }
 
       historyListEl.innerHTML = items.map((item) => {
-        const createdAt = item.approvedAt || item.createdAt || item.updatedAt || null;
+        const type = String(item.type || item.status || "ganho");
+        const createdAt = item.createdAt || item.approvedAt || item.date || null;
         const buyerEmail = item.buyerEmail || "";
-        const buyerName = item.buyerName || "";
-        const coins = Number(item.coinsAwarded || 0);
-        const amountBRL = Number(item.commissionAmount || 0);
-        const status = String(item.status || "pending").toUpperCase();
+        const coins = Number(item.coinsAwarded || item.coins || 0);
+        const amountBRL = Number(item.commissionAmount || item.amountBRL || 0);
         const externalReference = item.externalReference || item.referralId || "-";
 
         return `
           <div class="historyItem">
             <div class="historyTop">
-              <div class="historyType">Ganho • ${status}</div>
+              <div class="historyType">${type}</div>
               <div class="historyDate">${formatDateTime(createdAt)}</div>
             </div>
 
             <div class="historyMain">
-              +${coins} moedas
+              ${coins > 0 ? `+${coins} moedas` : formatMoney(amountBRL)}
             </div>
 
             <div class="historyMeta">
-              ${buyerName ? `Comprador: ${buyerName}<br>` : ""}
-              ${buyerEmail ? `E-mail: ${buyerEmail}<br>` : ""}
-              Comissão: ${formatMoney(amountBRL)}<br>
+              ${buyerEmail ? `Comprador: ${buyerEmail}<br>` : ""}
+              ${amountBRL > 0 ? `Comissão: ${formatMoney(amountBRL)}<br>` : ""}
               Referência: ${externalReference}
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderWithdrawals(items) {
-      if (!Array.isArray(items) || !items.length) {
-        withdrawListEl.innerHTML = `
-          <div class="historyEmpty">
-            Ainda não há saques solicitados na sua conta.
-          </div>
-        `;
-        return;
-      }
-
-      withdrawListEl.innerHTML = items.map((item) => {
-        const createdAt = item.createdAt || item.updatedAt || null;
-        const amountBRL = Number(item.amountBRL || 0);
-        const coinsUsed = Number(item.coinsUsed || 0);
-        const status = String(item.status || "pending").toUpperCase();
-        const pixKey = item.pixKey || "-";
-
-        return `
-          <div class="historyItem">
-            <div class="historyTop">
-              <div class="historyType">Saque • ${status}</div>
-              <div class="historyDate">${formatDateTime(createdAt)}</div>
-            </div>
-
-            <div class="historyMain">
-              ${formatMoney(amountBRL)}
-            </div>
-
-            <div class="historyMeta">
-              Moedas usadas: ${coinsUsed}<br>
-              Chave Pix: ${pixKey}
             </div>
           </div>
         `;
@@ -757,25 +1093,6 @@
       } catch (err) {
         console.error(err);
         renderHistory([]);
-      }
-    }
-
-    async function loadWithdrawHistory(user) {
-      if (!user) return;
-
-      try {
-        const res = await fetch(`${BACKEND_BASE_URL}/afiliado/saques/${user.uid}`);
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok || !data.ok || !Array.isArray(data.withdrawals)) {
-          renderWithdrawals([]);
-          return;
-        }
-
-        renderWithdrawals(data.withdrawals);
-      } catch (err) {
-        console.error(err);
-        renderWithdrawals([]);
       }
     }
 
@@ -1034,7 +1351,6 @@
       refreshUI(profile, user);
       await loadAffiliate(user);
       await loadAffiliateHistory(user);
-      await loadWithdrawHistory(user);
     }
 
     async function copyText(text) {
@@ -1204,7 +1520,6 @@
         }
 
         await loadAffiliate(currentUser);
-        await loadWithdrawHistory(currentUser);
         setAffiliateStatus("Chave Pix salva com sucesso.", "ok");
       } catch (err) {
         console.error(err);
@@ -1248,7 +1563,6 @@
 
         await loadAffiliate(currentUser);
         await loadAffiliateHistory(currentUser);
-        await loadWithdrawHistory(currentUser);
         setAffiliateStatus("Solicitação de saque criada com sucesso.", "ok");
       } catch (err) {
         console.error(err);
