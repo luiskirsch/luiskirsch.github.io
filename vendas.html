@@ -56,8 +56,363 @@ body{
   gap:30px;
 }
 
-    
-  @media(max-width:800px){
+/* ÁREA VISUAL */
+
+.productImage{
+  background:
+    radial-gradient(circle at top, rgba(230,192,123,.08), transparent 28%),
+    linear-gradient(145deg,#171720,#0c0c12);
+  border-radius:16px;
+  min-height:320px;
+  padding:18px;
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.previewBadge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.06);
+  color:#e6c07b;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+.previewBadge::before{
+  content:"";
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#e6c07b;
+  box-shadow:0 0 14px rgba(230,192,123,.45);
+}
+
+.roomPreview{
+  position:relative;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  background:
+    radial-gradient(circle at top, rgba(72,183,244,.06), transparent 30%),
+    linear-gradient(180deg,#0b0f15 0%, #090c11 100%);
+  box-shadow:
+    0 18px 50px rgba(0,0,0,.45),
+    inset 0 0 0 1px rgba(255,255,255,.02);
+}
+
+.roomTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.02);
+}
+
+.roomTopLeft{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.roomMiniTitle{
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(214,224,237,.65);
+}
+
+.roomMiniName{
+  font-size:18px;
+  font-weight:800;
+  color:#fff;
+}
+
+.roomMiniCode{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-height:34px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.06);
+  font-size:12px;
+  color:rgba(255,255,255,.86);
+  white-space:nowrap;
+}
+
+.roomMiniBody{
+  display:grid;
+  grid-template-columns:108px minmax(0, 1fr) 132px;
+  gap:12px;
+  padding:14px;
+  align-items:start;
+}
+
+.roomMiniSidebar{
+  display:grid;
+  gap:8px;
+  align-content:start;
+  min-width:0;
+}
+
+.playerMini{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 9px;
+  border-radius:12px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.05);
+}
+
+.playerMiniAvatar{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(180deg,#56bdf8,#1f86d9);
+  color:#fff;
+  font-size:12px;
+  font-weight:800;
+  flex:0 0 auto;
+}
+
+.playerMiniName{
+  font-size:12px;
+  font-weight:700;
+  color:#fff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.roomMiniCenter{
+  min-width:0;
+  display:grid;
+  gap:10px;
+}
+
+.roomMiniCardWrap{
+  display:grid;
+  place-items:center;
+  min-height:260px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at center, rgba(72,183,244,.08), transparent 55%),
+    rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.06);
+  padding:14px;
+}
+
+.roomMiniCard{
+  width:min(100%, 245px);
+  min-height:235px;
+  border-radius:20px;
+  border:1px solid rgba(230,192,123,.22);
+  background:
+    radial-gradient(circle at top, rgba(230,192,123,.06), transparent 35%),
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  box-shadow:0 16px 36px rgba(0,0,0,.35);
+  padding:18px 16px;
+  display:grid;
+  align-content:center;
+  gap:12px;
+  text-align:center;
+}
+
+.roomMiniCardType{
+  font-size:10px;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:#e6c07b;
+}
+
+.roomMiniCardTitle{
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:-.04em;
+  color:#fff;
+}
+
+.roomMiniCardText{
+  font-size:13px;
+  line-height:1.55;
+  color:rgba(255,255,255,.76);
+}
+
+.roomMiniBottom{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+
+.bottomMiniBox{
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.025);
+  padding:12px 14px;
+  min-height:auto;
+}
+
+.bottomMiniTitle{
+  font-size:10px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(214,224,237,.65);
+  margin-bottom:6px;
+}
+
+.bottomMiniText{
+  font-size:12px;
+  line-height:1.45;
+  color:rgba(255,255,255,.78);
+}
+
+.roomMiniChat{
+  display:grid;
+  gap:8px;
+  align-content:start;
+  min-width:0;
+}
+
+.chatMiniMsg{
+  padding:8px 9px;
+  border-radius:10px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.05);
+  font-size:11px;
+  line-height:1.45;
+  color:rgba(255,255,255,.82);
+  text-align:left;
+  word-break:break-word;
+}
+
+.chatMiniMsg.me{
+  background:rgba(72,183,244,.14);
+  border-color:rgba(72,183,244,.18);
+}
+
+.roomPreviewFooter{
+  margin-top:12px;
+  text-align:center;
+  font-size:13px;
+  color:rgba(255,255,255,.62);
+  line-height:1.5;
+}
+
+/* DETALHES */
+
+.productDetails h2{
+  font-size:26px;
+  margin-bottom:15px;
+}
+
+.productDetails p{
+  color:rgba(255,255,255,.75);
+  margin-bottom:20px;
+  line-height:1.6;
+}
+
+.features{
+  margin-bottom:18px;
+  padding-left:18px;
+}
+
+.features li{
+  margin-bottom:10px;
+}
+
+.price{
+  font-size:32px;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+.price span{
+  font-size:16px;
+  color:rgba(255,255,255,.6);
+}
+
+.formGrid{
+  display:grid;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.field{
+  display:grid;
+  gap:8px;
+}
+
+.field label{
+  font-size:13px;
+  color:rgba(255,255,255,.75);
+}
+
+.field input{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:#1a1a24;
+  color:#fff;
+  outline:none;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.buyBtn{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  background:linear-gradient(135deg,#e6c07b,#c99c4a);
+  color:#000;
+  transition:.2s;
+}
+
+.buyBtn:hover{
+  transform:scale(1.02);
+}
+
+.buyBtn:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.security{
+  margin-top:15px;
+  font-size:13px;
+  color:rgba(255,255,255,.5);
+  text-align:center;
+}
+
+.status{
+  margin-top:14px;
+  text-align:center;
+  font-size:14px;
+  color:rgba(255,255,255,.75);
+  min-height:20px;
+}
+
+/* RESPONSIVO CORRIGIDO */
+
+@media(max-width:800px){
   .productGrid{
     grid-template-columns:1fr;
     gap:22px;
@@ -136,8 +491,7 @@ body{
   }
 
   .roomMiniCenter{
-    display:grid;
-    gap:10px;
+    gap:8px;
   }
 
   .roomMiniCardWrap{
@@ -334,405 +688,6 @@ body{
     font-size:11px;
   }
 }
-
-  .hero{
-    margin-bottom:34px;
-  }
-
-  .hero h1{
-    font-size:28px;
-    line-height:1.08;
-  }
-
-  .hero p{
-    font-size:15px;
-    line-height:1.45;
-  }
-
-  .productDetails h2{
-    font-size:22px;
-    line-height:1.1;
-  }
-
-  .productDetails p{
-    font-size:15px;
-  }
-
-  .features li{
-    font-size:15px;
-    line-height:1.45;
-  }
-
-  .price{
-    font-size:26px;
-  }
-
-  .price span{
-    font-size:15px;
-  }
-}
-
-/* ÁREA VISUAL */
-
-.productImage{
-  background:
-    radial-gradient(circle at top, rgba(230,192,123,.08), transparent 28%),
-    linear-gradient(145deg,#171720,#0c0c12);
-  border-radius:16px;
-  min-height:320px;
-  padding:18px;
-  position:relative;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.06);
-}
-
-.previewBadge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 12px;
-  border-radius:999px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.06);
-  color:#e6c07b;
-  font-size:12px;
-  font-weight:600;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  margin-bottom:14px;
-}
-
-.previewBadge::before{
-  content:"";
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:#e6c07b;
-  box-shadow:0 0 14px rgba(230,192,123,.45);
-}
-
-.roomPreview{
-  position:relative;
-  border-radius:16px;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.06);
-  background:
-    radial-gradient(circle at top, rgba(72,183,244,.06), transparent 30%),
-    linear-gradient(180deg,#0b0f15 0%, #090c11 100%);
-  box-shadow:
-    0 18px 50px rgba(0,0,0,.45),
-    inset 0 0 0 1px rgba(255,255,255,.02);
-}
-
-.roomTop{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  padding:12px 14px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-  background:rgba(255,255,255,.02);
-}
-
-.roomTopLeft{
-  display:flex;
-  flex-direction:column;
-  gap:3px;
-}
-
-.roomMiniTitle{
-  font-size:11px;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-  color:rgba(214,224,237,.65);
-}
-
-.roomMiniName{
-  font-size:18px;
-  font-weight:800;
-  color:#fff;
-}
-
-.roomMiniCode{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  min-height:34px;
-  padding:8px 12px;
-  border-radius:999px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.06);
-  font-size:12px;
-  color:rgba(255,255,255,.86);
-  white-space:nowrap;
-}
-
-.roomMiniBody{
-  display:grid;
-  grid-template-columns:108px 1fr 132px;
-  gap:12px;
-  padding:14px;
-}
-
-.roomMiniSidebar{
-  display:grid;
-  gap:8px;
-  align-content:start;
-}
-
-.playerMini{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 9px;
-  border-radius:12px;
-  background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.05);
-}
-
-.playerMiniAvatar{
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:linear-gradient(180deg,#56bdf8,#1f86d9);
-  color:#fff;
-  font-size:12px;
-  font-weight:800;
-  flex:0 0 auto;
-}
-
-.playerMiniName{
-  font-size:12px;
-  font-weight:700;
-  color:#fff;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.roomMiniCenter{
-  min-width:0;
-  display:grid;
-  gap:10px;
-}
-
-.roomMiniCardWrap{
-  display:grid;
-  place-items:center;
-  min-height:260px;
-  border-radius:18px;
-  background:
-    radial-gradient(circle at center, rgba(72,183,244,.08), transparent 55%),
-    rgba(255,255,255,.02);
-  border:1px solid rgba(255,255,255,.06);
-  padding:14px;
-}
-
-.roomMiniCard{
-  width:min(100%, 245px);
-  min-height:235px;
-  border-radius:20px;
-  border:1px solid rgba(230,192,123,.22);
-  background:
-    radial-gradient(circle at top, rgba(230,192,123,.06), transparent 35%),
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-  box-shadow:0 16px 36px rgba(0,0,0,.35);
-  padding:18px 16px;
-  display:grid;
-  align-content:center;
-  gap:12px;
-  text-align:center;
-}
-
-.roomMiniCardType{
-  font-size:10px;
-  letter-spacing:.24em;
-  text-transform:uppercase;
-  color:#e6c07b;
-}
-
-.roomMiniCardTitle{
-  font-size:24px;
-  font-weight:900;
-  letter-spacing:-.04em;
-  color:#fff;
-}
-
-.roomMiniCardText{
-  font-size:13px;
-  line-height:1.55;
-  color:rgba(255,255,255,.76);
-}
-
-.roomMiniBottom{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:10px;
-}
-
-.bottomMiniBox{
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.06);
-  background:rgba(255,255,255,.025);
-  padding:12px 14px;
-  min-height:auto;
-}
-
-.bottomMiniTitle{
-  font-size:10px;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-  color:rgba(214,224,237,.65);
-  margin-bottom:6px;
-}
-
-.bottomMiniText{
-  font-size:12px;
-  line-height:1.45;
-  color:rgba(255,255,255,.78);
-}
-
-.roomMiniChat{
-  display:grid;
-  gap:8px;
-  align-content:start;
-}
-
-.chatMiniMsg{
-  padding:8px 9px;
-  border-radius:10px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.05);
-  font-size:11px;
-  line-height:1.45;
-  color:rgba(255,255,255,.82);
-  text-align:left;
-}
-
-.chatMiniMsg.me{
-  background:rgba(72,183,244,.14);
-  border-color:rgba(72,183,244,.18);
-}
-
-.roomPreviewFooter{
-  margin-top:12px;
-  text-align:center;
-  font-size:13px;
-  color:rgba(255,255,255,.62);
-  line-height:1.5;
-}
-
-/* DETALHES */
-
-.productDetails h2{
-  font-size:26px;
-  margin-bottom:15px;
-}
-
-.productDetails p{
-  color:rgba(255,255,255,.75);
-  margin-bottom:20px;
-  line-height:1.6;
-}
-
-.features{
-  margin-bottom:18px;
-  padding-left:18px;
-}
-
-.features li{
-  margin-bottom:10px;
-}
-
-.price{
-  font-size:32px;
-  font-weight:bold;
-  margin-bottom:15px;
-}
-
-.price span{
-  font-size:16px;
-  color:rgba(255,255,255,.6);
-}
-
-.formGrid{
-  display:grid;
-  gap:12px;
-  margin-bottom:18px;
-}
-
-.field{
-  display:grid;
-  gap:8px;
-}
-
-.field label{
-  font-size:13px;
-  color:rgba(255,255,255,.75);
-}
-
-.field input{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  background:#1a1a24;
-  color:#fff;
-  outline:none;
-  border:1px solid rgba(255,255,255,.08);
-}
-
-.buyBtn{
-  width:100%;
-  padding:16px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-  background:linear-gradient(135deg,#e6c07b,#c99c4a);
-  color:#000;
-  transition:.2s;
-}
-
-.buyBtn:hover{
-  transform:scale(1.02);
-}
-
-.buyBtn:disabled{
-  opacity:.65;
-  cursor:not-allowed;
-  transform:none;
-}
-
-.security{
-  margin-top:15px;
-  font-size:13px;
-  color:rgba(255,255,255,.5);
-  text-align:center;
-}
-
-.status{
-  margin-top:14px;
-  text-align:center;
-  font-size:14px;
-  color:rgba(255,255,255,.75);
-  min-height:20px;
-}
-
-.refInfo{
-  margin:0 0 18px;
-  padding:12px 14px;
-  border-radius:12px;
-  border:1px solid rgba(230,192,123,.18);
-  background:rgba(230,192,123,.08);
-  color:#f3dfb8;
-  font-size:13px;
-  line-height:1.5;
-  display:none;
-}
 </style>
 </head>
 
@@ -829,8 +784,6 @@ body{
           R$ 29,90 <span>pagamento único</span>
         </div>
 
-        <div class="refInfo" id="refInfo"></div>
-
         <div class="formGrid">
           <div class="field">
             <label for="nome">Seu nome</label>
@@ -859,32 +812,11 @@ body{
 </div>
 
 <script>
-const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
-
-function getReferralCodeFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  return String(params.get("ref") || "")
-    .trim()
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "");
-}
-
-function initReferralUI() {
-  const refCode = getReferralCodeFromUrl();
-  const refInfo = document.getElementById("refInfo");
-
-  if (!refCode || !refInfo) return;
-
-  refInfo.style.display = "block";
-  refInfo.textContent = `Você entrou por um link de indicação (${refCode}). Se a compra for aprovada, a recompensa será atribuída automaticamente.`;
-}
-
 async function comprar() {
   const nome = document.getElementById("nome").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
   const status = document.getElementById("status");
   const btn = document.getElementById("buyBtn");
-  const refCode = getReferralCodeFromUrl();
 
   if (!nome) {
     status.textContent = "Digite seu nome.";
@@ -900,18 +832,15 @@ async function comprar() {
     btn.disabled = true;
     status.textContent = "Criando pagamento...";
 
-    const payload = { nome, email };
-    if (refCode) payload.refCode = refCode;
-
-    const res = await fetch(`${BACKEND_BASE_URL}/criar-pagamento`, {
+    const res = await fetch("https://osl-video-server.onrender.com/criar-pagamento", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ nome, email })
     });
 
-    const data = await res.json().catch(() => ({}));
+    const data = await res.json();
 
     if (!res.ok || !data.url || !data.ref) {
       console.error(data);
@@ -921,13 +850,7 @@ async function comprar() {
       if (typeof data?.message === "string" && data.message.trim()) {
         erro = data.message;
       } else if (typeof data?.error === "string" && data.error.trim()) {
-        if (data.error === "CODIGO_INDICACAO_INVALIDO") {
-          erro = "O link de indicação é inválido.";
-        } else if (data.error === "AUTOINDICACAO_NAO_PERMITIDA") {
-          erro = "Você não pode comprar usando o próprio link de indicação.";
-        } else {
-          erro = data.error;
-        }
+        erro = data.error;
       } else if (data?.details) {
         erro = JSON.stringify(data.details);
       }
@@ -941,12 +864,6 @@ async function comprar() {
     localStorage.setItem("osl_checkout_email", email);
     localStorage.setItem("osl_checkout_ref", data.ref);
 
-    if (refCode) {
-      localStorage.setItem("osl_checkout_ref_code", refCode);
-    } else {
-      localStorage.removeItem("osl_checkout_ref_code");
-    }
-
     window.location.href = data.url;
   } catch (error) {
     console.error(error);
@@ -954,8 +871,6 @@ async function comprar() {
     btn.disabled = false;
   }
 }
-
-initReferralUI();
 </script>
 
 </body>
