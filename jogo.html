@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />  
   <title>O SextoLugar — Jogo</title>  
 
-  <!-- FAVICON / ÍCONE DA ABA -->
   <link rel="icon" href="./favicon.png">
   
   <style>  
@@ -55,6 +54,7 @@
       opacity:.72;  
       animation: pulseGlow 4.8s ease-in-out infinite;  
     }  
+
     @keyframes pulseGlow{  
       0%,100%{ opacity:.58; transform:translateY(0) scale(1); }  
       50%{ opacity:.92; transform:translateY(-6px) scale(1.01); }  
@@ -103,6 +103,7 @@
       position:relative;  
       overflow:hidden;  
     }  
+
     .card::after{  
       content:"";  
       position:absolute;  
@@ -138,6 +139,7 @@
       overflow:hidden;  
       box-shadow: inset 0 0 30px rgba(0,0,0,.35);  
     }  
+
     .progress{  
       height:100%;  
       width:0%;  
@@ -174,6 +176,7 @@
       transition: transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease;  
       box-shadow: 0 14px 40px rgba(0,0,0,.35);  
     }  
+
     button:hover{ transform: translateY(-1px); border-color:rgba(230,192,123,.34); }  
     button:active{ transform: translateY(0); opacity:.9; }  
   
@@ -204,6 +207,7 @@
       cursor:pointer;  
       user-select:none;  
     }  
+
     .pill strong{ color: var(--gold); }  
   
     @media (max-width:520px){  
@@ -223,6 +227,7 @@
       pointer-events:none;
       padding: 0 10px;
     }
+
     .footer .brand{
       color:rgba(230,192,123,.85);
       font-weight:700;
@@ -266,12 +271,200 @@
     <footer class="footer">
       © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
     </footer>
-
   </main>  
+  
+  <script>
+    window.PANEL_SERVER_BASE = "http://localhost:3000";
+  </script>
+
+  <script>
+    const PanelBridge = (() => {
+      const SERVER_BASE =
+        window.PANEL_SERVER_BASE ||
+        localStorage.getItem("PANEL_SERVER_BASE") ||
+        "http://localhost:3000";
+
+      async function post(path, data = {}) {
+        try {
+          const res = await fetch(SERVER_BASE + path, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+          });
+
+          const json = await res.json().catch(() => null);
+
+          if (!res.ok) {
+            console.error("PanelBridge erro:", path, json || res.status);
+            return { ok: false, error: json || res.status };
+          }
+
+          return json || { ok: true };
+        } catch (error) {
+          console.error("PanelBridge falha:", path, error);
+          return { ok: false, error: error.message || String(error) };
+        }
+      }
+
+      function normalizeRoomId(roomId) {
+        return String(roomId || "").trim();
+      }
+
+      function normalizePlayerId(playerId) {
+        return String(playerId || "").trim();
+      }
+
+      function normalizePlayerName(playerName) {
+        return String(playerName || "").trim();
+      }
+
+      return {
+        baseUrl: SERVER_BASE,
+
+        async roomCreate(roomId, name = "", host = "") {
+          return post("/game/room/create", {
+            roomId: normalizeRoomId(roomId),
+            name: String(name || "").trim(),
+            host: String(host || "").trim()
+          });
+        },
+
+        async playerJoin(roomId, playerId, playerName = "") {
+          return post("/game/player/join", {
+            roomId: normalizeRoomId(roomId),
+            playerId: normalizePlayerId(playerId),
+            playerName: normalizePlayerName(playerName)
+          });
+        },
+
+        async playerLeave(roomId, playerId) {
+          return post("/game/player/leave", {
+            roomId: normalizeRoomId(roomId),
+            playerId: normalizePlayerId(playerId)
+          });
+        },
+
+        async sessionStart(roomId) {
+          return post("/game/session/start", {
+            roomId: normalizeRoomId(roomId)
+          });
+        },
+
+        async sessionEnd(roomId) {
+          return post("/game/session/end", {
+            roomId: normalizeRoomId(roomId)
+          });
+        },
+
+        async video(roomId, active) {
+          return post("/game/video", {
+            roomId: normalizeRoomId(roomId),
+            active: !!active
+          });
+        },
+
+        async recording(roomId, active) {
+          return post("/game/recording", {
+            roomId: normalizeRoomId(roomId),
+            active: !!active
+          });
+        },
+
+        async paymentApproved(player, value, roomId = "") {
+          return post("/payment/approved", {
+            player: String(player || "").trim(),
+            value: Number(value || 0),
+            roomId: normalizeRoomId(roomId)
+          });
+        },
+
+        async licenseIssued(player, licenseCode) {
+          return post("/license/issued", {
+            player: String(player || "").trim(),
+            licenseCode: String(licenseCode || "").trim()
+          });
+        },
+
+        async accessGranted(player, roomId = "") {
+          return post("/access/granted", {
+            player: String(player || "").trim(),
+            roomId: normalizeRoomId(roomId)
+          });
+        },
+
+        async accessFailed(player, reason = "") {
+          return post("/access/failed", {
+            player: String(player || "").trim(),
+            reason: String(reason || "").trim()
+          });
+        },
+
+        async affiliateConversion(affiliate, buyer) {
+          return post("/affiliate/conversion", {
+            affiliate: String(affiliate || "").trim(),
+            buyer: String(buyer || "").trim()
+          });
+        }
+      };
+    })();
+
+    window.PanelBridge = PanelBridge;
+  </script>
   
   <script>  
     let audioCtx = null;  
     let soundEnabled = true;  
+    let gameBooted = false;
+    let sessionStartedInPanel = false;
+
+    const roomId =
+      sessionStorage.getItem("osl_room_id") ||
+      ("ritual-" + Math.random().toString(36).slice(2, 8));
+
+    const playerId =
+      sessionStorage.getItem("osl_player_id") ||
+      ("player-" + Math.random().toString(36).slice(2, 10));
+
+    const playerName =
+      sessionStorage.getItem("osl_player_name") || "Jogador";
+
+    sessionStorage.setItem("osl_room_id", roomId);
+    sessionStorage.setItem("osl_player_id", playerId);
+    sessionStorage.setItem("osl_player_name", playerName);
+
+    async function bootPanelConnection() {
+      if (gameBooted) return;
+      gameBooted = true;
+
+      await PanelBridge.roomCreate(roomId, "Sala do Jogo", playerName);
+      await PanelBridge.playerJoin(roomId, playerId, playerName);
+      await PanelBridge.video(roomId, false);
+      await PanelBridge.recording(roomId, false);
+    }
+
+    async function markSessionStart() {
+      if (sessionStartedInPanel) return;
+      sessionStartedInPanel = true;
+      await PanelBridge.sessionStart(roomId);
+    }
+
+    async function markSessionPause() {
+      await PanelBridge.video(roomId, false);
+    }
+
+    async function markSessionReset() {
+      sessionStartedInPanel = false;
+      await PanelBridge.sessionEnd(roomId);
+    }
+
+    async function markLeavingGame() {
+      await PanelBridge.playerLeave(roomId, playerId);
+      if (sessionStartedInPanel) {
+        await PanelBridge.sessionEnd(roomId);
+      }
+    }
   
     function ensureAudio() {  
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();  
@@ -325,7 +518,10 @@
       progressBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;  
     }  
   
-    function start(){  
+    async function start(){  
+      await bootPanelConnection();
+      await markSessionStart();
+
       ensureAudio();  
       if (!paused) return;  
       paused = false;  
@@ -338,6 +534,8 @@
           remaining = 0;  
           setUI();  
           statusEl.textContent = "Status: tempo esgotado.";  
+          PanelBridge.sessionEnd(roomId);
+          sessionStartedInPanel = false;
           return;  
         }  
         remaining--;  
@@ -346,18 +544,20 @@
       }, 1000);  
     }  
   
-    function pause(){  
+    async function pause(){  
       if (paused) return;  
       paused = true;  
       clearInterval(interval);  
       statusEl.textContent = "Status: pausado.";  
+      await markSessionPause();
     }  
   
-    function reset(){  
-      pause();  
+    async function reset(){  
+      await pause();  
       remaining = totalSeconds;  
       setUI();  
       statusEl.textContent = "Status: pronto.";  
+      await markSessionReset();
     }  
   
     function applyMode(){  
@@ -371,7 +571,11 @@
     btnStart.addEventListener("click", start);  
     btnPause.addEventListener("click", pause);  
     btnReset.addEventListener("click", reset);  
-    btnVoltar.addEventListener("click", () => window.location.href = "./entrada.html");  
+
+    btnVoltar.addEventListener("click", async () => {
+      await markLeavingGame();
+      window.location.href = "./entrada.html";
+    });  
   
     soundToggle.addEventListener("click", () => {  
       ensureAudio();  
@@ -384,8 +588,19 @@
       modeToggle.innerHTML = (mode === "rodada") ? "MODO: <strong>RODADA</strong>" : "MODO: <strong>LONGO</strong>";  
       applyMode();  
     });  
+
+    window.addEventListener("beforeunload", () => {
+      navigator.sendBeacon?.(
+        PanelBridge.baseUrl + "/game/player/leave",
+        new Blob(
+          [JSON.stringify({ roomId, playerId })],
+          { type: "application/json" }
+        )
+      );
+    });
   
-    setUI();  
+    setUI();
+    bootPanelConnection();
   </script>  
 </body>  
 </html>
