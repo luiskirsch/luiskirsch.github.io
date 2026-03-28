@@ -2492,6 +2492,7 @@
       panelRoomBooted = true;
 
       try {
+        await PanelBridge.playerLeave(roomCode, participantId).catch(() => {});
         await PanelBridge.roomCreate(roomCode, roomName, playerName);
         await PanelBridge.playerJoin(roomCode, participantId, playerName);
       } catch (error) {
@@ -2536,6 +2537,9 @@
         console.error("Erro ao atualizar gravação no painel:", error);
       }
     }
+
+    window.panelMarkVideo = panelMarkVideo;
+    window.panelMarkRecording = panelMarkRecording;
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -3649,9 +3653,6 @@
         await ensureUserProfile();
         await ensureRoom();
         await upsertSelf();
-
-        await panelMarkVideo(false);
-        await panelMarkRecording(false);
 
         setRitualWaitingState();
         startHeartbeat();
