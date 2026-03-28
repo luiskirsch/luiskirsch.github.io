@@ -8,6 +8,9 @@
 
   <style>
     body{
+      visibility:visible;
+    }
+    body.osl-loading{
       visibility:hidden;
     }
     body.osl-ready{
@@ -455,91 +458,93 @@
   </style>
 
   <script>
-(async function protegerEntrada() {
-  const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+    window.addEventListener("DOMContentLoaded", () => {
+      document.body.classList.add("osl-loading");
+    });
+  </script>
 
-  function liberarPagina() {
-    if (document.body) {
-      document.body.classList.add("osl-ready");
-    } else {
-      window.addEventListener("DOMContentLoaded", function () {
+  <script>
+    (async function protegerEntrada() {
+      const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+
+      function liberarPagina() {
+        if (!document.body) return;
+        document.body.classList.remove("osl-loading");
         document.body.classList.add("osl-ready");
-      }, { once: true });
-    }
-  }
-
-  function irParaVendas() {
-    window.location.href = "./vendas.html";
-  }
-
-  try {
-    let accessToken = localStorage.getItem("osl_access_token");
-    const licenseToken = localStorage.getItem("osl_license_token");
-
-    if (!accessToken && licenseToken) {
-      try {
-        const renewRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ licenseToken })
-        });
-
-        const renewData = await renewRes.json().catch(() => ({}));
-
-        if (renewRes.ok && renewData.accessToken) {
-          localStorage.setItem("osl_access_token", renewData.accessToken);
-
-          if (renewData.expiresAt) {
-            localStorage.setItem("osl_access_expires_at", String(renewData.expiresAt));
-          }
-
-          accessToken = renewData.accessToken;
-        }
-      } catch (e) {
-        console.error("Erro ao renovar acesso:", e);
       }
-    }
 
-    if (!accessToken) {
-      irParaVendas();
-      return;
-    }
+      function irParaVendas() {
+        window.location.href = "./vendas.html";
+      }
 
-    let res;
-    let data = {};
+      try {
+        let accessToken = localStorage.getItem("osl_access_token");
+        const licenseToken = localStorage.getItem("osl_license_token");
 
-    try {
-      res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ accessToken })
-      });
+        if (!accessToken && licenseToken) {
+          try {
+            const renewRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ licenseToken })
+            });
 
-      data = await res.json().catch(() => ({}));
-    } catch (e) {
-      console.error("Erro ao verificar acesso:", e);
-      irParaVendas();
-      return;
-    }
+            const renewData = await renewRes.json().catch(() => ({}));
 
-    if (!res.ok || !data.liberado) {
-      localStorage.removeItem("osl_access_token");
-      localStorage.removeItem("osl_access_expires_at");
-      irParaVendas();
-      return;
-    }
+            if (renewRes.ok && renewData.accessToken) {
+              localStorage.setItem("osl_access_token", renewData.accessToken);
 
-    liberarPagina();
-  } catch (error) {
-    console.error("Erro ao validar acesso:", error);
-    irParaVendas();
-  }
-})();
-</script>
+              if (renewData.expiresAt) {
+                localStorage.setItem("osl_access_expires_at", String(renewData.expiresAt));
+              }
+
+              accessToken = renewData.accessToken;
+            }
+          } catch (e) {
+            console.error("Erro ao renovar acesso:", e);
+          }
+        }
+
+        if (!accessToken) {
+          irParaVendas();
+          return;
+        }
+
+        let res;
+        let data = {};
+
+        try {
+          res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ accessToken })
+          });
+
+          data = await res.json().catch(() => ({}));
+        } catch (e) {
+          console.error("Erro ao verificar acesso:", e);
+          irParaVendas();
+          return;
+        }
+
+        if (!res.ok || !data.liberado) {
+          localStorage.removeItem("osl_access_token");
+          localStorage.removeItem("osl_access_expires_at");
+          irParaVendas();
+          return;
+        }
+
+        liberarPagina();
+      } catch (error) {
+        console.error("Erro ao validar acesso:", error);
+        irParaVendas();
+      }
+    })();
+  </script>
 </head>
 
 <body>
@@ -717,10 +722,18 @@
     const btnCriarSala = document.getElementById("btnCriarSala");
     const btnEntrarSala = document.getElementById("btnEntrarSala");
 
-    btnRitual.addEventListener("click", () => modalBack.style.display = "flex");
-    btnClose.addEventListener("click", () => modalBack.style.display = "none");
+    btnRitual.addEventListener("click", () => {
+      modalBack.style.display = "flex";
+    });
+
+    btnClose.addEventListener("click", () => {
+      modalBack.style.display = "none";
+    });
+
     modalBack.addEventListener("click", (e) => {
-      if(e.target === modalBack) modalBack.style.display = "none";
+      if (e.target === modalBack) {
+        modalBack.style.display = "none";
+      }
     });
 
     function setStatus(text, type){
@@ -778,10 +791,11 @@
       sessionStorage.setItem("osl_room_id", codigoSala);
       sessionStorage.setItem("osl_player_name", nomeJogador);
 
-      if (!sessionStorage.getItem("osl_player_id")) {
-        const existing = localStorage.getItem("osl_player_id") || gerarPlayerId();
-        localStorage.setItem("osl_player_id", existing);
-        sessionStorage.setItem("osl_player_id", existing);
+      let playerId = sessionStorage.getItem("osl_player_id");
+      if (!playerId) {
+        playerId = localStorage.getItem("osl_player_id") || gerarPlayerId();
+        localStorage.setItem("osl_player_id", playerId);
+        sessionStorage.setItem("osl_player_id", playerId);
       }
 
       try {
@@ -854,6 +868,10 @@
         codigoSala,
         nomeSala
       });
+    });
+
+    window.addEventListener("pageshow", () => {
+      scene.classList.remove("fadeOut");
     });
   </script>
 </body>
