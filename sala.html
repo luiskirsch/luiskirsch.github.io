@@ -3456,26 +3456,27 @@ async function leaveRoom() {
 }
 
 (async function init() {
+(async function init() {
   try {
     roomNameEl.textContent = roomName;
     roomCodeEl.textContent = roomCode;
     roomStatusEl.textContent = "Conectando";
     footerStatusEl.textContent = "Conectando";
 
-await ensureUserProfile();
-await ensureRoom();
-await upsertSelf();
+    await ensureUserProfile();
+    await ensureRoom();
+    await upsertSelf();
 
-await panelMarkVideo(false);
-await panelMarkRecording(false);
+    await panelMarkVideo(false);
+    await panelMarkRecording(false);
 
-setRitualWaitingState();
-startHeartbeat();
-bindRoom();
-bindPlayers();
-bindMessages();
-bindTyping();
-bindRitual();
+    setRitualWaitingState();
+    startHeartbeat();
+    bindRoom();
+    bindPlayers();
+    bindMessages();
+    bindTyping();
+    bindRitual();
   } catch (error) {
     console.error(error);
 
@@ -3494,7 +3495,18 @@ bindRitual();
     footerStatusEl.textContent = "Erro";
   }
 })();
-</script>
 
+window.addEventListener("beforeunload", () => {
+  try {
+    navigator.sendBeacon?.(
+      PanelBridge.baseUrl + "/game/player/leave",
+      new Blob(
+        [JSON.stringify({ roomId: roomCode, playerId: participantId })],
+        { type: "application/json" }
+      )
+    );
+  } catch (e) {}
+});
+     
 <script type="module" src="video.js"></script>
 <html>
