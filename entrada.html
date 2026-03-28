@@ -473,7 +473,7 @@
       const licenseToken = localStorage.getItem("osl_license_token");
 
       if (!accessToken && licenseToken) {
-        const renewRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso`, {
+        const renewRes = await fetch(\`\${BACKEND_BASE_URL}/emitir-acesso\`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -499,7 +499,7 @@
         return;
       }
 
-      const res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
+      const res = await fetch(\`\${BACKEND_BASE_URL}/verificar-acesso\`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -522,7 +522,7 @@
       window.location.href = "./vendas.html";
     }
   })();
-</script>
+  </script>
 </head>
 
 <body>
@@ -609,6 +609,84 @@
   </div>
 
   <script>
+    window.PANEL_SERVER_BASE = "http://localhost:3000";
+  </script>
+
+  <script>
+    const PanelBridge = (() => {
+      const SERVER_BASE =
+        window.PANEL_SERVER_BASE ||
+        localStorage.getItem("PANEL_SERVER_BASE") ||
+        "http://localhost:3000";
+
+      async function post(path, data = {}) {
+        try {
+          const res = await fetch(SERVER_BASE + path, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+          });
+
+          const json = await res.json().catch(() => null);
+
+          if (!res.ok) {
+            console.error("PanelBridge erro:", path, json || res.status);
+            return { ok: false, error: json || res.status };
+          }
+
+          return json || { ok: true };
+        } catch (error) {
+          console.error("PanelBridge falha:", path, error);
+          return { ok: false, error: error.message || String(error) };
+        }
+      }
+
+      function normalizeRoomId(roomId) {
+        return String(roomId || "").trim();
+      }
+
+      function normalizePlayerId(playerId) {
+        return String(playerId || "").trim();
+      }
+
+      function normalizePlayerName(playerName) {
+        return String(playerName || "").trim();
+      }
+
+      return {
+        baseUrl: SERVER_BASE,
+
+        async roomCreate(roomId, name = "", host = "") {
+          return post("/game/room/create", {
+            roomId: normalizeRoomId(roomId),
+            name: String(name || "").trim(),
+            host: String(host || "").trim()
+          });
+        },
+
+        async playerJoin(roomId, playerId, playerName = "") {
+          return post("/game/player/join", {
+            roomId: normalizeRoomId(roomId),
+            playerId: normalizePlayerId(playerId),
+            playerName: normalizePlayerName(playerName)
+          });
+        },
+
+        async playerLeave(roomId, playerId) {
+          return post("/game/player/leave", {
+            roomId: normalizeRoomId(roomId),
+            playerId: normalizePlayerId(playerId)
+          });
+        }
+      };
+    })();
+
+    window.PanelBridge = PanelBridge;
+  </script>
+
+  <script>
     const modalBack = document.getElementById("modalBack");
     const btnRitual = document.getElementById("btnRitual");
     const btnClose = document.getElementById("btnClose");
@@ -648,6 +726,10 @@
       return "SL-" + n;
     }
 
+    function gerarPlayerId(){
+      return "player-" + Math.random().toString(36).slice(2, 10);
+    }
+
     function obterNomeJogador(){
       return nomeJogadorEl.value.trim().slice(0, 40);
     }
@@ -656,10 +738,40 @@
       return nomeSalaEl.value.trim().slice(0, 40);
     }
 
-    function entrarNaSala({ nomeJogador, codigoSala, nomeSala }){
+    async function registrarNoPainel({ nomeJogador, codigoSala, nomeSala }) {
+      let playerId = localStorage.getItem("osl_player_id");
+
+      if (!playerId) {
+        playerId = gerarPlayerId();
+        localStorage.setItem("osl_player_id", playerId);
+      }
+
+      localStorage.setItem("osl_panel_room_id", codigoSala);
+      localStorage.setItem("osl_panel_player_name", nomeJogador);
+
+      await PanelBridge.roomCreate(codigoSala, nomeSala, nomeJogador);
+      await PanelBridge.playerJoin(codigoSala, playerId, nomeJogador);
+    }
+
+    async function entrarNaSala({ nomeJogador, codigoSala, nomeSala }){
       localStorage.setItem("osl_nome", nomeJogador);
       localStorage.setItem("osl_sala", codigoSala);
       localStorage.setItem("osl_nome_sala", nomeSala);
+
+      sessionStorage.setItem("osl_room_id", codigoSala);
+      sessionStorage.setItem("osl_player_name", nomeJogador);
+
+      if (!sessionStorage.getItem("osl_player_id")) {
+        const existing = localStorage.getItem("osl_player_id") || gerarPlayerId();
+        localStorage.setItem("osl_player_id", existing);
+        sessionStorage.setItem("osl_player_id", existing);
+      }
+
+      try {
+        await registrarNoPainel({ nomeJogador, codigoSala, nomeSala });
+      } catch (error) {
+        console.error("Falha ao registrar entrada no painel:", error);
+      }
 
       const url = new URL("./sala.html", window.location.href);
       url.searchParams.set("nome", nomeJogador);
@@ -674,7 +786,7 @@
       }, 560);
     }
 
-    btnCriarSala.addEventListener("click", () => {
+    btnCriarSala.addEventListener("click", async () => {
       const nomeJogador = obterNomeJogador();
       if(!nomeJogador){
         setStatus("Status: digite seu nome para criar a sala.", "err");
@@ -690,14 +802,14 @@
       const codigoSala = gerarCodigoSala();
       codigoSalaEl.value = codigoSala;
 
-      entrarNaSala({
+      await entrarNaSala({
         nomeJogador,
         codigoSala,
         nomeSala
       });
     });
 
-    btnEntrarSala.addEventListener("click", () => {
+    btnEntrarSala.addEventListener("click", async () => {
       const nomeJogador = obterNomeJogador();
       const codigoSala = normalizarCodigoSala(codigoSalaEl.value);
       let nomeSala = obterNomeSala();
@@ -720,7 +832,7 @@
         nomeSala = "Sala de Espera";
       }
 
-      entrarNaSala({
+      await entrarNaSala({
         nomeJogador,
         codigoSala,
         nomeSala
