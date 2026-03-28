@@ -8,7 +8,6 @@ import {
 const TOKEN_ENDPOINT = "https://osl-video-server.onrender.com/token";
 const VERIFY_ACCESS_ENDPOINT = "https://osl-video-server.onrender.com/verificar-acesso";
 const LIVEKIT_URL = "wss://osextolugar-eqa7q1iz.livekit.cloud";
-
 const SALES_PAGE_URL = "./vendas.html";
 
 const joinVideoBtn = document.getElementById("joinVideoBtn");
@@ -33,10 +32,22 @@ const playerName =
   localStorage.getItem("osl_nome") ||
   "Visitante";
 
-let participantId = sessionStorage.getItem("osl_video_participant_id");
+/*
+  MUITO IMPORTANTE:
+  usamos o MESMO participantId da sala.
+  Assim o painel não conta jogador duplicado.
+*/
+let participantId =
+  sessionStorage.getItem("osl_participant_id") ||
+  localStorage.getItem("osl_player_id");
+
 if (!participantId) {
-  participantId = "p_" + Math.random().toString(36).slice(2, 10);
-  sessionStorage.setItem("osl_video_participant_id", participantId);
+  participantId = "p_" + Math.random().toString(36).slice(2, 11);
+  sessionStorage.setItem("osl_participant_id", participantId);
+  localStorage.setItem("osl_player_id", participantId);
+} else {
+  sessionStorage.setItem("osl_participant_id", participantId);
+  localStorage.setItem("osl_player_id", participantId);
 }
 
 let lkRoom = null;
@@ -45,6 +56,45 @@ let localVideoTrack = null;
 let micEnabled = true;
 let camEnabled = true;
 let focusedIdentity = null;
+let panelVideoActive = false;
+
+const PanelBridge = window.PanelBridge || {
+  baseUrl: window.PANEL_SERVER_BASE || "http://localhost:3000",
+
+  async video(roomId, active) {
+    try {
+      const res = await fetch(this.baseUrl + "/game/video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId: String(roomId || "").trim(),
+          active: !!active
+        })
+      });
+      return await res.json().catch(() => ({ ok: res.ok }));
+    } catch (error) {
+      console.error("Erro PanelBridge.video:", error);
+      return { ok: false };
+    }
+  },
+
+  async playerLeave(roomId, playerId) {
+    try {
+      const res = await fetch(this.baseUrl + "/game/player/leave", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId: String(roomId || "").trim(),
+          playerId: String(playerId || "").trim()
+        })
+      });
+      return await res.json().catch(() => ({ ok: res.ok }));
+    } catch (error) {
+      console.error("Erro PanelBridge.playerLeave:", error);
+      return { ok: false };
+    }
+  }
+};
 
 function escapeHtml(str) {
   return String(str)
@@ -98,6 +148,34 @@ async function ensureValidGameAccess() {
     console.error("Erro ao validar acesso:", error);
     redirectToSales("Não foi possível validar seu acesso agora.");
     throw new Error("ACCESS_CHECK_FAILED");
+  }
+}
+
+async function markPanelVideo(active) {
+  try {
+    panelVideoActive = !!active;
+    await PanelBridge.video(roomCode, !!active);
+  } catch (error) {
+    console.error("Erro ao marcar vídeo no painel:", error);
+  }
+}
+
+function sendBeaconVideoOff() {
+  try {
+    const url = (PanelBridge.baseUrl || "http://localhost:3000") + "/game/video";
+    const payload = JSON.stringify({
+      roomId: roomCode,
+      active: false
+    });
+
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(
+        url,
+        new Blob([payload], { type: "application/json" })
+      );
+    }
+  } catch (error) {
+    console.error("Erro no beacon de vídeo:", error);
   }
 }
 
@@ -363,7 +441,6 @@ function clearAllVideoTiles() {
 
 function appendTrackToTile(tile, track, participantIdentity) {
   const mediaWrap = getMediaWrap(tile);
-
   const existing = mediaWrap.querySelector(`[data-track-sid="${track.sid}"]`);
   if (existing) return;
 
@@ -528,8 +605,9 @@ async function joinVideoCall() {
       removeVideoTile(participant.identity);
     });
 
-    lkRoom.on(RoomEvent.Disconnected, () => {
+    lkRoom.on(RoomEvent.Disconnected, async () => {
       videoStatusEl.textContent = "Desconectado da chamada.";
+      await markPanelVideo(false);
     });
 
     await lkRoom.connect(LIVEKIT_URL, token, {
@@ -567,9 +645,7 @@ async function joinVideoCall() {
     videoStatusEl.textContent = "Conectado à chamada.";
     updateVideoGridLayout();
 
-    if (typeof panelMarkVideo === "function") {
-      await panelMarkVideo(true);
-    }
+    await markPanelVideo(true);
   } catch (error) {
     console.error("Erro ao entrar na chamada:", error);
 
@@ -633,9 +709,7 @@ async function leaveVideoCall() {
   clearAllVideoTiles();
   videoStatusEl.textContent = "Vídeo desligado.";
 
-  if (typeof panelMarkVideo === "function") {
-    await panelMarkVideo(false);
-  }
+  await markPanelVideo(false);
 }
 
 async function toggleMic() {
@@ -666,19 +740,19 @@ async function toggleCam() {
   refreshLocalVisualState();
 }
 
-joinVideoBtn.addEventListener("click", () => {
+joinVideoBtn?.addEventListener("click", () => {
   joinVideoCall().catch(console.error);
 });
 
-toggleMicBtn.addEventListener("click", () => {
+toggleMicBtn?.addEventListener("click", () => {
   toggleMic().catch(console.error);
 });
 
-toggleCamBtn.addEventListener("click", () => {
+toggleCamBtn?.addEventListener("click", () => {
   toggleCam().catch(console.error);
 });
 
-leaveVideoBtn.addEventListener("click", () => {
+leaveVideoBtn?.addEventListener("click", () => {
   leaveVideoCall().catch(console.error);
 });
 
@@ -690,6 +764,14 @@ if (exitFocusBtn) {
   });
 }
 
+window.addEventListener("pagehide", () => {
+  if (panelVideoActive) {
+    sendBeaconVideoOff();
+  }
+});
+
 window.addEventListener("beforeunload", () => {
-  leaveVideoCall().catch(() => {});
+  if (panelVideoActive) {
+    sendBeaconVideoOff();
+  }
 });
