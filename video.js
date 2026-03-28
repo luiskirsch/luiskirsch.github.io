@@ -566,6 +566,10 @@ async function joinVideoCall() {
     toggleCamBtn.textContent = "Desligar câmera";
     videoStatusEl.textContent = "Conectado à chamada.";
     updateVideoGridLayout();
+
+    if (typeof panelMarkVideo === "function") {
+      await panelMarkVideo(true);
+    }
   } catch (error) {
     console.error("Erro ao entrar na chamada:", error);
 
@@ -628,6 +632,10 @@ async function leaveVideoCall() {
 
   clearAllVideoTiles();
   videoStatusEl.textContent = "Vídeo desligado.";
+
+  if (typeof panelMarkVideo === "function") {
+    await panelMarkVideo(false);
+  }
 }
 
 async function toggleMic() {
