@@ -2381,7 +2381,59 @@ function playIncomingMessageSound() {
 
 const participantId = getParticipantId();
 const userId = getUserId();
+let panelRoomBooted = false;
+let panelSessionActive = false;
 
+async function panelBootRoom() {
+  if (panelRoomBooted) return;
+  panelRoomBooted = true;
+
+  try {
+    await PanelBridge.roomCreate(roomCode, roomName, playerName);
+    await PanelBridge.playerJoin(roomCode, participantId, playerName);
+  } catch (error) {
+    console.error("Erro ao registrar sala no painel:", error);
+  }
+}
+
+async function panelMarkSessionStart() {
+  if (panelSessionActive) return;
+  panelSessionActive = true;
+
+  try {
+    await PanelBridge.sessionStart(roomCode);
+  } catch (error) {
+    console.error("Erro ao iniciar sessão no painel:", error);
+  }
+}
+
+async function panelMarkSessionEnd() {
+  if (!panelSessionActive) return;
+  panelSessionActive = false;
+
+  try {
+    await PanelBridge.sessionEnd(roomCode);
+  } catch (error) {
+    console.error("Erro ao encerrar sessão no painel:", error);
+  }
+}
+
+async function panelMarkVideo(active) {
+  try {
+    await PanelBridge.video(roomCode, !!active);
+  } catch (error) {
+    console.error("Erro ao atualizar vídeo no painel:", error);
+  }
+}
+
+async function panelMarkRecording(active) {
+  try {
+    await PanelBridge.recording(roomCode, !!active);
+  } catch (error) {
+    console.error("Erro ao atualizar gravação no painel:", error);
+  }
+  }
+  
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -2567,6 +2619,7 @@ async function resetRitualDeck() {
 
   await addHistoryItem("Ritual", "O ritual foi reiniciado.");
   await revealNextRitualCard();
+  await panelMarkSessionStart();
   updateRitualButtons();
 }
 
@@ -3178,8 +3231,10 @@ async function ensureRoom() {
     const data = snap.data();
     isHost = data.hostId === participantId;
   }
-}
 
+  await panelBootRoom();
+}
+  
 async function upsertSelf() {
   const playersSnap = await getDocs(playersCollectionRef);
 
@@ -3201,8 +3256,10 @@ async function upsertSelf() {
     joinedAt: serverTimestamp(),
     lastSeen: serverTimestamp()
   }, { merge: true });
-}
 
+  await panelBootRoom();
+}
+  
 async function setTyping(isTyping) {
   try {
     if (isTyping) {
@@ -3368,8 +3425,9 @@ async function startSession() {
   });
 
   await startRitualDeck();
+  await panelMarkSessionStart();
 }
-
+  
 async function leaveRoom() {
   if (leaving) return;
   leaving = true;
@@ -3386,78 +3444,16 @@ async function leaveRoom() {
     if (ritualUnsub) ritualUnsub();
     if (ritualHistoryUnsub) ritualHistoryUnsub();
 
+    await panelMarkSessionEnd();
+    await PanelBridge.playerLeave(roomCode, participantId);
+
     await deleteDoc(playerRef);
-  } catch (e) {}
+  } catch (e) {
+    console.error(e);
+  }
 
   window.location.href = "./entrada.html";
 }
-
-copyCodeBtn.addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(roomCode);
-    await addDoc(messagesRef, {
-      type: "system",
-      text: "O código da sala foi copiado.",
-      createdAt: serverTimestamp()
-    });
-  } catch (e) {}
-});
-
-sendBtn.addEventListener("click", () => {
-  sendMessage().catch(console.error);
-});
-
-messageInput.addEventListener("input", () => {
-  if (messageInput.value.trim()) {
-    setTyping(true);
-    scheduleTypingStop();
-  } else {
-    clearTimeout(typingTimer);
-    setTyping(false);
-  }
-});
-
-messageInput.addEventListener("blur", () => {
-  clearTimeout(typingTimer);
-  setTyping(false);
-});
-
-messageInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    sendMessage().catch(console.error);
-  }
-});
-
-startBtn.addEventListener("click", () => {
-  startSession().catch(console.error);
-});
-
-leaveBtn.addEventListener("click", () => {
-  const ok = confirm("Deseja sair da sala?");
-  if (ok) leaveRoom();
-});
-
-if (revealCardBtn) {
-  revealCardBtn.addEventListener("click", () => {
-    revealNextRitualCard().catch(console.error);
-  });
-}
-
-if (resetRitualBtn) {
-  resetRitualBtn.addEventListener("click", () => {
-    const ok = confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?");
-    if (ok) resetRitualDeck().catch(console.error);
-  });
-}
-
-window.addEventListener("pagehide", () => {
-  leaveRoom();
-});
-
-window.addEventListener("beforeunload", () => {
-  leaveRoom();
-});
 
 (async function init() {
   try {
@@ -3466,17 +3462,20 @@ window.addEventListener("beforeunload", () => {
     roomStatusEl.textContent = "Conectando";
     footerStatusEl.textContent = "Conectando";
 
-    await ensureUserProfile();
-    await ensureRoom();
-    await upsertSelf();
+await ensureUserProfile();
+await ensureRoom();
+await upsertSelf();
 
-    setRitualWaitingState();
-    startHeartbeat();
-    bindRoom();
-    bindPlayers();
-    bindMessages();
-    bindTyping();
-    bindRitual();
+await panelMarkVideo(false);
+await panelMarkRecording(false);
+
+setRitualWaitingState();
+startHeartbeat();
+bindRoom();
+bindPlayers();
+bindMessages();
+bindTyping();
+bindRitual();
   } catch (error) {
     console.error(error);
 
