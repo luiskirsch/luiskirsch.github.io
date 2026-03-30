@@ -2158,7 +2158,10 @@
   </div>
 
   <script>
-    window.PANEL_SERVER_BASE = "https://osl-video-server-production.up.railway.app";
+    window.PANEL_SERVER_BASE =
+  location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://osl-video-server-production.up.railway.app";
   </script>
 
   <script>
