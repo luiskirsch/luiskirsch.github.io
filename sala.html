@@ -592,11 +592,7 @@
 
     .revealPanel{
       min-height:0;
-      border:1px solid rgba(215,176,107,.16);
       border-radius:20px;
-      background:
-        radial-gradient(circle at center, rgba(215,176,107,.09), transparent 58%),
-        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -604,15 +600,91 @@
       padding:20px;
       position:relative;
       overflow:visible;
+
+      /* ── Bancada de madeira escura polida ── */
+      background:
+        /* Reflexo de luz diagonal — verniz polido */
+        linear-gradient(148deg,
+          rgba(255,230,160,.10) 0%,
+          rgba(255,230,160,.04) 18%,
+          transparent 40%,
+          transparent 70%,
+          rgba(255,200,100,.03) 100%
+        ),
+        /* Grão fino — fibras verticais primárias */
+        repeating-linear-gradient(
+          90.6deg,
+          transparent 0px,       transparent 11px,
+          rgba(0,0,0,.06)  11px, rgba(0,0,0,.06)  12px,
+          transparent      12px, transparent      24px,
+          rgba(180,100,30,.04) 24px, rgba(180,100,30,.04) 25px
+        ),
+        /* Grão médio — veios mais largos */
+        repeating-linear-gradient(
+          89.4deg,
+          transparent 0px,      transparent 38px,
+          rgba(0,0,0,.08) 38px, rgba(0,0,0,.08) 40px,
+          transparent     40px, transparent     80px,
+          rgba(0,0,0,.05) 80px, rgba(0,0,0,.05) 82px
+        ),
+        /* Vinheta de borda — profundidade e espessura */
+        radial-gradient(ellipse 90% 80% at 50% 50%,
+          transparent 35%,
+          rgba(0,0,0,.55) 100%
+        ),
+        /* Gradiente de perspectiva — superfície inclinada */
+        linear-gradient(188deg,
+          #5a3418 0%,
+          #45280f 20%,
+          #331d0a 50%,
+          #261508 80%,
+          #1a0e05 100%
+        );
+
+      /* Borda — moldura de madeira com friso dourado */
+      border:1px solid rgba(140,85,30,.45);
+      outline:1px solid rgba(0,0,0,.6);
+      outline-offset:-3px;
+
+      /* Sombra — bancada sobre a mesa */
+      box-shadow:
+        inset 0 1px 0 rgba(255,210,120,.14),   /* topo polido */
+        inset 0 -3px 14px rgba(0,0,0,.45),      /* profundidade base */
+        inset 4px 0 16px rgba(0,0,0,.22),        /* lateral esquerda */
+        inset -4px 0 16px rgba(0,0,0,.22),       /* lateral direita */
+        0 28px 64px rgba(0,0,0,.65),             /* sombra projetada */
+        0 6px 18px rgba(0,0,0,.40);
     }
 
+    /* Reflexo central suave — superfície envernizada */
     .revealPanel::before{
       content:"";
       position:absolute;
       inset:0;
+      border-radius:20px;
       pointer-events:none;
-      background:radial-gradient(500px 200px at 50% 12%, rgba(215,176,107,.13), transparent 60%);
-      opacity:.7;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 20%,
+          rgba(255,220,140,.08),
+          transparent 65%
+        );
+    }
+
+    /* Friso dourado na borda superior — acabamento de mesa */
+    .revealPanel::after{
+      content:"";
+      position:absolute;
+      top:0; left:10%; right:10%;
+      height:1px;
+      border-radius:999px;
+      pointer-events:none;
+      background:linear-gradient(90deg,
+        transparent,
+        rgba(200,150,60,.55) 30%,
+        rgba(255,210,100,.80) 50%,
+        rgba(200,150,60,.55) 70%,
+        transparent
+      );
     }
 
     .revealStage{
