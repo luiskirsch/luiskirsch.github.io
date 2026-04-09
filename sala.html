@@ -294,7 +294,6 @@
       overflow:hidden;
       min-height:0;
       position:relative;
-      contain:layout style paint;
     }
 
     .card::before{
@@ -467,6 +466,7 @@
       display:grid;
       grid-template-rows:auto 1fr;
       min-height:0;
+      overflow:visible; /* permite o 3D da carta sair dos limites sem ser clipado */
     }
 
     .tableHead{
@@ -1713,13 +1713,12 @@
        CARTA FÍSICA — textura, profundidade, luz real
     ============================================================ */
 
-    /* Wrapper — sem filter (filter aplana preserve-3d, quebra o verso) */
+    /* Wrapper — sem will-change nem filter: ambos achatam preserve-3d */
     .ritualCardWrap{
       position:relative;
       height:55vh;
       aspect-ratio:5/7;
       flex-shrink:0;
-      will-change:transform;
       transform: rotateX(3deg);
       transform-style: preserve-3d;
       transition: transform 320ms var(--ease-spring);
