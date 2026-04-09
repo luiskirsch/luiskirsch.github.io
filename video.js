@@ -14,11 +14,22 @@ const joinVideoBtn = document.getElementById("joinVideoBtn");
 const leaveVideoBtn = document.getElementById("leaveVideoBtn");
 const toggleMicBtn = document.getElementById("toggleMicBtn");
 const toggleCamBtn = document.getElementById("toggleCamBtn");
-const videoGridEl = document.getElementById("videoGrid");
+const videoGridEl = document.getElementById("videoGrid");       // outer gameTableGrid wrapper
+const videoColLeftEl = document.getElementById("videoColLeft");
+const videoColRightEl = document.getElementById("videoColRight");
+const videoSelfSlotEl = document.getElementById("videoSelfSlot");
 const videoEmptyEl = document.getElementById("videoEmpty");
 const videoStatusEl = document.getElementById("videoStatus");
 const videoFocusBarEl = document.getElementById("videoFocusBar");
 const exitFocusBtn = document.getElementById("exitFocusBtn");
+
+// Placeholder elements inside the columns
+const placeholders = {
+  L1: document.getElementById("videoPlaceholderL1"),
+  L2: document.getElementById("videoPlaceholderL2"),
+  R1: document.getElementById("videoPlaceholderR1"),
+  R2: document.getElementById("videoPlaceholderR2"),
+};
 
 const params = new URLSearchParams(window.location.search);
 
@@ -184,36 +195,31 @@ function updateFocusBar() {
   videoFocusBarEl.hidden = !focusedIdentity;
 }
 
-function updateVideoGridLayout() {
-  const count = videoGridEl.querySelectorAll(".videoTile").length;
-
-  videoGridEl.classList.remove(
-    "videoGrid--one",
-    "videoGrid--two",
-    "videoGrid--three",
-    "videoGrid--four",
-    "videoGrid--five",
-    "videoGrid--focus"
+/**
+ * Distribui tiles de amigos entre coluna esquerda e direita.
+ * Slots 1-2 → esquerda, slots 3-4 → direita.
+ * Atualiza a visibilidade dos placeholders.
+ */
+function assignSlots() {
+  const nonSelfTiles = Array.from(
+    videoGridEl.querySelectorAll(".videoTile:not(.videoTile--self)")
   );
 
-  if (focusedIdentity) {
-    videoGridEl.classList.add("videoGrid--focus");
-    updateFocusBar();
-    return;
-  }
+  // Reposiciona tiles nos containers corretos
+  nonSelfTiles.forEach((t) => t.remove());
+  nonSelfTiles.slice(0, 2).forEach((t) => videoColLeftEl.appendChild(t));
+  nonSelfTiles.slice(2, 4).forEach((t) => videoColRightEl.appendChild(t));
 
-  if (count <= 1) {
-    videoGridEl.classList.add("videoGrid--one");
-  } else if (count === 2) {
-    videoGridEl.classList.add("videoGrid--two");
-  } else if (count === 3) {
-    videoGridEl.classList.add("videoGrid--three");
-  } else if (count === 4) {
-    videoGridEl.classList.add("videoGrid--four");
-  } else {
-    videoGridEl.classList.add("videoGrid--five");
-  }
+  // Mostra/esconde placeholders conforme quantidade de tiles em cada coluna
+  const lc = videoColLeftEl.querySelectorAll(".videoTile").length;
+  const rc = videoColRightEl.querySelectorAll(".videoTile").length;
+  if (placeholders.L1) placeholders.L1.style.display = lc >= 1 ? "none" : "";
+  if (placeholders.L2) placeholders.L2.style.display = lc >= 2 ? "none" : "";
+  if (placeholders.R1) placeholders.R1.style.display = rc >= 1 ? "none" : "";
+  if (placeholders.R2) placeholders.R2.style.display = rc >= 2 ? "none" : "";
+}
 
+function updateVideoGridLayout() {
   updateFocusBar();
 }
 
@@ -400,12 +406,16 @@ function getOrCreateVideoTile(identity, labelText) {
 
   tile = createVideoTile(identity, labelText);
 
-  if (videoEmptyEl && videoEmptyEl.parentNode === videoGridEl) {
-    videoEmptyEl.remove();
+  if (identity === participantId) {
+    tile.classList.add("videoTile--self");
+    videoSelfSlotEl.appendChild(tile);
+  } else {
+    // Coluna esquerda provisória; assignSlots vai redistribuir
+    videoColLeftEl.appendChild(tile);
   }
 
-  videoGridEl.appendChild(tile);
   updateTileLabel(identity, labelText);
+  assignSlots();
   updateVideoGridLayout();
   return tile;
 }
@@ -421,21 +431,14 @@ function removeVideoTile(identity) {
     clearFocusState();
   }
 
-  if (!videoGridEl.querySelector(".videoTile") && videoEmptyEl) {
-    videoGridEl.appendChild(videoEmptyEl);
-  }
-
+  assignSlots();
   updateVideoGridLayout();
 }
 
 function clearAllVideoTiles() {
   videoGridEl.querySelectorAll(".videoTile").forEach((tile) => tile.remove());
   clearFocusState();
-
-  if (videoEmptyEl && !videoEmptyEl.parentNode) {
-    videoGridEl.appendChild(videoEmptyEl);
-  }
-
+  assignSlots();
   updateVideoGridLayout();
 }
 
@@ -640,9 +643,9 @@ async function joinVideoCall() {
     leaveVideoBtn.disabled = false;
     joinVideoBtn.disabled = true;
 
-    toggleMicBtn.textContent = "Mutar microfone";
-    toggleCamBtn.textContent = "Desligar câmera";
-    videoStatusEl.textContent = "Conectado à chamada.";
+    toggleMicBtn.textContent = "🎤 Mutar";
+    toggleCamBtn.textContent = "📷 Off";
+    videoStatusEl.textContent = "Conectado.";
     updateVideoGridLayout();
 
     await markPanelVideo(true);
@@ -703,8 +706,8 @@ async function leaveVideoCall() {
   leaveVideoBtn.disabled = true;
   joinVideoBtn.disabled = false;
 
-  toggleMicBtn.textContent = "Mutar microfone";
-  toggleCamBtn.textContent = "Desligar câmera";
+  toggleMicBtn.textContent = "🎤 Mutar";
+  toggleCamBtn.textContent = "📷 Off";
 
   clearAllVideoTiles();
   videoStatusEl.textContent = "Vídeo desligado.";
@@ -721,7 +724,7 @@ async function toggleMic() {
   else await localAudioTrack.mute();
 
   toggleMicBtn.textContent =
-    micEnabled ? "Mutar microfone" : "Ativar microfone";
+    micEnabled ? "🎤 Mutar" : "🎤 Ativar";
 
   refreshLocalVisualState();
 }
@@ -735,7 +738,7 @@ async function toggleCam() {
   else await localVideoTrack.mute();
 
   toggleCamBtn.textContent =
-    camEnabled ? "Desligar câmera" : "Ligar câmera";
+    camEnabled ? "📷 Off" : "📷 On";
 
   refreshLocalVisualState();
 }

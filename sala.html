@@ -435,7 +435,7 @@
 
     .mainArea{
       display:grid;
-      grid-template-rows:minmax(360px, 1fr) 220px;
+      grid-template-rows:1fr;
       gap:14px;
       min-height:0;
     }
@@ -572,11 +572,13 @@
       background:
         radial-gradient(circle at center, rgba(215,176,107,.09), transparent 58%),
         linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
-      display:grid;
-      place-items:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
       padding:20px;
       position:relative;
-      overflow:hidden;
+      overflow:visible;
     }
 
     .revealPanel::before{
@@ -590,8 +592,10 @@
 
     .revealStage{
       width:100%;
-      display:grid;
-      justify-items:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
       gap:18px;
       position:relative;
       z-index:1;
@@ -695,131 +699,234 @@
       min-height:0;
     }
 
-    .videoCard{
-      display:grid;
-      grid-template-rows:auto auto auto 1fr;
-      min-height:0;
+    .rightColumn .historyCard{
+      height:100%;
     }
 
-    .videoTop{
+    .rightColumn .historyDeckMini{
+      display:none;
+    }
+
+    .rightColumn .historyBody{
+      grid-template-columns:1fr;
+    }
+
+    /* ===== GAME TABLE VIDEO LAYER ===== */
+
+    /* Fixed overlay — covers the entire viewport, pointer-events off by default */
+    .videoLayer{
+      position:fixed;
+      inset:0;
+      z-index:20;
+      pointer-events:none;
+    }
+
+    /* Compact control bar pinned at top-center */
+    .videoControlBar{
+      position:fixed;
+      top:0;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:30;
+      pointer-events:auto;
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      padding:16px 18px 10px;
-      position:relative;
-      z-index:1;
+      gap:8px;
+      padding:7px 14px;
+      background:rgba(8,6,4,.84);
+      border:1px solid rgba(215,176,107,.22);
+      border-top:none;
+      border-radius:0 0 16px 16px;
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      box-shadow:0 4px 24px rgba(0,0,0,.55);
+      white-space:nowrap;
     }
 
-    .videoTitle{
-      margin:0;
-      font-size:clamp(24px, 2vw, 34px);
-      letter-spacing:-.03em;
-      color:#f5ede1;
-      font-family:Georgia, "Times New Roman", serif;
+    .videoStatusInline{
+      font-size:11px;
+      color:rgba(243,237,229,.50);
+      letter-spacing:.04em;
+      padding-right:10px;
+      border-right:1px solid rgba(255,255,255,.08);
     }
 
-    .videoActions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .videoBtn{
+    .videoCtrlBtn{
       appearance:none;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.04);
       color:#f5f7fb;
-      min-height:42px;
-      padding:10px 14px;
-      border-radius:12px;
+      height:30px;
+      padding:0 11px;
+      border-radius:8px;
       cursor:pointer;
       font:inherit;
+      font-size:11px;
       font-weight:700;
+      white-space:nowrap;
+      transition:background .15s, border-color .15s;
     }
 
-    .videoBtn.primary{
-      background:linear-gradient(180deg, #e7c58a, #c99a4b);
+    .videoCtrlBtn:hover:not([disabled]){
+      background:rgba(255,255,255,.08);
+      border-color:rgba(215,176,107,.30);
+    }
+
+    .videoCtrlBtn.primary{
+      background:linear-gradient(180deg,#e7c58a,#c99a4b);
       color:#1a140d;
       border-color:transparent;
     }
 
-    .videoBtn.danger{
+    .videoCtrlBtn.danger{
       color:#ffdede;
       border-color:rgba(255,107,107,.20);
       background:rgba(255,107,107,.08);
     }
 
-    .videoBtn[disabled]{
-      opacity:.45;
+    .videoCtrlBtn[disabled]{
+      opacity:.35;
       cursor:not-allowed;
     }
 
-    .videoStatus{
-      font-size:13px;
-      color:var(--muted);
-      min-height:18px;
-      padding:0 18px 10px;
-      position:relative;
-      z-index:1;
-    }
-
+    /* Focus exit bar */
     .videoFocusBar{
-      display:flex;
-      justify-content:flex-end;
-      padding:0 18px 10px;
-      position:relative;
-      z-index:1;
+      position:fixed;
+      bottom:14px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:30;
+      pointer-events:auto;
     }
 
     .videoFocusBtn{
       appearance:none;
       border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.05);
+      background:rgba(0,0,0,.72);
       color:#f5f7fb;
-      min-height:38px;
-      padding:8px 14px;
-      border-radius:12px;
+      height:32px;
+      padding:0 14px;
+      border-radius:10px;
       cursor:pointer;
       font:inherit;
+      font-size:11px;
       font-weight:700;
+      backdrop-filter:blur(8px);
     }
 
-    .videoGrid{
+    /* ===== GAME TABLE GRID — inline 3-column layout inside tableCard ===== */
+    .gameTableGrid{
       display:grid;
-      gap:10px;
-      align-items:stretch;
-      padding:0 18px 18px;
+      grid-template-columns:clamp(110px,14vw,180px) 1fr clamp(110px,14vw,180px);
+      gap:14px;
+      padding:16px 18px 20px;
+      align-items:center;
       min-height:0;
-      overflow:auto;
-      position:relative;
-      z-index:1;
     }
 
-    .videoGrid.videoGrid--one{ grid-template-columns:minmax(0,1fr); }
-    .videoGrid.videoGrid--two{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-    .videoGrid.videoGrid--three{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-    .videoGrid.videoGrid--four{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-    .videoGrid.videoGrid--five{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-    .videoGrid.videoGrid--focus{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+    .videoColLeft,
+    .videoColRight{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-self:stretch;
+      justify-content:center;
+    }
+
+    .cardCenter{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+    }
+
+    .deckInfoBar{
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+      letter-spacing:.04em;
+      line-height:1.55;
+    }
+
+    /* Placeholder shown when a column slot has no tile yet */
+    .videoColPlaceholder{
+      width:100%;
+      aspect-ratio:1/1;
+      border:1px dashed rgba(215,176,107,.14);
+      border-radius:14px;
+      background:rgba(255,255,255,.01);
+      display:grid;
+      place-items:center;
+      color:rgba(215,176,107,.14);
+      font-size:20px;
+    }
+
+    /* Self video slot below the card */
+    .videoSelfSlot{
+      width:100%;
+      display:flex;
+      justify-content:center;
+    }
 
     .videoMedia{
       width:100%;
       height:100%;
+      display:block;
+    }
+
+    /* Side-column video tiles: square cards */
+    .videoColLeft .videoTile,
+    .videoColRight .videoTile{
+      position:relative !important;
+      width:100% !important;
+      aspect-ratio:1/1 !important;
+      left:auto !important; right:auto !important;
+      top:auto !important; bottom:auto !important;
+      transform:none !important;
     }
 
     .videoTile{
       position:relative;
-      background:#000;
-      border:1px solid rgba(215,176,107,.18);
-      border-radius:12px;
+      width:100%;
+      aspect-ratio:1/1;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(215,176,107,.06), transparent 50%),
+        linear-gradient(180deg, #0f0b08, #060504);
+      border:1px solid rgba(215,176,107,.28);
+      border-radius:16px;
       overflow:hidden;
-      min-height:150px;
-      aspect-ratio:16/10;
-      transition:all .2s ease;
+      transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
       cursor:pointer;
-      box-shadow:0 12px 28px rgba(0,0,0,.25);
+      box-shadow:
+        0 6px 22px rgba(0,0,0,.50),
+        inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .videoTile:hover{
+      border-color:rgba(215,176,107,.46);
+      transform:translateY(-2px);
+      box-shadow:
+        0 12px 36px rgba(0,0,0,.60),
+        inset 0 1px 0 rgba(255,255,255,.06);
+    }
+
+    /* Self tile: in the selfSlot, slightly wider / rectangular, gold border */
+    .videoSelfSlot .videoTile{
+      position:relative !important;
+      width:min(260px,100%) !important;
+      aspect-ratio:4/3 !important;
+      left:auto !important; right:auto !important;
+      top:auto !important; bottom:auto !important;
+      transform:none !important;
+      border:2px solid var(--gold) !important;
+      box-shadow:
+        0 0 24px rgba(215,176,107,.32),
+        0 8px 28px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.06) !important;
+    }
+
+    .videoSelfSlot .videoTile:hover{
+      transform:translateY(-2px) !important;
     }
 
     .videoTile video,
@@ -831,14 +938,26 @@
       background:#000;
     }
 
+    /* Tile em foco: borda dourada + leve escala */
     .videoTile--focused{
-      grid-column:1 / -1;
-      min-height:320px;
+      border-color:rgba(215,176,107,.60) !important;
+      box-shadow:
+        0 0 0 2px rgba(215,176,107,.24),
+        0 12px 40px rgba(0,0,0,.65),
+        inset 0 1px 0 rgba(255,255,255,.06) !important;
+      transform:scale(1.04) !important;
+      z-index:2;
+      cursor:default;
     }
 
+    /* Miniaturas: levemente translúcidas */
     .videoTile--mini{
-      min-height:120px;
-      aspect-ratio:16/9;
+      opacity:.55;
+      border-radius:12px;
+    }
+
+    .videoTile--mini:hover{
+      opacity:.85;
     }
 
     .videoTile--hasNoCamera video{
@@ -851,50 +970,67 @@
       pointer-events:none;
     }
 
+    /* Badge row: top-right corner, small & translucent */
     .videoBadgeRow{
       position:absolute;
-      top:10px;
-      right:10px;
+      top:6%;
+      right:6%;
       display:flex;
-      gap:8px;
+      gap:3px;
       z-index:2;
     }
 
     .videoBadge{
-      min-width:34px;
-      height:34px;
-      padding:0 10px;
-      border-radius:999px;
+      width:1.5em;
+      height:1.5em;
+      padding:0;
+      border-radius:50%;
       display:flex;
       align-items:center;
       justify-content:center;
-      background:rgba(0,0,0,.55);
-      color:#fff;
-      font-size:14px;
-      border:1px solid rgba(255,255,255,.12);
-      backdrop-filter:blur(6px);
+      background:rgba(0,0,0,.32);
+      color:rgba(255,255,255,.80);
+      font-size:10px; /* scales relative to tile via em on child */
+      border:1px solid rgba(255,255,255,.07);
+      backdrop-filter:blur(4px);
+      transition:opacity .15s;
+    }
+
+    /* Hide badge when NOT muted — show only when there's a problem */
+    .videoBadge[data-kind="mic"]:not(.is-off),
+    .videoBadge[data-kind="cam"]:not(.is-off){
+      display:none;
     }
 
     .videoBadge.is-off{
-      background:rgba(255,107,107,.20);
-      border-color:rgba(255,107,107,.35);
+      background:rgba(200,60,60,.30);
+      border-color:rgba(255,107,107,.28);
+      color:rgba(255,200,200,.90);
     }
 
+    /* Name label: transparent, text-shadow only */
     .videoLabel{
       position:absolute;
-      left:10px;
-      bottom:10px;
+      left:7%;
+      bottom:6%;
       display:flex;
       align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border-radius:999px;
-      background:rgba(0,0,0,.55);
-      color:#fff;
-      font-size:12px;
-      letter-spacing:.04em;
+      gap:5px;
+      padding:0;
+      background:none;
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+      border:none;
+      color:rgba(255,255,255,.92);
+      font-size:0.72em;
+      font-weight:600;
+      font-family:Georgia,"Times New Roman",serif;
+      letter-spacing:.03em;
+      text-shadow:
+        0 1px 5px rgba(0,0,0,.95),
+        0 0 16px rgba(0,0,0,.80);
       z-index:2;
-      max-width:calc(100% - 20px);
+      max-width:86%;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -904,14 +1040,14 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      padding:4px 8px;
+      padding:1px 5px;
       border-radius:999px;
-      background:rgba(215,176,107,.18);
+      background:rgba(215,176,107,.16);
       color:#f6dfb0;
-      font-size:10px;
-      letter-spacing:.12em;
+      font-size:0.75em;
+      letter-spacing:.10em;
       text-transform:uppercase;
-      border:1px solid rgba(215,176,107,.22);
+      border:1px solid rgba(215,176,107,.20);
     }
 
     .videoNameText{
@@ -928,9 +1064,9 @@
       justify-content:center;
       gap:10px;
       background:
-        radial-gradient(circle at center, rgba(215,176,107,.08), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
-      color:rgba(245,247,251,.92);
+        radial-gradient(ellipse at 50% 35%, rgba(215,176,107,.07), transparent 60%),
+        linear-gradient(180deg, #100d0a, #080604);
+      color:rgba(245,240,232,.90);
       z-index:1;
     }
 
@@ -939,19 +1075,22 @@
     }
 
     .videoCameraOffIcon{
-      width:60px;
-      height:60px;
+      width:52px;
+      height:52px;
       border-radius:50%;
       display:grid;
       place-items:center;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      font-size:24px;
+      background:rgba(215,176,107,.08);
+      border:1px solid rgba(215,176,107,.18);
+      font-size:20px;
+      box-shadow:0 0 20px rgba(215,176,107,.08);
     }
 
     .videoCameraOffText{
-      font-size:13px;
-      color:rgba(214,224,237,.78);
+      font-size:12px;
+      color:rgba(215,176,107,.72);
+      letter-spacing:.06em;
+      text-transform:uppercase;
     }
 
     .videoEmpty{
@@ -1494,7 +1633,8 @@
 
     .ritualVisualCard{
       width:min(100%, 260px);
-      aspect-ratio:3/5;
+      height:auto;
+      max-height:65vh;
       position:relative;
       border-radius:22px;
       overflow:hidden;
@@ -1533,13 +1673,16 @@
     .ritualCardFrame{
       position:relative;
       z-index:1;
-      height:100%;
+      height:auto;
+      max-height:calc(65vh - 2px);
       padding:20px 18px;
       display:flex;
       flex-direction:column;
       align-items:center;
+      justify-content:center;
       text-align:center;
       color:#f7f3ea;
+      overflow-y:auto;
     }
 
     .ritualTopOrnaments{
@@ -1772,6 +1915,436 @@
       }
     }
 
+    /* =================================================================
+       ARENA MODE — experiência de jogo imersiva, viewport-locked
+       Ativado quando o ritual começa (data.status === "started")
+       ou manualmente via botão "⚔ Arena".
+    ================================================================= */
+
+    /* --- Lock & Entry --- */
+    html.arenaMode,
+    html.arenaMode body{
+      overflow:hidden !important;
+      height:100% !important;
+    }
+
+    html.arenaMode .page{
+      height:100vh;
+      height:100svh;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      padding:
+        max(6px, env(safe-area-inset-top))
+        max(10px, env(safe-area-inset-right))
+        max(6px, env(safe-area-inset-bottom))
+        max(10px, env(safe-area-inset-left));
+    }
+
+    html.arenaMode .shell{
+      flex:1;
+      min-height:0;
+      overflow:hidden;
+      display:grid;
+      grid-template-rows:auto 1fr;
+      gap:6px;
+    }
+
+    /* --- Entry animation: mesa "levanta" --- */
+    @keyframes arenaLift{
+      from{ opacity:0; transform:scale(.975) translateY(10px); }
+      to{   opacity:1; transform:none; }
+    }
+
+    html.arenaMode .layout{
+      animation:arenaLift .48s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    html.arenaMode .tableCard{
+      box-shadow:
+        0 0 0 1px rgba(215,176,107,.14),
+        0 0 70px rgba(215,176,107,.08),
+        0 36px 90px rgba(0,0,0,.65);
+    }
+
+    /* --- Dark vignette acentuado --- */
+    html.arenaMode body::before{
+      opacity:1;
+      background:
+        radial-gradient(circle at center, transparent 38%, rgba(0,0,0,.62) 100%),
+        linear-gradient(180deg, rgba(255,255,255,.02), transparent 20%, transparent 80%, rgba(255,255,255,.02));
+    }
+
+    /* --- Sidebar & History dim (foco vai para a mesa) --- */
+    html.arenaMode .sidebar,
+    html.arenaMode .rightColumn{
+      opacity:.78;
+      transition:opacity .22s ease;
+    }
+
+    html.arenaMode .sidebar:hover,
+    html.arenaMode .sidebar:focus-within,
+    html.arenaMode .rightColumn:hover{
+      opacity:1;
+    }
+
+    /* --- Topbar compacto --- */
+    html.arenaMode .topbar{
+      padding:8px 14px;
+    }
+
+    html.arenaMode .roomTitle{
+      font-size:clamp(18px,2vw,26px) !important;
+    }
+
+    html.arenaMode .topActionBtn{
+      min-height:34px;
+      padding:6px 12px;
+      font-size:12px;
+    }
+
+    html.arenaMode .topCenterMeta{
+      font-size:12px;
+      gap:8px;
+    }
+
+    html.arenaMode .footerBar{
+      display:none !important;
+    }
+
+    /* --- Layout 3 colunas: [CHAT 25%] | [MESA] | [HISTÓRICO 18%] --- */
+    html.arenaMode .layout{
+      height:100%;
+      min-height:0;
+      gap:6px;
+      grid-template-columns:clamp(260px,25vw,360px) minmax(0,1fr) clamp(200px,18vw,280px);
+    }
+
+    /* --- Sidebar: oculta lista de jogadores, chat vira protagonista --- */
+    html.arenaMode .sidebar{
+      grid-template-rows:1fr;   /* só o chat */
+      min-height:0;
+      overflow:hidden;
+    }
+
+    /* Painel de jogadores oculto na arena (sessão já iniciou) */
+    html.arenaMode .playerPanel{
+      display:none;
+    }
+
+    /* Chat com glassmorphism: fundo semi-transparente + blur */
+    html.arenaMode .chatCard{
+      min-height:0;
+      overflow:hidden;
+      background:rgba(6,4,2,.84) !important;
+      backdrop-filter:blur(24px) saturate(180%) !important;
+      -webkit-backdrop-filter:blur(24px) saturate(180%) !important;
+      border:1px solid rgba(215,176,107,.28) !important;
+      box-shadow:
+        0 10px 48px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.05) !important;
+    }
+
+    html.arenaMode .chatHeader{
+      padding:10px 14px;
+      background:rgba(255,255,255,.03);
+      border-bottom:1px solid rgba(215,176,107,.14);
+    }
+
+    html.arenaMode .chatHeaderLeft h2{
+      font-size:18px;
+      margin-bottom:0;
+    }
+
+    html.arenaMode .chatHeaderLeft p{
+      display:none;
+    }
+
+    /* Mensagens maiores para leitura em gravação */
+    html.arenaMode .messages{
+      padding:10px 14px;
+      gap:10px;
+    }
+
+    html.arenaMode .message{
+      padding:12px 14px;
+      font-size:15px;
+      line-height:1.65;
+      border-radius:14px;
+      max-width:92%;
+      color:#f8f5ef;
+      text-shadow:0 1px 3px rgba(0,0,0,.45);
+    }
+
+    html.arenaMode .message.other{
+      color:rgba(255,255,255,.92);
+      text-shadow:0 1px 4px rgba(0,0,0,.6);
+      background:rgba(255,255,255,.07);
+      border-color:rgba(255,255,255,.09);
+    }
+
+    html.arenaMode .message.me{
+      color:rgba(255,255,255,.95);
+      text-shadow:0 1px 4px rgba(0,0,0,.6);
+    }
+
+    html.arenaMode .message .meta{
+      font-size:10px;
+      margin-bottom:4px;
+      color:rgba(255,255,255,.50);
+    }
+
+    html.arenaMode .typingBar{
+      padding:0 14px 6px;
+      min-height:16px;
+      font-size:12px;
+    }
+
+    html.arenaMode .chatComposer{
+      padding:8px 14px;
+    }
+
+    html.arenaMode .composerRow{
+      grid-template-columns:minmax(0,1fr) 64px;
+      gap:6px;
+    }
+
+    html.arenaMode .input{
+      min-height:36px;
+      padding:8px 11px;
+      font-size:13px;
+    }
+
+    html.arenaMode .composerRow .btn{
+      min-height:36px;
+      font-size:11px;
+      padding:0 8px;
+    }
+
+    /* --- Main area: preenche altura --- */
+    html.arenaMode .mainArea{
+      min-height:0;
+      height:100%;
+      grid-template-rows:1fr;
+    }
+
+    html.arenaMode .tableCard{
+      height:100%;
+      min-height:0;
+      display:grid;
+      grid-template-rows:auto 1fr;
+    }
+
+    html.arenaMode .tableHead{
+      padding:8px 14px;
+    }
+
+    html.arenaMode .tableHeadLeft h2{
+      font-size:clamp(16px,1.5vw,22px);
+      margin-bottom:0;
+    }
+
+    html.arenaMode .tableHeadLeft p{
+      display:none;
+    }
+
+    html.arenaMode .tableHeadRight{
+      gap:6px;
+    }
+
+    html.arenaMode .videoBtn{
+      min-height:30px;
+      padding:4px 9px;
+      font-size:11px;
+    }
+
+    html.arenaMode .sessionStatus{
+      padding:5px 10px;
+      font-size:10px;
+    }
+
+    /* --- GameTableGrid: preenche o resto do tableCard --- */
+    html.arenaMode .gameTableGrid{
+      height:100%;
+      min-height:0;
+      padding:8px 14px 10px;
+      align-items:stretch;
+    }
+
+    html.arenaMode .videoColLeft,
+    html.arenaMode .videoColRight{
+      justify-content:space-evenly;
+    }
+
+    html.arenaMode .videoColLeft .videoTile,
+    html.arenaMode .videoColRight .videoTile{
+      flex:0 0 auto;
+    }
+
+    html.arenaMode .cardCenter{
+      min-height:0;
+      overflow:hidden;
+      justify-content:flex-start;
+    }
+
+    html.arenaMode .deckInfoBar{
+      font-size:10px;
+      letter-spacing:.05em;
+    }
+
+    /* A carta cresce para preencher o espaço vertical disponível */
+    html.arenaMode .revealPanel{
+      flex:1;
+      min-height:0;
+      overflow:hidden;
+      padding:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    html.arenaMode .revealStage{
+      width:100%;
+      max-height:50vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    html.arenaMode .ritualVisualCard{
+      width:min(260px,100%);
+      max-height:50vh;
+      height:auto;
+      transform:none !important;
+    }
+
+    html.arenaMode .ritualCardMainTitle{
+      font-size:clamp(20px, 2.4vw, 30px);
+    }
+
+    html.arenaMode .ritualMainInstruction{
+      font-size:clamp(12px, 1.25vw, 16px);
+    }
+
+    html.arenaMode .ritualRuleText{
+      font-size:13px;
+    }
+
+    html.arenaMode .ritualVisualCard{
+      height:auto;
+      width:min(260px, 100%);
+      max-height:60vh;
+    }
+
+    html.arenaMode .videoSelfSlot{
+      width:100%;
+      margin-top:auto;
+      display:flex;
+      justify-content:center;
+      align-items:flex-end;
+      padding-top:6px;
+    }
+
+    html.arenaMode .videoSelfSlot .videoTile{
+      width:min(200px,100%) !important;
+    }
+
+    /* --- Coluna de histórico compacta --- */
+    html.arenaMode .rightColumn{
+      min-height:0;
+      overflow:hidden;
+    }
+
+    html.arenaMode .historyCard{
+      height:100%;
+      min-height:0;
+    }
+
+    html.arenaMode .historyHead{
+      padding:8px 14px;
+    }
+
+    html.arenaMode .historyHead h3{
+      font-size:17px;
+    }
+
+    html.arenaMode .historyBody{
+      padding:8px 14px;
+      gap:8px;
+    }
+
+    html.arenaMode .historyList{
+      gap:6px;
+    }
+
+    html.arenaMode .historyItem{
+      padding:7px 10px;
+    }
+
+    html.arenaMode .historyType{
+      font-size:9px;
+      margin-bottom:4px;
+    }
+
+    html.arenaMode .historyText{
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    /* --- Botão para sair do Arena Mode --- */
+    .exitArenaBtn{
+      display:none;
+      position:fixed;
+      bottom:14px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:100;
+      appearance:none;
+      border:1px solid rgba(215,176,107,.22);
+      background:rgba(8,6,4,.82);
+      color:rgba(243,237,229,.45);
+      padding:5px 16px;
+      border-radius:10px;
+      font:inherit;
+      font-size:11px;
+      letter-spacing:.06em;
+      cursor:pointer;
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      transition:color .2s, border-color .2s;
+      pointer-events:auto;
+    }
+
+    .exitArenaBtn:hover{
+      color:rgba(243,237,229,.88);
+      border-color:rgba(215,176,107,.48);
+    }
+
+    html.arenaMode .exitArenaBtn{
+      display:block;
+      animation:fadeInUp .4s .5s both;
+    }
+
+    @keyframes fadeInUp{
+      from{ opacity:0; transform:translateX(-50%) translateY(8px); }
+      to{   opacity:1; transform:translateX(-50%) translateY(0); }
+    }
+
+    /* @media <= 640px: empilha colunas de vídeo horizontalmente */
+    @media (max-width:640px){
+      html.arenaMode .layout{
+        grid-template-columns:1fr;
+      }
+
+      html.arenaMode .gameTableGrid{
+        grid-template-columns:1fr;
+        grid-template-rows:auto auto auto;
+      }
+    }
+
+    /* ================================================================= */
+
     @media (max-width:640px){
       .page{
         padding:
@@ -1794,21 +2367,18 @@
         grid-template-columns:1fr;
       }
 
-      .videoGrid,
-      .videoGrid.videoGrid--one,
-      .videoGrid.videoGrid--two,
-      .videoGrid.videoGrid--three,
-      .videoGrid.videoGrid--four,
-      .videoGrid.videoGrid--five,
-      .videoGrid.videoGrid--focus{
+      .gameTableGrid{
         grid-template-columns:1fr;
+        grid-template-rows:auto auto auto;
       }
 
-      .videoTile--focused{
-        min-height:240px;
-      }
+      .videoColLeft{ flex-direction:row; }
+      .videoColRight{ flex-direction:row; }
 
-      .footerBar{
+      .videoColLeft .videoTile,
+      .videoColRight .videoTile{ flex:1; }
+
+.footerBar{
         flex-direction:column;
         align-items:flex-start;
         gap:6px;
@@ -1850,6 +2420,7 @@
 
         <div class="topActions">
           <button class="topActionBtn primary" id="copyCodeBtn">Convidar Amigos</button>
+          <button class="topActionBtn" id="arenaBtn" title="Alternar Modo Arena">⚔ Arena</button>
           <button class="topActionBtn" id="myProfileBtn">Configurações</button>
           <button class="topActionBtn iconOnly" id="leaveBtn" aria-label="Sair da sala">⇢</button>
         </div>
@@ -1926,96 +2497,107 @@
               </div>
             </div>
 
-            <div class="tableBody">
-              <aside class="deckPanel">
-                <div class="sectionTitle">Deck</div>
+            <!-- ===== GAME TABLE: 3-column grid (left videos | card + self | right videos) ===== -->
+            <div class="gameTableGrid" id="videoGrid">
 
-                <div class="deckStack" aria-hidden="true">
-                  <div class="cardBack"></div>
-                  <div class="cardBack"></div>
-                  <div class="cardBack">
-                    <div class="deckLabel">DECK</div>
+              <!-- Left column: friend tiles 1 & 2 -->
+              <div class="videoColLeft" id="videoColLeft">
+                <div class="videoColPlaceholder" id="videoPlaceholderL1">👤</div>
+                <div class="videoColPlaceholder" id="videoPlaceholderL2">👤</div>
+              </div>
+
+              <!-- Center column: ritual card + self video below -->
+              <div class="cardCenter">
+                <div class="deckInfoBar" id="deckInfo">
+                  Aguardando o anfitrião iniciar.
+                </div>
+
+                <div class="revealPanel">
+                  <div class="revealStage">
+                    <article class="ritualVisualCard silenceCard">
+                      <div class="ritualCardFrame">
+                        <div class="ritualTopOrnaments">
+                          <div class="ritualLine"></div>
+                          <div class="ritualStars">✦ ✦ ✦</div>
+                          <div class="ritualSigil">△</div>
+                          <div class="ritualStars">✦ ✦ ✦</div>
+                          <div class="ritualLine"></div>
+                        </div>
+
+                        <div class="ritualCardNumber" id="ritualCardType">CARTA 01</div>
+                        <h3 class="ritualCardMainTitle" id="ritualCardTitle">SILÊNCIO</h3>
+
+                        <div class="ritualMainInstruction" id="ritualCardText">
+                          DURANTE 60 SEGUNDOS<br>
+                          NINGUÉM PODE FALAR.
+                        </div>
+
+                        <div class="ritualMidDetails">
+                          <div class="ritualMiniDivider">
+                            <span></span><i></i><span></span>
+                          </div>
+
+                          <p class="ritualRuleText">
+                            Se alguém quebrar o silêncio:<br>
+                            <strong>MARQUE 1 PONTO DE INFLUÊNCIA.</strong>
+                          </p>
+
+                          <div class="ritualMiniDivider">
+                            <span></span><i></i><span></span>
+                          </div>
+
+                          <p class="ritualRuleText subtle">
+                            Se ninguém quebrar...<br>
+                            OBSERVE QUEM PARECEU<br>
+                            MAIS <strong class="goldText">DESCONFORTÁVEL.</strong>
+                          </p>
+                        </div>
+
+                        <div class="ritualWhiteDivider"></div>
+
+                        <p class="ritualFinalPhrase">
+                          A SESSÃO REAGE AO DESCONFORTO,<br>
+                          NÃO ÀS PALAVRAS.
+                        </p>
+
+                        <div class="ritualFingerprint">
+                          <div class="finger finger1"></div>
+                          <div class="finger finger2"></div>
+                          <div class="finger finger3"></div>
+                          <div class="finger finger4"></div>
+                          <div class="finger finger5"></div>
+                          <div class="finger finger6"></div>
+                        </div>
+
+                        <div class="ritualBottomOrnaments">
+                          <div class="ritualBottomSet left">
+                            <span></span><span></span><span></span>
+                          </div>
+                          <div class="ritualBottomSet right">
+                            <span></span><span></span><span></span>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
                   </div>
                 </div>
 
-                <div class="deckInfo" id="deckInfo">
-                  Aguardando o anfitrião iniciar.<br>
-                  Depois disso, a mesa se transforma.
-                </div>
-              </aside>
-
-              <div class="revealPanel">
-                <div class="revealStage">
-                  <article class="ritualVisualCard silenceCard">
-                    <div class="ritualCardFrame">
-                      <div class="ritualTopOrnaments">
-                        <div class="ritualLine"></div>
-                        <div class="ritualStars">✦ ✦ ✦</div>
-                        <div class="ritualSigil">△</div>
-                        <div class="ritualStars">✦ ✦ ✦</div>
-                        <div class="ritualLine"></div>
-                      </div>
-
-                      <div class="ritualCardNumber" id="ritualCardType">CARTA 01</div>
-                      <h3 class="ritualCardMainTitle" id="ritualCardTitle">SILÊNCIO</h3>
-
-                      <div class="ritualMainInstruction" id="ritualCardText">
-                        DURANTE 60 SEGUNDOS<br>
-                        NINGUÉM PODE FALAR.
-                      </div>
-
-                      <div class="ritualMidDetails">
-                        <div class="ritualMiniDivider">
-                          <span></span><i></i><span></span>
-                        </div>
-
-                        <p class="ritualRuleText">
-                          Se alguém quebrar o silêncio:<br>
-                          <strong>MARQUE 1 PONTO DE INFLUÊNCIA.</strong>
-                        </p>
-
-                        <div class="ritualMiniDivider">
-                          <span></span><i></i><span></span>
-                        </div>
-
-                        <p class="ritualRuleText subtle">
-                          Se ninguém quebrar...<br>
-                          OBSERVE QUEM PARECEU<br>
-                          MAIS <strong class="goldText">DESCONFORTÁVEL.</strong>
-                        </p>
-                      </div>
-
-                      <div class="ritualWhiteDivider"></div>
-
-                      <p class="ritualFinalPhrase">
-                        A SESSÃO REAGE AO DESCONFORTO,<br>
-                        NÃO ÀS PALAVRAS.
-                      </p>
-
-                      <div class="ritualFingerprint">
-                        <div class="finger finger1"></div>
-                        <div class="finger finger2"></div>
-                        <div class="finger finger3"></div>
-                        <div class="finger finger4"></div>
-                        <div class="finger finger5"></div>
-                        <div class="finger finger6"></div>
-                      </div>
-
-                      <div class="ritualBottomOrnaments">
-                        <div class="ritualBottomSet left">
-                          <span></span><span></span><span></span>
-                        </div>
-                        <div class="ritualBottomSet right">
-                          <span></span><span></span><span></span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                </div>
+                <!-- Self video: centralizado abaixo da carta -->
+                <div class="videoSelfSlot" id="videoSelfSlot"></div>
               </div>
+
+              <!-- Right column: friend tiles 3 & 4 -->
+              <div class="videoColRight" id="videoColRight">
+                <div class="videoColPlaceholder" id="videoPlaceholderR1">👤</div>
+                <div class="videoColPlaceholder" id="videoPlaceholderR2">👤</div>
+              </div>
+
             </div>
           </section>
 
+        </section>
+
+        <section class="rightColumn">
           <section class="card historyCard">
             <div class="historyHead">
               <div class="ornament"></div>
@@ -2044,34 +2626,6 @@
           </section>
         </section>
 
-        <section class="rightColumn">
-          <section class="card videoCard">
-            <div class="videoTop">
-              <h3 class="videoTitle">Vídeo</h3>
-
-              <div class="videoActions">
-                <button class="videoBtn primary" id="joinVideoBtn">Entrar na chamada</button>
-                <button class="videoBtn" id="toggleMicBtn" disabled>Mutar microfone</button>
-                <button class="videoBtn" id="toggleCamBtn" disabled>Desligar câmera</button>
-                <button class="videoBtn danger" id="leaveVideoBtn" disabled>Sair da chamada</button>
-              </div>
-            </div>
-
-            <div class="videoStatus" id="videoStatus">Vídeo desligado.</div>
-
-            <div class="videoFocusBar" id="videoFocusBar" hidden>
-              <button class="videoFocusBtn" id="exitFocusBtn">Voltar para grade</button>
-            </div>
-
-            <div class="videoGrid" id="videoGrid">
-              <div class="videoEmpty" id="videoEmpty">
-                Entre na chamada para abrir câmera e microfone.<br>
-                Até 5 participantes podem ficar juntos aqui.
-              </div>
-            </div>
-          </section>
-        </section>
-
       </section>
 
       <div class="footerBar">
@@ -2080,6 +2634,24 @@
       </div>
     </div>
   </main>
+
+  <!-- ===== VIDEO CONTROL BAR (fixed, top-center) ===== -->
+  <div class="videoLayer">
+    <div class="videoControlBar">
+      <span class="videoStatusInline" id="videoStatus">Vídeo desligado.</span>
+      <button class="videoCtrlBtn primary" id="joinVideoBtn">Entrar na chamada</button>
+      <button class="videoCtrlBtn" id="toggleMicBtn" disabled>🎤 Mutar</button>
+      <button class="videoCtrlBtn" id="toggleCamBtn" disabled>📷 Câmera</button>
+      <button class="videoCtrlBtn danger" id="leaveVideoBtn" disabled>✕ Sair</button>
+    </div>
+
+    <div class="videoFocusBar" id="videoFocusBar" hidden>
+      <button class="videoFocusBtn" id="exitFocusBtn">Voltar</button>
+    </div>
+  </div>
+
+  <!-- Hidden anchor for videoEmptyEl (JS compatibilidade) -->
+  <div id="videoEmpty" style="display:none"></div>
 
   <div id="profileModal" class="profileModal hidden">
     <div class="profileCard profileCard--large">
@@ -3413,7 +3985,11 @@
         startBtn.disabled = !isHost;
         startBtn.textContent = isHost ? (started ? "Ritual iniciado" : "Iniciar Ritual") : "Aguardando anfitrião";
 
-        if (!started) {
+        // Arena Mode: ativa automaticamente quando o ritual começa
+        if (started) {
+          if (typeof window.activateArenaMode === "function") window.activateArenaMode();
+        } else {
+          if (typeof window.deactivateArenaMode === "function") window.deactivateArenaMode();
           setRitualWaitingState();
         }
 
@@ -3685,5 +4261,77 @@
   </script>
 
   <script type="module" src="video.js"></script>
+
+  <!-- Botão discreto de saída do Arena Mode -->
+  <button id="exitArenaBtn" class="exitArenaBtn">← Sair da imersão</button>
+
+  <script>
+    /* ===== ARENA MODE ===== */
+    (function () {
+      const html = document.documentElement;
+
+      function activateArenaMode() {
+        html.classList.add("arenaMode");
+        sessionStorage.setItem("osl_arena", "1");
+        const btn = document.getElementById("arenaBtn");
+        if (btn) {
+          btn.textContent = "✕ Arena";
+          btn.title = "Sair do Modo Arena";
+        }
+
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.().catch(() => {});
+        }
+      }
+
+      function deactivateArenaMode() {
+        html.classList.remove("arenaMode");
+        sessionStorage.removeItem("osl_arena");
+        const btn = document.getElementById("arenaBtn");
+        if (btn) {
+          btn.textContent = "⚔ Arena";
+          btn.title = "Alternar Modo Arena";
+        }
+
+        if (document.fullscreenElement) {
+          document.exitFullscreen?.().catch(() => {});
+        }
+      }
+
+      function toggleArenaMode() {
+        if (html.classList.contains("arenaMode")) {
+          deactivateArenaMode();
+        } else {
+          activateArenaMode();
+        }
+      }
+
+      // Expõe globalmente para o listener Firebase chamar
+      window.activateArenaMode   = activateArenaMode;
+      window.deactivateArenaMode = deactivateArenaMode;
+
+      // Botão do topbar
+      document.getElementById("arenaBtn")
+        ?.addEventListener("click", toggleArenaMode);
+
+      // Botão de saída flutuante
+      document.getElementById("exitArenaBtn")
+        ?.addEventListener("click", deactivateArenaMode);
+
+      // ESC sai da imersão — apenas se nenhum modal estiver aberto
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (!html.classList.contains("arenaMode")) return;
+        const profileModal = document.getElementById("profileModal");
+        if (profileModal && !profileModal.classList.contains("hidden")) return;
+        deactivateArenaMode();
+      });
+
+      // Restaura modo arena se a sessão já estava ativa
+      if (sessionStorage.getItem("osl_arena") === "1") {
+        activateArenaMode();
+      }
+    })();
+  </script>
 </body>
 </html>
