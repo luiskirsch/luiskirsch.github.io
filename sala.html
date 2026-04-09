@@ -1742,6 +1742,8 @@
       position:relative;
       border-radius:20px;
       overflow:hidden;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
 
       /* Papel grosso escuro — camadas de textura simulada */
       background:
@@ -2561,84 +2563,80 @@
     }
 
     /* ============================================================
-       THE REVEAL — transição ritual com 3D e profundidade
+       THE REVEAL — virada 360° ritual
+       Carta gira no eixo Y: conteúdo trocado aos 90° (lado invisível)
     ============================================================ */
 
-    /* Saída: roda no Y, encolhe, afunda no preto */
-    @keyframes theVanish {
-      0% {
-        opacity:1;
-        transform:rotateX(3deg) rotateY(0deg) scale(1) translateZ(0px);
-        filter:drop-shadow(0 14px 20px rgba(0,0,0,.70)) drop-shadow(0 0 28px rgba(215,176,107,.12)) blur(0px) brightness(1);
+    @keyframes theFlip {
+      /* Frente visível — saindo */
+      0%  {
+        transform: rotateX(3deg) rotateY(0deg)   scale(1);
+        filter: drop-shadow(0 14px 20px rgba(0,0,0,.70))
+                drop-shadow(0 0 28px rgba(215,176,107,.12));
       }
-      100% {
-        opacity:0;
-        transform:rotateX(8deg) rotateY(24deg) scale(0.68) translateZ(-160px);
-        filter:drop-shadow(0 4px 6px rgba(0,0,0,.95)) blur(5px) brightness(0.08);
+      /* Fica de lado — invisível, momento da troca */
+      25% {
+        transform: rotateX(4deg) rotateY(90deg)  scale(0.88);
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,.95)) brightness(0.2);
       }
-    }
-
-    /* Entrada: vem do fundo desfocada, avança e trava com brilho */
-    @keyframes theSummons {
-      0% {
-        opacity:0;
-        transform:rotateX(3deg) rotateY(-14deg) scale(0.48) translateZ(-340px);
-        filter:blur(14px) brightness(0.35);
-      }
+      /* Costas — oculto pelo backface-visibility */
       50% {
-        opacity:1;
-        filter:blur(4px) brightness(0.9);
+        transform: rotateX(4deg) rotateY(180deg) scale(0.85);
+        filter: brightness(0.05);
       }
-      78% {
-        transform:rotateX(2deg) rotateY(2.5deg) scale(1.06) translateZ(16px);
-        filter:blur(0px) brightness(1.45);
+      /* De lado de volta — nova carta ainda oculta */
+      75% {
+        transform: rotateX(4deg) rotateY(270deg) scale(0.88);
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,.95)) brightness(0.2);
       }
+      /* Overshoot + flash dourado ao pousar */
+      88% {
+        transform: rotateX(2deg) rotateY(353deg) scale(1.05);
+        filter: drop-shadow(0 20px 36px rgba(0,0,0,.60))
+                drop-shadow(0 0 54px rgba(215,176,107,.48))
+                brightness(1.38);
+      }
+      /* Repouso final */
       100% {
-        opacity:1;
-        transform:rotateX(3deg) rotateY(0deg) scale(1) translateZ(0px);
-        filter:drop-shadow(0 14px 20px rgba(0,0,0,.70)) drop-shadow(0 0 28px rgba(215,176,107,.12)) blur(0px) brightness(1);
+        transform: rotateX(3deg) rotateY(360deg) scale(1);
+        filter: drop-shadow(0 14px 20px rgba(0,0,0,.70))
+                drop-shadow(0 0 28px rgba(215,176,107,.12));
       }
     }
 
-    /* Tremida da mesa no momento do impacto */
+    .ritualCardWrap--flipping {
+      animation: theFlip 1s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+      pointer-events: none;
+    }
+
+    /* Tremida da mesa quando a carta vai de lado */
     @keyframes tableShake {
-      0%   { transform:translate(0,0) rotate(0deg); }
-      18%  { transform:translate(-6px, 2px) rotate(-0.5deg); }
-      36%  { transform:translate(5px, -2px) rotate(0.4deg); }
-      54%  { transform:translate(-4px, 1px) rotate(-0.3deg); }
-      72%  { transform:translate(3px, -1px) rotate(0.2deg); }
-      100% { transform:translate(0,0) rotate(0deg); }
-    }
-
-    /* Aura dourada */
-    @keyframes goldenPulse {
-      0%   { opacity:0; transform:scale(0.6); }
-      35%  { opacity:1; transform:scale(1.0); }
-      100% { opacity:0; transform:scale(1.6); }
-    }
-
-    .ritualCardWrap--exiting {
-      animation:theVanish .5s cubic-bezier(0.4,0,0.2,1) forwards !important;
-      pointer-events:none;
-    }
-
-    .ritualCardWrap--entering {
-      animation:theSummons .65s cubic-bezier(0.4,0,0.2,1) forwards !important;
-      pointer-events:none;
+      0%   { transform: translate(0,0) rotate(0deg); }
+      20%  { transform: translate(-5px, 2px) rotate(-0.4deg); }
+      40%  { transform: translate(5px, -2px) rotate(0.4deg); }
+      60%  { transform: translate(-3px, 1px) rotate(-0.25deg); }
+      80%  { transform: translate(3px, -1px) rotate(0.2deg); }
+      100% { transform: translate(0,0) rotate(0deg); }
     }
 
     .revealPanel--shake {
-      animation:tableShake .22s cubic-bezier(0.4,0,0.2,1) both !important;
+      animation: tableShake .22s cubic-bezier(0.4,0,0.2,1) both !important;
     }
 
-    /* Aura dourada que expande durante a troca */
-    .revealGlow{
+    /* Aura dourada que pulsa quando a nova carta aparece */
+    @keyframes goldenPulse {
+      0%   { opacity:0; transform:scale(0.65); }
+      38%  { opacity:1; transform:scale(1.02); }
+      100% { opacity:0; transform:scale(1.55); }
+    }
+
+    .revealGlow {
       position:absolute;
       inset:-32px;
       border-radius:40px;
       pointer-events:none;
       background:radial-gradient(ellipse at center,
-        rgba(215,176,107,.65) 0%,
+        rgba(215,176,107,.68) 0%,
         rgba(215,176,107,.28) 30%,
         transparent 65%
       );
@@ -2646,8 +2644,8 @@
       z-index:0;
     }
 
-    .revealGlow--active{
-      animation:goldenPulse .55s cubic-bezier(0.4,0,0.2,1) forwards;
+    .revealGlow--active {
+      animation: goldenPulse .55s cubic-bezier(0.4,0,0.2,1) forwards;
     }
 
   </style>
@@ -3599,48 +3597,41 @@
       revealAnimating = true;
       if (revealCardBtn) revealCardBtn.disabled = true;
 
-      // ── Fase 1: The Vanish (500ms) ─────────────────────────────
-      ritualCardWrapEl.classList.remove("ritualCardWrap--entering");
-      ritualCardWrapEl.classList.add("ritualCardWrap--exiting");
+      // Garante estado limpo antes de iniciar
+      ritualCardWrapEl.classList.remove("ritualCardWrap--flipping");
+      void ritualCardWrapEl.offsetWidth; // reflow
 
+      // ── Inicia a virada 360° (1000ms total) ──────────────────
+      ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
+
+      // t=250ms → carta está de lado (90°): troca conteúdo + tremida
       setTimeout(() => {
-        // ── Ponto de troca: carta invisível ───────────────────────
         applyCardContent(currentCard);
 
-        // Remove saída
-        ritualCardWrapEl.classList.remove("ritualCardWrap--exiting");
-
-        // Tremida da mesa (200ms)
         if (revealPanelEl) {
           revealPanelEl.classList.remove("revealPanel--shake");
           void revealPanelEl.offsetWidth;
           revealPanelEl.classList.add("revealPanel--shake");
           setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 240);
         }
+      }, 250);
 
-        // Pulso dourado (dispara junto com a entrada)
+      // t=750ms → carta volta de lado (270°): pulso dourado anuncia chegada
+      setTimeout(() => {
         if (revealGlowEl) {
           revealGlowEl.classList.remove("revealGlow--active");
           void revealGlowEl.offsetWidth;
           revealGlowEl.classList.add("revealGlow--active");
         }
+      }, 750);
 
-        // ── Fase 2: The Summons (650ms) — precisa de 2 frames para
-        //    o browser perceber a remoção da classe --exiting antes
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            ritualCardWrapEl.classList.add("ritualCardWrap--entering");
-
-            setTimeout(() => {
-              ritualCardWrapEl.classList.remove("ritualCardWrap--entering");
-              if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
-              revealAnimating = false;
-              updateRitualButtons();
-            }, 680);
-          });
-        });
-
-      }, 510); // espera a saída terminar (500ms + 10ms buffer)
+      // t=1050ms → animação concluída: limpa estado
+      setTimeout(() => {
+        ritualCardWrapEl.classList.remove("ritualCardWrap--flipping");
+        if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
+        revealAnimating = false;
+        updateRitualButtons();
+      }, 1050);
     }
 
     function renderRitualCardFromState(data) {
