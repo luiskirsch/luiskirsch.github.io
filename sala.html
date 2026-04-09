@@ -624,6 +624,9 @@
       gap:18px;
       position:relative;
       z-index:1;
+      /* Perspectiva no pai — necessário para rotateY 3D real na carta */
+      perspective:1100px;
+      perspective-origin:50% 45%;
     }
 
     .historyCard{
@@ -1710,7 +1713,7 @@
        CARTA FÍSICA — textura, profundidade, luz real
     ============================================================ */
 
-    /* Wrapper que cria a sombra de mesa e perspectiva 3D */
+    /* Wrapper — perspectiva vem do pai (.revealStage) */
     .ritualCardWrap{
       position:relative;
       height:55vh;
@@ -1718,20 +1721,16 @@
       flex-shrink:0;
       will-change:transform;
       contain:layout style;
-
-      /* Sombra de mesa — 2 camadas (4 era GPU intensivo) */
       filter:
         drop-shadow(0 14px 20px rgba(0,0,0,.70))
         drop-shadow(0 0 28px rgba(215,176,107,.12));
-
-      /* Leve inclinação 3D para dar profundidade */
-      transform: perspective(900px) rotateX(3deg);
+      transform: rotateX(3deg);
       transform-style: preserve-3d;
       transition: transform 320ms var(--ease-spring), filter 220ms var(--ease-out);
     }
 
     .ritualCardWrap:hover{
-      transform: perspective(900px) rotateX(0.5deg) translateY(-8px) scale(1.015);
+      transform: rotateX(0.5deg) translateY(-8px) scale(1.015);
       filter:
         drop-shadow(0 24px 36px rgba(0,0,0,.65))
         drop-shadow(0 0 48px rgba(215,176,107,.22));
@@ -2562,52 +2561,93 @@
     }
 
     /* ============================================================
-       THE REVEAL — transição cerimonial de cartas
+       THE REVEAL — transição ritual com 3D e profundidade
     ============================================================ */
 
-    @keyframes cardExit {
-      0%   { opacity:1; transform:perspective(900px) rotateX(3deg) scale(1); }
-      100% { opacity:0; transform:perspective(900px) rotateX(3deg) scale(0.9); }
+    /* Saída: roda no Y, encolhe, afunda no preto */
+    @keyframes theVanish {
+      0% {
+        opacity:1;
+        transform:rotateX(3deg) rotateY(0deg) scale(1) translateZ(0px);
+        filter:drop-shadow(0 14px 20px rgba(0,0,0,.70)) drop-shadow(0 0 28px rgba(215,176,107,.12)) blur(0px) brightness(1);
+      }
+      100% {
+        opacity:0;
+        transform:rotateX(8deg) rotateY(24deg) scale(0.68) translateZ(-160px);
+        filter:drop-shadow(0 4px 6px rgba(0,0,0,.95)) blur(5px) brightness(0.08);
+      }
     }
 
-    @keyframes cardEnter {
-      0%   { opacity:0; transform:perspective(900px) rotateX(3deg) scale(1.1); }
-      100% { opacity:1; transform:perspective(900px) rotateX(3deg) scale(1); }
+    /* Entrada: vem do fundo desfocada, avança e trava com brilho */
+    @keyframes theSummons {
+      0% {
+        opacity:0;
+        transform:rotateX(3deg) rotateY(-14deg) scale(0.48) translateZ(-340px);
+        filter:blur(14px) brightness(0.35);
+      }
+      50% {
+        opacity:1;
+        filter:blur(4px) brightness(0.9);
+      }
+      78% {
+        transform:rotateX(2deg) rotateY(2.5deg) scale(1.06) translateZ(16px);
+        filter:blur(0px) brightness(1.45);
+      }
+      100% {
+        opacity:1;
+        transform:rotateX(3deg) rotateY(0deg) scale(1) translateZ(0px);
+        filter:drop-shadow(0 14px 20px rgba(0,0,0,.70)) drop-shadow(0 0 28px rgba(215,176,107,.12)) blur(0px) brightness(1);
+      }
     }
 
+    /* Tremida da mesa no momento do impacto */
+    @keyframes tableShake {
+      0%   { transform:translate(0,0) rotate(0deg); }
+      18%  { transform:translate(-6px, 2px) rotate(-0.5deg); }
+      36%  { transform:translate(5px, -2px) rotate(0.4deg); }
+      54%  { transform:translate(-4px, 1px) rotate(-0.3deg); }
+      72%  { transform:translate(3px, -1px) rotate(0.2deg); }
+      100% { transform:translate(0,0) rotate(0deg); }
+    }
+
+    /* Aura dourada */
     @keyframes goldenPulse {
-      0%   { opacity:0; transform:scale(0.8); }
-      45%  { opacity:1; transform:scale(1.05); }
-      100% { opacity:0; transform:scale(1.45); }
+      0%   { opacity:0; transform:scale(0.6); }
+      35%  { opacity:1; transform:scale(1.0); }
+      100% { opacity:0; transform:scale(1.6); }
     }
 
     .ritualCardWrap--exiting {
-      animation:cardExit .5s ease-in forwards !important;
+      animation:theVanish .5s cubic-bezier(0.4,0,0.2,1) forwards !important;
       pointer-events:none;
     }
 
     .ritualCardWrap--entering {
-      animation:cardEnter .5s ease-out forwards !important;
+      animation:theSummons .65s cubic-bezier(0.4,0,0.2,1) forwards !important;
       pointer-events:none;
     }
 
-    /* Aura dourada que pulsa durante a troca */
+    .revealPanel--shake {
+      animation:tableShake .22s cubic-bezier(0.4,0,0.2,1) both !important;
+    }
+
+    /* Aura dourada que expande durante a troca */
     .revealGlow{
       position:absolute;
-      inset:-28px;
-      border-radius:36px;
+      inset:-32px;
+      border-radius:40px;
       pointer-events:none;
       background:radial-gradient(ellipse at center,
-        rgba(215,176,107,.55) 0%,
-        rgba(215,176,107,.22) 35%,
-        transparent 68%
+        rgba(215,176,107,.65) 0%,
+        rgba(215,176,107,.28) 30%,
+        transparent 65%
       );
       opacity:0;
       z-index:0;
     }
 
     .revealGlow--active{
-      animation:goldenPulse .75s ease-in-out forwards;
+      animation:goldenPulse .55s cubic-bezier(0.4,0,0.2,1) forwards;
     }
 
   </style>
@@ -3122,6 +3162,7 @@
     const deckInfo = document.getElementById("deckInfo");
     const ritualCardWrapEl = document.getElementById("ritualCardWrap");
     const revealGlowEl = document.getElementById("revealGlow");
+    const revealPanelEl = document.querySelector(".revealPanel");
 
     // Rastreia a carta atual para detectar mudanças e animar
     let lastRevealedCardKey = null;
@@ -3558,36 +3599,48 @@
       revealAnimating = true;
       if (revealCardBtn) revealCardBtn.disabled = true;
 
-      // Fase 1: Saída — encolhe e some (0.5s ease-in)
+      // ── Fase 1: The Vanish (500ms) ─────────────────────────────
       ritualCardWrapEl.classList.remove("ritualCardWrap--entering");
       ritualCardWrapEl.classList.add("ritualCardWrap--exiting");
 
       setTimeout(() => {
-        // Atualiza conteúdo enquanto está invisível
+        // ── Ponto de troca: carta invisível ───────────────────────
         applyCardContent(currentCard);
 
-        // Pulso dourado no container
+        // Remove saída
+        ritualCardWrapEl.classList.remove("ritualCardWrap--exiting");
+
+        // Tremida da mesa (200ms)
+        if (revealPanelEl) {
+          revealPanelEl.classList.remove("revealPanel--shake");
+          void revealPanelEl.offsetWidth;
+          revealPanelEl.classList.add("revealPanel--shake");
+          setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 240);
+        }
+
+        // Pulso dourado (dispara junto com a entrada)
         if (revealGlowEl) {
           revealGlowEl.classList.remove("revealGlow--active");
-          void revealGlowEl.offsetWidth; // força reflow para reiniciar animação
+          void revealGlowEl.offsetWidth;
           revealGlowEl.classList.add("revealGlow--active");
         }
 
-        // Fase 2: Entrada — aparece maior e pousa (0.5s ease-out)
-        ritualCardWrapEl.classList.remove("ritualCardWrap--exiting");
-
+        // ── Fase 2: The Summons (650ms) — precisa de 2 frames para
+        //    o browser perceber a remoção da classe --exiting antes
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             ritualCardWrapEl.classList.add("ritualCardWrap--entering");
 
             setTimeout(() => {
               ritualCardWrapEl.classList.remove("ritualCardWrap--entering");
+              if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
               revealAnimating = false;
               updateRitualButtons();
-            }, 520);
+            }, 680);
           });
         });
-      }, 520);
+
+      }, 510); // espera a saída terminar (500ms + 10ms buffer)
     }
 
     function renderRitualCardFromState(data) {
