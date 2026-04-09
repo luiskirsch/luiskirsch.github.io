@@ -468,9 +468,15 @@
       const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
 
       function liberarPagina() {
-        if (!document.body) return;
-        document.body.classList.remove("osl-loading");
-        document.body.classList.add("osl-ready");
+        function doLiberar() {
+          document.body.classList.remove("osl-loading");
+          document.body.classList.add("osl-ready");
+        }
+        if (document.body) {
+          doLiberar();
+        } else {
+          document.addEventListener("DOMContentLoaded", doLiberar);
+        }
       }
 
       // Usuário tem licença mas precisa relogar no painel para emitir novo acesso
