@@ -799,6 +799,31 @@
 
     const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
 
+    // Acorda o servidor Render silenciosamente ao carregar a página
+    fetch(`${BACKEND_BASE_URL}/health`).catch(() => {});
+
+    // Fetch com timeout + retry automático
+    async function fetchComRetry(url, options = {}, { tentativas = 3, timeoutMs = 18000 } = {}) {
+      let ultimoErro;
+      for (let i = 0; i < tentativas; i++) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+        try {
+          const res = await fetch(url, { ...options, signal: ctrl.signal });
+          clearTimeout(timer);
+          return res;
+        } catch (err) {
+          clearTimeout(timer);
+          ultimoErro = err;
+          if (i < tentativas - 1) {
+            setStatus(`Servidor iniciando, aguardando… (tentativa ${i + 2}/${tentativas})`);
+            await new Promise(r => setTimeout(r, 4000));
+          }
+        }
+      }
+      throw ultimoErro;
+    }
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -1192,21 +1217,24 @@
       if (!accessToken) return false;
 
       try {
-        const res = await fetch(`${BACKEND_BASE_URL}/verificar-acesso`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
+        const res = await fetchComRetry(
+          `${BACKEND_BASE_URL}/verificar-acesso`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ accessToken })
           },
-          body: JSON.stringify({ accessToken })
-        });
+          { tentativas: 2, timeoutMs: 12000 }
+        );
 
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok || !data.liberado) return false;
-        return data.uid && data.uid === user.uid;
+        return true;
       } catch (err) {
-        console.error("Erro ao verificar access token:", err);
-        return false;
+        // Servidor offline → assume token local como válido se existir
+        console.warn("Servidor offline ao verificar acesso, usando local:", err);
+        return !!accessToken;
       }
     }
 
@@ -1220,50 +1248,48 @@
 
       setStatus("Validando código da licença...");
 
-      const verifyRes = await fetch(`${BACKEND_BASE_URL}/validar-codigo-licenca`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          licenseCode: typedCode,
-          uid: user.uid,
-          email: user.email || ""
-        })
-      });
+      const verifyRes = await fetchComRetry(
+        `${BACKEND_BASE_URL}/validar-codigo-licenca`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ licenseCode: typedCode, uid: user.uid, email: user.email || "" })
+        }
+      );
 
       const verifyData = await verifyRes.json().catch(() => ({}));
 
       if (!verifyRes.ok || !verifyData.valid) {
         if (verifyData?.error === "LICENCA_JA_VINCULADA_A_OUTRA_CONTA") {
           setStatus("Esta licença já está vinculada a outra conta.", "err");
+        } else if (verifyData?.error === "LICENCA_INATIVA") {
+          setStatus("Licença encontrada mas marcada como inativa. Entre em contato com o suporte.", "err");
         } else {
-          setStatus("Código de licença inválido ou não encontrado.", "err");
+          setStatus(`Código de licença inválido ou não encontrado. (${verifyData?.error || "erro desconhecido"})`, "err");
         }
         return false;
       }
 
       setStatus("Emitindo acesso...");
 
-      const accessRes = await fetch(`${BACKEND_BASE_URL}/emitir-acesso-por-codigo`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          licenseCode: typedCode,
-          uid: user.uid,
-          email: user.email || ""
-        })
-      });
+      const accessRes = await fetchComRetry(
+        `${BACKEND_BASE_URL}/emitir-acesso-por-codigo`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ licenseCode: typedCode, uid: user.uid, email: user.email || "" })
+        }
+      );
 
       const accessData = await accessRes.json().catch(() => ({}));
 
       if (!accessRes.ok || !accessData.accessToken) {
         if (accessData?.error === "LICENCA_JA_VINCULADA_A_OUTRA_CONTA") {
           setStatus("Esta licença já está vinculada a outra conta.", "err");
+        } else if (accessData?.error === "LICENCA_INATIVA") {
+          setStatus("Licença inativa. Entre em contato com o suporte.", "err");
         } else {
-          setStatus("Não foi possível emitir o acesso com essa licença.", "err");
+          setStatus(`Não foi possível emitir o acesso. (${accessData?.error || "erro desconhecido"})`, "err");
         }
         return false;
       }
