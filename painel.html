@@ -1246,28 +1246,34 @@
         return false;
       }
 
-      setStatus("Validando código da licença...");
+      // Se o perfil já tem a licença vinculada, pula a validação e vai direto para emitir acesso
+      const alreadyLinked = currentProfile?.licenseLinked &&
+        normalizeLicenseCode(currentProfile?.licenseCode || "") === typedCode;
 
-      const verifyRes = await fetchComRetry(
-        `${BACKEND_BASE_URL}/validar-codigo-licenca`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ licenseCode: typedCode, uid: user.uid, email: user.email || "" })
+      if (!alreadyLinked) {
+        setStatus("Validando código da licença...");
+
+        const verifyRes = await fetchComRetry(
+          `${BACKEND_BASE_URL}/validar-codigo-licenca`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ licenseCode: typedCode, uid: user.uid, email: user.email || "" })
+          }
+        );
+
+        const verifyData = await verifyRes.json().catch(() => ({}));
+
+        if (!verifyRes.ok || !verifyData.valid) {
+          if (verifyData?.error === "LICENCA_JA_VINCULADA_A_OUTRA_CONTA") {
+            setStatus("Esta licença já está vinculada a outra conta.", "err");
+          } else if (verifyData?.error === "LICENCA_INATIVA") {
+            setStatus("Licença encontrada mas marcada como inativa. Entre em contato com o suporte.", "err");
+          } else {
+            setStatus(`Código inválido ou não encontrado. (${verifyData?.error || "erro"})`, "err");
+          }
+          return false;
         }
-      );
-
-      const verifyData = await verifyRes.json().catch(() => ({}));
-
-      if (!verifyRes.ok || !verifyData.valid) {
-        if (verifyData?.error === "LICENCA_JA_VINCULADA_A_OUTRA_CONTA") {
-          setStatus("Esta licença já está vinculada a outra conta.", "err");
-        } else if (verifyData?.error === "LICENCA_INATIVA") {
-          setStatus("Licença encontrada mas marcada como inativa. Entre em contato com o suporte.", "err");
-        } else {
-          setStatus(`Código de licença inválido ou não encontrado. (${verifyData?.error || "erro desconhecido"})`, "err");
-        }
-        return false;
       }
 
       setStatus("Emitindo acesso...");
@@ -1278,7 +1284,8 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ licenseCode: typedCode, uid: user.uid, email: user.email || "" })
-        }
+        },
+        { tentativas: 4, timeoutMs: 25000 }
       );
 
       const accessData = await accessRes.json().catch(() => ({}));
@@ -1289,7 +1296,7 @@
         } else if (accessData?.error === "LICENCA_INATIVA") {
           setStatus("Licença inativa. Entre em contato com o suporte.", "err");
         } else {
-          setStatus(`Não foi possível emitir o acesso. (${accessData?.error || "erro desconhecido"})`, "err");
+          setStatus(`Não foi possível emitir o acesso. (${accessData?.error || "erro"})`, "err");
         }
         return false;
       }
