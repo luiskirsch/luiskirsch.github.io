@@ -451,7 +451,7 @@
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      padding:16px 18px;
+      padding:16px 18px 24px;
       border-bottom:1px solid var(--line);
       background:rgba(255,255,255,.02);
       position:relative;
@@ -467,7 +467,7 @@
     }
 
     .tableHeadLeft p{
-      margin:0;
+      margin:0 0 20px;
       color:var(--muted);
       font-size:13px;
     }
@@ -789,6 +789,44 @@
       cursor:not-allowed;
     }
 
+    /* ===== Action buttons in tableHead (Revelar / Reiniciar) ===== */
+    .videoBtn{
+      appearance:none;
+      border:1px solid rgba(215,176,107,.30);
+      background:rgba(215,176,107,.10);
+      color:rgba(215,176,107,.92);
+      height:36px;
+      padding:0 16px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      white-space:nowrap;
+      cursor:pointer;
+      transition:background .15s, border-color .15s, opacity .15s;
+    }
+
+    .videoBtn:hover:not([disabled]){
+      background:rgba(215,176,107,.18);
+      border-color:rgba(215,176,107,.55);
+    }
+
+    .videoBtn.primary{
+      background:linear-gradient(180deg,#e7c58a,#c99a4b);
+      color:#1a140d;
+      border-color:transparent;
+    }
+
+    .videoBtn.primary:hover:not([disabled]){
+      background:linear-gradient(180deg,#f0d09a,#d4a858);
+    }
+
+    .videoBtn[disabled]{
+      opacity:.35;
+      cursor:not-allowed;
+    }
+
     /* Focus exit bar */
     .videoFocusBar{
       position:fixed;
@@ -817,7 +855,7 @@
     /* ===== GAME TABLE GRID — inline 3-column layout inside tableCard ===== */
     .gameTableGrid{
       display:grid;
-      grid-template-columns:clamp(110px,14vw,180px) 1fr clamp(110px,14vw,180px);
+      grid-template-columns:clamp(80px,10vw,130px) 1fr clamp(80px,10vw,130px);
       gap:14px;
       padding:16px 18px 20px;
       align-items:center;
@@ -1633,8 +1671,8 @@
 
     .ritualVisualCard{
       width:auto;
-      height:60vh;
-      aspect-ratio:2/3;
+      height:70vh;
+      aspect-ratio:5/7;
       position:relative;
       border-radius:22px;
       overflow:hidden;
@@ -1674,11 +1712,11 @@
       position:relative;
       z-index:1;
       height:100%;
-      padding:12px 14px;
+      padding:30px;
       display:flex;
       flex-direction:column;
       align-items:center;
-      justify-content:space-evenly;
+      justify-content:space-between;
       text-align:center;
       color:#f7f3ea;
       overflow:hidden;
@@ -1736,7 +1774,7 @@
 
     .ritualMainInstruction{
       margin:0;
-      font-size:clamp(11px, 1vw, 14px);
+      font-size:clamp(0.8rem, 2vh, 1.2rem);
       line-height:1.3;
       text-align:center;
       color:rgba(255,255,255,.88);
@@ -2230,9 +2268,9 @@
     }
 
     html.arenaMode .ritualVisualCard{
-      height:60vh;
+      height:70vh;
       width:auto;
-      aspect-ratio:2/3;
+      aspect-ratio:5/7;
       max-height:none;
     }
 
@@ -2487,7 +2525,7 @@
 
               <div class="tableHeadRight">
                 <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar Próxima Carta</button>
-                <button class="videoBtn" id="resetRitualBtn" disabled>Reiniciar ritual</button>
+                <button class="videoBtn primary" id="resetRitualBtn" disabled>Reiniciar ritual</button>
 
                 <div class="sessionStatus">
                   <span class="dot"></span>
