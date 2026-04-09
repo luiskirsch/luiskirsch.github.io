@@ -1736,6 +1736,23 @@
         drop-shadow(0 0 48px rgba(215,176,107,.22));
     }
 
+    /* Verso da carta — espelho da frente, rotacionado 180° no Y */
+    .ritualCardBack{
+      position:absolute;
+      inset:0;
+      border-radius:20px;
+      overflow:hidden;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      transform:rotateY(180deg);
+      background:
+        url('./verso-carta.jpg') center center / cover no-repeat;
+      /* Borda dourada igual à frente */
+      border:1px solid rgba(215,176,107,.55);
+      outline:1px solid rgba(0,0,0,.8);
+      outline-offset:-3px;
+    }
+
     .ritualVisualCard{
       width:100%;
       height:100%;
@@ -2832,6 +2849,10 @@
                         </div>
                       </div>
                     </article>
+
+                    <!-- Verso da carta — visível durante os 90°–270° da virada -->
+                    <div class="ritualCardBack" aria-hidden="true"></div>
+
                     </div>
                   </div>
                 </div>
