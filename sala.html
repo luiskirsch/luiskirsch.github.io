@@ -1632,9 +1632,9 @@
     }
 
     .ritualVisualCard{
-      width:min(100%, 260px);
-      height:auto;
-      max-height:65vh;
+      width:auto;
+      height:60vh;
+      aspect-ratio:2/3;
       position:relative;
       border-radius:22px;
       overflow:hidden;
@@ -1673,16 +1673,15 @@
     .ritualCardFrame{
       position:relative;
       z-index:1;
-      height:auto;
-      max-height:calc(65vh - 2px);
-      padding:20px 18px;
+      height:100%;
+      padding:12px 14px;
       display:flex;
       flex-direction:column;
       align-items:center;
-      justify-content:center;
+      justify-content:space-evenly;
       text-align:center;
       color:#f7f3ea;
-      overflow-y:auto;
+      overflow:hidden;
     }
 
     .ritualTopOrnaments{
@@ -1690,8 +1689,8 @@
       display:grid;
       grid-template-columns:1fr auto auto auto 1fr;
       align-items:center;
-      gap:10px;
-      margin-bottom:18px;
+      gap:8px;
+      margin-bottom:0;
     }
 
     .ritualLine{
@@ -1709,24 +1708,23 @@
 
     .ritualSigil{
       color:#f4efe5;
-      font-size:26px;
+      font-size:20px;
       line-height:1;
       text-shadow:0 0 18px rgba(255,255,255,.18);
-      transform:translateY(-2px);
     }
 
     .ritualCardNumber{
-      font-size:13px;
+      font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
       color:#ebe2cf;
-      margin-bottom:12px;
+      margin:0;
     }
 
     .ritualCardMainTitle{
-      margin:8px 0 10px;
-      font-size:clamp(22px, 2vw, 34px);
-      line-height:.95;
+      margin:0;
+      font-size:clamp(18px, 1.6vw, 26px);
+      line-height:1;
       font-weight:700;
       letter-spacing:.01em;
       text-align:center;
@@ -1737,9 +1735,9 @@
     }
 
     .ritualMainInstruction{
-      margin:10px 0 0;
-      font-size:clamp(13px, 1.2vw, 18px);
-      line-height:1.35;
+      margin:0;
+      font-size:clamp(11px, 1vw, 14px);
+      line-height:1.3;
       text-align:center;
       color:rgba(255,255,255,.88);
     }
@@ -1749,8 +1747,8 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:14px;
-      margin:18px 0 0;
+      gap:6px;
+      margin:0;
     }
 
     .ritualMiniDivider{
@@ -1777,22 +1775,22 @@
 
     .ritualRuleText{
       margin:0;
-      font-size:14px;
-      line-height:1.35;
+      font-size:12px;
+      line-height:1.3;
       color:#f5f2ea;
     }
 
     .ritualRuleText strong{
       display:inline-block;
-      margin-top:4px;
-      font-size:15px;
+      margin-top:2px;
+      font-size:12px;
       letter-spacing:.02em;
       color:#fff;
     }
 
     .ritualRuleText.subtle{
-      font-size:13px;
-      line-height:1.42;
+      font-size:11px;
+      line-height:1.35;
     }
 
     .goldText{
@@ -1802,16 +1800,16 @@
     .ritualWhiteDivider{
       width:82%;
       height:2px;
-      margin:10px 0 16px;
+      margin:0;
       background:linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
       opacity:.9;
     }
 
     .ritualFinalPhrase{
-      margin:0 0 16px;
-      font-size:13px;
-      line-height:1.45;
-      letter-spacing:.10em;
+      margin:0;
+      font-size:11px;
+      line-height:1.35;
+      letter-spacing:.08em;
       text-transform:uppercase;
       color:#efe9dc;
     }
@@ -2232,9 +2230,10 @@
     }
 
     html.arenaMode .ritualVisualCard{
-      height:auto;
-      width:min(260px, 100%);
-      max-height:60vh;
+      height:60vh;
+      width:auto;
+      aspect-ratio:2/3;
+      max-height:none;
     }
 
     html.arenaMode .videoSelfSlot{
