@@ -2660,21 +2660,60 @@
     }
 
     /* ============================================================
-       THE REVEAL — virada 360° ritual
-       Carta gira no eixo Y: conteúdo trocado aos 90° (lado invisível)
+       THE REVEAL — virada 360° ritual com elevação
     ============================================================ */
 
+    /* Sombra da carta projetada na mesa */
+    .ritualCardShadow{
+      position:absolute;
+      bottom:16%;
+      left:50%;
+      transform:translateX(-50%);
+      width:40%;
+      height:52px;
+      background:radial-gradient(ellipse at 50% 50%,
+        rgba(0,0,0,.70) 0%,
+        rgba(0,0,0,.35) 40%,
+        transparent 72%
+      );
+      border-radius:50%;
+      filter:blur(8px);
+      pointer-events:none;
+      z-index:2;
+    }
+
+    /* Sombra acompanha a elevação: encolhe quando sobe, expande no impacto */
+    @keyframes shadowFlip {
+      0%   { transform:translateX(-50%) scale(1,   1);    opacity:.70; filter:blur(8px); }
+      12%  { transform:translateX(-50%) scale(.72, .55);  opacity:.35; filter:blur(14px); }
+      25%  { transform:translateX(-50%) scale(.48, .32);  opacity:.18; filter:blur(22px); }
+      50%  { transform:translateX(-50%) scale(.40, .26);  opacity:.12; filter:blur(26px); }
+      75%  { transform:translateX(-50%) scale(.48, .32);  opacity:.18; filter:blur(22px); }
+      87%  { transform:translateX(-50%) scale(1.14,.85);  opacity:.80; filter:blur(4px);  }
+      100% { transform:translateX(-50%) scale(1,   1);    opacity:.70; filter:blur(8px);  }
+    }
+
+    .ritualCardShadow--animating{
+      animation:shadowFlip 1.1s cubic-bezier(0.4,0,0.2,1) forwards !important;
+    }
+
+    /* Carta eleva antes de girar, pousa com leve impacto */
     @keyframes theFlip {
-      0%  { transform: rotateX(3deg) rotateY(0deg)   scale(1); }
-      25% { transform: rotateX(4deg) rotateY(90deg)  scale(0.88); }
-      50% { transform: rotateX(4deg) rotateY(180deg) scale(0.85); }
-      75% { transform: rotateX(4deg) rotateY(270deg) scale(0.88); }
-      88% { transform: rotateX(2deg) rotateY(353deg) scale(1.05); }
-      100%{ transform: rotateX(3deg) rotateY(360deg) scale(1); }
+      /* Decolagem */
+      0%   { transform: rotateX(3deg) rotateY(0deg)   translateY(0px)   scale(1); }
+      12%  { transform: rotateX(1deg) rotateY(55deg)  translateY(-32px) scale(1.04); }
+      /* Girada elevada */
+      25%  { transform: rotateX(0deg) rotateY(90deg)  translateY(-44px) scale(1.06); }
+      50%  { transform: rotateX(0deg) rotateY(180deg) translateY(-40px) scale(1.05); }
+      75%  { transform: rotateX(0deg) rotateY(270deg) translateY(-44px) scale(1.06); }
+      85%  { transform: rotateX(1deg) rotateY(330deg) translateY(-22px) scale(1.04); }
+      /* Pouso — leve impacto e overshoot */
+      93%  { transform: rotateX(4deg) rotateY(353deg) translateY(5px)   scale(1.02); }
+      100% { transform: rotateX(3deg) rotateY(360deg) translateY(0px)   scale(1); }
     }
 
     .ritualCardWrap--flipping {
-      animation: theFlip 1s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+      animation: theFlip 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
       pointer-events: none;
     }
 
@@ -2833,6 +2872,8 @@
                 </div>
 
                 <div class="revealPanel">
+                  <!-- Sombra da carta projetada sobre a mesa -->
+                  <div class="ritualCardShadow" id="ritualCardShadow"></div>
                   <div class="revealStage">
                     <div class="revealGlow" id="revealGlow"></div>
                     <div class="ritualCardWrap" id="ritualCardWrap">
@@ -3234,6 +3275,7 @@
     const ritualCardWrapEl = document.getElementById("ritualCardWrap");
     const revealGlowEl = document.getElementById("revealGlow");
     const revealPanelEl = document.querySelector(".revealPanel");
+    const ritualCardShadowEl = document.getElementById("ritualCardShadow");
 
     // Rastreia a carta atual para detectar mudanças e animar
     let lastRevealedCardKey = null;
@@ -3674,10 +3716,17 @@
       ritualCardWrapEl.classList.remove("ritualCardWrap--flipping");
       void ritualCardWrapEl.offsetWidth; // reflow
 
-      // ── Inicia a virada 360° (1000ms total) ──────────────────
+      // ── Sombra e carta animam juntas ──────────────────────────
+      if (ritualCardShadowEl) {
+        ritualCardShadowEl.classList.remove("ritualCardShadow--animating");
+        void ritualCardShadowEl.offsetWidth;
+        ritualCardShadowEl.classList.add("ritualCardShadow--animating");
+      }
+
+      // ── Inicia a virada 360° elevada (1100ms total) ───────────
       ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
 
-      // t=250ms → carta está de lado (90°): troca conteúdo + tremida
+      // t=275ms → carta de lado (90°): troca conteúdo + tremida da mesa
       setTimeout(() => {
         applyCardContent(currentCard);
 
@@ -3687,24 +3736,25 @@
           revealPanelEl.classList.add("revealPanel--shake");
           setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 240);
         }
-      }, 250);
+      }, 275);
 
-      // t=750ms → carta volta de lado (270°): pulso dourado anuncia chegada
+      // t=825ms → carta voltando (270°): pulso dourado anuncia chegada
       setTimeout(() => {
         if (revealGlowEl) {
           revealGlowEl.classList.remove("revealGlow--active");
           void revealGlowEl.offsetWidth;
           revealGlowEl.classList.add("revealGlow--active");
         }
-      }, 750);
+      }, 825);
 
-      // t=1050ms → animação concluída: limpa estado
+      // t=1150ms → animação concluída: limpa estado
       setTimeout(() => {
         ritualCardWrapEl.classList.remove("ritualCardWrap--flipping");
+        if (ritualCardShadowEl) ritualCardShadowEl.classList.remove("ritualCardShadow--animating");
         if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
         revealAnimating = false;
         updateRitualButtons();
-      }, 1050);
+      }, 1150);
     }
 
     function renderRitualCardFromState(data) {
