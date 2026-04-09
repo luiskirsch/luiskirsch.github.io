@@ -1713,27 +1713,36 @@
        CARTA FÍSICA — textura, profundidade, luz real
     ============================================================ */
 
-    /* Wrapper — perspectiva vem do pai (.revealStage) */
+    /* Wrapper — sem filter (filter aplana preserve-3d, quebra o verso) */
     .ritualCardWrap{
       position:relative;
       height:55vh;
       aspect-ratio:5/7;
       flex-shrink:0;
       will-change:transform;
-      contain:layout style;
-      filter:
-        drop-shadow(0 14px 20px rgba(0,0,0,.70))
-        drop-shadow(0 0 28px rgba(215,176,107,.12));
       transform: rotateX(3deg);
       transform-style: preserve-3d;
-      transition: transform 320ms var(--ease-spring), filter 220ms var(--ease-out);
+      transition: transform 320ms var(--ease-spring);
     }
 
     .ritualCardWrap:hover{
       transform: rotateX(0.5deg) translateY(-8px) scale(1.015);
-      filter:
-        drop-shadow(0 24px 36px rgba(0,0,0,.65))
-        drop-shadow(0 0 48px rgba(215,176,107,.22));
+    }
+
+    /* Sombra fica nas faces (não no wrapper) para não quebrar 3D */
+    .ritualVisualCard,
+    .ritualCardBack{
+      box-shadow:
+        0 14px 20px rgba(0,0,0,.70),
+        0 0 28px rgba(215,176,107,.12);
+      transition: box-shadow 220ms var(--ease-out);
+    }
+
+    .ritualCardWrap:hover .ritualVisualCard,
+    .ritualCardWrap:hover .ritualCardBack{
+      box-shadow:
+        0 24px 36px rgba(0,0,0,.65),
+        0 0 48px rgba(215,176,107,.22);
     }
 
     /* Verso da carta — espelho da frente, rotacionado 180° no Y */
@@ -2585,40 +2594,12 @@
     ============================================================ */
 
     @keyframes theFlip {
-      /* Frente visível — saindo */
-      0%  {
-        transform: rotateX(3deg) rotateY(0deg)   scale(1);
-        filter: drop-shadow(0 14px 20px rgba(0,0,0,.70))
-                drop-shadow(0 0 28px rgba(215,176,107,.12));
-      }
-      /* Fica de lado — invisível, momento da troca */
-      25% {
-        transform: rotateX(4deg) rotateY(90deg)  scale(0.88);
-        filter: drop-shadow(0 4px 8px rgba(0,0,0,.95)) brightness(0.2);
-      }
-      /* Costas — oculto pelo backface-visibility */
-      50% {
-        transform: rotateX(4deg) rotateY(180deg) scale(0.85);
-        filter: brightness(0.05);
-      }
-      /* De lado de volta — nova carta ainda oculta */
-      75% {
-        transform: rotateX(4deg) rotateY(270deg) scale(0.88);
-        filter: drop-shadow(0 4px 8px rgba(0,0,0,.95)) brightness(0.2);
-      }
-      /* Overshoot + flash dourado ao pousar */
-      88% {
-        transform: rotateX(2deg) rotateY(353deg) scale(1.05);
-        filter: drop-shadow(0 20px 36px rgba(0,0,0,.60))
-                drop-shadow(0 0 54px rgba(215,176,107,.48))
-                brightness(1.38);
-      }
-      /* Repouso final */
-      100% {
-        transform: rotateX(3deg) rotateY(360deg) scale(1);
-        filter: drop-shadow(0 14px 20px rgba(0,0,0,.70))
-                drop-shadow(0 0 28px rgba(215,176,107,.12));
-      }
+      0%  { transform: rotateX(3deg) rotateY(0deg)   scale(1); }
+      25% { transform: rotateX(4deg) rotateY(90deg)  scale(0.88); }
+      50% { transform: rotateX(4deg) rotateY(180deg) scale(0.85); }
+      75% { transform: rotateX(4deg) rotateY(270deg) scale(0.88); }
+      88% { transform: rotateX(2deg) rotateY(353deg) scale(1.05); }
+      100%{ transform: rotateX(3deg) rotateY(360deg) scale(1); }
     }
 
     .ritualCardWrap--flipping {
