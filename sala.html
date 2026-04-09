@@ -120,17 +120,7 @@
       mix-blend-mode:screen;
     }
 
-    body::after{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      opacity:.08;
-      background-image:
-        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-      background-size:38px 38px;
-    }
+    /* body::after grid removido — causava repaint full-screen a cada frame */
 
     .page{
       position:relative;
@@ -278,6 +268,7 @@
       overflow:hidden;
       min-height:0;
       position:relative;
+      contain:layout style paint;
     }
 
     .card::before{
@@ -735,12 +726,10 @@
       align-items:center;
       gap:8px;
       padding:7px 14px;
-      background:rgba(8,6,4,.84);
+      background:#100d0a;
       border:1px solid rgba(215,176,107,.22);
       border-top:none;
       border-radius:0 0 16px 16px;
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
       box-shadow:0 4px 24px rgba(0,0,0,.55);
       white-space:nowrap;
     }
@@ -842,7 +831,7 @@
     .videoFocusBtn{
       appearance:none;
       border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.72);
+      background:#0a0806;
       color:#f5f7fb;
       height:32px;
       padding:0 14px;
@@ -851,7 +840,6 @@
       font:inherit;
       font-size:11px;
       font-weight:700;
-      backdrop-filter:blur(8px);
     }
 
     /* ===== GAME TABLE GRID — inline 3-column layout inside tableCard ===== */
@@ -935,8 +923,9 @@
       border:1px solid rgba(215,176,107,.28);
       border-radius:16px;
       overflow:hidden;
-      transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+      transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;
       cursor:pointer;
+      will-change:transform;
       box-shadow:
         0 6px 22px rgba(0,0,0,.50),
         inset 0 1px 0 rgba(255,255,255,.04);
@@ -1028,11 +1017,10 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      background:rgba(0,0,0,.32);
+      background:rgba(0,0,0,.55);
       color:rgba(255,255,255,.80);
       font-size:10px; /* scales relative to tile via em on child */
       border:1px solid rgba(255,255,255,.07);
-      backdrop-filter:blur(4px);
       transition:opacity .15s;
     }
 
@@ -1681,27 +1669,25 @@
       height:55vh;
       aspect-ratio:5/7;
       flex-shrink:0;
+      will-change:transform;
+      contain:layout style;
 
-      /* Sombra de mesa em camadas: difusa embaixo + aura dourada */
+      /* Sombra de mesa — 2 camadas (4 era GPU intensivo) */
       filter:
-        drop-shadow(0 6px 2px rgba(0,0,0,.55))
-        drop-shadow(0 18px 24px rgba(0,0,0,.65))
-        drop-shadow(0 40px 60px rgba(0,0,0,.50))
-        drop-shadow(0 0 32px rgba(215,176,107,.12));
+        drop-shadow(0 14px 20px rgba(0,0,0,.70))
+        drop-shadow(0 0 28px rgba(215,176,107,.12));
 
       /* Leve inclinação 3D para dar profundidade */
       transform: perspective(900px) rotateX(3deg);
       transform-style: preserve-3d;
-      transition: transform .35s ease, filter .35s ease;
+      transition: transform .2s ease, filter .2s ease;
     }
 
     .ritualCardWrap:hover{
       transform: perspective(900px) rotateX(1deg) translateY(-4px);
       filter:
-        drop-shadow(0 10px 4px rgba(0,0,0,.45))
-        drop-shadow(0 28px 36px rgba(0,0,0,.60))
-        drop-shadow(0 55px 80px rgba(0,0,0,.45))
-        drop-shadow(0 0 48px rgba(215,176,107,.20));
+        drop-shadow(0 22px 32px rgba(0,0,0,.65))
+        drop-shadow(0 0 44px rgba(215,176,107,.20));
     }
 
     .ritualVisualCard{
@@ -2159,13 +2145,11 @@
       display:none;
     }
 
-    /* Chat com glassmorphism: fundo semi-transparente + blur */
+    /* Chat arena: fundo sólido (blur era muito custoso) */
     html.arenaMode .chatCard{
       min-height:0;
       overflow:hidden;
-      background:rgba(6,4,2,.84) !important;
-      backdrop-filter:blur(24px) saturate(180%) !important;
-      -webkit-backdrop-filter:blur(24px) saturate(180%) !important;
+      background:#0a0705 !important;
       border:1px solid rgba(215,176,107,.28) !important;
       box-shadow:
         0 10px 48px rgba(0,0,0,.55),
