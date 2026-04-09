@@ -125,6 +125,12 @@ function redirectToSales(message) {
   window.location.href = SALES_PAGE_URL;
 }
 
+function tokenLocalValido() {
+  const token = localStorage.getItem("osl_access_token");
+  const exp = Number(localStorage.getItem("osl_access_expires_at") || 0);
+  return !!token && (exp === 0 || Date.now() < exp);
+}
+
 async function ensureValidGameAccess() {
   const accessToken = localStorage.getItem("osl_access_token");
 
@@ -133,18 +139,23 @@ async function ensureValidGameAccess() {
     throw new Error("NO_ACCESS_TOKEN");
   }
 
+  // Token local ainda válido → não precisa chamar o servidor
+  if (tokenLocalValido()) {
+    return accessToken;
+  }
+
+  // Token existe mas pode ter expirado → confirma no servidor
   try {
     const response = await fetch(VERIFY_ACCESS_ENDPOINT, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ accessToken })
     });
 
     const data = await response.json().catch(() => ({}));
 
-    if (!response.ok || !data.liberado) {
+    if (response.status === 401 || response.status === 403 || !data.liberado) {
+      // Servidor recusou explicitamente
       clearStoredAccess();
       redirectToSales("Seu acesso é inválido ou expirou. Faça uma nova liberação.");
       throw new Error("ACCESS_INVALID");
@@ -156,9 +167,9 @@ async function ensureValidGameAccess() {
       throw error;
     }
 
-    console.error("Erro ao validar acesso:", error);
-    redirectToSales("Não foi possível validar seu acesso agora.");
-    throw new Error("ACCESS_CHECK_FAILED");
+    // Servidor offline / cold start → confia no token local se existir
+    console.warn("Servidor indisponível ao validar acesso, usando token local:", error);
+    return accessToken;
   }
 }
 
@@ -505,17 +516,32 @@ function refreshLocalVisualState() {
   });
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function requestToken() {
   const accessToken = await ensureValidGameAccess();
 
-  const response = await fetch(
-    `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
+  let response;
+  try {
+    response = await fetchWithTimeout(
+      `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+      20000
+    );
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error("TOKEN_TIMEOUT");
     }
-  );
+    throw new Error("TOKEN_REQUEST_FAILED");
+  }
 
   const data = await response.json().catch(() => ({}));
 
@@ -665,13 +691,15 @@ async function joinVideoCall() {
       error.message !== "ACCESS_CHECK_FAILED"
     ) {
       let msg = "Erro ao entrar na chamada.";
-      if (error.message === "TOKEN_REQUEST_FAILED") {
-        msg = "Falha ao pedir token ao servidor.";
+      if (error.message === "TOKEN_TIMEOUT") {
+        msg = "O servidor demorou para responder. Aguarde alguns segundos e tente novamente.";
+      } else if (error.message === "TOKEN_REQUEST_FAILED") {
+        msg = "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.";
       } else if (error.message === "TOKEN_INVALID") {
         msg = "O servidor retornou um token inválido.";
       }
 
-      alert(msg);
+      if (videoStatusEl) videoStatusEl.textContent = msg;
     }
   }
 }
