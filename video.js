@@ -546,39 +546,57 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
 async function requestToken() {
   const accessToken = await ensureValidGameAccess();
 
-  let response;
-  try {
-    response = await fetchWithTimeout(
-      `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`,
-      { headers: { Authorization: `Bearer ${accessToken}` } },
-      20000
-    );
-  } catch (err) {
-    if (err.name === "AbortError") {
-      throw new Error("TOKEN_TIMEOUT");
-    }
-    throw new Error("TOKEN_REQUEST_FAILED");
-  }
+  const url = `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`;
+  const opts = { headers: { Authorization: `Bearer ${accessToken}` } };
 
-  const data = await response.json().catch(() => ({}));
+  const MAX_TENTATIVAS = 3;
+  let lastErr;
 
-  if (!response.ok) {
-    console.error("Erro ao obter token:", data);
-
-    if (response.status === 401) {
-      clearStoredAccess();
-      redirectToSales("Seu acesso expirou ou é inválido.");
-      throw new Error("TOKEN_UNAUTHORIZED");
+  for (let i = 0; i < MAX_TENTATIVAS; i++) {
+    if (i > 0 && videoStatusEl) {
+      videoStatusEl.textContent = `Servidor iniciando, aguardando... (${i}/${MAX_TENTATIVAS - 1})`;
+      await new Promise(r => setTimeout(r, 3000));
     }
 
-    throw new Error("TOKEN_REQUEST_FAILED");
+    let response;
+    try {
+      response = await fetchWithTimeout(url, opts, 25000);
+    } catch (err) {
+      lastErr = err.name === "AbortError" ? new Error("TOKEN_TIMEOUT") : new Error("TOKEN_REQUEST_FAILED");
+      continue; // tenta de novo
+    }
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      console.error("Erro ao obter token:", data);
+
+      if (response.status === 401) {
+        // Token rejeitado — tenta renovar antes de desistir
+        if (i === 0) {
+          const renovado = await tentarRenovarAcesso();
+          if (renovado) {
+            // Atualiza o header e repete com o novo token
+            opts.headers = { Authorization: `Bearer ${renovado}` };
+            lastErr = new Error("TOKEN_UNAUTHORIZED");
+            continue;
+          }
+        }
+        clearStoredAccess();
+        redirectToSales("Seu acesso expirou. Faça login novamente.");
+        throw new Error("TOKEN_UNAUTHORIZED");
+      }
+
+      lastErr = new Error("TOKEN_REQUEST_FAILED");
+      continue;
+    }
+
+    if (!data.token) throw new Error("TOKEN_INVALID");
+
+    return data.token;
   }
 
-  if (!data.token) {
-    throw new Error("TOKEN_INVALID");
-  }
-
-  return data.token;
+  throw lastErr || new Error("TOKEN_REQUEST_FAILED");
 }
 
 function renderExistingParticipantTracks(participant) {
@@ -707,13 +725,13 @@ async function joinVideoCall() {
       error.message !== "ACCESS_INVALID" &&
       error.message !== "ACCESS_CHECK_FAILED"
     ) {
-      let msg = "Erro ao entrar na chamada.";
+      let msg = "Erro ao entrar na chamada. Tente novamente.";
       if (error.message === "TOKEN_TIMEOUT") {
-        msg = "O servidor demorou para responder. Aguarde alguns segundos e tente novamente.";
+        msg = "Servidor demorou para responder. Clique em Entrar novamente.";
       } else if (error.message === "TOKEN_REQUEST_FAILED") {
-        msg = "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.";
+        msg = "Servidor indisponível. Aguarde 10s e clique em Entrar novamente.";
       } else if (error.message === "TOKEN_INVALID") {
-        msg = "O servidor retornou um token inválido.";
+        msg = "Servidor retornou token inválido. Tente novamente.";
       }
 
       if (videoStatusEl) videoStatusEl.textContent = msg;
