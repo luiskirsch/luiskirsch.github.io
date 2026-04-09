@@ -2560,6 +2560,56 @@
         grid-template-rows:auto auto;
       }
     }
+
+    /* ============================================================
+       THE REVEAL — transição cerimonial de cartas
+    ============================================================ */
+
+    @keyframes cardExit {
+      0%   { opacity:1; transform:perspective(900px) rotateX(3deg) scale(1); }
+      100% { opacity:0; transform:perspective(900px) rotateX(3deg) scale(0.9); }
+    }
+
+    @keyframes cardEnter {
+      0%   { opacity:0; transform:perspective(900px) rotateX(3deg) scale(1.1); }
+      100% { opacity:1; transform:perspective(900px) rotateX(3deg) scale(1); }
+    }
+
+    @keyframes goldenPulse {
+      0%   { opacity:0; transform:scale(0.8); }
+      45%  { opacity:1; transform:scale(1.05); }
+      100% { opacity:0; transform:scale(1.45); }
+    }
+
+    .ritualCardWrap--exiting {
+      animation:cardExit .5s ease-in forwards !important;
+      pointer-events:none;
+    }
+
+    .ritualCardWrap--entering {
+      animation:cardEnter .5s ease-out forwards !important;
+      pointer-events:none;
+    }
+
+    /* Aura dourada que pulsa durante a troca */
+    .revealGlow{
+      position:absolute;
+      inset:-28px;
+      border-radius:36px;
+      pointer-events:none;
+      background:radial-gradient(ellipse at center,
+        rgba(215,176,107,.55) 0%,
+        rgba(215,176,107,.22) 35%,
+        transparent 68%
+      );
+      opacity:0;
+      z-index:0;
+    }
+
+    .revealGlow--active{
+      animation:goldenPulse .75s ease-in-out forwards;
+    }
+
   </style>
 </head>
 
@@ -2677,7 +2727,8 @@
 
                 <div class="revealPanel">
                   <div class="revealStage">
-                    <div class="ritualCardWrap">
+                    <div class="revealGlow" id="revealGlow"></div>
+                    <div class="ritualCardWrap" id="ritualCardWrap">
                     <article class="ritualVisualCard silenceCard">
                       <div class="ritualCardFrame">
                         <div class="ritualTopOrnaments">
@@ -3069,6 +3120,12 @@
     const ritualCardText = document.getElementById("ritualCardText");
     const historyList = document.getElementById("historyList");
     const deckInfo = document.getElementById("deckInfo");
+    const ritualCardWrapEl = document.getElementById("ritualCardWrap");
+    const revealGlowEl = document.getElementById("revealGlow");
+
+    // Rastreia a carta atual para detectar mudanças e animar
+    let lastRevealedCardKey = null;
+    let revealAnimating = false;
 
     const params = new URLSearchParams(window.location.search);
 
@@ -3470,18 +3527,7 @@
       updateRitualButtons();
     }
 
-    function renderRitualCardFromState(data) {
-      const started = !!data?.started;
-      const currentCard = data?.currentCard || null;
-
-      ritualStarted = started;
-      ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
-
-      if (!started) {
-        setRitualWaitingState();
-        return;
-      }
-
+    function applyCardContent(currentCard) {
       if (currentCard) {
         if (ritualCardType) ritualCardType.textContent = (currentCard.type || "Ritual").toUpperCase();
         if (ritualCardTitle) ritualCardTitle.textContent = currentCard.title || "Carta revelada";
@@ -3501,6 +3547,73 @@
       }
 
       updateRitualButtons();
+    }
+
+    function fireRevealAnimation(currentCard) {
+      if (!ritualCardWrapEl || revealAnimating) {
+        applyCardContent(currentCard);
+        return;
+      }
+
+      revealAnimating = true;
+      if (revealCardBtn) revealCardBtn.disabled = true;
+
+      // Fase 1: Saída — encolhe e some (0.5s ease-in)
+      ritualCardWrapEl.classList.remove("ritualCardWrap--entering");
+      ritualCardWrapEl.classList.add("ritualCardWrap--exiting");
+
+      setTimeout(() => {
+        // Atualiza conteúdo enquanto está invisível
+        applyCardContent(currentCard);
+
+        // Pulso dourado no container
+        if (revealGlowEl) {
+          revealGlowEl.classList.remove("revealGlow--active");
+          void revealGlowEl.offsetWidth; // força reflow para reiniciar animação
+          revealGlowEl.classList.add("revealGlow--active");
+        }
+
+        // Fase 2: Entrada — aparece maior e pousa (0.5s ease-out)
+        ritualCardWrapEl.classList.remove("ritualCardWrap--exiting");
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            ritualCardWrapEl.classList.add("ritualCardWrap--entering");
+
+            setTimeout(() => {
+              ritualCardWrapEl.classList.remove("ritualCardWrap--entering");
+              revealAnimating = false;
+              updateRitualButtons();
+            }, 520);
+          });
+        });
+      }, 520);
+    }
+
+    function renderRitualCardFromState(data) {
+      const started = !!data?.started;
+      const currentCard = data?.currentCard || null;
+
+      ritualStarted = started;
+      ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
+
+      if (!started) {
+        lastRevealedCardKey = null;
+        setRitualWaitingState();
+        return;
+      }
+
+      const newKey = currentCard ? (currentCard.title || "__card__") : "__waiting__";
+      const isFirstRender = lastRevealedCardKey === null;
+      const cardChanged = !isFirstRender && newKey !== lastRevealedCardKey;
+
+      lastRevealedCardKey = newKey;
+
+      if (cardChanged) {
+        fireRevealAnimation(currentCard);
+      } else {
+        applyCardContent(currentCard);
+      }
     }
 
     function bindRitual() {
