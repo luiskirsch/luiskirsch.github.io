@@ -101,30 +101,39 @@
       min-height:100%;
       color:var(--text);
       font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-      overflow-x:hidden;
+      overflow-x:clip; /* clip não quebra o compositor thread como hidden faz */
+      background:var(--bg-1); /* cor sólida no body — sem repaint no scroll */
+    }
+
+    /* Camada de fundo fixa — pintada 1x, nunca repintada no scroll */
+    html::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      pointer-events:none;
       background:
         radial-gradient(80vw 60vh at 50% 0%, rgba(215,176,107,.07), transparent 55%),
         radial-gradient(55vw 45vh at 10% 30%, rgba(255,255,255,.03), transparent 60%),
         linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%);
+      will-change:transform;
     }
 
+    /* Vinheta — sem mix-blend-mode (muito custoso em GPU) */
     body::before{
       content:"";
       position:fixed;
       inset:0;
+      z-index:0;
       pointer-events:none;
-      background:
-        radial-gradient(circle at center, transparent 55%, rgba(0,0,0,.34) 100%),
-        linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0) 18%, rgba(255,255,255,0) 82%, rgba(255,255,255,.015));
-      opacity:.95;
-      mix-blend-mode:screen;
+      background:radial-gradient(ellipse 110% 80% at 50% 50%, transparent 45%, rgba(0,0,0,.38) 100%);
+      will-change:transform;
     }
-
-    /* body::after grid removido — causava repaint full-screen a cada frame */
 
     .page{
       position:relative;
       z-index:1;
+      isolation:isolate;
       width:100%;
       min-height:100vh;
       min-height:100svh;
