@@ -125,52 +125,69 @@ function redirectToSales(message) {
   window.location.href = SALES_PAGE_URL;
 }
 
+const RENEW_ENDPOINT = "https://osl-video-server.onrender.com/emitir-acesso-por-codigo";
+
 function tokenLocalValido() {
   const token = localStorage.getItem("osl_access_token");
   const exp = Number(localStorage.getItem("osl_access_expires_at") || 0);
   return !!token && (exp === 0 || Date.now() < exp);
 }
 
-async function ensureValidGameAccess() {
-  const accessToken = localStorage.getItem("osl_access_token");
+async function tentarRenovarAcesso() {
+  const licenseCode = localStorage.getItem("osl_license_code");
+  const uid = localStorage.getItem("osl_auth_uid");
+  const email = localStorage.getItem("osl_license_email") || "";
 
-  if (!accessToken) {
-    redirectToSales("Acesso não autorizado. Faça a compra para entrar.");
-    throw new Error("NO_ACCESS_TOKEN");
-  }
+  if (!licenseCode || !uid) return null;
 
-  // Token local ainda válido → não precisa chamar o servidor
-  if (tokenLocalValido()) {
-    return accessToken;
-  }
-
-  // Token existe mas pode ter expirado → confirma no servidor
   try {
-    const response = await fetch(VERIFY_ACCESS_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accessToken })
-    });
+    const res = await fetchWithTimeout(
+      RENEW_ENDPOINT,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ licenseCode, uid, email })
+      },
+      15000
+    );
 
-    const data = await response.json().catch(() => ({}));
+    const data = await res.json().catch(() => ({}));
 
-    if (response.status === 401 || response.status === 403 || !data.liberado) {
-      // Servidor recusou explicitamente
-      clearStoredAccess();
-      redirectToSales("Seu acesso é inválido ou expirou. Faça uma nova liberação.");
-      throw new Error("ACCESS_INVALID");
+    if (res.ok && data.accessToken) {
+      localStorage.setItem("osl_access_token", data.accessToken);
+      localStorage.setItem("osl_access_expires_at", String(data.expiresAt || ""));
+      return data.accessToken;
     }
-
-    return accessToken;
-  } catch (error) {
-    if (error.message === "ACCESS_INVALID" || error.message === "NO_ACCESS_TOKEN") {
-      throw error;
-    }
-
-    // Servidor offline / cold start → confia no token local se existir
-    console.warn("Servidor indisponível ao validar acesso, usando token local:", error);
-    return accessToken;
+  } catch (e) {
+    console.warn("Renovação de acesso falhou:", e);
   }
+
+  return null;
+}
+
+async function ensureValidGameAccess() {
+  // Token local ainda válido → usa direto
+  if (tokenLocalValido()) {
+    return localStorage.getItem("osl_access_token");
+  }
+
+  // Expirado ou ausente → tenta renovar automaticamente
+  localStorage.removeItem("osl_access_token");
+  localStorage.removeItem("osl_access_expires_at");
+
+  if (videoStatusEl) videoStatusEl.textContent = "Renovando acesso...";
+
+  const renovado = await tentarRenovarAcesso();
+  if (renovado) return renovado;
+
+  // Renovação falhou → redireciona para o painel (não vendas)
+  const temLicenca = !!localStorage.getItem("osl_license_code");
+  if (temLicenca) {
+    window.location.href = "./painel.html";
+  } else {
+    redirectToSales("Acesso não autorizado.");
+  }
+  throw new Error("NO_ACCESS_TOKEN");
 }
 
 async function markPanelVideo(active) {
