@@ -3213,6 +3213,7 @@
       orderBy,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
@@ -3498,6 +3499,36 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const BACKEND_BASE_URL_OSL = "https://osl-video-server.onrender.com";
+
+    // Carrega compras da conta do servidor e faz merge com localStorage
+    async function syncAccountPurchases() {
+      try {
+        const user = await new Promise(function(resolve) {
+          const unsub = onAuthStateChanged(auth, function(u) { unsub(); resolve(u); });
+        });
+        if (!user) return; // sem conta → usa só localStorage
+        const idToken = await user.getIdToken();
+        const res = await fetch(BACKEND_BASE_URL_OSL + "/minhas-compras", {
+          headers: { "Authorization": "Bearer " + idToken }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const serverCompras = Array.isArray(data.compras) ? data.compras : [];
+        if (!serverCompras.length) return;
+        // Merge com localStorage sem duplicatas
+        let localCompras = [];
+        try { localCompras = JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch(e){}
+        const localRefs = new Set(localCompras.map(function(c){ return c.ref; }));
+        serverCompras.forEach(function(c) {
+          if (!localRefs.has(c.ref)) localCompras.push(c);
+        });
+        localStorage.setItem("osl_compras", JSON.stringify(localCompras));
+      } catch(e) { /* silencioso — não bloqueia a sala */ }
+    }
+    syncAccountPurchases();
 
     const userRef = doc(db, "users", userId);
     const roomRef = doc(db, "salas", roomCode);

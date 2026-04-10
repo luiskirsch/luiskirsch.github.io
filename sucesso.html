@@ -149,7 +149,27 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+    const _fbApp  = initializeApp({
+      apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+      authDomain: "osextolugar-game.firebaseapp.com",
+      projectId: "osextolugar-game",
+      storageBucket: "osextolugar-game.firebasestorage.app",
+      messagingSenderId: "1042107749185",
+      appId: "1:1042107749185:web:c4a53d6f61f2fe82b0c891"
+    }, "sucesso-app");
+    const _auth = getAuth(_fbApp);
+
+    // Retorna o usuário logado (ou null) resolvendo a Promise
+    function getLoggedUser() {
+      return new Promise(function(resolve) {
+        const unsub = onAuthStateChanged(_auth, function(u) { unsub(); resolve(u); });
+      });
+    }
+
     (async function () {
       const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
       const CREATE_ACCOUNT_URL = "./cadastro.html";
@@ -260,8 +280,23 @@
         setStatus("Tudo pronto. Sua licença foi emitida.");
       }
 
+      // ── Salva compra no servidor (se logado) ─────────────────────────────
+      async function registrarNaConta(ref, titulo) {
+        try {
+          const user = await getLoggedUser();
+          if (!user) return false;
+          const idToken = await user.getIdToken();
+          const r = await fetch(BACKEND_BASE_URL + "/registrar-compra", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },
+            body: JSON.stringify({ ref })
+          });
+          return r.ok;
+        } catch(e) { return false; }
+      }
+
       // ── Fluxo para pacotes / consumáveis / cosméticos ─────────────────────
-      function handleCompra(ref, produto, tipo, titulo) {
+      async function handleCompra(ref, produto, tipo, titulo) {
         saveCompra(ref, produto, titulo);
         localStorage.setItem("osl_checkout_ref", ref);
 
@@ -279,15 +314,26 @@
           msg = "Sua compra foi registrada com sucesso.";
         }
 
+        // Tenta salvar na conta
+        const savedInAccount = await registrarNaConta(ref, titulo);
+
+        if (savedInAccount) {
+          msg += " Salvo na sua conta — disponível em qualquer dispositivo.";
+          loginBtn.style.display = "none";
+          createAccountBtn.style.display = "none";
+          panelBtn.style.display = "";
+          panelBtn.textContent = "Ver meu painel";
+        } else {
+          msg += " Faça login para salvar na sua conta e acessar de qualquer dispositivo.";
+          panelBtn.style.display = "none";
+        }
+
         nextInfoEl.textContent = msg;
         nextInfoEl.style.display = "block";
         smallNote.textContent = "Referência: " + ref;
 
         primaryBtn.textContent = "Entrar na sala";
         primaryBtn.style.display = "";
-        createAccountBtn.style.display = "none";
-        loginBtn.style.display = "none";
-        panelBtn.style.display = "none";
         actionsEl.style.display = "flex";
       }
 
@@ -348,7 +394,7 @@
           }
           await handleLicenca(paymentId, fallbackRef);
         } else {
-          handleCompra(fallbackRef, produto, tipo, titulo);
+          await handleCompra(fallbackRef, produto, tipo, titulo);
         }
 
       } catch (error) {
