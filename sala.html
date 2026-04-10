@@ -4954,6 +4954,8 @@
 
     let oslRevealCount = parseInt(sessionStorage.getItem("osl_rev") || "0");
     let oslSaveProduto = null;
+    let oslBypassReveal = false;  // bypass flag: pular modal sem contar
+    let oslBypassLeave = false;   // bypass flag: sair sem salvar
 
     // ---- helpers ----
 
@@ -5060,8 +5062,11 @@
     document.getElementById("oslLockedPular").addEventListener("click", function () {
       oslLockedPhase = 0;
       oslCloseAll();
-      if (typeof revealNextRitualCard === "function") {
-        revealNextRitualCard().catch(console.error);
+      // Programmatic click com bypass — não conta no lock, deixa o módulo revelar
+      var rb = document.getElementById("revealCardBtn");
+      if (rb && !rb.disabled) {
+        oslBypassReveal = true;
+        rb.click();
       }
     });
 
@@ -5095,8 +5100,10 @@
     document.getElementById("oslFinalPular").addEventListener("click", function () {
       oslFinalPhase = 0;
       oslCloseAll();
-      if (typeof revealNextRitualCard === "function") {
-        revealNextRitualCard().catch(console.error);
+      var rb = document.getElementById("revealCardBtn");
+      if (rb && !rb.disabled) {
+        oslBypassReveal = true;
+        rb.click();
       }
     });
 
@@ -5160,9 +5167,11 @@
 
     document.getElementById("oslSaveSair").addEventListener("click", function () {
       oslCloseAll();
-      if (typeof window.leaveRoom === "function") {
-        var ok = confirm("Deseja sair da sala?");
-        if (ok) window.leaveRoom(true);
+      // Programmatic click com bypass — deixa o módulo processar o sair normalmente
+      var lb = document.getElementById("leaveBtn");
+      if (lb) {
+        oslBypassLeave = true;
+        lb.click();
       }
     });
 
@@ -5172,6 +5181,12 @@
     if (revealBtn) {
       revealBtn.addEventListener("click", function (e) {
         if (revealBtn.disabled) return;
+
+        // Bypass: "Pular" triggered a programmatic click — let it through without counting
+        if (oslBypassReveal) {
+          oslBypassReveal = false;
+          return;
+        }
 
         oslRevealCount++;
         sessionStorage.setItem("osl_rev", String(oslRevealCount));
@@ -5214,6 +5229,11 @@
     var leaveBtn = document.getElementById("leaveBtn");
     if (leaveBtn) {
       leaveBtn.addEventListener("click", function (e) {
+        // Bypass: "Sair sem salvar" acionou programmaticamente — deixa o módulo processar
+        if (oslBypassLeave) {
+          oslBypassLeave = false;
+          return;
+        }
         e.stopImmediatePropagation();
         oslSaveProduto = null;
         oslHideFields("oslSaveFields");
