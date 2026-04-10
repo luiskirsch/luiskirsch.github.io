@@ -126,7 +126,7 @@
 
   <div class="box">
     <h1>Pagamento aprovado</h1>
-    <p>Estamos validando seu pagamento e preparando sua licença.</p>
+    <p id="subtitleEl">Estamos validando seu pagamento...</p>
 
     <div class="status" id="status">Validando pagamento...</div>
     <div class="code" id="licenseBox"></div>
@@ -135,18 +135,17 @@
       <button class="miniBtn secondary" id="copyCodeBtn" type="button">Copiar código</button>
     </div>
 
-    <div class="nextInfo" id="nextInfo">
-      Sua licença foi emitida e salva. Agora faça login ou crie sua conta para vinculá-la no painel.
-    </div>
+    <div class="nextInfo" id="nextInfo"></div>
 
     <div class="actions" id="actions">
-      <button id="createAccountBtn" type="button">Criar conta</button>
+      <button id="primaryBtn" type="button">Entrar na sala</button>
+      <button id="createAccountBtn" class="secondary" type="button">Criar conta</button>
       <button id="loginBtn" class="secondary" type="button">Já tenho conta</button>
       <button id="panelBtn" class="secondary" type="button">Ir para o painel</button>
     </div>
 
-    <div class="small">
-      Guarde seu código de licença. Agora ele também fica salvo no servidor e pode ser usado depois no painel.
+    <div class="small" id="smallNote">
+      Sua compra foi registrada e ficará salva para uso na sessão.
     </div>
   </div>
 
@@ -156,152 +155,75 @@
       const CREATE_ACCOUNT_URL = "./cadastro.html";
       const LOGIN_URL = "./login.html";
       const PANEL_URL = "./painel.html";
+      const SALA_URL = "./entrada.html";
 
-      const statusEl = document.getElementById("status");
-      const licenseBox = document.getElementById("licenseBox");
-      const actionsEl = document.getElementById("actions");
-      const nextInfoEl = document.getElementById("nextInfo");
-      const miniActionsEl = document.getElementById("miniActions");
+      const statusEl    = document.getElementById("status");
+      const subtitleEl  = document.getElementById("subtitleEl");
+      const licenseBox  = document.getElementById("licenseBox");
+      const actionsEl   = document.getElementById("actions");
+      const nextInfoEl  = document.getElementById("nextInfo");
+      const miniActEl   = document.getElementById("miniActions");
+      const smallNote   = document.getElementById("smallNote");
 
-      const createAccountBtn = document.getElementById("createAccountBtn");
-      const loginBtn = document.getElementById("loginBtn");
-      const panelBtn = document.getElementById("panelBtn");
-      const copyCodeBtn = document.getElementById("copyCodeBtn");
+      const primaryBtn      = document.getElementById("primaryBtn");
+      const createAccountBtn= document.getElementById("createAccountBtn");
+      const loginBtn        = document.getElementById("loginBtn");
+      const panelBtn        = document.getElementById("panelBtn");
+      const copyCodeBtn     = document.getElementById("copyCodeBtn");
 
       let currentLicenseCode = "";
 
       function setStatus(text, isError = false) {
         statusEl.textContent = text;
-        statusEl.style.color = isError
-          ? "rgba(255,120,120,.95)"
-          : "rgba(255,255,255,.88)";
+        statusEl.style.color = isError ? "rgba(255,120,120,.95)" : "rgba(255,255,255,.88)";
       }
 
-      function showNextStep() {
-        actionsEl.style.display = "flex";
-        nextInfoEl.style.display = "block";
-        miniActionsEl.style.display = "flex";
-      }
-
-      function saveLocalData(payload) {
-        localStorage.setItem("osl_license_token", payload.licenseToken || "");
-        localStorage.setItem("osl_license_code", payload.licenseCode || "");
-        localStorage.setItem("osl_license_email", payload.email || "");
-        localStorage.setItem("osl_payment_id", payload.paymentId || "");
-        localStorage.setItem("osl_payment_ref", payload.ref || "");
-        localStorage.setItem("osl_checkout_email", payload.email || "");
-        localStorage.setItem("osl_checkout_ref", payload.ref || "");
-
-        const existingRefCode = localStorage.getItem("osl_checkout_ref_code");
-        if (existingRefCode) {
-          localStorage.setItem("osl_last_ref_code", existingRefCode);
+      // ── Salva uma compra não-licença no localStorage ──────────────────────
+      function saveCompra(ref, produto, titulo) {
+        let compras = [];
+        try { compras = JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch(e){}
+        // evita duplicatas
+        if (!compras.find(function(c){ return c.ref === ref; })) {
+          compras.push({ ref: ref, produto: produto, titulo: titulo, ts: Date.now() });
+          localStorage.setItem("osl_compras", JSON.stringify(compras));
         }
       }
 
-      function renderLicenseBox(payload) {
-        currentLicenseCode = payload.licenseCode || "";
-
-        licenseBox.style.display = "block";
-        licenseBox.innerHTML = `
-          <strong>Licença emitida com sucesso</strong><br><br>
-          Código: ${payload.licenseCode || "indisponível"}<br>
-          E-mail: ${payload.email || "indisponível"}<br>
-          Referência: ${payload.ref || "indisponível"}<br>
-          Payment ID: ${payload.paymentId || "indisponível"}
-        `;
+      // ── Verifica o pagamento pelo ref ─────────────────────────────────────
+      async function verificarCompra(ref) {
+        const res = await fetch(`${BACKEND_BASE_URL}/verificar-compra/${encodeURIComponent(ref)}`);
+        return res.json().catch(function(){ return {}; });
       }
 
-      async function tryCopyLicenseCode() {
-        if (!currentLicenseCode) return;
-
-        try {
-          await navigator.clipboard.writeText(currentLicenseCode);
-          setStatus("Código da licença copiado.", false);
-        } catch (error) {
-          console.error("Erro ao copiar código:", error);
-          setStatus("Não foi possível copiar automaticamente. Copie manualmente.", true);
+      // ── Aguarda o webhook processar (até 20s) ─────────────────────────────
+      async function aguardarAprovacao(ref) {
+        for (let i = 0; i < 10; i++) {
+          const data = await verificarCompra(ref);
+          if (data.approved) return data;
+          await new Promise(function(r){ setTimeout(r, 2000); });
         }
+        return null;
       }
 
-      async function resolvePaymentId(initialPaymentId, fallbackRef) {
-        if (initialPaymentId) return initialPaymentId;
-
-        if (!fallbackRef) return "";
-
+      async function resolvePaymentId(paymentIdFromUrl, ref) {
+        if (paymentIdFromUrl) return paymentIdFromUrl;
+        if (!ref) return "";
         setStatus("Recuperando identificação do pagamento...");
-
-        const statusRes = await fetch(
-          `${BACKEND_BASE_URL}/status-pagamento/${encodeURIComponent(fallbackRef)}`
-        );
-
-        const statusData = await statusRes.json().catch(() => ({}));
-
-        if (!statusRes.ok || !statusData.approved || !statusData.paymentId) {
-          return "";
-        }
-
-        return String(statusData.paymentId || "").trim();
+        const data = await verificarCompra(ref);
+        return data.approved ? String(data.paymentId || "") : "";
       }
 
-      createAccountBtn.addEventListener("click", function () {
-        window.location.href = CREATE_ACCOUNT_URL;
-      });
-
-      loginBtn.addEventListener("click", function () {
-        window.location.href = LOGIN_URL;
-      });
-
-      panelBtn.addEventListener("click", function () {
-        window.location.href = PANEL_URL;
-      });
-
-      copyCodeBtn.addEventListener("click", function () {
-        tryCopyLicenseCode();
-      });
-
-      const params = new URLSearchParams(window.location.search);
-
-      const paymentIdFromUrl = String(params.get("payment_id") || "").trim();
-      const paymentStatus = String(params.get("status") || "").trim().toLowerCase();
-      const collectionStatus = String(params.get("collection_status") || "").trim().toLowerCase();
-      const externalReferenceFromUrl = String(params.get("external_reference") || "").trim();
-
-      const storedRef = String(localStorage.getItem("osl_checkout_ref") || "").trim();
-      const fallbackRef = externalReferenceFromUrl || storedRef;
-
-      if (paymentStatus && paymentStatus !== "approved" && paymentStatus !== "success") {
-        setStatus("O pagamento ainda não foi aprovado.", true);
-        return;
-      }
-
-      if (
-        collectionStatus &&
-        collectionStatus !== "approved" &&
-        collectionStatus !== "success"
-      ) {
-        setStatus("O pagamento ainda não foi confirmado.", true);
-        return;
-      }
-
-      try {
-        let paymentId = await resolvePaymentId(paymentIdFromUrl, fallbackRef);
-
-        if (!paymentId) {
-          setStatus("Não foi possível identificar o pagamento aprovado.", true);
-          return;
-        }
-
+      // ── Fluxo para licença (produto principal) ────────────────────────────
+      async function handleLicenca(paymentId, fallbackRef) {
+        subtitleEl.textContent = "Estamos validando seu pagamento e preparando sua licença.";
         setStatus("Emitindo licença...");
 
         const licRes = await fetch(`${BACKEND_BASE_URL}/emitir-licenca`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ paymentId })
         });
-
-        const licData = await licRes.json().catch(() => ({}));
+        const licData = await licRes.json().catch(function(){ return {}; });
 
         if (!licRes.ok || !licData.licenseToken || !licData.licenseCode) {
           console.error("Falha em /emitir-licenca:", licData);
@@ -309,22 +231,129 @@
           return;
         }
 
-        const finalPayload = {
-          paymentId,
-          licenseToken: licData.licenseToken || "",
-          licenseCode: licData.licenseCode || "",
-          email: licData.email || "",
-          ref: licData.ref || fallbackRef || ""
-        };
+        localStorage.setItem("osl_license_token", licData.licenseToken || "");
+        localStorage.setItem("osl_license_code",  licData.licenseCode  || "");
+        localStorage.setItem("osl_license_email",  licData.email        || "");
+        localStorage.setItem("osl_payment_id",     paymentId            || "");
+        localStorage.setItem("osl_payment_ref",    licData.ref          || fallbackRef || "");
+        localStorage.setItem("osl_checkout_email", licData.email        || "");
+        localStorage.setItem("osl_checkout_ref",   licData.ref          || fallbackRef || "");
+        const existingRefCode = localStorage.getItem("osl_checkout_ref_code");
+        if (existingRefCode) localStorage.setItem("osl_last_ref_code", existingRefCode);
 
-        saveLocalData(finalPayload);
-        renderLicenseBox(finalPayload);
+        currentLicenseCode = licData.licenseCode || "";
+        licenseBox.style.display = "block";
+        licenseBox.innerHTML =
+          "<strong>Licença emitida com sucesso</strong><br><br>" +
+          "Código: " + (licData.licenseCode || "—") + "<br>" +
+          "E-mail: " + (licData.email        || "—") + "<br>" +
+          "Referência: " + (licData.ref || fallbackRef || "—") + "<br>" +
+          "Payment ID: " + paymentId;
 
+        smallNote.textContent = "Guarde seu código de licença. Ele também fica salvo no servidor e pode ser usado depois no painel.";
+        nextInfoEl.textContent = "Sua licença foi emitida e salva. Agora faça login ou crie sua conta para vinculá-la no painel.";
+        nextInfoEl.style.display = "block";
+        miniActEl.style.display = "flex";
+
+        primaryBtn.style.display = "none";
+        actionsEl.style.display = "flex";
         setStatus("Tudo pronto. Sua licença foi emitida.");
-        showNextStep();
+      }
+
+      // ── Fluxo para pacotes / consumáveis / cosméticos ─────────────────────
+      function handleCompra(ref, produto, tipo, titulo) {
+        saveCompra(ref, produto, titulo);
+        localStorage.setItem("osl_checkout_ref", ref);
+
+        subtitleEl.textContent = "Sua compra foi confirmada!";
+        setStatus("✓ " + titulo);
+
+        var msg = "";
+        if (tipo === "pack") {
+          msg = "Seu pacote de cartas foi desbloqueado e já está disponível na sala.";
+        } else if (tipo === "consumable") {
+          msg = "Sua compra foi registrada e será aplicada na sessão atual.";
+        } else if (tipo === "cosmetic") {
+          msg = "Seu item cosmético foi desbloqueado e já está disponível na sala.";
+        } else {
+          msg = "Sua compra foi registrada com sucesso.";
+        }
+
+        nextInfoEl.textContent = msg;
+        nextInfoEl.style.display = "block";
+        smallNote.textContent = "Referência: " + ref;
+
+        primaryBtn.textContent = "Entrar na sala";
+        primaryBtn.style.display = "";
+        createAccountBtn.style.display = "none";
+        loginBtn.style.display = "none";
+        panelBtn.style.display = "none";
+        actionsEl.style.display = "flex";
+      }
+
+      // ─────────────────────────────────────────────────────────────────────
+      primaryBtn.addEventListener("click",       function(){ window.location.href = SALA_URL; });
+      createAccountBtn.addEventListener("click", function(){ window.location.href = CREATE_ACCOUNT_URL; });
+      loginBtn.addEventListener("click",         function(){ window.location.href = LOGIN_URL; });
+      panelBtn.addEventListener("click",         function(){ window.location.href = PANEL_URL; });
+      copyCodeBtn.addEventListener("click",      async function(){
+        if (!currentLicenseCode) return;
+        try {
+          await navigator.clipboard.writeText(currentLicenseCode);
+          setStatus("Código copiado.");
+        } catch(e) {
+          setStatus("Copie manualmente o código acima.", true);
+        }
+      });
+
+      // ─────────────────────────────────────────────────────────────────────
+      const params = new URLSearchParams(window.location.search);
+      const paymentIdFromUrl     = String(params.get("payment_id")        || "").trim();
+      const paymentStatus        = String(params.get("status")            || "").trim().toLowerCase();
+      const collectionStatus     = String(params.get("collection_status") || "").trim().toLowerCase();
+      const externalReferenceUrl = String(params.get("external_reference")|| "").trim();
+
+      const storedRef  = String(localStorage.getItem("osl_checkout_ref") || "").trim();
+      const fallbackRef = externalReferenceUrl || storedRef;
+
+      if (paymentStatus && paymentStatus !== "approved" && paymentStatus !== "success") {
+        setStatus("O pagamento ainda não foi aprovado.", true);
+        return;
+      }
+      if (collectionStatus && collectionStatus !== "approved" && collectionStatus !== "success") {
+        setStatus("O pagamento ainda não foi confirmado.", true);
+        return;
+      }
+
+      try {
+        setStatus("Verificando compra...");
+
+        // Aguarda o webhook processar o pagamento (até 20s)
+        const compraData = fallbackRef ? await aguardarAprovacao(fallbackRef) : null;
+
+        if (!compraData) {
+          setStatus("Não foi possível confirmar o pagamento. Guarde sua referência: " + (fallbackRef || "—"), true);
+          return;
+        }
+
+        const tipo    = compraData.tipo    || "license";
+        const produto = compraData.produto || "osl_ritual_completo";
+        const titulo  = compraData.titulo  || "O SextoLugar";
+
+        if (tipo === "license") {
+          const paymentId = await resolvePaymentId(paymentIdFromUrl, fallbackRef);
+          if (!paymentId) {
+            setStatus("Não foi possível identificar o pagamento.", true);
+            return;
+          }
+          await handleLicenca(paymentId, fallbackRef);
+        } else {
+          handleCompra(fallbackRef, produto, tipo, titulo);
+        }
+
       } catch (error) {
-        console.error("Erro ao finalizar licença:", error);
-        setStatus("Erro ao finalizar sua licença.", true);
+        console.error("Erro ao finalizar compra:", error);
+        setStatus("Erro ao finalizar sua compra.", true);
       }
     })();
   </script>
