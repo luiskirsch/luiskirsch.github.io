@@ -556,13 +556,9 @@
           return;
         }
 
-        // 3. Sem licença → decide para onde redirecionar
-        if (temLicenca || temUid) {
-          irParaPainel();
-        } else {
-          // Nunca comprou
-          irParaVendas();
-        }
+        // 3. Acesso livre — modelo free-to-play
+        // Sem licença, permite acesso ao deck básico gratuitamente
+        liberarPagina();
       } catch (error) {
         console.error("Erro ao validar acesso:", error);
         // Se há licença salva, não bloqueia — libera a página

@@ -2,876 +2,988 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Desbloquear a Experiência | O SextoLugar</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>O SextoLugar — Jogar Grátis</title>
+<link rel="icon" href="./favicon.png">
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:"Segoe UI",sans-serif;
+:root{
+  --bg:#040303;
+  --gold:#e6c07b;
+  --gold-dim:rgba(230,192,123,.22);
+  --text:#f2f2f2;
+  --muted:rgba(242,242,242,.62);
+  --card-bg:rgba(255,255,255,.035);
+  --card-border:rgba(255,255,255,.07);
 }
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
 
 body{
   background:
-    radial-gradient(circle at top, rgba(230,192,123,.06), transparent 30%),
-    linear-gradient(180deg,#0b0b0f 0%, #09090c 100%);
-  color:#fff;
+    radial-gradient(800px 400px at 50% 0%, rgba(230,192,123,.07), transparent 55%),
+    linear-gradient(180deg,#070604 0%,#040303 50%,#020202 100%);
+  background-color:var(--bg);
+  color:var(--text);
+  font-family:ui-serif,Georgia,"Times New Roman",serif;
+  overflow-x:hidden;
+  min-height:100vh;
 }
 
-.container{
-  max-width:1100px;
-  margin:0 auto;
-  padding:40px 20px;
+/* ---- NAV ---- */
+.nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 24px;
+  background:rgba(4,3,3,.88);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.05);
 }
+.nav-logo{
+  font-size:15px;
+  font-weight:700;
+  color:var(--gold);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+}
+.nav-cta{
+  padding:9px 22px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--gold),#c99c4a);
+  color:#000;
+  font-size:13px;
+  font-weight:800;
+  text-decoration:none;
+  letter-spacing:.06em;
+  transition:.15s;
+  white-space:nowrap;
+}
+.nav-cta:hover{opacity:.88;transform:translateY(-1px);}
 
+/* ---- HERO ---- */
 .hero{
   text-align:center;
-  margin-bottom:50px;
+  padding:80px 20px 64px;
+  max-width:900px;
+  margin:0 auto;
 }
-
-.hero h1{
-  font-size:38px;
-  margin-bottom:15px;
-  letter-spacing:-.02em;
-}
-
-.hero p{
-  color:rgba(255,255,255,.7);
-  font-size:16px;
-}
-
-.productCard{
-  background:linear-gradient(180deg,#12121a 0%, #101018 100%);
-  border-radius:18px;
-  padding:30px;
-  box-shadow:0 0 40px rgba(0,0,0,.6);
-  border:1px solid rgba(255,255,255,.05);
-}
-
-.productGrid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:30px;
-}
-
-/* ÁREA VISUAL */
-
-.productImage{
-  background:
-    radial-gradient(circle at top, rgba(230,192,123,.08), transparent 28%),
-    linear-gradient(145deg,#171720,#0c0c12);
-  border-radius:16px;
-  min-height:320px;
-  padding:18px;
-  position:relative;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.06);
-}
-
-.previewBadge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 12px;
+.hero-eyebrow{
+  display:inline-block;
+  padding:6px 16px;
   border-radius:999px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.06);
-  color:#e6c07b;
-  font-size:12px;
-  font-weight:600;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  margin-bottom:14px;
-}
-
-.previewBadge::before{
-  content:"";
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:#e6c07b;
-  box-shadow:0 0 14px rgba(230,192,123,.45);
-}
-
-.roomPreview{
-  position:relative;
-  border-radius:16px;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.06);
-  background:
-    radial-gradient(circle at top, rgba(72,183,244,.06), transparent 30%),
-    linear-gradient(180deg,#0b0f15 0%, #090c11 100%);
-  box-shadow:
-    0 18px 50px rgba(0,0,0,.45),
-    inset 0 0 0 1px rgba(255,255,255,.02);
-}
-
-.roomTop{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  padding:12px 14px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-  background:rgba(255,255,255,.02);
-}
-
-.roomTopLeft{
-  display:flex;
-  flex-direction:column;
-  gap:3px;
-}
-
-.roomMiniTitle{
+  border:1px solid rgba(230,192,123,.25);
+  background:rgba(230,192,123,.07);
   font-size:11px;
-  letter-spacing:.18em;
+  letter-spacing:.26em;
   text-transform:uppercase;
-  color:rgba(214,224,237,.65);
+  color:rgba(230,192,123,.9);
+  margin-bottom:26px;
 }
-
-.roomMiniName{
-  font-size:18px;
-  font-weight:800;
-  color:#fff;
-}
-
-.roomMiniCode{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  min-height:34px;
-  padding:8px 12px;
-  border-radius:999px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.06);
-  font-size:12px;
-  color:rgba(255,255,255,.86);
-  white-space:nowrap;
-}
-
-.roomMiniBody{
-  display:grid;
-  grid-template-columns:108px minmax(0, 1fr) 132px;
-  gap:12px;
-  padding:14px;
-  align-items:start;
-}
-
-.roomMiniSidebar{
-  display:grid;
-  gap:8px;
-  align-content:start;
-  min-width:0;
-}
-
-.playerMini{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 9px;
-  border-radius:12px;
-  background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.05);
-}
-
-.playerMiniAvatar{
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:linear-gradient(180deg,#56bdf8,#1f86d9);
-  color:#fff;
-  font-size:12px;
-  font-weight:800;
-  flex:0 0 auto;
-}
-
-.playerMiniName{
-  font-size:12px;
-  font-weight:700;
-  color:#fff;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.roomMiniCenter{
-  min-width:0;
-  display:grid;
-  gap:10px;
-}
-
-.roomMiniCardWrap{
-  display:grid;
-  place-items:center;
-  min-height:260px;
-  border-radius:18px;
-  background:
-    radial-gradient(circle at center, rgba(72,183,244,.08), transparent 55%),
-    rgba(255,255,255,.02);
-  border:1px solid rgba(255,255,255,.06);
-  padding:14px;
-}
-
-.roomMiniCard{
-  width:min(100%, 245px);
-  min-height:235px;
-  border-radius:20px;
-  border:1px solid rgba(230,192,123,.22);
-  background:
-    radial-gradient(circle at top, rgba(230,192,123,.06), transparent 35%),
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-  box-shadow:0 16px 36px rgba(0,0,0,.35);
-  padding:18px 16px;
-  display:grid;
-  align-content:center;
-  gap:12px;
-  text-align:center;
-}
-
-.roomMiniCardType{
-  font-size:10px;
-  letter-spacing:.24em;
-  text-transform:uppercase;
-  color:#e6c07b;
-}
-
-.roomMiniCardTitle{
-  font-size:24px;
+.hero h1{
+  font-size:clamp(38px,6.5vw,90px);
   font-weight:900;
   letter-spacing:-.04em;
-  color:#fff;
-}
-
-.roomMiniCardText{
-  font-size:13px;
-  line-height:1.55;
-  color:rgba(255,255,255,.76);
-}
-
-.roomMiniBottom{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:10px;
-}
-
-.bottomMiniBox{
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.06);
-  background:rgba(255,255,255,.025);
-  padding:12px 14px;
-  min-height:auto;
-}
-
-.bottomMiniTitle{
-  font-size:10px;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-  color:rgba(214,224,237,.65);
-  margin-bottom:6px;
-}
-
-.bottomMiniText{
-  font-size:12px;
-  line-height:1.45;
-  color:rgba(255,255,255,.78);
-}
-
-.roomMiniChat{
-  display:grid;
-  gap:8px;
-  align-content:start;
-  min-width:0;
-}
-
-.chatMiniMsg{
-  padding:8px 9px;
-  border-radius:10px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.05);
-  font-size:11px;
-  line-height:1.45;
-  color:rgba(255,255,255,.82);
-  text-align:left;
-  word-break:break-word;
-}
-
-.chatMiniMsg.me{
-  background:rgba(72,183,244,.14);
-  border-color:rgba(72,183,244,.18);
-}
-
-.roomPreviewFooter{
-  margin-top:12px;
-  text-align:center;
-  font-size:13px;
-  color:rgba(255,255,255,.62);
-  line-height:1.5;
-}
-
-/* DETALHES */
-
-.productDetails h2{
-  font-size:26px;
-  margin-bottom:15px;
-}
-
-.productDetails p{
-  color:rgba(255,255,255,.75);
+  line-height:1.01;
   margin-bottom:20px;
-  line-height:1.6;
+  background:linear-gradient(180deg,#ffffff 0%,rgba(255,255,255,.75) 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
 }
-
-.features{
-  margin-bottom:18px;
-  padding-left:18px;
+.hero-sub{
+  font-size:clamp(15px,2vw,19px);
+  color:var(--muted);
+  line-height:1.65;
+  max-width:54ch;
+  margin:0 auto 40px;
 }
-
-.features li{
-  margin-bottom:10px;
+.hero-free{
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:40px;
 }
-
-.price{
-  font-size:32px;
-  font-weight:bold;
-  margin-bottom:15px;
-}
-
-.price span{
-  font-size:16px;
-  color:rgba(255,255,255,.6);
-}
-
-.formGrid{
-  display:grid;
-  gap:12px;
-  margin-bottom:18px;
-}
-
-.field{
-  display:grid;
+.hero-free-item{
+  display:flex;
+  align-items:center;
   gap:8px;
-}
-
-.field label{
-  font-size:13px;
-  color:rgba(255,255,255,.75);
-}
-
-.field input{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  background:#1a1a24;
-  color:#fff;
-  outline:none;
-  border:1px solid rgba(255,255,255,.08);
-}
-
-.buyBtn{
-  width:100%;
-  padding:16px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-  background:linear-gradient(135deg,#e6c07b,#c99c4a);
-  color:#000;
-  transition:.2s;
-}
-
-.buyBtn:hover{
-  transform:scale(1.02);
-}
-
-.buyBtn:disabled{
-  opacity:.65;
-  cursor:not-allowed;
-  transform:none;
-}
-
-.security{
-  margin-top:15px;
-  font-size:13px;
-  color:rgba(255,255,255,.5);
-  text-align:center;
-}
-
-.status{
-  margin-top:14px;
-  text-align:center;
   font-size:14px;
   color:rgba(255,255,255,.75);
-  min-height:20px;
+}
+.hero-free-item::before{
+  content:"✓";
+  color:var(--gold);
+  font-weight:700;
+  font-size:13px;
+}
+.hero-btn{
+  display:inline-block;
+  padding:17px 44px;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--gold),#c99c4a);
+  color:#000;
+  font-size:17px;
+  font-weight:800;
+  text-decoration:none;
+  letter-spacing:.04em;
+  transition:.15s;
+  box-shadow:0 18px 54px rgba(230,192,123,.28);
+}
+.hero-btn:hover{transform:translateY(-2px);box-shadow:0 24px 64px rgba(230,192,123,.38);}
+.hero-note{
+  margin-top:14px;
+  font-size:12px;
+  color:rgba(255,255,255,.38);
+  letter-spacing:.1em;
 }
 
-/* RESPONSIVO CORRIGIDO */
-
-@media(max-width:800px){
-  .productGrid{
-    grid-template-columns:1fr;
-    gap:22px;
-  }
-
-  .productCard{
-    padding:22px;
-  }
-
-  .productImage{
-    min-height:auto;
-    padding:14px;
-  }
-
-  .previewBadge{
-    margin-bottom:12px;
-    font-size:11px;
-    padding:7px 11px;
-  }
-
-  .roomTop{
-    padding:11px 12px;
-    align-items:flex-start;
-    flex-direction:column;
-  }
-
-  .roomMiniTitle{
-    font-size:10px;
-  }
-
-  .roomMiniName{
-    font-size:16px;
-    line-height:1.1;
-  }
-
-  .roomMiniCode{
-    font-size:11px;
-    min-height:30px;
-    padding:7px 10px;
-  }
-
-  .roomMiniBody{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    padding:12px;
-  }
-
-  .roomMiniSidebar{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:8px;
-  }
-
-  .playerMini{
-    padding:8px 8px;
-    justify-content:center;
-    flex-direction:column;
-    text-align:center;
-    gap:6px;
-    min-height:74px;
-  }
-
-  .playerMiniAvatar{
-    width:30px;
-    height:30px;
-    font-size:12px;
-  }
-
-  .playerMiniName{
-    font-size:11px;
-    white-space:normal;
-    overflow:visible;
-    text-overflow:unset;
-    line-height:1.15;
-  }
-
-  .roomMiniCenter{
-    gap:8px;
-  }
-
-  .roomMiniCardWrap{
-    min-height:auto;
-    padding:10px;
-    border-radius:16px;
-  }
-
-  .roomMiniCard{
-    width:100%;
-    max-width:100%;
-    min-height:auto;
-    padding:18px 14px;
-    border-radius:16px;
-    gap:10px;
-  }
-
-  .roomMiniCardType{
-    font-size:10px;
-  }
-
-  .roomMiniCardTitle{
-    font-size:20px;
-  }
-
-  .roomMiniCardText{
-    font-size:12px;
-    line-height:1.45;
-  }
-
-  .roomMiniBottom{
-    grid-template-columns:1fr;
-    gap:8px;
-  }
-
-  .bottomMiniBox{
-    padding:10px 12px;
-  }
-
-  .bottomMiniTitle{
-    font-size:10px;
-    margin-bottom:4px;
-  }
-
-  .bottomMiniText{
-    font-size:11px;
-    line-height:1.4;
-  }
-
-  .roomMiniChat{
-    display:grid;
-    gap:7px;
-  }
-
-  .chatMiniMsg{
-    font-size:11px;
-    padding:8px 9px;
-    line-height:1.35;
-  }
-
-  .roomPreviewFooter{
-    margin-top:10px;
-    font-size:12px;
-  }
-
-  .hero{
-    margin-bottom:34px;
-  }
-
-  .hero h1{
-    font-size:28px;
-    line-height:1.08;
-  }
-
-  .hero p{
-    font-size:15px;
-    line-height:1.45;
-  }
-
-  .productDetails h2{
-    font-size:22px;
-    line-height:1.1;
-  }
-
-  .productDetails p{
-    font-size:15px;
-  }
-
-  .features li{
-    font-size:15px;
-    line-height:1.45;
-  }
-
-  .price{
-    font-size:26px;
-  }
-
-  .price span{
-    font-size:15px;
-  }
+/* ---- SECTION ---- */
+.section{
+  padding:68px 20px;
+  max-width:1100px;
+  margin:0 auto;
+}
+.section-header{
+  text-align:center;
+  margin-bottom:44px;
+}
+.section-eyebrow{
+  display:block;
+  font-size:11px;
+  letter-spacing:.30em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:10px;
+  opacity:.82;
+}
+.section-title{
+  font-size:clamp(28px,3.8vw,52px);
+  font-weight:900;
+  letter-spacing:-.04em;
+  line-height:1.04;
+}
+.section-sub{
+  margin-top:14px;
+  font-size:15px;
+  color:var(--muted);
+  max-width:50ch;
+  margin-left:auto;
+  margin-right:auto;
+  line-height:1.65;
 }
 
-@media(max-width:480px){
-  .container{
-    padding:26px 14px;
-  }
+/* ---- PACKS GRID ---- */
+.packs-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:16px;
+}
+.pack-card{
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:20px;
+  padding:22px 18px;
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+  transition:border-color .2s,transform .2s;
+}
+.pack-card:hover{
+  border-color:rgba(230,192,123,.28);
+  transform:translateY(-2px);
+}
+.pack-card::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;
+  height:3px;
+  border-radius:999px;
+}
+.pack-conexao::before{background:linear-gradient(90deg,#56bdf8,#94d9ff);}
+.pack-verdades::before{background:linear-gradient(90deg,#7ef596,#b4f8c8);}
+.pack-conflito::before{background:linear-gradient(90deg,#f5a056,#f8d48a);}
+.pack-segredos::before{background:linear-gradient(90deg,#c956f8,#e4a0f8);}
+.pack-casais::before{background:linear-gradient(90deg,#f85680,#f8a0b8);}
 
-  .productCard{
-    padding:16px;
-    border-radius:16px;
-  }
+.pack-badge{
+  display:inline-block;
+  font-size:10px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  color:rgba(255,255,255,.65);
+  width:fit-content;
+}
+.pack-name{
+  font-size:23px;
+  font-weight:800;
+  letter-spacing:-.02em;
+  line-height:1.1;
+}
+.pack-desc{
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.6;
+  flex:1;
+}
+.pack-example{
+  padding:12px 14px;
+  border-radius:12px;
+  background:rgba(0,0,0,.32);
+  border:1px solid rgba(255,255,255,.06);
+  font-size:12px;
+  line-height:1.5;
+  color:rgba(255,255,255,.72);
+  font-style:italic;
+}
+.pack-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+.pack-count{
+  font-size:11px;
+  color:rgba(255,255,255,.45);
+  letter-spacing:.08em;
+}
+.pack-price{
+  font-size:18px;
+  font-weight:800;
+  color:var(--gold);
+}
+.pack-buy-btn{
+  width:100%;
+  padding:11px;
+  border-radius:10px;
+  border:1px solid rgba(230,192,123,.3);
+  background:rgba(230,192,123,.08);
+  color:var(--gold);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.08em;
+  cursor:pointer;
+  transition:.15s;
+  font-family:inherit;
+}
+.pack-buy-btn:hover{background:rgba(230,192,123,.16);border-color:rgba(230,192,123,.52);}
 
-  .productImage{
-    padding:10px;
-    border-radius:14px;
-  }
+/* ---- IN-SESSION LIST ---- */
+.insession-list{
+  display:grid;
+  gap:12px;
+}
+.insession-item{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  padding:18px 22px;
+  border-radius:16px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+}
+.insession-icon{
+  font-size:26px;
+  flex:0 0 auto;
+}
+.insession-info{flex:1;}
+.insession-name{font-size:15px;font-weight:700;}
+.insession-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.insession-price{
+  font-size:16px;
+  font-weight:800;
+  color:var(--gold);
+  white-space:nowrap;
+}
 
-  .previewBadge{
-    font-size:10px;
-    padding:6px 10px;
-  }
+/* ---- PREMIUM GRID ---- */
+.premium-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+.premium-card{
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:22px;
+  padding:26px 22px;
+  display:grid;
+  gap:14px;
+  transition:border-color .2s;
+}
+.premium-card:hover{border-color:rgba(230,192,123,.22);}
+.premium-icon{font-size:30px;display:block;}
+.premium-name{font-size:20px;font-weight:800;}
+.premium-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+.premium-features{
+  list-style:none;
+  display:grid;
+  gap:7px;
+}
+.premium-features li{
+  font-size:13px;
+  color:rgba(255,255,255,.68);
+  display:flex;
+  gap:9px;
+  align-items:flex-start;
+  line-height:1.4;
+}
+.premium-features li::before{
+  content:"·";
+  color:var(--gold);
+  flex:0 0 auto;
+  font-size:18px;
+  line-height:1.1;
+}
+.premium-price{
+  font-size:24px;
+  font-weight:800;
+  color:var(--gold);
+}
+.premium-price small{
+  font-size:13px;
+  color:var(--muted);
+  font-weight:400;
+}
+.premium-buy-btn{
+  padding:12px 18px;
+  border-radius:11px;
+  border:1px solid rgba(230,192,123,.3);
+  background:rgba(230,192,123,.08);
+  color:var(--gold);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.06em;
+  cursor:pointer;
+  transition:.15s;
+  font-family:inherit;
+  text-align:center;
+}
+.premium-buy-btn:hover{background:rgba(230,192,123,.16);}
 
-  .roomPreview{
-    border-radius:14px;
-  }
+/* ---- RECORDING GRID ---- */
+.recording-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+.rec-card{
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:18px;
+  padding:22px 18px;
+  text-align:center;
+  display:grid;
+  gap:11px;
+  position:relative;
+  transition:border-color .2s;
+}
+.rec-card:hover{border-color:rgba(230,192,123,.2);}
+.rec-card.rec-best{
+  border-color:rgba(230,192,123,.3);
+  background:linear-gradient(180deg,rgba(230,192,123,.07),rgba(230,192,123,.02));
+}
+.rec-best-badge{
+  position:absolute;
+  top:-10px;left:50%;
+  transform:translateX(-50%);
+  background:var(--gold);
+  color:#000;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  padding:3px 12px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+.rec-icon{font-size:28px;}
+.rec-name{font-size:16px;font-weight:800;}
+.rec-features{
+  list-style:none;
+  text-align:left;
+  display:grid;
+  gap:6px;
+}
+.rec-features li{
+  font-size:12px;
+  color:rgba(255,255,255,.68);
+  display:flex;
+  gap:7px;
+}
+.rec-features li::before{content:"✓";color:var(--gold);font-size:11px;flex:0 0 auto;margin-top:1px;}
+.rec-price{font-size:22px;font-weight:800;color:var(--gold);}
+.rec-buy-btn{
+  padding:10px;
+  border-radius:9px;
+  border:1px solid rgba(230,192,123,.28);
+  background:rgba(230,192,123,.07);
+  color:var(--gold);
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.15s;
+  font-family:inherit;
+}
+.rec-buy-btn:hover{background:rgba(230,192,123,.18);}
 
-  .roomTop{
-    padding:10px;
-  }
+/* ---- COSMETICS ---- */
+.cosmetics-item-btn{
+  min-width:110px;
+  padding:9px 14px;
+  border-radius:9px;
+  border:1px solid rgba(230,192,123,.28);
+  background:rgba(230,192,123,.07);
+  color:var(--gold);
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.15s;
+  font-family:inherit;
+  white-space:nowrap;
+}
+.cosmetics-item-btn:hover{background:rgba(230,192,123,.16);}
 
-  .roomMiniName{
-    font-size:15px;
-  }
+/* ---- DIVIDER ---- */
+.divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+  margin:0 24px;
+}
 
-  .roomMiniCode{
-    font-size:10px;
-    padding:6px 9px;
-  }
+/* ---- CHECKOUT OVERLAY ---- */
+.checkout-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.78);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:200;
+  backdrop-filter:blur(5px);
+}
+.checkout-overlay.open{display:flex;}
+.checkout-modal{
+  width:min(480px,100%);
+  background:linear-gradient(180deg,#0f0e18,#090812);
+  border:1px solid rgba(230,192,123,.18);
+  border-radius:22px;
+  padding:30px 26px;
+  box-shadow:0 50px 120px rgba(0,0,0,.75);
+  display:grid;
+  gap:16px;
+}
+.checkout-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.checkout-title{font-size:20px;font-weight:800;}
+.checkout-price{
+  font-size:30px;
+  font-weight:900;
+  color:var(--gold);
+  margin-top:2px;
+}
+.checkout-close{
+  background:transparent;
+  border:none;
+  color:rgba(255,255,255,.55);
+  font-size:22px;
+  cursor:pointer;
+  padding:4px 8px;
+  border-radius:8px;
+  flex:0 0 auto;
+  transition:.15s;
+}
+.checkout-close:hover{background:rgba(255,255,255,.07);color:#fff;}
+.checkout-field{display:grid;gap:7px;}
+.checkout-field label{
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+}
+.checkout-field input{
+  padding:13px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.04);
+  color:#fff;
+  font-size:15px;
+  outline:none;
+  font-family:inherit;
+  transition:border-color .15s;
+}
+.checkout-field input:focus{border-color:rgba(230,192,123,.3);}
+.checkout-field input::placeholder{color:rgba(255,255,255,.28);}
+.checkout-submit{
+  padding:15px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--gold),#c99c4a);
+  color:#000;
+  font-size:15px;
+  font-weight:800;
+  border:none;
+  cursor:pointer;
+  transition:.15s;
+  font-family:inherit;
+}
+.checkout-submit:hover{opacity:.9;transform:translateY(-1px);}
+.checkout-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.checkout-secure{
+  font-size:11px;
+  color:rgba(255,255,255,.38);
+  text-align:center;
+  letter-spacing:.1em;
+}
+.checkout-status{
+  font-size:13px;
+  color:rgba(255,255,255,.68);
+  text-align:center;
+  min-height:18px;
+}
 
-  .roomMiniBody{
-    padding:10px;
-    gap:10px;
-  }
+/* ---- FOOTER ---- */
+.footer{
+  text-align:center;
+  padding:48px 20px;
+  border-top:1px solid rgba(255,255,255,.05);
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.36);
+}
+.footer strong{color:rgba(230,192,123,.68);}
 
-  .roomMiniSidebar{
-    gap:6px;
-  }
-
-  .playerMini{
-    min-height:68px;
-    padding:7px 6px;
-    border-radius:10px;
-  }
-
-  .playerMiniAvatar{
-    width:28px;
-    height:28px;
-  }
-
-  .playerMiniName{
-    font-size:10px;
-  }
-
-  .roomMiniCardWrap{
-    padding:8px;
-  }
-
-  .roomMiniCard{
-    padding:15px 12px;
-  }
-
-  .roomMiniCardTitle{
-    font-size:18px;
-  }
-
-  .roomMiniCardText{
-    font-size:11px;
-  }
-
-  .bottomMiniBox{
-    padding:9px 10px;
-  }
-
-  .bottomMiniText{
-    font-size:10.5px;
-  }
-
-  .chatMiniMsg{
-    font-size:10.5px;
-    padding:7px 8px;
-  }
-
-  .roomPreviewFooter{
-    font-size:11px;
-  }
+/* ---- RESPONSIVE ---- */
+@media(max-width:760px){
+  .premium-grid{grid-template-columns:1fr;}
+  .recording-grid{grid-template-columns:1fr;}
+  .packs-grid{grid-template-columns:repeat(2,1fr);}
+  .hero{padding:56px 16px 48px;}
+  .section{padding:52px 16px;}
+}
+@media(max-width:500px){
+  .packs-grid{grid-template-columns:1fr;}
+  .hero-free{gap:14px;}
+  .nav{padding:12px 16px;}
+  .insession-item{flex-direction:column;align-items:flex-start;gap:10px;}
 }
 </style>
 </head>
-
 <body>
 
-<div class="container">
+<nav class="nav">
+  <div class="nav-logo">O SextoLugar</div>
+  <a href="./entrada.html" class="nav-cta">Jogar Grátis</a>
+</nav>
 
-  <div class="hero">
-    <h1>Desbloqueie a Experiência Completa</h1>
-    <p>O SextoLugar não é apenas um jogo. É uma experiência psicológica.</p>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Prelúdio Jogos · 2026</div>
+  <h1>Jogar é grátis.<br>Ir fundo tem preço.</h1>
+  <p class="hero-sub">Entre, crie uma sala, jogue com seu grupo — sem pagar nada. Os pacotes existem para quem quer que a experiência vá mais longe.</p>
+
+  <div class="hero-free">
+    <span class="hero-free-item">Criar e entrar em salas</span>
+    <span class="hero-free-item">Deck básico de 8 cartas</span>
+    <span class="hero-free-item">Vídeo em tempo real</span>
+    <span class="hero-free-item">Sessões completas</span>
   </div>
 
-  <div class="productCard">
-    <div class="productGrid">
+  <a href="./entrada.html" class="hero-btn">Jogar Agora — Grátis</a>
+  <p class="hero-note">Sem cadastro obrigatório · Sem assinatura · Grátis para sempre</p>
+</section>
 
-      <div class="productImage">
-        <div style="width:100%;">
-          <div class="previewBadge">Prévia</div>
+<div class="divider"></div>
 
-          <div class="roomPreview">
-            <div class="roomTop">
-              <div class="roomTopLeft">
-                <div class="roomMiniTitle">Sala do ritual</div>
-                <div class="roomMiniName">O SextoLugar</div>
-              </div>
-              <div class="roomMiniCode">Código: SL-4812</div>
-            </div>
+<!-- PACOTES DE CARTAS -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-eyebrow">Expansões</span>
+    <h2 class="section-title">Pacotes de Cartas</h2>
+    <p class="section-sub">Cada pacote muda a dinâmica do ritual. Compre antes ou durante a sessão.</p>
+  </div>
 
-            <div class="roomMiniBody">
-              <div class="roomMiniSidebar">
-                <div class="playerMini">
-                  <div class="playerMiniAvatar">A</div>
-                  <div class="playerMiniName">Ana</div>
-                </div>
-                <div class="playerMini">
-                  <div class="playerMiniAvatar">L</div>
-                  <div class="playerMiniName">Lucas</div>
-                </div>
-                <div class="playerMini">
-                  <div class="playerMiniAvatar">V</div>
-                  <div class="playerMiniName">Você</div>
-                </div>
-              </div>
+  <div class="packs-grid">
 
-              <div class="roomMiniCenter">
-                <div class="roomMiniCardWrap">
-                  <div class="roomMiniCard">
-                    <div class="roomMiniCardType">Carta 01</div>
-                    <div class="roomMiniCardTitle">SILÊNCIO</div>
-                    <div class="roomMiniCardText">
-                      Durante 60 segundos,<br>
-                      ninguém pode falar.
-                    </div>
-                  </div>
-                </div>
-
-                <div class="roomMiniBottom">
-                  <div class="bottomMiniBox">
-                    <div class="bottomMiniTitle">Status</div>
-                    <div class="bottomMiniText">Chat, vídeo e jogadores conectados em tempo real.</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="roomMiniChat">
-                <div class="chatMiniMsg">Lucas: isso ficou estranho...</div>
-                <div class="chatMiniMsg">Ana: alguém parece desconfortável</div>
-                <div class="chatMiniMsg me">Você: ...</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="roomPreviewFooter">
-            Depois da compra, é aqui que o ritual acontece.
-          </div>
-        </div>
+    <div class="pack-card pack-conexao">
+      <div class="pack-badge">Pacote 1</div>
+      <div class="pack-name">Conexão</div>
+      <div class="pack-desc">Cartas leves e emocionais. Criam vínculo antes do desconforto. Perfeito para grupos que acabaram de se juntar — ou que faz tempo que não se veem de verdade.</div>
+      <div class="pack-example">"Conta algo que nunca teve coragem de dizer em voz alta para este grupo."</div>
+      <div class="pack-meta">
+        <span class="pack-count">12 cartas</span>
+        <span class="pack-price">R$ 9,90</span>
       </div>
+      <button class="pack-buy-btn" onclick="abrirCheckout('pacote-conexao','Pacote Conexão','9.90')">Adicionar ao ritual</button>
+    </div>
 
-      <div class="productDetails">
-        <h2>O SextoLugar — Ritual Completo</h2>
+    <div class="pack-card pack-verdades">
+      <div class="pack-badge">Pacote 2</div>
+      <div class="pack-name">Verdades</div>
+      <div class="pack-desc">Mais direto. Desconforto leve, mas real. Você vai querer saber as respostas — e vai ficar desconfortável com elas.</div>
+      <div class="pack-example">"Qual foi a última mentira que você contou para alguém desta sala?"</div>
+      <div class="pack-meta">
+        <span class="pack-count">15 cartas</span>
+        <span class="pack-price">R$ 12,90</span>
+      </div>
+      <button class="pack-buy-btn" onclick="abrirCheckout('pacote-verdades','Pacote Verdades','12.90')">Adicionar ao ritual</button>
+    </div>
 
-        <p>
-          Cada decisão muda o rumo da sessão. Cada silêncio carrega peso.
-        </p>
+    <div class="pack-card pack-conflito">
+      <div class="pack-badge">Pacote 3</div>
+      <div class="pack-name">Conflito</div>
+      <div class="pack-desc">Provocações reais. Expõe tensões antigas. Força o grupo a apontar o que normalmente fica guardado no silêncio.</div>
+      <div class="pack-example">"Escolha alguém aqui. O que você nunca diria na frente deles — mas todos já sabem?"</div>
+      <div class="pack-meta">
+        <span class="pack-count">15 cartas</span>
+        <span class="pack-price">R$ 14,90</span>
+      </div>
+      <button class="pack-buy-btn" onclick="abrirCheckout('pacote-conflito','Pacote Conflito','14.90')">Adicionar ao ritual</button>
+    </div>
 
-        <ul class="features">
-          <li>✔ Sistema psicológico de cartas</li>
-          <li>✔ Sala com vídeo em tempo real</li>
-          <li>✔ Experiência imersiva em grupo</li>
-          <li>✔ Atualizações incluídas</li>
-        </ul>
+    <div class="pack-card pack-segredos">
+      <div class="pack-badge">Pacote 4</div>
+      <div class="pack-name">Segredos</div>
+      <div class="pack-desc">Intenso. Psicológico. Cartas que fazem as pessoas pararem de respirar por alguns segundos antes de responder.</div>
+      <div class="pack-example">"O que você faria se tivesse certeza absoluta de que ninguém jamais saberia?"</div>
+      <div class="pack-meta">
+        <span class="pack-count">18 cartas</span>
+        <span class="pack-price">R$ 19,90</span>
+      </div>
+      <button class="pack-buy-btn" onclick="abrirCheckout('pacote-segredos','Pacote Segredos','19.90')">Adicionar ao ritual</button>
+    </div>
 
-        <div class="price">
-          R$ 29,90 <span>pagamento único</span>
-        </div>
+    <div class="pack-card pack-casais">
+      <div class="pack-badge">Pacote 5</div>
+      <div class="pack-name">Casais</div>
+      <div class="pack-desc">Nichado para dois. Abre o que ficou fechado, toca no que foi evitado, revela o que virou silêncio de tanto ser normal.</div>
+      <div class="pack-example">"O que você ainda não me contou sobre o dia em que nos conhecemos?"</div>
+      <div class="pack-meta">
+        <span class="pack-count">18 cartas</span>
+        <span class="pack-price">R$ 19,90</span>
+      </div>
+      <button class="pack-buy-btn" onclick="abrirCheckout('pacote-casais','Pacote Casais','19.90')">Adicionar ao ritual</button>
+    </div>
 
-        <div class="formGrid">
-          <div class="field">
-            <label for="nome">Seu nome</label>
-            <input id="nome" type="text" maxlength="80" placeholder="Digite seu nome">
-          </div>
+  </div>
+</section>
 
-          <div class="field">
-            <label for="email">Seu e-mail</label>
-            <input id="email" type="email" maxlength="160" placeholder="Digite seu e-mail">
-          </div>
-        </div>
+<div class="divider"></div>
 
-        <button class="buyBtn" id="buyBtn" onclick="comprar()">
-          Desbloquear agora
-        </button>
+<!-- COMPRAS DURANTE A SESSÃO -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-eyebrow">Durante a Sessão</span>
+    <h2 class="section-title">Compras Dentro do Jogo</h2>
+    <p class="section-sub">Aparecem no momento certo. Sempre opcionais. Nunca quebram o fluxo do ritual.</p>
+  </div>
 
-        <div class="security">
-          Pagamento seguro • Licença assinada • Liberação automática após confirmação
-        </div>
+  <div class="insession-list">
+    <div class="insession-item">
+      <span class="insession-icon">🔒</span>
+      <div class="insession-info">
+        <div class="insession-name">Carta Bloqueada</div>
+        <div class="insession-desc">Aparece quando o deck gratuito atinge o limite. Desbloqueia a próxima carta para continuar — ou pule gratuitamente.</div>
+      </div>
+      <div class="insession-price">R$ 2,90</div>
+    </div>
+    <div class="insession-item">
+      <span class="insession-icon">✨</span>
+      <div class="insession-info">
+        <div class="insession-name">Carta de Revelação Final</div>
+        <div class="insession-desc">Evento raro. Uma carta de alto impacto emocional emerge no momento de maior tensão do grupo.</div>
+      </div>
+      <div class="insession-price">R$ 4,90</div>
+    </div>
+    <div class="insession-item">
+      <span class="insession-icon">🔄</span>
+      <div class="insession-info">
+        <div class="insession-name">Segunda Chance</div>
+        <div class="insession-desc">Quando o deck termina e o grupo ainda está engajado — adiciona 3 cartas extras para continuar.</div>
+      </div>
+      <div class="insession-price">R$ 1,90</div>
+    </div>
+  </div>
+</section>
 
-        <div class="status" id="status"></div>
+<div class="divider"></div>
+
+<!-- SALAS PREMIUM -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-eyebrow">Salas</span>
+    <h2 class="section-title">Salas Premium</h2>
+    <p class="section-sub">Controle total da experiência. Sem limite de tempo, sem cartas bloqueadas.</p>
+  </div>
+
+  <div class="premium-grid">
+    <div class="premium-card">
+      <span class="premium-icon">🏠</span>
+      <div class="premium-name">Sala Privada Premium</div>
+      <div class="premium-desc">Uma sala com controle total para você e seu grupo. Sem limite de duração, sem interrupções de cartas.</div>
+      <ul class="premium-features">
+        <li>Acesso completo a todos os decks que você possui</li>
+        <li>Sem bloqueio de carta durante toda a sessão</li>
+        <li>Personalização de nome, tema e atmosfera</li>
+        <li>Controle de acesso — só entra quem você quer</li>
+      </ul>
+      <div class="premium-price">R$ 4,90 <small>por sala criada</small></div>
+      <button class="premium-buy-btn" onclick="abrirCheckout('sala-premium','Sala Privada Premium','4.90')">Criar sala premium</button>
+    </div>
+
+    <div class="premium-card">
+      <span class="premium-icon">🕯</span>
+      <div class="premium-name">Modo Ritual</div>
+      <div class="premium-desc">Transforma a sessão em uma experiência completamente imersiva. Ativa camadas visuais e cartas de intensidade máxima.</div>
+      <ul class="premium-features">
+        <li>Cartas de intensidade máxima desbloqueadas</li>
+        <li>Efeitos visuais de imersão na sala</li>
+        <li>Atmosfera visual e sonora elevada</li>
+        <li>Modo arena automático ativado</li>
+      </ul>
+      <div class="premium-price">R$ 6,90 <small>por sessão</small></div>
+      <button class="premium-buy-btn" onclick="abrirCheckout('modo-ritual','Modo Ritual','6.90')">Ativar o ritual</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- GRAVAÇÃO -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-eyebrow">Pós-sessão</span>
+    <h2 class="section-title">Gravação do Ritual</h2>
+    <p class="section-sub">Salve o que aconteceu. Sessões assim não se repetem — e têm potencial viral.</p>
+  </div>
+
+  <div class="recording-grid">
+    <div class="rec-card">
+      <span class="rec-icon">🎥</span>
+      <div class="rec-name">Simples</div>
+      <ul class="rec-features">
+        <li>Gravação da sessão completa</li>
+        <li>Disponível por 7 dias</li>
+        <li>Visualização online</li>
+      </ul>
+      <div class="rec-price">R$ 6,90</div>
+      <button class="rec-buy-btn" onclick="abrirCheckout('gravacao-simples','Gravação Simples','6.90')">Salvar ritual</button>
+    </div>
+
+    <div class="rec-card rec-best">
+      <div class="rec-best-badge">Popular</div>
+      <span class="rec-icon">📥</span>
+      <div class="rec-name">Com Download</div>
+      <ul class="rec-features">
+        <li>Gravação da sessão completa</li>
+        <li>Download em MP4 — HD</li>
+        <li>Acesso permanente no link</li>
+        <li>Compartilhe quando quiser</li>
+      </ul>
+      <div class="rec-price">R$ 9,90</div>
+      <button class="rec-buy-btn" onclick="abrirCheckout('gravacao-download','Gravação + Download','9.90')">Salvar + baixar</button>
+    </div>
+
+    <div class="rec-card">
+      <span class="rec-icon">✂️</span>
+      <div class="rec-name">Com Cortes</div>
+      <ul class="rec-features">
+        <li>Gravação + download em MP4</li>
+        <li>Cortes automáticos nos melhores momentos</li>
+        <li>Versão editada pronta para compartilhar</li>
+        <li>Alto potencial de viralização</li>
+      </ul>
+      <div class="rec-price">R$ 14,90</div>
+      <button class="rec-buy-btn" onclick="abrirCheckout('gravacao-cortes','Gravação + Cortes','14.90')">Salvar + editar</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PERSONALIZAÇÃO -->
+<section class="section" style="padding-bottom:88px;">
+  <div class="section-header">
+    <span class="section-eyebrow">Personalização</span>
+    <h2 class="section-title">Estética do Ritual</h2>
+    <p class="section-sub">Complementar, não essencial. Mude como a sala se parece e se sente.</p>
+  </div>
+
+  <div class="insession-list">
+    <div class="insession-item">
+      <span class="insession-icon">🎨</span>
+      <div class="insession-info">
+        <div class="insession-name">Tema da Sala</div>
+        <div class="insession-desc">Noir, Floresta, Oceano, Deserto — cada tema muda completamente as cores e a atmosfera da sala.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+        <div class="insession-price">R$ 4,90</div>
+        <button class="cosmetics-item-btn" onclick="abrirCheckout('tema-sala','Tema da Sala','4.90')">Personalizar</button>
+      </div>
+    </div>
+    <div class="insession-item">
+      <span class="insession-icon">🃏</span>
+      <div class="insession-info">
+        <div class="insession-name">Estilo de Carta</div>
+        <div class="insession-desc">Muda o visual do verso e frente — dourado, obsidiana, pergaminho ou neon.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+        <div class="insession-price">R$ 3,90</div>
+        <button class="cosmetics-item-btn" onclick="abrirCheckout('estilo-carta','Estilo de Carta','3.90')">Personalizar</button>
+      </div>
+    </div>
+    <div class="insession-item">
+      <span class="insession-icon">💫</span>
+      <div class="insession-info">
+        <div class="insession-name">Efeitos Visuais</div>
+        <div class="insession-desc">Partículas, névoa, pulsos de luz — camadas visuais que elevam a atmosfera da sessão.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+        <div class="insession-price">R$ 2,90</div>
+        <button class="cosmetics-item-btn" onclick="abrirCheckout('efeitos-visuais','Efeitos Visuais','2.90')">Personalizar</button>
       </div>
     </div>
   </div>
+</section>
 
+<!-- CHECKOUT OVERLAY -->
+<div class="checkout-overlay" id="checkoutOverlay">
+  <div class="checkout-modal">
+    <div class="checkout-header">
+      <div>
+        <div class="checkout-title" id="checkoutTitle">Produto</div>
+        <div class="checkout-price" id="checkoutPrice">R$ 0,00</div>
+      </div>
+      <button class="checkout-close" onclick="fecharCheckout()" aria-label="Fechar">✕</button>
+    </div>
+
+    <div class="checkout-field">
+      <label for="checkoutNome">Seu nome</label>
+      <input id="checkoutNome" type="text" placeholder="Como você quer ser chamado" maxlength="80" autocomplete="name">
+    </div>
+
+    <div class="checkout-field">
+      <label for="checkoutEmail">Seu e-mail</label>
+      <input id="checkoutEmail" type="email" placeholder="Para receber confirmação e acesso" autocomplete="email">
+    </div>
+
+    <button class="checkout-submit" id="checkoutSubmit" onclick="processarCompra()">Ir para o pagamento</button>
+    <div class="checkout-status" id="checkoutStatus"></div>
+    <div class="checkout-secure">Pagamento seguro · Liberação automática após confirmação</div>
+  </div>
 </div>
 
+<footer class="footer">
+  © 2026 <strong>PRELÚDIO JOGOS™</strong> · <strong>O SEXTOLUGAR™</strong> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+</footer>
+
 <script>
-async function comprar() {
-  const nome = document.getElementById("nome").value.trim();
-  const email = document.getElementById("email").value.trim().toLowerCase();
-  const status = document.getElementById("status");
-  const btn = document.getElementById("buyBtn");
+  const OSL_BASE = "https://osl-video-server.onrender.com";
+  let currentProduct = null;
 
-  if (!nome) {
-    status.textContent = "Digite seu nome.";
-    return;
+  function abrirCheckout(produtoId, nome, valor) {
+    currentProduct = { id: produtoId, nome, valor };
+
+    document.getElementById("checkoutTitle").textContent = nome;
+    document.getElementById("checkoutPrice").textContent = "R$ " + valor.replace(".", ",");
+    document.getElementById("checkoutStatus").textContent = "";
+
+    const btn = document.getElementById("checkoutSubmit");
+    btn.disabled = false;
+    btn.textContent = "Ir para o pagamento";
+
+    const savedNome = localStorage.getItem("osl_checkout_nome") || "";
+    const savedEmail = localStorage.getItem("osl_checkout_email") || "";
+    const nomeEl = document.getElementById("checkoutNome");
+    const emailEl = document.getElementById("checkoutEmail");
+    if (savedNome && !nomeEl.value) nomeEl.value = savedNome;
+    if (savedEmail && !emailEl.value) emailEl.value = savedEmail;
+
+    document.getElementById("checkoutOverlay").classList.add("open");
+    nomeEl.focus();
   }
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    status.textContent = "Digite um e-mail válido.";
-    return;
+  function fecharCheckout() {
+    document.getElementById("checkoutOverlay").classList.remove("open");
+    currentProduct = null;
   }
 
-  try {
-    btn.disabled = true;
-    status.textContent = "Criando pagamento...";
+  document.getElementById("checkoutOverlay").addEventListener("click", function(e) {
+    if (e.target === this) fecharCheckout();
+  });
 
-    const res = await fetch("https://osl-video-server.onrender.com/criar-pagamento", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ nome, email })
-    });
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") fecharCheckout();
+  });
 
-    const data = await res.json();
+  async function processarCompra() {
+    if (!currentProduct) return;
 
-    if (!res.ok || !data.url || !data.ref) {
-      console.error(data);
+    const nome = document.getElementById("checkoutNome").value.trim();
+    const email = document.getElementById("checkoutEmail").value.trim().toLowerCase();
+    const statusEl = document.getElementById("checkoutStatus");
+    const btn = document.getElementById("checkoutSubmit");
 
-      let erro = "Não foi possível iniciar o pagamento.";
-
-      if (typeof data?.message === "string" && data.message.trim()) {
-        erro = data.message;
-      } else if (typeof data?.error === "string" && data.error.trim()) {
-        erro = data.error;
-      } else if (data?.details) {
-        erro = JSON.stringify(data.details);
-      }
-
-      status.textContent = erro;
-      btn.disabled = false;
-      return;
+    if (!nome) { statusEl.textContent = "Digite seu nome."; return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      statusEl.textContent = "Digite um e-mail válido."; return;
     }
 
-    localStorage.setItem("osl_checkout_nome", nome);
-    localStorage.setItem("osl_checkout_email", email);
-    localStorage.setItem("osl_checkout_ref", data.ref);
+    btn.disabled = true;
+    btn.textContent = "Criando pagamento...";
+    statusEl.textContent = "";
 
-    window.location.href = data.url;
-  } catch (error) {
-    console.error(error);
-    status.textContent = "Erro ao conectar com o servidor.";
-    btn.disabled = false;
+    try {
+      const res = await fetch(OSL_BASE + "/criar-pagamento", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome,
+          email,
+          produto: currentProduct.id,
+          valor: currentProduct.valor
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.url) {
+        let erro = "Não foi possível criar o pagamento.";
+        if (data?.message) erro = data.message;
+        else if (data?.error) erro = data.error;
+        statusEl.textContent = erro;
+        btn.disabled = false;
+        btn.textContent = "Ir para o pagamento";
+        return;
+      }
+
+      localStorage.setItem("osl_checkout_nome", nome);
+      localStorage.setItem("osl_checkout_email", email);
+      if (data.ref) localStorage.setItem("osl_checkout_ref", data.ref);
+
+      window.location.href = data.url;
+
+    } catch(e) {
+      statusEl.textContent = "Erro ao conectar com o servidor. Tente novamente.";
+      btn.disabled = false;
+      btn.textContent = "Ir para o pagamento";
+    }
   }
-}
 </script>
-
 </body>
 </html>

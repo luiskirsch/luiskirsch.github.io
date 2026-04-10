@@ -1382,8 +1382,11 @@
     async function loadAll(user) {
       const profile = await ensureUserProfile(user);
       refreshUI(profile, user);
-      await loadAffiliate(user);
-      await loadAffiliateHistory(user);
+      // Afiliado em paralelo — não bloqueia UI
+      Promise.all([
+        loadAffiliate(user),
+        loadAffiliateHistory(user)
+      ]).catch(console.error);
     }
 
     async function copyText(text) {

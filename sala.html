@@ -64,8 +64,9 @@
         return;
       }
 
-      // 3. Sem nenhuma licença no dispositivo → manda para vendas
-      window.location.href = "./vendas.html";
+      // 3. Sem licença → acesso livre ao deck básico (free-to-play)
+      document.documentElement.style.visibility = "visible";
+      return;
     })();
   </script>
 
@@ -2663,57 +2664,59 @@
        THE REVEAL — virada 360° ritual com elevação
     ============================================================ */
 
-    /* Sombra da carta projetada na mesa */
+    /* Sombra da carta projetada na mesa — ABAIXO da carta (z-index:0) */
     .ritualCardShadow{
       position:absolute;
-      bottom:16%;
+      bottom:14%;
       left:50%;
       transform:translateX(-50%);
-      width:40%;
-      height:52px;
+      width:44%;
+      height:56px;
       background:radial-gradient(ellipse at 50% 50%,
-        rgba(0,0,0,.70) 0%,
-        rgba(0,0,0,.35) 40%,
-        transparent 72%
+        rgba(0,0,0,.75) 0%,
+        rgba(0,0,0,.38) 38%,
+        transparent 70%
       );
       border-radius:50%;
-      filter:blur(8px);
+      filter:blur(10px);
       pointer-events:none;
-      z-index:2;
+      z-index:0; /* abaixo do revealStage (z-index:1) para ficar sob a carta */
     }
 
-    /* Sombra acompanha a elevação: encolhe quando sobe, expande no impacto */
+    /* Sombra encolhe na subida, explode no impacto do pouso */
     @keyframes shadowFlip {
-      0%   { transform:translateX(-50%) scale(1,   1);    opacity:.70; filter:blur(8px); }
-      12%  { transform:translateX(-50%) scale(.72, .55);  opacity:.35; filter:blur(14px); }
-      25%  { transform:translateX(-50%) scale(.48, .32);  opacity:.18; filter:blur(22px); }
-      50%  { transform:translateX(-50%) scale(.40, .26);  opacity:.12; filter:blur(26px); }
-      75%  { transform:translateX(-50%) scale(.48, .32);  opacity:.18; filter:blur(22px); }
-      87%  { transform:translateX(-50%) scale(1.14,.85);  opacity:.80; filter:blur(4px);  }
-      100% { transform:translateX(-50%) scale(1,   1);    opacity:.70; filter:blur(8px);  }
+      0%   { transform:translateX(-50%) scaleX(1)    scaleY(1);    opacity:.72; filter:blur(10px); }
+      14%  { transform:translateX(-50%) scaleX(.58)  scaleY(.38);  opacity:.30; filter:blur(20px); }
+      25%  { transform:translateX(-50%) scaleX(.34)  scaleY(.20);  opacity:.14; filter:blur(30px); }
+      50%  { transform:translateX(-50%) scaleX(.28)  scaleY(.16);  opacity:.09; filter:blur(36px); }
+      75%  { transform:translateX(-50%) scaleX(.34)  scaleY(.20);  opacity:.14; filter:blur(30px); }
+      88%  { transform:translateX(-50%) scaleX(1.16) scaleY(.88);  opacity:.85; filter:blur(3px);  }
+      94%  { transform:translateX(-50%) scaleX(.96)  scaleY(.82);  opacity:.78; filter:blur(6px);  }
+      100% { transform:translateX(-50%) scaleX(1)    scaleY(1);    opacity:.72; filter:blur(10px); }
     }
 
     .ritualCardShadow--animating{
-      animation:shadowFlip 1.1s cubic-bezier(0.4,0,0.2,1) forwards !important;
+      animation:shadowFlip 1.4s ease-in-out forwards !important;
     }
 
-    /* Carta eleva antes de girar, pousa com leve impacto */
+    /* Carta sobe alto, gira com suavidade absoluta, pousa com impacto */
     @keyframes theFlip {
-      /* Decolagem */
-      0%   { transform: rotateX(3deg) rotateY(0deg)   translateY(0px)   scale(1); }
-      12%  { transform: rotateX(1deg) rotateY(55deg)  translateY(-32px) scale(1.04); }
-      /* Girada elevada */
-      25%  { transform: rotateX(0deg) rotateY(90deg)  translateY(-44px) scale(1.06); }
-      50%  { transform: rotateX(0deg) rotateY(180deg) translateY(-40px) scale(1.05); }
-      75%  { transform: rotateX(0deg) rotateY(270deg) translateY(-44px) scale(1.06); }
-      85%  { transform: rotateX(1deg) rotateY(330deg) translateY(-22px) scale(1.04); }
-      /* Pouso — leve impacto e overshoot */
-      93%  { transform: rotateX(4deg) rotateY(353deg) translateY(5px)   scale(1.02); }
-      100% { transform: rotateX(3deg) rotateY(360deg) translateY(0px)   scale(1); }
+      /* Decolagem — sobe antes de começar a girar */
+      0%   { transform: rotateX(3deg) rotateY(0deg)   translateY(0px)   scale(1);    }
+      14%  { transform: rotateX(1deg) rotateY(50deg)  translateY(-60px) scale(1.05); }
+      /* Girada elevada — altura constante */
+      25%  { transform: rotateX(0deg) rotateY(90deg)  translateY(-78px) scale(1.07); }
+      50%  { transform: rotateX(0deg) rotateY(180deg) translateY(-75px) scale(1.07); }
+      75%  { transform: rotateX(0deg) rotateY(270deg) translateY(-78px) scale(1.07); }
+      /* Descida suave */
+      86%  { transform: rotateX(1deg) rotateY(338deg) translateY(-28px) scale(1.04); }
+      /* Impacto na mesa — leve bounce */
+      93%  { transform: rotateX(5deg) rotateY(355deg) translateY(6px)   scale(1.01); }
+      100% { transform: rotateX(3deg) rotateY(360deg) translateY(0px)   scale(1);    }
     }
 
     .ritualCardWrap--flipping {
-      animation: theFlip 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+      animation: theFlip 1.4s ease-in-out forwards !important;
       pointer-events: none;
     }
 
@@ -2779,6 +2782,7 @@
 
         <div class="topActions">
           <button class="topActionBtn primary" id="copyCodeBtn">Convidar Amigos</button>
+          <button class="topActionBtn" id="oslShopFab" title="Ver pacotes de cartas">🎴 Loja</button>
           <button class="topActionBtn" id="arenaBtn" title="Alternar Modo Arena">⚔ Arena</button>
           <button class="topActionBtn" id="myProfileBtn">Configurações</button>
           <button class="topActionBtn iconOnly" id="leaveBtn" aria-label="Sair da sala">⇢</button>
@@ -4706,6 +4710,533 @@
   </script>
 
   <script type="module" src="video.js"></script>
+
+  <!-- ===== OSL MONETIZAÇÃO IN-SESSION ===== -->
+  <style>
+    .osl-overlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.80);
+      display:none;
+      align-items:center;justify-content:center;
+      padding:20px;
+      z-index:2000;
+      backdrop-filter:blur(7px);
+    }
+    .osl-overlay.osl-open{display:flex;}
+    .osl-modal{
+      width:min(440px,100%);
+      background:linear-gradient(180deg,#0d0c12,#080810);
+      border:1px solid rgba(215,176,107,.22);
+      border-radius:22px;
+      padding:30px 26px;
+      box-shadow:0 60px 140px rgba(0,0,0,.80),inset 0 1px 0 rgba(255,255,255,.04);
+      display:none;
+      flex-direction:column;
+      align-items:center;
+      gap:16px;
+      text-align:center;
+      font-family:ui-serif,Georgia,serif;
+      color:#f3ede5;
+    }
+    .osl-modal.osl-active{display:flex;}
+    .osl-modal-icon{font-size:44px;}
+    .osl-modal-eyebrow{
+      font-size:11px;letter-spacing:.28em;
+      text-transform:uppercase;color:rgba(215,176,107,.72);
+    }
+    .osl-modal-title{
+      font-size:21px;font-weight:800;
+      letter-spacing:-.02em;margin:-4px 0 0;width:100%;
+    }
+    .osl-modal-desc{
+      font-size:13px;color:rgba(243,237,229,.68);
+      line-height:1.65;max-width:36ch;
+    }
+    .osl-modal-price{
+      font-size:34px;font-weight:900;
+      color:#d7b06b;letter-spacing:-.03em;
+    }
+    .osl-btn{
+      width:100%;padding:14px 20px;
+      border-radius:12px;border:none;
+      font-size:14px;font-weight:700;
+      cursor:pointer;font-family:inherit;
+      letter-spacing:.04em;transition:.15s;
+    }
+    .osl-btn-primary{
+      background:linear-gradient(135deg,#d7b06b,#b8863c);
+      color:#000;
+    }
+    .osl-btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+    .osl-btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .osl-btn-secondary{
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.09);
+      color:rgba(243,237,229,.72);
+    }
+    .osl-btn-secondary:hover{background:rgba(255,255,255,.09);}
+    .osl-btn-danger{
+      background:rgba(255,60,60,.07);
+      border:1px solid rgba(255,100,100,.14);
+      color:rgba(255,150,150,.82);
+    }
+    .osl-btn-danger:hover{background:rgba(255,60,60,.13);}
+    .osl-checkout-fields{
+      display:none;width:100%;
+      grid-template-columns:1fr;gap:10px;
+      text-align:left;
+    }
+    .osl-checkout-fields.osl-show{display:grid;}
+    .osl-checkout-field{display:grid;gap:5px;}
+    .osl-checkout-field label{
+      font-size:10px;letter-spacing:.18em;
+      text-transform:uppercase;color:rgba(255,255,255,.5);
+    }
+    .osl-checkout-field input{
+      padding:11px 12px;border-radius:9px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+      color:#fff;font-size:14px;outline:none;
+      font-family:inherit;transition:border-color .15s;
+    }
+    .osl-checkout-field input:focus{border-color:rgba(215,176,107,.35);}
+    .osl-checkout-field input::placeholder{color:rgba(255,255,255,.28);}
+    .osl-rec-grid{width:100%;display:grid;gap:10px;}
+    .osl-rec-item{
+      display:flex;align-items:center;
+      justify-content:space-between;
+      padding:12px 14px;border-radius:12px;
+      border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.03);
+      cursor:pointer;transition:.15s;
+    }
+    .osl-rec-item:hover{
+      border-color:rgba(215,176,107,.3);
+      background:rgba(215,176,107,.06);
+    }
+    .osl-rec-item.osl-selected{
+      border-color:rgba(215,176,107,.55);
+      background:rgba(215,176,107,.10);
+    }
+    .osl-rec-info{text-align:left;}
+    .osl-rec-name{font-size:14px;font-weight:700;}
+    .osl-rec-feat{font-size:11px;color:rgba(255,255,255,.48);margin-top:2px;}
+    .osl-rec-price{font-size:16px;font-weight:800;color:#d7b06b;white-space:nowrap;margin-left:12px;}
+    .osl-status{
+      font-size:12px;color:rgba(255,255,255,.52);
+      min-height:16px;width:100%;text-align:center;
+    }
+  </style>
+
+  <div class="osl-overlay" id="oslOverlay">
+
+    <!-- Modal 1: Carta Bloqueada -->
+    <div class="osl-modal" id="oslModalLocked">
+      <div class="osl-modal-icon">🔒</div>
+      <div class="osl-modal-eyebrow">Carta Bloqueada</div>
+      <div class="osl-modal-title">Esta carta está além do deck gratuito</div>
+      <div class="osl-modal-desc">O deck básico chegou ao limite. Desbloqueie para continuar o ritual — ou pule para a próxima gratuitamente.</div>
+      <div class="osl-modal-price">R$ 2,90</div>
+      <div class="osl-checkout-fields" id="oslLockedFields">
+        <div class="osl-checkout-field">
+          <label>Seu nome</label>
+          <input type="text" id="oslLockedNome" placeholder="Nome" maxlength="80">
+        </div>
+        <div class="osl-checkout-field">
+          <label>Seu e-mail</label>
+          <input type="email" id="oslLockedEmail" placeholder="E-mail">
+        </div>
+      </div>
+      <button class="osl-btn osl-btn-primary" id="oslLockedDesbloq">Desbloquear agora — R$ 2,90</button>
+      <button class="osl-btn osl-btn-secondary" id="oslLockedPular">Pular esta carta</button>
+      <div class="osl-status" id="oslLockedStatus"></div>
+    </div>
+
+    <!-- Modal 2: Carta de Revelação Final -->
+    <div class="osl-modal" id="oslModalFinal">
+      <div class="osl-modal-icon">✨</div>
+      <div class="osl-modal-eyebrow">Evento Raro</div>
+      <div class="osl-modal-title">Uma carta de revelação final emergiu</div>
+      <div class="osl-modal-desc">Nas profundezas do ritual, esta carta apareceu. Cartas assim chegam poucas vezes por sessão — e mudam tudo.</div>
+      <div class="osl-modal-price">R$ 4,90</div>
+      <div class="osl-checkout-fields" id="oslFinalFields">
+        <div class="osl-checkout-field">
+          <label>Seu nome</label>
+          <input type="text" id="oslFinalNome" placeholder="Nome" maxlength="80">
+        </div>
+        <div class="osl-checkout-field">
+          <label>Seu e-mail</label>
+          <input type="email" id="oslFinalEmail" placeholder="E-mail">
+        </div>
+      </div>
+      <button class="osl-btn osl-btn-primary" id="oslFinalRevelar">Revelar agora — R$ 4,90</button>
+      <button class="osl-btn osl-btn-secondary" id="oslFinalPular">Ignorar e continuar</button>
+      <div class="osl-status" id="oslFinalStatus"></div>
+    </div>
+
+    <!-- Modal 3: Segunda Chance -->
+    <div class="osl-modal" id="oslModalSC">
+      <div class="osl-modal-icon">🔄</div>
+      <div class="osl-modal-eyebrow">O deck acabou</div>
+      <div class="osl-modal-title">O ritual chegou ao fim</div>
+      <div class="osl-modal-desc">Todas as cartas foram reveladas. O grupo ainda está aqui? Adicione 3 cartas extras para continuar.</div>
+      <div class="osl-modal-price">R$ 1,90</div>
+      <div class="osl-checkout-fields" id="oslScFields">
+        <div class="osl-checkout-field">
+          <label>Seu nome</label>
+          <input type="text" id="oslScNome" placeholder="Nome" maxlength="80">
+        </div>
+        <div class="osl-checkout-field">
+          <label>Seu e-mail</label>
+          <input type="email" id="oslScEmail" placeholder="E-mail">
+        </div>
+      </div>
+      <button class="osl-btn osl-btn-primary" id="oslScAdicionar">Adicionar 3 cartas — R$ 1,90</button>
+      <button class="osl-btn osl-btn-secondary" id="oslScEncerrar">Encerrar o ritual</button>
+      <div class="osl-status" id="oslScStatus"></div>
+    </div>
+
+    <!-- Modal 4: Salvar Sessão -->
+    <div class="osl-modal" id="oslModalSave">
+      <div class="osl-modal-icon">🎥</div>
+      <div class="osl-modal-eyebrow">Antes de sair</div>
+      <div class="osl-modal-title">Deseja salvar este ritual?</div>
+      <div class="osl-modal-desc">Sessões assim não se repetem. Guarde o momento antes de ir embora.</div>
+      <div class="osl-rec-grid" id="oslRecGrid">
+        <div class="osl-rec-item" id="oslRec1" onclick="oslSelecionarGravacao('gravacao-simples','6.90',this)">
+          <div class="osl-rec-info">
+            <div class="osl-rec-name">🎥 Gravação Simples</div>
+            <div class="osl-rec-feat">Visualização online por 7 dias</div>
+          </div>
+          <div class="osl-rec-price">R$ 6,90</div>
+        </div>
+        <div class="osl-rec-item" id="oslRec2" onclick="oslSelecionarGravacao('gravacao-download','9.90',this)">
+          <div class="osl-rec-info">
+            <div class="osl-rec-name">📥 Com Download</div>
+            <div class="osl-rec-feat">MP4 + acesso permanente</div>
+          </div>
+          <div class="osl-rec-price">R$ 9,90</div>
+        </div>
+        <div class="osl-rec-item" id="oslRec3" onclick="oslSelecionarGravacao('gravacao-cortes','14.90',this)">
+          <div class="osl-rec-info">
+            <div class="osl-rec-name">✂️ Com Cortes Automáticos</div>
+            <div class="osl-rec-feat">Edição pronta para compartilhar</div>
+          </div>
+          <div class="osl-rec-price">R$ 14,90</div>
+        </div>
+      </div>
+      <div class="osl-checkout-fields" id="oslSaveFields">
+        <div class="osl-checkout-field">
+          <label>Seu nome</label>
+          <input type="text" id="oslSaveNome" placeholder="Nome" maxlength="80">
+        </div>
+        <div class="osl-checkout-field">
+          <label>Seu e-mail</label>
+          <input type="email" id="oslSaveEmail" placeholder="E-mail">
+        </div>
+        <button class="osl-btn osl-btn-primary" id="oslSaveSubmit">Confirmar e pagar</button>
+      </div>
+      <div class="osl-status" id="oslSaveStatus"></div>
+      <button class="osl-btn osl-btn-danger" id="oslSaveSair">Sair sem salvar</button>
+    </div>
+
+  </div>
+
+  <!-- Shop button is in the topbar (#oslShopFab) -->
+
+  <script>
+  (function () {
+    'use strict';
+
+    const OSL_BASE = "https://osl-video-server.onrender.com";
+    const OSL_LOCK_EVERY = 4; // lock appears every Nth reveal
+    const OSL_FINAL_CHANCE = 0.20; // 20% chance of "Revelação Final" instead of lock
+
+    let oslRevealCount = parseInt(sessionStorage.getItem("osl_rev") || "0");
+    let oslSaveProduto = null;
+
+    // ---- helpers ----
+
+    function oslOpenModal(id) {
+      document.getElementById("oslOverlay").classList.add("osl-open");
+      document.querySelectorAll(".osl-modal").forEach(function (m) {
+        m.classList.remove("osl-active");
+      });
+      document.getElementById(id).classList.add("osl-active");
+    }
+
+    function oslCloseAll() {
+      document.getElementById("oslOverlay").classList.remove("osl-open");
+      document.querySelectorAll(".osl-modal").forEach(function (m) {
+        m.classList.remove("osl-active");
+      });
+    }
+
+    function oslPrefill(nomeId, emailId) {
+      var savedNome = localStorage.getItem("osl_checkout_nome") || localStorage.getItem("osl_nome") || "";
+      var savedEmail = localStorage.getItem("osl_checkout_email") || "";
+      var nEl = document.getElementById(nomeId);
+      var eEl = document.getElementById(emailId);
+      if (nEl && savedNome && !nEl.value) nEl.value = savedNome;
+      if (eEl && savedEmail && !eEl.value) eEl.value = savedEmail;
+    }
+
+    function oslShowFields(fieldsId) {
+      var el = document.getElementById(fieldsId);
+      if (el) el.classList.add("osl-show");
+    }
+
+    function oslHideFields(fieldsId) {
+      var el = document.getElementById(fieldsId);
+      if (el) el.classList.remove("osl-show");
+    }
+
+    async function oslPay(nome, email, produtoId, valor, statusId, btnEl) {
+      var statusEl = document.getElementById(statusId);
+      if (btnEl) btnEl.disabled = true;
+      if (statusEl) statusEl.textContent = "Criando pagamento...";
+      try {
+        var res = await fetch(OSL_BASE + "/criar-pagamento", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nome: nome, email: email, produto: produtoId, valor: valor })
+        });
+        var data = await res.json();
+        if (data && data.url) {
+          localStorage.setItem("osl_checkout_nome", nome);
+          localStorage.setItem("osl_checkout_email", email);
+          window.open(data.url, "_blank");
+          if (statusEl) statusEl.textContent = "Pagamento aberto em nova aba. Retorne após confirmar.";
+          if (btnEl) btnEl.textContent = "✓ Aguardando pagamento";
+        } else {
+          var msg = (data && (data.message || data.error)) || "Erro ao criar pagamento.";
+          if (statusEl) statusEl.textContent = msg;
+          if (btnEl) { btnEl.disabled = false; }
+        }
+      } catch (e) {
+        if (statusEl) statusEl.textContent = "Erro de conexão. Tente novamente.";
+        if (btnEl) { btnEl.disabled = false; }
+      }
+    }
+
+    function oslValidate(nomeId, emailId, statusId) {
+      var nome = document.getElementById(nomeId).value.trim();
+      var email = document.getElementById(emailId).value.trim().toLowerCase();
+      var statusEl = document.getElementById(statusId);
+      if (!nome) { statusEl.textContent = "Digite seu nome."; return null; }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        statusEl.textContent = "E-mail inválido."; return null;
+      }
+      return { nome: nome, email: email };
+    }
+
+    // ---- Modal 1: Carta Bloqueada ----
+
+    var oslLockedPhase = 0; // 0=offer, 1=checkout
+
+    function oslShowLocked() {
+      oslLockedPhase = 0;
+      oslHideFields("oslLockedFields");
+      document.getElementById("oslLockedStatus").textContent = "";
+      var btn = document.getElementById("oslLockedDesbloq");
+      btn.disabled = false;
+      btn.textContent = "Desbloquear agora — R$ 2,90";
+      oslOpenModal("oslModalLocked");
+    }
+
+    document.getElementById("oslLockedDesbloq").addEventListener("click", async function () {
+      if (oslLockedPhase === 0) {
+        oslLockedPhase = 1;
+        oslShowFields("oslLockedFields");
+        oslPrefill("oslLockedNome", "oslLockedEmail");
+        this.textContent = "Confirmar pagamento";
+        return;
+      }
+      var v = oslValidate("oslLockedNome", "oslLockedEmail", "oslLockedStatus");
+      if (!v) return;
+      await oslPay(v.nome, v.email, "carta-bloqueada", "2.90", "oslLockedStatus", this);
+    });
+
+    document.getElementById("oslLockedPular").addEventListener("click", function () {
+      oslLockedPhase = 0;
+      oslCloseAll();
+      if (typeof revealNextRitualCard === "function") {
+        revealNextRitualCard().catch(console.error);
+      }
+    });
+
+    // ---- Modal 2: Carta de Revelação Final ----
+
+    var oslFinalPhase = 0;
+
+    function oslShowFinal() {
+      oslFinalPhase = 0;
+      oslHideFields("oslFinalFields");
+      document.getElementById("oslFinalStatus").textContent = "";
+      var btn = document.getElementById("oslFinalRevelar");
+      btn.disabled = false;
+      btn.textContent = "Revelar agora — R$ 4,90";
+      oslOpenModal("oslModalFinal");
+    }
+
+    document.getElementById("oslFinalRevelar").addEventListener("click", async function () {
+      if (oslFinalPhase === 0) {
+        oslFinalPhase = 1;
+        oslShowFields("oslFinalFields");
+        oslPrefill("oslFinalNome", "oslFinalEmail");
+        this.textContent = "Confirmar pagamento";
+        return;
+      }
+      var v = oslValidate("oslFinalNome", "oslFinalEmail", "oslFinalStatus");
+      if (!v) return;
+      await oslPay(v.nome, v.email, "carta-final", "4.90", "oslFinalStatus", this);
+    });
+
+    document.getElementById("oslFinalPular").addEventListener("click", function () {
+      oslFinalPhase = 0;
+      oslCloseAll();
+      if (typeof revealNextRitualCard === "function") {
+        revealNextRitualCard().catch(console.error);
+      }
+    });
+
+    // ---- Modal 3: Segunda Chance ----
+
+    var oslScPhase = 0;
+    var oslScShown = false;
+
+    function oslShowSC() {
+      if (oslScShown) return;
+      oslScShown = true;
+      oslScPhase = 0;
+      oslHideFields("oslScFields");
+      document.getElementById("oslScStatus").textContent = "";
+      var btn = document.getElementById("oslScAdicionar");
+      btn.disabled = false;
+      btn.textContent = "Adicionar 3 cartas — R$ 1,90";
+      oslOpenModal("oslModalSC");
+    }
+
+    document.getElementById("oslScAdicionar").addEventListener("click", async function () {
+      if (oslScPhase === 0) {
+        oslScPhase = 1;
+        oslShowFields("oslScFields");
+        oslPrefill("oslScNome", "oslScEmail");
+        this.textContent = "Confirmar pagamento";
+        return;
+      }
+      var v = oslValidate("oslScNome", "oslScEmail", "oslScStatus");
+      if (!v) return;
+      await oslPay(v.nome, v.email, "segunda-chance", "1.90", "oslScStatus", this);
+    });
+
+    document.getElementById("oslScEncerrar").addEventListener("click", function () {
+      oslScPhase = 0;
+      oslCloseAll();
+    });
+
+    // ---- Modal 4: Salvar Sessão ----
+
+    window.oslSelecionarGravacao = function (prodId, valor, el) {
+      oslSaveProduto = { id: prodId, valor: valor };
+      document.querySelectorAll(".osl-rec-item").forEach(function (i) {
+        i.classList.remove("osl-selected");
+      });
+      el.classList.add("osl-selected");
+      oslShowFields("oslSaveFields");
+      oslPrefill("oslSaveNome", "oslSaveEmail");
+      document.getElementById("oslSaveStatus").textContent = "";
+      var btn = document.getElementById("oslSaveSubmit");
+      btn.disabled = false;
+      btn.textContent = "Confirmar e pagar";
+    };
+
+    document.getElementById("oslSaveSubmit").addEventListener("click", async function () {
+      if (!oslSaveProduto) return;
+      var v = oslValidate("oslSaveNome", "oslSaveEmail", "oslSaveStatus");
+      if (!v) return;
+      await oslPay(v.nome, v.email, oslSaveProduto.id, oslSaveProduto.valor, "oslSaveStatus", this);
+    });
+
+    document.getElementById("oslSaveSair").addEventListener("click", function () {
+      oslCloseAll();
+      if (typeof window.leaveRoom === "function") {
+        var ok = confirm("Deseja sair da sala?");
+        if (ok) window.leaveRoom(true);
+      }
+    });
+
+    // ---- Override: Reveal Button (capture phase) ----
+
+    var revealBtn = document.getElementById("revealCardBtn");
+    if (revealBtn) {
+      revealBtn.addEventListener("click", function (e) {
+        if (revealBtn.disabled) return;
+
+        oslRevealCount++;
+        sessionStorage.setItem("osl_rev", String(oslRevealCount));
+
+        // Every OSL_LOCK_EVERY-th reveal triggers monetization
+        if (oslRevealCount % OSL_LOCK_EVERY === 0) {
+          e.stopImmediatePropagation();
+          if (Math.random() < OSL_FINAL_CHANCE) {
+            oslShowFinal();
+          } else {
+            oslShowLocked();
+          }
+        }
+        // else: let existing listener handle normally
+      }, true); // capture phase — runs before existing bubble listeners
+    }
+
+    // ---- Reset count when ritual resets ----
+    var resetBtn = document.getElementById("resetRitualBtn");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", function () {
+        oslRevealCount = 0;
+        oslScShown = false;
+        sessionStorage.setItem("osl_rev", "0");
+      }, true);
+    }
+
+    // ---- Watch for empty deck ----
+    var deckInfo = document.getElementById("deckInfo");
+    if (deckInfo) {
+      var deckObs = new MutationObserver(function () {
+        if (!oslScShown && deckInfo.textContent.includes("deck chegou ao fim")) {
+          setTimeout(oslShowSC, 900);
+        }
+      });
+      deckObs.observe(deckInfo, { childList: true, subtree: true });
+    }
+
+    // ---- Intercept Leave Button ----
+    var leaveBtn = document.getElementById("leaveBtn");
+    if (leaveBtn) {
+      leaveBtn.addEventListener("click", function (e) {
+        e.stopImmediatePropagation();
+        oslSaveProduto = null;
+        oslHideFields("oslSaveFields");
+        document.getElementById("oslSaveStatus").textContent = "";
+        document.querySelectorAll(".osl-rec-item").forEach(function (i) {
+          i.classList.remove("osl-selected");
+        });
+        oslOpenModal("oslModalSave");
+      }, true);
+    }
+
+    // ---- Shop FAB ----
+    document.getElementById("oslShopFab").addEventListener("click", function () {
+      window.open("./vendas.html", "_blank");
+    });
+
+    // ---- Close overlay on backdrop click ----
+    document.getElementById("oslOverlay").addEventListener("click", function (e) {
+      if (e.target === this) oslCloseAll();
+    });
+
+  })();
+  </script>
 
   <!-- Botão discreto de saída do Arena Mode -->
   <button id="exitArenaBtn" class="exitArenaBtn">← Sair da imersão</button>
