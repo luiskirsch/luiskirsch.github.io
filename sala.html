@@ -1483,19 +1483,23 @@
       transform:none !important;
     }
 
+    /* ═══════════════════════════════════════
+       PROFILE MODAL
+    ═══════════════════════════════════════ */
     .profileModal{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.78);
+      background:rgba(0,0,0,.82);
+      backdrop-filter:blur(4px);
+      -webkit-backdrop-filter:blur(4px);
       display:flex;
       align-items:center;
       justify-content:center;
       z-index:9999;
+      padding:16px;
     }
 
-    .profileModal.hidden{
-      display:none;
-    }
+    .profileModal.hidden{ display:none; }
 
     .profileCard{
       width:min(320px, calc(100vw - 28px));
@@ -1509,110 +1513,391 @@
     }
 
     .profileCard--large{
-      width:min(460px, calc(100vw - 28px));
+      width:min(580px, calc(100vw - 28px));
+      max-height:min(780px, calc(100vh - 32px));
       text-align:left;
       position:relative;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      background:linear-gradient(160deg,#141008 0%,#0d0a06 50%,#090604 100%);
+      border:1px solid rgba(215,176,107,.20);
+      border-radius:20px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,.6),
+        0 32px 96px rgba(0,0,0,.75);
+      color:#f5ede1;
     }
 
-    .profileX{
+    /* Gold shimmer on top edge */
+    .profileCard--large::before{
+      content:"";
       position:absolute;
-      top:12px;
-      right:12px;
-      width:34px;
-      height:34px;
-      border:none;
-      border-radius:50%;
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      cursor:pointer;
-      font-size:22px;
-      line-height:1;
+      top:0; left:0; right:0;
+      height:1px;
+      background:linear-gradient(90deg,
+        transparent 5%,
+        rgba(215,176,107,.55) 40%,
+        rgba(215,176,107,.70) 50%,
+        rgba(215,176,107,.55) 60%,
+        transparent 95%
+      );
     }
 
-    .profileHeader{
+    /* ── Profile head ── */
+    .profHead{
       display:flex;
       align-items:center;
-      gap:16px;
-      margin-bottom:14px;
+      gap:18px;
+      padding:26px 26px 18px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      flex-shrink:0;
     }
 
-    .profileIdentity{
-      min-width:0;
-    }
+    .profAvatarWrap{ flex:0 0 auto; }
 
     .profileAvatarLarge{
-      width:90px;
-      height:90px;
+      width:76px; height:76px;
       border-radius:50%;
       display:grid;
       place-items:center;
-      font-size:28px;
-      font-weight:900;
-      margin:0 auto 14px auto;
-      background:linear-gradient(180deg,#7c6338,#342718);
+      font-size:32px;
+      background:linear-gradient(160deg,#7c6338,#342718);
       color:#fff;
-      border:1px solid rgba(215,176,107,.30);
+      border:2px solid rgba(215,176,107,.38);
+      box-shadow:0 0 24px rgba(215,176,107,.18);
+      transition:background .3s ease;
+      flex-shrink:0;
     }
 
-    .profileCard--large .profileAvatarLarge{
-      margin:0;
-    }
+    .profIdentity{ min-width:0; flex:1; }
 
     .profileName{
-      font-size:20px;
-      font-weight:800;
-      margin-bottom:8px;
+      font-size:19px; font-weight:800;
+      line-height:1.2; margin-bottom:4px;
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     }
 
     .profileUsername{
-      font-size:13px;
-      color:rgba(214,224,237,.72);
-      margin-top:4px;
+      font-size:12px;
+      color:rgba(214,224,237,.52);
+      margin-bottom:8px;
     }
 
     .profileBio{
       font-size:13px;
-      color:rgba(214,224,237,.75);
-      margin-bottom:14px;
+      color:rgba(214,224,237,.68);
+      line-height:1.45;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
     }
 
-    .profileStats{
+    /* ── Tabs ── */
+    .profTabs{
       display:flex;
-      justify-content:center;
-      gap:14px;
+      padding:0 26px;
+      gap:0;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      flex-shrink:0;
+    }
+
+    .profTab{
+      appearance:none;
+      border:none; background:none;
+      color:rgba(214,224,237,.45);
+      font:inherit;
       font-size:12px;
-      color:rgba(214,224,237,.7);
-      margin-bottom:16px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      padding:12px 12px 10px;
+      cursor:pointer;
+      border-bottom:2px solid transparent;
+      margin-bottom:-1px;
+      transition:color .15s ease, border-color .15s ease;
+      white-space:nowrap;
+    }
+
+    .profTab:hover{ color:rgba(214,224,237,.80); }
+
+    .profTab--active{
+      color:#d7b06b;
+      border-bottom-color:#d7b06b;
+    }
+
+    /* ── Panes ── */
+    .profPane{
+      display:none;
+      flex-direction:column;
+      gap:14px;
+      padding:20px 26px 16px;
+      overflow-y:auto;
+      flex:1;
+    }
+
+    .profPane--active{ display:flex; }
+
+    /* ── Stat row ── */
+    .profStatRow{
+      display:flex;
+      gap:10px;
+    }
+
+    .profStat{
+      flex:1;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:14px;
+      padding:14px 10px;
+      text-align:center;
+    }
+
+    .profStatValue{
+      font-size:26px; font-weight:800;
+      color:#d7b06b;
+      line-height:1;
+      margin-bottom:6px;
+    }
+
+    .profStatLabel{
+      font-size:10px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:rgba(214,224,237,.50);
+    }
+
+    /* ── Info block (Sessão + Conta) ── */
+    .profInfoBlock{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:14px;
+      overflow:hidden;
+    }
+
+    .profInfoRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:11px 16px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      font-size:13px;
+    }
+
+    .profInfoRow:last-child{ border-bottom:none; }
+
+    .profInfoLabel{
+      font-size:11px;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color:rgba(214,224,237,.45);
+      flex-shrink:0;
+    }
+
+    .profInfoValue{
+      color:rgba(255,255,255,.85);
+      text-align:right;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .profInfoValue--mono{
+      font-family:monospace;
+      font-size:11px;
+      color:rgba(214,224,237,.50);
+    }
+
+    .profInfoValue--code{
+      font-family:monospace;
+      font-size:12px;
+    }
+
+    .profCopyBtn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:rgba(255,255,255,.60);
+      border-radius:6px;
+      padding:2px 7px;
+      font-size:12px;
+      cursor:pointer;
+      flex-shrink:0;
+      transition:background .15s ease;
+    }
+
+    .profCopyBtn:hover{ background:rgba(255,255,255,.14); color:#fff; }
+
+    /* ── Pack grid ── */
+    .profPackGrid{ display:grid; gap:8px; }
+
+    .profPackCard{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:4px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.03);
+      transition:background .15s ease;
+    }
+
+    .profPackCard--unlocked{
+      border-color:rgba(110,200,138,.25);
+      background:rgba(110,200,138,.05);
+    }
+
+    .profPackIcon{
+      font-size:22px;
+      flex-shrink:0;
+      width:38px;
+      text-align:center;
+    }
+
+    .profPackInfo{ flex:1; min-width:0; }
+
+    .profPackName{
+      font-size:14px; font-weight:700;
+      color:rgba(255,255,255,.90);
+      margin-bottom:2px;
+    }
+
+    .profPackSub,
+    .profPackDesc{
+      font-size:11px;
+      color:rgba(214,224,237,.48);
+    }
+
+    .profPackBadge{
+      font-size:11px;
+      padding:4px 9px;
+      border-radius:999px;
+      font-weight:700;
+      letter-spacing:.05em;
+      flex-shrink:0;
+      text-decoration:none;
+    }
+
+    .profPackBadge--ok{
+      background:rgba(110,200,138,.18);
+      color:#6ec98a;
+      border:1px solid rgba(110,200,138,.25);
+    }
+
+    .profPackBadge--locked{
+      background:rgba(255,255,255,.06);
+      color:rgba(214,224,237,.42);
+      border:1px solid rgba(255,255,255,.09);
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+    }
+
+    .profPackBadge--locked:hover{
+      background:rgba(215,176,107,.12);
+      color:#d7b06b;
+      border-color:rgba(215,176,107,.25);
+    }
+
+    /* ── Badge inline ── */
+    .profBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:3px;
+      font-size:11px;
+      padding:3px 8px;
+      border-radius:999px;
+      font-weight:700;
+    }
+
+    .profBadge--green{
+      background:rgba(110,200,138,.15);
+      color:#6ec98a;
+      border:1px solid rgba(110,200,138,.22);
+    }
+
+    .profBadge--red{
+      background:rgba(220,80,80,.15);
+      color:#e05555;
+      border:1px solid rgba(220,80,80,.22);
+    }
+
+    /* ── Color swatches ── */
+    .colorSwatchRow{
+      display:flex;
+      gap:8px;
       flex-wrap:wrap;
     }
 
-    .profileCard--large .profileStats{
-      justify-content:flex-start;
+    .colorSwatch{
+      appearance:none;
+      width:30px; height:30px;
+      border-radius:50%;
+      border:2px solid rgba(255,255,255,.14);
+      cursor:pointer;
+      transition:transform .12s ease, border-color .15s ease, box-shadow .15s ease;
+      flex-shrink:0;
     }
+
+    .colorSwatch:hover{ transform:scale(1.15); }
+
+    .colorSwatch--active{
+      border-color:rgba(215,176,107,.85);
+      box-shadow:0 0 0 3px rgba(215,176,107,.22);
+    }
+
+    /* ── Close X button ── */
+
+    .profileX{
+      position:absolute;
+      top:14px; right:14px;
+      width:32px; height:32px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:50%;
+      background:rgba(255,255,255,.06);
+      color:rgba(255,255,255,.70);
+      cursor:pointer;
+      font-size:18px;
+      line-height:1;
+      display:grid;
+      place-items:center;
+      z-index:2;
+      transition:background .15s ease;
+    }
+
+    .profileX:hover{ background:rgba(255,255,255,.12); color:#fff; }
 
     .profileActions{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      margin-bottom:14px;
     }
 
-    .profileActions.hidden{
-      display:none;
-    }
+    .profileActions.hidden{ display:none; }
 
     .profileActionBtn{
       appearance:none;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.05);
       color:#f5f7fb;
-      min-height:40px;
-      padding:10px 14px;
+      min-height:42px;
+      padding:10px 16px;
       border-radius:12px;
       cursor:pointer;
       font:inherit;
       font-weight:700;
+      font-size:13px;
+      transition:background .15s ease, transform .12s ease;
     }
+
+    .profileActionBtn:hover{ background:rgba(255,255,255,.09); transform:translateY(-1px); }
+    .profileActionBtn:active{ transform:translateY(0); }
 
     .profileActionBtn--primary{
       background:linear-gradient(180deg,#e7c58a,#c99a4b);
@@ -1620,30 +1905,38 @@
       border-color:transparent;
     }
 
+    .profileActionBtn--primary:hover{
+      background:linear-gradient(180deg,#f0cf96,#d4a553);
+    }
+
+    .profileActionBtn--danger{
+      border-color:rgba(220,60,60,.35);
+      color:#e07070;
+    }
+    .profileActionBtn--danger:hover{
+      background:rgba(220,60,60,.12);
+      border-color:rgba(220,60,60,.55);
+      color:#ff9999;
+    }
+
     .profileEditor{
       display:grid;
       gap:12px;
-      margin:16px 0;
       padding:14px;
       border-radius:16px;
       background:rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.08);
     }
 
-    .profileEditor.hidden{
-      display:none;
-    }
+    .profileEditor.hidden{ display:none; }
 
-    .profileField{
-      display:grid;
-      gap:8px;
-    }
+    .profileField{ display:grid; gap:8px; }
 
     .profileField span{
-      font-size:12px;
-      letter-spacing:.08em;
+      font-size:11px;
+      letter-spacing:.10em;
       text-transform:uppercase;
-      color:rgba(214,224,237,.72);
+      color:rgba(214,224,237,.65);
     }
 
     .profileInput,
@@ -1651,22 +1944,26 @@
       width:100%;
       border-radius:12px;
       border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.22);
+      background:rgba(0,0,0,.28);
       color:var(--text);
-      padding:12px 14px;
+      padding:11px 14px;
       font:inherit;
+      font-size:14px;
       outline:none;
+      transition:border-color .15s ease;
     }
 
-    .profileTextarea{
-      min-height:100px;
-      resize:vertical;
+    .profileInput:focus,
+    .profileTextarea:focus{
+      border-color:rgba(215,176,107,.50);
     }
+
+    .profileTextarea{ min-height:80px; resize:vertical; }
 
     .avatarPicker{
       display:grid;
       grid-template-columns:repeat(4, minmax(0,1fr));
-      gap:10px;
+      gap:8px;
     }
 
     .avatarOption{
@@ -1674,53 +1971,42 @@
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.04);
       color:#fff;
-      min-height:56px;
-      border-radius:14px;
+      min-height:48px;
+      border-radius:12px;
       cursor:pointer;
-      font-size:24px;
+      font-size:22px;
+      transition:background .12s ease, border-color .12s ease, transform .12s ease;
     }
+
+    .avatarOption:hover{ background:rgba(255,255,255,.09); transform:scale(1.08); }
 
     .avatarOption.active{
-      border-color:rgba(215,176,107,.45);
+      border-color:rgba(215,176,107,.55);
       background:rgba(215,176,107,.14);
-      box-shadow:0 0 0 1px rgba(215,176,107,.18) inset;
+      box-shadow:0 0 0 2px rgba(215,176,107,.18);
     }
 
-    .profileEditorActions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    .profileEditorActions{ display:flex; gap:10px; flex-wrap:wrap; }
 
-    .friendsPanel{
-      display:grid;
-      gap:12px;
-      margin-top:12px;
-    }
-
-    .friendsPanel.hidden{
-      display:none;
-    }
+    .friendsPanel{ display:grid; gap:12px; }
+    .friendsPanel.hidden{ display:none; }
 
     .friendsBlock{
       padding:12px;
       border-radius:14px;
       background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.07);
     }
 
     .friendsTitle{
-      font-size:12px;
-      letter-spacing:.08em;
+      font-size:11px;
+      letter-spacing:.10em;
       text-transform:uppercase;
-      color:rgba(214,224,237,.72);
+      color:rgba(214,224,237,.60);
       margin-bottom:10px;
     }
 
-    .friendsList{
-      display:grid;
-      gap:10px;
-    }
+    .friendsList{ display:grid; gap:10px; }
 
     .friendItem{
       display:flex;
@@ -1729,20 +2015,14 @@
       gap:10px;
       padding:10px 12px;
       border-radius:12px;
-      background:rgba(255,255,255,.035);
+      background:rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.06);
     }
 
-    .friendLeft{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
+    .friendLeft{ display:flex; align-items:center; gap:10px; min-width:0; }
 
     .friendAvatar{
-      width:34px;
-      height:34px;
+      width:34px; height:34px;
       border-radius:50%;
       display:grid;
       place-items:center;
@@ -1752,28 +2032,17 @@
       flex:0 0 auto;
     }
 
-    .friendMeta{
-      min-width:0;
-    }
+    .friendMeta{ min-width:0; }
 
     .friendName{
-      font-size:14px;
-      font-weight:700;
+      font-size:14px; font-weight:700;
       white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      overflow:hidden; text-overflow:ellipsis;
     }
 
-    .friendUsername{
-      font-size:12px;
-      color:rgba(214,224,237,.68);
-    }
+    .friendUsername{ font-size:12px; color:rgba(214,224,237,.60); }
 
-    .friendActions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
+    .friendActions{ display:flex; gap:8px; flex-wrap:wrap; }
 
     .friendBtn{
       appearance:none;
@@ -1799,23 +2068,27 @@
       padding:10px 12px;
       border-radius:12px;
       background:rgba(255,255,255,.02);
-      color:rgba(214,224,237,.68);
+      color:rgba(214,224,237,.55);
       font-size:13px;
-      border:1px dashed rgba(255,255,255,.08);
+      border:1px dashed rgba(255,255,255,.07);
     }
 
     .profileClose{
-      width:100%;
+      margin:0 26px 22px;
+      width:calc(100% - 52px);
       border:none;
       border-radius:12px;
-      padding:10px;
+      padding:12px;
       background:linear-gradient(180deg,#e7c58a,#c99a4b);
       color:#1a140d;
       font-weight:700;
+      font:inherit;
       cursor:pointer;
-      position:relative;
-      z-index:2;
+      flex-shrink:0;
+      transition:opacity .15s ease;
     }
+
+    .profileClose:hover{ opacity:.9; }
 
     .footerBar{
       display:flex;
@@ -2836,7 +3109,7 @@
           <button class="topActionBtn primary" id="copyCodeBtn">Convidar Amigos</button>
           <button class="topActionBtn" id="oslShopFab" title="Ver pacotes de cartas">🎴 Loja</button>
           <button class="topActionBtn" id="arenaBtn" title="Alternar Modo Arena">⚔ Arena</button>
-          <button class="topActionBtn" id="myProfileBtn">Configurações</button>
+          <button class="topActionBtn" id="myProfileBtn">👤 Perfil</button>
           <button class="topActionBtn iconOnly" id="leaveBtn" aria-label="Sair da sala">⇢</button>
         </div>
       </header>
@@ -3081,73 +3354,160 @@
     <div class="profileCard profileCard--large">
       <button class="profileX" id="closeProfileXBtn" aria-label="Fechar perfil">×</button>
 
-      <div class="profileHeader">
+      <div class="profHead">
         <div class="profileAvatarLarge" id="profileAvatarLarge">🔮</div>
-        <div class="profileIdentity">
+        <div class="profIdentity">
           <div class="profileName" id="profileName">Jogador</div>
           <div class="profileUsername" id="profileUsername">@jogador</div>
+          <div class="profileBio" id="profileBio">Sem descrição.</div>
         </div>
       </div>
 
-      <div class="profileBio" id="profileBio">Sem descrição.</div>
+      <nav class="profTabs" id="profTabs">
+        <button class="profTab profTab--active" data-target="profPaneIdentity">Perfil</button>
+        <button class="profTab profTab--selfOnly" data-target="profPaneSessao">Sessão</button>
+        <button class="profTab" data-target="profPanePacotes">Pacotes</button>
+        <button class="profTab profTab--selfOnly" data-target="profPaneConta">Conta</button>
+      </nav>
 
-      <div class="profileStats">
-        <span id="profileGames">Partidas: 0</span>
-        <span id="profileWins">Vitórias: 0</span>
-      </div>
-
-      <div class="profileActions" id="profileActions">
-        <button class="profileActionBtn profileActionBtn--primary" id="editProfileBtn">Editar perfil</button>
-        <button class="profileActionBtn" id="addFriendBtn" hidden>Adicionar amigo</button>
-      </div>
-
-      <div class="friendsPanel hidden" id="friendsPanel">
-        <div class="friendsBlock" id="friendsListBlock">
-          <div class="friendsTitle">Amigos</div>
-          <div class="friendsList" id="friendsList"></div>
-        </div>
-
-        <div class="friendsBlock" id="incomingRequestsBlock">
-          <div class="friendsTitle">Pedidos recebidos</div>
-          <div class="friendsList" id="incomingRequestsList"></div>
-        </div>
-      </div>
-
-      <form class="profileEditor hidden" id="profileEditor">
-        <label class="profileField">
-          <span>Nome de exibição</span>
-          <input class="profileInput" id="editDisplayName" maxlength="40" type="text" />
-        </label>
-
-        <label class="profileField">
-          <span>@usuário</span>
-          <input class="profileInput" id="editUsername" maxlength="20" type="text" />
-        </label>
-
-        <label class="profileField">
-          <span>Bio</span>
-          <textarea class="profileTextarea" id="editBio" maxlength="180"></textarea>
-        </label>
-
-        <div class="profileField">
-          <span>Avatar</span>
-          <div class="avatarPicker" id="avatarPicker">
-            <button type="button" class="avatarOption" data-avatar="🔮">🔮</button>
-            <button type="button" class="avatarOption" data-avatar="🕯️">🕯️</button>
-            <button type="button" class="avatarOption" data-avatar="👁️">👁️</button>
-            <button type="button" class="avatarOption" data-avatar="🎭">🎭</button>
-            <button type="button" class="avatarOption" data-avatar="🐺">🐺</button>
-            <button type="button" class="avatarOption" data-avatar="🌙">🌙</button>
-            <button type="button" class="avatarOption" data-avatar="🦉">🦉</button>
-            <button type="button" class="avatarOption" data-avatar="⚡">⚡</button>
+      <div id="profPaneIdentity" class="profPane profPane--active">
+        <div class="profStatRow">
+          <div class="profStat">
+            <div class="profStatValue" id="profileGames">0</div>
+            <div class="profStatLabel">Partidas</div>
+          </div>
+          <div class="profStat">
+            <div class="profStatValue" id="profileWins">0</div>
+            <div class="profStatLabel">Vitórias</div>
+          </div>
+          <div class="profStat">
+            <div class="profStatValue" id="profileSince">—</div>
+            <div class="profStatLabel">Membro desde</div>
           </div>
         </div>
 
-        <div class="profileEditorActions">
-          <button type="button" class="profileActionBtn" id="cancelEditProfileBtn">Cancelar</button>
-          <button type="submit" class="profileActionBtn profileActionBtn--primary" id="saveProfileBtn">Salvar perfil</button>
+        <div class="profileActions" id="profileActions">
+          <button class="profileActionBtn profileActionBtn--primary" id="editProfileBtn">Editar perfil</button>
+          <button class="profileActionBtn" id="addFriendBtn" hidden>Adicionar amigo</button>
         </div>
-      </form>
+
+        <form class="profileEditor hidden" id="profileEditor">
+          <label class="profileField">
+            <span>Nome de exibição</span>
+            <input class="profileInput" id="editDisplayName" maxlength="40" type="text" />
+          </label>
+
+          <label class="profileField">
+            <span>@usuário</span>
+            <input class="profileInput" id="editUsername" maxlength="20" type="text" />
+          </label>
+
+          <label class="profileField">
+            <span>Bio</span>
+            <textarea class="profileTextarea" id="editBio" maxlength="180"></textarea>
+          </label>
+
+          <div class="profileField">
+            <span>Avatar</span>
+            <div class="avatarPicker" id="avatarPicker">
+              <button type="button" class="avatarOption" data-avatar="🔮">🔮</button>
+              <button type="button" class="avatarOption" data-avatar="🕯️">🕯️</button>
+              <button type="button" class="avatarOption" data-avatar="👁️">👁️</button>
+              <button type="button" class="avatarOption" data-avatar="🎭">🎭</button>
+              <button type="button" class="avatarOption" data-avatar="🐺">🐺</button>
+              <button type="button" class="avatarOption" data-avatar="🌙">🌙</button>
+              <button type="button" class="avatarOption" data-avatar="🦉">🦉</button>
+              <button type="button" class="avatarOption" data-avatar="⚡">⚡</button>
+              <button type="button" class="avatarOption" data-avatar="🃏">🃏</button>
+              <button type="button" class="avatarOption" data-avatar="🌀">🌀</button>
+              <button type="button" class="avatarOption" data-avatar="🔥">🔥</button>
+              <button type="button" class="avatarOption" data-avatar="💀">💀</button>
+              <button type="button" class="avatarOption" data-avatar="🌿">🌿</button>
+              <button type="button" class="avatarOption" data-avatar="⚗️">⚗️</button>
+              <button type="button" class="avatarOption" data-avatar="🎪">🎪</button>
+              <button type="button" class="avatarOption" data-avatar="🧿">🧿</button>
+            </div>
+          </div>
+
+          <div class="profileField">
+            <span>Cor do avatar</span>
+            <div class="colorSwatchRow" id="colorSwatchRow">
+              <button type="button" class="colorSwatch" data-color="#342718" style="background:#342718" title="Âmbar"></button>
+              <button type="button" class="colorSwatch" data-color="#1a2a3a" style="background:#1a2a3a" title="Azul Profundo"></button>
+              <button type="button" class="colorSwatch" data-color="#1f2820" style="background:#1f2820" title="Verde Floresta"></button>
+              <button type="button" class="colorSwatch" data-color="#2a1a2e" style="background:#2a1a2e" title="Roxo Noturno"></button>
+              <button type="button" class="colorSwatch" data-color="#2a1010" style="background:#2a1010" title="Vinho"></button>
+              <button type="button" class="colorSwatch" data-color="#1a1a1a" style="background:#1a1a1a" title="Obsidiana"></button>
+            </div>
+          </div>
+
+          <div class="profileEditorActions">
+            <button type="button" class="profileActionBtn" id="cancelEditProfileBtn">Cancelar</button>
+            <button type="submit" class="profileActionBtn profileActionBtn--primary" id="saveProfileBtn">Salvar perfil</button>
+          </div>
+        </form>
+
+        <div class="friendsPanel hidden" id="friendsPanel">
+          <div class="friendsBlock" id="friendsListBlock">
+            <div class="friendsTitle">Amigos</div>
+            <div class="friendsList" id="friendsList"></div>
+          </div>
+
+          <div class="friendsBlock" id="incomingRequestsBlock">
+            <div class="friendsTitle">Pedidos recebidos</div>
+            <div class="friendsList" id="incomingRequestsList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="profPaneSessao" class="profPane profPane--selfOnly">
+        <div class="profInfoBlock">
+          <div class="profInfoRow">
+            <span class="profInfoLabel">Sala</span>
+            <span class="profInfoValue" id="sessSala">—</span>
+          </div>
+          <div class="profInfoRow">
+            <span class="profInfoLabel">Nome da Sala</span>
+            <span class="profInfoValue" id="sessNomeSala">—</span>
+          </div>
+          <div class="profInfoRow">
+            <span class="profInfoLabel">Papel</span>
+            <span class="profInfoValue" id="sessPapel">—</span>
+          </div>
+          <div class="profInfoRow">
+            <span class="profInfoLabel">Vídeo</span>
+            <span class="profInfoValue" id="sessVideo">—</span>
+          </div>
+        </div>
+        <button class="profileActionBtn" id="copyRoomCodeBtn">Copiar código da sala</button>
+      </div>
+
+      <div id="profPanePacotes" class="profPane">
+        <div class="profPackGrid" id="profPackGrid"></div>
+      </div>
+
+      <div id="profPaneConta" class="profPane profPane--selfOnly">
+        <div class="profInfoBlock">
+          <div class="profInfoRow">
+            <span class="profInfoLabel">Email</span>
+            <span class="profInfoValue" id="contaEmail">—</span>
+          </div>
+          <div class="profInfoRow">
+            <span class="profInfoLabel">Licença</span>
+            <span class="profInfoValue" id="contaLicenca">—</span>
+            <button class="profCopyBtn" id="profCopyLicBtn" title="Copiar">⎘</button>
+          </div>
+          <div class="profInfoRow">
+            <span class="profInfoLabel">Acesso</span>
+            <span class="profInfoValue" id="contaAcesso">—</span>
+          </div>
+          <div class="profInfoRow">
+            <span class="profInfoLabel">UID</span>
+            <span class="profInfoValue" id="contaUid">—</span>
+          </div>
+        </div>
+        <button class="profileActionBtn profileActionBtn--danger" id="logoutBtn">Sair da conta</button>
+      </div>
 
       <button class="profileClose" id="closeProfileBtn">Fechar perfil</button>
     </div>
@@ -3606,6 +3966,7 @@
     let openedProfileUserId = null;
     let openedProfileData = null;
     let selectedAvatarEmoji = "🔮";
+    let selectedAvatarColor = "#342718";
 
     let ritualDeck = [];
     let ritualStarted = false;
@@ -4025,6 +4386,15 @@
       });
     }
 
+    function setColorSelection(color) {
+      selectedAvatarColor = color || "#342718";
+      const row = document.getElementById("colorSwatchRow");
+      if (!row) return;
+      row.querySelectorAll(".colorSwatch").forEach(sw => {
+        sw.classList.toggle("colorSwatch--active", sw.dataset.color === selectedAvatarColor);
+      });
+    }
+
     function openEditorWithUser(user) {
       profileEditor.classList.remove("hidden");
       profileActions.classList.add("hidden");
@@ -4032,6 +4402,7 @@
       editUsername.value = user.username || "";
       editBio.value = user.bio || "";
       setAvatarSelection(user.avatarEmoji || "🔮");
+      setColorSelection(user.avatarColor || "#342718");
     }
 
     function closeEditor() {
@@ -4130,17 +4501,130 @@
       }
     }
 
+    function maskEmail(email) {
+      if (!email) return "—";
+      const [local, domain] = email.split("@");
+      if (!domain) return email;
+      return local.slice(0, 1) + "***@" + domain;
+    }
+
+    function maskLicense(code) {
+      if (!code) return "—";
+      const parts = code.split("-");
+      return parts.map((p, i) => (i > 0 && i < parts.length - 1) ? "****" : p).join("-");
+    }
+
+    function formatMemberSince(ts) {
+      if (!ts) return "—";
+      const date = ts.toDate ? ts.toDate() : new Date(ts);
+      return date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
+    }
+
+    function fillPacksTab() {
+      const grid = document.getElementById("profPackGrid");
+      if (!grid) return;
+      const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
+      const packs = [
+        { id: "pacote-conexao",  name: "Conexão",  price: "R$ 9,90",  desc: "12 cartas · leve e emocional" },
+        { id: "pacote-verdades", name: "Verdades", price: "R$ 12,90", desc: "15 cartas · desconforto leve" },
+        { id: "pacote-conflito", name: "Conflito", price: "R$ 14,90", desc: "15 cartas · provocações" },
+        { id: "pacote-segredos", name: "Segredos", price: "R$ 19,90", desc: "18 cartas · psicológico intenso" },
+        { id: "pacote-casais",   name: "Casais",   price: "R$ 19,90", desc: "18 cartas · nichado" }
+      ];
+      grid.innerHTML = "";
+      // Deck básico sempre incluso
+      const basicCard = document.createElement("div");
+      basicCard.className = "profPackCard profPackCard--unlocked";
+      basicCard.innerHTML = `
+        <div class="profPackName">Deck Básico</div>
+        <div class="profPackDesc">8 cartas · sempre incluído</div>
+        <span class="profPackBadge profPackBadge--ok">✓ Incluído</span>
+      `;
+      grid.appendChild(basicCard);
+      packs.forEach(pack => {
+        const unlocked = compras.includes(pack.id);
+        const card = document.createElement("div");
+        card.className = `profPackCard ${unlocked ? "profPackCard--unlocked" : "profPackCard--locked"}`;
+        card.innerHTML = `
+          <div class="profPackName">${pack.name}</div>
+          <div class="profPackDesc">${pack.desc}</div>
+          ${unlocked
+            ? `<span class="profPackBadge profPackBadge--ok">✓ Desbloqueado</span>`
+            : `<span class="profPackBadge profPackBadge--locked">🔒 ${pack.price}</span><a class="profileActionBtn" href="./vendas.html" style="margin-top:6px;font-size:.75rem;padding:4px 10px">Ver na loja</a>`
+          }
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function fillContaTab() {
+      const email = localStorage.getItem("osl_license_email") || "";
+      const lic = localStorage.getItem("osl_license_code") || "";
+      const expires = localStorage.getItem("osl_access_expires_at");
+      const uid = localStorage.getItem("osl_auth_uid") || userId || "";
+
+      const emailEl = document.getElementById("contaEmail");
+      const licEl = document.getElementById("contaLicenca");
+      const acessoEl = document.getElementById("contaAcesso");
+      const uidEl = document.getElementById("contaUid");
+
+      if (emailEl) emailEl.textContent = maskEmail(email);
+      if (licEl) licEl.textContent = maskLicense(lic);
+      if (uidEl) uidEl.textContent = uid ? uid.slice(0, 12) + "…" : "—";
+
+      if (acessoEl) {
+        if (!expires) {
+          acessoEl.innerHTML = `<span class="profBadge profBadge--red">Não autenticado</span>`;
+        } else {
+          const expDate = new Date(Number(expires));
+          const expired = Date.now() > Number(expires);
+          const label = expDate.toLocaleDateString("pt-BR", { day:"2-digit", month:"short", year:"numeric" });
+          acessoEl.innerHTML = expired
+            ? `<span class="profBadge profBadge--red">Expirado em ${label}</span>`
+            : `<span class="profBadge profBadge--green">Ativo até ${label}</span>`;
+        }
+      }
+    }
+
+    function fillSessaoTab() {
+      const salaEl = document.getElementById("sessSala");
+      const nomeEl = document.getElementById("sessNomeSala");
+      const papelEl = document.getElementById("sessPapel");
+      const videoEl = document.getElementById("sessVideo");
+
+      const salaCode = localStorage.getItem("osl_sala") || roomCode || "—";
+      const salaNome = localStorage.getItem("osl_nome_sala") || "—";
+      const papel = (typeof isHost !== "undefined" && isHost) ? "Anfitrião" : "Jogador";
+      const videoConn = (typeof window.lkRoom !== "undefined" && window.lkRoom?.state === "connected")
+        ? "Conectado" : "Desconectado";
+
+      if (salaEl) salaEl.textContent = salaCode;
+      if (nomeEl) nomeEl.textContent = salaNome;
+      if (papelEl) papelEl.textContent = papel;
+      if (videoEl) videoEl.textContent = videoConn;
+    }
+
     async function fillProfileUI(user, isSelfView) {
       profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
+      if (user.avatarColor) profileAvatarLarge.style.background = user.avatarColor;
       profileNameEl.textContent = user.displayName || "Jogador";
       profileUsernameEl.textContent = `@${user.username || "jogador"}`;
       profileBioEl.textContent = user.bio || "Sem descrição.";
 
-      document.getElementById("profileGames").textContent = `Partidas: ${user.stats?.gamesPlayed || 0}`;
-      document.getElementById("profileWins").textContent = `Vitórias: ${user.stats?.wins || 0}`;
+      const gamesEl = document.getElementById("profileGames");
+      const winsEl = document.getElementById("profileWins");
+      const sinceEl = document.getElementById("profileSince");
+      if (gamesEl) gamesEl.textContent = user.stats?.gamesPlayed || 0;
+      if (winsEl) winsEl.textContent = user.stats?.wins || 0;
+      if (sinceEl) sinceEl.textContent = formatMemberSince(user.memberSince);
 
       editProfileBtn.hidden = !isSelfView;
       addFriendBtn.hidden = isSelfView;
+
+      // Show/hide self-only tabs
+      document.querySelectorAll(".profTab--selfOnly, .profPane--selfOnly").forEach(el => {
+        el.style.display = isSelfView ? "" : "none";
+      });
 
       if (!isSelfView) {
         const alreadyFriend = (user.friends || []).includes(userId);
@@ -4148,8 +4632,11 @@
         addFriendBtn.disabled = alreadyFriend;
       } else {
         addFriendBtn.disabled = false;
+        fillSessaoTab();
+        fillContaTab();
       }
 
+      fillPacksTab();
       closeEditor();
       await renderFriendsSection(user, isSelfView);
     }
@@ -4207,8 +4694,8 @@
           profileNameEl.textContent = player?.name || playerName;
           profileUsernameEl.textContent = "@jogador";
           profileBioEl.textContent = "Perfil não encontrado.";
-          document.getElementById("profileGames").textContent = "Partidas: 0";
-          document.getElementById("profileWins").textContent = "Vitórias: 0";
+          const gEl = document.getElementById("profileGames"); if (gEl) gEl.textContent = "0";
+          const wEl = document.getElementById("profileWins"); if (wEl) wEl.textContent = "0";
           editProfileBtn.hidden = true;
           addFriendBtn.hidden = true;
           friendsPanel.classList.add("hidden");
@@ -4223,6 +4710,14 @@
         const isSelfView = targetUserId === userId;
         await fillProfileUI(user, isSelfView);
 
+        // Reset to first tab
+        document.querySelectorAll(".profTab").forEach(t => t.classList.remove("profTab--active"));
+        document.querySelectorAll(".profPane").forEach(p => p.classList.remove("profPane--active"));
+        const firstTab = document.querySelector(".profTab");
+        if (firstTab) firstTab.classList.add("profTab--active");
+        const firstPane = document.getElementById("profPaneIdentity");
+        if (firstPane) firstPane.classList.add("profPane--active");
+
         profileModal.classList.remove("hidden");
       } catch (error) {
         console.error(error);
@@ -4235,6 +4730,13 @@
       openedProfileData = null;
       friendsPanel.classList.add("hidden");
       closeEditor();
+      // Reset to first tab
+      document.querySelectorAll(".profTab").forEach(t => t.classList.remove("profTab--active"));
+      document.querySelectorAll(".profPane").forEach(p => p.classList.remove("profPane--active"));
+      const firstTab = document.querySelector(".profTab");
+      if (firstTab) firstTab.classList.add("profTab--active");
+      const firstPane = document.getElementById("profPaneIdentity");
+      if (firstPane) firstPane.classList.add("profPane--active");
     }
 
     closeProfileBtn.addEventListener("click", (e) => {
@@ -4288,6 +4790,66 @@
       });
     }
 
+    // Tab switcher
+    const profTabsNav = document.getElementById("profTabs");
+    if (profTabsNav) {
+      profTabsNav.addEventListener("click", (e) => {
+        const tab = e.target.closest(".profTab");
+        if (!tab || !tab.dataset.target) return;
+        document.querySelectorAll(".profTab").forEach(t => t.classList.remove("profTab--active"));
+        document.querySelectorAll(".profPane").forEach(p => p.classList.remove("profPane--active"));
+        tab.classList.add("profTab--active");
+        const pane = document.getElementById(tab.dataset.target);
+        if (pane) pane.classList.add("profPane--active");
+      });
+    }
+
+    // Color swatch picker
+    const colorSwatchRow = document.getElementById("colorSwatchRow");
+    if (colorSwatchRow) {
+      colorSwatchRow.addEventListener("click", (e) => {
+        const sw = e.target.closest(".colorSwatch");
+        if (!sw) return;
+        setColorSelection(sw.dataset.color);
+      });
+    }
+
+    // Copy room code button (Sessão tab)
+    const copyRoomCodeBtn = document.getElementById("copyRoomCodeBtn");
+    if (copyRoomCodeBtn) {
+      copyRoomCodeBtn.addEventListener("click", () => {
+        const code = localStorage.getItem("osl_sala") || roomCode || "";
+        if (!code) return;
+        navigator.clipboard.writeText(code).then(() => {
+          copyRoomCodeBtn.textContent = "Copiado!";
+          setTimeout(() => { copyRoomCodeBtn.textContent = "Copiar código da sala"; }, 2000);
+        });
+      });
+    }
+
+    // Copy license button (Conta tab)
+    const profCopyLicBtn = document.getElementById("profCopyLicBtn");
+    if (profCopyLicBtn) {
+      profCopyLicBtn.addEventListener("click", () => {
+        const lic = localStorage.getItem("osl_license_code") || "";
+        if (!lic) return;
+        navigator.clipboard.writeText(lic).then(() => {
+          profCopyLicBtn.textContent = "✓";
+          setTimeout(() => { profCopyLicBtn.textContent = "⎘"; }, 2000);
+        });
+      });
+    }
+
+    // Logout button (Conta tab)
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        if (!confirm("Sair da conta? Você será redirecionado para a entrada.")) return;
+        localStorage.clear();
+        window.location.href = "./entrada.html";
+      });
+    }
+
     if (profileEditor) {
       profileEditor.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -4302,8 +4864,10 @@
             username,
             bio,
             avatarEmoji: selectedAvatarEmoji,
+            avatarColor: selectedAvatarColor,
             lastSeen: serverTimestamp()
           });
+          if (profileAvatarLarge) profileAvatarLarge.style.background = selectedAvatarColor;
 
           if (openedProfileUserId === userId) {
             playerName = displayName;
