@@ -1003,45 +1003,62 @@
       position:relative;
       width:100%;
       aspect-ratio:1/1;
-      border:1px solid rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.05);
       border-radius:16px;
-      background:#060504;
+      background:#050403;
       display:grid;
       place-items:center;
       overflow:hidden;
       box-shadow:
-        0 8px 28px rgba(0,0,0,.80),
-        inset 0 0 20px rgba(0,0,0,.60);
+        0 10px 36px rgba(0,0,0,.88),
+        inset 0 1px 0 rgba(255,255,255,.03);
+      animation:placeholderBorder 7s cubic-bezier(0.45,0,0.55,1) infinite;
     }
 
-    #videoPlaceholderL2{ animation-delay:-2s; }
-    #videoPlaceholderR1{ animation-delay:-4s; }
-    #videoPlaceholderR2{ animation-delay:-1s; }
+    #videoPlaceholderL2{ animation-delay:-2.8s; }
+    #videoPlaceholderR1{ animation-delay:-5.2s; }
+    #videoPlaceholderR2{ animation-delay:-1.4s; }
 
+    /* Glow: radial oversized para que só a parte plana/central apareça — sem ponto focal */
     .videoColPlaceholder::before{
       content:"";
       position:absolute;
-      inset:0;
-      background:rgba(255,255,255,1);
-      animation:placeholderGlow 5.5s ease-in-out infinite;
+      inset:-40%;
+      background:radial-gradient(
+        ellipse at 50% 50%,
+        rgba(255,255,255,.13) 0%,
+        rgba(255,255,255,.07) 45%,
+        transparent 72%
+      );
+      animation:placeholderGlow 7s cubic-bezier(0.45,0,0.55,1) infinite;
       pointer-events:none;
     }
 
-    #videoPlaceholderL2::before{ animation-delay:-2s; }
-    #videoPlaceholderR1::before{ animation-delay:-4s; }
-    #videoPlaceholderR2::before{ animation-delay:-1s; }
+    #videoPlaceholderL2::before{ animation-delay:-2.8s; }
+    #videoPlaceholderR1::before{ animation-delay:-5.2s; }
+    #videoPlaceholderR2::before{ animation-delay:-1.4s; }
 
+    /* Filete superior: luz suave que toca a borda de cima */
     .videoColPlaceholder::after{
       content:"";
       position:absolute;
       inset:0;
       border-radius:16px;
+      background:linear-gradient(180deg,
+        rgba(255,255,255,.05) 0%,
+        transparent 28%
+      );
       pointer-events:none;
     }
 
     @keyframes placeholderGlow{
       0%,100%{ opacity:0; }
-      50%{ opacity:0.07; }
+      50%{ opacity:1; }
+    }
+
+    @keyframes placeholderBorder{
+      0%,100%{ border-color:rgba(255,255,255,.04); }
+      50%{ border-color:rgba(255,255,255,.20); }
     }
 
     /* Self video slot below the card */
