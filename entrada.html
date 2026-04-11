@@ -7,236 +7,283 @@
   <link rel="icon" href="./favicon.png">
 
   <style>
-    body{
-      visibility:visible;
-    }
-    body.osl-loading{
-      visibility:hidden;
-    }
-    body.osl-ready{
-      visibility:visible;
-    }
+    /* ── Visibility guard ── */
+    body{ visibility:visible; }
+    body.osl-loading{ visibility:hidden; }
+    body.osl-ready{ visibility:visible; }
 
+    /* ── Tokens ── */
     :root{
-      --bg:#050505;
-      --bg-2:#080808;
-      --gold:#e6c07b;
-      --muted:#a7a7a7;
-      --shadow:rgba(0,0,0,.55);
-      --danger:#ff4d4d;
-      --ok:#82d996;
+      --bg:    #050403;
+      --bg2:   #0d0906;
+      --gold:  #d7b06b;
+      --gold2: rgba(215,176,107,.70);
+      --text:  rgba(255,255,255,.88);
+      --muted: rgba(255,255,255,.42);
+      --danger:#e05555;
+      --ok:    #6ec98a;
+      --radius:18px;
+      --ease-spring: cubic-bezier(.22,.68,0,1.2);
+      --ease-out:    cubic-bezier(0,.55,.45,1);
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ min-height:100%; }
+    *, *::before, *::after{ box-sizing:border-box; margin:0; padding:0; }
 
     html{
-      background:
-        radial-gradient(1000px 520px at 50% 14%, rgba(230,192,123,.08), transparent 58%),
-        linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 55%, var(--bg) 100%);
-      background-color:var(--bg);
-    }
-
-    body{
-      margin:0;
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:24px;
-      padding-left:max(24px, env(safe-area-inset-left));
-      padding-right:max(24px, env(safe-area-inset-right));
-      padding-top:max(18px, env(safe-area-inset-top));
-      padding-bottom:max(18px, env(safe-area-inset-bottom));
-      background:
-        radial-gradient(1000px 520px at 50% 14%, rgba(230,192,123,.08), transparent 58%),
-        linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 55%, var(--bg) 100%);
-      background-color:var(--bg);
-      color:#f2f2f2;
-      font-family: ui-serif, Georgia, "Times New Roman", serif;
-      overflow-x:hidden;
-      overflow-y:auto;
+      background:var(--bg);
+      color-scheme:dark;
       -webkit-text-size-adjust:100%;
     }
 
-    @supports (height: 100dvh){
-      body{ min-height:100dvh; }
+    body{
+      min-height:100vh;
+      min-height:100svh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(24px,5vw,56px) clamp(16px,4vw,28px);
+      padding-top:max(clamp(24px,5vw,56px), env(safe-area-inset-top));
+      padding-bottom:max(clamp(24px,5vw,56px), env(safe-area-inset-bottom));
+      background:
+        radial-gradient(ellipse 900px 420px at 50% 12%, rgba(215,176,107,.08), transparent 56%),
+        linear-gradient(180deg, var(--bg2) 0%, var(--bg) 55%);
+      background-color:var(--bg);
+      color:var(--text);
+      font-family:Georgia,"Times New Roman",ui-serif,serif;
+      overflow-x:hidden;
+      position:relative;
     }
 
+    /* Ambient breath layer */
     body::before{
       content:"";
       position:fixed;
       inset:0;
       pointer-events:none;
-      background:
-        radial-gradient(700px 260px at 50% 18%, rgba(230,192,123,.07), transparent 62%);
-      opacity:.75;
-      animation:pulseGlow 4.8s ease-in-out infinite;
+      z-index:0;
+      background:radial-gradient(ellipse 700px 260px at 50% 16%, rgba(215,176,107,.07), transparent 60%);
+      animation:ambientBreath 5.5s ease-in-out infinite;
     }
 
-    @keyframes pulseGlow{
-      0%,100%{ opacity:.58; transform:translateY(0) scale(1); }
-      50%{ opacity:.82; transform:translateY(-4px) scale(1.01); }
+    @keyframes ambientBreath{
+      0%,100%{ opacity:.55; transform:scaleY(1); }
+      50%{     opacity:1;   transform:scaleY(1.05); }
     }
 
+    /* ── Wrapper ── */
     .wrap{
-      width:100%;
-      max-width:980px;
-      display:grid;
-      gap:14px;
-      align-items:center;
-      justify-items:center;
-      text-align:center;
       position:relative;
       z-index:1;
+      width:100%;
+      max-width:500px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:0;
+    }
+
+    /* ═══════════════════════════════════════
+       HEAD
+    ═══════════════════════════════════════ */
+    .pageHead{
+      text-align:center;
+      width:100%;
+      margin-bottom:28px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+    }
+
+    /* Ornamental divider above title */
+    .ornament{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      width:min(240px,80%);
+      color:var(--gold2);
+      font-size:9px;
+      letter-spacing:.3em;
+    }
+
+    .ornLine{
+      flex:1;
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(215,176,107,.38), transparent);
     }
 
     h1{
-      margin:0;
-      letter-spacing:.18em;
-      line-height:1.02;
+      font-size:clamp(30px,7vw,60px);
       font-weight:700;
-      color:var(--gold);
+      letter-spacing:.18em;
       text-transform:uppercase;
-      font-size:clamp(30px, 6vw, 78px);
-      text-shadow:0 18px 60px var(--shadow);
+      color:var(--gold);
+      text-shadow:
+        0 0 80px rgba(215,176,107,.22),
+        0 6px 24px rgba(0,0,0,.60);
+      line-height:1;
     }
 
     .subtitle{
-      margin:0;
-      max-width:72ch;
-      font-size:clamp(13px, 2.2vw, 18px);
-      opacity:.88;
-      color:#eaeaea;
+      font-size:clamp(13px,1.9vw,16px);
+      color:rgba(255,255,255,.60);
+      line-height:1.60;
+      letter-spacing:.01em;
+      max-width:38ch;
     }
 
     .whisper{
-      margin-top:2px;
-      font-size:clamp(12px, 2vw, 16px);
-      color:var(--muted);
-      opacity:.78;
-      letter-spacing:.06em;
-      animation:flicker 3.2s ease-in-out infinite;
+      font-size:13px;
+      color:rgba(215,176,107,.50);
+      letter-spacing:.10em;
+      font-style:italic;
+      animation:flicker 4.2s ease-in-out infinite;
     }
 
     @keyframes flicker{
-      0%,100%{ opacity:.50; filter:blur(.2px); }
-      50%{ opacity:.92; filter:blur(0); }
+      0%,100%{ opacity:.40; }
+      50%{     opacity:.90; }
     }
 
+    /* ═══════════════════════════════════════
+       CARD
+    ═══════════════════════════════════════ */
     .card{
-      width:100%;
-      max-width:860px;
-      padding:clamp(16px, 3vw, 34px);
-      border-radius:20px;
-      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border:1px solid rgba(255,255,255,.08);
-      box-shadow:0 28px 80px rgba(0,0,0,.55);
-      backdrop-filter:blur(10px);
       position:relative;
+      width:100%;
+      background:linear-gradient(155deg, #141008 0%, #0c0906 45%, #080604 100%);
+      border:1px solid rgba(215,176,107,.20);
+      border-radius:var(--radius);
+      padding:clamp(22px,4vw,38px);
       overflow:hidden;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,.55),
+        0 4px 6px rgba(0,0,0,.35),
+        0 28px 80px rgba(0,0,0,.70),
+        inset 0 1px 0 rgba(255,255,255,.04);
     }
 
+    /* Gold shimmer line at top */
+    .card::before{
+      content:"";
+      position:absolute;
+      top:0; left:0; right:0;
+      height:1px;
+      background:linear-gradient(90deg,
+        transparent 5%,
+        rgba(215,176,107,.50) 35%,
+        rgba(215,176,107,.65) 50%,
+        rgba(215,176,107,.50) 65%,
+        transparent 95%
+      );
+      border-radius:var(--radius) var(--radius) 0 0;
+    }
+
+    /* Radial glow from top inside card */
     .card::after{
       content:"";
       position:absolute;
-      inset:0;
+      top:0; left:0; right:0;
+      height:160px;
+      background:radial-gradient(ellipse 80% 120px at 50% 0%,
+        rgba(215,176,107,.07), transparent 100%);
       pointer-events:none;
-      background:radial-gradient(700px 220px at 50% 0%, rgba(230,192,123,.08), transparent 60%);
-      opacity:.8;
     }
 
+    /* ── Tag ── */
     .tag{
       position:relative;
       z-index:1;
       display:flex;
-      gap:10px;
       align-items:center;
       justify-content:center;
-      font-size:12px;
-      letter-spacing:.22em;
-      color:rgba(230,192,123,.8);
+      gap:9px;
+      font-size:11px;
+      letter-spacing:.24em;
+      color:rgba(215,176,107,.68);
       text-transform:uppercase;
-      margin-bottom:12px;
+      margin-bottom:20px;
     }
 
     .dot{
-      width:5px;
-      height:5px;
-      background:rgba(230,192,123,.8);
+      width:4px; height:4px;
       border-radius:50%;
-      box-shadow:0 0 16px rgba(230,192,123,.35);
+      background:rgba(215,176,107,.60);
+      box-shadow:0 0 8px rgba(215,176,107,.32);
     }
 
-    .prompt{
+    /* ── Protocol statement ── */
+    .protocol{
       position:relative;
       z-index:1;
-      margin:0;
-      font-size:clamp(16px, 2.8vw, 30px);
-      line-height:1.45;
-      color:#f3f3f3;
-      text-shadow:0 18px 60px rgba(0,0,0,.55);
+      font-size:clamp(14px,2.1vw,17px);
+      line-height:1.65;
+      color:rgba(255,255,255,.72);
+      text-align:center;
+      padding:16px 18px;
+      background:rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:12px;
+      margin-bottom:24px;
     }
 
-    .prompt em{
-      color:#ffffff;
+    .protocol em{
+      color:#fff;
       font-style:italic;
-      opacity:.95;
     }
 
-    .rule{
-      position:relative;
-      z-index:1;
-      margin:16px auto 10px;
-      height:10px;
-      width:min(720px, 92%);
-      border-radius:999px;
-      background:linear-gradient(90deg,
-        rgba(255,255,255,.06),
-        rgba(230,192,123,.18),
-        rgba(255,255,255,.06));
-      opacity:.65;
-      filter:blur(.2px);
-    }
-
+    /* ── Form ── */
     .formWrap{
       position:relative;
       z-index:1;
-      width:min(640px, 100%);
-      margin:14px auto 0;
-      display:grid;
-      gap:12px;
-      text-align:left;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
     }
 
     .field{
-      display:grid;
-      gap:8px;
+      display:flex;
+      flex-direction:column;
+      gap:7px;
     }
 
     .field label{
-      font-size:12px;
-      letter-spacing:.18em;
+      font-size:11px;
+      letter-spacing:.20em;
       text-transform:uppercase;
-      color:rgba(230,192,123,.82);
+      color:rgba(215,176,107,.72);
     }
 
     .field input{
       width:100%;
-      min-height:50px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.24);
+      height:50px;
+      background:rgba(0,0,0,.32);
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:12px;
       color:#fff;
-      padding:12px 14px;
-      outline:none;
+      padding:0 16px;
       font:inherit;
-      font-size:16px;
-      box-shadow:0 14px 40px rgba(0,0,0,.18);
+      font-size:15px;
+      outline:none;
+      transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+      -webkit-appearance:none;
+      appearance:none;
     }
 
     .field input::placeholder{
-      color:rgba(255,255,255,.34);
-      opacity:1;
+      color:rgba(255,255,255,.22);
+    }
+
+    .field input:hover{
+      border-color:rgba(255,255,255,.16);
+      background:rgba(0,0,0,.38);
+    }
+
+    .field input:focus{
+      border-color:rgba(215,176,107,.58);
+      box-shadow:0 0 0 3px rgba(215,176,107,.10), inset 0 1px 0 rgba(255,255,255,.04);
+      background:rgba(0,0,0,.42);
     }
 
     .row{
@@ -245,215 +292,253 @@
       gap:12px;
     }
 
+    /* ── Status ── */
     .status{
       position:relative;
       z-index:1;
-      margin:10px 0 0;
+      min-height:22px;
       font-size:13px;
-      color:rgba(255,255,255,.65);
       letter-spacing:.02em;
-      min-height:18px;
+      color:var(--muted);
+      margin-top:14px;
+      text-align:center;
+      transition:color .2s ease;
     }
 
-    .status.ok{ color:var(--ok); }
+    .status.ok { color:var(--ok); }
     .status.err{ color:var(--danger); }
 
+    /* ── Actions ── */
     .actions{
       position:relative;
       z-index:1;
       display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      justify-content:center;
-      margin-top:16px;
+      flex-direction:column;
+      gap:10px;
+      margin-top:20px;
     }
 
-    button{
-      border:1px solid rgba(230,192,123,.22);
-      background:rgba(0,0,0,.25);
-      color:rgba(230,192,123,.92);
-      padding:12px 18px;
+    /* Base button */
+    .btn{
+      width:100%;
+      height:52px;
       border-radius:14px;
-      cursor:pointer;
-      font-family:inherit;
-      letter-spacing:.12em;
+      font:inherit;
+      font-size:13px;
+      letter-spacing:.14em;
       text-transform:uppercase;
-      min-width:180px;
-      transition:transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
-      box-shadow:0 14px 40px rgba(0,0,0,.35);
+      cursor:pointer;
+      transition:
+        transform .14s var(--ease-spring),
+        opacity .15s ease,
+        background .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease;
     }
 
-    button:hover{ transform:translateY(-1px); border-color:rgba(230,192,123,.34); }
-    button:active{ transform:translateY(0); opacity:.9; }
+    /* Primary — gold fill */
+    .btn--primary{
+      background:linear-gradient(160deg, rgba(230,196,130,1) 0%, rgba(210,168,98,1) 100%);
+      color:#0e0b05;
+      border:1px solid rgba(215,176,107,.55);
+      font-weight:700;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.18) inset,
+        0 4px 16px rgba(215,176,107,.22),
+        0 12px 36px rgba(0,0,0,.40);
+    }
 
-    .hint{
+    .btn--primary:hover{
+      transform:translateY(-2px);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.22) inset,
+        0 6px 22px rgba(215,176,107,.34),
+        0 16px 42px rgba(0,0,0,.45);
+    }
+
+    .btn--primary:active{
+      transform:translateY(0);
+      opacity:.9;
+    }
+
+    /* Secondary — outlined */
+    .btn--secondary{
+      background:rgba(0,0,0,.18);
+      color:rgba(215,176,107,.82);
+      border:1px solid rgba(215,176,107,.28);
+    }
+
+    .btn--secondary:hover{
+      background:rgba(215,176,107,.07);
+      border-color:rgba(215,176,107,.48);
+      transform:translateY(-1px);
+    }
+
+    .btn--secondary:active{
+      transform:translateY(0);
+      opacity:.9;
+    }
+
+    /* Ritual — ghost link */
+    .ritualLink{
       position:relative;
       z-index:1;
-      margin-top:10px;
+      display:block;
+      width:100%;
+      margin-top:18px;
+      padding:0;
+      background:none;
+      border:none;
+      color:rgba(255,255,255,.32);
+      font:inherit;
       font-size:12px;
-      color:rgba(255,255,255,.55);
+      letter-spacing:.07em;
+      text-align:center;
+      cursor:pointer;
+      transition:color .18s ease;
     }
 
+    .ritualLink:hover{
+      color:rgba(215,176,107,.65);
+    }
+
+    /* ═══════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════ */
+    .footer{
+      position:relative;
+      z-index:1;
+      margin-top:22px;
+      font-size:10px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.28);
+      text-align:center;
+      line-height:1.6;
+    }
+
+    .footer .brand{
+      color:rgba(215,176,107,.62);
+    }
+
+    /* ═══════════════════════════════════════
+       MODAL
+    ═══════════════════════════════════════ */
     .modalBack{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.72);
+      background:rgba(0,0,0,.80);
       display:none;
       align-items:center;
       justify-content:center;
-      padding:22px;
-      z-index:50;
+      padding:20px;
+      z-index:100;
+      backdrop-filter:blur(6px);
+      -webkit-backdrop-filter:blur(6px);
     }
 
     .modal{
-      width:min(860px, 100%);
-      border-radius:18px;
-      background:rgba(15,15,15,.92);
-      border:1px solid rgba(255,255,255,.08);
-      box-shadow:0 30px 90px rgba(0,0,0,.65);
-      padding:18px;
-      text-align:left;
-      backdrop-filter:blur(10px);
+      position:relative;
+      width:min(500px,100%);
+      background:linear-gradient(155deg, #141008, #0a0806);
+      border:1px solid rgba(215,176,107,.22);
+      border-radius:var(--radius);
+      padding:28px 28px 24px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,.6),
+        0 32px 96px rgba(0,0,0,.78);
+      overflow:hidden;
+    }
+
+    /* Shimmer line on modal */
+    .modal::before{
+      content:"";
+      position:absolute;
+      top:0; left:0; right:0;
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(215,176,107,.50), transparent);
+      border-radius:var(--radius) var(--radius) 0 0;
     }
 
     .modalHeader{
       display:flex;
       justify-content:space-between;
       align-items:center;
-      gap:10px;
-      margin-bottom:10px;
+      margin-bottom:20px;
     }
 
     .modalHeader h2{
-      margin:0;
-      font-size:15px;
-      letter-spacing:.18em;
-      color:rgba(230,192,123,.9);
+      font-size:12px;
+      letter-spacing:.24em;
+      color:rgba(215,176,107,.85);
       text-transform:uppercase;
     }
 
     .close{
-      border:none;
-      background:transparent;
-      color:rgba(255,255,255,.7);
-      font-size:20px;
+      width:32px; height:32px;
+      border-radius:8px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      color:rgba(255,255,255,.55);
+      font-size:14px;
+      display:grid;
+      place-items:center;
       cursor:pointer;
-      padding:6px 10px;
-      border-radius:10px;
+      transition:background .15s ease;
       min-width:auto;
       box-shadow:none;
+      padding:0;
+      font-family:inherit;
     }
 
-    .close:hover{ background:rgba(255,255,255,.06); }
+    .close:hover{ background:rgba(255,255,255,.10); color:#fff; }
 
     .modalBody{
-      color:rgba(255,255,255,.82);
+      color:rgba(255,255,255,.72);
       font-size:14px;
-      line-height:1.6;
-      padding:8px 4px 2px;
+      line-height:1.70;
+    }
+
+    .modalBody > p{
+      margin-bottom:14px;
     }
 
     .ritualList{
-      margin:10px 0 0;
       padding-left:18px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
-
-    .ritualList li{ margin:8px 0; }
 
     .warn{
-      margin-top:12px;
-      padding:10px 12px;
-      border-left:3px solid rgba(230,192,123,.5);
-      background:rgba(230,192,123,.08);
-      border-radius:12px;
-      color:rgba(255,255,255,.86);
+      margin-top:20px;
+      padding:13px 16px;
+      border-left:2px solid rgba(215,176,107,.45);
+      background:rgba(215,176,107,.06);
+      border-radius:0 10px 10px 0;
+      color:rgba(255,255,255,.75);
+      font-size:13px;
+      line-height:1.55;
     }
 
-    .fadeOut{ animation:fadeOut .55s ease forwards; }
+    /* ═══════════════════════════════════════
+       TRANSITIONS
+    ═══════════════════════════════════════ */
+    .fadeOut{
+      animation:fadeOut .5s ease forwards;
+    }
 
     @keyframes fadeOut{
-      to{ opacity:0; transform:translateY(6px) scale(.995); filter:blur(1px); }
+      to{ opacity:0; transform:translateY(8px) scale(.99); filter:blur(1px); }
     }
 
-    .footer{
-      width:100%;
-      max-width:980px;
-      margin:14px auto 0;
-      text-align:center;
-      font-size:11px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,.42);
-      pointer-events:none;
-      padding:0 10px;
-      background:transparent;
-    }
-
-    .footer .brand{
-      color:rgba(230,192,123,.85);
-      font-weight:700;
-    }
-
-    @media (max-width: 430px){
-      body{ padding:14px; }
-
-      .wrap{ gap:10px; }
-
-      h1{
-        font-size:clamp(26px, 9vw, 40px);
-        letter-spacing:.16em;
-      }
-
-      .subtitle{
-        font-size:13px;
-        line-height:1.35;
-        max-width:34ch;
-      }
-
-      .whisper{
-        font-size:12px;
-        margin-top:0;
-      }
-
-      .card{
-        padding:14px 14px 16px;
-        border-radius:18px;
-      }
-
-      .tag{ margin-bottom:10px; font-size:11px; }
-
-      .prompt{
-        font-size:18px;
-        line-height:1.35;
-      }
-
-      .rule{
-        margin:12px auto 8px;
-        height:9px;
-      }
-
-      .row{
-        grid-template-columns:1fr;
-      }
-
-      .actions{ gap:10px; margin-top:14px; }
-
-      button{
-        width:min(320px, 100%);
-        min-width:0;
-        padding:11px 14px;
-        border-radius:14px;
-      }
-
-      .hint{
-        font-size:11px;
-        margin-top:8px;
-        padding-bottom:2px;
-      }
-    }
-
-    @media (min-width: 700px){
-      .footer{ margin-top:16px; }
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+    @media (max-width:480px){
+      .row{ grid-template-columns:1fr; }
+      .ornament{ width:160px; }
+      .protocol{ font-size:14px; padding:14px 14px; }
     }
   </style>
 
@@ -479,12 +564,10 @@
         }
       }
 
-      // Usuário tem licença mas precisa relogar no painel para emitir novo acesso
       function irParaPainel() {
         window.location.href = "./painel.html";
       }
 
-      // Usuário nunca comprou
       function irParaVendas() {
         window.location.href = "./vendas.html";
       }
@@ -530,14 +613,11 @@
       }
 
       try {
-        // 1. Token local ainda válido → entra direto, sem chamar servidor
         if (tokenLocalValido()) {
           liberarPagina();
           return;
         }
 
-        // 2. Tem licença salva → tenta renovar com timeout de 12s
-        //    Se o servidor não responder a tempo, libera a página mesmo assim
         localStorage.removeItem("osl_access_token");
         localStorage.removeItem("osl_access_expires_at");
 
@@ -550,18 +630,13 @@
             liberarPagina();
             return;
           }
-          // Servidor não respondeu ou rejeitou → libera mesmo assim
-          // (o servidor vai validar o access token depois se necessário)
           liberarPagina();
           return;
         }
 
-        // 3. Acesso livre — modelo free-to-play
-        // Sem licença, permite acesso ao deck básico gratuitamente
         liberarPagina();
       } catch (error) {
         console.error("Erro ao validar acesso:", error);
-        // Se há licença salva, não bloqueia — libera a página
         if (localStorage.getItem("osl_license_code") || localStorage.getItem("osl_auth_uid")) {
           liberarPagina();
         } else {
@@ -574,82 +649,105 @@
 
 <body>
   <main class="wrap" id="scene">
-    <h1>O SextoLugar</h1>
 
-    <p class="subtitle">
-      Você está prestes a atravessar a linha. Respire. Leia. E escolha com cuidado.
-    </p>
-
-    <div class="whisper" id="whisper">O silêncio é parte do jogo.</div>
+    <header class="pageHead">
+      <div class="ornament">
+        <div class="ornLine"></div>
+        <span>✦</span>
+        <div class="ornLine"></div>
+      </div>
+      <h1>O SextoLugar</h1>
+      <p class="subtitle">
+        Você está prestes a atravessar a linha.<br>
+        Respire. Leia. E escolha com cuidado.
+      </p>
+      <div class="whisper" id="whisper">O silêncio é parte do jogo.</div>
+    </header>
 
     <section class="card" aria-label="Protocolo de entrada">
       <div class="tag">
         <span class="dot"></span>
-        <span>Protocolo • Entrada</span>
+        <span>Protocolo · Entrada</span>
         <span class="dot"></span>
       </div>
 
-      <p class="prompt">
-        Antes de iniciar, confirme que você entendeu:
-        <br />
+      <p class="protocol">
+        Antes de iniciar, confirme que você entendeu:<br>
         <em>as cartas são físicas</em> — e o site só guia o ritmo.
       </p>
-
-      <div class="rule"></div>
 
       <div class="formWrap">
         <div class="field">
           <label for="nomeJogador">Seu nome</label>
-          <input id="nomeJogador" type="text" maxlength="40" placeholder="Ex.: Luis">
+          <input
+            id="nomeJogador"
+            type="text"
+            maxlength="40"
+            placeholder="Ex.: Luis"
+            autocomplete="given-name"
+          >
         </div>
 
         <div class="row">
           <div class="field">
             <label for="nomeSala">Nome da sala</label>
-            <input id="nomeSala" type="text" maxlength="40" placeholder="Ex.: Mesa Principal">
+            <input
+              id="nomeSala"
+              type="text"
+              maxlength="40"
+              placeholder="Ex.: Mesa Principal"
+            >
           </div>
-
           <div class="field">
             <label for="codigoSala">Código da sala</label>
-            <input id="codigoSala" type="text" maxlength="20" placeholder="Ex.: SL-0001">
+            <input
+              id="codigoSala"
+              type="text"
+              maxlength="20"
+              placeholder="Ex.: SL-0001"
+              autocomplete="off"
+              spellcheck="false"
+            >
           </div>
         </div>
       </div>
 
-      <p class="status" id="status">Status: aguardando confirmação.</p>
+      <p class="status" id="status" aria-live="polite"></p>
 
       <div class="actions">
-        <button id="btnRitual" type="button">Ler o ritual</button>
-        <button id="btnCriarSala" type="button">Criar sala</button>
-        <button id="btnEntrarSala" type="button">Entrar na sala</button>
+        <button id="btnCriarSala" class="btn btn--primary" type="button">Criar sala</button>
+        <button id="btnEntrarSala" class="btn btn--secondary" type="button">Entrar na sala</button>
       </div>
 
-      <div class="hint">Dica: se estiver no celular, aumente o brilho só um pouco.</div>
+      <button id="btnRitual" class="ritualLink" type="button">
+        Ler o ritual antes de começar →
+      </button>
     </section>
 
     <footer class="footer" aria-label="Direitos autorais">
-      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">O SEXTOLUGAR™</span><br>
+      TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
     </footer>
+
   </main>
 
+  <!-- Modal: Ritual -->
   <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-labelledby="ritualTitle">
     <div class="modal">
       <div class="modalHeader">
-        <h2 id="ritualTitle">Ritual (rápido)</h2>
+        <h2 id="ritualTitle">O Ritual — Rápido</h2>
         <button class="close" id="btnClose" aria-label="Fechar">✕</button>
       </div>
-
       <div class="modalBody">
         <p>O site não substitui as cartas. Ele só controla o tempo e o clima.</p>
         <ol class="ritualList">
           <li>Separe o baralho físico e deixe a mesa livre.</li>
           <li>Escolha um modo: <strong>solo</strong> ou <strong>grupo</strong> (decisão na mesa).</li>
           <li>Quando o timer rodar, sigam as instruções da carta puxada.</li>
-          <li>Se o timer zerar, a rodada termina — mesmo que alguém queira “só mais um”.</li>
+          <li>Se o timer zerar, a rodada termina — mesmo que alguém queira "só mais um".</li>
         </ol>
-
         <div class="warn">
-          O jogo pode ser com 3 à 5 pessoas. O “silêncio” é uma regra de clima, não de solidão.
+          O jogo pode ser com 3 à 5 pessoas. O "silêncio" é uma regra de clima, não de solidão.
         </div>
       </div>
     </div>
@@ -670,9 +768,7 @@
         try {
           const res = await fetch(SERVER_BASE + path, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
           });
 
@@ -734,17 +830,17 @@
   </script>
 
   <script>
-    const modalBack = document.getElementById("modalBack");
-    const btnRitual = document.getElementById("btnRitual");
-    const btnClose = document.getElementById("btnClose");
-    const scene = document.getElementById("scene");
-    const statusEl = document.getElementById("status");
+    const modalBack    = document.getElementById("modalBack");
+    const btnRitual    = document.getElementById("btnRitual");
+    const btnClose     = document.getElementById("btnClose");
+    const scene        = document.getElementById("scene");
+    const statusEl     = document.getElementById("status");
 
     const nomeJogadorEl = document.getElementById("nomeJogador");
-    const nomeSalaEl = document.getElementById("nomeSala");
-    const codigoSalaEl = document.getElementById("codigoSala");
+    const nomeSalaEl    = document.getElementById("nomeSala");
+    const codigoSalaEl  = document.getElementById("codigoSala");
 
-    const btnCriarSala = document.getElementById("btnCriarSala");
+    const btnCriarSala  = document.getElementById("btnCriarSala");
     const btnEntrarSala = document.getElementById("btnEntrarSala");
 
     btnRitual.addEventListener("click", () => {
@@ -756,18 +852,16 @@
     });
 
     modalBack.addEventListener("click", (e) => {
-      if (e.target === modalBack) {
-        modalBack.style.display = "none";
-      }
+      if (e.target === modalBack) modalBack.style.display = "none";
     });
 
-    function setStatus(text, type){
+    function setStatus(text, type) {
       statusEl.textContent = text;
       statusEl.classList.remove("ok", "err");
-      if(type) statusEl.classList.add(type);
+      if (type) statusEl.classList.add(type);
     }
 
-    function normalizarCodigoSala(valor){
+    function normalizarCodigoSala(valor) {
       return valor
         .trim()
         .toUpperCase()
@@ -776,20 +870,20 @@
         .slice(0, 20);
     }
 
-    function gerarCodigoSala(){
+    function gerarCodigoSala() {
       const n = Math.floor(1000 + Math.random() * 9000);
       return "SL-" + n;
     }
 
-    function gerarPlayerId(){
+    function gerarPlayerId() {
       return "player-" + Math.random().toString(36).slice(2, 10);
     }
 
-    function obterNomeJogador(){
+    function obterNomeJogador() {
       return nomeJogadorEl.value.trim().slice(0, 40);
     }
 
-    function obterNomeSala(){
+    function obterNomeSala() {
       return nomeSalaEl.value.trim().slice(0, 40);
     }
 
@@ -808,7 +902,7 @@
       await PanelBridge.playerJoin(codigoSala, playerId, nomeJogador);
     }
 
-    async function entrarNaSala({ nomeJogador, codigoSala, nomeSala }){
+    async function entrarNaSala({ nomeJogador, codigoSala, nomeSala }) {
       localStorage.setItem("osl_nome", nomeJogador);
       localStorage.setItem("osl_sala", codigoSala);
       localStorage.setItem("osl_nome_sala", nomeSala);
@@ -834,7 +928,7 @@
       url.searchParams.set("sala", codigoSala);
       url.searchParams.set("nomeSala", nomeSala);
 
-      setStatus("Status: entrando na sala…", "ok");
+      setStatus("Entrando na sala…", "ok");
       scene.classList.add("fadeOut");
 
       setTimeout(() => {
@@ -844,55 +938,42 @@
 
     btnCriarSala.addEventListener("click", async () => {
       const nomeJogador = obterNomeJogador();
-      if(!nomeJogador){
-        setStatus("Status: digite seu nome para criar a sala.", "err");
+      if (!nomeJogador) {
+        setStatus("Digite seu nome para criar a sala.", "err");
         nomeJogadorEl.focus();
         return;
       }
 
       let nomeSala = obterNomeSala();
-      if(!nomeSala){
-        nomeSala = "Sala de Espera";
-      }
+      if (!nomeSala) nomeSala = "Sala de Espera";
 
       const codigoSala = gerarCodigoSala();
       codigoSalaEl.value = codigoSala;
 
-      await entrarNaSala({
-        nomeJogador,
-        codigoSala,
-        nomeSala
-      });
+      await entrarNaSala({ nomeJogador, codigoSala, nomeSala });
     });
 
     btnEntrarSala.addEventListener("click", async () => {
       const nomeJogador = obterNomeJogador();
-      const codigoSala = normalizarCodigoSala(codigoSalaEl.value);
-      let nomeSala = obterNomeSala();
+      const codigoSala  = normalizarCodigoSala(codigoSalaEl.value);
+      let nomeSala      = obterNomeSala();
 
-      if(!nomeJogador){
-        setStatus("Status: digite seu nome para entrar na sala.", "err");
+      if (!nomeJogador) {
+        setStatus("Digite seu nome para entrar na sala.", "err");
         nomeJogadorEl.focus();
         return;
       }
 
-      if(!codigoSala){
-        setStatus("Status: digite o código da sala.", "err");
+      if (!codigoSala) {
+        setStatus("Digite o código da sala.", "err");
         codigoSalaEl.focus();
         return;
       }
 
       codigoSalaEl.value = codigoSala;
+      if (!nomeSala) nomeSala = "Sala de Espera";
 
-      if(!nomeSala){
-        nomeSala = "Sala de Espera";
-      }
-
-      await entrarNaSala({
-        nomeJogador,
-        codigoSala,
-        nomeSala
-      });
+      await entrarNaSala({ nomeJogador, codigoSala, nomeSala });
     });
 
     window.addEventListener("pageshow", () => {
