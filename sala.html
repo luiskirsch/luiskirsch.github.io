@@ -1000,15 +1000,76 @@
 
     /* Placeholder shown when a column slot has no tile yet */
     .videoColPlaceholder{
+      position:relative;
       width:100%;
       aspect-ratio:1/1;
-      border:1px dashed rgba(215,176,107,.14);
-      border-radius:14px;
-      background:rgba(255,255,255,.01);
+      border:1px solid rgba(215,176,107,.20);
+      border-radius:16px;
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(215,176,107,.06) 0%, transparent 65%),
+        linear-gradient(180deg,#1a1108 0%,#0d0a06 60%,#080604 100%);
       display:grid;
       place-items:center;
-      color:rgba(215,176,107,.14);
-      font-size:20px;
+      overflow:hidden;
+      box-shadow:
+        0 8px 28px rgba(0,0,0,.70),
+        inset 0 1px 0 rgba(255,255,255,.04),
+        inset 0 0 24px rgba(0,0,0,.40);
+      animation:placeholderPulse 5.5s ease-in-out infinite;
+    }
+
+    #videoPlaceholderL2{ animation-delay:-2s; }
+    #videoPlaceholderR1{ animation-delay:-4s; }
+    #videoPlaceholderR2{ animation-delay:-1s; }
+
+    .videoColPlaceholder::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:38%;
+      transform:translate(-50%,-50%);
+      width:55%;
+      height:55%;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(215,176,107,.32) 0%, rgba(215,176,107,.10) 40%, transparent 70%);
+      animation:placeholderGlow 5.5s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    #videoPlaceholderL2::before{ animation-delay:-2s; }
+    #videoPlaceholderR1::before{ animation-delay:-4s; }
+    #videoPlaceholderR2::before{ animation-delay:-1s; }
+
+    .videoColPlaceholder::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:16px;
+      box-shadow:inset 0 0 32px rgba(215,176,107,.08);
+      pointer-events:none;
+    }
+
+    @keyframes placeholderPulse{
+      0%,100%{
+        border-color:rgba(215,176,107,.14);
+        box-shadow:
+          0 8px 28px rgba(0,0,0,.70),
+          inset 0 1px 0 rgba(255,255,255,.03),
+          inset 0 0 24px rgba(0,0,0,.40);
+      }
+      50%{
+        border-color:rgba(215,176,107,.48);
+        box-shadow:
+          0 8px 28px rgba(0,0,0,.70),
+          0 0 20px rgba(215,176,107,.14),
+          inset 0 0 36px rgba(215,176,107,.10),
+          inset 0 1px 0 rgba(255,255,255,.06);
+      }
+    }
+
+    @keyframes placeholderGlow{
+      0%,100%{ opacity:0.15; }
+      50%{ opacity:1; }
     }
 
     /* Self video slot below the card */
@@ -1019,9 +1080,9 @@
     }
 
     .videoMedia{
-      width:100%;
-      height:100%;
-      display:block;
+      position:absolute;
+      inset:0;
+      overflow:hidden;
     }
 
     /* Side-column video tiles: square cards */
@@ -2865,8 +2926,8 @@
 
               <!-- Left column: friend tiles 1 & 2 -->
               <div class="videoColLeft" id="videoColLeft">
-                <div class="videoColPlaceholder" id="videoPlaceholderL1">👤</div>
-                <div class="videoColPlaceholder" id="videoPlaceholderL2">👤</div>
+                <div class="videoColPlaceholder" id="videoPlaceholderL1"></div>
+                <div class="videoColPlaceholder" id="videoPlaceholderL2"></div>
               </div>
 
               <!-- Center column: ritual card + self video below -->
@@ -2960,8 +3021,8 @@
 
               <!-- Right column: friend tiles 3 & 4 -->
               <div class="videoColRight" id="videoColRight">
-                <div class="videoColPlaceholder" id="videoPlaceholderR1">👤</div>
-                <div class="videoColPlaceholder" id="videoPlaceholderR2">👤</div>
+                <div class="videoColPlaceholder" id="videoPlaceholderR1"></div>
+                <div class="videoColPlaceholder" id="videoPlaceholderR2"></div>
               </div>
 
             </div>

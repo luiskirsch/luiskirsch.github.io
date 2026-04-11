@@ -483,16 +483,34 @@ function appendTrackToTile(tile, track, participantIdentity) {
     mediaEl.style.width = "100%";
     mediaEl.style.height = "100%";
     mediaEl.style.objectFit = "cover";
+    mediaEl.style.display = "block";
+    // iOS Safari requires these as attributes, not just properties
+    mediaEl.setAttribute("playsinline", "");
+    mediaEl.setAttribute("webkit-playsinline", "");
+    mediaEl.setAttribute("autoplay", "");
     mediaEl.playsInline = true;
     mediaEl.autoplay = true;
-    mediaEl.muted = participantIdentity === participantId;
+    const isSelf = participantIdentity === participantId;
+    mediaEl.muted = isSelf;
+    // Mirror local camera so it looks like a real mirror
+    if (isSelf) {
+      mediaEl.style.transform = "scaleX(-1)";
+    }
   }
 
   if (track.kind === "audio") {
+    mediaEl.setAttribute("autoplay", "");
     mediaEl.autoplay = true;
   }
 
   mediaWrap.appendChild(mediaEl);
+
+  // Kick autoplay explicitly — needed in some browsers even with autoplay attr
+  if (track.kind === "video" || track.kind === "audio") {
+    mediaEl.play().catch(() => {
+      // Autoplay blocked — user interaction will resume it
+    });
+  }
 }
 
 function removeTrackFromParticipant(identity, trackSid) {
