@@ -1003,62 +1003,66 @@
       position:relative;
       width:100%;
       aspect-ratio:1/1;
-      border:1px solid rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
       border-radius:16px;
-      background:#050403;
+      background:#000;
       display:grid;
       place-items:center;
       overflow:hidden;
       box-shadow:
-        0 10px 36px rgba(0,0,0,.88),
-        inset 0 1px 0 rgba(255,255,255,.03);
-      animation:placeholderBorder 7s cubic-bezier(0.45,0,0.55,1) infinite;
+        0 0 5px  rgba(255,255,255,.10),
+        0 0 14px rgba(255,255,255,.06),
+        0 0 30px rgba(255,255,255,.02),
+        inset 0 0 10px rgba(255,255,255,.05);
+      animation:whiteGlowPulse 7s ease-in-out infinite;
     }
 
     #videoPlaceholderL2{ animation-delay:-2.8s; }
     #videoPlaceholderR1{ animation-delay:-5.2s; }
     #videoPlaceholderR2{ animation-delay:-1.4s; }
 
-    /* Glow: radial oversized para que só a parte plana/central apareça — sem ponto focal */
-    .videoColPlaceholder::before{
-      content:"";
-      position:absolute;
-      inset:-40%;
-      background:radial-gradient(
-        ellipse at 50% 50%,
-        rgba(255,255,255,.13) 0%,
-        rgba(255,255,255,.07) 45%,
-        transparent 72%
-      );
-      animation:placeholderGlow 7s cubic-bezier(0.45,0,0.55,1) infinite;
-      pointer-events:none;
+    /* Pseudo-elements limpos — sem ruído visual */
+    .videoColPlaceholder::before,
+    .videoColPlaceholder::after{ display:none; }
+
+    /* ─── Glow branco pulsante — placeholders ─── */
+    @keyframes whiteGlowPulse{
+      0%,100%{
+        border-color:rgba(255,255,255,.10);
+        box-shadow:
+          0 0 5px  rgba(255,255,255,.10),
+          0 0 14px rgba(255,255,255,.06),
+          0 0 30px rgba(255,255,255,.02),
+          inset 0 0 10px rgba(255,255,255,.05);
+      }
+      50%{
+        border-color:rgba(255,255,255,.28);
+        box-shadow:
+          0 0 5px  rgba(255,255,255,.25),
+          0 0 14px rgba(255,255,255,.16),
+          0 0 30px rgba(255,255,255,.08),
+          inset 0 0 10px rgba(255,255,255,.12);
+      }
     }
 
-    #videoPlaceholderL2::before{ animation-delay:-2.8s; }
-    #videoPlaceholderR1::before{ animation-delay:-5.2s; }
-    #videoPlaceholderR2::before{ animation-delay:-1.4s; }
-
-    /* Filete superior: luz suave que toca a borda de cima */
-    .videoColPlaceholder::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius:16px;
-      background:linear-gradient(180deg,
-        rgba(255,255,255,.05) 0%,
-        transparent 28%
-      );
-      pointer-events:none;
-    }
-
-    @keyframes placeholderGlow{
-      0%,100%{ opacity:0; }
-      50%{ opacity:1; }
-    }
-
-    @keyframes placeholderBorder{
-      0%,100%{ border-color:rgba(255,255,255,.04); }
-      50%{ border-color:rgba(255,255,255,.20); }
+    /* ─── Glow branco pulsante — carta ritual (mais intenso) ─── */
+    @keyframes whiteGlowPulseCard{
+      0%,100%{
+        box-shadow:
+          0 14px 22px rgba(0,0,0,.75),
+          0 0 8px  rgba(255,255,255,.12),
+          0 0 22px rgba(255,255,255,.08),
+          0 0 50px rgba(255,255,255,.04),
+          inset 0 0 14px rgba(255,255,255,.07);
+      }
+      50%{
+        box-shadow:
+          0 14px 22px rgba(0,0,0,.75),
+          0 0 8px  rgba(255,255,255,.32),
+          0 0 22px rgba(255,255,255,.20),
+          0 0 50px rgba(255,255,255,.10),
+          inset 0 0 14px rgba(255,255,255,.18);
+      }
     }
 
     /* Self video slot below the card */
@@ -1854,17 +1858,18 @@
     /* Sombra fica nas faces (não no wrapper) para não quebrar 3D */
     .ritualVisualCard,
     .ritualCardBack{
-      box-shadow:
-        0 14px 20px rgba(0,0,0,.70),
-        0 0 28px rgba(215,176,107,.12);
-      transition: box-shadow 220ms var(--ease-out);
+      animation:whiteGlowPulseCard 7s ease-in-out infinite;
     }
 
     .ritualCardWrap:hover .ritualVisualCard,
     .ritualCardWrap:hover .ritualCardBack{
+      animation-play-state:paused;
       box-shadow:
-        0 24px 36px rgba(0,0,0,.65),
-        0 0 48px rgba(215,176,107,.22);
+        0 24px 40px rgba(0,0,0,.70),
+        0 0 8px  rgba(255,255,255,.38),
+        0 0 28px rgba(255,255,255,.24),
+        0 0 60px rgba(255,255,255,.12),
+        inset 0 0 18px rgba(255,255,255,.20);
     }
 
     /* Verso da carta — espelho da frente, rotacionado 180° no Y */
