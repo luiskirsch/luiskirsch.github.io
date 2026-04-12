@@ -3668,31 +3668,9 @@
     /* Remove outline preta do desktop (visível apenas no mobile) */
     .ritualVisualCard { outline: none !important; }
 
-    /* ── Botão flutuante de perfil — canto superior direito ── */
-    #mobileProfileFab {
-      display: flex;
-      position: fixed;
-      top: max(10px, env(safe-area-inset-top));
-      right: 12px;
-      z-index: 800;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: rgba(8,7,5,.88);
-      border: 1.5px solid rgba(215,176,107,.40);
-      box-shadow: 0 2px 12px rgba(0,0,0,.45);
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: border-color .15s, box-shadow .15s;
-    }
-    #mobileProfileFab:active {
-      border-color: rgba(215,176,107,.75);
-      box-shadow: 0 0 16px rgba(215,176,107,.30);
+    /* ── Botão de perfil na barra inferior — mostra emoji do usuário ── */
+    .mobileNavIcon--profile {
+      font-size: 20px;
     }
 
     /* ── Slot vazio de jogador ── */
@@ -5280,7 +5258,7 @@
       profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
       if (user.avatarColor) profileAvatarLarge.style.background = user.avatarColor;
       if (isSelfView && user.avatarEmoji) {
-        const fab = document.getElementById("mobileProfileFab");
+        const fab = document.getElementById("mobileProfileBtn");
         if (fab) fab.textContent = user.avatarEmoji;
       }
       profileNameEl.textContent = user.displayName || "Jogador";
@@ -5345,7 +5323,7 @@
             wins: 0
           }
         });
-        const fab = document.getElementById("mobileProfileFab");
+        const fab = document.getElementById("mobileProfileBtn");
         if (fab) fab.textContent = "🔮";
       } else {
         await updateDoc(userRef, {
@@ -5353,7 +5331,7 @@
         });
         const emoji = snap.data().avatarEmoji;
         if (emoji) {
-          const fab = document.getElementById("mobileProfileFab");
+          const fab = document.getElementById("mobileProfileBtn");
           if (fab) fab.textContent = emoji;
         }
       }
@@ -6763,7 +6741,8 @@
     var mobileResetBtn   = document.getElementById("mobileResetBtn");
     var mobileStartBtn   = document.getElementById("mobileStartBtn");
     var mobileChatBtn    = document.getElementById("mobileChatBtn");
-    var mobileHistBtn    = document.getElementById("mobileHistoryBtn");
+    var mobileHistBtn    = document.getElementById("mobileHistoryBtn"); // removido do HTML, será null
+    var mobileProfileBtn = document.getElementById("mobileProfileBtn");
     var mobileChatOverlay= document.getElementById("mobileChatOverlay");
     var mobileHistOverlay= document.getElementById("mobileHistoryOverlay");
     var mobileChatMsgs   = document.getElementById("mobileChatMessages");
@@ -6774,7 +6753,7 @@
     var mobileVideoThumb = document.getElementById("mobileVideoThumb");
     var mobilePlayerStrip= document.getElementById("mobilePlayerStripInline");
     var mobileCardLabel  = document.getElementById("mobileCardLabel");
-    var mobileProfileFab = document.getElementById("mobileProfileFab");
+    var mobileProfileFab = mobileProfileBtn; // alias — FAB migrou para a barra inferior
 
     var desktopRevealBtn = document.getElementById("revealCardBtn");
     var desktopResetBtn  = document.getElementById("resetRitualBtn");
@@ -6799,7 +6778,6 @@
       mobileBar.style.display = mobile ? "flex" : "none";
       if (mobilePlayerStrip) mobilePlayerStrip.style.display = mobile ? "flex" : "none";
       if (mobileCardLabel)   mobileCardLabel.style.display   = mobile ? "block" : "none";
-      if (mobileProfileFab)  mobileProfileFab.style.display  = mobile ? "flex" : "none";
     }
 
     applyMobileMode(IS_MOBILE.matches);
@@ -6970,11 +6948,13 @@
       mobileHistList.innerHTML = desktopHistory.innerHTML;
     }
 
-    mobileHistBtn.addEventListener("click", function () {
-      if (histIsOpen) { closeHistory(); return; }
-      if (chatIsOpen) closeChat();
-      openHistory();
-    });
+    if (mobileHistBtn) {
+      mobileHistBtn.addEventListener("click", function () {
+        if (histIsOpen) { closeHistory(); return; }
+        if (chatIsOpen) closeChat();
+        openHistory();
+      });
+    }
 
     mobileHistOverlay.addEventListener("click", function (e) {
       if (e.target === mobileHistOverlay) closeHistory();
@@ -7163,9 +7143,9 @@
       }, { passive: true });
     });
 
-    // ── Botão de perfil ───────────────────────────────────────────────────────
-    if (mobileProfileFab) {
-      mobileProfileFab.addEventListener("click", function () {
+    // ── Botão de perfil (agora na barra inferior) ────────────────────────────
+    if (mobileProfileBtn) {
+      mobileProfileBtn.addEventListener("click", function () {
         var btn = document.getElementById("myProfileBtn");
         if (btn) btn.click();
       });
@@ -7233,10 +7213,10 @@
         <span class="mobileNavIconLabel">Chat</span>
       </div>
       <div class="mobileNavIconWrap">
-        <button class="mobileNavIcon" id="mobileHistoryBtn" title="Histórico" aria-label="Ver histórico">
-          📜
+        <button class="mobileNavIcon mobileNavIcon--profile" id="mobileProfileBtn" title="Meu perfil" aria-label="Abrir perfil">
+          👤
         </button>
-        <span class="mobileNavIconLabel">Histórico</span>
+        <span class="mobileNavIconLabel">Perfil</span>
       </div>
     </div>
 
@@ -7285,9 +7265,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ===== MOBILE PROFILE BUTTON (fixed, top-right) ===== -->
-  <button id="mobileProfileFab" style="display:none" aria-label="Meu perfil" title="Meu perfil">👤</button>
 
   <!-- ===== MOBILE VIDEO OVERLAY ===== -->
   <div id="mobileVideoOverlay" role="dialog" aria-modal="true" aria-label="Câmera e áudio">
