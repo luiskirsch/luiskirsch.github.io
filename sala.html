@@ -3271,7 +3271,7 @@
       display: flex !important;
       flex-direction: column;
       flex: 1;
-      padding: 0 16px;
+      padding: 0 6px;
       overflow: hidden;
       min-height: 0;
     }
@@ -3300,13 +3300,17 @@
       filter: drop-shadow(0 0 28px rgba(215,176,107,.20));
     }
 
-    /* Carta: width-driven em portrait — ocupa a largura disponível */
+    /* Carta: ocupa toda a largura disponível, height pelo aspect-ratio */
     .ritualCardWrap {
-      width: min(88vw, 290px) !important;
-      height: auto !important;          /* aspect-ratio 5/7 calcula a altura */
+      width: 100% !important;
+      height: auto !important;
       max-height: none !important;
+      transform: none !important;   /* remove rotateX(3deg) que mostra bordas 3D */
     }
     .ritualVisualCard { width: 100% !important; height: 100% !important; }
+
+    /* Remove hover 3D no mobile (sem mouse) */
+    .ritualCardWrap:hover { transform: none !important; }
 
     /* Carta ornamentada — borda dupla dourada */
     .ritualVisualCard {
@@ -3722,6 +3726,7 @@
       width: auto !important;
       height: min(60svh, 185px) !important;
       max-height: none !important;
+      transform: none !important;
     }
     .mobileAvatar { width: 36px !important; height: 36px !important; font-size: 14px !important; }
     #mobilePlayerStripInline { padding-top: 6px !important; padding-bottom: 4px !important; gap: 10px !important; }
@@ -6823,9 +6828,17 @@
       if (window._osl) {
         isHost    = !!window._osl.getIsHost?.();
         isStarted = !!window._osl.isStarted?.();
+        // Guard contra race condition: _osl carrega antes do primeiro snapshot Firebase.
+        // Se _osl diz não-host mas startBtn ainda não foi desabilitado (DOM não atualizado),
+        // manter como host até o Firebase confirmar com startBtn.disabled = true.
+        if (!isHost && desktopStartBtn && !desktopStartBtn.disabled) {
+          isHost = true;
+        }
+        if (!isStarted && desktopRevealBtn && !desktopRevealBtn.disabled) {
+          isStarted = true;
+        }
       } else {
         // DOM fallback: Firebase seta startBtn.disabled = !isHost (linha ~5832)
-        // revealCardBtn.disabled = !canControl (linha ~4764)
         isHost    = desktopStartBtn  ? !desktopStartBtn.disabled  : false;
         isStarted = desktopRevealBtn ? !desktopRevealBtn.disabled : false;
       }
