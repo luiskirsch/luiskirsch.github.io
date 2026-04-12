@@ -3300,12 +3300,11 @@
       filter: drop-shadow(0 0 28px rgba(215,176,107,.20));
     }
 
-    /* Carta: dimensionada pelo aspect-ratio, não por altura fixa */
+    /* Carta: width-driven em portrait — ocupa a largura disponível */
     .ritualCardWrap {
-      height: auto !important;
-      width: auto !important;
-      max-height: min(52svh, 340px) !important;
-      aspect-ratio: 5/7;
+      width: min(88vw, 290px) !important;
+      height: auto !important;          /* aspect-ratio 5/7 calcula a altura */
+      max-height: none !important;
     }
     .ritualVisualCard { width: 100% !important; height: 100% !important; }
 
@@ -3323,26 +3322,9 @@
       border: 1px solid rgba(215,176,107,.42) !important;
     }
 
-    /* Cantos L-bracket */
+    /* Remove cantos L-bracket no mobile */
     .ritualCardFrame::before,
-    .ritualCardFrame::after {
-      content: "";
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      z-index: 5;
-      pointer-events: none;
-    }
-    .ritualCardFrame::before {
-      top: 11px; left: 11px;
-      border-top: 1.5px solid rgba(215,176,107,.80);
-      border-left: 1.5px solid rgba(215,176,107,.80);
-    }
-    .ritualCardFrame::after {
-      bottom: 11px; right: 11px;
-      border-bottom: 1.5px solid rgba(215,176,107,.80);
-      border-right: 1.5px solid rgba(215,176,107,.80);
-    }
+    .ritualCardFrame::after { display: none !important; }
 
     /* Tipografia da carta */
     .ritualCardNumber      { font-size: 9px  !important; letter-spacing: .28em !important; color: rgba(215,176,107,.50) !important; }
@@ -3710,12 +3692,36 @@
       50%      { border-color: rgba(215,176,107,.28); box-shadow: 0 0 10px rgba(215,176,107,.10); }
     }
 
+    /* ── Perfil: bottom sheet em mobile ── */
+    .profileModal {
+      align-items: flex-end !important;
+      padding: 0 !important;
+    }
+    .profileCard--large {
+      width: 100% !important;
+      max-height: 92svh !important;
+      border-radius: 20px 20px 0 0 !important;
+      overflow: hidden !important;
+      padding-top: 14px !important;
+    }
+    .profPane {
+      -webkit-overflow-scrolling: touch;
+      overflow-y: auto !important;
+    }
+    /* Reduz padding interno para ganhar mais espaço vertical */
+    .profHead { padding: 18px 20px 14px !important; }
+    .profTabs { padding: 0 20px !important; }
+    .profPane { padding: 16px 20px 24px !important; gap: 12px !important; }
+    .profileAvatarLarge { width: 60px !important; height: 60px !important; font-size: 24px !important; }
+
   } /* end @media mobile */
 
   /* ── Landscape phones: compact card & strip ── */
   @media (max-width: 960px) and (orientation: landscape) and (pointer: coarse) {
     .ritualCardWrap {
-      max-height: min(62svh, 200px) !important;
+      width: auto !important;
+      height: min(60svh, 185px) !important;
+      max-height: none !important;
     }
     .mobileAvatar { width: 36px !important; height: 36px !important; font-size: 14px !important; }
     #mobilePlayerStripInline { padding-top: 6px !important; padding-bottom: 4px !important; gap: 10px !important; }
