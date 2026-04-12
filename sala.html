@@ -3094,7 +3094,10 @@
 
   @media (max-width: 640px) {
 
-    /* --- Hide desktop panels --- */
+    /* ═══════════════════════════════════════════════════════
+       ESCONDER TUDO DO DESKTOP
+    ═══════════════════════════════════════════════════════ */
+    .topbar,
     .sidebar,
     .rightColumn,
     .tableHead,
@@ -3103,124 +3106,108 @@
     .videoColLeft,
     .videoColRight,
     .videoSelfSlot,
-    .videoLayer {
+    .videoLayer,
+    .shell > .topbar {
       display: none !important;
     }
 
-    /* --- Page & Shell --- */
+    /* ═══════════════════════════════════════════════════════
+       PAGE — ocupa 100% da tela sem scroll
+    ═══════════════════════════════════════════════════════ */
+    html, body {
+      overflow: hidden;
+      height: 100%;
+    }
+
     .page {
       padding: 0;
-      background: #0a0a0a;
-      min-height: 100svh;
+      height: 100svh;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* --- Top bar compact --- */
-    .topbar {
-      grid-template-columns: 1fr auto;
-      gap: 6px;
-      padding: 10px 14px;
-      border-radius: 0;
-      background: rgba(12,12,18,.97);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-
-    .topCenterMeta {
-      display: none;
-    }
-
-    .topActions {
-      gap: 6px;
-    }
-
-    .topActionBtn {
-      padding: 7px 11px;
-      font-size: 12px;
-      border-radius: 8px;
-    }
-
-    .topActionBtn.iconOnly {
-      padding: 7px 10px;
-    }
-
-    /* --- Layout: single column --- */
-    .layout {
+    .shell {
+      padding: 0;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       gap: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LAYOUT PRINCIPAL
+    ═══════════════════════════════════════════════════════ */
+    .layout {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 0;
       padding: 0;
+      overflow: hidden;
     }
 
     .mainArea {
       flex: 1;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     .tableCard {
       border-radius: 0;
       border: none;
-      background: #0a0a0a;
+      background: transparent;
       flex: 1;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
-    /* --- Player avatar strip --- */
-    #mobilePlayerStrip {
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 20px;
-      padding: 16px 20px 12px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      flex-shrink: 0;
-      background: linear-gradient(180deg, rgba(215,176,107,.04) 0%, transparent 100%);
-    }
-
-    #mobilePlayerStrip::-webkit-scrollbar { display: none; }
-
-    /* Inline strip (inside tableCard) — same layout as external strip */
+    /* ═══════════════════════════════════════════════════════
+       STRIP DE JOGADORES — topo
+    ═══════════════════════════════════════════════════════ */
     #mobilePlayerStripInline {
-      display: flex;
+      display: flex !important;
       align-items: flex-end;
       justify-content: center;
-      gap: 20px;
-      padding: 16px 20px 10px;
+      gap: 18px;
+      padding: max(14px, env(safe-area-inset-top)) 16px 10px;
       overflow-x: auto;
       scrollbar-width: none;
-      -ms-overflow-style: none;
       flex-shrink: 0;
-      background: linear-gradient(180deg, rgba(215,176,107,.04) 0%, transparent 100%);
     }
-
     #mobilePlayerStripInline::-webkit-scrollbar { display: none; }
+
+    /* Strip externo (fora da tableCard) — nunca usado no mobile, esconder */
+    #mobilePlayerStrip { display: none !important; }
 
     .mobileAvatarWrap {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex-shrink: 0;
     }
 
     .mobileAvatar {
-      width: 54px;
-      height: 54px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #1e1e2a, #2a2a3a);
-      border: 2px solid rgba(215, 176, 107, 0.65);
-      box-shadow: 0 0 10px rgba(215, 176, 107, 0.18);
+      background: linear-gradient(135deg, #1c1a14, #2a2518);
+      border: 2px solid rgba(215,176,107,.55);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
       color: #d7b06b;
       cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
+      transition: transform 0.15s;
       overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .mobileAvatar img {
@@ -3230,145 +3217,65 @@
       border-radius: 50%;
     }
 
-    .mobileAvatar:active {
-      transform: scale(0.92);
-      box-shadow: 0 0 20px rgba(215, 176, 107, 0.5);
-    }
+    .mobileAvatar:active { transform: scale(0.90); }
 
     .mobileAvatarName {
-      font-size: 10px;
-      color: rgba(255,255,255,.6);
+      font-size: 9px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.50);
       text-align: center;
-      max-width: 56px;
+      max-width: 54px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .mobileAvatar--self {
-      border-color: rgba(215, 176, 107, 0.45);
-      box-shadow: none;
-    }
-
-    /* Active/current player — glowing gold ring */
+    /* Host / jogador ativo — anel dourado pulsante */
     .mobileAvatar--active {
       border-color: #d7b06b;
+      border-width: 2.5px;
       box-shadow:
-        0 0 0 3px rgba(215,176,107,.22),
-        0 0 16px rgba(215,176,107,.60),
-        0 0 32px rgba(215,176,107,.30);
-      animation: mobileAvatarPulse 2.4s ease-in-out infinite;
+        0 0 0 3px rgba(215,176,107,.20),
+        0 0 18px rgba(215,176,107,.65),
+        0 0 38px rgba(215,176,107,.28);
+      animation: avatarPulse 2.6s ease-in-out infinite;
     }
 
-    @keyframes mobileAvatarPulse {
-      0%, 100% { box-shadow: 0 0 0 3px rgba(215,176,107,.22), 0 0 16px rgba(215,176,107,.60), 0 0 32px rgba(215,176,107,.30); }
-      50%       { box-shadow: 0 0 0 4px rgba(215,176,107,.35), 0 0 24px rgba(215,176,107,.80), 0 0 44px rgba(215,176,107,.45); }
+    @keyframes avatarPulse {
+      0%,100% { box-shadow: 0 0 0 3px rgba(215,176,107,.20), 0 0 18px rgba(215,176,107,.65), 0 0 38px rgba(215,176,107,.28); }
+      50%      { box-shadow: 0 0 0 4px rgba(215,176,107,.35), 0 0 26px rgba(215,176,107,.90), 0 0 52px rgba(215,176,107,.45); }
     }
 
-    /* --- Card section label --- */
+    .mobileAvatarName.mobileAvatarName--active {
+      color: rgba(215,176,107,.85);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LABEL "CARTA ATUAL"
+    ═══════════════════════════════════════════════════════ */
     #mobileCardLabel {
-      display: block;
+      display: block !important;
       text-align: center;
-      font-size: 12px;
-      letter-spacing: .32em;
-      color: rgba(215,176,107,.80);
-      text-transform: uppercase;
-      padding: 6px 0 10px;
       font-family: Georgia, "Times New Roman", serif;
-      font-weight: 400;
-      text-shadow: 0 0 18px rgba(215,176,107,.35);
-    }
-
-    /* ── Ornate card frame upgrade (mobile) ─────────────────── */
-    .ritualVisualCard {
-      border: 2px solid rgba(215,176,107,.70) !important;
-      box-shadow:
-        0 0 0 1px rgba(215,176,107,.12),
-        inset 0 0 0 1px rgba(215,176,107,.08),
-        0 12px 50px rgba(0,0,0,.65),
-        0 0 36px rgba(215,176,107,.18) !important;
-    }
-
-    /* Thicker inner border */
-    .ritualVisualCard::before {
-      inset: 10px !important;
-      border: 1px solid rgba(215,176,107,.45) !important;
-      box-shadow:
-        inset 0 0 0 1px rgba(0,0,0,.6),
-        0 0 0 1px rgba(215,176,107,.15) !important;
-    }
-
-    /* Four-corner bracket ornaments — L-shapes at each corner */
-    .ritualCardFrame::before,
-    .ritualCardFrame::after {
-      content: "";
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      pointer-events: none;
-      z-index: 5;
-    }
-    /* Top-left */
-    .ritualCardFrame::before {
-      top: 12px; left: 12px;
-      border-top: 1.5px solid rgba(215,176,107,.85);
-      border-left: 1.5px solid rgba(215,176,107,.85);
-    }
-    /* Bottom-right */
-    .ritualCardFrame::after {
-      bottom: 12px; right: 12px;
-      border-bottom: 1.5px solid rgba(215,176,107,.85);
-      border-right: 1.5px solid rgba(215,176,107,.85);
-    }
-    /* Reinforce card glow on mobile */
-    .revealStage {
-      filter: drop-shadow(0 0 24px rgba(215,176,107,.22));
-    }
-
-    /* ── Card typography — mobile-first sizes ── */
-    .ritualCardMainTitle {
-      font-size: 26px !important;
-      letter-spacing: .06em !important;
-      text-shadow:
-        0 2px 10px rgba(0,0,0,.9),
-        0 0 28px rgba(215,176,107,.30) !important;
-    }
-
-    .ritualMainInstruction {
-      font-size: 12px !important;
-      letter-spacing: .08em !important;
+      font-size: 10px;
+      letter-spacing: .40em;
       text-transform: uppercase;
-      color: rgba(245,238,220,.80) !important;
+      color: rgba(215,176,107,.70);
+      padding: 4px 0 6px;
+      flex-shrink: 0;
     }
 
-    .ritualRuleText {
-      font-size: 12px !important;
-      line-height: 1.6 !important;
-      text-align: center;
-      color: rgba(240,232,210,.82) !important;
-    }
-
-    .ritualRuleText.subtle {
-      font-size: 11px !important;
-    }
-
-    .ritualFinalPhrase {
-      font-size: 9px !important;
-      letter-spacing: .14em !important;
-    }
-
-    .ritualCardNumber {
-      font-size: 9px !important;
-      letter-spacing: .28em !important;
-      color: rgba(215,176,107,.55) !important;
-    }
-
-    /* --- Game table: card fills space --- */
+    /* ═══════════════════════════════════════════════════════
+       ÁREA DA CARTA — centro da tela
+    ═══════════════════════════════════════════════════════ */
     .gameTableGrid {
       display: flex !important;
       flex-direction: column;
       flex: 1;
-      padding: 0 12px;
+      padding: 0 16px;
+      overflow: hidden;
+      min-height: 0;
     }
 
     .cardCenter {
@@ -3377,6 +3284,7 @@
       align-items: center;
       justify-content: center;
       flex: 1;
+      min-height: 0;
     }
 
     .revealPanel {
@@ -3387,41 +3295,83 @@
     }
 
     .revealStage {
-      width: min(310px, 88vw);
+      width: min(300px, 86vw);
+      filter: drop-shadow(0 0 28px rgba(215,176,107,.20));
     }
 
-    .ritualCardWrap {
-      width: 100% !important;
-    }
+    .ritualCardWrap  { width: 100% !important; }
+    .ritualVisualCard { width: 100% !important; }
 
+    /* Carta ornamentada — borda dupla dourada */
     .ritualVisualCard {
-      width: 100% !important;
+      border: 2px solid rgba(215,176,107,.72) !important;
+      box-shadow:
+        inset 0 0 0 8px rgba(0,0,0,.25),
+        0 16px 60px rgba(0,0,0,.70),
+        0 0 40px rgba(215,176,107,.16) !important;
     }
 
-    /* --- Mobile bottom nav bar --- */
+    .ritualVisualCard::before {
+      inset: 9px !important;
+      border: 1px solid rgba(215,176,107,.42) !important;
+    }
+
+    /* Cantos L-bracket */
+    .ritualCardFrame::before,
+    .ritualCardFrame::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .ritualCardFrame::before {
+      top: 11px; left: 11px;
+      border-top: 1.5px solid rgba(215,176,107,.80);
+      border-left: 1.5px solid rgba(215,176,107,.80);
+    }
+    .ritualCardFrame::after {
+      bottom: 11px; right: 11px;
+      border-bottom: 1.5px solid rgba(215,176,107,.80);
+      border-right: 1.5px solid rgba(215,176,107,.80);
+    }
+
+    /* Tipografia da carta */
+    .ritualCardNumber      { font-size: 9px  !important; letter-spacing: .28em !important; color: rgba(215,176,107,.50) !important; }
+    .ritualCardMainTitle   { font-size: 24px !important; letter-spacing: .05em !important; }
+    .ritualMainInstruction { font-size: 11px !important; letter-spacing: .07em !important; text-transform: uppercase; }
+    .ritualRuleText        { font-size: 11px !important; line-height: 1.55 !important; text-align: center; }
+    .ritualRuleText.subtle { font-size: 10px !important; }
+    .ritualFinalPhrase     { font-size: 8px  !important; letter-spacing: .14em !important; }
+
+    /* ═══════════════════════════════════════════════════════
+       BOTTOM NAV BAR — fixo no rodapé
+    ═══════════════════════════════════════════════════════ */
     #mobileBottomBar {
-      display: flex;
+      display: flex !important;
       align-items: center;
-      justify-content: space-between;
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       z-index: 900;
-      background: linear-gradient(180deg, rgba(8,7,5,.96) 0%, rgba(5,4,3,.99) 100%);
-      border-top: 1px solid rgba(215,176,107,.14);
-      padding: 10px 12px max(12px, env(safe-area-inset-bottom)) 12px;
-      gap: 10px;
-      backdrop-filter: blur(18px) saturate(1.4);
-      -webkit-backdrop-filter: blur(18px) saturate(1.4);
-      box-shadow: 0 -1px 0 rgba(215,176,107,.06), 0 -8px 32px rgba(0,0,0,.45);
+      padding: 8px 10px max(10px, env(safe-area-inset-bottom)) 10px;
+      gap: 8px;
+      background: linear-gradient(180deg, rgba(7,6,4,.97), rgba(4,3,2,.99));
+      border-top: 1px solid rgba(215,176,107,.15);
+      backdrop-filter: blur(20px) saturate(1.5);
+      -webkit-backdrop-filter: blur(20px) saturate(1.5);
+      box-shadow: 0 -4px 30px rgba(0,0,0,.50), 0 -1px 0 rgba(215,176,107,.08);
     }
 
-    /* Left: icon buttons stacked */
+    /* Compensação: empurra a carta para cima do bottom bar */
+    .gameTableGrid { padding-bottom: 0; }
+    .layout { padding-bottom: 108px; }
+
+    /* ── Ícones esquerda ── */
     .mobileNavIcons {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
       flex-shrink: 0;
     }
 
@@ -3429,135 +3379,129 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
     }
 
     .mobileNavIconLabel {
-      font-size: 8px;
-      letter-spacing: .12em;
+      font-size: 7px;
+      letter-spacing: .10em;
       text-transform: uppercase;
-      color: rgba(255,255,255,.38);
-      line-height: 1;
+      color: rgba(255,255,255,.35);
       pointer-events: none;
+      line-height: 1;
     }
 
     .mobileNavIcon {
-      width: 44px;
-      height: 36px;
-      border-radius: 10px;
+      width: 42px;
+      height: 34px;
+      border-radius: 9px;
       background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.09);
-      color: rgba(255,255,255,.70);
-      font-size: 17px;
+      border: 1px solid rgba(255,255,255,.08);
+      color: rgba(255,255,255,.65);
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       position: relative;
-      transition: background 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .12s;
     }
 
-    .mobileNavIcon:active {
-      background: rgba(215,176,107,.16);
-      border-color: rgba(215,176,107,.35);
-    }
+    .mobileNavIcon:active { background: rgba(215,176,107,.18); }
 
     .mobileNavIcon .badge {
       position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 8px;
-      height: 8px;
+      top: 3px; right: 3px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: #d7b06b;
       display: none;
     }
+    .mobileNavIcon .badge.visible { display: block; }
 
-    .mobileNavIcon .badge.visible {
-      display: block;
-    }
-
-    /* Center: action buttons */
+    /* ── Botões centrais ── */
     .mobileNavActions {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
       flex: 1;
+      min-width: 0;
     }
 
     .mobilePrimaryBtn {
       width: 100%;
-      padding: 12px 8px;
+      padding: 11px 6px;
       border: none;
       border-radius: 10px;
-      background: linear-gradient(160deg, #e0bc78 0%, #c99a4b 55%, #a87832 100%);
-      color: #110b04;
+      background: linear-gradient(160deg, #e2bf7a, #c99a4b 60%, #a87832);
+      color: #110c03;
       font-weight: 800;
-      font-size: 11px;
-      letter-spacing: .06em;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      font-size: 10.5px;
+      letter-spacing: .05em;
       text-transform: uppercase;
-      box-shadow: 0 2px 14px rgba(215,176,107,.35), inset 0 1px 0 rgba(255,255,255,.20);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .10s, opacity .12s;
+      box-shadow: 0 2px 14px rgba(215,176,107,.32), inset 0 1px 0 rgba(255,255,255,.22);
     }
 
-    .mobilePrimaryBtn:disabled {
-      opacity: 0.32;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .mobilePrimaryBtn:not(:disabled):active {
-      transform: scale(0.96);
-      box-shadow: 0 1px 6px rgba(215,176,107,.20);
-    }
+    .mobilePrimaryBtn:disabled    { opacity: .30; cursor: not-allowed; box-shadow: none; }
+    .mobilePrimaryBtn:active:not(:disabled) { transform: scale(.96); }
 
     .mobileSecondaryBtn {
       width: 100%;
-      padding: 10px 8px;
-      border: 1px solid rgba(215,176,107,.45);
+      padding: 9px 6px;
+      border: 1px solid rgba(215,176,107,.42);
       border-radius: 10px;
       background: rgba(215,176,107,.07);
-      color: rgba(215,176,107,.90);
+      color: rgba(215,176,107,.88);
       font-weight: 700;
       font-size: 10px;
-      letter-spacing: .06em;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s, background 0.15s;
+      letter-spacing: .05em;
       text-transform: uppercase;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .10s, background .12s;
     }
 
-    .mobileSecondaryBtn:disabled {
-      opacity: 0.28;
-      cursor: not-allowed;
+    .mobileSecondaryBtn:disabled  { opacity: .28; cursor: not-allowed; }
+    .mobileSecondaryBtn:active:not(:disabled) { transform: scale(.96); background: rgba(215,176,107,.14); }
+
+    #mobileStartBtn {
+      padding: 11px 6px;
+      border-radius: 10px;
+      background: linear-gradient(160deg, #e2bf7a, #c99a4b 60%, #a87832);
+      color: #110c03;
+      font-weight: 800;
+      font-size: 10.5px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      box-shadow: 0 2px 14px rgba(215,176,107,.32);
     }
 
-    .mobileSecondaryBtn:not(:disabled):active {
-      transform: scale(0.96);
-      background: rgba(215,176,107,.14);
-    }
-
-    /* Right: self video thumbnail */
+    /* ── Vídeo VOCÊ (canto direito) ── */
     .mobileNavSelf {
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
+      cursor: pointer;
     }
 
     #mobileVideoThumb {
-      width: 54px;
-      height: 76px;
-      border-radius: 12px;
-      background: linear-gradient(160deg, #1a1a24, #0f0f18);
-      border: 1.5px solid rgba(215,176,107,.38);
-      box-shadow: 0 0 12px rgba(215,176,107,.15);
+      width: 50px;
+      height: 70px;
+      border-radius: 11px;
+      background: linear-gradient(160deg, #1c1a14, #100e09);
+      border: 1.5px solid rgba(215,176,107,.40);
+      box-shadow: 0 0 14px rgba(215,176,107,.12);
       overflow: hidden;
-      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
 
     #mobileVideoThumb video,
@@ -3567,25 +3511,73 @@
       object-fit: cover;
     }
 
-    #mobileVideoThumb .mobileVideoOff {
-      font-size: 22px;
-      opacity: 0.35;
-    }
+    #mobileVideoThumb .mobileVideoOff { font-size: 20px; opacity: .35; }
 
     .mobileNavSelfLabel {
-      font-size: 9px;
-      letter-spacing: .18em;
-      color: rgba(255,255,255,.42);
+      font-size: 8px;
+      letter-spacing: .16em;
       text-transform: uppercase;
+      color: rgba(255,255,255,.38);
       font-weight: 500;
     }
 
-    /* --- Bottom bar padding compensation --- */
-    .shell {
-      padding-bottom: 100px;
+    /* ═══════════════════════════════════════════════════════
+       OVERLAY DE VÍDEO — abre ao tocar no VOCÊ
+    ═══════════════════════════════════════════════════════ */
+    #mobileVideoOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      background: rgba(0,0,0,.60);
+      backdrop-filter: blur(3px);
+    }
+    #mobileVideoOverlay.open { display: flex; align-items: flex-end; }
+
+    #mobileVideoDrawer {
+      width: 100%;
+      background: #0f0e0b;
+      border-top: 1px solid rgba(215,176,107,.20);
+      border-radius: 20px 20px 0 0;
+      padding: 16px 20px max(20px, env(safe-area-inset-bottom));
+      animation: drawerSlideUp .26s cubic-bezier(.22,.8,.36,1);
     }
 
-    /* --- Mobile overlays (chat + history) --- */
+    .mobileVideoDrawerHandle {
+      width: 36px; height: 4px;
+      background: rgba(255,255,255,.18);
+      border-radius: 2px;
+      margin: 0 auto 14px;
+    }
+
+    .mobileVideoDrawerTitle {
+      font-size: 11px;
+      letter-spacing: .20em;
+      text-transform: uppercase;
+      color: rgba(215,176,107,.70);
+      text-align: center;
+      margin-bottom: 14px;
+      font-family: Georgia, serif;
+    }
+
+    .mobileVideoDrawerBtns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .mobileVideoDrawerBtns .videoCtrlBtn {
+      width: 100%;
+      padding: 12px 8px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       OVERLAYS DE CHAT E HISTÓRICO
+    ═══════════════════════════════════════════════════════ */
     .mobileOverlay {
       display: none;
       position: fixed;
@@ -3593,23 +3585,18 @@
       z-index: 1000;
       background: rgba(0,0,0,.55);
       backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
     }
-
-    .mobileOverlay.open {
-      display: flex;
-      align-items: flex-end;
-    }
+    .mobileOverlay.open { display: flex; align-items: flex-end; }
 
     .mobileDrawer {
       width: 100%;
-      max-height: 70svh;
-      background: #12121c;
-      border-top: 1px solid rgba(255,255,255,.1);
+      max-height: 72svh;
+      background: #100f0c;
+      border-top: 1px solid rgba(255,255,255,.09);
       border-radius: 20px 20px 0 0;
       display: flex;
       flex-direction: column;
-      animation: drawerSlideUp 0.28s cubic-bezier(0.22,0.8,0.36,1);
+      animation: drawerSlideUp .26s cubic-bezier(.22,.8,.36,1);
     }
 
     @keyframes drawerSlideUp {
@@ -3618,21 +3605,20 @@
     }
 
     .mobileDrawerHandle {
-      width: 40px;
-      height: 4px;
-      background: rgba(255,255,255,.2);
+      width: 38px; height: 4px;
+      background: rgba(255,255,255,.18);
       border-radius: 2px;
       margin: 12px auto 0;
       flex-shrink: 0;
     }
 
     .mobileDrawerTitle {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      color: rgba(255,255,255,.85);
+      color: rgba(255,255,255,.80);
       text-align: center;
-      padding: 12px 0 8px;
-      letter-spacing: 1px;
+      padding: 10px 0 8px;
+      letter-spacing: .08em;
       flex-shrink: 0;
     }
 
@@ -3641,10 +3627,9 @@
       overflow-y: auto;
       padding: 0 16px 16px;
       scrollbar-width: thin;
-      scrollbar-color: rgba(215,176,107,.3) transparent;
+      scrollbar-color: rgba(215,176,107,.25) transparent;
     }
 
-    /* Chat inside mobile drawer */
     #mobileChatDrawer .messages {
       max-height: none;
       height: auto;
@@ -3654,11 +3639,9 @@
     }
 
     #mobileChatDrawer .chatComposer {
-      border-top: 1px solid rgba(255,255,255,.08);
-      padding-top: 10px;
-      margin-top: 10px;
+      border-top: 1px solid rgba(255,255,255,.07);
       flex-shrink: 0;
-      padding: 10px 16px 14px;
+      padding: 10px 16px max(14px, env(safe-area-inset-bottom));
     }
 
     #mobileChatDrawer .composerRow {
@@ -3667,63 +3650,15 @@
       gap: 8px;
     }
 
-    /* Start button in mobile context — shown in overlay or via bottom bar */
-    #mobileStartBtn {
-      width: 100%;
-      padding: 11px;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #d7b06b, #b8892e);
-      color: #000;
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-      margin-top: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* Sync disabled state from desktop buttons */
-    #mobileRevealBtn:disabled,
-    #mobileResetBtn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    /* History inside drawer */
     #mobileHistoryDrawer .historyItem {
       padding: 10px 0;
-      border-bottom: 1px solid rgba(255,255,255,.07);
+      border-bottom: 1px solid rgba(255,255,255,.06);
     }
 
-    /* Video control bar — mobile-adapted */
-    .videoLayer {
-      display: block !important;
-    }
-
-    .videoControlBar {
-      top: auto;
-      bottom: 108px;
-      left: 50%;
-      transform: translateX(-50%);
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 12px;
-      max-width: calc(100vw - 24px);
-    }
-
-    .videoCtrlBtn {
-      font-size: 12px;
-      padding: 7px 10px;
-      border-radius: 8px;
-    }
-
-    .videoStatusInline {
-      font-size: 11px;
-      width: 100%;
-      text-align: center;
-    }
+    /* ═══════════════════════════════════════════════════════
+       OCULTAR ELEMENTOS DESNECESSÁRIOS NO MOBILE
+    ═══════════════════════════════════════════════════════ */
+    .ritualCardShadow { display: none; }
 
   } /* end @media 640px */
 
@@ -6990,6 +6925,46 @@
       }, { passive: true });
     });
 
+    // ── Video overlay — abre ao tocar no VOCÊ ────────────────────────────────
+    var videoOverlay = document.getElementById("mobileVideoOverlay");
+    var videoDrawerBtns = document.getElementById("mobileVideoDrawerBtns");
+
+    function openVideoOverlay() {
+      if (!videoOverlay) return;
+      // Popula os botões do desktop no drawer
+      if (videoDrawerBtns) {
+        var desktopBar = document.querySelector(".videoControlBar");
+        if (desktopBar) {
+          videoDrawerBtns.innerHTML = "";
+          desktopBar.querySelectorAll("button").forEach(function (btn) {
+            var clone = btn.cloneNode(true);
+            clone.addEventListener("click", function () {
+              btn.click();
+              closeVideoOverlay();
+            });
+            videoDrawerBtns.appendChild(clone);
+          });
+        }
+      }
+      videoOverlay.classList.add("open");
+    }
+
+    function closeVideoOverlay() {
+      if (videoOverlay) videoOverlay.classList.remove("open");
+    }
+
+    if (mobileVideoThumb) {
+      mobileVideoThumb.addEventListener("click", function () {
+        openVideoOverlay();
+      });
+    }
+
+    if (videoOverlay) {
+      videoOverlay.addEventListener("click", function (e) {
+        if (e.target === videoOverlay) closeVideoOverlay();
+      });
+    }
+
   })();
   </script>
 
@@ -7060,6 +7035,17 @@
       <div class="mobileDrawerTitle">Histórico de Cartas</div>
       <div class="mobileDrawerBody" id="mobileHistoryList">
         <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MOBILE VIDEO OVERLAY ===== -->
+  <div id="mobileVideoOverlay" role="dialog" aria-modal="true" aria-label="Câmera e áudio">
+    <div id="mobileVideoDrawer">
+      <div class="mobileVideoDrawerHandle"></div>
+      <div class="mobileVideoDrawerTitle">Câmera &amp; Áudio</div>
+      <div class="mobileVideoDrawerBtns" id="mobileVideoDrawerBtns">
+        <!-- Buttons injected by JS from desktop videoControlBar -->
       </div>
     </div>
   </div>
