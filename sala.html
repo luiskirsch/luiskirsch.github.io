@@ -3113,12 +3113,8 @@
 
     /* ═══════════════════════════════════════════════════════
        PAGE — ocupa 100% da tela sem scroll
+       (NÃO tocar em html/body overflow — quebra position:fixed no iOS)
     ═══════════════════════════════════════════════════════ */
-    html, body {
-      overflow: hidden;
-      height: 100%;
-    }
-
     .page {
       padding: 0;
       height: 100svh;
@@ -3126,6 +3122,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .shell {
@@ -3135,6 +3132,7 @@
       display: flex;
       flex-direction: column;
       gap: 0;
+      overflow: hidden;
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -3659,6 +3657,46 @@
        OCULTAR ELEMENTOS DESNECESSÁRIOS NO MOBILE
     ═══════════════════════════════════════════════════════ */
     .ritualCardShadow { display: none; }
+
+    /* Remove outline preta do desktop (visível apenas no mobile) */
+    .ritualVisualCard { outline: none !important; }
+
+    /* ── Botão flutuante de perfil — canto superior direito ── */
+    #mobileProfileFab {
+      display: flex;
+      position: fixed;
+      top: max(10px, env(safe-area-inset-top));
+      right: 12px;
+      z-index: 800;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(8,7,5,.88);
+      border: 1.5px solid rgba(215,176,107,.40);
+      box-shadow: 0 2px 12px rgba(0,0,0,.45);
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    #mobileProfileFab:active {
+      border-color: rgba(215,176,107,.75);
+      box-shadow: 0 0 16px rgba(215,176,107,.30);
+    }
+
+    /* ── Strip vazia — placeholder animado ── */
+    .mobileAvatarWrap--ghost .mobileAvatar {
+      background: linear-gradient(135deg, #181612, #221e18);
+      animation: ghostPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes ghostPulse {
+      0%,100% { opacity: .4; }
+      50%      { opacity: .7; }
+    }
 
   } /* end @media 640px */
 
@@ -6664,6 +6702,7 @@
     var mobileVideoThumb = document.getElementById("mobileVideoThumb");
     var mobilePlayerStrip= document.getElementById("mobilePlayerStripInline");
     var mobileCardLabel  = document.getElementById("mobileCardLabel");
+    var mobileProfileFab = document.getElementById("mobileProfileFab");
 
     var desktopRevealBtn = document.getElementById("revealCardBtn");
     var desktopResetBtn  = document.getElementById("resetRitualBtn");
@@ -6674,6 +6713,11 @@
     var desktopHistory   = document.getElementById("historyList");
     var desktopPlayerList= document.getElementById("playerList");
 
+    // Dados do próprio jogador (para avatar na strip quando lista estiver vazia)
+    var selfName   = localStorage.getItem("osl_name") || "Você";
+    var selfAvatar = localStorage.getItem("osl_avatar") || "";
+    var selfColor  = localStorage.getItem("osl_color") || "#1c1a14";
+
     var chatIsOpen = false;
     var histIsOpen = false;
     var unreadCount = 0;
@@ -6683,6 +6727,7 @@
       mobileBar.style.display = mobile ? "flex" : "none";
       if (mobilePlayerStrip) mobilePlayerStrip.style.display = mobile ? "flex" : "none";
       if (mobileCardLabel)   mobileCardLabel.style.display   = mobile ? "block" : "none";
+      if (mobileProfileFab)  mobileProfileFab.style.display  = mobile ? "flex" : "none";
     }
 
     applyMobileMode(IS_MOBILE.matches);
@@ -6702,26 +6747,23 @@
     setInterval(syncButtonStates, 800);
     syncButtonStates();
 
-    // ── Delegate clicks to desktop buttons ───────────────────────────────────
-    mobileRevealBtn.addEventListener("click", function () {
-      if (desktopRevealBtn && !desktopRevealBtn.disabled) desktopRevealBtn.click();
-    });
+    // ── Delegar cliques para os botões do desktop ─────────────────────────────
+    // Usa dispatchEvent para garantir compatibilidade com listeners no Firefox/iOS
+    function fireDesktopBtn(btn) {
+      if (!btn || btn.disabled) return;
+      // Tenta dispatchEvent primeiro (mais confiável com handlers complexos)
+      try { btn.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })); }
+      catch (e) { btn.click(); }
+    }
 
-    mobileResetBtn.addEventListener("click", function () {
-      if (desktopResetBtn && !desktopResetBtn.disabled) desktopResetBtn.click();
-    });
-
-    mobileStartBtn.addEventListener("click", function () {
-      if (desktopStartBtn) desktopStartBtn.click();
-    });
+    mobileRevealBtn.addEventListener("click", function () { fireDesktopBtn(desktopRevealBtn); });
+    mobileResetBtn.addEventListener("click",  function () { fireDesktopBtn(desktopResetBtn);  });
+    mobileStartBtn.addEventListener("click",  function () { fireDesktopBtn(desktopStartBtn);  });
 
     // ── Show/hide start button based on ritual state ──────────────────────────
     function syncStartBtn() {
-      if (!desktopStartBtn) return;
-      var visible = !desktopStartBtn.hidden && desktopStartBtn.style.display !== "none" &&
-                    desktopStartBtn.offsetParent !== null;
-      // startBtn is inside sidebar (hidden on mobile) so we check disabled state differently
-      // Show mobileStartBtn only when reveal + reset are both disabled (session not started)
+      // revealCardBtn fica disabled quando: sessão não iniciada OU usuário não é host
+      // Aqui apenas determinamos qual conjunto de botões mostrar
       var sessionNotStarted = desktopRevealBtn ? desktopRevealBtn.disabled : true;
       mobileStartBtn.style.display = sessionNotStarted ? "" : "none";
       mobileRevealBtn.style.display = sessionNotStarted ? "none" : "";
@@ -6825,6 +6867,29 @@
     }
 
     // ── Player strip: sync from desktop player list ───────────────────────────
+    function makeAvatarWrap(initText, nameText, bg, isActive, isSelf, onClickFn) {
+      var wrap = document.createElement("div");
+      wrap.className = "mobileAvatarWrap";
+
+      var av = document.createElement("div");
+      av.className = "mobileAvatar" +
+        (isActive ? " mobileAvatar--active" : "") +
+        (isSelf   ? " mobileAvatar--self"   : "");
+      if (bg) av.style.background = bg;
+      av.textContent = initText;
+      if (onClickFn) av.addEventListener("click", onClickFn);
+      // Long-press / touch hint
+      av.style.setProperty("-webkit-tap-highlight-color", "transparent");
+
+      var nm = document.createElement("span");
+      nm.className = "mobileAvatarName" + (isActive ? " mobileAvatarName--active" : "");
+      nm.textContent = nameText.length > 8 ? nameText.slice(0,8) + "…" : nameText;
+
+      wrap.appendChild(av);
+      wrap.appendChild(nm);
+      return wrap;
+    }
+
     function syncPlayerStrip() {
       if (!mobilePlayerStrip || !desktopPlayerList) return;
       var players = desktopPlayerList.querySelectorAll(".player");
@@ -6833,45 +6898,37 @@
       players.forEach(function (playerEl) {
         var avatarEl = playerEl.querySelector(".avatar");
         var nameEl   = playerEl.querySelector(".playerName, .name, [class*='name']");
-        var roleEl   = playerEl.querySelector(".playerRole, .playerHost, [class*='host'], [class*='role']");
         var initText = avatarEl ? avatarEl.textContent.trim() : "?";
         var nameText = nameEl  ? nameEl.textContent.trim() : "Jogador";
         var bg       = avatarEl ? (avatarEl.style.background || avatarEl.style.backgroundColor || "") : "";
         var pid      = playerEl.dataset.pid || playerEl.dataset.id || "";
-        // Mark host as active (ring glow) — host leads the ritual
-        var isActivePlayer = !!playerEl.querySelector(".playerHost, [class*='host']") ||
-                             playerEl.classList.contains("player--host");
+        var isHost   = !!playerEl.querySelector(".playerHost, [class*='host']");
+        var isSelf   = pid === (localStorage.getItem("osl_pid") || "");
 
-        var wrap = document.createElement("div");
-        wrap.className = "mobileAvatarWrap";
-
-        var av = document.createElement("div");
-        av.className = "mobileAvatar" + (isActivePlayer ? " mobileAvatar--active" : "");
-        if (bg) av.style.background = bg;
-        av.textContent = initText;
-        if (pid) {
-          av.addEventListener("click", function () {
-            var desktopPlayer = desktopPlayerList.querySelector("[data-pid='" + pid + "'], [data-id='" + pid + "']");
-            if (desktopPlayer) desktopPlayer.click();
-          });
-        }
-
-        var nm = document.createElement("span");
-        nm.className = "mobileAvatarName";
-        nm.textContent = nameText.length > 8 ? nameText.slice(0,8) + "…" : nameText;
-        if (isActivePlayer) nm.style.color = "rgba(215,176,107,.90)";
-
-        wrap.appendChild(av);
-        wrap.appendChild(nm);
+        var wrap = makeAvatarWrap(initText, nameText, bg, isHost, isSelf, function () {
+          var desktopPlayer = desktopPlayerList.querySelector("[data-pid='" + pid + "'], [data-id='" + pid + "']");
+          if (desktopPlayer) desktopPlayer.click();
+        });
         mobilePlayerStrip.appendChild(wrap);
       });
+
+      // Fallback: se strip ainda vazia, mostra placeholder do próprio jogador
+      if (!mobilePlayerStrip.children.length) {
+        var initials = selfName.trim().split(/\s+/).map(function(w){ return w[0]; }).join("").slice(0,2).toUpperCase() || "?";
+        var wrap = makeAvatarWrap(selfAvatar || initials, selfName, selfColor, false, true, function () {
+          var btn = document.getElementById("myProfileBtn");
+          if (btn) btn.click();
+        });
+        wrap.className += " mobileAvatarWrap--ghost";
+        mobilePlayerStrip.appendChild(wrap);
+      }
     }
 
     if (desktopPlayerList) {
       var playerObs = new MutationObserver(syncPlayerStrip);
       playerObs.observe(desktopPlayerList, { childList: true, subtree: true });
     }
-    setInterval(syncPlayerStrip, 3000);
+    setInterval(syncPlayerStrip, 2000);
     syncPlayerStrip();
 
     // ── Self video thumbnail ──────────────────────────────────────────────────
@@ -6924,6 +6981,14 @@
         }
       }, { passive: true });
     });
+
+    // ── Botão de perfil ───────────────────────────────────────────────────────
+    if (mobileProfileFab) {
+      mobileProfileFab.addEventListener("click", function () {
+        var btn = document.getElementById("myProfileBtn");
+        if (btn) btn.click();
+      });
+    }
 
     // ── Video overlay — abre ao tocar no VOCÊ ────────────────────────────────
     var videoOverlay = document.getElementById("mobileVideoOverlay");
@@ -7038,6 +7103,9 @@
       </div>
     </div>
   </div>
+
+  <!-- ===== MOBILE PROFILE BUTTON (fixed, top-right) ===== -->
+  <button id="mobileProfileFab" style="display:none" aria-label="Meu perfil" title="Meu perfil">👤</button>
 
   <!-- ===== MOBILE VIDEO OVERLAY ===== -->
   <div id="mobileVideoOverlay" role="dialog" aria-modal="true" aria-label="Câmera e áudio">
