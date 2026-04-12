@@ -3517,7 +3517,7 @@
     window.PANEL_SERVER_BASE =
   location.hostname === "localhost"
     ? "http://localhost:3000"
-    : "https://osl-video-server-production.up.railway.app";
+    : "https://osl-video-server.onrender.com";
   </script>
 
   <script>
@@ -4542,7 +4542,7 @@
       `;
       grid.appendChild(basicCard);
       packs.forEach(pack => {
-        const unlocked = compras.includes(pack.id);
+        const unlocked = compras.some(c => c.produto === pack.id);
         const card = document.createElement("div");
         card.className = `profPackCard ${unlocked ? "profPackCard--unlocked" : "profPackCard--locked"}`;
         card.innerHTML = `
