@@ -3084,6 +3084,649 @@
       animation: goldenPulse .55s cubic-bezier(0.4,0,0.2,1) forwards;
     }
 
+  /* ================================================================
+     MOBILE LAYOUT — max-width: 640px
+     Inspired by the compact smartphone mockup:
+       • Circular player avatars strip at top
+       • Full-screen ritual card in center
+       • Fixed bottom nav: icons | action buttons | self-video thumb
+  ================================================================ */
+
+  @media (max-width: 640px) {
+
+    /* --- Hide desktop panels --- */
+    .sidebar,
+    .rightColumn,
+    .tableHead,
+    .footerBar,
+    .deckInfoBar,
+    .videoColLeft,
+    .videoColRight,
+    .videoSelfSlot,
+    .videoLayer {
+      display: none !important;
+    }
+
+    /* --- Page & Shell --- */
+    .page {
+      padding: 0;
+      background: #0a0a0a;
+      min-height: 100svh;
+    }
+
+    /* --- Top bar compact --- */
+    .topbar {
+      grid-template-columns: 1fr auto;
+      gap: 6px;
+      padding: 10px 14px;
+      border-radius: 0;
+      background: rgba(12,12,18,.97);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .topCenterMeta {
+      display: none;
+    }
+
+    .topActions {
+      gap: 6px;
+    }
+
+    .topActionBtn {
+      padding: 7px 11px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    .topActionBtn.iconOnly {
+      padding: 7px 10px;
+    }
+
+    /* --- Layout: single column --- */
+    .layout {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding: 0;
+    }
+
+    .mainArea {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tableCard {
+      border-radius: 0;
+      border: none;
+      background: #0a0a0a;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- Player avatar strip --- */
+    #mobilePlayerStrip {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 20px;
+      padding: 16px 20px 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, rgba(215,176,107,.04) 0%, transparent 100%);
+    }
+
+    #mobilePlayerStrip::-webkit-scrollbar { display: none; }
+
+    /* Inline strip (inside tableCard) — same layout as external strip */
+    #mobilePlayerStripInline {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 20px;
+      padding: 16px 20px 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, rgba(215,176,107,.04) 0%, transparent 100%);
+    }
+
+    #mobilePlayerStripInline::-webkit-scrollbar { display: none; }
+
+    .mobileAvatarWrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .mobileAvatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e1e2a, #2a2a3a);
+      border: 2px solid rgba(215, 176, 107, 0.65);
+      box-shadow: 0 0 10px rgba(215, 176, 107, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #d7b06b;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      overflow: hidden;
+    }
+
+    .mobileAvatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .mobileAvatar:active {
+      transform: scale(0.92);
+      box-shadow: 0 0 20px rgba(215, 176, 107, 0.5);
+    }
+
+    .mobileAvatarName {
+      font-size: 10px;
+      color: rgba(255,255,255,.6);
+      text-align: center;
+      max-width: 56px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mobileAvatar--self {
+      border-color: rgba(215, 176, 107, 0.45);
+      box-shadow: none;
+    }
+
+    /* Active/current player — glowing gold ring */
+    .mobileAvatar--active {
+      border-color: #d7b06b;
+      box-shadow:
+        0 0 0 3px rgba(215,176,107,.22),
+        0 0 16px rgba(215,176,107,.60),
+        0 0 32px rgba(215,176,107,.30);
+      animation: mobileAvatarPulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes mobileAvatarPulse {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(215,176,107,.22), 0 0 16px rgba(215,176,107,.60), 0 0 32px rgba(215,176,107,.30); }
+      50%       { box-shadow: 0 0 0 4px rgba(215,176,107,.35), 0 0 24px rgba(215,176,107,.80), 0 0 44px rgba(215,176,107,.45); }
+    }
+
+    /* --- Card section label --- */
+    #mobileCardLabel {
+      display: block;
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: .32em;
+      color: rgba(215,176,107,.80);
+      text-transform: uppercase;
+      padding: 6px 0 10px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 400;
+      text-shadow: 0 0 18px rgba(215,176,107,.35);
+    }
+
+    /* ── Ornate card frame upgrade (mobile) ─────────────────── */
+    .ritualVisualCard {
+      border: 2px solid rgba(215,176,107,.70) !important;
+      box-shadow:
+        0 0 0 1px rgba(215,176,107,.12),
+        inset 0 0 0 1px rgba(215,176,107,.08),
+        0 12px 50px rgba(0,0,0,.65),
+        0 0 36px rgba(215,176,107,.18) !important;
+    }
+
+    /* Thicker inner border */
+    .ritualVisualCard::before {
+      inset: 10px !important;
+      border: 1px solid rgba(215,176,107,.45) !important;
+      box-shadow:
+        inset 0 0 0 1px rgba(0,0,0,.6),
+        0 0 0 1px rgba(215,176,107,.15) !important;
+    }
+
+    /* Four-corner bracket ornaments — L-shapes at each corner */
+    .ritualCardFrame::before,
+    .ritualCardFrame::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+      z-index: 5;
+    }
+    /* Top-left */
+    .ritualCardFrame::before {
+      top: 12px; left: 12px;
+      border-top: 1.5px solid rgba(215,176,107,.85);
+      border-left: 1.5px solid rgba(215,176,107,.85);
+    }
+    /* Bottom-right */
+    .ritualCardFrame::after {
+      bottom: 12px; right: 12px;
+      border-bottom: 1.5px solid rgba(215,176,107,.85);
+      border-right: 1.5px solid rgba(215,176,107,.85);
+    }
+    /* Reinforce card glow on mobile */
+    .revealStage {
+      filter: drop-shadow(0 0 24px rgba(215,176,107,.22));
+    }
+
+    /* ── Card typography — mobile-first sizes ── */
+    .ritualCardMainTitle {
+      font-size: 26px !important;
+      letter-spacing: .06em !important;
+      text-shadow:
+        0 2px 10px rgba(0,0,0,.9),
+        0 0 28px rgba(215,176,107,.30) !important;
+    }
+
+    .ritualMainInstruction {
+      font-size: 12px !important;
+      letter-spacing: .08em !important;
+      text-transform: uppercase;
+      color: rgba(245,238,220,.80) !important;
+    }
+
+    .ritualRuleText {
+      font-size: 12px !important;
+      line-height: 1.6 !important;
+      text-align: center;
+      color: rgba(240,232,210,.82) !important;
+    }
+
+    .ritualRuleText.subtle {
+      font-size: 11px !important;
+    }
+
+    .ritualFinalPhrase {
+      font-size: 9px !important;
+      letter-spacing: .14em !important;
+    }
+
+    .ritualCardNumber {
+      font-size: 9px !important;
+      letter-spacing: .28em !important;
+      color: rgba(215,176,107,.55) !important;
+    }
+
+    /* --- Game table: card fills space --- */
+    .gameTableGrid {
+      display: flex !important;
+      flex-direction: column;
+      flex: 1;
+      padding: 0 12px;
+    }
+
+    .cardCenter {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .revealPanel {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .revealStage {
+      width: min(310px, 88vw);
+    }
+
+    .ritualCardWrap {
+      width: 100% !important;
+    }
+
+    .ritualVisualCard {
+      width: 100% !important;
+    }
+
+    /* --- Mobile bottom nav bar --- */
+    #mobileBottomBar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 900;
+      background: linear-gradient(180deg, rgba(8,7,5,.96) 0%, rgba(5,4,3,.99) 100%);
+      border-top: 1px solid rgba(215,176,107,.14);
+      padding: 10px 12px max(12px, env(safe-area-inset-bottom)) 12px;
+      gap: 10px;
+      backdrop-filter: blur(18px) saturate(1.4);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      box-shadow: 0 -1px 0 rgba(215,176,107,.06), 0 -8px 32px rgba(0,0,0,.45);
+    }
+
+    /* Left: icon buttons stacked */
+    .mobileNavIcons {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .mobileNavIconWrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .mobileNavIconLabel {
+      font-size: 8px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.38);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .mobileNavIcon {
+      width: 44px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.09);
+      color: rgba(255,255,255,.70);
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .mobileNavIcon:active {
+      background: rgba(215,176,107,.16);
+      border-color: rgba(215,176,107,.35);
+    }
+
+    .mobileNavIcon .badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #d7b06b;
+      display: none;
+    }
+
+    .mobileNavIcon .badge.visible {
+      display: block;
+    }
+
+    /* Center: action buttons */
+    .mobileNavActions {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex: 1;
+    }
+
+    .mobilePrimaryBtn {
+      width: 100%;
+      padding: 12px 8px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(160deg, #e0bc78 0%, #c99a4b 55%, #a87832 100%);
+      color: #110b04;
+      font-weight: 800;
+      font-size: 11px;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      text-transform: uppercase;
+      box-shadow: 0 2px 14px rgba(215,176,107,.35), inset 0 1px 0 rgba(255,255,255,.20);
+    }
+
+    .mobilePrimaryBtn:disabled {
+      opacity: 0.32;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .mobilePrimaryBtn:not(:disabled):active {
+      transform: scale(0.96);
+      box-shadow: 0 1px 6px rgba(215,176,107,.20);
+    }
+
+    .mobileSecondaryBtn {
+      width: 100%;
+      padding: 10px 8px;
+      border: 1px solid rgba(215,176,107,.45);
+      border-radius: 10px;
+      background: rgba(215,176,107,.07);
+      color: rgba(215,176,107,.90);
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s, background 0.15s;
+      text-transform: uppercase;
+    }
+
+    .mobileSecondaryBtn:disabled {
+      opacity: 0.28;
+      cursor: not-allowed;
+    }
+
+    .mobileSecondaryBtn:not(:disabled):active {
+      transform: scale(0.96);
+      background: rgba(215,176,107,.14);
+    }
+
+    /* Right: self video thumbnail */
+    .mobileNavSelf {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    #mobileVideoThumb {
+      width: 54px;
+      height: 76px;
+      border-radius: 12px;
+      background: linear-gradient(160deg, #1a1a24, #0f0f18);
+      border: 1.5px solid rgba(215,176,107,.38);
+      box-shadow: 0 0 12px rgba(215,176,107,.15);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #mobileVideoThumb video,
+    #mobileVideoThumb canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #mobileVideoThumb .mobileVideoOff {
+      font-size: 22px;
+      opacity: 0.35;
+    }
+
+    .mobileNavSelfLabel {
+      font-size: 9px;
+      letter-spacing: .18em;
+      color: rgba(255,255,255,.42);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* --- Bottom bar padding compensation --- */
+    .shell {
+      padding-bottom: 100px;
+    }
+
+    /* --- Mobile overlays (chat + history) --- */
+    .mobileOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+
+    .mobileOverlay.open {
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .mobileDrawer {
+      width: 100%;
+      max-height: 70svh;
+      background: #12121c;
+      border-top: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      flex-direction: column;
+      animation: drawerSlideUp 0.28s cubic-bezier(0.22,0.8,0.36,1);
+    }
+
+    @keyframes drawerSlideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+
+    .mobileDrawerHandle {
+      width: 40px;
+      height: 4px;
+      background: rgba(255,255,255,.2);
+      border-radius: 2px;
+      margin: 12px auto 0;
+      flex-shrink: 0;
+    }
+
+    .mobileDrawerTitle {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,.85);
+      text-align: center;
+      padding: 12px 0 8px;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+
+    .mobileDrawerBody {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 16px 16px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(215,176,107,.3) transparent;
+    }
+
+    /* Chat inside mobile drawer */
+    #mobileChatDrawer .messages {
+      max-height: none;
+      height: auto;
+      overflow: visible;
+      border: none;
+      background: transparent;
+    }
+
+    #mobileChatDrawer .chatComposer {
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding-top: 10px;
+      margin-top: 10px;
+      flex-shrink: 0;
+      padding: 10px 16px 14px;
+    }
+
+    #mobileChatDrawer .composerRow {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    /* Start button in mobile context — shown in overlay or via bottom bar */
+    #mobileStartBtn {
+      width: 100%;
+      padding: 11px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #d7b06b, #b8892e);
+      color: #000;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Sync disabled state from desktop buttons */
+    #mobileRevealBtn:disabled,
+    #mobileResetBtn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* History inside drawer */
+    #mobileHistoryDrawer .historyItem {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    /* Video control bar — mobile-adapted */
+    .videoLayer {
+      display: block !important;
+    }
+
+    .videoControlBar {
+      top: auto;
+      bottom: 108px;
+      left: 50%;
+      transform: translateX(-50%);
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 12px;
+      max-width: calc(100vw - 24px);
+    }
+
+    .videoCtrlBtn {
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 8px;
+    }
+
+    .videoStatusInline {
+      font-size: 11px;
+      width: 100%;
+      text-align: center;
+    }
+
+  } /* end @media 640px */
+
   </style>
 </head>
 
@@ -3184,6 +3827,12 @@
                 </div>
               </div>
             </div>
+
+            <!-- ===== MOBILE PLAYER STRIP (visible only on mobile via CSS) ===== -->
+            <div id="mobilePlayerStripInline" style="display:none">
+              <!-- Populated by mobile JS -->
+            </div>
+            <span id="mobileCardLabel" style="display:none">Carta Atual</span>
 
             <!-- ===== GAME TABLE: 3-column grid (left videos | card + self | right videos) ===== -->
             <div class="gameTableGrid" id="videoGrid">
@@ -6057,6 +6706,363 @@
 
   <!-- Botão discreto de saída do Arena Mode -->
   <button id="exitArenaBtn" class="exitArenaBtn">← Sair da imersão</button>
+
+  <!-- ===== MOBILE LAYOUT CONTROLLER ===== -->
+  <script>
+  (function () {
+    var IS_MOBILE = window.matchMedia("(max-width: 640px)");
+
+    // ── Element refs ──────────────────────────────────────────────────────────
+    var mobileBar        = document.getElementById("mobileBottomBar");
+    var mobileRevealBtn  = document.getElementById("mobileRevealBtn");
+    var mobileResetBtn   = document.getElementById("mobileResetBtn");
+    var mobileStartBtn   = document.getElementById("mobileStartBtn");
+    var mobileChatBtn    = document.getElementById("mobileChatBtn");
+    var mobileHistBtn    = document.getElementById("mobileHistoryBtn");
+    var mobileChatOverlay= document.getElementById("mobileChatOverlay");
+    var mobileHistOverlay= document.getElementById("mobileHistoryOverlay");
+    var mobileChatMsgs   = document.getElementById("mobileChatMessages");
+    var mobileHistList   = document.getElementById("mobileHistoryList");
+    var mobileMsgInput   = document.getElementById("mobileMsgInput");
+    var mobileSendBtn    = document.getElementById("mobileSendBtn");
+    var mobileChatBadge  = document.getElementById("mobileChatBadge");
+    var mobileVideoThumb = document.getElementById("mobileVideoThumb");
+    var mobilePlayerStrip= document.getElementById("mobilePlayerStripInline");
+    var mobileCardLabel  = document.getElementById("mobileCardLabel");
+
+    var desktopRevealBtn = document.getElementById("revealCardBtn");
+    var desktopResetBtn  = document.getElementById("resetRitualBtn");
+    var desktopStartBtn  = document.getElementById("startBtn");
+    var desktopSendBtn   = document.getElementById("sendBtn");
+    var desktopMsgInput  = document.getElementById("messageInput");
+    var desktopMessages  = document.getElementById("messages");
+    var desktopHistory   = document.getElementById("historyList");
+    var desktopPlayerList= document.getElementById("playerList");
+
+    var chatIsOpen = false;
+    var histIsOpen = false;
+    var unreadCount = 0;
+
+    // ── Show/hide based on viewport ───────────────────────────────────────────
+    function applyMobileMode(mobile) {
+      mobileBar.style.display = mobile ? "flex" : "none";
+      if (mobilePlayerStrip) mobilePlayerStrip.style.display = mobile ? "flex" : "none";
+      if (mobileCardLabel)   mobileCardLabel.style.display   = mobile ? "block" : "none";
+    }
+
+    applyMobileMode(IS_MOBILE.matches);
+    IS_MOBILE.addEventListener("change", function (e) { applyMobileMode(e.matches); });
+
+    // ── Sync disabled state from desktop buttons ──────────────────────────────
+    function syncButtonStates() {
+      if (desktopRevealBtn) {
+        mobileRevealBtn.disabled = desktopRevealBtn.disabled;
+      }
+      if (desktopResetBtn) {
+        mobileResetBtn.disabled = desktopResetBtn.disabled;
+      }
+    }
+
+    // Poll for state changes (desktop buttons are updated by Firebase listeners)
+    setInterval(syncButtonStates, 800);
+    syncButtonStates();
+
+    // ── Delegate clicks to desktop buttons ───────────────────────────────────
+    mobileRevealBtn.addEventListener("click", function () {
+      if (desktopRevealBtn && !desktopRevealBtn.disabled) desktopRevealBtn.click();
+    });
+
+    mobileResetBtn.addEventListener("click", function () {
+      if (desktopResetBtn && !desktopResetBtn.disabled) desktopResetBtn.click();
+    });
+
+    mobileStartBtn.addEventListener("click", function () {
+      if (desktopStartBtn) desktopStartBtn.click();
+    });
+
+    // ── Show/hide start button based on ritual state ──────────────────────────
+    function syncStartBtn() {
+      if (!desktopStartBtn) return;
+      var visible = !desktopStartBtn.hidden && desktopStartBtn.style.display !== "none" &&
+                    desktopStartBtn.offsetParent !== null;
+      // startBtn is inside sidebar (hidden on mobile) so we check disabled state differently
+      // Show mobileStartBtn only when reveal + reset are both disabled (session not started)
+      var sessionNotStarted = desktopRevealBtn ? desktopRevealBtn.disabled : true;
+      mobileStartBtn.style.display = sessionNotStarted ? "" : "none";
+      mobileRevealBtn.style.display = sessionNotStarted ? "none" : "";
+      mobileResetBtn.style.display  = sessionNotStarted ? "none" : "";
+    }
+
+    setInterval(syncStartBtn, 1000);
+    syncStartBtn();
+
+    // ── Chat overlay ──────────────────────────────────────────────────────────
+    function openChat() {
+      chatIsOpen = true;
+      mobileChatOverlay.classList.add("open");
+      syncChatMessages();
+      unreadCount = 0;
+      mobileChatBadge.classList.remove("visible");
+      if (mobileMsgInput) mobileMsgInput.focus();
+    }
+
+    function closeChat() {
+      chatIsOpen = false;
+      mobileChatOverlay.classList.remove("open");
+    }
+
+    function syncChatMessages() {
+      if (!mobileChatMsgs || !desktopMessages) return;
+      mobileChatMsgs.innerHTML = desktopMessages.innerHTML;
+      mobileChatMsgs.scrollTop = mobileChatMsgs.scrollHeight;
+    }
+
+    mobileChatBtn.addEventListener("click", function () {
+      if (chatIsOpen) { closeChat(); return; }
+      if (histIsOpen) closeHistory();
+      openChat();
+    });
+
+    mobileChatOverlay.addEventListener("click", function (e) {
+      if (e.target === mobileChatOverlay) closeChat();
+    });
+
+    // Watch desktop messages for new content → badge
+    if (desktopMessages) {
+      var chatObs = new MutationObserver(function () {
+        if (chatIsOpen) {
+          syncChatMessages();
+        } else {
+          unreadCount++;
+          mobileChatBadge.classList.add("visible");
+        }
+      });
+      chatObs.observe(desktopMessages, { childList: true, subtree: true });
+    }
+
+    // Mobile send button → delegates to desktop
+    if (mobileSendBtn && mobileMsgInput) {
+      mobileSendBtn.addEventListener("click", function () {
+        if (!desktopMsgInput || !desktopSendBtn) return;
+        desktopMsgInput.value = mobileMsgInput.value;
+        desktopSendBtn.click();
+        mobileMsgInput.value = "";
+        setTimeout(syncChatMessages, 200);
+      });
+
+      mobileMsgInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") mobileSendBtn.click();
+      });
+    }
+
+    // ── History overlay ───────────────────────────────────────────────────────
+    function openHistory() {
+      histIsOpen = true;
+      mobileHistOverlay.classList.add("open");
+      syncHistory();
+    }
+
+    function closeHistory() {
+      histIsOpen = false;
+      mobileHistOverlay.classList.remove("open");
+    }
+
+    function syncHistory() {
+      if (!mobileHistList || !desktopHistory) return;
+      mobileHistList.innerHTML = desktopHistory.innerHTML;
+    }
+
+    mobileHistBtn.addEventListener("click", function () {
+      if (histIsOpen) { closeHistory(); return; }
+      if (chatIsOpen) closeChat();
+      openHistory();
+    });
+
+    mobileHistOverlay.addEventListener("click", function (e) {
+      if (e.target === mobileHistOverlay) closeHistory();
+    });
+
+    if (desktopHistory) {
+      var histObs = new MutationObserver(function () {
+        if (histIsOpen) syncHistory();
+      });
+      histObs.observe(desktopHistory, { childList: true, subtree: true });
+    }
+
+    // ── Player strip: sync from desktop player list ───────────────────────────
+    function syncPlayerStrip() {
+      if (!mobilePlayerStrip || !desktopPlayerList) return;
+      var players = desktopPlayerList.querySelectorAll(".player");
+      mobilePlayerStrip.innerHTML = "";
+
+      players.forEach(function (playerEl) {
+        var avatarEl = playerEl.querySelector(".avatar");
+        var nameEl   = playerEl.querySelector(".playerName, .name, [class*='name']");
+        var roleEl   = playerEl.querySelector(".playerRole, .playerHost, [class*='host'], [class*='role']");
+        var initText = avatarEl ? avatarEl.textContent.trim() : "?";
+        var nameText = nameEl  ? nameEl.textContent.trim() : "Jogador";
+        var bg       = avatarEl ? (avatarEl.style.background || avatarEl.style.backgroundColor || "") : "";
+        var pid      = playerEl.dataset.pid || playerEl.dataset.id || "";
+        // Mark host as active (ring glow) — host leads the ritual
+        var isActivePlayer = !!playerEl.querySelector(".playerHost, [class*='host']") ||
+                             playerEl.classList.contains("player--host");
+
+        var wrap = document.createElement("div");
+        wrap.className = "mobileAvatarWrap";
+
+        var av = document.createElement("div");
+        av.className = "mobileAvatar" + (isActivePlayer ? " mobileAvatar--active" : "");
+        if (bg) av.style.background = bg;
+        av.textContent = initText;
+        if (pid) {
+          av.addEventListener("click", function () {
+            var desktopPlayer = desktopPlayerList.querySelector("[data-pid='" + pid + "'], [data-id='" + pid + "']");
+            if (desktopPlayer) desktopPlayer.click();
+          });
+        }
+
+        var nm = document.createElement("span");
+        nm.className = "mobileAvatarName";
+        nm.textContent = nameText.length > 8 ? nameText.slice(0,8) + "…" : nameText;
+        if (isActivePlayer) nm.style.color = "rgba(215,176,107,.90)";
+
+        wrap.appendChild(av);
+        wrap.appendChild(nm);
+        mobilePlayerStrip.appendChild(wrap);
+      });
+    }
+
+    if (desktopPlayerList) {
+      var playerObs = new MutationObserver(syncPlayerStrip);
+      playerObs.observe(desktopPlayerList, { childList: true, subtree: true });
+    }
+    setInterval(syncPlayerStrip, 3000);
+    syncPlayerStrip();
+
+    // ── Self video thumbnail ──────────────────────────────────────────────────
+    function mirrorSelfVideo() {
+      var selfSlot = document.getElementById("videoSelfSlot");
+      if (!selfSlot || !mobileVideoThumb) return;
+      var video = selfSlot.querySelector("video");
+      if (!video) {
+        mobileVideoThumb.innerHTML = '<span class="mobileVideoOff">🎥</span>';
+        return;
+      }
+      // Clone the video element into the thumb
+      if (!mobileVideoThumb.contains(video)) {
+        mobileVideoThumb.innerHTML = "";
+        mobileVideoThumb.appendChild(video.cloneNode(true));
+        var cloned = mobileVideoThumb.querySelector("video");
+        if (cloned) {
+          cloned.srcObject = video.srcObject;
+          cloned.muted = true;
+          cloned.autoplay = true;
+          cloned.playsInline = true;
+          cloned.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:inherit;transform:scaleX(-1)";
+          cloned.play().catch(function(){});
+        }
+      }
+    }
+
+    var selfSlotEl = document.getElementById("videoSelfSlot");
+    if (selfSlotEl) {
+      var selfObs = new MutationObserver(mirrorSelfVideo);
+      selfObs.observe(selfSlotEl, { childList: true, subtree: true });
+    }
+    setInterval(mirrorSelfVideo, 2000);
+
+    // ── Swipe down to close drawers ───────────────────────────────────────────
+    [mobileChatOverlay, mobileHistOverlay].forEach(function (overlay) {
+      var startY = 0;
+      var drawer = overlay.querySelector(".mobileDrawer");
+      if (!drawer) return;
+
+      drawer.addEventListener("touchstart", function (e) {
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+
+      drawer.addEventListener("touchend", function (e) {
+        var dy = e.changedTouches[0].clientY - startY;
+        if (dy > 60) {
+          if (overlay === mobileChatOverlay) closeChat();
+          else closeHistory();
+        }
+      }, { passive: true });
+    });
+
+  })();
+  </script>
+
+  <!-- ===== MOBILE PLAYER AVATAR STRIP (injected above card on mobile) ===== -->
+  <div id="mobilePlayerStrip" style="display:none">
+    <!-- Populated by JS on mobile -->
+  </div>
+
+  <!-- ===== MOBILE BOTTOM NAV BAR ===== -->
+  <nav id="mobileBottomBar" style="display:none" aria-label="Navegação mobile">
+
+    <!-- Left: icon buttons with labels -->
+    <div class="mobileNavIcons">
+      <div class="mobileNavIconWrap">
+        <button class="mobileNavIcon" id="mobileChatBtn" title="Chat" aria-label="Abrir chat">
+          💬
+          <span class="badge" id="mobileChatBadge"></span>
+        </button>
+        <span class="mobileNavIconLabel">Chat</span>
+      </div>
+      <div class="mobileNavIconWrap">
+        <button class="mobileNavIcon" id="mobileHistoryBtn" title="Histórico" aria-label="Ver histórico">
+          📜
+        </button>
+        <span class="mobileNavIconLabel">Histórico</span>
+      </div>
+    </div>
+
+    <!-- Center: action buttons -->
+    <div class="mobileNavActions">
+      <button class="mobilePrimaryBtn" id="mobileRevealBtn" disabled>Revelar Próxima Carta</button>
+      <button class="mobileSecondaryBtn" id="mobileResetBtn" disabled>Reiniciar Ritual</button>
+      <button class="mobilePrimaryBtn" id="mobileStartBtn" style="display:none">Iniciar Ritual</button>
+    </div>
+
+    <!-- Right: self video thumbnail -->
+    <div class="mobileNavSelf">
+      <div id="mobileVideoThumb">
+        <span class="mobileVideoOff">🎥</span>
+      </div>
+      <span class="mobileNavSelfLabel">Você</span>
+    </div>
+
+  </nav>
+
+  <!-- ===== MOBILE CHAT OVERLAY ===== -->
+  <div id="mobileChatOverlay" class="mobileOverlay" role="dialog" aria-modal="true" aria-label="Chat">
+    <div class="mobileDrawer" id="mobileChatDrawer">
+      <div class="mobileDrawerHandle"></div>
+      <div class="mobileDrawerTitle">Chat</div>
+      <div class="mobileDrawerBody">
+        <!-- Messages cloned here by JS -->
+        <div id="mobileChatMessages"></div>
+      </div>
+      <div class="chatComposer" style="padding:10px 16px max(14px,env(safe-area-inset-bottom)); border-top:1px solid rgba(255,255,255,.08); flex-shrink:0">
+        <div class="composerRow" style="display:grid;grid-template-columns:1fr auto;gap:8px">
+          <input class="input" id="mobileMsgInput" type="text" maxlength="240" placeholder="Digite uma mensagem..." autocomplete="off">
+          <button class="btn btnPrimary" id="mobileSendBtn">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MOBILE HISTORY OVERLAY ===== -->
+  <div id="mobileHistoryOverlay" class="mobileOverlay" role="dialog" aria-modal="true" aria-label="Histórico">
+    <div class="mobileDrawer" id="mobileHistoryDrawer">
+      <div class="mobileDrawerHandle"></div>
+      <div class="mobileDrawerTitle">Histórico de Cartas</div>
+      <div class="mobileDrawerBody" id="mobileHistoryList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
 
   <script>
     /* ===== ARENA MODE ===== */
