@@ -4720,7 +4720,25 @@
 
         profileModal.classList.remove("hidden");
       } catch (error) {
-        console.error(error);
+        console.error("openProfile error:", error);
+        // Fallback: show modal with basic player info even on Firebase error
+        try {
+          const name = player?.name || playerName || "Jogador";
+          profileAvatarLarge.textContent = initials(name);
+          profileAvatarLarge.style.background = "";
+          profileNameEl.textContent = name;
+          profileUsernameEl.textContent = "@jogador";
+          profileBioEl.textContent = "Não foi possível carregar o perfil completo.";
+          const gEl = document.getElementById("profileGames"); if (gEl) gEl.textContent = "—";
+          const wEl = document.getElementById("profileWins"); if (wEl) wEl.textContent = "—";
+          editProfileBtn.hidden = true;
+          addFriendBtn.hidden = true;
+          friendsPanel.classList.add("hidden");
+          closeEditor();
+          profileModal.classList.remove("hidden");
+        } catch (e2) {
+          console.error("openProfile fallback failed:", e2);
+        }
       }
     }
 
@@ -5292,26 +5310,39 @@
     async function startSession() {
       if (!isHost) return;
 
-      const snap = await getDoc(roomRef);
-      if (!snap.exists()) return;
+      try {
+        const snap = await getDoc(roomRef);
+        if (!snap.exists()) return;
 
-      const data = snap.data();
-      if (data.status === "started") return;
+        const data = snap.data();
+        if (data.status === "started") {
+          // Ritual already running — offer to restart with a fresh deck
+          const ok = confirm("O ritual já está em andamento. Deseja reiniciá-lo com um novo deck embaralhado?");
+          if (ok) await resetRitualDeck();
+          return;
+        }
 
-      await updateDoc(roomRef, {
-        status: "started",
-        startedAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
+        if (deckInfo) deckInfo.textContent = "Iniciando o ritual...";
 
-      await addDoc(messagesRef, {
-        type: "system",
-        text: "O anfitrião iniciou o ritual. A próxima etapa pode começar.",
-        createdAt: serverTimestamp()
-      });
+        await updateDoc(roomRef, {
+          status: "started",
+          startedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
 
-      await startRitualDeck();
-      await panelMarkSessionStart();
+        await addDoc(messagesRef, {
+          type: "system",
+          text: "O anfitrião iniciou o ritual. A próxima etapa pode começar.",
+          createdAt: serverTimestamp()
+        });
+
+        await startRitualDeck();
+        await panelMarkSessionStart();
+      } catch (error) {
+        console.error("startSession error:", error);
+        if (deckInfo) deckInfo.textContent = "Erro ao iniciar o ritual. Tente novamente.";
+        alert("Não foi possível iniciar o ritual. Verifique sua conexão e tente novamente.");
+      }
     }
 
     async function leaveRoom(redirect = true) {
