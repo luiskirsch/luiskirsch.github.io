@@ -562,10 +562,20 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
 }
 
 async function requestToken() {
-  const accessToken = await ensureValidGameAccess();
+  // Owner bypass: if osl_owner_key is set in localStorage, skip license check
+  const ownerKey = localStorage.getItem("osl_owner_key") || "";
+  let accessToken = null;
+  let requestHeaders = {};
+
+  if (ownerKey) {
+    requestHeaders = { "X-Admin-Secret": ownerKey };
+  } else {
+    accessToken = await ensureValidGameAccess();
+    requestHeaders = { Authorization: `Bearer ${accessToken}` };
+  }
 
   const url = `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`;
-  const opts = { headers: { Authorization: `Bearer ${accessToken}` } };
+  const opts = { headers: requestHeaders };
 
   const MAX_TENTATIVAS = 3;
   let lastErr;
