@@ -5491,9 +5491,17 @@
           return;
         }
 
-        showChatEmpty("Não foi possível conectar à sala.<br>Verifique a configuração do Firebase.");
-        roomStatusEl.textContent = "Erro de conexão";
-        footerStatusEl.textContent = "Erro";
+        const isPermission = error?.code === "permission-denied" || String(error).includes("Missing or insufficient permissions");
+        if (isPermission) {
+          showChatEmpty("Permissão negada pelo Firestore.<br>As regras de segurança precisam ser atualizadas no Firebase Console.");
+          roomStatusEl.textContent = "Permissão negada";
+          footerStatusEl.textContent = "Sem acesso";
+          alert("Erro de permissão no Firestore: as regras de segurança bloquearam o acesso. Verifique o Firebase Console → Firestore → Rules e permita leitura/escrita.");
+        } else {
+          showChatEmpty("Não foi possível conectar à sala.<br>Verifique a configuração do Firebase.");
+          roomStatusEl.textContent = "Erro de conexão";
+          footerStatusEl.textContent = "Erro";
+        }
       }
     })();
   </script>
