@@ -5279,6 +5279,10 @@
     async function fillProfileUI(user, isSelfView) {
       profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
       if (user.avatarColor) profileAvatarLarge.style.background = user.avatarColor;
+      if (isSelfView && user.avatarEmoji) {
+        const fab = document.getElementById("mobileProfileFab");
+        if (fab) fab.textContent = user.avatarEmoji;
+      }
       profileNameEl.textContent = user.displayName || "Jogador";
       profileUsernameEl.textContent = `@${user.username || "jogador"}`;
       profileBioEl.textContent = user.bio || "Sem descrição.";
@@ -5341,10 +5345,17 @@
             wins: 0
           }
         });
+        const fab = document.getElementById("mobileProfileFab");
+        if (fab) fab.textContent = "🔮";
       } else {
         await updateDoc(userRef, {
           lastSeen: serverTimestamp()
         });
+        const emoji = snap.data().avatarEmoji;
+        if (emoji) {
+          const fab = document.getElementById("mobileProfileFab");
+          if (fab) fab.textContent = emoji;
+        }
       }
     }
 
@@ -6977,7 +6988,7 @@
     }
 
     // ── Player strip: sync from desktop player list ───────────────────────────
-    function makeAvatarWrap(initText, nameText, bg, isActive, isSelf, onClickFn) {
+    function makeAvatarWrap(initText, nameText, bg, isActive, isSelf, onClickFn, pid) {
       var wrap = document.createElement("div");
       wrap.className = "mobileAvatarWrap";
 
@@ -6987,6 +6998,8 @@
         (isSelf   ? " mobileAvatar--self"   : "");
       if (bg) av.style.background = bg;
       av.textContent = initText;
+      av.dataset.pid = pid || "";
+      av.dataset.initText = initText;
       if (onClickFn) av.addEventListener("click", onClickFn);
       // Long-press / touch hint
       av.style.setProperty("-webkit-tap-highlight-color", "transparent");
@@ -6998,6 +7011,39 @@
       wrap.appendChild(av);
       wrap.appendChild(nm);
       return wrap;
+    }
+
+    var lastStripKey = "";
+
+    // Pipes live video srcObjects from desktop tiles into mobile avatar circles
+    function syncAvatarVideos() {
+      if (!mobilePlayerStrip) return;
+      var videoGrid = document.getElementById("videoGrid");
+      if (!videoGrid) return;
+      mobilePlayerStrip.querySelectorAll(".mobileAvatar[data-pid]").forEach(function(avatarEl) {
+        var pid = avatarEl.dataset.pid;
+        if (!pid) return;
+        var tile = videoGrid.querySelector(".videoTile[data-identity=\"" + pid + "\"]");
+        var tileVideo = tile ? tile.querySelector(".videoMedia video") : null;
+        if (tileVideo && tileVideo.srcObject) {
+          var existingVideo = avatarEl.querySelector("video");
+          if (existingVideo && existingVideo.srcObject === tileVideo.srcObject) return;
+          avatarEl.innerHTML = "";
+          var v = document.createElement("video");
+          v.srcObject = tileVideo.srcObject;
+          v.muted = true;
+          v.autoplay = true;
+          v.playsInline = true;
+          v.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:50%;display:block";
+          avatarEl.appendChild(v);
+          v.play().catch(function(){});
+        } else {
+          // No video — restore initials if currently showing video
+          if (avatarEl.querySelector("video")) {
+            avatarEl.innerHTML = avatarEl.dataset.initText || "?";
+          }
+        }
+      });
     }
 
     function syncPlayerStrip() {
@@ -7012,36 +7058,48 @@
         return !selfPid || !pid || pid !== selfPid;
       });
 
-      mobilePlayerStrip.innerHTML = "";
+      // Keyed diff — only rebuild DOM if player composition changed (prevents animation restarts)
+      var newKey = others.slice(0, 4).map(function(el) {
+        return (el.dataset.pid || "") + (el.querySelector(".playerHost") ? "H" : "");
+      }).join(",");
 
-      // Sempre 4 slots: jogadores reais primeiro, resto = círculos vazios pulsantes
-      for (var i = 0; i < 4; i++) {
-        var playerEl = others[i] || null;
+      if (newKey !== lastStripKey) {
+        lastStripKey = newKey;
+        mobilePlayerStrip.innerHTML = "";
 
-        if (playerEl) {
-          var avatarEl = playerEl.querySelector(".avatar");
-          var nameEl   = playerEl.querySelector(".playerName");
-          var initText = avatarEl ? avatarEl.textContent.trim() : "?";
-          var nameText = nameEl  ? nameEl.textContent.trim() : "Jogador";
-          var isHost   = !!playerEl.querySelector(".playerHost");
-          var wrap = makeAvatarWrap(initText, nameText, "", isHost, false, (function (el) {
-            return function () { el.click(); };
-          })(playerEl));
-          mobilePlayerStrip.appendChild(wrap);
-        } else {
-          // Slot vazio — círculo escuro com anel pulsante
-          var wrap = document.createElement("div");
-          wrap.className = "mobileAvatarWrap";
-          var av = document.createElement("div");
-          av.className = "mobileAvatar mobileAvatar--empty";
-          var nm = document.createElement("span");
-          nm.className = "mobileAvatarName";
-          nm.innerHTML = "&nbsp;";
-          wrap.appendChild(av);
-          wrap.appendChild(nm);
-          mobilePlayerStrip.appendChild(wrap);
+        // Sempre 4 slots: jogadores reais primeiro, resto = círculos vazios pulsantes
+        for (var i = 0; i < 4; i++) {
+          var playerEl = others[i] || null;
+
+          if (playerEl) {
+            var avatarEl = playerEl.querySelector(".avatar");
+            var nameEl   = playerEl.querySelector(".playerName");
+            var initText = avatarEl ? avatarEl.textContent.trim() : "?";
+            var nameText = nameEl  ? nameEl.textContent.trim() : "Jogador";
+            var isHost   = !!playerEl.querySelector(".playerHost");
+            var pid      = playerEl.dataset.pid || "";
+            var wrap = makeAvatarWrap(initText, nameText, "", isHost, false, (function (el) {
+              return function () { el.click(); };
+            })(playerEl), pid);
+            mobilePlayerStrip.appendChild(wrap);
+          } else {
+            // Slot vazio — círculo escuro com anel pulsante
+            var wrap = document.createElement("div");
+            wrap.className = "mobileAvatarWrap";
+            var av = document.createElement("div");
+            av.className = "mobileAvatar mobileAvatar--empty";
+            var nm = document.createElement("span");
+            nm.className = "mobileAvatarName";
+            nm.innerHTML = "&nbsp;";
+            wrap.appendChild(av);
+            wrap.appendChild(nm);
+            mobilePlayerStrip.appendChild(wrap);
+          }
         }
       }
+
+      // Always sync video into circles (even if DOM wasn't rebuilt)
+      syncAvatarVideos();
     }
 
     if (desktopPlayerList) {
@@ -7056,24 +7114,27 @@
       var selfSlot = document.getElementById("videoSelfSlot");
       if (!selfSlot || !mobileVideoThumb) return;
       var video = selfSlot.querySelector("video");
-      if (!video) {
-        mobileVideoThumb.innerHTML = '<span class="mobileVideoOff">🎥</span>';
+      if (!video || !video.srcObject) {
+        // No active video — show placeholder only if not already shown
+        if (!mobileVideoThumb.querySelector("video")) {
+          if (!mobileVideoThumb.querySelector(".mobileVideoOff")) {
+            mobileVideoThumb.innerHTML = '<span class="mobileVideoOff">🎥</span>';
+          }
+        }
         return;
       }
-      // Clone the video element into the thumb
-      if (!mobileVideoThumb.contains(video)) {
-        mobileVideoThumb.innerHTML = "";
-        mobileVideoThumb.appendChild(video.cloneNode(true));
-        var cloned = mobileVideoThumb.querySelector("video");
-        if (cloned) {
-          cloned.srcObject = video.srcObject;
-          cloned.muted = true;
-          cloned.autoplay = true;
-          cloned.playsInline = true;
-          cloned.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:inherit;transform:scaleX(-1)";
-          cloned.play().catch(function(){});
-        }
-      }
+      // Compare by srcObject identity — re-clone only when stream changes
+      var existingClone = mobileVideoThumb.querySelector("video");
+      if (existingClone && existingClone.srcObject === video.srcObject) return;
+      mobileVideoThumb.innerHTML = "";
+      var cloned = document.createElement("video");
+      cloned.srcObject = video.srcObject;
+      cloned.muted = true;
+      cloned.autoplay = true;
+      cloned.playsInline = true;
+      cloned.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:inherit;transform:scaleX(-1)";
+      mobileVideoThumb.appendChild(cloned);
+      cloned.play().catch(function(){});
     }
 
     var selfSlotEl = document.getElementById("videoSelfSlot");
