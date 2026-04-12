@@ -4728,7 +4728,8 @@
           profileAvatarLarge.style.background = "";
           profileNameEl.textContent = name;
           profileUsernameEl.textContent = "@jogador";
-          profileBioEl.textContent = "Não foi possível carregar o perfil completo.";
+          const errDetail = error?.code || error?.message || String(error);
+          profileBioEl.textContent = "Erro ao carregar perfil: " + errDetail;
           const gEl = document.getElementById("profileGames"); if (gEl) gEl.textContent = "—";
           const wEl = document.getElementById("profileWins"); if (wEl) wEl.textContent = "—";
           editProfileBtn.hidden = true;
