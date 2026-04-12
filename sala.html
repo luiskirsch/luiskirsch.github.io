@@ -5643,6 +5643,7 @@
       players.forEach((player) => {
         const div = document.createElement("div");
         div.className = "player";
+        div.dataset.pid = player.id;
         div.innerHTML = `
           <div class="playerLeft">
             <div class="avatar">${initials(player.name)}</div>
@@ -6063,8 +6064,9 @@
     window._osl.startGame   = () => startSession().catch(console.error);
     window._osl.revealCard  = () => revealNextRitualCard().catch(console.error);
     window._osl.resetDeck   = () => resetRitualDeck().catch(console.error);
-    window._osl.getIsHost   = () => isHost;
-    window._osl.isStarted   = () => ritualStarted;
+    window._osl.getIsHost        = () => isHost;
+    window._osl.isStarted        = () => ritualStarted;
+    window._osl.getParticipantId = () => participantId;
 
     window.addEventListener("pagehide", () => {
       try {
@@ -6722,9 +6724,9 @@
     var desktopPlayerList= document.getElementById("playerList");
 
     // Dados do próprio jogador (para avatar na strip quando lista estiver vazia)
-    var selfName   = localStorage.getItem("osl_name") || "Você";
+    var selfName   = localStorage.getItem("osl_nome") || localStorage.getItem("osl_name") || "Você";
     var selfAvatar = localStorage.getItem("osl_avatar") || "";
-    var selfColor  = localStorage.getItem("osl_color") || "#1c1a14";
+    var selfColor  = localStorage.getItem("osl_color") || "";
 
     var chatIsOpen = false;
     var histIsOpen = false;
@@ -6783,11 +6785,14 @@
 
     // ── Sincroniza visibilidade e texto dos botões ───────────────────────────
     function syncStartBtn() {
-      var isHost    = window._osl ? !!window._osl.getIsHost?.()  : false;
-      var isStarted = window._osl ? !!window._osl.isStarted?.()  : false;
-
-      // Fallback via DOM quando _osl ainda não carregou
-      if (!window._osl) {
+      var isHost, isStarted;
+      if (window._osl) {
+        isHost    = !!window._osl.getIsHost?.();
+        isStarted = !!window._osl.isStarted?.();
+      } else {
+        // DOM fallback: Firebase seta startBtn.disabled = !isHost (linha ~5832)
+        // revealCardBtn.disabled = !canControl (linha ~4764)
+        isHost    = desktopStartBtn  ? !desktopStartBtn.disabled  : false;
         isStarted = desktopRevealBtn ? !desktopRevealBtn.disabled : false;
       }
 
@@ -6941,32 +6946,34 @@
       var players = desktopPlayerList.querySelectorAll(".player");
       mobilePlayerStrip.innerHTML = "";
 
+      // Pega o próprio participantId para marcar isSelf
+      var selfPid = (window._osl && window._osl.getParticipantId) ? window._osl.getParticipantId() : "";
+
       players.forEach(function (playerEl) {
         var avatarEl = playerEl.querySelector(".avatar");
-        var nameEl   = playerEl.querySelector(".playerName, .name, [class*='name']");
+        var nameEl   = playerEl.querySelector(".playerName");
         var initText = avatarEl ? avatarEl.textContent.trim() : "?";
         var nameText = nameEl  ? nameEl.textContent.trim() : "Jogador";
-        var bg       = avatarEl ? (avatarEl.style.background || avatarEl.style.backgroundColor || "") : "";
-        var pid      = playerEl.dataset.pid || playerEl.dataset.id || "";
-        var isHost   = !!playerEl.querySelector(".playerHost, [class*='host']");
-        var isSelf   = pid === (localStorage.getItem("osl_pid") || "");
+        var pid      = playerEl.dataset.pid || "";
+        var isActive = !!playerEl.querySelector(".playerHost");
+        var isSelf   = selfPid ? (pid === selfPid) : false;
 
-        var wrap = makeAvatarWrap(initText, nameText, bg, isHost, isSelf, function () {
-          var desktopPlayer = desktopPlayerList.querySelector("[data-pid='" + pid + "'], [data-id='" + pid + "']");
-          if (desktopPlayer) desktopPlayer.click();
+        var wrap = makeAvatarWrap(initText, nameText, "", isActive, isSelf, function () {
+          playerEl.click();
         });
         mobilePlayerStrip.appendChild(wrap);
       });
 
       // Fallback: se strip ainda vazia, mostra placeholder do próprio jogador
       if (!mobilePlayerStrip.children.length) {
-        var initials = selfName.trim().split(/\s+/).map(function(w){ return w[0]; }).join("").slice(0,2).toUpperCase() || "?";
-        var wrap = makeAvatarWrap(selfAvatar || initials, selfName, selfColor, false, true, function () {
+        var nameForInit = selfName || "Você";
+        var initials = nameForInit.trim().split(/\s+/).map(function(w){ return w[0]; }).join("").slice(0,2).toUpperCase() || "?";
+        var ghost = makeAvatarWrap(selfAvatar || initials, nameForInit, "", false, true, function () {
           var btn = document.getElementById("myProfileBtn");
           if (btn) btn.click();
         });
-        wrap.className += " mobileAvatarWrap--ghost";
-        mobilePlayerStrip.appendChild(wrap);
+        ghost.className += " mobileAvatarWrap--ghost";
+        mobilePlayerStrip.appendChild(ghost);
       }
     }
 
