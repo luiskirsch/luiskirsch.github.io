@@ -116,79 +116,6 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
-function clearStoredAccess() {
-  localStorage.removeItem("osl_access_token");
-}
-
-function redirectToSales(message) {
-  if (message) alert(message);
-  window.location.href = SALES_PAGE_URL;
-}
-
-const RENEW_ENDPOINT = "https://osl-video-server.onrender.com/emitir-acesso-por-codigo";
-
-function tokenLocalValido() {
-  const token = localStorage.getItem("osl_access_token");
-  const exp = Number(localStorage.getItem("osl_access_expires_at") || 0);
-  return !!token && (exp === 0 || Date.now() < exp);
-}
-
-async function tentarRenovarAcesso() {
-  const licenseCode = localStorage.getItem("osl_license_code");
-  const uid = localStorage.getItem("osl_auth_uid");
-  const email = localStorage.getItem("osl_license_email") || "";
-
-  if (!licenseCode || !uid) return null;
-
-  try {
-    const res = await fetchWithTimeout(
-      RENEW_ENDPOINT,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ licenseCode, uid, email })
-      },
-      15000
-    );
-
-    const data = await res.json().catch(() => ({}));
-
-    if (res.ok && data.accessToken) {
-      localStorage.setItem("osl_access_token", data.accessToken);
-      localStorage.setItem("osl_access_expires_at", String(data.expiresAt || ""));
-      return data.accessToken;
-    }
-  } catch (e) {
-    console.warn("Renovação de acesso falhou:", e);
-  }
-
-  return null;
-}
-
-async function ensureValidGameAccess() {
-  // Token local ainda válido → usa direto
-  if (tokenLocalValido()) {
-    return localStorage.getItem("osl_access_token");
-  }
-
-  // Expirado ou ausente → tenta renovar automaticamente
-  localStorage.removeItem("osl_access_token");
-  localStorage.removeItem("osl_access_expires_at");
-
-  if (videoStatusEl) videoStatusEl.textContent = "Renovando acesso...";
-
-  const renovado = await tentarRenovarAcesso();
-  if (renovado) return renovado;
-
-  // Renovação falhou → redireciona para o painel (não vendas)
-  const temLicenca = !!localStorage.getItem("osl_license_code");
-  if (temLicenca) {
-    window.location.href = "./painel.html";
-  } else {
-    redirectToSales("Acesso não autorizado.");
-  }
-  throw new Error("NO_ACCESS_TOKEN");
-}
 
 async function markPanelVideo(active) {
   try {
@@ -588,19 +515,8 @@ async function requestToken() {
       console.error("Erro ao obter token:", data);
 
       if (response.status === 401) {
-        // Token rejeitado — tenta renovar antes de desistir
-        if (i === 0) {
-          const renovado = await tentarRenovarAcesso();
-          if (renovado) {
-            // Atualiza o header e repete com o novo token
-            opts.headers = { Authorization: `Bearer ${renovado}` };
-            lastErr = new Error("TOKEN_UNAUTHORIZED");
-            continue;
-          }
-        }
-        clearStoredAccess();
-        redirectToSales("Seu acesso expirou. Faça login novamente.");
-        throw new Error("TOKEN_UNAUTHORIZED");
+        lastErr = new Error("TOKEN_UNAUTHORIZED");
+        continue;
       }
 
       lastErr = new Error("TOKEN_REQUEST_FAILED");
