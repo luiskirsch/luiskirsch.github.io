@@ -6058,6 +6058,14 @@
       if (ok) leaveRoom(true);
     });
 
+    // ── Expõe funções do módulo para o mobile JS (evita .click() sintético) ──
+    window._osl = window._osl || {};
+    window._osl.startGame   = () => startSession().catch(console.error);
+    window._osl.revealCard  = () => revealNextRitualCard().catch(console.error);
+    window._osl.resetDeck   = () => resetRitualDeck().catch(console.error);
+    window._osl.getIsHost   = () => isHost;
+    window._osl.isStarted   = () => ritualStarted;
+
     window.addEventListener("pagehide", () => {
       try {
         navigator.sendBeacon?.(
@@ -6747,27 +6755,65 @@
     setInterval(syncButtonStates, 800);
     syncButtonStates();
 
-    // ── Delegar cliques para os botões do desktop ─────────────────────────────
-    // Usa dispatchEvent para garantir compatibilidade com listeners no Firefox/iOS
-    function fireDesktopBtn(btn) {
-      if (!btn || btn.disabled) return;
-      // Tenta dispatchEvent primeiro (mais confiável com handlers complexos)
-      try { btn.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })); }
-      catch (e) { btn.click(); }
+    // ── Botões mobile chamam funções Firebase diretamente ────────────────────
+    // Motivo: confirm() e dispatchEvent() são bloqueados em eventos sintéticos no iOS.
+    // window._osl é exposto pelo módulo Firebase logo acima dos listeners.
+
+    function mobileCallOrFallback(fnKey, desktopBtn) {
+      // Prefere a função direta do módulo; fallback para click no desktop
+      if (window._osl && typeof window._osl[fnKey] === "function") {
+        window._osl[fnKey]();
+      } else if (desktopBtn && !desktopBtn.disabled) {
+        try { desktopBtn.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })); }
+        catch (e) { desktopBtn.click(); }
+      }
     }
 
-    mobileRevealBtn.addEventListener("click", function () { fireDesktopBtn(desktopRevealBtn); });
-    mobileResetBtn.addEventListener("click",  function () { fireDesktopBtn(desktopResetBtn);  });
-    mobileStartBtn.addEventListener("click",  function () { fireDesktopBtn(desktopStartBtn);  });
+    mobileRevealBtn.addEventListener("click", function () {
+      mobileCallOrFallback("revealCard", desktopRevealBtn);
+    });
 
-    // ── Show/hide start button based on ritual state ──────────────────────────
+    mobileResetBtn.addEventListener("click", function () {
+      mobileCallOrFallback("resetDeck", desktopResetBtn);
+    });
+
+    mobileStartBtn.addEventListener("click", function () {
+      mobileCallOrFallback("startGame", desktopStartBtn);
+    });
+
+    // ── Sincroniza visibilidade e texto dos botões ───────────────────────────
     function syncStartBtn() {
-      // revealCardBtn fica disabled quando: sessão não iniciada OU usuário não é host
-      // Aqui apenas determinamos qual conjunto de botões mostrar
-      var sessionNotStarted = desktopRevealBtn ? desktopRevealBtn.disabled : true;
-      mobileStartBtn.style.display = sessionNotStarted ? "" : "none";
-      mobileRevealBtn.style.display = sessionNotStarted ? "none" : "";
-      mobileResetBtn.style.display  = sessionNotStarted ? "none" : "";
+      var isHost    = window._osl ? !!window._osl.getIsHost?.()  : false;
+      var isStarted = window._osl ? !!window._osl.isStarted?.()  : false;
+
+      // Fallback via DOM quando _osl ainda não carregou
+      if (!window._osl) {
+        isStarted = desktopRevealBtn ? !desktopRevealBtn.disabled : false;
+      }
+
+      // Host: mostra botões de ação assim que sessão iniciada
+      // Não-host (participante): nunca mostra botões de controle
+      if (!isHost) {
+        mobileStartBtn.style.display  = "";
+        mobileStartBtn.disabled       = true;
+        mobileStartBtn.textContent    = "Aguardando anfitrião";
+        mobileRevealBtn.style.display = "none";
+        mobileResetBtn.style.display  = "none";
+        return;
+      }
+
+      if (isStarted) {
+        mobileStartBtn.style.display  = "none";
+        mobileRevealBtn.style.display = "";
+        mobileResetBtn.style.display  = "";
+        mobileStartBtn.disabled       = false;
+      } else {
+        mobileStartBtn.style.display  = "";
+        mobileStartBtn.disabled       = false;
+        mobileStartBtn.textContent    = "Iniciar Ritual";
+        mobileRevealBtn.style.display = "none";
+        mobileResetBtn.style.display  = "none";
+      }
     }
 
     setInterval(syncStartBtn, 1000);
