@@ -3092,7 +3092,7 @@
        • Fixed bottom nav: icons | action buttons | self-video thumb
   ================================================================ */
 
-  @media (max-width: 640px) {
+  @media (max-width: 640px), (max-width: 960px) and (orientation: landscape) and (pointer: coarse) {
 
     /* ═══════════════════════════════════════════════════════
        ESCONDER TUDO DO DESKTOP
@@ -3293,12 +3293,21 @@
     }
 
     .revealStage {
-      width: min(300px, 86vw);
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       filter: drop-shadow(0 0 28px rgba(215,176,107,.20));
     }
 
-    .ritualCardWrap  { width: 100% !important; }
-    .ritualVisualCard { width: 100% !important; }
+    /* Carta: dimensionada pelo aspect-ratio, não por altura fixa */
+    .ritualCardWrap {
+      height: auto !important;
+      width: auto !important;
+      max-height: min(52svh, 340px) !important;
+      aspect-ratio: 5/7;
+    }
+    .ritualVisualCard { width: 100% !important; height: 100% !important; }
 
     /* Carta ornamentada — borda dupla dourada */
     .ritualVisualCard {
@@ -3688,17 +3697,35 @@
       box-shadow: 0 0 16px rgba(215,176,107,.30);
     }
 
-    /* ── Strip vazia — placeholder animado ── */
-    .mobileAvatarWrap--ghost .mobileAvatar {
-      background: linear-gradient(135deg, #181612, #221e18);
-      animation: ghostPulse 1.8s ease-in-out infinite;
+    /* ── Slot vazio de jogador ── */
+    .mobileAvatar--empty {
+      border-color: rgba(215,176,107,.10) !important;
+      background: rgba(10,9,7,.60) !important;
+      animation: emptySlotPulse 3.2s ease-in-out infinite !important;
     }
-    @keyframes ghostPulse {
-      0%,100% { opacity: .4; }
-      50%      { opacity: .7; }
+    .mobileAvatar--empty::after { display: none !important; }
+
+    @keyframes emptySlotPulse {
+      0%,100% { border-color: rgba(215,176,107,.08); box-shadow: none; }
+      50%      { border-color: rgba(215,176,107,.28); box-shadow: 0 0 10px rgba(215,176,107,.10); }
     }
 
-  } /* end @media 640px */
+  } /* end @media mobile */
+
+  /* ── Landscape phones: compact card & strip ── */
+  @media (max-width: 960px) and (orientation: landscape) and (pointer: coarse) {
+    .ritualCardWrap {
+      max-height: min(62svh, 200px) !important;
+    }
+    .mobileAvatar { width: 36px !important; height: 36px !important; font-size: 14px !important; }
+    #mobilePlayerStripInline { padding-top: 6px !important; padding-bottom: 4px !important; gap: 10px !important; }
+    #mobileCardLabel { padding: 2px 0 3px !important; font-size: 9px !important; }
+    .layout { padding-bottom: 78px !important; }
+    #mobileBottomBar { padding-top: 5px !important; padding-bottom: max(5px, env(safe-area-inset-bottom)) !important; }
+    .mobilePrimaryBtn { padding: 8px 6px !important; font-size: 9.5px !important; }
+    .mobileSecondaryBtn { padding: 6px 6px !important; }
+    #mobileVideoThumb { width: 40px !important; height: 54px !important; }
+  }
 
   </style>
 </head>
@@ -6694,7 +6721,7 @@
   <script>
   document.addEventListener("DOMContentLoaded", function () {
   (function () {
-    var IS_MOBILE = window.matchMedia("(max-width: 640px)");
+    var IS_MOBILE = window.matchMedia("(max-width: 640px), (max-width: 960px) and (orientation: landscape) and (pointer: coarse)");
 
     // ── Element refs ──────────────────────────────────────────────────────────
     var mobileBar        = document.getElementById("mobileBottomBar");
@@ -6943,38 +6970,46 @@
     }
 
     function syncPlayerStrip() {
-      if (!mobilePlayerStrip || !desktopPlayerList) return;
-      var players = desktopPlayerList.querySelectorAll(".player");
-      mobilePlayerStrip.innerHTML = "";
+      if (!mobilePlayerStrip) return;
 
-      // Pega o próprio participantId para marcar isSelf
+      // Exclui o próprio jogador — ele aparece no FAB de perfil, não na strip
       var selfPid = (window._osl && window._osl.getParticipantId) ? window._osl.getParticipantId() : "";
-
-      players.forEach(function (playerEl) {
-        var avatarEl = playerEl.querySelector(".avatar");
-        var nameEl   = playerEl.querySelector(".playerName");
-        var initText = avatarEl ? avatarEl.textContent.trim() : "?";
-        var nameText = nameEl  ? nameEl.textContent.trim() : "Jogador";
-        var pid      = playerEl.dataset.pid || "";
-        var isActive = !!playerEl.querySelector(".playerHost");
-        var isSelf   = selfPid ? (pid === selfPid) : false;
-
-        var wrap = makeAvatarWrap(initText, nameText, "", isActive, isSelf, function () {
-          playerEl.click();
-        });
-        mobilePlayerStrip.appendChild(wrap);
+      var allEls = desktopPlayerList ? Array.from(desktopPlayerList.querySelectorAll(".player")) : [];
+      var others = allEls.filter(function (el) {
+        var pid = el.dataset.pid || "";
+        // Exclui self apenas quando selfPid é conhecido; sem selfPid, mostra todos
+        return !selfPid || !pid || pid !== selfPid;
       });
 
-      // Fallback: se strip ainda vazia, mostra placeholder do próprio jogador
-      if (!mobilePlayerStrip.children.length) {
-        var nameForInit = selfName || "Você";
-        var initials = nameForInit.trim().split(/\s+/).map(function(w){ return w[0]; }).join("").slice(0,2).toUpperCase() || "?";
-        var ghost = makeAvatarWrap(selfAvatar || initials, nameForInit, "", false, true, function () {
-          var btn = document.getElementById("myProfileBtn");
-          if (btn) btn.click();
-        });
-        ghost.className += " mobileAvatarWrap--ghost";
-        mobilePlayerStrip.appendChild(ghost);
+      mobilePlayerStrip.innerHTML = "";
+
+      // Sempre 4 slots: jogadores reais primeiro, resto = círculos vazios pulsantes
+      for (var i = 0; i < 4; i++) {
+        var playerEl = others[i] || null;
+
+        if (playerEl) {
+          var avatarEl = playerEl.querySelector(".avatar");
+          var nameEl   = playerEl.querySelector(".playerName");
+          var initText = avatarEl ? avatarEl.textContent.trim() : "?";
+          var nameText = nameEl  ? nameEl.textContent.trim() : "Jogador";
+          var isHost   = !!playerEl.querySelector(".playerHost");
+          var wrap = makeAvatarWrap(initText, nameText, "", isHost, false, (function (el) {
+            return function () { el.click(); };
+          })(playerEl));
+          mobilePlayerStrip.appendChild(wrap);
+        } else {
+          // Slot vazio — círculo escuro com anel pulsante
+          var wrap = document.createElement("div");
+          wrap.className = "mobileAvatarWrap";
+          var av = document.createElement("div");
+          av.className = "mobileAvatar mobileAvatar--empty";
+          var nm = document.createElement("span");
+          nm.className = "mobileAvatarName";
+          nm.innerHTML = "&nbsp;";
+          wrap.appendChild(av);
+          wrap.appendChild(nm);
+          mobilePlayerStrip.appendChild(wrap);
+        }
       }
     }
 
