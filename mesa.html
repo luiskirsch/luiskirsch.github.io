@@ -66,24 +66,64 @@ justify-content:center;
 font-weight:800;
 letter-spacing:.2em;
 cursor:pointer;
+transition:transform .15s;
 }
 
 .deck:hover{
 transform:scale(1.05);
 }
 
-.card{
+/* Flip card */
+.card-wrapper{
 width:200px;
 height:280px;
+perspective:1000px;
+}
+
+.card{
+width:100%;
+height:100%;
+position:relative;
+transform-style:preserve-3d;
+transition:transform .7s cubic-bezier(.4,0,.2,1);
+}
+
+.card.flipped{
+transform:rotateY(180deg);
+}
+
+.card-face{
+position:absolute;
+inset:0;
+backface-visibility:hidden;
+-webkit-backface-visibility:hidden;
 border-radius:16px;
-background:rgba(255,255,255,.04);
-border:1px solid rgba(255,255,255,.1);
 display:flex;
 align-items:center;
 justify-content:center;
+overflow:hidden;
+}
+
+/* Verso: logo */
+.card-back{
+background:#0d1117;
+border:1px solid rgba(255,255,255,.12);
+}
+
+.card-back img{
+width:70%;
+opacity:.9;
+}
+
+/* Frente: texto da carta */
+.card-front{
+transform:rotateY(180deg);
+background:rgba(255,255,255,.04);
+border:1px solid rgba(255,255,255,.1);
 text-align:center;
 padding:20px;
 font-size:18px;
+line-height:1.5;
 }
 
 .history{
@@ -126,8 +166,13 @@ O SextoLugar
 REVELAR
 </div>
 
-<div class="card" id="card">
-Aguardando carta...
+<div class="card-wrapper">
+  <div class="card" id="card">
+    <div class="card-face card-back">
+      <img src="logo_oficial_fundo_transparente.png" alt="O SextoLugar">
+    </div>
+    <div class="card-face card-front" id="cardText"></div>
+  </div>
 </div>
 
 </div>
@@ -153,23 +198,46 @@ const deck = [
 "Algo mudou na sala."
 ]
 
-const cardEl = document.getElementById("card")
+const cardEl    = document.getElementById("card")
+const cardText  = document.getElementById("cardText")
 const historyEl = document.getElementById("history")
-const deckBtn = document.getElementById("deck")
+const deckBtn   = document.getElementById("deck")
 
-deckBtn.onclick = () => {
+let flipping = false
 
-const random = deck[Math.floor(Math.random()*deck.length)]
+function reveal() {
+  if (flipping) return
+  flipping = true
 
-cardEl.innerText = random
+  const random = deck[Math.floor(Math.random() * deck.length)]
 
-const h = document.createElement("div")
-h.className="historyCard"
-h.innerText=random
-
-historyEl.appendChild(h)
-
+  if (!cardEl.classList.contains("flipped")) {
+    // Primeira vez (ou carta já está no verso): atualiza texto e gira para frente
+    cardText.innerText = random
+    cardEl.classList.add("flipped")
+    addHistory(random)
+    setTimeout(() => { flipping = false }, 750)
+  } else {
+    // Carta já está na frente: gira de volta para o verso...
+    cardEl.classList.remove("flipped")
+    // ...e depois gira para frente com o novo texto
+    setTimeout(() => {
+      cardText.innerText = random
+      cardEl.classList.add("flipped")
+      addHistory(random)
+      setTimeout(() => { flipping = false }, 750)
+    }, 750)
+  }
 }
+
+function addHistory(text) {
+  const h = document.createElement("div")
+  h.className = "historyCard"
+  h.innerText = text
+  historyEl.appendChild(h)
+}
+
+deckBtn.onclick = reveal
 
 </script>
 
