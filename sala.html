@@ -3367,28 +3367,31 @@
     .ritualFinalPhrase     { font-size: 8px  !important; letter-spacing: .14em !important; }
 
     /*
-      Giro mobile — a carta:
-        1. Sobe levemente da mesa (translateY negativo) antes de girar.
-        2. Cresce em escala simulando aproximação ao viewer (perspective no pai).
-        3. Retorna com leve bounce.
-      overflow: visible nos pais garante que o lift e a escala não sejam cortados.
+      Giro mobile — duração: 1.15 s = exatamente o timeout do JS (1150 ms).
+      Isso garante que a animação atinge 100% (rotateY 360°) no exato momento
+      em que o JS remove a classe, sem snap visível.
+
+      A carta:
+        1. Sobe da mesa em direção ao viewer (translateY + scale).
+        2. Gira 360° completos no ar, acima do frame da mesa de madeira.
+        3. Pousa com leve bounce.
     */
     @keyframes theFlipMobile {
-      0%   { transform: rotateY(0deg)   translateY(0px)   scale(1);    z-index: 1;  }
-      10%  { transform: rotateY(20deg)  translateY(-14px) scale(1.04); z-index: 50; }
-      25%  { transform: rotateY(90deg)  translateY(-22px) scale(1.10); z-index: 50; }
-      50%  { transform: rotateY(180deg) translateY(-20px) scale(1.12); z-index: 50; }
-      75%  { transform: rotateY(270deg) translateY(-22px) scale(1.10); z-index: 50; }
-      86%  { transform: rotateY(338deg) translateY(-8px)  scale(1.04); z-index: 50; }
-      93%  { transform: rotateY(355deg) translateY(5px)   scale(0.99); z-index: 50; }
-      100% { transform: rotateY(360deg) translateY(0px)   scale(1);    z-index: 1;  }
+      0%   { transform: rotateY(0deg)   translateY(0px)   scale(1);    }
+      10%  { transform: rotateY(22deg)  translateY(-28px) scale(1.05); }
+      25%  { transform: rotateY(90deg)  translateY(-55px) scale(1.12); }
+      50%  { transform: rotateY(180deg) translateY(-52px) scale(1.14); }
+      75%  { transform: rotateY(270deg) translateY(-55px) scale(1.12); }
+      86%  { transform: rotateY(338deg) translateY(-18px) scale(1.05); }
+      93%  { transform: rotateY(355deg) translateY(5px)   scale(0.99); }
+      100% { transform: rotateY(360deg) translateY(0px)   scale(1);    }
     }
 
     .ritualCardWrap--flipping {
-      animation: theFlipMobile 1.45s ease-in-out forwards !important;
+      animation: theFlipMobile 1.15s ease-in-out forwards !important;
       pointer-events: none;
       position: relative;
-      z-index: 50; /* acima do painel da mesa durante o giro */
+      z-index: 50; /* revealStage já tem z-index:1 → card flutua acima de tudo no layout */
     }
 
     /* ═══════════════════════════════════════════════════════
