@@ -3187,6 +3187,9 @@
       overflow-x: auto;
       scrollbar-width: none;
       flex-shrink: 0;
+      /* Reserva a altura dos avatares desde o carregamento inicial,
+         evitando layout shift quando o Firebase popula os jogadores. */
+      min-height: calc(max(10px, env(safe-area-inset-top)) + 83px);
     }
     #mobilePlayerStripInline::-webkit-scrollbar { display: none; }
 
