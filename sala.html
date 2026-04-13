@@ -3271,27 +3271,27 @@
       min-height: 0;
     }
 
-    /* cardCenter ocupa todo o espaço restante */
+    /* cardCenter: bloco de posicionamento para o revealPanel absoluto */
     .cardCenter {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
       flex: 1;
+      position: relative;
       min-height: 0;
       overflow: hidden;
     }
 
-    /* revealPanel preenche o cardCenter verticalmente */
+    /* revealPanel: preenche o cardCenter com position absolute — bypassa
+       todos os problemas de flex chain no iOS Safari */
     .revealPanel {
-      flex: 1;
-      align-self: center;    /* centraliza horizontalmente dentro do cardCenter */
-      width: 88%;            /* mesa um pouco mais estreita que a tela */
+      position: absolute !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      left: 6% !important;   /* (100% - 88%) / 2 = 6% */
+      right: 6% !important;
+      width: auto !important;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 0;
       overflow: hidden;
       padding: 5px 8px !important;
     }
