@@ -2073,6 +2073,53 @@
       border:1px dashed rgba(255,255,255,.07);
     }
 
+    /* ── Busca de jogadores ── */
+    .friendSearchRow{
+      display:flex;
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .friendSearchInput{
+      flex:1;
+      min-width:0;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:10px;
+      color:#f5f7fb;
+      padding:8px 12px;
+      font:inherit;
+      font-size:13px;
+      outline:none;
+      transition:border-color .15s;
+    }
+    .friendSearchInput::placeholder{ color:rgba(214,224,237,.35); }
+    .friendSearchInput:focus{ border-color:rgba(215,176,107,.55); }
+    .friendSearchBtn{
+      appearance:none;
+      background:linear-gradient(180deg,#e7c58a,#c99a4b);
+      color:#1a140d;
+      border:none;
+      border-radius:10px;
+      padding:8px 14px;
+      font:inherit;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      white-space:nowrap;
+      flex-shrink:0;
+      transition:opacity .15s;
+    }
+    .friendSearchBtn:disabled{ opacity:.5; cursor:default; }
+    .friendBtn--pending{
+      opacity:.55;
+      cursor:default;
+    }
+    .friendBtn--incoming{
+      background:linear-gradient(180deg,#e7c58a,#c99a4b);
+      color:#1a140d;
+      border-color:transparent;
+    }
+
     .profileClose{
       margin:0 26px 22px;
       width:calc(100% - 52px);
@@ -4263,6 +4310,17 @@
         </form>
 
         <div class="friendsPanel hidden" id="friendsPanel">
+
+          <div class="friendsBlock" id="friendSearchBlock" hidden>
+            <div class="friendsTitle">Buscar jogadores</div>
+            <div class="friendSearchRow">
+              <input class="friendSearchInput" id="friendSearchInput" type="text"
+                placeholder="@usuário ou nome" maxlength="40" autocomplete="off">
+              <button class="friendSearchBtn" id="friendSearchBtn">Buscar</button>
+            </div>
+            <div class="friendsList" id="friendSearchResults"></div>
+          </div>
+
           <div class="friendsBlock" id="friendsListBlock">
             <div class="friendsTitle">Amigos</div>
             <div class="friendsList" id="friendsList"></div>
@@ -4437,6 +4495,8 @@
       addDoc,
       onSnapshot,
       query,
+      where,
+      limit,
       orderBy,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -4496,6 +4556,10 @@
     const incomingRequestsList = document.getElementById("incomingRequestsList");
     const friendsListBlock = document.getElementById("friendsListBlock");
     const incomingRequestsBlock = document.getElementById("incomingRequestsBlock");
+    const friendSearchBlock = document.getElementById("friendSearchBlock");
+    const friendSearchInput = document.getElementById("friendSearchInput");
+    const friendSearchBtn = document.getElementById("friendSearchBtn");
+    const friendSearchResults = document.getElementById("friendSearchResults");
 
     const revealCardBtn = document.getElementById("revealCardBtn");
     const resetRitualBtn = document.getElementById("resetRitualBtn");
@@ -5343,6 +5407,10 @@
       });
 
       if (isSelfView) {
+        friendSearchBlock.hidden = false;
+        friendSearchInput.value = "";
+        friendSearchResults.innerHTML = "";
+
         incomingRequestsBlock.hidden = false;
         const incomingUsers = await getUsersByIds(user.incomingRequests || []);
         renderFriendList(incomingRequestsList, incomingUsers, {
@@ -5350,9 +5418,98 @@
           mode: "requests"
         });
       } else {
+        friendSearchBlock.hidden = true;
         incomingRequestsBlock.hidden = true;
         incomingRequestsList.innerHTML = "";
       }
+    }
+
+    // ── Busca de jogadores por username/nome ────────────────────────────────
+    async function searchPlayers(rawQuery) {
+      const q = rawQuery.replace(/^@/, "").toLowerCase().trim();
+      if (!q) return [];
+
+      const usersRef = collection(db, "users");
+
+      // Busca por username (prefixo)
+      const byUsername = await getDocs(
+        query(usersRef,
+          where("username", ">=", q),
+          where("username", "<=", q + "\uf8ff"),
+          limit(8)
+        )
+      );
+
+      // Busca por displayName em lowercase (prefixo)
+      const byName = await getDocs(
+        query(usersRef,
+          where("displayNameLower", ">=", q),
+          where("displayNameLower", "<=", q + "\uf8ff"),
+          limit(8)
+        )
+      );
+
+      const seen = new Set();
+      const results = [];
+      for (const snap of [...byUsername.docs, ...byName.docs]) {
+        const data = snap.data();
+        if (!data.userId || data.userId === userId || seen.has(data.userId)) continue;
+        seen.add(data.userId);
+        results.push(data);
+      }
+      return results;
+    }
+
+    async function renderSearchResults(results) {
+      friendSearchResults.innerHTML = "";
+
+      if (!results.length) {
+        const empty = document.createElement("div");
+        empty.className = "friendEmpty";
+        empty.textContent = "Nenhum jogador encontrado.";
+        friendSearchResults.appendChild(empty);
+        return;
+      }
+
+      // Lê estado atual do próprio usuário para saber o relacionamento
+      const mySnap = await getDoc(userRef);
+      const myData = mySnap.exists() ? mySnap.data() : {};
+      const myFriends = myData.friends || [];
+      const myOutgoing = myData.outgoingRequests || [];
+      const myIncoming = myData.incomingRequests || [];
+
+      results.forEach((user) => {
+        const item = document.createElement("div");
+        item.className = "friendItem";
+
+        const avatar = user.avatarEmoji || "🔮";
+        const displayName = user.displayName || "Jogador";
+        const username = user.username || "jogador";
+        const targetId = user.userId;
+
+        let actionHtml = "";
+        if (myFriends.includes(targetId)) {
+          actionHtml = `<button class="friendBtn" disabled>Amigos ✓</button>`;
+        } else if (myOutgoing.includes(targetId)) {
+          actionHtml = `<button class="friendBtn friendBtn--pending" disabled>Pedido enviado</button>`;
+        } else if (myIncoming.includes(targetId)) {
+          actionHtml = `<button class="friendBtn friendBtn--incoming" data-action="accept-search" data-user-id="${targetId}">Aceitar pedido</button>`;
+        } else {
+          actionHtml = `<button class="friendBtn friendBtn--accept" data-action="add" data-user-id="${targetId}">+ Adicionar</button>`;
+        }
+
+        item.innerHTML = `
+          <div class="friendLeft">
+            <div class="friendAvatar">${avatar}</div>
+            <div class="friendMeta">
+              <div class="friendName">${escapeHtml(displayName)}</div>
+              <div class="friendUsername">@${escapeHtml(username)}</div>
+            </div>
+          </div>
+          <div class="friendActions">${actionHtml}</div>
+        `;
+        friendSearchResults.appendChild(item);
+      });
     }
 
     function maskEmail(email) {
@@ -5887,6 +6044,84 @@
         } catch (error) {
           console.error(error);
           alert("Não foi possível atualizar o pedido.");
+        }
+      });
+    }
+
+    // ── Busca: botão + Enter ────────────────────────────────────────────────
+    if (friendSearchBtn) {
+      async function doSearch() {
+        const q = friendSearchInput.value.trim();
+        if (!q) return;
+        friendSearchBtn.disabled = true;
+        friendSearchBtn.textContent = "…";
+        friendSearchResults.innerHTML = "";
+        try {
+          const results = await searchPlayers(q);
+          await renderSearchResults(results);
+        } catch (e) {
+          console.error(e);
+          friendSearchResults.innerHTML = `<div class="friendEmpty">Erro ao buscar. Tente novamente.</div>`;
+        }
+        friendSearchBtn.disabled = false;
+        friendSearchBtn.textContent = "Buscar";
+      }
+
+      friendSearchBtn.addEventListener("click", doSearch);
+      friendSearchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); doSearch(); }
+      });
+    }
+
+    // ── Busca: ações nos resultados (add / aceitar) ─────────────────────────
+    if (friendSearchResults) {
+      friendSearchResults.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".friendBtn");
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const targetId = btn.dataset.userId;
+        if (!targetId) return;
+
+        btn.disabled = true;
+
+        try {
+          const mySnap = await getDoc(userRef);
+          const targetRef = doc(db, "users", targetId);
+          const targetSnap = await getDoc(targetRef);
+          if (!mySnap.exists() || !targetSnap.exists()) return;
+
+          const myUser = mySnap.data();
+          const targetUser = targetSnap.data();
+
+          if (action === "add") {
+            const myOutgoing = uniqueArray(myUser.outgoingRequests || []);
+            const targetIncoming = uniqueArray(targetUser.incomingRequests || []);
+            await updateDoc(userRef, { outgoingRequests: uniqueArray([...myOutgoing, targetId]) });
+            await updateDoc(targetRef, { incomingRequests: uniqueArray([...targetIncoming, userId]) });
+            btn.textContent = "Pedido enviado";
+            btn.classList.remove("friendBtn--accept");
+            btn.classList.add("friendBtn--pending");
+          }
+
+          if (action === "accept-search") {
+            const myIncoming = uniqueArray(myUser.incomingRequests || []);
+            const myFriends = uniqueArray(myUser.friends || []);
+            const requesterOutgoing = uniqueArray(targetUser.outgoingRequests || []);
+            const requesterFriends = uniqueArray(targetUser.friends || []);
+            await updateDoc(userRef, {
+              incomingRequests: myIncoming.filter(id => id !== targetId),
+              friends: uniqueArray([...myFriends, targetId])
+            });
+            await updateDoc(targetRef, {
+              outgoingRequests: requesterOutgoing.filter(id => id !== userId),
+              friends: uniqueArray([...requesterFriends, userId])
+            });
+            btn.textContent = "Amigos ✓";
+            btn.classList.remove("friendBtn--incoming");
+          }
+        } catch (err) {
+          console.error(err);
+          btn.disabled = false;
         }
       });
     }
