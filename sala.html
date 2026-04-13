@@ -2117,6 +2117,7 @@
       aspect-ratio:5/7;
       flex-shrink:0;
       transform: rotateX(3deg);
+      -webkit-transform-style: preserve-3d;
       transform-style: preserve-3d;
       transition: transform 320ms var(--ease-spring);
     }
@@ -2151,8 +2152,12 @@
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
       transform:rotateY(180deg);
-      background:
-        url('./verso-carta.jpg?v=2') center center / cover no-repeat;
+      /* cor sólida de fallback garante opacidade total caso a imagem demore a carregar */
+      background-color: #0d0b07;
+      background-image: url('./verso-carta.jpg?v=2');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
       /* Borda dourada igual à frente */
       border:1px solid rgba(215,176,107,.55);
       outline:1px solid rgba(0,0,0,.8);
@@ -3291,7 +3296,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+      overflow: visible; /* visible: permite carta crescer durante o giro sem ser cortada */
       padding: 5px 8px !important;
     }
 
@@ -3303,6 +3308,7 @@
       justify-content: center;
       align-items: center;
       gap: 0 !important;
+      overflow: visible;
       /* filter removido: qualquer filter no pai achata transform-style:preserve-3d
          e quebra o backface-visibility:hidden das faces da carta */
     }
@@ -3317,12 +3323,15 @@
       width: auto !important;
       max-width: 100% !important;
       max-height: calc(88vw * 7 / 5) !important;
-      transform: none !important;
+      /* rotateX(0deg) em vez de "none": mantém contexto 3D para backface-visibility funcionar */
+      transform: rotateX(0deg) !important;
+      -webkit-transform-style: preserve-3d;
+      transform-style: preserve-3d;
     }
     .ritualVisualCard { width: 100% !important; height: 100% !important; }
 
     /* Sem hover 3D no touch */
-    .ritualCardWrap:hover { transform: none !important; }
+    .ritualCardWrap:hover { transform: rotateX(0deg) !important; }
 
     /* Carta ornamentada — borda dupla dourada */
     .ritualVisualCard {
@@ -3349,6 +3358,27 @@
     .ritualRuleText        { font-size: 11px !important; line-height: 1.55 !important; text-align: center; }
     .ritualRuleText.subtle { font-size: 10px !important; }
     .ritualFinalPhrase     { font-size: 8px  !important; letter-spacing: .14em !important; }
+
+    /*
+      Giro mobile — escala em direção à tela (sem translateY),
+      a carta não sai dos limites verticais do layout.
+      A perspectiva do pai (.revealStage: perspective:1100px) dá profundidade.
+    */
+    @keyframes theFlipMobile {
+      0%   { transform: rotateY(0deg)   scale(1);    }
+      14%  { transform: rotateY(50deg)  scale(1.06); }
+      25%  { transform: rotateY(90deg)  scale(1.12); }
+      50%  { transform: rotateY(180deg) scale(1.14); }
+      75%  { transform: rotateY(270deg) scale(1.12); }
+      86%  { transform: rotateY(338deg) scale(1.05); }
+      93%  { transform: rotateY(355deg) scale(0.98); }
+      100% { transform: rotateY(360deg) scale(1);    }
+    }
+
+    .ritualCardWrap--flipping {
+      animation: theFlipMobile 1.4s ease-in-out forwards !important;
+      pointer-events: none;
+    }
 
     /* ═══════════════════════════════════════════════════════
        BOTTOM NAV BAR — fixo no rodapé
