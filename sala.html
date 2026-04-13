@@ -2172,6 +2172,9 @@
       overflow:hidden;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
+      /* translateZ(1px) força a face frontal no próprio layer de GPU —
+         fix mais confiável para backface-visibility no iOS Safari */
+      transform:translateZ(1px);
 
       /* Papel grosso escuro — camadas de textura simulada */
       background:
@@ -3272,7 +3275,7 @@
       flex-direction: column;
       flex: 1;
       padding: 0;
-      overflow: hidden;
+      overflow: visible; /* visible: permite carta sair dos limites durante o giro */
       min-height: 0;
     }
 
@@ -3284,7 +3287,7 @@
       justify-content: center;
       flex: 1;
       min-height: 0;
-      overflow: hidden;
+      overflow: visible; /* visible: permite leve subida da carta acima do painel */
     }
 
     /* revealPanel: mesa de madeira — preenche todo o espaço disponível via flex */
@@ -3323,14 +3326,18 @@
       width: auto !important;
       max-width: 100% !important;
       max-height: calc(88vw * 7 / 5) !important;
-      /* rotateX(0deg) em vez de "none": mantém contexto 3D para backface-visibility funcionar */
-      transform: rotateX(0deg) !important;
+      /*
+        rotateX(0deg) SEM !important: mantém contexto 3D sem bloquear os keyframes.
+        Com !important, o transform da regra base impede a animação de alterar o transform.
+        A regra mobile vence o desktop no cascade por vir depois (sem precisar de !important).
+      */
+      transform: rotateX(0deg);
       -webkit-transform-style: preserve-3d;
       transform-style: preserve-3d;
     }
     .ritualVisualCard { width: 100% !important; height: 100% !important; }
 
-    /* Sem hover 3D no touch */
+    /* Sem hover 3D no touch — mantém !important aqui para bloquear a regra hover do desktop */
     .ritualCardWrap:hover { transform: rotateX(0deg) !important; }
 
     /* Carta ornamentada — borda dupla dourada */
@@ -3360,24 +3367,28 @@
     .ritualFinalPhrase     { font-size: 8px  !important; letter-spacing: .14em !important; }
 
     /*
-      Giro mobile — escala em direção à tela (sem translateY),
-      a carta não sai dos limites verticais do layout.
-      A perspectiva do pai (.revealStage: perspective:1100px) dá profundidade.
+      Giro mobile — a carta:
+        1. Sobe levemente da mesa (translateY negativo) antes de girar.
+        2. Cresce em escala simulando aproximação ao viewer (perspective no pai).
+        3. Retorna com leve bounce.
+      overflow: visible nos pais garante que o lift e a escala não sejam cortados.
     */
     @keyframes theFlipMobile {
-      0%   { transform: rotateY(0deg)   scale(1);    }
-      14%  { transform: rotateY(50deg)  scale(1.06); }
-      25%  { transform: rotateY(90deg)  scale(1.12); }
-      50%  { transform: rotateY(180deg) scale(1.14); }
-      75%  { transform: rotateY(270deg) scale(1.12); }
-      86%  { transform: rotateY(338deg) scale(1.05); }
-      93%  { transform: rotateY(355deg) scale(0.98); }
-      100% { transform: rotateY(360deg) scale(1);    }
+      0%   { transform: rotateY(0deg)   translateY(0px)   scale(1);    z-index: 1;  }
+      10%  { transform: rotateY(20deg)  translateY(-14px) scale(1.04); z-index: 50; }
+      25%  { transform: rotateY(90deg)  translateY(-22px) scale(1.10); z-index: 50; }
+      50%  { transform: rotateY(180deg) translateY(-20px) scale(1.12); z-index: 50; }
+      75%  { transform: rotateY(270deg) translateY(-22px) scale(1.10); z-index: 50; }
+      86%  { transform: rotateY(338deg) translateY(-8px)  scale(1.04); z-index: 50; }
+      93%  { transform: rotateY(355deg) translateY(5px)   scale(0.99); z-index: 50; }
+      100% { transform: rotateY(360deg) translateY(0px)   scale(1);    z-index: 1;  }
     }
 
     .ritualCardWrap--flipping {
-      animation: theFlipMobile 1.4s ease-in-out forwards !important;
+      animation: theFlipMobile 1.45s ease-in-out forwards !important;
       pointer-events: none;
+      position: relative;
+      z-index: 50; /* acima do painel da mesa durante o giro */
     }
 
     /* ═══════════════════════════════════════════════════════
