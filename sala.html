@@ -3303,7 +3303,8 @@
       justify-content: center;
       align-items: center;
       gap: 0 !important;
-      filter: drop-shadow(0 0 28px rgba(215,176,107,.20));
+      /* filter removido: qualquer filter no pai achata transform-style:preserve-3d
+         e quebra o backface-visibility:hidden das faces da carta */
     }
 
     /*
@@ -3343,7 +3344,7 @@
 
     /* Tipografia da carta */
     .ritualCardNumber      { font-size: 9px  !important; letter-spacing: .28em !important; color: rgba(215,176,107,.50) !important; }
-    .ritualCardMainTitle   { font-size: 24px !important; letter-spacing: .05em !important; }
+    .ritualCardMainTitle   { font-size: 17px !important; letter-spacing: .05em !important; }
     .ritualMainInstruction { font-size: 11px !important; letter-spacing: .07em !important; text-transform: uppercase; }
     .ritualRuleText        { font-size: 11px !important; line-height: 1.55 !important; text-align: center; }
     .ritualRuleText.subtle { font-size: 10px !important; }
