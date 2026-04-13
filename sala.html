@@ -3849,21 +3849,29 @@
     }
     .profileCard--large {
       width: 100% !important;
-      max-height: 92svh !important;
+      max-height: 94svh !important;
       border-radius: 20px 20px 0 0 !important;
       overflow: hidden !important;
       padding-top: 14px !important;
+      display: flex !important;
+      flex-direction: column !important;
     }
     .profPane {
       -webkit-overflow-scrolling: touch;
       overflow-y: auto !important;
-      min-height: 0 !important; /* necessário para flex child scrollar corretamente */
+      min-height: 0 !important;
+      /* translateZ força layer GPU no iOS — garante scroll dentro de overflow:hidden */
+      transform: translateZ(0);
+      flex: 1 !important;
     }
     /* Reduz padding interno para ganhar mais espaço vertical */
-    .profHead { padding: 18px 20px 14px !important; }
+    .profHead { padding: 14px 20px 10px !important; }
     .profTabs { padding: 0 20px !important; }
-    .profPane { padding: 16px 20px 24px !important; gap: 12px !important; }
-    .profileAvatarLarge { width: 60px !important; height: 60px !important; font-size: 24px !important; }
+    .profPane { padding: 12px 20px 20px !important; gap: 10px !important; }
+    .profileAvatarLarge { width: 56px !important; height: 56px !important; font-size: 22px !important; }
+    /* Garante que a última linha não seja clipada pelos cantos arredondados do bloco */
+    .profInfoBlock { padding-bottom: 4px !important; }
+    .profInfoRow { padding: 10px 16px !important; }
 
   } /* end @media mobile */
 
