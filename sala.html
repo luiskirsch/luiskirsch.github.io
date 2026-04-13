@@ -2166,8 +2166,6 @@
       background-repeat: no-repeat;
       /* Borda dourada igual à frente */
       border:1px solid rgba(215,176,107,.55);
-      outline:1px solid rgba(0,0,0,.8);
-      outline-offset:-3px;
     }
 
     .ritualVisualCard{
@@ -3072,11 +3070,22 @@
     .ritualCardWrap--flipping {
       animation: theFlip 1.4s ease-in-out forwards !important;
       pointer-events: none;
+      transition: none !important;
     }
 
     .ritualCardWrap--first-reveal {
       animation: theFlipFirstReveal 1.0s ease-in-out forwards !important;
       pointer-events: none;
+      transition: none !important;
+    }
+
+    /* Durante o flip, pausar o glow pulsante das faces para evitar
+       repaint de box-shadow em cada frame (ganho crítico de performance) */
+    .ritualCardWrap--flipping .ritualVisualCard,
+    .ritualCardWrap--flipping .ritualCardBack,
+    .ritualCardWrap--first-reveal .ritualVisualCard,
+    .ritualCardWrap--first-reveal .ritualCardBack {
+      animation-play-state: paused !important;
     }
 
     /* Tremida da mesa quando a carta vai de lado */
@@ -3469,7 +3478,8 @@
       animation: theFlipMobile 1.15s ease-in-out forwards !important;
       pointer-events: none;
       position: relative;
-      z-index: 50; /* revealStage já tem z-index:1 → card flutua acima de tudo no layout */
+      z-index: 50;
+      transition: none !important;
     }
 
     .ritualCardWrap--first-reveal {
@@ -3477,6 +3487,14 @@
       pointer-events: none;
       position: relative;
       z-index: 50;
+      transition: none !important;
+    }
+
+    .ritualCardWrap--flipping .ritualVisualCard,
+    .ritualCardWrap--flipping .ritualCardBack,
+    .ritualCardWrap--first-reveal .ritualVisualCard,
+    .ritualCardWrap--first-reveal .ritualCardBack {
+      animation-play-state: paused !important;
     }
 
     /* ═══════════════════════════════════════════════════════
