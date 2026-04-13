@@ -74,50 +74,34 @@ transform:scale(1.05);
 }
 
 /* Flip card */
-.card-wrapper{
+.card{
 width:200px;
 height:280px;
-perspective:1000px;
-}
-
-.card{
-width:100%;
-height:100%;
-position:relative;
-transform-style:preserve-3d;
-transition:transform .7s cubic-bezier(.4,0,.2,1);
-}
-
-.card.flipped{
-transform:rotateY(180deg);
-}
-
-.card-face{
-position:absolute;
-inset:0;
-backface-visibility:hidden;
--webkit-backface-visibility:hidden;
 border-radius:16px;
 display:flex;
 align-items:center;
 justify-content:center;
 overflow:hidden;
+transition:transform .3s ease-in;
+transform-origin:center;
 }
 
-/* Verso: logo */
-.card-back{
+.card.fold{
+transform:scaleX(0);
+}
+
+.card.back{
 background:#0d1117;
 border:1px solid rgba(255,255,255,.12);
 }
 
-.card-back img{
+.card.back img{
 width:70%;
 opacity:.9;
+pointer-events:none;
 }
 
-/* Frente: texto da carta */
-.card-front{
-transform:rotateY(180deg);
+.card.front{
 background:rgba(255,255,255,.04);
 border:1px solid rgba(255,255,255,.1);
 text-align:center;
@@ -166,13 +150,8 @@ O SextoLugar
 REVELAR
 </div>
 
-<div class="card-wrapper">
-  <div class="card" id="card">
-    <div class="card-face card-back">
-      <img src="logo_oficial_fundo_transparente.png" alt="O SextoLugar">
-    </div>
-    <div class="card-face card-front" id="cardText"></div>
-  </div>
+<div class="card back" id="card">
+  <img src="verso-carta.jpg" alt="verso">
 </div>
 
 </div>
@@ -199,11 +178,38 @@ const deck = [
 ]
 
 const cardEl    = document.getElementById("card")
-const cardText  = document.getElementById("cardText")
 const historyEl = document.getElementById("history")
 const deckBtn   = document.getElementById("deck")
 
 let flipping = false
+
+function flipTo(showBack, text) {
+  // Fase 1: dobrar a carta (scaleX 0)
+  cardEl.classList.add("fold")
+
+  setTimeout(() => {
+    // Fase 2: trocar conteúdo com a carta "fechada"
+    if (showBack) {
+      cardEl.className = "card back fold"
+      cardEl.innerHTML = '<img src="verso-carta.jpg" alt="verso">'
+    } else {
+      cardEl.className = "card front fold"
+      cardEl.innerText = text
+    }
+
+    // Forçar reflow para a transição funcionar na direção inversa
+    cardEl.getBoundingClientRect()
+
+    // Fase 3: desdobrar — troca a transição para ease-out
+    cardEl.style.transition = "transform .3s ease-out"
+    cardEl.classList.remove("fold")
+
+    setTimeout(() => {
+      cardEl.style.transition = ""
+      flipping = false
+    }, 320)
+  }, 310)
+}
 
 function reveal() {
   if (flipping) return
@@ -211,22 +217,19 @@ function reveal() {
 
   const random = deck[Math.floor(Math.random() * deck.length)]
 
-  if (!cardEl.classList.contains("flipped")) {
-    // Primeira vez (ou carta já está no verso): atualiza texto e gira para frente
-    cardText.innerText = random
-    cardEl.classList.add("flipped")
+  if (cardEl.classList.contains("back")) {
+    // Carta está no verso: revelar frente
+    flipTo(false, random)
     addHistory(random)
-    setTimeout(() => { flipping = false }, 750)
   } else {
-    // Carta já está na frente: gira de volta para o verso...
-    cardEl.classList.remove("flipped")
-    // ...e depois gira para frente com o novo texto
+    // Carta está na frente: voltar ao verso primeiro, depois revelar nova
+    flipTo(true, null)
     setTimeout(() => {
-      cardText.innerText = random
-      cardEl.classList.add("flipped")
+      if (flipping) return
+      flipping = true
+      flipTo(false, random)
       addHistory(random)
-      setTimeout(() => { flipping = false }, 750)
-    }, 750)
+    }, 700)
   }
 }
 
