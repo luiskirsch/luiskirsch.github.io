@@ -3615,6 +3615,18 @@
 
     .mobileNavIcon:active { background: rgba(215,176,107,.18); }
 
+    /* ── Desktop profile/chat badge ── */
+    .topActionBtn { position: relative; }
+    .topActionBtn .badge {
+      position: absolute;
+      top: 2px; right: 2px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #d7b06b;
+      display: none;
+    }
+    .topActionBtn .badge.visible { display: block; }
+
     .mobileNavIcon .badge {
       position: absolute;
       top: 3px; right: 3px;
@@ -3965,7 +3977,7 @@
           <button class="topActionBtn primary" id="copyCodeBtn">Convidar Amigos</button>
           <button class="topActionBtn" id="oslShopFab" title="Ver pacotes de cartas">🎴 Loja</button>
           <button class="topActionBtn" id="arenaBtn" title="Alternar Modo Arena">⚔ Arena</button>
-          <button class="topActionBtn" id="myProfileBtn">👤 Perfil</button>
+          <button class="topActionBtn" id="myProfileBtn">👤 Perfil<span class="badge" id="desktopProfileBadge"></span></button>
           <button class="topActionBtn iconOnly" id="leaveBtn" aria-label="Sair da sala">⇢</button>
         </div>
       </header>
@@ -5741,6 +5753,15 @@
         openedProfileData = user;
 
         const isSelfView = targetUserId === userId;
+
+        // Clear notification badges when user opens their own profile
+        if (isSelfView) {
+          const mb = document.getElementById("mobileProfileBadge");
+          const db2 = document.getElementById("desktopProfileBadge");
+          if (mb)  mb.classList.remove("visible");
+          if (db2) db2.classList.remove("visible");
+        }
+
         await fillProfileUI(user, isSelfView);
 
         // Reset to first tab
@@ -6312,6 +6333,18 @@
       }, HEARTBEAT_MS);
     }
 
+    function bindUserDoc() {
+      onSnapshot(doc(db, "users", userId), (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        const pending = (data.incomingRequests || []).length;
+        const mobileProfileBadge  = document.getElementById("mobileProfileBadge");
+        const desktopProfileBadge = document.getElementById("desktopProfileBadge");
+        if (mobileProfileBadge)  mobileProfileBadge.classList.toggle("visible", pending > 0);
+        if (desktopProfileBadge) desktopProfileBadge.classList.toggle("visible", pending > 0);
+      });
+    }
+
     function bindRoom() {
       roomUnsub = onSnapshot(roomRef, async (snap) => {
         if (!snap.exists()) return;
@@ -6608,6 +6641,7 @@
         bindMessages();
         bindTyping();
         bindRitual();
+        bindUserDoc();
       } catch (error) {
         console.error(error);
 
@@ -7683,6 +7717,7 @@
       <div class="mobileNavIconWrap">
         <button class="mobileNavIcon mobileNavIcon--profile" id="mobileProfileBtn" title="Meu perfil" aria-label="Abrir perfil">
           👤
+          <span class="badge" id="mobileProfileBadge"></span>
         </button>
         <span class="mobileNavIconLabel">Perfil</span>
       </div>
