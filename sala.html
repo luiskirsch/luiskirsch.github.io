@@ -3173,10 +3173,11 @@
       flex-direction: column;
       overflow: hidden;
       min-height: 0;
+      position: relative; /* âncora o strip absoluto */
     }
 
     /* ═══════════════════════════════════════════════════════
-       STRIP DE JOGADORES — topo
+       STRIP DE JOGADORES — topo (fora do fluxo flex)
     ═══════════════════════════════════════════════════════ */
     #mobilePlayerStripInline {
       display: flex !important;
@@ -3186,10 +3187,12 @@
       padding: max(10px, env(safe-area-inset-top)) 16px 8px;
       overflow-x: auto;
       scrollbar-width: none;
-      flex-shrink: 0;
-      /* Reserva a altura dos avatares desde o carregamento inicial,
-         evitando layout shift quando o Firebase popula os jogadores. */
-      min-height: calc(max(10px, env(safe-area-inset-top)) + 83px);
+      /* Sai do fluxo flex: não empurra a mesa independente do conteúdo */
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
     }
     #mobilePlayerStripInline::-webkit-scrollbar { display: none; }
 
@@ -3277,7 +3280,8 @@
       display: flex !important;
       flex-direction: column;
       flex: 1;
-      padding: 0;
+      /* Compensa o strip absoluto de avatares no topo */
+      padding: calc(max(10px, env(safe-area-inset-top)) + 83px) 0 0 !important;
       overflow: visible; /* visible: permite carta sair dos limites durante o giro */
       min-height: 0;
     }
