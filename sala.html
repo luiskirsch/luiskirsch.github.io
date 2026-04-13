@@ -2126,6 +2126,12 @@
       transform: rotateX(0.5deg) translateY(-8px) scale(1.015);
     }
 
+    /* Carta de costas — mantém rotateY(180deg) mesmo no hover */
+    .ritualCardWrap--facedown,
+    .ritualCardWrap--facedown:hover {
+      transform: rotateY(180deg) !important;
+    }
+
     /* Sombra fica nas faces (não no wrapper) para não quebrar 3D */
     .ritualVisualCard,
     .ritualCardBack{
@@ -3399,6 +3405,10 @@
 
     /* Sem hover 3D no touch — mantém !important aqui para bloquear a regra hover do desktop */
     .ritualCardWrap:hover { transform: rotateX(0deg) !important; }
+
+    /* Carta de costas no mobile — sobrescreve o rotateX(0deg) acima */
+    .ritualCardWrap--facedown,
+    .ritualCardWrap--facedown:hover { transform: rotateY(180deg) !important; }
 
     /* Carta ornamentada — borda dupla dourada */
     .ritualVisualCard {
