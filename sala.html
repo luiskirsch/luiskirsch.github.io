@@ -3032,6 +3032,11 @@
       animation:shadowFlip 1.4s ease-in-out forwards !important;
     }
 
+    /* Estado inicial — carta de costas para o usuário */
+    .ritualCardWrap--facedown {
+      transform: rotateY(180deg);
+    }
+
     /* Carta sobe alto, gira com suavidade absoluta, pousa com impacto */
     @keyframes theFlip {
       /* Decolagem — sobe antes de começar a girar */
@@ -3048,8 +3053,23 @@
       100% { transform: rotateX(3deg) rotateY(360deg) translateY(0px)   scale(1);    }
     }
 
+    /* Primeira virada — parte do verso (180°) e revela a frente (360°) */
+    @keyframes theFlipFirstReveal {
+      0%   { transform: rotateX(3deg) rotateY(180deg) translateY(0px)   scale(1);    }
+      14%  { transform: rotateX(1deg) rotateY(230deg) translateY(-60px) scale(1.05); }
+      25%  { transform: rotateX(0deg) rotateY(270deg) translateY(-78px) scale(1.07); }
+      60%  { transform: rotateX(0deg) rotateY(340deg) translateY(-28px) scale(1.04); }
+      80%  { transform: rotateX(5deg) rotateY(355deg) translateY(6px)   scale(1.01); }
+      100% { transform: rotateX(3deg) rotateY(360deg) translateY(0px)   scale(1);    }
+    }
+
     .ritualCardWrap--flipping {
       animation: theFlip 1.4s ease-in-out forwards !important;
+      pointer-events: none;
+    }
+
+    .ritualCardWrap--first-reveal {
+      animation: theFlipFirstReveal 1.0s ease-in-out forwards !important;
       pointer-events: none;
     }
 
@@ -3427,11 +3447,26 @@
       100% { transform: rotateY(360deg) translateY(0px)   scale(1);    }
     }
 
+    @keyframes theFlipFirstRevealMobile {
+      0%   { transform: rotateY(180deg) translateY(0px)   scale(1);    }
+      25%  { transform: rotateY(270deg) translateY(-55px) scale(1.12); }
+      75%  { transform: rotateY(340deg) translateY(-20px) scale(1.05); }
+      90%  { transform: rotateY(355deg) translateY(5px)   scale(0.99); }
+      100% { transform: rotateY(360deg) translateY(0px)   scale(1);    }
+    }
+
     .ritualCardWrap--flipping {
       animation: theFlipMobile 1.15s ease-in-out forwards !important;
       pointer-events: none;
       position: relative;
       z-index: 50; /* revealStage já tem z-index:1 → card flutua acima de tudo no layout */
+    }
+
+    .ritualCardWrap--first-reveal {
+      animation: theFlipFirstRevealMobile 0.85s ease-in-out forwards !important;
+      pointer-events: none;
+      position: relative;
+      z-index: 50;
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -3942,7 +3977,7 @@
                   <div class="ritualCardShadow" id="ritualCardShadow"></div>
                   <div class="revealStage">
                     <div class="revealGlow" id="revealGlow"></div>
-                    <div class="ritualCardWrap" id="ritualCardWrap">
+                    <div class="ritualCardWrap ritualCardWrap--facedown" id="ritualCardWrap">
                     <article class="ritualVisualCard silenceCard">
                       <div class="ritualCardFrame">
                         <div class="ritualTopOrnaments">
@@ -4434,6 +4469,7 @@
     // Rastreia a carta atual para detectar mudanças e animar
     let lastRevealedCardKey = null;
     let revealAnimating = false;
+    let cardFaceDown = true; // carta começa de costas; vira na primeira revelação
 
     const params = new URLSearchParams(window.location.search);
 
@@ -5007,8 +5043,11 @@
       revealAnimating = true;
       if (revealCardBtn) revealCardBtn.disabled = true;
 
+      const isFirstReveal = cardFaceDown;
+      if (isFirstReveal) cardFaceDown = false;
+
       // Garante estado limpo antes de iniciar
-      ritualCardWrapEl.classList.remove("ritualCardWrap--flipping");
+      ritualCardWrapEl.classList.remove("ritualCardWrap--flipping", "ritualCardWrap--first-reveal", "ritualCardWrap--facedown");
       void ritualCardWrapEl.offsetWidth; // reflow
 
       // ── Sombra e carta animam juntas ──────────────────────────
@@ -5018,38 +5057,73 @@
         ritualCardShadowEl.classList.add("ritualCardShadow--animating");
       }
 
-      // ── Inicia a virada 360° elevada (1100ms total) ───────────
-      ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
+      if (isFirstReveal) {
+        // ── Primeira virada: verso → frente (180°→360°, ~1000ms) ──
+        ritualCardWrapEl.classList.add("ritualCardWrap--first-reveal");
 
-      // t=275ms → carta de lado (90°): troca conteúdo + tremida da mesa
-      setTimeout(() => {
-        applyCardContent(currentCard);
+        // t=250ms → carta perpendicular (270°): troca conteúdo
+        setTimeout(() => {
+          applyCardContent(currentCard);
+          if (revealPanelEl) {
+            revealPanelEl.classList.remove("revealPanel--shake");
+            void revealPanelEl.offsetWidth;
+            revealPanelEl.classList.add("revealPanel--shake");
+            setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 240);
+          }
+        }, 250);
 
-        if (revealPanelEl) {
-          revealPanelEl.classList.remove("revealPanel--shake");
-          void revealPanelEl.offsetWidth;
-          revealPanelEl.classList.add("revealPanel--shake");
-          setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 240);
-        }
-      }, 275);
+        // t=600ms → pulso dourado
+        setTimeout(() => {
+          if (revealGlowEl) {
+            revealGlowEl.classList.remove("revealGlow--active");
+            void revealGlowEl.offsetWidth;
+            revealGlowEl.classList.add("revealGlow--active");
+          }
+        }, 600);
 
-      // t=825ms → carta voltando (270°): pulso dourado anuncia chegada
-      setTimeout(() => {
-        if (revealGlowEl) {
-          revealGlowEl.classList.remove("revealGlow--active");
-          void revealGlowEl.offsetWidth;
-          revealGlowEl.classList.add("revealGlow--active");
-        }
-      }, 825);
+        // t=1000ms → fim
+        setTimeout(() => {
+          ritualCardWrapEl.classList.remove("ritualCardWrap--first-reveal");
+          if (ritualCardShadowEl) ritualCardShadowEl.classList.remove("ritualCardShadow--animating");
+          if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
+          revealAnimating = false;
+          updateRitualButtons();
+        }, 1000);
 
-      // t=1150ms → animação concluída: limpa estado
-      setTimeout(() => {
-        ritualCardWrapEl.classList.remove("ritualCardWrap--flipping");
-        if (ritualCardShadowEl) ritualCardShadowEl.classList.remove("ritualCardShadow--animating");
-        if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
-        revealAnimating = false;
-        updateRitualButtons();
-      }, 1150);
+      } else {
+        // ── Virada normal: 360° completos ─────────────────────────
+        ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
+
+        // t=275ms → carta de lado (90°): troca conteúdo + tremida da mesa
+        setTimeout(() => {
+          applyCardContent(currentCard);
+
+          if (revealPanelEl) {
+            revealPanelEl.classList.remove("revealPanel--shake");
+            void revealPanelEl.offsetWidth;
+            revealPanelEl.classList.add("revealPanel--shake");
+            setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 240);
+          }
+        }, 275);
+
+        // t=825ms → carta voltando (270°): pulso dourado anuncia chegada
+        setTimeout(() => {
+          if (revealGlowEl) {
+            revealGlowEl.classList.remove("revealGlow--active");
+            void revealGlowEl.offsetWidth;
+            revealGlowEl.classList.add("revealGlow--active");
+          }
+        }, 825);
+
+        // t=1150ms → animação concluída: limpa estado
+        setTimeout(() => {
+          ritualCardWrapEl.classList.remove("ritualCardWrap--flipping");
+          if (ritualCardShadowEl) ritualCardShadowEl.classList.remove("ritualCardShadow--animating");
+          if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
+          revealAnimating = false;
+          updateRitualButtons();
+        }, 1150);
+      }
     }
 
     function renderRitualCardFromState(data) {
