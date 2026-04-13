@@ -3296,17 +3296,9 @@
       overflow: visible; /* visible: permite leve subida da carta acima do painel */
     }
 
-    /* revealPanel: mesa de madeira — preenche todo o espaço disponível via flex */
+    /* revealPanel: mesa de madeira — oculta antes do ritual, aparece só no arenaMode */
     .revealPanel {
-      flex: 1;
-      min-height: 0;
-      width: 88%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: visible; /* visible: permite carta crescer durante o giro sem ser cortada */
-      padding: 5px 8px !important;
+      display: none !important;
     }
 
     .revealStage {
@@ -3330,8 +3322,18 @@
     html.arenaMode .revealStage {
       max-height: none !important;
     }
+    /* Mesa só aparece após iniciar o ritual */
     html.arenaMode .revealPanel {
+      display: flex !important;
+      flex: 1;
+      min-height: 0;
+      width: 88%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       overflow: visible !important;
+      padding: 5px 8px !important;
+      outline: none !important; /* remove linha preta nos cantos */
     }
 
     /*
