@@ -3270,8 +3270,9 @@
     .gameTableGrid {
       display: flex !important;
       flex-direction: column;
-      flex: 1;
-      padding: 0 10px;
+      flex: 1 1 0%;   /* flex-basis 0% → iOS Safari height definite */
+      height: 0;      /* iOS Safari: força altura definida para filhos % */
+      padding: 0;     /* remove padding lateral — carta usa toda a largura */
       overflow: hidden;
       min-height: 0;
     }
@@ -3280,44 +3281,57 @@
     .cardCenter {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
+      align-items: stretch;    /* stretch → revealPanel preenche largura */
+      justify-content: stretch;
+      flex: 1 1 0%;
+      height: 0;               /* iOS Safari: altura definida para filhos % */
       min-height: 0;
       overflow: hidden;
     }
 
     /* revealPanel preenche o cardCenter verticalmente */
     .revealPanel {
-      flex: 1;
+      flex: 1 1 0%;
+      height: 0;               /* iOS Safari: altura definida para filhos % */
       width: 100%;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 0;
       overflow: hidden;
+      padding: 10px !important;   /* reduz padding do painel — mais espaço pra carta */
     }
 
     .revealStage {
-      height: 100%;
+      flex: 1 1 0%;            /* cresce para preencher o revealPanel */
+      height: 0;               /* iOS Safari: força altura definida */
       width: 100%;
+      min-height: 0;
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 0 !important;       /* remove gap 18px do base — carta fica no topo do stage */
       filter: drop-shadow(0 0 28px rgba(215,176,107,.20));
     }
 
     /*
       Carta: height-driven.
-      O card preenche a altura do revealStage (que é a altura disponível
-      depois do strip + label + bottom-bar). A largura sai do aspect-ratio 5/7
-      automaticamente — nunca corta em cima nem embaixo.
+      height: 100% → ocupa toda a altura disponível no revealStage.
+      width: auto   → calculado pelo aspect-ratio 5/7.
+      max-width: 100% → se a largura calculada ultrapassar o container,
+        CSS Sizing L4 "transfere" o max-width para reduzir a altura
+        proporcionalmente (suportado no iOS Safari 15+).
     */
     .ritualCardWrap {
       height: 100% !important;
       width: auto !important;
-      max-height: none !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      aspect-ratio: 5/7 !important;
       transform: none !important;
+      align-self: center;
+      flex-shrink: 0;
     }
     .ritualVisualCard { width: 100% !important; height: 100% !important; }
 
@@ -3369,7 +3383,7 @@
     }
 
     /* Compensação: empurra a carta para cima do bottom bar */
-    .gameTableGrid { padding-bottom: 0; }
+    .gameTableGrid { padding: 0 !important; }
     .layout { padding-bottom: 108px; }
 
     /* ── Ícones esquerda ── */
@@ -3663,7 +3677,10 @@
     /* ═══════════════════════════════════════════════════════
        OCULTAR ELEMENTOS DESNECESSÁRIOS NO MOBILE
     ═══════════════════════════════════════════════════════ */
-    .ritualCardShadow { display: none; }
+    .ritualCardShadow { display: none !important; }
+
+    /* revealGlow: posicionado absolutamente, não ocupa altura no flex */
+    .revealGlow { position: absolute !important; pointer-events: none !important; }
 
     /* Remove outline preta do desktop (visível apenas no mobile) */
     .ritualVisualCard { outline: none !important; }
