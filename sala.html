@@ -3316,7 +3316,11 @@
          e quebra o backface-visibility:hidden das faces da carta */
     }
 
-    /* Cancela restrições do arenaMode que encolhem a carta no mobile */
+    /* Cancela regras de grid/restrições do arenaMode que quebram o layout mobile */
+    html.arenaMode .tableCard {
+      display: flex !important;
+      grid-template-rows: none !important;
+    }
     html.arenaMode .revealStage {
       max-height: none !important;
     }
