@@ -3282,15 +3282,15 @@
       overflow: hidden;
     }
 
-    /* revealPanel: a mesa de madeira */
+    /* revealPanel: mesa de madeira — preenche todo o espaço disponível via flex */
     .revealPanel {
       flex: 1;
+      min-height: 0;
       width: 88%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 0;
       overflow: hidden;
       padding: 5px 8px !important;
     }
@@ -3307,15 +3307,15 @@
     }
 
     /*
-      Carta: ocupa toda a altura disponível do revealStage.
-      width: auto + aspect-ratio 5/7 calculam a largura proporcionalmente.
-      max-width: 100% evita overflow horizontal.
+      Carta: ocupa toda a altura do revealStage.
+      max-height evita que o card transborde horizontalmente ao respeitar aspect-ratio 5/7.
+      88vw = largura do painel → max-height = largura × 7/5.
     */
     .ritualCardWrap {
       height: 100% !important;
       width: auto !important;
       max-width: 100% !important;
-      max-height: none !important;
+      max-height: calc(88vw * 7 / 5) !important;
       transform: none !important;
     }
     .ritualVisualCard { width: 100% !important; height: 100% !important; }
