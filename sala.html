@@ -3851,6 +3851,7 @@
     .profPane {
       -webkit-overflow-scrolling: touch;
       overflow-y: auto !important;
+      min-height: 0 !important; /* necessário para flex child scrollar corretamente */
     }
     /* Reduz padding interno para ganhar mais espaço vertical */
     .profHead { padding: 18px 20px 14px !important; }
@@ -5514,6 +5515,9 @@
         });
         const fab = document.getElementById("mobileProfileBtn");
         if (fab) fab.textContent = "🔮";
+        const desktopBtn = document.getElementById("myProfileBtn");
+        if (desktopBtn) desktopBtn.textContent = "🔮 Perfil";
+        localStorage.setItem("osl_avatar", "🔮");
       } else {
         await updateDoc(userRef, {
           lastSeen: serverTimestamp()
@@ -5522,6 +5526,9 @@
         if (emoji) {
           const fab = document.getElementById("mobileProfileBtn");
           if (fab) fab.textContent = emoji;
+          const desktopBtn = document.getElementById("myProfileBtn");
+          if (desktopBtn) desktopBtn.textContent = emoji + " Perfil";
+          localStorage.setItem("osl_avatar", emoji);
         }
       }
     }
@@ -6957,6 +6964,15 @@
     var selfName   = localStorage.getItem("osl_nome") || localStorage.getItem("osl_name") || "Você";
     var selfAvatar = localStorage.getItem("osl_avatar") || "";
     var selfColor  = localStorage.getItem("osl_color") || "";
+
+    // Aplica o emoji dos botões de perfil imediatamente do cache local,
+    // antes de o Firestore responder — evita flash do boneco 👤
+    if (selfAvatar) {
+      var _mobileBtn  = document.getElementById("mobileProfileBtn");
+      var _desktopBtn = document.getElementById("myProfileBtn");
+      if (_mobileBtn)  _mobileBtn.textContent  = selfAvatar;
+      if (_desktopBtn) _desktopBtn.textContent  = selfAvatar + " Perfil";
+    }
 
     var chatIsOpen = false;
     var histIsOpen = false;
