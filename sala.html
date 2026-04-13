@@ -3316,6 +3316,14 @@
          e quebra o backface-visibility:hidden das faces da carta */
     }
 
+    /* Cancela restrições do arenaMode que encolhem a carta no mobile */
+    html.arenaMode .revealStage {
+      max-height: none !important;
+    }
+    html.arenaMode .revealPanel {
+      overflow: visible !important;
+    }
+
     /*
       Carta: ocupa toda a altura do revealStage.
       max-height evita que o card transborde horizontalmente ao respeitar aspect-ratio 5/7.
