@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>O SextoLugar — Em Breve</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,7 +23,7 @@ body {
   overflow: hidden;
   overscroll-behavior: none;
   color: #f5f7fb;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: 'Sora', system-ui, -apple-system, sans-serif;
   -webkit-text-size-adjust: 100%;
   background:
     radial-gradient(ellipse 90% 55% at 50% -5%,  rgba(38,118,240,.16), transparent 52%),
@@ -99,11 +102,12 @@ body::after {
 
 /* ─── Eyebrow ─── */
 .eyebrow {
-  font-size: clamp(16px, 1.8vh, 26px);
+  font-size: clamp(15px, 1.7vh, 24px);
   font-weight: 600;
-  letter-spacing: .04em;
-  color: rgba(210,224,248,.70);
+  letter-spacing: .06em;
+  color: rgba(210,224,248,.65);
   animation: fadeUp .55s cubic-bezier(.22,1,.36,1) .05s both;
+  margin-bottom: clamp(8px, 1.6vh, 20px);
 }
 
 /* ─── Título ─── */
@@ -116,23 +120,24 @@ body::after {
 
 .title .line1 {
   display: block;
-  font-size: clamp(28px, 3.8vh, 54px);
-  font-weight: 800;
-  letter-spacing: -.02em;
-  color: rgba(245,247,251,.88);
+  font-size: clamp(26px, 3.6vh, 50px);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: rgba(245,247,251,.85);
 }
 
 .title .line2 {
   display: block;
-  font-size: clamp(44px, 8.2vh, 112px);
+  font-size: clamp(42px, 7.8vh, 108px);
   font-weight: 900;
-  letter-spacing: -.055em;
-  line-height: .96;
+  letter-spacing: -.03em;
+  line-height: 1;
   background: linear-gradient(175deg, #ffffff 0%, #e8effd 40%, #c8daf5 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   text-shadow: none;
+  padding: 0 4px; /* evita clip nas laterais */
 }
 
 /* ─── Grid countdown ─── */
