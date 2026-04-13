@@ -7528,8 +7528,16 @@
         deactivateArenaMode();
       });
 
-      // Restaura modo arena se a sessão já estava ativa
-      if (sessionStorage.getItem("osl_arena") === "1") {
+      // Restaura modo arena se a sessão já estava ativa.
+      // No mobile o estado é gerenciado exclusivamente pelo Firebase listener,
+      // então não restauramos via sessionStorage — evita flash da mesa antes
+      // do ritual ser confirmado como iniciado.
+      const isMobileDevice = window.matchMedia("(max-width: 640px)").matches ||
+        (window.matchMedia("(max-width: 960px)").matches &&
+         window.matchMedia("(orientation: landscape)").matches &&
+         window.matchMedia("(pointer: coarse)").matches);
+
+      if (!isMobileDevice && sessionStorage.getItem("osl_arena") === "1") {
         activateArenaMode();
       }
     })();
