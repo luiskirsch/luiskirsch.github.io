@@ -5513,6 +5513,8 @@
             wins: 0
           }
         });
+        selectedAvatarEmoji = "🔮";
+        selectedAvatarColor = "#1f86d9";
         const fab = document.getElementById("mobileProfileBtn");
         if (fab) fab.textContent = "🔮";
         const desktopBtn = document.getElementById("myProfileBtn");
@@ -5523,13 +5525,16 @@
           lastSeen: serverTimestamp()
         });
         const emoji = snap.data().avatarEmoji;
+        const color = snap.data().avatarColor;
         if (emoji) {
+          selectedAvatarEmoji = emoji;
           const fab = document.getElementById("mobileProfileBtn");
           if (fab) fab.textContent = emoji;
           const desktopBtn = document.getElementById("myProfileBtn");
           if (desktopBtn) desktopBtn.textContent = emoji + " Perfil";
           localStorage.setItem("osl_avatar", emoji);
         }
+        if (color) selectedAvatarColor = color;
       }
     }
 
@@ -5879,9 +5884,14 @@
         const div = document.createElement("div");
         div.className = "player";
         div.dataset.pid = player.id;
+        const avatarContent = player.avatarEmoji || initials(player.name);
+        const avatarStyle = player.avatarEmoji
+          ? `style="font-size:1.3em;background:${player.avatarColor || "#342718"}"`
+          : (player.avatarColor ? `style="background:${player.avatarColor}"` : "");
+
         div.innerHTML = `
           <div class="playerLeft">
-            <div class="avatar">${initials(player.name)}</div>
+            <div class="avatar" ${avatarStyle}>${avatarContent}</div>
             <div class="playerMeta">
               <div class="playerName">${escapeHtml(player.name)}</div>
               <div class="playerRole">${player.isHost ? "Anfitrião" : "Participante"}</div>
@@ -6012,6 +6022,8 @@
         userId,
         name: playerName,
         isHost,
+        avatarEmoji: selectedAvatarEmoji || "🔮",
+        avatarColor: selectedAvatarColor || "#342718",
         joinedAt: serverTimestamp(),
         lastSeen: serverTimestamp()
       }, { merge: true });
