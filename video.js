@@ -5,8 +5,8 @@ import {
   createLocalVideoTrack
 } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
 
-const TOKEN_ENDPOINT = "https://osl-video-server.onrender.com/token";
-const VERIFY_ACCESS_ENDPOINT = "https://osl-video-server.onrender.com/verificar-acesso";
+const TOKEN_ENDPOINT = "https://osl-video-server-production.up.railway.app/token";
+const VERIFY_ACCESS_ENDPOINT = "https://osl-video-server-production.up.railway.app/verificar-acesso";
 const LIVEKIT_URL = "wss://osextolugar-eqa7q1iz.livekit.cloud";
 const SALES_PAGE_URL = "./vendas.html";
 

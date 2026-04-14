@@ -3,7 +3,7 @@
 <head>
   <script>
     (async function protegerSala() {
-      const BASE = "https://osl-video-server.onrender.com";
+      const BASE = "https://osl-video-server-production.up.railway.app";
 
       function tokenLocalValido() {
         const token = localStorage.getItem("osl_access_token");
@@ -4666,7 +4666,7 @@
     window.PANEL_SERVER_BASE =
   location.hostname === "localhost"
     ? "http://localhost:3000"
-    : "https://osl-video-server.onrender.com";
+    : "https://osl-video-server-production.up.railway.app";
   </script>
 
   <script>
@@ -5069,7 +5069,7 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    const BACKEND_BASE_URL_OSL = "https://osl-video-server.onrender.com";
+    const BACKEND_BASE_URL_OSL = "https://osl-video-server-production.up.railway.app";
 
     // Carrega compras da conta do servidor e faz merge com localStorage
     async function syncAccountPurchases() {
@@ -7246,7 +7246,7 @@
   (function () {
     'use strict';
 
-    const OSL_BASE = "https://osl-video-server.onrender.com";
+    const OSL_BASE = "https://osl-video-server-production.up.railway.app";
     const OSL_LOCK_EVERY = 4; // lock appears every Nth reveal
     const OSL_FINAL_CHANCE = 0.20; // 20% chance of "Revelação Final" instead of lock
 
@@ -7561,7 +7561,7 @@
   (function () {
     'use strict';
 
-    const REC_BASE = "https://osl-video-server.onrender.com";
+    const REC_BASE = "https://osl-video-server-production.up.railway.app";
 
     const roomCode = (new URLSearchParams(window.location.search)).get("sala")
       || localStorage.getItem("osl_sala") || "SL-0001";
