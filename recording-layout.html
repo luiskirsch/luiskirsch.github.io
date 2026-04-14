@@ -2,334 +2,129 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  />
-  <title>Recording Layout | O SextoLugar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recording | O SextoLugar</title>
 
   <style>
     :root{
-      --bg-1:#040506;
-      --bg-2:#0a0d10;
+      --bg:#050505;
       --gold:#e6c07b;
-      --gold-soft:rgba(230,192,123,.18);
-      --line:rgba(255,255,255,.08);
-      --text:#f6f7fb;
-      --muted:rgba(255,255,255,.70);
-      --panel:rgba(255,255,255,.04);
-      --shadow:0 30px 80px rgba(0,0,0,.45);
-      --radius-xl:28px;
-      --radius-lg:22px;
-      --radius-md:16px;
+      --gold-dim:rgba(215,176,107,.55);
+      --line:rgba(215,176,107,.28);
+      --muted:#a7a7a7;
     }
 
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-    }
+    *{ box-sizing:border-box; margin:0; padding:0; }
 
     html,body{
-      width:100%;
-      height:100%;
-      overflow:hidden;
+      width:100%; height:100%; overflow:hidden;
       background:
-        radial-gradient(1000px 420px at 50% 8%, rgba(230,192,123,.07), transparent 60%),
-        radial-gradient(600px 280px at 14% 80%, rgba(72,183,244,.06), transparent 60%),
-        linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
-      color:var(--text);
-      font-family:Inter, "Segoe UI", Arial, sans-serif;
+        radial-gradient(1200px 700px at 50% 20%, rgba(230,192,123,.10), transparent 55%),
+        radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 560px at 82% 75%, rgba(255,255,255,.05), transparent 62%),
+        var(--bg);
+      color:#f2f2f2;
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
     }
 
     body::before{
       content:"";
       position:fixed;
-      inset:0;
+      inset:-20%;
       pointer-events:none;
       background:
-        linear-gradient(180deg, rgba(255,255,255,.018), transparent 14%, transparent 86%, rgba(255,255,255,.015)),
-        radial-gradient(circle at center, transparent 52%, rgba(0,0,0,.24) 100%);
-      opacity:.95;
+        radial-gradient(700px 360px at 50% 35%, rgba(230,192,123,.08), transparent 60%),
+        radial-gradient(900px 480px at 60% 70%, rgba(255,255,255,.05), transparent 65%);
+      filter:blur(12px);
+      opacity:.72;
+      animation:pulseGlow 4.8s ease-in-out infinite;
     }
 
-    .frame{
+    @keyframes pulseGlow{
+      0%,100%{ opacity:.58; transform:translateY(0) scale(1); }
+      50%{ opacity:.92; transform:translateY(-6px) scale(1.01); }
+    }
+
+    /* ─── Game Table Grid ─── */
+    .scene{
       position:relative;
       z-index:1;
       width:100%;
       height:100%;
-      padding:28px;
       display:grid;
-      grid-template-rows: 380px 1fr;
-      gap:20px;
-    }
-
-    .topArea{
-      display:grid;
-      grid-template-columns: 1.15fr 320px;
-      gap:20px;
-      min-height:0;
-    }
-
-    .cardPanel,
-    .metaPanel,
-    .videoPanel{
-      position:relative;
-      border:1px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-
-    .cardPanel::before,
-    .metaPanel::before,
-    .videoPanel::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:
-        radial-gradient(700px 220px at 50% 0%, rgba(230,192,123,.08), transparent 60%);
-      opacity:.8;
-    }
-
-    .cardPanel{
-      border-radius:var(--radius-xl);
-      padding:26px 28px;
-      display:grid;
-      grid-template-rows:auto auto 1fr auto;
-      gap:16px;
-      background:
-        radial-gradient(circle at top, rgba(230,192,123,.07), transparent 30%),
-        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018));
-    }
-
-    .cardTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-    }
-
-    .ritualBadge{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-      color:var(--gold);
-      font-size:12px;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      font-weight:700;
-      white-space:nowrap;
-    }
-
-    .ritualBadge::before{
-      content:"";
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:var(--gold);
-      box-shadow:0 0 14px rgba(230,192,123,.45);
-    }
-
-    .cardNumber{
-      font-size:13px;
-      letter-spacing:.24em;
-      text-transform:uppercase;
-      color:rgba(255,255,255,.64);
-      white-space:nowrap;
-    }
-
-    .cardType{
-      color:var(--gold);
-      font-size:13px;
-      letter-spacing:.26em;
-      text-transform:uppercase;
-      font-weight:800;
-    }
-
-    .cardTitle{
-      font-size:64px;
-      line-height:.94;
-      letter-spacing:-.06em;
-      font-weight:900;
-      max-width:10ch;
-      text-transform:uppercase;
-      text-shadow:0 16px 40px rgba(0,0,0,.32);
-    }
-
-    .cardTextWrap{
-      display:grid;
-      align-content:center;
-      min-height:0;
-    }
-
-    .cardText{
-      font-size:28px;
-      line-height:1.45;
-      color:rgba(255,255,255,.88);
-      max-width:30ch;
-    }
-
-    .cardFooter{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:20px;
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    .cardFooterLeft{
-      display:grid;
-      gap:8px;
-    }
-
-    .footerRule{
-      width:180px;
-      height:2px;
-      border-radius:999px;
-      background:linear-gradient(90deg, rgba(230,192,123,.95), transparent);
-      box-shadow:0 0 10px rgba(230,192,123,.18);
-    }
-
-    .metaPanel{
-      border-radius:var(--radius-xl);
-      padding:24px 22px;
-      display:grid;
-      grid-template-rows:auto auto 1fr auto;
-      gap:16px;
-    }
-
-    .brandSmall{
-      color:var(--gold);
-      font-size:12px;
-      letter-spacing:.2em;
-      text-transform:uppercase;
-      font-weight:700;
-    }
-
-    .brandTitle{
-      font-size:34px;
-      letter-spacing:-.05em;
-      line-height:.95;
-      font-weight:900;
-    }
-
-    .roomInfo{
-      display:grid;
-      gap:10px;
-    }
-
-    .pill{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      min-height:48px;
-      padding:12px 14px;
-      border-radius:16px;
-      background:rgba(255,255,255,.035);
-      border:1px solid rgba(255,255,255,.07);
-      font-size:13px;
-      color:var(--muted);
-    }
-
-    .pill strong{
-      color:#fff;
-      font-size:14px;
-      font-weight:800;
-      letter-spacing:.02em;
-    }
-
-    .liveStatus{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:12px 14px;
-      border-radius:16px;
-      background:rgba(255,255,255,.035);
-      border:1px solid rgba(255,255,255,.07);
-      color:#fff;
-      font-size:13px;
-      font-weight:700;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-    }
-
-    .liveStatus::before{
-      content:"";
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:#ff6464;
-      box-shadow:0 0 14px rgba(255,100,100,.55);
-    }
-
-    .metaBottom{
-      color:rgba(255,255,255,.62);
-      font-size:13px;
-      line-height:1.6;
-    }
-
-    .videoPanel{
-      border-radius:var(--radius-xl);
-      padding:18px;
-      display:grid;
-      min-height:0;
-    }
-
-    .videoGrid{
-      width:100%;
-      height:100%;
-      display:grid;
+      grid-template-columns: clamp(80px,10vw,130px) 1fr clamp(80px,10vw,130px);
       gap:14px;
-      align-items:stretch;
-      justify-items:stretch;
-      min-height:0;
+      padding:20px;
+      align-items:center;
     }
 
-    .videoGrid.grid-1{
-      grid-template-columns:1fr;
-      grid-template-rows:1fr;
+    /* ─── Side Columns ─── */
+    .videoColLeft,
+    .videoColRight{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-self:stretch;
+      justify-content:center;
     }
 
-    .videoGrid.grid-2{
-      grid-template-columns:repeat(2,1fr);
-      grid-template-rows:1fr;
+    /* ─── Placeholder (empty slot) ─── */
+    .videoColPlaceholder{
+      position:relative;
+      width:100%;
+      aspect-ratio:1/1;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      background:#000;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      box-shadow:
+        0 0 5px  rgba(255,255,255,.10),
+        0 0 14px rgba(255,255,255,.06),
+        0 0 30px rgba(255,255,255,.02),
+        inset 0 0 10px rgba(255,255,255,.05);
+      animation:whiteGlowPulse 7s ease-in-out infinite;
     }
 
-    .videoGrid.grid-3,
-    .videoGrid.grid-4{
-      grid-template-columns:repeat(2,1fr);
-      grid-template-rows:repeat(2,1fr);
+    @keyframes whiteGlowPulse{
+      0%,100%{
+        border-color:rgba(255,255,255,.10);
+        box-shadow:
+          0 0 5px rgba(255,255,255,.10),
+          0 0 14px rgba(255,255,255,.06),
+          0 0 30px rgba(255,255,255,.02),
+          inset 0 0 10px rgba(255,255,255,.05);
+      }
+      50%{
+        border-color:rgba(255,255,255,.28);
+        box-shadow:
+          0 0 5px rgba(255,255,255,.25),
+          0 0 14px rgba(255,255,255,.16),
+          0 0 30px rgba(255,255,255,.08),
+          inset 0 0 10px rgba(255,255,255,.12);
+      }
     }
 
-    .videoGrid.grid-5,
-    .videoGrid.grid-6{
-      grid-template-columns:repeat(3,1fr);
-      grid-template-rows:repeat(2,1fr);
-    }
-
+    /* ─── Video Tiles ─── */
     .videoTile{
       position:relative;
-      overflow:hidden;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.08);
+      width:100%;
+      aspect-ratio:1/1;
       background:
-        radial-gradient(circle at center, rgba(72,183,244,.06), transparent 55%),
-        #05070a;
-      min-height:0;
+        radial-gradient(circle at 50% 0%, rgba(215,176,107,.06), transparent 50%),
+        linear-gradient(180deg, #0f0b08, #060504);
+      border:1px solid var(--line);
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:
+        0 6px 22px rgba(0,0,0,.50),
+        inset 0 1px 0 rgba(255,255,255,.04);
     }
 
-    .videoTile video{
-      width:100%;
-      height:100%;
+    .videoTile video,
+    .videoTile audio{
+      width:100%; height:100%;
       object-fit:cover;
       display:block;
       background:#000;
@@ -337,377 +132,605 @@
 
     .videoTileLabel{
       position:absolute;
-      left:12px;
-      bottom:12px;
-      max-width:calc(100% - 24px);
-      padding:9px 12px;
+      left:8px; bottom:8px;
+      max-width:calc(100% - 16px);
+      padding:5px 9px;
       border-radius:999px;
-      background:rgba(0,0,0,.55);
+      background:rgba(0,0,0,.60);
       border:1px solid rgba(255,255,255,.12);
-      backdrop-filter:blur(6px);
+      backdrop-filter:blur(4px);
       color:#fff;
-      font-size:12px;
+      font-size:11px;
       font-weight:700;
-      letter-spacing:.04em;
+      letter-spacing:.03em;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      font-family:ui-sans-serif, system-ui, sans-serif;
     }
 
-    .videoEmpty{
-      width:100%;
+    /* ─── Center Column ─── */
+    .cardCenter{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+    }
+
+    /* ─── Ritual Card Wrap ─── */
+    .ritualCardWrap{
+      position:relative;
+      height:55vh;
+      aspect-ratio:5/7;
+      flex-shrink:0;
+      transform:rotateX(3deg);
+      transform-style:preserve-3d;
+    }
+
+    @keyframes whiteGlowPulseCard{
+      0%,100%{
+        box-shadow:
+          0 14px 22px rgba(0,0,0,.75),
+          0 0 8px rgba(255,255,255,.12),
+          0 0 22px rgba(255,255,255,.08),
+          0 0 50px rgba(255,255,255,.04),
+          inset 0 0 14px rgba(255,255,255,.07);
+      }
+      50%{
+        box-shadow:
+          0 14px 22px rgba(0,0,0,.75),
+          0 0 8px rgba(255,255,255,.32),
+          0 0 22px rgba(255,255,255,.20),
+          0 0 50px rgba(255,255,255,.10),
+          inset 0 0 14px rgba(255,255,255,.18);
+      }
+    }
+
+    .ritualVisualCard{
+      width:100%; height:100%;
+      position:relative;
+      border-radius:20px;
+      overflow:hidden;
+      backface-visibility:hidden;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,.008) 2px, rgba(255,255,255,.008) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,.006) 3px, rgba(255,255,255,.006) 6px),
+        radial-gradient(ellipse 80% 30% at 50% -10%, rgba(255,248,220,.18), transparent 60%),
+        radial-gradient(ellipse 60% 60% at 50% 40%, rgba(205,163,92,.07), transparent 70%),
+        linear-gradient(160deg, #1e1810 0%, #17120c 30%, #100d08 60%, #0d0b07 100%);
+      border:1px solid rgba(215,176,107,.55);
+      outline:1px solid rgba(0,0,0,.8);
+      outline-offset:-3px;
+      animation:whiteGlowPulseCard 7s ease-in-out infinite;
+    }
+
+    .ritualVisualCard::before{
+      content:"";
+      position:absolute;
+      inset:8px;
+      border-radius:14px;
+      border:1px solid rgba(215,176,107,.38);
+      box-shadow:
+        inset 0 0 0 1px rgba(0,0,0,.5),
+        0 0 0 1px rgba(215,176,107,.10);
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .ritualVisualCard::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:20px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.13) 0%, rgba(255,255,255,.04) 20%, transparent 45%),
+        linear-gradient(to bottom, transparent 75%, rgba(215,176,107,.06) 100%);
+      pointer-events:none;
+      z-index:3;
+    }
+
+    .ritualCardFrame{
+      position:relative;
+      z-index:4;
       height:100%;
-      display:grid;
-      place-items:center;
+      padding:16px 14px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:space-between;
       text-align:center;
-      padding:24px;
-      border-radius:22px;
-      border:1px dashed rgba(255,255,255,.10);
-      color:rgba(255,255,255,.62);
-      font-size:16px;
-      line-height:1.6;
-      background:rgba(255,255,255,.02);
+      color:#f7f3ea;
+      overflow:hidden;
+    }
+
+    .ritualTopOrnaments{
+      width:100%;
+      display:grid;
+      grid-template-columns:1fr auto auto auto 1fr;
+      align-items:center;
+      gap:7px;
+    }
+
+    .ritualLine{
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(215,176,107,.5) 30%, rgba(255,240,180,.9) 50%, rgba(215,176,107,.5) 70%, transparent);
+    }
+
+    .ritualStars{
+      color:#f3eee3;
+      font-size:10px;
+      letter-spacing:.20em;
+      white-space:nowrap;
+      opacity:.90;
+    }
+
+    .ritualSigil{
+      color:#e8d5a3;
+      font-size:18px;
+      line-height:1;
+      text-shadow:0 0 12px rgba(215,176,107,.6), 0 1px 0 rgba(0,0,0,.8);
+    }
+
+    .ritualCardNumber{
+      font-size:10px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(215,176,107,.80);
+      text-shadow:0 1px 2px rgba(0,0,0,.6);
+      font-family:ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .ritualCardMainTitle{
+      font-size:clamp(16px, 1.5vw, 24px);
+      line-height:1.05;
+      font-weight:700;
+      letter-spacing:.03em;
+      text-align:center;
+      color:#fff8ee;
+      text-transform:uppercase;
+      word-break:break-word;
+      font-family:Georgia, "Times New Roman", serif;
+      text-shadow:0 2px 8px rgba(0,0,0,.8), 0 0 20px rgba(215,176,107,.25);
+    }
+
+    .ritualMainInstruction{
+      font-size:clamp(0.72rem, 1.6vh, 1rem);
+      line-height:1.4;
+      text-align:center;
+      color:rgba(245,238,220,.92);
+      text-shadow:0 1px 3px rgba(0,0,0,.7);
+      font-family:Georgia, "Times New Roman", serif;
+    }
+
+    .ritualMidDetails{
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:5px;
+    }
+
+    .ritualMiniDivider{
+      width:72%;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .ritualMiniDivider span{
+      flex:1;
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(215,176,107,.75), transparent);
+    }
+
+    .ritualMiniDivider i{
+      width:7px; height:7px;
+      border-radius:50%;
+      display:block;
+      background:radial-gradient(circle, #fff8e0 0%, #d4a84b 50%, transparent 75%);
+      box-shadow:0 0 6px rgba(215,176,107,.5);
+    }
+
+    .ritualRuleText{
+      font-size:clamp(9px, 1.1vh, 12px);
+      line-height:1.35;
+      color:rgba(240,232,210,.88);
+      text-shadow:0 1px 2px rgba(0,0,0,.6);
+      font-family:ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .ritualRuleText strong{
+      display:inline-block;
+      margin-top:1px;
+      font-size:clamp(9px, 1.1vh, 12px);
+      letter-spacing:.04em;
+      color:#fff;
+      text-shadow:0 0 8px rgba(255,255,255,.3);
+    }
+
+    .ritualRuleText.subtle{
+      font-size:clamp(8px, 1vh, 11px);
+      opacity:.85;
+    }
+
+    .goldText{ color:#e7c57f !important; text-shadow:0 0 8px rgba(215,176,107,.4) !important; }
+
+    .ritualWhiteDivider{
+      width:76%; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.5) 30%, rgba(255,255,255,.9) 50%, rgba(255,255,255,.5) 70%, transparent);
+      box-shadow:0 0 6px rgba(255,255,255,.2);
+    }
+
+    .ritualFinalPhrase{
+      font-size:clamp(8px, 1vh, 10px);
+      line-height:1.35;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color:rgba(215,176,107,.75);
+      text-shadow:0 1px 3px rgba(0,0,0,.7);
+      font-family:ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .ritualFingerprint{
+      position:relative;
+      width:44px; height:44px;
+      flex-shrink:0;
+      opacity:.65;
+    }
+
+    .ritualFingerprint .finger{
+      position:absolute;
+      inset:0;
+      border:1.5px solid rgba(215,176,107,.80);
+      border-color:rgba(215,176,107,.80) transparent transparent rgba(215,176,107,.80);
+      border-radius:58% 42% 60% 40% / 50% 46% 54% 50%;
+      transform-origin:center;
+    }
+
+    .ritualFingerprint .finger1{ inset:3px; }
+    .ritualFingerprint .finger2{ inset:8px; }
+    .ritualFingerprint .finger3{ inset:13px; }
+    .ritualFingerprint .finger4{ inset:18px; }
+    .ritualFingerprint .finger5{ inset:23px; }
+
+    .ritualBottomOrnaments{
+      width:100%;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+    }
+
+    .ritualBottomSet{
+      width:35%;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .ritualBottomSet span{
+      display:block;
+      height:1.5px;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(215,176,107,.85), transparent);
+    }
+
+    .ritualBottomSet.left span:nth-child(1){ width:100%; }
+    .ritualBottomSet.left span:nth-child(2){ width:70%; }
+    .ritualBottomSet.left span:nth-child(3){ width:48%; }
+
+    .ritualBottomSet.right{ align-items:flex-end; }
+    .ritualBottomSet.right span{ background:linear-gradient(90deg, transparent, rgba(215,176,107,.85)); }
+
+    /* ─── Card with facedown placeholder text ─── */
+    .cardWaiting{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      height:100%;
+      opacity:.55;
+      font-size:13px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:rgba(215,176,107,.8);
+      font-family:ui-sans-serif, system-ui, sans-serif;
+    }
+
+    /* ─── Self (center-bottom) Video Tile ─── */
+    .videoSelfSlot{
+      width:100%;
+      display:flex;
+      justify-content:center;
+    }
+
+    .videoSelfSlot .videoTile{
+      width:min(220px,100%);
+      aspect-ratio:4/3;
+      border:2px solid var(--gold) !important;
+      box-shadow:
+        0 0 24px rgba(215,176,107,.32),
+        0 8px 28px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.06) !important;
     }
   </style>
 </head>
 <body>
-  <main class="frame">
-    <section class="topArea">
-      <section class="cardPanel">
-        <div class="cardTop">
-          <div class="ritualBadge">O SextoLugar</div>
-          <div class="cardNumber" id="cardNumber">Carta 01</div>
-        </div>
+  <div class="scene">
 
-        <div class="cardType" id="cardType">Ritual</div>
+    <!-- Left column: players 1 & 2 -->
+    <div class="videoColLeft" id="colLeft">
+      <div class="videoColPlaceholder" id="slotL1"></div>
+      <div class="videoColPlaceholder" id="slotL2"></div>
+    </div>
 
-        <h1 class="cardTitle" id="cardTitle">Silêncio</h1>
+    <!-- Center: ritual card + player 5 below -->
+    <div class="cardCenter">
+      <div class="ritualCardWrap">
+        <article class="ritualVisualCard">
+          <div class="ritualCardFrame">
 
-        <div class="cardTextWrap">
-          <div class="cardText" id="cardText">
-            Durante 60 segundos, ninguém pode falar.
+            <div class="ritualTopOrnaments">
+              <div class="ritualLine"></div>
+              <div class="ritualStars">✦ ✦ ✦</div>
+              <div class="ritualSigil">△</div>
+              <div class="ritualStars">✦ ✦ ✦</div>
+              <div class="ritualLine"></div>
+            </div>
+
+            <div class="ritualCardNumber" id="ritualCardType">AGUARDANDO</div>
+            <h3 class="ritualCardMainTitle" id="ritualCardTitle">O SextoLugar</h3>
+
+            <div class="ritualMainInstruction" id="ritualCardText">
+              Aguardando o anfitrião iniciar.<br>
+              Depois disso, a carta se transforma.
+            </div>
+
+            <div class="ritualMidDetails">
+              <div class="ritualMiniDivider"><span></span><i></i><span></span></div>
+              <p class="ritualRuleText" id="ritualRuleText"></p>
+              <div class="ritualMiniDivider"><span></span><i></i><span></span></div>
+              <p class="ritualRuleText subtle" id="ritualRuleSubtle"></p>
+            </div>
+
+            <div class="ritualWhiteDivider"></div>
+
+            <p class="ritualFinalPhrase" id="ritualFinalPhrase"></p>
+
+            <div class="ritualFingerprint">
+              <div class="finger finger1"></div>
+              <div class="finger finger2"></div>
+              <div class="finger finger3"></div>
+              <div class="finger finger4"></div>
+              <div class="finger finger5"></div>
+            </div>
+
+            <div class="ritualBottomOrnaments">
+              <div class="ritualBottomSet left">
+                <span></span><span></span><span></span>
+              </div>
+              <div class="ritualBottomSet right">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+
           </div>
-        </div>
-
-        <div class="cardFooter">
-          <div class="cardFooterLeft">
-            <div class="footerRule"></div>
-            <div>A sessão reage ao desconforto, não às palavras.</div>
-          </div>
-          <div id="updatedAtText">Ao vivo</div>
-        </div>
-      </section>
-
-      <aside class="metaPanel">
-        <div class="brandSmall">Recording Layout</div>
-        <div class="brandTitle">O SextoLugar</div>
-
-        <div class="roomInfo">
-          <div class="pill">
-            <span>Sala</span>
-            <strong id="roomName">Carregando</strong>
-          </div>
-
-          <div class="pill">
-            <span>Código</span>
-            <strong id="roomCode">----</strong>
-          </div>
-
-          <div class="pill">
-            <span>Jogadores</span>
-            <strong id="participantCount">0</strong>
-          </div>
-        </div>
-
-        <div class="liveStatus">Gravação ativa</div>
-
-        <div class="metaBottom">
-          Layout oficial de captura da sessão com carta em destaque e reações do grupo em tempo real.
-        </div>
-      </aside>
-    </section>
-
-    <section class="videoPanel">
-      <div class="videoGrid grid-1" id="videoGrid">
-        <div class="videoEmpty" id="videoEmpty">
-          Aguardando participantes entrarem na chamada.
-        </div>
+        </article>
       </div>
-    </section>
-  </main>
+
+      <div class="videoSelfSlot" id="slotCenter"></div>
+    </div>
+
+    <!-- Right column: players 3 & 4 -->
+    <div class="videoColRight" id="colRight">
+      <div class="videoColPlaceholder" id="slotR1"></div>
+      <div class="videoColPlaceholder" id="slotR2"></div>
+    </div>
+
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import {
-      getFirestore,
-      doc,
-      onSnapshot
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-    import {
-      Room,
-      RoomEvent
-    } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyC8sSvA7_1HPYRFGfgdgzstkP_yQHadY-c",
-      authDomain: "osextolugar-game.firebaseapp.com",
-      projectId: "osextolugar-game",
-      storageBucket: "osextolugar-game.firebasestorage.app",
-      messagingSenderId: "947922328721",
-      appId: "1:947922328721:web:989522c99e16ab449f3330",
-      measurementId: "G-D6HG779ZFR"
-    };
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { Room, RoomEvent } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
 
     const BACKEND_BASE_URL = "https://osl-video-server-production.up.railway.app";
-    const LIVEKIT_URL = "wss://osextolugar-eqa7q1iz.livekit.cloud";
+    const LIVEKIT_URL      = "wss://osextolugar-eqa7q1iz.livekit.cloud";
 
-    const params = new URLSearchParams(window.location.search);
-    const roomCode =
-      params.get("room") ||
-      params.get("sala") ||
-      "SL-0001";
+    const firebaseConfig = {
+      apiKey:"AIzaSyC8sSvA7_1HPYRFGfgdgzstkP_yQHadY-c",
+      authDomain:"osextolugar-game.firebaseapp.com",
+      projectId:"osextolugar-game",
+      storageBucket:"osextolugar-game.firebasestorage.app",
+      messagingSenderId:"947922328721",
+      appId:"1:947922328721:web:989522c99e16ab449f3330"
+    };
 
-    const roomName =
-      params.get("nomeSala") ||
-      "Sala do Ritual";
+    const params   = new URLSearchParams(window.location.search);
+    const roomCode = params.get("room") || params.get("sala") || "SL-0001";
 
+    // ── Firestore: sync current card ────────────────────────────────────
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db  = getFirestore(app);
 
-    const roomNameEl = document.getElementById("roomName");
-    const roomCodeEl = document.getElementById("roomCode");
-    const participantCountEl = document.getElementById("participantCount");
+    const cardTypeEl    = document.getElementById("ritualCardType");
+    const cardTitleEl   = document.getElementById("ritualCardTitle");
+    const cardTextEl    = document.getElementById("ritualCardText");
+    const ruleTextEl    = document.getElementById("ritualRuleText");
+    const ruleSubtleEl  = document.getElementById("ritualRuleSubtle");
+    const finalPhraseEl = document.getElementById("ritualFinalPhrase");
 
-    const cardTypeEl = document.getElementById("cardType");
-    const cardTitleEl = document.getElementById("cardTitle");
-    const cardTextEl = document.getElementById("cardText");
-    const cardNumberEl = document.getElementById("cardNumber");
-    const updatedAtTextEl = document.getElementById("updatedAtText");
+    onSnapshot(doc(db, "salas", roomCode, "ritual", "state"), (snap) => {
+      if (!snap.exists()) return;
+      const card = snap.data().currentCard || null;
+      if (!card) return;
 
-    const videoGridEl = document.getElementById("videoGrid");
-    const videoEmptyEl = document.getElementById("videoEmpty");
+      cardTypeEl.textContent    = card.type   ? `CARTA — ${card.type.toUpperCase()}` : "CARTA RITUAL";
+      cardTitleEl.textContent   = card.title  || "";
+      cardTextEl.innerHTML      = String(card.text || "").replace(/\n/g, "<br>");
+      ruleTextEl.innerHTML      = card.rule   ? String(card.rule).replace(/\n/g, "<br>") : "";
+      ruleSubtleEl.innerHTML    = card.subtle ? String(card.subtle).replace(/\n/g, "<br>") : "";
+      finalPhraseEl.textContent = card.phrase || "";
+    });
 
-    roomNameEl.textContent = roomName;
-    roomCodeEl.textContent = roomCode;
+    // ── Slot assignment ──────────────────────────────────────────────────
+    // Order: L1, L2, R1, R2, CENTER (5 spots)
+    const SLOT_IDS = ["slotL1", "slotL2", "slotR1", "slotR2", "slotCenter"];
+    const slotByIdentity = new Map(); // identity → slotId
+    const freeSlots = [...SLOT_IDS];
 
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    function escapeHtml(s){
+      return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     }
 
-    function applyGridClass(count) {
-      videoGridEl.className = "videoGrid";
-
-      if (count <= 1) videoGridEl.classList.add("grid-1");
-      else if (count === 2) videoGridEl.classList.add("grid-2");
-      else if (count <= 4) videoGridEl.classList.add("grid-4");
-      else videoGridEl.classList.add("grid-6");
+    function getOrAssignSlot(identity){
+      if (slotByIdentity.has(identity)) return slotByIdentity.get(identity);
+      if (freeSlots.length === 0) return null;
+      const slotId = freeSlots.shift();
+      slotByIdentity.set(identity, slotId);
+      return slotId;
     }
 
-    function updateParticipantCount() {
-      const count = videoGridEl.querySelectorAll(".videoTile").length;
-      participantCountEl.textContent = String(count);
-      applyGridClass(count || 1);
-
-      if (count === 0 && videoEmptyEl && !videoEmptyEl.parentNode) {
-        videoGridEl.appendChild(videoEmptyEl);
+    function releaseSlot(identity){
+      const slotId = slotByIdentity.get(identity);
+      if (!slotId) return;
+      slotByIdentity.delete(identity);
+      freeSlots.unshift(slotId); // return to front so next join reuses it
+      // restore placeholder
+      const el = document.getElementById(slotId);
+      if (el){
+        const isSelf = slotId === "slotCenter";
+        if (isSelf){
+          el.innerHTML = "";
+          el.className = "videoSelfSlot";
+          el.id = slotId;
+        } else {
+          el.innerHTML = "";
+          el.className = "videoColPlaceholder";
+          el.id = slotId;
+        }
       }
-
-      if (count > 0 && videoEmptyEl && videoEmptyEl.parentNode === videoGridEl) {
-        videoEmptyEl.remove();
-      }
     }
 
-    function getTile(identity) {
-      return videoGridEl.querySelector(`.videoTile[data-identity="${CSS.escape(identity)}"]`);
-    }
-
-    function createTile(identity, label) {
+    function buildTile(identity, label){
       const tile = document.createElement("div");
       tile.className = "videoTile";
       tile.dataset.identity = identity;
 
-      const mediaWrap = document.createElement("div");
-      mediaWrap.className = "videoMedia";
+      const media = document.createElement("div");
+      media.className = "videoMedia";
+      media.style.cssText = "position:absolute;inset:0;overflow:hidden;";
 
-      const labelEl = document.createElement("div");
-      labelEl.className = "videoTileLabel";
-      labelEl.innerHTML = escapeHtml(label || "Jogador");
+      const lbl = document.createElement("div");
+      lbl.className = "videoTileLabel";
+      lbl.innerHTML = escapeHtml(label || "Jogador");
 
-      tile.appendChild(mediaWrap);
-      tile.appendChild(labelEl);
-
+      tile.appendChild(media);
+      tile.appendChild(lbl);
       return tile;
     }
 
-    function ensureTile(identity, label) {
-      let tile = getTile(identity);
-      if (tile) {
-        const labelEl = tile.querySelector(".videoTileLabel");
-        if (labelEl) labelEl.innerHTML = escapeHtml(label || "Jogador");
-        return tile;
+    function ensureTile(identity, label){
+      // Check if tile already exists in any slot
+      const existing = document.querySelector(`.videoTile[data-identity="${CSS.escape(identity)}"]`);
+      if (existing){
+        const lbl = existing.querySelector(".videoTileLabel");
+        if (lbl) lbl.innerHTML = escapeHtml(label || "Jogador");
+        return existing;
       }
 
-      tile = createTile(identity, label);
-      videoGridEl.appendChild(tile);
-      updateParticipantCount();
+      const slotId = getOrAssignSlot(identity);
+      if (!slotId) return null;
+
+      const slot = document.getElementById(slotId);
+      if (!slot) return null;
+
+      const tile = buildTile(identity, label);
+
+      if (slotId === "slotCenter"){
+        // Self slot: wrap in videoSelfSlot div
+        slot.innerHTML = "";
+        slot.className = "videoSelfSlot";
+        slot.id = slotId;
+        slot.appendChild(tile);
+      } else {
+        // Replace placeholder div with tile directly
+        slot.replaceWith(tile);
+        tile.id = slotId;
+      }
+
       return tile;
     }
 
-    function removeTile(identity) {
-      const tile = getTile(identity);
-      if (tile) tile.remove();
-      updateParticipantCount();
-    }
-
-    function attachTrack(identity, track, label) {
+    function attachTrack(identity, track, label){
       const tile = ensureTile(identity, label);
-      const mediaWrap = tile.querySelector(".videoMedia");
-      if (!mediaWrap) return;
+      if (!tile) return;
 
-      const existing = mediaWrap.querySelector(`[data-track-sid="${track.sid}"]`);
-      if (existing) return;
+      const media = tile.querySelector(".videoMedia");
+      if (!media) return;
+
+      if (media.querySelector(`[data-track-sid="${track.sid}"]`)) return;
 
       const el = track.attach();
       el.dataset.trackSid = track.sid;
 
-      if (track.kind === "video") {
-        el.autoplay = true;
-        el.playsInline = true;
-        el.muted = true;
-      }
+      if (track.kind === "video"){ el.autoplay = true; el.playsInline = true; el.muted = true; }
+      if (track.kind === "audio"){ el.autoplay = true; }
 
-      if (track.kind === "audio") {
-        el.autoplay = true;
-      }
-
-      mediaWrap.appendChild(el);
+      media.appendChild(el);
     }
 
-    async function getRecordingToken() {
-      const identity = `recording_bot_${Math.random().toString(36).slice(2, 10)}`;
+    function detachTrack(identity, track){
+      const tile = document.querySelector(`.videoTile[data-identity="${CSS.escape(identity)}"]`);
+      if (!tile) return;
+      const el = tile.querySelector(`[data-track-sid="${track.sid}"]`);
+      if (el) el.remove();
+    }
 
-      const accessToken = localStorage.getItem("osl_access_token");
-
+    // ── LiveKit connection ───────────────────────────────────────────────
+    async function getToken(){
+      const identity = `rec_bot_${Math.random().toString(36).slice(2,9)}`;
       const res = await fetch(
-        `${BACKEND_BASE_URL}/token?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(identity)}`,
-        {
-          headers: accessToken
-            ? { Authorization: `Bearer ${accessToken}` }
-            : {}
-        }
+        `${BACKEND_BASE_URL}/token?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(identity)}`
       );
-
       const data = await res.json().catch(() => ({}));
-
-      if (!res.ok || !data.token) {
-        throw new Error(data?.error || "TOKEN_RECORDING_INVALIDO");
-      }
-
+      if (!res.ok || !data.token) throw new Error(data?.error || "TOKEN_INVALIDO");
       return data.token;
     }
 
-    async function connectRoom() {
-      const token = await getRecordingToken();
+    async function connectRoom(){
+      const token = await getToken();
+      const room  = new Room({ adaptiveStream:true, dynacast:true });
 
-      const room = new Room({
-        adaptiveStream: true,
-        dynacast: true
+      room.on(RoomEvent.ParticipantConnected, (p) => {
+        ensureTile(p.identity, p.name || "Jogador");
       });
 
-      room.on(RoomEvent.ParticipantConnected, (participant) => {
-        ensureTile(
-          participant.identity,
-          participant.name || "Jogador"
-        );
+      room.on(RoomEvent.TrackSubscribed, (track, _pub, p) => {
+        attachTrack(p.identity, track, p.name || "Jogador");
       });
 
-      room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-        attachTrack(
-          participant.identity,
-          track,
-          participant.name || "Jogador"
-        );
+      room.on(RoomEvent.TrackUnsubscribed, (track, _pub, p) => {
+        detachTrack(p.identity, track);
       });
 
-      room.on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
-        const tile = getTile(participant.identity);
-        if (!tile) return;
-
-        const mediaWrap = tile.querySelector(".videoMedia");
-        const mediaEl = mediaWrap?.querySelector(`[data-track-sid="${track.sid}"]`);
-        if (mediaEl) mediaEl.remove();
+      room.on(RoomEvent.ParticipantDisconnected, (p) => {
+        releaseSlot(p.identity);
       });
 
-      room.on(RoomEvent.ParticipantDisconnected, (participant) => {
-        removeTile(participant.identity);
-      });
+      await room.connect(LIVEKIT_URL, token, { autoSubscribe:true });
 
-      await room.connect(LIVEKIT_URL, token, { autoSubscribe: true });
-
-      for (const participant of room.remoteParticipants.values()) {
-        ensureTile(participant.identity, participant.name || "Jogador");
-
-        participant.trackPublications.forEach((pub) => {
-          if (pub.track) {
-            attachTrack(
-              participant.identity,
-              pub.track,
-              participant.name || "Jogador"
-            );
-          }
-        });
+      // Attach already-present participants
+      for (const p of room.remoteParticipants.values()){
+        ensureTile(p.identity, p.name || "Jogador");
+        for (const pub of p.trackPublications.values()){
+          if (pub.track) attachTrack(p.identity, pub.track, p.name || "Jogador");
+        }
       }
-
-      updateParticipantCount();
     }
 
-    function bindCard() {
-      const ritualRef = doc(db, "salas", roomCode, "ritual", "state");
-
-      onSnapshot(ritualRef, (snap) => {
-        if (!snap.exists()) {
-          cardTypeEl.textContent = "Ritual";
-          cardTitleEl.textContent = "Aguardando";
-          cardTextEl.innerHTML = "A sessão ainda não iniciou.";
-          cardNumberEl.textContent = "Carta 01";
-          updatedAtTextEl.textContent = "Ao vivo";
-          return;
-        }
-
-        const data = snap.data();
-        const card = data.currentCard || null;
-
-        if (!card) {
-          cardTypeEl.textContent = "Ritual";
-          cardTitleEl.textContent = "Aguardando revelação";
-          cardTextEl.innerHTML = "O anfitrião ainda não revelou a próxima carta.";
-          cardNumberEl.textContent = "Carta 01";
-        } else {
-          cardTypeEl.textContent = card.type || "Ritual";
-          cardTitleEl.textContent = card.title || "Carta revelada";
-          cardTextEl.innerHTML = String(card.text || "").replace(/\n/g, "<br>");
-          cardNumberEl.textContent = card.number
-            ? `Carta ${String(card.number).padStart(2, "0")}`
-            : "Carta Ritual";
-        }
-
-        updatedAtTextEl.textContent = "Ao vivo";
-      });
-    }
-
-    bindCard();
-    connectRoom().catch((error) => {
-      console.error("Erro ao conectar recording layout:", error);
-      if (videoEmptyEl) {
-        videoEmptyEl.innerHTML = "Não foi possível conectar à sala de gravação.";
-      }
-    });
+    connectRoom().catch(err => console.error("recording connect error:", err));
   </script>
 </body>
-          </html>
+</html>
