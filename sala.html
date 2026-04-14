@@ -8265,39 +8265,57 @@
     syncPlayerStrip();
 
     // ── Self video thumbnail ──────────────────────────────────────────────────
+    // Usa o LiveKit track diretamente no thumbnail visível — evita clonar
+    // srcObject de um elemento display:none (que o browser não renderiza).
+    var _mirrorTrack = null;
+
     function mirrorSelfVideo() {
-      var selfSlot = document.getElementById("videoSelfSlot");
-      if (!selfSlot || !mobileVideoThumb) return;
-      var video = selfSlot.querySelector("video");
-      if (!video || !video.srcObject) {
-        // No active video — show placeholder only if not already shown
-        if (!mobileVideoThumb.querySelector("video")) {
-          if (!mobileVideoThumb.querySelector(".mobileVideoOff")) {
-            mobileVideoThumb.innerHTML = '<span class="mobileVideoOff">🎥</span>';
-          }
+      if (!mobileVideoThumb) return;
+
+      var lkTrack = window._oslLocalVideoTrack || null;
+
+      if (!lkTrack) {
+        // Sem câmera ativa — mostra placeholder
+        _mirrorTrack = null;
+        var existingVid = mobileVideoThumb.querySelector("video");
+        if (existingVid) { existingVid.remove(); }
+        if (!mobileVideoThumb.querySelector(".mobileVideoOff")) {
+          mobileVideoThumb.innerHTML = '<span class="mobileVideoOff">🎥</span>';
         }
         return;
       }
-      // Compare by srcObject identity — re-clone only when stream changes
-      var existingClone = mobileVideoThumb.querySelector("video");
-      if (existingClone && existingClone.srcObject === video.srcObject) return;
+
+      // Já temos um elemento para este track — nada a fazer
+      if (lkTrack === _mirrorTrack) return;
+      _mirrorTrack = lkTrack;
+
+      // Limpa estado anterior
       mobileVideoThumb.innerHTML = "";
-      var cloned = document.createElement("video");
-      cloned.srcObject = video.srcObject;
-      cloned.muted = true;
-      cloned.autoplay = true;
-      cloned.playsInline = true;
-      cloned.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:inherit;transform:scaleX(-1)";
-      mobileVideoThumb.appendChild(cloned);
-      cloned.play().catch(function(){});
+
+      // Cria elemento diretamente do track (visível → play funciona no iOS)
+      var el = lkTrack.attach();
+      el.muted = true;
+      el.autoplay = true;
+      el.playsInline = true;
+      el.setAttribute("playsinline", "");
+      el.setAttribute("webkit-playsinline", "");
+      el.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:inherit;transform:scaleX(-1)";
+      mobileVideoThumb.appendChild(el);
+
+      // Garante play assim que o elemento tiver dados
+      var doPlay = function() { el.play().catch(function(){}); };
+      el.addEventListener("loadedmetadata", doPlay, { once: true });
+      requestAnimationFrame(doPlay);
     }
 
+    // Dispara quando video.js expõe o track
     var selfSlotEl = document.getElementById("videoSelfSlot");
     if (selfSlotEl) {
       var selfObs = new MutationObserver(mirrorSelfVideo);
       selfObs.observe(selfSlotEl, { childList: true, subtree: true });
     }
-    setInterval(mirrorSelfVideo, 2000);
+    // Fallback polling — detecta track que já estava pronto antes do observer
+    setInterval(mirrorSelfVideo, 800);
 
     // ── Swipe down to close drawers ───────────────────────────────────────────
     [mobileChatOverlay, mobileHistOverlay].forEach(function (overlay) {

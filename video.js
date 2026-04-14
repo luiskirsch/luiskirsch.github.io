@@ -698,6 +698,9 @@ async function joinVideoCall() {
 
     isInPreview = false;
 
+    // Expõe para o mobile usar diretamente (evita clonar de display:none)
+    window._oslLocalVideoTrack = localVideoTrack;
+
     const myTile = getOrCreateVideoTile(
       participantId,
       `${playerName} (você)`
@@ -771,6 +774,7 @@ async function leaveVideoCall() {
       localVideoTrack.stop();
       localVideoTrack.detach().forEach((el) => el.remove());
       localVideoTrack = null;
+      window._oslLocalVideoTrack = null;
     }
   } catch (error) {
     console.error("Erro ao sair:", error);
