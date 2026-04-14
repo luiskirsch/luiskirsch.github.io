@@ -168,6 +168,43 @@
       radial-gradient(55vw 45vh at 10% 30%, rgba(120,20,20,.06), transparent 60%),
       linear-gradient(180deg, #080404 0%, #0e0606 52%, #120808 100%); }
 
+    /* ── Temas exclusivos de pacotes ── */
+
+    /* Âmbar — dourado caloroso (Conexão) */
+    html.bg-ambar{ background:#090600 !important; }
+    html.bg-ambar::before{ background:
+      radial-gradient(80vw 60vh at 50% 0%, rgba(220,150,20,.10), transparent 55%),
+      radial-gradient(55vw 45vh at 85% 25%, rgba(180,100,10,.06), transparent 60%),
+      linear-gradient(180deg, #090600 0%, #0e0a02 52%, #130d03 100%); }
+
+    /* Cristal — frio aço prata (Verdades) */
+    html.bg-cristal{ background:#030508 !important; }
+    html.bg-cristal::before{ background:
+      radial-gradient(80vw 60vh at 50% 0%, rgba(140,180,220,.10), transparent 55%),
+      radial-gradient(55vw 45vh at 15% 35%, rgba(80,120,180,.07), transparent 60%),
+      linear-gradient(180deg, #030508 0%, #05070e 52%, #070a14 100%); }
+
+    /* Chama — laranja intenso (Conflito) */
+    html.bg-chama{ background:#0a0400 !important; }
+    html.bg-chama::before{ background:
+      radial-gradient(80vw 60vh at 50% 0%, rgba(240,100,10,.12), transparent 55%),
+      radial-gradient(55vw 45vh at 80% 20%, rgba(200,60,0,.07), transparent 60%),
+      linear-gradient(180deg, #0a0400 0%, #120600 52%, #180800 100%); }
+
+    /* Véu — roxo abissal (Segredos) */
+    html.bg-veu{ background:#040008 !important; }
+    html.bg-veu::before{ background:
+      radial-gradient(80vw 60vh at 50% 0%, rgba(180,20,220,.10), transparent 55%),
+      radial-gradient(55vw 45vh at 20% 40%, rgba(100,0,160,.07), transparent 60%),
+      linear-gradient(180deg, #040008 0%, #07000e 52%, #0a0014 100%); }
+
+    /* Vinho — rosa escuro (Casais) */
+    html.bg-vinho{ background:#090004 !important; }
+    html.bg-vinho::before{ background:
+      radial-gradient(80vw 60vh at 50% 0%, rgba(200,20,80,.10), transparent 55%),
+      radial-gradient(55vw 45vh at 75% 30%, rgba(140,10,50,.07), transparent 60%),
+      linear-gradient(180deg, #090004 0%, #0e0007 52%, #130009 100%); }
+
     /* Vinheta — sem mix-blend-mode (muito custoso em GPU) */
     body::before{
       content:"";
@@ -2178,11 +2215,36 @@
       color:rgba(255,255,255,.55); font-family:ui-sans-serif,system-ui,sans-serif;
     }
 
+    .bgSwatch--locked{
+      opacity:.45; cursor:not-allowed;
+      border-style:dashed;
+    }
+    .bgSwatch--locked:hover{ transform:none; }
+
+    .bgSwatch .lockIcon{
+      position:absolute; top:3px; right:4px;
+      font-size:9px; line-height:1; opacity:.7;
+    }
+
+    .bgSwatchSection{
+      width:100%; font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+      color:rgba(243,237,229,.35); margin-top:10px; margin-bottom:2px;
+    }
+
     .profLabelFree{
       display:inline-block;
       font-size:10px; letter-spacing:.08em; text-transform:uppercase;
       background:rgba(84,208,109,.14); color:#54d06d;
       border:1px solid rgba(84,208,109,.28);
+      border-radius:999px; padding:1px 7px;
+      vertical-align:middle; margin-left:6px;
+    }
+
+    .profLabelPack{
+      display:inline-block;
+      font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+      background:rgba(215,176,107,.10); color:#d7b06b;
+      border:1px solid rgba(215,176,107,.25);
       border-radius:999px; padding:1px 7px;
       vertical-align:middle; margin-left:6px;
     }
@@ -4657,8 +4719,9 @@
           </div>
 
           <div class="profFieldGroup">
-            <label class="profLabel">Fundo da Sala <span class="profLabelFree">Grátis</span></label>
+            <label class="profLabel">Fundo da Sala</label>
             <div class="bgSwatchRow" id="bgSwatchRow">
+              <div class="bgSwatchSection">Grátis</div>
               <button type="button" class="bgSwatch" data-bg="default" title="Escuridão"
                 style="background:linear-gradient(135deg,#080604,#1a140f)">
                 <span>Padrão</span></button>
@@ -4677,7 +4740,25 @@
               <button type="button" class="bgSwatch" data-bg="brasa" title="Brasa"
                 style="background:linear-gradient(135deg,#080404,#120808)">
                 <span>Brasa</span></button>
+
+              <div class="bgSwatchSection" id="bgExclusiveLabel">Exclusivos · Pacotes</div>
+              <button type="button" class="bgSwatch bgSwatch--pack" data-bg="ambar" data-pack="pacote-conexao" title="Âmbar — Pacote Conexão"
+                style="background:linear-gradient(135deg,#090600,#130d03)">
+                <span>Âmbar</span><span class="lockIcon">🔒</span></button>
+              <button type="button" class="bgSwatch bgSwatch--pack" data-bg="cristal" data-pack="pacote-verdades" title="Cristal — Pacote Verdades"
+                style="background:linear-gradient(135deg,#030508,#070a14)">
+                <span>Cristal</span><span class="lockIcon">🔒</span></button>
+              <button type="button" class="bgSwatch bgSwatch--pack" data-bg="chama" data-pack="pacote-conflito" title="Chama — Pacote Conflito"
+                style="background:linear-gradient(135deg,#0a0400,#180800)">
+                <span>Chama</span><span class="lockIcon">🔒</span></button>
+              <button type="button" class="bgSwatch bgSwatch--pack" data-bg="veu" data-pack="pacote-segredos" title="Véu — Pacote Segredos"
+                style="background:linear-gradient(135deg,#040008,#0a0014)">
+                <span>Véu</span><span class="lockIcon">🔒</span></button>
+              <button type="button" class="bgSwatch bgSwatch--pack" data-bg="vinho" data-pack="pacote-casais" title="Vinho — Pacote Casais"
+                style="background:linear-gradient(135deg,#090004,#130009)">
+                <span>Vinho</span><span class="lockIcon">🔒</span></button>
             </div>
+            <div id="bgPackHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
           </div>
 
           <div class="profileEditorActions">
@@ -5691,7 +5772,23 @@
       });
     }
 
-    const BG_THEMES = ["default","abismo","floresta","oceano","bruma","brasa"];
+    const BG_THEMES = ["default","abismo","floresta","oceano","bruma","brasa","ambar","cristal","chama","veu","vinho"];
+
+    // Mapeia tema exclusivo → pacote que o desbloqueia
+    const BG_PACK_THEMES = {
+      "ambar":  "pacote-conexao",
+      "cristal": "pacote-verdades",
+      "chama":  "pacote-conflito",
+      "veu":    "pacote-segredos",
+      "vinho":  "pacote-casais"
+    };
+
+    function isThemeUnlocked(theme) {
+      const requiredPack = BG_PACK_THEMES[theme];
+      if (!requiredPack) return true; // temas grátis sempre liberados
+      const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
+      return compras.some(c => c.produto === requiredPack);
+    }
 
     function applyBgTheme(theme) {
       const t = BG_THEMES.includes(theme) ? theme : "default";
@@ -5699,7 +5796,19 @@
       if (t !== "default") document.documentElement.classList.add("bg-" + t);
     }
 
+    function refreshPackSwatches() {
+      const row = document.getElementById("bgSwatchRow");
+      if (!row) return;
+      row.querySelectorAll(".bgSwatch--pack").forEach(sw => {
+        const unlocked = isThemeUnlocked(sw.dataset.bg);
+        sw.classList.toggle("bgSwatch--locked", !unlocked);
+        const lock = sw.querySelector(".lockIcon");
+        if (lock) lock.style.display = unlocked ? "none" : "";
+      });
+    }
+
     function setBgSelection(theme) {
+      if (BG_PACK_THEMES[theme] && !isThemeUnlocked(theme)) return; // bloqueado
       selectedBgTheme = BG_THEMES.includes(theme) ? theme : "default";
       const row = document.getElementById("bgSwatchRow");
       if (!row) return;
@@ -5717,6 +5826,7 @@
       editBio.value = user.bio || "";
       setAvatarSelection(user.avatarEmoji || "🔮");
       setColorSelection(user.avatarColor || "#342718");
+      refreshPackSwatches();
       setBgSelection(user.bgTheme || selectedBgTheme);
     }
 
@@ -5933,11 +6043,11 @@
       if (!grid) return;
       const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
       const packs = [
-        { id: "pacote-conexao",  name: "Conexão",  price: "R$ 9,90",  desc: "12 cartas · leve e emocional" },
-        { id: "pacote-verdades", name: "Verdades", price: "R$ 12,90", desc: "15 cartas · desconforto leve" },
-        { id: "pacote-conflito", name: "Conflito", price: "R$ 14,90", desc: "15 cartas · provocações" },
-        { id: "pacote-segredos", name: "Segredos", price: "R$ 19,90", desc: "18 cartas · psicológico intenso" },
-        { id: "pacote-casais",   name: "Casais",   price: "R$ 19,90", desc: "18 cartas · nichado" }
+        { id: "pacote-conexao",  name: "Conexão",  price: "R$ 9,90",  desc: "12 cartas · leve e emocional",    theme: "ambar",  themeName: "Âmbar",  themeColor: "#0e0a02" },
+        { id: "pacote-verdades", name: "Verdades", price: "R$ 12,90", desc: "15 cartas · desconforto leve",     theme: "cristal", themeName: "Cristal", themeColor: "#05070e" },
+        { id: "pacote-conflito", name: "Conflito", price: "R$ 14,90", desc: "15 cartas · provocações",          theme: "chama",  themeName: "Chama",  themeColor: "#120600" },
+        { id: "pacote-segredos", name: "Segredos", price: "R$ 19,90", desc: "18 cartas · psicológico intenso",  theme: "veu",    themeName: "Véu",    themeColor: "#07000e" },
+        { id: "pacote-casais",   name: "Casais",   price: "R$ 19,90", desc: "18 cartas · nichado",              theme: "vinho",  themeName: "Vinho",  themeColor: "#0e0007" }
       ];
       grid.innerHTML = "";
       // Deck básico sempre incluso
@@ -5956,6 +6066,10 @@
         card.innerHTML = `
           <div class="profPackName">${pack.name}</div>
           <div class="profPackDesc">${pack.desc}</div>
+          <div class="profPackDesc" style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${pack.themeColor};border:1px solid rgba(255,255,255,.15);flex-shrink:0"></span>
+            <span style="color:rgba(243,237,229,.5);font-size:.7rem">Tema <strong style="color:rgba(215,176,107,.75)">${pack.themeName}</strong></span>
+          </div>
           ${unlocked
             ? `<span class="profPackBadge profPackBadge--ok">✓ Desbloqueado</span>`
             : `<span class="profPackBadge profPackBadge--locked">🔒 ${pack.price}</span><a class="profileActionBtn" href="./vendas.html" style="margin-top:6px;font-size:.75rem;padding:4px 10px">Ver na loja</a>`
@@ -6280,11 +6394,25 @@
 
     // Background theme picker
     const bgSwatchRow = document.getElementById("bgSwatchRow");
+    let _bgHintTimer = null;
     if (bgSwatchRow) {
       bgSwatchRow.addEventListener("click", (e) => {
         const sw = e.target.closest(".bgSwatch");
         if (!sw) return;
-        setBgSelection(sw.dataset.bg);
+        const bg = sw.dataset.bg;
+        if (BG_PACK_THEMES[bg] && !isThemeUnlocked(bg)) {
+          const packNames = { "pacote-conexao":"Conexão", "pacote-verdades":"Verdades", "pacote-conflito":"Conflito", "pacote-segredos":"Segredos", "pacote-casais":"Casais" };
+          const packName = packNames[BG_PACK_THEMES[bg]] || "um pacote";
+          const hint = document.getElementById("bgPackHint");
+          if (hint) {
+            hint.textContent = `Exclusivo do Pacote ${packName}`;
+            hint.style.opacity = "1";
+            clearTimeout(_bgHintTimer);
+            _bgHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200);
+          }
+          return;
+        }
+        setBgSelection(bg);
       });
     }
 
