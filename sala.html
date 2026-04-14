@@ -277,6 +277,232 @@
       place-items:center;
     }
 
+    /* ── Recording ─────────────────────────────────────────────── */
+    .topActionBtn.rec{
+      color:#ff9090;
+      border-color:rgba(220,60,60,.30);
+      background:rgba(220,60,60,.07);
+    }
+    .topActionBtn.rec:hover{
+      border-color:rgba(220,60,60,.55);
+      background:rgba(220,60,60,.14);
+    }
+    .topActionBtn.rec.is-recording{
+      color:#ff4444;
+      border-color:rgba(220,60,60,.55);
+      background:rgba(220,60,60,.14);
+      animation:recBtnPulse 2s ease-in-out infinite;
+    }
+    @keyframes recBtnPulse{
+      0%,100%{ box-shadow:0 0 0 0 rgba(220,60,60,.0); }
+      50%    { box-shadow:0 0 0 5px rgba(220,60,60,.18); }
+    }
+
+    .recStatusBadge{
+      display:none;
+      align-items:center;
+      gap:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      background:rgba(220,60,60,.12);
+      border:1px solid rgba(220,60,60,.28);
+      color:rgba(255,160,160,.95);
+      font-size:10px;
+      font-weight:700;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .recStatusBadge.visible{ display:inline-flex; }
+    .recDot{
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:#ff4444;
+      box-shadow:0 0 8px rgba(255,68,68,.75);
+      flex-shrink:0;
+      animation:recDotPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes recDotPulse{
+      0%,100%{ opacity:1; transform:scale(1); }
+      50%    { opacity:.45; transform:scale(.65); }
+    }
+
+    /* ── Recording Modal ──────────────────────────────────────── */
+    .recOverlay{
+      position:fixed;
+      inset:0;
+      z-index:200;
+      background:rgba(4,3,2,.82);
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      display:none;
+      place-items:center;
+      padding:20px;
+    }
+    .recOverlay.open{ display:grid; }
+
+    .recModal{
+      background:
+        radial-gradient(circle at 50% 0%, rgba(215,176,107,.08), transparent 60%),
+        linear-gradient(180deg, #1a1510, #100d0a);
+      border:1px solid rgba(215,176,107,.18);
+      border-radius:24px;
+      padding:32px 28px 28px;
+      width:min(520px,100%);
+      box-shadow:0 40px 120px rgba(0,0,0,.65);
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+
+    .recModal-eyebrow{
+      font-size:10px;
+      letter-spacing:.28em;
+      text-transform:uppercase;
+      color:rgba(215,176,107,.72);
+      font-weight:700;
+    }
+    .recModal-title{
+      font-size:26px;
+      font-weight:900;
+      letter-spacing:-.03em;
+      color:#f6efe4;
+      line-height:1.1;
+      margin-top:-4px;
+    }
+    .recModal-desc{
+      font-size:14px;
+      color:rgba(245,240,232,.65);
+      line-height:1.6;
+    }
+
+    .recPlanGrid{
+      display:grid;
+      gap:8px;
+    }
+    .recPlan{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.03);
+      cursor:pointer;
+      transition:border-color .15s, background .15s;
+    }
+    .recPlan:hover{
+      border-color:rgba(215,176,107,.30);
+      background:rgba(215,176,107,.05);
+    }
+    .recPlan.selected{
+      border-color:rgba(215,176,107,.55);
+      background:rgba(215,176,107,.08);
+    }
+    .recPlan-info{ display:flex; flex-direction:column; gap:2px; }
+    .recPlan-name{ font-weight:700; font-size:14px; color:#f6efe4; }
+    .recPlan-feat{ font-size:12px; color:rgba(245,240,232,.52); }
+    .recPlan-price{
+      font-weight:900;
+      font-size:16px;
+      color:var(--gold);
+      white-space:nowrap;
+    }
+
+    .recFields{
+      display:none;
+      flex-direction:column;
+      gap:10px;
+    }
+    .recFields.show{ display:flex; }
+
+    .recField{ display:flex; flex-direction:column; gap:6px; }
+    .recField label{ font-size:11px; letter-spacing:.08em; color:rgba(245,240,232,.55); text-transform:uppercase; }
+    .recField input{
+      height:42px;
+      padding:0 14px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:#f6efe4;
+      font:inherit;
+      font-size:14px;
+      outline:none;
+      transition:border-color .15s;
+    }
+    .recField input:focus{ border-color:rgba(215,176,107,.45); }
+
+    .recBtn-primary{
+      appearance:none;
+      width:100%;
+      height:48px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+      font:inherit;
+      font-size:15px;
+      font-weight:800;
+      background:linear-gradient(180deg, #e7c58a, #c99a4b);
+      color:#1a140d;
+      transition:opacity .15s, transform .10s;
+    }
+    .recBtn-primary:hover{ opacity:.92; }
+    .recBtn-primary:active{ transform:scale(.97); }
+    .recBtn-primary:disabled{ opacity:.45; cursor:default; }
+
+    .recBtn-secondary{
+      appearance:none;
+      background:none;
+      border:none;
+      color:rgba(245,240,232,.45);
+      font:inherit;
+      font-size:13px;
+      cursor:pointer;
+      text-align:center;
+      padding:4px;
+      transition:color .15s;
+    }
+    .recBtn-secondary:hover{ color:rgba(245,240,232,.75); }
+
+    .recStatus{
+      font-size:13px;
+      color:rgba(245,240,232,.60);
+      text-align:center;
+      min-height:18px;
+    }
+    .recStatus.err{ color:rgba(255,120,120,.85); }
+    .recStatus.ok{ color:rgba(120,220,120,.85); }
+
+    .recDownloadBox{
+      display:none;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+      padding:18px;
+      border-radius:14px;
+      border:1px solid rgba(215,176,107,.22);
+      background:rgba(215,176,107,.05);
+      text-align:center;
+    }
+    .recDownloadBox.show{ display:flex; }
+    .recDownloadBox p{ font-size:13px; color:rgba(245,240,232,.65); line-height:1.5; }
+    .recDownloadLink{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 20px;
+      border-radius:10px;
+      background:linear-gradient(180deg, #e7c58a, #c99a4b);
+      color:#1a140d;
+      font-weight:800;
+      font-size:13px;
+      text-decoration:none;
+      transition:opacity .15s;
+    }
+    .recDownloadLink:hover{ opacity:.88; }
+
     .layout{
       display:grid;
       grid-template-columns:290px minmax(0, 1fr) 360px;
@@ -4003,6 +4229,11 @@
             <span>Modo: <strong>Ritual</strong></span>
           </div>
 
+          <div class="recStatusBadge" id="recStatusBadge">
+            <span class="recDot"></span>
+            <span id="recStatusText">GRAVANDO</span>
+          </div>
+
           <div class="videoControlBar">
             <span class="videoStatusInline" id="videoStatus">Vídeo desligado.</span>
             <button class="videoCtrlBtn primary" id="joinVideoBtn">Entrar na chamada</button>
@@ -4013,6 +4244,7 @@
         </div>
 
         <div class="topActions">
+          <button class="topActionBtn rec" id="recBtn" title="Gravar sessão">🔴 Gravar</button>
           <button class="topActionBtn primary" id="copyCodeBtn">Convidar Amigos</button>
           <button class="topActionBtn" id="oslShopFab" title="Ver pacotes de cartas">🎴 Loja</button>
           <button class="topActionBtn" id="arenaBtn" title="Alternar Modo Arena">⚔ Arena</button>
@@ -6935,6 +7167,79 @@
 
   </div>
 
+  <!-- ===== RECORDING MODAL ===== -->
+  <div class="recOverlay" id="recOverlay">
+    <div class="recModal" id="recModal">
+
+      <!-- Step 1: Plan selection -->
+      <div id="recStep1">
+        <div class="recModal-eyebrow">Memória do ritual</div>
+        <div class="recModal-title">Gravar esta sessão</div>
+        <div class="recModal-desc">A gravação captura o vídeo de todos os participantes junto com as cartas reveladas em tempo real. Escolha seu plano:</div>
+
+        <div class="recPlanGrid" style="margin-top:4px">
+          <div class="recPlan" id="recPlan1" onclick="recSelectPlan('gravacao-simples','6.90',this)">
+            <div class="recPlan-info">
+              <div class="recPlan-name">🎥 Gravação Simples</div>
+              <div class="recPlan-feat">Visualização online por 7 dias</div>
+            </div>
+            <div class="recPlan-price">R$ 6,90</div>
+          </div>
+          <div class="recPlan" id="recPlan2" onclick="recSelectPlan('gravacao-download','9.90',this)">
+            <div class="recPlan-info">
+              <div class="recPlan-name">📥 Gravação + Download</div>
+              <div class="recPlan-feat">MP4 para guardar para sempre</div>
+            </div>
+            <div class="recPlan-price">R$ 9,90</div>
+          </div>
+          <div class="recPlan" id="recPlan3" onclick="recSelectPlan('gravacao-cortes','14.90',this)">
+            <div class="recPlan-info">
+              <div class="recPlan-name">✂️ Gravação + Cortes</div>
+              <div class="recPlan-feat">Edição automática dos momentos mais intensos</div>
+            </div>
+            <div class="recPlan-price">R$ 14,90</div>
+          </div>
+        </div>
+
+        <div class="recFields" id="recFields">
+          <div class="recField">
+            <label>Seu nome</label>
+            <input type="text" id="recNome" placeholder="Nome completo" maxlength="80">
+          </div>
+          <div class="recField">
+            <label>E-mail para receber o link</label>
+            <input type="email" id="recEmail" placeholder="seu@email.com">
+          </div>
+        </div>
+
+        <div id="recStep1Actions" style="display:none; flex-direction:column; gap:10px">
+          <button class="recBtn-primary" id="recPayBtn">Confirmar e pagar</button>
+          <div class="recStatus" id="recPayStatus"></div>
+        </div>
+
+        <button class="recBtn-secondary" id="recCancelBtn">Cancelar</button>
+      </div>
+
+      <!-- Step 2: Waiting for payment + recording active -->
+      <div id="recStep2" style="display:none">
+        <div class="recModal-eyebrow">Aguardando pagamento</div>
+        <div class="recModal-title">Quase lá...</div>
+        <div class="recModal-desc" id="recWaitDesc">Complete o pagamento na aba que abriu. A gravação inicia automaticamente após a confirmação.</div>
+
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:4px">
+          <div class="recStatus" id="recWaitStatus">Verificando pagamento...</div>
+          <div class="recDownloadBox" id="recDownloadBox">
+            <p>✅ Gravação concluída! Seu vídeo está pronto.</p>
+            <a class="recDownloadLink" id="recDownloadLink" href="#" target="_blank" rel="noopener">⬇ Baixar gravação</a>
+          </div>
+        </div>
+
+        <button class="recBtn-secondary" id="recStep2CancelBtn">Fechar</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Shop button is in the topbar (#oslShopFab) -->
 
   <script>
@@ -7247,6 +7552,295 @@
     document.getElementById("oslOverlay").addEventListener("click", function (e) {
       if (e.target === this) oslCloseAll();
     });
+
+  })();
+  </script>
+
+  <!-- ===== RECORDING CONTROL ===== -->
+  <script>
+  (function () {
+    'use strict';
+
+    const REC_BASE = "https://osl-video-server.onrender.com";
+
+    const roomCode = (new URLSearchParams(window.location.search)).get("sala")
+      || localStorage.getItem("osl_sala") || "SL-0001";
+
+    // State
+    let recPlan    = null;   // { id, valor }
+    let recRef     = null;   // payment reference
+    let recPollTimer = null;
+    let recActive  = false;
+
+    // ── DOM refs ──
+    const recBtn        = document.getElementById("recBtn");
+    const recOverlay    = document.getElementById("recOverlay");
+    const recStep1      = document.getElementById("recStep1");
+    const recStep2      = document.getElementById("recStep2");
+    const recFields     = document.getElementById("recFields");
+    const recStep1Acts  = document.getElementById("recStep1Actions");
+    const recPayBtn     = document.getElementById("recPayBtn");
+    const recPayStatus  = document.getElementById("recPayStatus");
+    const recWaitDesc   = document.getElementById("recWaitDesc");
+    const recWaitStatus = document.getElementById("recWaitStatus");
+    const recDownloadBox = document.getElementById("recDownloadBox");
+    const recDownloadLink = document.getElementById("recDownloadLink");
+    const recStatusBadge = document.getElementById("recStatusBadge");
+    const recStatusText  = document.getElementById("recStatusText");
+
+    // ── Helpers ──
+    function openModal()  { recOverlay.classList.add("open"); }
+    function closeModal() { recOverlay.classList.remove("open"); clearPoll(); }
+
+    function setPayStatus(msg, cls) {
+      recPayStatus.textContent = msg;
+      recPayStatus.className = "recStatus" + (cls ? " " + cls : "");
+    }
+
+    function setWaitStatus(msg, cls) {
+      recWaitStatus.textContent = msg;
+      recWaitStatus.className = "recStatus" + (cls ? " " + cls : "");
+    }
+
+    function clearPoll() {
+      if (recPollTimer) { clearInterval(recPollTimer); recPollTimer = null; }
+    }
+
+    function showRecordingActive() {
+      recActive = true;
+      recStatusBadge.classList.add("visible");
+      if (recBtn) {
+        recBtn.classList.add("is-recording");
+        recBtn.textContent = "⏹ Parar Gravação";
+        recBtn.title = "Clique para parar a gravação";
+      }
+    }
+
+    function showRecordingInactive() {
+      recActive = false;
+      recStatusBadge.classList.remove("visible");
+      if (recBtn) {
+        recBtn.classList.remove("is-recording");
+        recBtn.textContent = "🔴 Gravar";
+        recBtn.title = "Gravar sessão";
+      }
+    }
+
+    // ── Plan selection ──
+    window.recSelectPlan = function (planId, valor, el) {
+      recPlan = { id: planId, valor: valor };
+      document.querySelectorAll(".recPlan").forEach(function (p) {
+        p.classList.remove("selected");
+      });
+      el.classList.add("selected");
+      recFields.classList.add("show");
+      recStep1Acts.style.display = "flex";
+
+      // Prefill
+      var savedNome  = localStorage.getItem("osl_checkout_nome")  || localStorage.getItem("osl_nome") || "";
+      var savedEmail = localStorage.getItem("osl_checkout_email") || "";
+      var nEl = document.getElementById("recNome");
+      var eEl = document.getElementById("recEmail");
+      if (nEl && savedNome  && !nEl.value) nEl.value = savedNome;
+      if (eEl && savedEmail && !eEl.value) eEl.value = savedEmail;
+
+      setPayStatus("");
+    };
+
+    // ── Pay button ──
+    if (recPayBtn) {
+      recPayBtn.addEventListener("click", async function () {
+        if (!recPlan) { setPayStatus("Selecione um plano.", "err"); return; }
+
+        var nome  = (document.getElementById("recNome")?.value  || "").trim();
+        var email = (document.getElementById("recEmail")?.value || "").trim().toLowerCase();
+        if (!nome)  { setPayStatus("Digite seu nome.", "err"); return; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          setPayStatus("E-mail inválido.", "err"); return;
+        }
+
+        recPayBtn.disabled = true;
+        setPayStatus("Criando pagamento...");
+
+        try {
+          var res = await fetch(REC_BASE + "/criar-pagamento", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nome: nome,
+              email: email,
+              produto: recPlan.id,
+              valor: recPlan.valor,
+              roomId: roomCode
+            })
+          });
+          var data = await res.json();
+          if (data && data.ref && data.url) {
+            localStorage.setItem("osl_checkout_nome",  nome);
+            localStorage.setItem("osl_checkout_email", email);
+            recRef = data.ref;
+            window.open(data.url, "_blank");
+
+            // Advance to step 2
+            recStep1.style.display = "none";
+            recStep2.style.display = "flex";
+            recStep2.style.flexDirection = "column";
+            recStep2.style.gap = "20px";
+            setWaitStatus("Aguardando confirmação do pagamento...");
+            startPaymentPoll();
+          } else {
+            var msg = (data && (data.message || data.error)) || "Erro ao criar pagamento.";
+            setPayStatus(msg, "err");
+            recPayBtn.disabled = false;
+          }
+        } catch (e) {
+          setPayStatus("Erro de conexão. Tente novamente.", "err");
+          recPayBtn.disabled = false;
+        }
+      });
+    }
+
+    // ── Poll payment → then start recording ──
+    function startPaymentPoll() {
+      var attempts = 0;
+      var maxAttempts = 40; // ~2 min
+
+      clearPoll();
+      recPollTimer = setInterval(async function () {
+        if (!recRef) { clearPoll(); return; }
+        attempts++;
+        if (attempts > maxAttempts) {
+          clearPoll();
+          setWaitStatus("Tempo esgotado. Se já pagou, entre em contato.", "err");
+          return;
+        }
+
+        try {
+          var r = await fetch(REC_BASE + "/status-pagamento/" + encodeURIComponent(recRef));
+          var d = await r.json();
+
+          if (d.approved) {
+            clearPoll();
+            setWaitStatus("Pagamento confirmado! Iniciando gravação...");
+            await startRecording(d.produto || recPlan?.id || "gravacao-simples");
+          }
+        } catch (_) { /* ignore network errors, keep polling */ }
+      }, 3000);
+    }
+
+    async function startRecording(type) {
+      try {
+        var res = await fetch(REC_BASE + "/recording/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId: roomCode, ref: recRef, type: type })
+        });
+        var data = await res.json();
+        if (data.ok) {
+          setWaitStatus("🔴 Gravação ativa! Pode fechar esta janela.", "ok");
+          showRecordingActive();
+          startStatusPoll();
+        } else {
+          setWaitStatus(data.error || "Erro ao iniciar gravação.", "err");
+        }
+      } catch (e) {
+        setWaitStatus("Erro ao iniciar gravação. Tente novamente.", "err");
+      }
+    }
+
+    // ── Poll recording status (to detect when it ends / get download URL) ──
+    function startStatusPoll() {
+      clearPoll();
+      recPollTimer = setInterval(async function () {
+        try {
+          var r = await fetch(REC_BASE + "/recording/status/" + encodeURIComponent(roomCode));
+          var d = await r.json();
+
+          if (!d.active && d.completed) {
+            clearPoll();
+            showRecordingInactive();
+            if (d.downloadUrl) {
+              recDownloadLink.href = d.downloadUrl;
+              recDownloadBox.classList.add("show");
+              setWaitStatus("Gravação finalizada.", "ok");
+            }
+          } else if (!d.active && !d.completed) {
+            // Recording was already stopped externally
+            clearPoll();
+            showRecordingInactive();
+          }
+        } catch (_) {}
+      }, 8000);
+    }
+
+    // ── Stop recording ──
+    async function stopRecording() {
+      if (!recActive) return;
+      try {
+        var res = await fetch(REC_BASE + "/recording/stop", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId: roomCode })
+        });
+        var data = await res.json();
+        showRecordingInactive();
+        clearPoll();
+
+        if (data.downloadUrl) {
+          openModal();
+          recStep1.style.display = "none";
+          recStep2.style.display = "flex";
+          recStep2.style.flexDirection = "column";
+          recStep2.style.gap = "20px";
+          recDownloadLink.href = data.downloadUrl;
+          recDownloadBox.classList.add("show");
+          setWaitStatus("Gravação finalizada.", "ok");
+        }
+      } catch (e) {
+        console.error("Erro ao parar gravação:", e);
+      }
+    }
+
+    // ── Button click: open modal OR stop ──
+    if (recBtn) {
+      recBtn.addEventListener("click", function () {
+        if (recActive) {
+          if (confirm("Parar a gravação agora?")) stopRecording();
+          return;
+        }
+
+        // Reset modal state
+        recPlan = null;
+        recRef  = null;
+        document.querySelectorAll(".recPlan").forEach(function (p) { p.classList.remove("selected"); });
+        recFields.classList.remove("show");
+        recStep1Acts.style.display = "none";
+        recStep1.style.display = "block";
+        recStep2.style.display = "none";
+        recDownloadBox.classList.remove("show");
+        if (recPayBtn) { recPayBtn.disabled = false; recPayBtn.textContent = "Confirmar e pagar"; }
+        setPayStatus("");
+        clearPoll();
+        openModal();
+      });
+    }
+
+    // ── Cancel buttons ──
+    document.getElementById("recCancelBtn")?.addEventListener("click", closeModal);
+    document.getElementById("recStep2CancelBtn")?.addEventListener("click", closeModal);
+    recOverlay?.addEventListener("click", function (e) { if (e.target === recOverlay) closeModal(); });
+
+    // ── On page load: check if recording already active ──
+    (async function () {
+      try {
+        var r = await fetch(REC_BASE + "/recording/status/" + encodeURIComponent(roomCode));
+        var d = await r.json();
+        if (d.active) {
+          showRecordingActive();
+          startStatusPoll();
+        }
+      } catch (_) {}
+    })();
 
   })();
   </script>
