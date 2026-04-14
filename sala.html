@@ -7177,27 +7177,22 @@
         <div class="recModal-title">Gravar esta sessão</div>
         <div class="recModal-desc">A gravação captura o vídeo de todos os participantes junto com as cartas reveladas em tempo real. Escolha seu plano:</div>
 
-        <div class="recPlanGrid" style="margin-top:4px">
-          <div class="recPlan" id="recPlan1" onclick="recSelectPlan('gravacao-simples','6.90',this)">
+        <div id="recPassBadge" style="display:none; margin-top:4px; padding:10px 14px; border-radius:10px; background:rgba(120,220,120,.08); border:1px solid rgba(120,220,120,.22); color:rgba(160,240,160,.9); font-size:13px; font-weight:600;"></div>
+
+        <div class="recPlanGrid" id="recPlanGrid" style="margin-top:4px">
+          <div class="recPlan" id="recPlan1" onclick="recSelectPlan('gravacao-download','6.90',this)">
             <div class="recPlan-info">
-              <div class="recPlan-name">🎥 Gravação Simples</div>
-              <div class="recPlan-feat">Visualização online por 7 dias</div>
+              <div class="recPlan-name">📥 Gravação + Download</div>
+              <div class="recPlan-feat">Arquivo MP4 desta sessão para guardar para sempre</div>
             </div>
             <div class="recPlan-price">R$ 6,90</div>
           </div>
-          <div class="recPlan" id="recPlan2" onclick="recSelectPlan('gravacao-download','9.90',this)">
+          <div class="recPlan" id="recPlan2" onclick="recSelectPlan('gravacao-mensal','14.90',this)">
             <div class="recPlan-info">
-              <div class="recPlan-name">📥 Gravação + Download</div>
-              <div class="recPlan-feat">MP4 para guardar para sempre</div>
+              <div class="recPlan-name">♾️ Gravação Livre Mensal</div>
+              <div class="recPlan-feat">Sessões ilimitadas por 30 dias · Renovação manual</div>
             </div>
-            <div class="recPlan-price">R$ 9,90</div>
-          </div>
-          <div class="recPlan" id="recPlan3" onclick="recSelectPlan('gravacao-cortes','14.90',this)">
-            <div class="recPlan-info">
-              <div class="recPlan-name">✂️ Gravação + Cortes</div>
-              <div class="recPlan-feat">Edição automática dos momentos mais intensos</div>
-            </div>
-            <div class="recPlan-price">R$ 14,90</div>
+            <div class="recPlan-price">R$ 14,90<span style="font-size:10px;font-weight:400;color:rgba(215,176,107,.6)">/mês</span></div>
           </div>
         </div>
 
@@ -7207,7 +7202,7 @@
             <input type="text" id="recNome" placeholder="Nome completo" maxlength="80">
           </div>
           <div class="recField">
-            <label>E-mail para receber o link</label>
+            <label>E-mail</label>
             <input type="email" id="recEmail" placeholder="seu@email.com">
           </div>
         </div>
@@ -7650,6 +7645,20 @@
     // ── Pay button ──
     if (recPayBtn) {
       recPayBtn.addEventListener("click", async function () {
+        // Passe mensal ativo — inicia direto sem pagamento
+        if (this.dataset.passEmail) {
+          var passEmail = this.dataset.passEmail;
+          this.disabled = true;
+          setPayStatus("Iniciando gravação...");
+          recStep1.style.display = "none";
+          recStep2.style.display = "flex";
+          recStep2.style.flexDirection = "column";
+          recStep2.style.gap = "20px";
+          setWaitStatus("Iniciando gravação com passe mensal...");
+          await startRecording("gravacao-mensal", passEmail);
+          return;
+        }
+
         if (!recPlan) { setPayStatus("Selecione um plano.", "err"); return; }
 
         var nome  = (document.getElementById("recNome")?.value  || "").trim();
@@ -7722,18 +7731,19 @@
           if (d.approved) {
             clearPoll();
             setWaitStatus("Pagamento confirmado! Iniciando gravação...");
-            await startRecording(d.produto || recPlan?.id || "gravacao-simples");
+            var email = document.getElementById("recEmail")?.value?.trim() || "";
+            await startRecording(d.produto || recPlan?.id || "gravacao-download", email);
           }
         } catch (_) { /* ignore network errors, keep polling */ }
       }, 3000);
     }
 
-    async function startRecording(type) {
+    async function startRecording(type, email) {
       try {
         var res = await fetch(REC_BASE + "/recording/start", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roomId: roomCode, ref: recRef, type: type })
+          body: JSON.stringify({ roomId: roomCode, ref: recRef || "", type: type, email: email || "" })
         });
         var data = await res.json();
         if (data.ok) {
@@ -7801,9 +7811,19 @@
       }
     }
 
+    // ── Verifica passe mensal ativo ──
+    async function checkMonthlyPass(email) {
+      if (!email) return null;
+      try {
+        var r = await fetch(REC_BASE + "/recording/pass/" + encodeURIComponent(email));
+        var d = await r.json();
+        return d.active ? d : null;
+      } catch (_) { return null; }
+    }
+
     // ── Button click: open modal OR stop ──
     if (recBtn) {
-      recBtn.addEventListener("click", function () {
+      recBtn.addEventListener("click", async function () {
         if (recActive) {
           if (confirm("Parar a gravação agora?")) stopRecording();
           return;
@@ -7821,6 +7841,33 @@
         if (recPayBtn) { recPayBtn.disabled = false; recPayBtn.textContent = "Confirmar e pagar"; }
         setPayStatus("");
         clearPoll();
+
+        // Verifica se já tem passe mensal pelo e-mail salvo
+        var savedEmail = localStorage.getItem("osl_checkout_email") || "";
+        var passBadge  = document.getElementById("recPassBadge");
+        var planGrid   = document.getElementById("recPlanGrid");
+        if (savedEmail) {
+          var pass = await checkMonthlyPass(savedEmail);
+          if (pass) {
+            var expDate = new Date(pass.expiresAt).toLocaleDateString("pt-BR");
+            if (passBadge) {
+              passBadge.textContent = "✅ Passe mensal ativo até " + expDate + " — gravação gratuita!";
+              passBadge.style.display = "block";
+            }
+            if (planGrid) planGrid.style.display = "none";
+            // Mostra só o botão de iniciar sem pagamento
+            recFields.classList.add("show");
+            recStep1Acts.style.display = "flex";
+            if (recPayBtn) {
+              recPayBtn.textContent = "Iniciar gravação";
+              recPayBtn.dataset.passEmail = savedEmail;
+            }
+          } else {
+            if (passBadge) passBadge.style.display = "none";
+            if (planGrid) planGrid.style.display = "grid";
+          }
+        }
+
         openModal();
       });
     }
