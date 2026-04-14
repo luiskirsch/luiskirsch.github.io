@@ -2184,6 +2184,17 @@
       box-shadow:0 0 0 3px rgba(215,176,107,.22);
     }
 
+    /* ── Seção de fundo da sala (standalone, fora do form) ── */
+    .profBgSection{
+      border-top:1px solid var(--line);
+      padding-top:14px;
+      margin-top:14px;
+    }
+    .profBgTitle{
+      font-size:.72rem; letter-spacing:.09em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:10px;
+    }
+
     /* ── Seletor de fundo da sala ── */
     .bgSwatchRow{
       display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;
@@ -4668,6 +4679,50 @@
           <button class="profileActionBtn" id="addFriendBtn" hidden>Adicionar amigo</button>
         </div>
 
+        <!-- Fundo da Sala — visível direto no perfil, apenas para o próprio usuário -->
+        <div class="profBgSection hidden" id="profBgSection">
+          <div class="profBgTitle">Fundo da Sala</div>
+          <div class="bgSwatchRow" id="bgSwatchRow">
+            <div class="bgSwatchSection">Grátis</div>
+            <button type="button" class="bgSwatch" data-bg="default" title="Escuridão"
+              style="background:linear-gradient(135deg,#080604,#1a140f)">
+              <span>Padrão</span></button>
+            <button type="button" class="bgSwatch" data-bg="abismo" title="Abismo"
+              style="background:linear-gradient(135deg,#040608,#080d18)">
+              <span>Abismo</span></button>
+            <button type="button" class="bgSwatch" data-bg="floresta" title="Floresta"
+              style="background:linear-gradient(135deg,#040806,#08120a)">
+              <span>Floresta</span></button>
+            <button type="button" class="bgSwatch" data-bg="oceano" title="Oceano"
+              style="background:linear-gradient(135deg,#030810,#071018)">
+              <span>Oceano</span></button>
+            <button type="button" class="bgSwatch" data-bg="bruma" title="Bruma"
+              style="background:linear-gradient(135deg,#060408,#0e0a14)">
+              <span>Bruma</span></button>
+            <button type="button" class="bgSwatch" data-bg="brasa" title="Brasa"
+              style="background:linear-gradient(135deg,#080404,#120808)">
+              <span>Brasa</span></button>
+
+            <div class="bgSwatchSection" id="bgExclusiveLabel">Exclusivos · Pacotes</div>
+            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="ambar" data-pack="pacote-conexao" title="Âmbar — Pacote Conexão"
+              style="background:linear-gradient(135deg,#090600,#130d03)">
+              <span>Âmbar</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="cristal" data-pack="pacote-verdades" title="Cristal — Pacote Verdades"
+              style="background:linear-gradient(135deg,#030508,#070a14)">
+              <span>Cristal</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="chama" data-pack="pacote-conflito" title="Chama — Pacote Conflito"
+              style="background:linear-gradient(135deg,#0a0400,#180800)">
+              <span>Chama</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="veu" data-pack="pacote-segredos" title="Véu — Pacote Segredos"
+              style="background:linear-gradient(135deg,#040008,#0a0014)">
+              <span>Véu</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="vinho" data-pack="pacote-casais" title="Vinho — Pacote Casais"
+              style="background:linear-gradient(135deg,#090004,#130009)">
+              <span>Vinho</span><span class="lockIcon">🔒</span></button>
+          </div>
+          <div id="bgPackHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
+        </div>
+
         <form class="profileEditor hidden" id="profileEditor">
           <label class="profileField">
             <span>Nome de exibição</span>
@@ -4716,49 +4771,6 @@
               <button type="button" class="colorSwatch" data-color="#2a1010" style="background:#2a1010" title="Vinho"></button>
               <button type="button" class="colorSwatch" data-color="#1a1a1a" style="background:#1a1a1a" title="Obsidiana"></button>
             </div>
-          </div>
-
-          <div class="profFieldGroup">
-            <label class="profLabel">Fundo da Sala</label>
-            <div class="bgSwatchRow" id="bgSwatchRow">
-              <div class="bgSwatchSection">Grátis</div>
-              <button type="button" class="bgSwatch" data-bg="default" title="Escuridão"
-                style="background:linear-gradient(135deg,#080604,#1a140f)">
-                <span>Padrão</span></button>
-              <button type="button" class="bgSwatch" data-bg="abismo" title="Abismo"
-                style="background:linear-gradient(135deg,#040608,#080d18)">
-                <span>Abismo</span></button>
-              <button type="button" class="bgSwatch" data-bg="floresta" title="Floresta"
-                style="background:linear-gradient(135deg,#040806,#08120a)">
-                <span>Floresta</span></button>
-              <button type="button" class="bgSwatch" data-bg="oceano" title="Oceano"
-                style="background:linear-gradient(135deg,#030810,#071018)">
-                <span>Oceano</span></button>
-              <button type="button" class="bgSwatch" data-bg="bruma" title="Bruma"
-                style="background:linear-gradient(135deg,#060408,#0e0a14)">
-                <span>Bruma</span></button>
-              <button type="button" class="bgSwatch" data-bg="brasa" title="Brasa"
-                style="background:linear-gradient(135deg,#080404,#120808)">
-                <span>Brasa</span></button>
-
-              <div class="bgSwatchSection" id="bgExclusiveLabel">Exclusivos · Pacotes</div>
-              <button type="button" class="bgSwatch bgSwatch--pack" data-bg="ambar" data-pack="pacote-conexao" title="Âmbar — Pacote Conexão"
-                style="background:linear-gradient(135deg,#090600,#130d03)">
-                <span>Âmbar</span><span class="lockIcon">🔒</span></button>
-              <button type="button" class="bgSwatch bgSwatch--pack" data-bg="cristal" data-pack="pacote-verdades" title="Cristal — Pacote Verdades"
-                style="background:linear-gradient(135deg,#030508,#070a14)">
-                <span>Cristal</span><span class="lockIcon">🔒</span></button>
-              <button type="button" class="bgSwatch bgSwatch--pack" data-bg="chama" data-pack="pacote-conflito" title="Chama — Pacote Conflito"
-                style="background:linear-gradient(135deg,#0a0400,#180800)">
-                <span>Chama</span><span class="lockIcon">🔒</span></button>
-              <button type="button" class="bgSwatch bgSwatch--pack" data-bg="veu" data-pack="pacote-segredos" title="Véu — Pacote Segredos"
-                style="background:linear-gradient(135deg,#040008,#0a0014)">
-                <span>Véu</span><span class="lockIcon">🔒</span></button>
-              <button type="button" class="bgSwatch bgSwatch--pack" data-bg="vinho" data-pack="pacote-casais" title="Vinho — Pacote Casais"
-                style="background:linear-gradient(135deg,#090004,#130009)">
-                <span>Vinho</span><span class="lockIcon">🔒</span></button>
-            </div>
-            <div id="bgPackHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
           </div>
 
           <div class="profileEditorActions">
@@ -5276,6 +5288,8 @@
           if (!localRefs.has(c.ref)) localCompras.push(c);
         });
         localStorage.setItem("osl_compras", JSON.stringify(localCompras));
+        // Atualiza swatches de tema após sincronizar compras
+        refreshPackSwatches();
       } catch(e) { /* silencioso — não bloqueia a sala */ }
     }
     syncAccountPurchases();
@@ -5826,8 +5840,6 @@
       editBio.value = user.bio || "";
       setAvatarSelection(user.avatarEmoji || "🔮");
       setColorSelection(user.avatarColor || "#342718");
-      refreshPackSwatches();
-      setBgSelection(user.bgTheme || selectedBgTheme);
     }
 
     function closeEditor() {
@@ -6153,6 +6165,16 @@
       editProfileBtn.hidden = !isSelfView;
       addFriendBtn.hidden = isSelfView;
 
+      // Mostra/oculta seção de fundo
+      const profBgSection = document.getElementById("profBgSection");
+      if (profBgSection) {
+        profBgSection.classList.toggle("hidden", !isSelfView);
+        if (isSelfView) {
+          refreshPackSwatches();
+          setBgSelection(user.bgTheme || selectedBgTheme);
+        }
+      }
+
       // Show/hide self-only tabs
       document.querySelectorAll(".profTab--selfOnly, .profPane--selfOnly").forEach(el => {
         el.style.display = isSelfView ? "" : "none";
@@ -6392,11 +6414,11 @@
       });
     }
 
-    // Background theme picker
+    // Background theme picker — salva imediatamente ao clicar
     const bgSwatchRow = document.getElementById("bgSwatchRow");
     let _bgHintTimer = null;
     if (bgSwatchRow) {
-      bgSwatchRow.addEventListener("click", (e) => {
+      bgSwatchRow.addEventListener("click", async (e) => {
         const sw = e.target.closest(".bgSwatch");
         if (!sw) return;
         const bg = sw.dataset.bg;
@@ -6413,6 +6435,11 @@
           return;
         }
         setBgSelection(bg);
+        // Salva imediatamente em localStorage e Firestore
+        localStorage.setItem("osl_bg", bg);
+        try {
+          await updateDoc(doc(db, "users", userId), { bgTheme: bg, lastSeen: serverTimestamp() });
+        } catch(err) { /* silencioso */ }
       });
     }
 
