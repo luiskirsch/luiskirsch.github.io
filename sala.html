@@ -1635,6 +1635,8 @@
       flex:1;
       min-height:0;
       overscroll-behavior-y:contain;
+      transform:translateZ(0);
+      -webkit-overflow-scrolling:touch;
     }
 
     /* Pausa animações box-shadow (paint-only) enquanto o perfil está aberto.
@@ -3927,8 +3929,6 @@
       overflow-y: auto !important;
       min-height: 0 !important;
       flex: 1 !important;
-      transform: translateZ(0); /* iOS: força layer GPU dentro de overflow:clip */
-      -webkit-overflow-scrolling: touch;
     }
     /* Reduz padding interno para ganhar mais espaço vertical */
     .profHead { padding: 14px 20px 10px !important; }
