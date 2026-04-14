@@ -873,5 +873,17 @@ window.addEventListener("beforeunload", () => {
   }
 });
 
+// Retorna o track de vídeo ativo de um participante remoto pelo identity.
+// Usado pelo mobile para attach direto em elementos visíveis (display:none quebra iOS).
+window._oslGetRemoteVideoTrack = function(identity) {
+  if (!lkRoom) return null;
+  const p = lkRoom.remoteParticipants.get(identity);
+  if (!p) return null;
+  for (const pub of p.trackPublications.values()) {
+    if (pub.kind === "video" && pub.track && !pub.isMuted) return pub.track;
+  }
+  return null;
+};
+
 // Conecta silenciosamente ao entrar na sala — permite ver quem já está em vídeo
 startPreview().catch(() => {});

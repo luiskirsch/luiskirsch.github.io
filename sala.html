@@ -8170,34 +8170,43 @@
 
     var lastStripKey = null; // null forces first build even when player list is empty
 
-    // Pipes live video srcObjects from desktop tiles into mobile avatar circles
+    // Pipes live video into mobile avatar circles via LiveKit track.attach()
+    // — attach direto no elemento visível evita o bug do iOS com display:none.
     function syncAvatarVideos() {
       if (!mobilePlayerStrip) return;
-      var videoGrid = document.getElementById("videoGrid");
-      if (!videoGrid) return;
       mobilePlayerStrip.querySelectorAll(".mobileAvatar[data-pid]").forEach(function(avatarEl) {
         var pid = avatarEl.dataset.pid;
         if (!pid) return;
-        var tile = videoGrid.querySelector(".videoTile[data-identity=\"" + pid + "\"]");
-        var tileVideo = tile ? tile.querySelector(".videoMedia video") : null;
-        if (tileVideo && tileVideo.srcObject) {
-          var existingVideo = avatarEl.querySelector("video");
-          if (existingVideo && existingVideo.srcObject === tileVideo.srcObject) return;
-          avatarEl.innerHTML = "";
-          var v = document.createElement("video");
-          v.srcObject = tileVideo.srcObject;
-          v.muted = true;
-          v.autoplay = true;
-          v.playsInline = true;
-          v.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:50%;display:block";
-          avatarEl.appendChild(v);
-          v.play().catch(function(){});
-        } else {
-          // No video — restore initials if currently showing video
-          if (avatarEl.querySelector("video")) {
+
+        var lkTrack = window._oslGetRemoteVideoTrack ? window._oslGetRemoteVideoTrack(pid) : null;
+
+        if (!lkTrack) {
+          // Sem vídeo — restaura iniciais se estava mostrando vídeo
+          if (avatarEl._oslRemoteTrack) {
+            avatarEl._oslRemoteTrack = null;
             avatarEl.innerHTML = avatarEl.dataset.initText || "?";
           }
+          return;
         }
+
+        // Já exibindo este track — nada a fazer
+        if (avatarEl._oslRemoteTrack === lkTrack) return;
+        avatarEl._oslRemoteTrack = lkTrack;
+
+        // Attach direto no avatar visível (iOS renderiza corretamente)
+        avatarEl.innerHTML = "";
+        var el = lkTrack.attach();
+        el.muted = true;
+        el.autoplay = true;
+        el.playsInline = true;
+        el.setAttribute("playsinline", "");
+        el.setAttribute("webkit-playsinline", "");
+        el.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:50%;display:block";
+        avatarEl.appendChild(el);
+
+        var doPlay = function() { el.play().catch(function(){}); };
+        el.addEventListener("loadedmetadata", doPlay, { once: true });
+        requestAnimationFrame(doPlay);
       });
     }
 
