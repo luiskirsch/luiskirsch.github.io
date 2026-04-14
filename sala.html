@@ -1519,7 +1519,6 @@
       flex-direction:column;
       overflow:hidden;
       transform:translateZ(0);
-      contain:layout style;
       background:linear-gradient(160deg,#141008 0%,#0d0a06 50%,#090604 100%);
       border:1px solid rgba(215,176,107,.20);
       border-radius:20px;
@@ -1635,9 +1634,8 @@
       overflow-x:hidden;
       flex:1;
       min-height:0;
-      will-change:scroll-position;
+      transform:translateZ(0);
       -webkit-overflow-scrolling:touch;
-      contain:layout style;
     }
 
     .profPane--active{ display:flex; }
@@ -3919,11 +3917,8 @@
       flex-direction: column !important;
     }
     .profPane {
-      -webkit-overflow-scrolling: touch;
       overflow-y: auto !important;
       min-height: 0 !important;
-      /* translateZ força layer GPU no iOS — garante scroll dentro de overflow:hidden */
-      transform: translateZ(0);
       flex: 1 !important;
     }
     /* Reduz padding interno para ganhar mais espaço vertical */
