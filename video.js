@@ -69,6 +69,9 @@ let camEnabled = true;
 let focusedIdentity = null;
 let panelVideoActive = false;
 
+// true = conectado ao LiveKit mas sem publicar câmera/mic (só assistindo)
+let isInPreview = false;
+
 const PanelBridge = window.PanelBridge || {
   baseUrl: window.PANEL_SERVER_BASE || "http://localhost:3000",
 
@@ -478,6 +481,72 @@ function refreshLocalVisualState() {
   });
 }
 
+// Atualiza o texto de status do bar de vídeo quando em modo preview
+function updatePreviewStatus() {
+  if (!isInPreview || !lkRoom || !videoStatusEl) return;
+  const count = lkRoom.remoteParticipants.size;
+  if (count === 0) {
+    videoStatusEl.textContent = "Ninguém em chamada.";
+  } else if (count === 1) {
+    videoStatusEl.textContent = "1 pessoa em chamada · Clique para participar";
+  } else {
+    videoStatusEl.textContent = `${count} pessoas em chamada · Clique para participar`;
+  }
+}
+
+// Registra todos os listeners de eventos do room (preview e ativo compartilham)
+function setupRoomListeners(room) {
+  room.on(RoomEvent.ParticipantConnected, (participant) => {
+    getOrCreateVideoTile(
+      participant.identity,
+      buildParticipantLabel(participant, false)
+    );
+    refreshParticipantVisualState(participant);
+    updateVideoGridLayout();
+    if (isInPreview) updatePreviewStatus();
+  });
+
+  room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+    if (participant.identity === participantId) return;
+
+    const tile = getOrCreateVideoTile(
+      participant.identity,
+      buildParticipantLabel(participant, false)
+    );
+
+    appendTrackToTile(tile, track, participant.identity);
+    refreshParticipantVisualState(participant);
+    updateVideoGridLayout();
+  });
+
+  room.on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+    if (participant) {
+      removeTrackFromParticipant(participant.identity, track.sid);
+      refreshParticipantVisualState(participant);
+    }
+  });
+
+  room.on(RoomEvent.TrackMuted, (publication, participant) => {
+    if (participant) refreshParticipantVisualState(participant);
+  });
+
+  room.on(RoomEvent.TrackUnmuted, (publication, participant) => {
+    if (participant) refreshParticipantVisualState(participant);
+  });
+
+  room.on(RoomEvent.ParticipantDisconnected, (participant) => {
+    removeVideoTile(participant.identity);
+    if (isInPreview) updatePreviewStatus();
+  });
+
+  room.on(RoomEvent.Disconnected, async () => {
+    lkRoom = null;
+    isInPreview = false;
+    if (videoStatusEl) videoStatusEl.textContent = "Desconectado da chamada.";
+    await markPanelVideo(false);
+  });
+}
+
 async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -546,13 +615,15 @@ function renderExistingParticipantTracks(participant) {
   refreshParticipantVisualState(participant);
 }
 
-async function joinVideoCall() {
-  if (lkRoom) return;
+/**
+ * Conecta ao LiveKit silenciosamente — sem câmera nem microfone.
+ * O usuário pode assistir a chamada antes de participar.
+ * Falha silenciosamente para não incomodar quem não vai usar vídeo.
+ */
+async function startPreview() {
+  if (lkRoom) return; // já conectado (preview ou ativo)
 
   try {
-    videoStatusEl.textContent = "Entrando na chamada...";
-    joinVideoBtn.disabled = true;
-
     const token = await requestToken();
 
     lkRoom = new Room({
@@ -560,61 +631,67 @@ async function joinVideoCall() {
       dynacast: true
     });
 
-    lkRoom.on(RoomEvent.ParticipantConnected, (participant) => {
-      getOrCreateVideoTile(
-        participant.identity,
-        buildParticipantLabel(participant, false)
-      );
-      refreshParticipantVisualState(participant);
-      updateVideoGridLayout();
-    });
-
-    lkRoom.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-      if (participant.identity === participantId) return;
-
-      const tile = getOrCreateVideoTile(
-        participant.identity,
-        buildParticipantLabel(participant, false)
-      );
-
-      appendTrackToTile(tile, track, participant.identity);
-      refreshParticipantVisualState(participant);
-      updateVideoGridLayout();
-    });
-
-    lkRoom.on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
-      if (participant) {
-        removeTrackFromParticipant(participant.identity, track.sid);
-        refreshParticipantVisualState(participant);
-      }
-    });
-
-    lkRoom.on(RoomEvent.TrackMuted, (publication, participant) => {
-      if (participant) refreshParticipantVisualState(participant);
-    });
-
-    lkRoom.on(RoomEvent.TrackUnmuted, (publication, participant) => {
-      if (participant) refreshParticipantVisualState(participant);
-    });
-
-    lkRoom.on(RoomEvent.ParticipantDisconnected, (participant) => {
-      removeVideoTile(participant.identity);
-    });
-
-    lkRoom.on(RoomEvent.Disconnected, async () => {
-      videoStatusEl.textContent = "Desconectado da chamada.";
-      await markPanelVideo(false);
-    });
+    setupRoomListeners(lkRoom);
 
     await lkRoom.connect(LIVEKIT_URL, token, {
       autoSubscribe: true
     });
+
+    isInPreview = true;
+
+    // Renderiza participantes que já estão na chamada
+    for (const participant of lkRoom.remoteParticipants.values()) {
+      renderExistingParticipantTracks(participant);
+    }
+
+    updatePreviewStatus();
+
+  } catch (_err) {
+    // Falha silenciosa — preview é best-effort
+    lkRoom = null;
+    isInPreview = false;
+  }
+}
+
+async function joinVideoCall() {
+  // Já está na chamada como participante ativo
+  if (lkRoom && !isInPreview) return;
+
+  try {
+    joinVideoBtn.disabled = true;
+
+    if (!lkRoom) {
+      // Nem preview existe — conecta do zero
+      videoStatusEl.textContent = "Entrando na chamada...";
+      const token = await requestToken();
+
+      lkRoom = new Room({
+        adaptiveStream: true,
+        dynacast: true
+      });
+
+      setupRoomListeners(lkRoom);
+
+      await lkRoom.connect(LIVEKIT_URL, token, {
+        autoSubscribe: true
+      });
+
+      // Renderiza quem já estava antes de entrar
+      for (const participant of lkRoom.remoteParticipants.values()) {
+        renderExistingParticipantTracks(participant);
+      }
+    } else {
+      // Já estava em preview — só ativa câmera/mic
+      videoStatusEl.textContent = "Ativando câmera e microfone...";
+    }
 
     localAudioTrack = await createLocalAudioTrack();
     localVideoTrack = await createLocalVideoTrack();
 
     await lkRoom.localParticipant.publishTrack(localAudioTrack);
     await lkRoom.localParticipant.publishTrack(localVideoTrack);
+
+    isInPreview = false;
 
     const myTile = getOrCreateVideoTile(
       participantId,
@@ -626,10 +703,6 @@ async function joinVideoCall() {
     micEnabled = true;
     camEnabled = true;
     refreshLocalVisualState();
-
-    for (const participant of lkRoom.remoteParticipants.values()) {
-      renderExistingParticipantTracks(participant);
-    }
 
     toggleMicBtn.disabled = false;
     toggleCamBtn.disabled = false;
@@ -645,11 +718,18 @@ async function joinVideoCall() {
   } catch (error) {
     console.error("Erro ao entrar na chamada:", error);
 
+    // Se estava em preview, volta para o estado de preview
+    isInPreview = !!lkRoom;
     joinVideoBtn.disabled = false;
     toggleMicBtn.disabled = true;
     toggleCamBtn.disabled = true;
     leaveVideoBtn.disabled = true;
-    videoStatusEl.textContent = "Não foi possível entrar na chamada.";
+
+    if (isInPreview) {
+      updatePreviewStatus();
+    } else {
+      videoStatusEl.textContent = "Não foi possível entrar na chamada.";
+    }
 
     if (
       error.message !== "TOKEN_UNAUTHORIZED" &&
@@ -673,25 +753,26 @@ async function joinVideoCall() {
 
 async function leaveVideoCall() {
   try {
+    // Unpublica e para as tracks locais, mas mantém a conexão com o room
     if (localAudioTrack) {
+      try { await lkRoom?.localParticipant.unpublishTrack(localAudioTrack); } catch (_) {}
       localAudioTrack.stop();
       localAudioTrack.detach().forEach((el) => el.remove());
       localAudioTrack = null;
     }
 
     if (localVideoTrack) {
+      try { await lkRoom?.localParticipant.unpublishTrack(localVideoTrack); } catch (_) {}
       localVideoTrack.stop();
       localVideoTrack.detach().forEach((el) => el.remove());
       localVideoTrack = null;
     }
-
-    if (lkRoom) {
-      lkRoom.disconnect();
-      lkRoom = null;
-    }
   } catch (error) {
     console.error("Erro ao sair:", error);
   }
+
+  // Remove apenas o tile próprio — os dos outros ficam visíveis
+  removeVideoTile(participantId);
 
   micEnabled = true;
   camEnabled = true;
@@ -704,8 +785,13 @@ async function leaveVideoCall() {
   toggleMicBtn.textContent = "🎤 Mutar";
   toggleCamBtn.textContent = "📷 Off";
 
-  clearAllVideoTiles();
-  videoStatusEl.textContent = "Vídeo desligado.";
+  // Volta ao modo preview se ainda conectado, ou desconecta se room sumiu
+  if (lkRoom) {
+    isInPreview = true;
+    updatePreviewStatus();
+  } else {
+    videoStatusEl.textContent = "Vídeo desligado.";
+  }
 
   await markPanelVideo(false);
 }
@@ -766,6 +852,10 @@ window.addEventListener("pagehide", () => {
   if (panelVideoActive) {
     sendBeaconVideoOff();
   }
+  // Desconecta o room ao sair da página (preview ou ativo)
+  if (lkRoom) {
+    try { lkRoom.disconnect(); } catch (_) {}
+  }
 });
 
 window.addEventListener("beforeunload", () => {
@@ -773,3 +863,6 @@ window.addEventListener("beforeunload", () => {
     sendBeaconVideoOff();
   }
 });
+
+// Conecta silenciosamente ao entrar na sala — permite ver quem já está em vídeo
+startPreview().catch(() => {});
