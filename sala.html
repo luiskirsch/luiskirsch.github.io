@@ -1520,6 +1520,7 @@
       display:flex;
       flex-direction:column;
       overflow:hidden;
+      transform:translateZ(0);
       background:linear-gradient(160deg,#141008 0%,#0d0a06 50%,#090604 100%);
       border:1px solid rgba(215,176,107,.20);
       border-radius:20px;
@@ -1634,7 +1635,11 @@
       gap:14px;
       padding:20px 26px 16px;
       overflow-y:auto;
+      overflow-x:hidden;
       flex:1;
+      min-height:0;
+      will-change:transform;
+      -webkit-overflow-scrolling:touch;
     }
 
     .profPane--active{ display:flex; }
