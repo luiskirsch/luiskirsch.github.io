@@ -1489,9 +1489,7 @@
     .profileModal{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.82);
-      backdrop-filter:blur(4px);
-      -webkit-backdrop-filter:blur(4px);
+      background:rgba(0,0,0,.84);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -1521,12 +1519,11 @@
       flex-direction:column;
       overflow:hidden;
       transform:translateZ(0);
+      contain:layout style;
       background:linear-gradient(160deg,#141008 0%,#0d0a06 50%,#090604 100%);
       border:1px solid rgba(215,176,107,.20);
       border-radius:20px;
-      box-shadow:
-        0 0 0 1px rgba(0,0,0,.6),
-        0 32px 96px rgba(0,0,0,.75);
+      box-shadow:0 24px 72px rgba(0,0,0,.70);
       color:#f5ede1;
     }
 
@@ -1566,8 +1563,8 @@
       background:linear-gradient(160deg,#7c6338,#342718);
       color:#fff;
       border:2px solid rgba(215,176,107,.38);
-      box-shadow:0 0 24px rgba(215,176,107,.18);
-      transition:background .3s ease;
+      box-shadow:0 0 18px rgba(215,176,107,.14);
+      transition:background .12s ease;
       flex-shrink:0;
     }
 
@@ -1638,8 +1635,9 @@
       overflow-x:hidden;
       flex:1;
       min-height:0;
-      will-change:transform;
+      will-change:scroll-position;
       -webkit-overflow-scrolling:touch;
+      contain:layout style;
     }
 
     .profPane--active{ display:flex; }
