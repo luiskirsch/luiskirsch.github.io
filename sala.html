@@ -131,6 +131,43 @@
       will-change:transform;
     }
 
+    /* ── Temas de fundo da sala (gratuitos) ────────────────────────────── */
+
+    /* Abismo — azul noturno profundo */
+    html.bg-abismo{ background:#040608 !important; }
+    html.bg-abismo::before{ background:
+      radial-gradient(80vw 60vh at 50% 0%, rgba(56,100,200,.09), transparent 55%),
+      radial-gradient(55vw 45vh at 10% 30%, rgba(20,40,100,.05), transparent 60%),
+      linear-gradient(180deg, #040608 0%, #06090f 52%, #080d18 100%); }
+
+    /* Floresta — verde esmeralda escuro */
+    html.bg-floresta{ background:#040806 !important; }
+    html.bg-floresta::before{ background:
+      radial-gradient(80vw 60vh at 50% 0%, rgba(40,160,80,.08), transparent 55%),
+      radial-gradient(55vw 45vh at 10% 30%, rgba(20,80,30,.05), transparent 60%),
+      linear-gradient(180deg, #040806 0%, #060d08 52%, #08120a 100%); }
+
+    /* Oceano — azul teal abissal */
+    html.bg-oceano{ background:#030810 !important; }
+    html.bg-oceano::before{ background:
+      radial-gradient(80vw 60vh at 50% 0%, rgba(0,160,180,.09), transparent 55%),
+      radial-gradient(55vw 45vh at 10% 30%, rgba(0,80,120,.06), transparent 60%),
+      linear-gradient(180deg, #030810 0%, #050c14 52%, #071018 100%); }
+
+    /* Bruma — roxo crepuscular */
+    html.bg-bruma{ background:#060408 !important; }
+    html.bg-bruma::before{ background:
+      radial-gradient(80vw 60vh at 50% 0%, rgba(140,60,200,.09), transparent 55%),
+      radial-gradient(55vw 45vh at 10% 30%, rgba(80,30,120,.06), transparent 60%),
+      linear-gradient(180deg, #060408 0%, #0a070e 52%, #0e0a14 100%); }
+
+    /* Brasa — vermelho brasa / crimson */
+    html.bg-brasa{ background:#080404 !important; }
+    html.bg-brasa::before{ background:
+      radial-gradient(80vw 60vh at 50% 0%, rgba(200,40,40,.09), transparent 55%),
+      radial-gradient(55vw 45vh at 10% 30%, rgba(120,20,20,.06), transparent 60%),
+      linear-gradient(180deg, #080404 0%, #0e0606 52%, #120808 100%); }
+
     /* Vinheta — sem mix-blend-mode (muito custoso em GPU) */
     body::before{
       content:"";
@@ -2108,6 +2145,46 @@
     .colorSwatch--active{
       border-color:rgba(215,176,107,.85);
       box-shadow:0 0 0 3px rgba(215,176,107,.22);
+    }
+
+    /* ── Seletor de fundo da sala ── */
+    .bgSwatchRow{
+      display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;
+    }
+
+    .bgSwatch{
+      appearance:none;
+      position:relative;
+      width:46px; height:34px;
+      border-radius:10px;
+      border:2px solid rgba(255,255,255,.14);
+      cursor:pointer;
+      overflow:hidden;
+      transition:transform .12s ease, border-color .15s ease, box-shadow .15s ease;
+      flex-shrink:0;
+    }
+
+    .bgSwatch:hover{ transform:scale(1.08); }
+
+    .bgSwatch--active{
+      border-color:rgba(215,176,107,.85);
+      box-shadow:0 0 0 3px rgba(215,176,107,.22);
+    }
+
+    .bgSwatch span{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:9px; letter-spacing:.06em; text-transform:uppercase;
+      color:rgba(255,255,255,.55); font-family:ui-sans-serif,system-ui,sans-serif;
+    }
+
+    .profLabelFree{
+      display:inline-block;
+      font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+      background:rgba(84,208,109,.14); color:#54d06d;
+      border:1px solid rgba(84,208,109,.28);
+      border-radius:999px; padding:1px 7px;
+      vertical-align:middle; margin-left:6px;
     }
 
     /* ── Close X button ── */
@@ -4579,6 +4656,30 @@
             </div>
           </div>
 
+          <div class="profFieldGroup">
+            <label class="profLabel">Fundo da Sala <span class="profLabelFree">Grátis</span></label>
+            <div class="bgSwatchRow" id="bgSwatchRow">
+              <button type="button" class="bgSwatch" data-bg="default" title="Escuridão"
+                style="background:linear-gradient(135deg,#080604,#1a140f)">
+                <span>Padrão</span></button>
+              <button type="button" class="bgSwatch" data-bg="abismo" title="Abismo"
+                style="background:linear-gradient(135deg,#040608,#080d18)">
+                <span>Abismo</span></button>
+              <button type="button" class="bgSwatch" data-bg="floresta" title="Floresta"
+                style="background:linear-gradient(135deg,#040806,#08120a)">
+                <span>Floresta</span></button>
+              <button type="button" class="bgSwatch" data-bg="oceano" title="Oceano"
+                style="background:linear-gradient(135deg,#030810,#071018)">
+                <span>Oceano</span></button>
+              <button type="button" class="bgSwatch" data-bg="bruma" title="Bruma"
+                style="background:linear-gradient(135deg,#060408,#0e0a14)">
+                <span>Bruma</span></button>
+              <button type="button" class="bgSwatch" data-bg="brasa" title="Brasa"
+                style="background:linear-gradient(135deg,#080404,#120808)">
+                <span>Brasa</span></button>
+            </div>
+          </div>
+
           <div class="profileEditorActions">
             <button type="button" class="profileActionBtn" id="cancelEditProfileBtn">Cancelar</button>
             <button type="submit" class="profileActionBtn profileActionBtn--primary" id="saveProfileBtn">Salvar perfil</button>
@@ -5123,6 +5224,7 @@
     let openedProfileData = null;
     let selectedAvatarEmoji = "🔮";
     let selectedAvatarColor = "#342718";
+    let selectedBgTheme = localStorage.getItem("osl_bg") || "default";
 
     let ritualDeck = [];
     let ritualStarted = false;
@@ -5589,6 +5691,24 @@
       });
     }
 
+    const BG_THEMES = ["default","abismo","floresta","oceano","bruma","brasa"];
+
+    function applyBgTheme(theme) {
+      const t = BG_THEMES.includes(theme) ? theme : "default";
+      BG_THEMES.forEach(k => document.documentElement.classList.remove("bg-" + k));
+      if (t !== "default") document.documentElement.classList.add("bg-" + t);
+    }
+
+    function setBgSelection(theme) {
+      selectedBgTheme = BG_THEMES.includes(theme) ? theme : "default";
+      const row = document.getElementById("bgSwatchRow");
+      if (!row) return;
+      row.querySelectorAll(".bgSwatch").forEach(sw => {
+        sw.classList.toggle("bgSwatch--active", sw.dataset.bg === selectedBgTheme);
+      });
+      applyBgTheme(selectedBgTheme);
+    }
+
     function openEditorWithUser(user) {
       profileEditor.classList.remove("hidden");
       profileActions.classList.add("hidden");
@@ -5597,6 +5717,7 @@
       editBio.value = user.bio || "";
       setAvatarSelection(user.avatarEmoji || "🔮");
       setColorSelection(user.avatarColor || "#342718");
+      setBgSelection(user.bgTheme || selectedBgTheme);
     }
 
     function closeEditor() {
@@ -5894,6 +6015,12 @@
     async function fillProfileUI(user, isSelfView) {
       profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
       if (user.avatarColor) profileAvatarLarge.style.background = user.avatarColor;
+      // Aplica fundo salvo do próprio usuário
+      if (isSelfView && user.bgTheme) {
+        selectedBgTheme = user.bgTheme;
+        localStorage.setItem("osl_bg", user.bgTheme);
+        applyBgTheme(user.bgTheme);
+      }
       if (isSelfView && user.avatarEmoji) {
         const fab = document.getElementById("mobileProfileBtn");
         if (fab) fab.textContent = user.avatarEmoji;
@@ -6151,6 +6278,16 @@
       });
     }
 
+    // Background theme picker
+    const bgSwatchRow = document.getElementById("bgSwatchRow");
+    if (bgSwatchRow) {
+      bgSwatchRow.addEventListener("click", (e) => {
+        const sw = e.target.closest(".bgSwatch");
+        if (!sw) return;
+        setBgSelection(sw.dataset.bg);
+      });
+    }
+
     // Copy room code button (Sessão tab)
     const copyRoomCodeBtn = document.getElementById("copyRoomCodeBtn");
     if (copyRoomCodeBtn) {
@@ -6202,8 +6339,11 @@
             bio,
             avatarEmoji: selectedAvatarEmoji,
             avatarColor: selectedAvatarColor,
+            bgTheme: selectedBgTheme,
             lastSeen: serverTimestamp()
           });
+          localStorage.setItem("osl_bg", selectedBgTheme);
+          applyBgTheme(selectedBgTheme);
           if (profileAvatarLarge) profileAvatarLarge.style.background = selectedAvatarColor;
 
           if (openedProfileUserId === userId) {
@@ -7897,6 +8037,14 @@
 
   <!-- ===== MOBILE LAYOUT CONTROLLER ===== -->
   <script>
+  // Aplica o tema de fundo salvo antes do primeiro render — sem flash
+  (function() {
+    var saved = localStorage.getItem("osl_bg");
+    if (saved && saved !== "default") {
+      document.documentElement.classList.add("bg-" + saved);
+    }
+  })();
+
   document.addEventListener("DOMContentLoaded", function () {
   (function () {
     var IS_MOBILE = window.matchMedia("(max-width: 640px), (max-width: 960px) and (orientation: landscape) and (pointer: coarse)");
