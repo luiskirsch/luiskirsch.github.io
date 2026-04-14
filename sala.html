@@ -1211,6 +1211,26 @@
       color:rgba(255,200,200,.90);
     }
 
+    /* Traço diagonal vermelho no badge da câmera desligada */
+    .videoBadge[data-kind="cam"].is-off{
+      position:relative;
+      overflow:hidden;
+    }
+    .videoBadge[data-kind="cam"].is-off::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:linear-gradient(
+        135deg,
+        transparent calc(50% - 1.5px),
+        rgba(230,60,60,.95) calc(50% - 1.5px),
+        rgba(230,60,60,.95) calc(50% + 1.5px),
+        transparent calc(50% + 1.5px)
+      );
+      pointer-events:none;
+    }
+
     /* Name label: transparent, text-shadow only */
     .videoLabel{
       position:absolute;

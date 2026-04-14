@@ -342,7 +342,7 @@ function setTileStatus(identity, { micMuted = false, camMuted = false } = {}) {
 
   if (camBadge) {
     camBadge.classList.toggle("is-off", camMuted);
-    camBadge.textContent = camMuted ? "📷✖" : "📷";
+    camBadge.textContent = "📷";
     camBadge.title = camMuted ? "Câmera desligada" : "Câmera ligada";
   }
 
@@ -608,7 +608,12 @@ function renderExistingParticipantTracks(participant) {
 
   participant.trackPublications.forEach((pub) => {
     if (pub.track) {
+      // Track já disponível — anexa direto
       appendTrackToTile(tile, pub.track, participant.identity);
+    } else if (pub.isSubscribed === false || !pub.isSubscribed) {
+      // Track ainda não subscrita — força subscrição explícita
+      // O evento TrackSubscribed vai disparar quando chegar
+      try { pub.setSubscribed(true); } catch (_) {}
     }
   });
 
