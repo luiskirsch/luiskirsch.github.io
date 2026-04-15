@@ -8138,6 +8138,8 @@
     window._osl.isStarted        = () => ritualStarted;
     window._osl.getParticipantId = () => participantId;
     window._osl.getRoomCode      = () => roomCode;
+    window._osl.setTyping        = (v) => setTyping(v);
+    window._osl.scheduleTypingStop = () => scheduleTypingStop();
 
     window.addEventListener("pagehide", () => {
       try {
@@ -9535,6 +9537,9 @@
         desktopMsgInput.value = mobileMsgInput.value;
         desktopSendBtn.click();
         mobileMsgInput.value = "";
+        if (window._osl && typeof window._osl.setTyping === "function") {
+          window._osl.setTyping(false);
+        }
         mobileMsgInput.focus(); // mantém teclado aberto
       });
 
@@ -9543,9 +9548,19 @@
       });
 
       mobileMsgInput.addEventListener("input", function () {
-        if (typeof setTyping === "function") {
-          setTyping(true);
-          scheduleTypingStop();
+        if (window._osl && typeof window._osl.setTyping === "function") {
+          if (mobileMsgInput.value.trim()) {
+            window._osl.setTyping(true);
+            window._osl.scheduleTypingStop();
+          } else {
+            window._osl.setTyping(false);
+          }
+        }
+      });
+
+      mobileMsgInput.addEventListener("blur", function () {
+        if (window._osl && typeof window._osl.setTyping === "function") {
+          window._osl.setTyping(false);
         }
       });
     }
