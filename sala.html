@@ -133,99 +133,75 @@
 
     /* ── Temas de fundo da sala (gratuitos) ────────────────────────────── */
 
-    /* ── Temas de fundo — sobrescrevem as variáveis para que body e html::before mudem juntos ── */
-
-    /* Abismo — azul noturno profundo */
-    html.bg-abismo{
-      --bg-1:#010610; --bg-2:#030a18; --bg-3:#050e20;
+    /* ── Temas com imagem real — overlay escuro preserva legibilidade do UI ── */
+    /* Overlay padrão para todos os temas com imagem */
+    html[class*="bg-"]::before{
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
     }
+
+    /* Abismo — céu noturno estrelado */
+    html.bg-abismo{ --bg-1:#020408; }
     html.bg-abismo::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(56,100,230,.22), transparent 55%),
-      radial-gradient(55vw 45vh at 10% 30%, rgba(20,50,140,.12), transparent 60%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
+      linear-gradient(180deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.78) 100%),
+      url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
-    /* Floresta — verde esmeralda escuro */
-    html.bg-floresta{
-      --bg-1:#010a04; --bg-2:#031008; --bg-3:#05160c;
-    }
+    /* Floresta — floresta densa noturna */
+    html.bg-floresta{ --bg-1:#010802; }
     html.bg-floresta::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(30,180,70,.20), transparent 55%),
-      radial-gradient(55vw 45vh at 10% 30%, rgba(10,100,30,.12), transparent 60%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
+      linear-gradient(180deg, rgba(0,0,0,.70) 0%, rgba(0,0,0,.52) 45%, rgba(0,0,0,.76) 100%),
+      url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
-    /* Oceano — azul teal abissal */
-    html.bg-oceano{
-      --bg-1:#010810; --bg-2:#020e18; --bg-3:#031420;
-    }
+    /* Oceano — fundo do oceano */
+    html.bg-oceano{ --bg-1:#010610; }
     html.bg-oceano::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(0,180,200,.20), transparent 55%),
-      radial-gradient(55vw 45vh at 10% 30%, rgba(0,100,140,.12), transparent 60%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
+      linear-gradient(180deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.54) 45%, rgba(0,0,0,.78) 100%),
+      url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
-    /* Bruma — roxo crepuscular */
-    html.bg-bruma{
-      --bg-1:#060210; --bg-2:#0a0318; --bg-3:#0e0420;
-    }
+    /* Bruma — montanha neblinosa */
+    html.bg-bruma{ --bg-1:#04020a; }
     html.bg-bruma::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(160,60,240,.20), transparent 55%),
-      radial-gradient(55vw 45vh at 10% 30%, rgba(90,20,160,.12), transparent 60%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
+      linear-gradient(180deg, rgba(0,0,0,.74) 0%, rgba(0,0,0,.56) 45%, rgba(0,0,0,.80) 100%),
+      url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
-    /* Brasa — vermelho brasa / crimson */
-    html.bg-brasa{
-      --bg-1:#100202; --bg-2:#160404; --bg-3:#1c0606;
-    }
+    /* Brasa — chamas e brasas */
+    html.bg-brasa{ --bg-1:#0e0101; }
     html.bg-brasa::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(220,40,40,.22), transparent 55%),
-      radial-gradient(55vw 45vh at 10% 30%, rgba(140,20,20,.12), transparent 60%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
+      linear-gradient(180deg, rgba(0,0,0,.68) 0%, rgba(0,0,0,.48) 45%, rgba(0,0,0,.74) 100%),
+      url('https://images.unsplash.com/photo-1476673160081-cf065607f449?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
     /* ── Temas exclusivos de pacotes ── */
 
-    /* Âmbar — dourado caloroso (Conexão) */
-    html.bg-ambar{
-      --bg-1:#0e0800; --bg-2:#140e00; --bg-3:#1a1200;
-    }
+    /* Âmbar — luz de velas dourada (Conexão) */
+    html.bg-ambar{ --bg-1:#0c0600; }
     html.bg-ambar::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(240,170,20,.22), transparent 55%),
-      radial-gradient(55vw 45vh at 85% 25%, rgba(200,110,10,.12), transparent 60%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
+      linear-gradient(180deg, rgba(0,0,0,.68) 0%, rgba(0,0,0,.48) 45%, rgba(0,0,0,.72) 100%),
+      url('https://images.unsplash.com/photo-1512908390106-4aeee60e7a27?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
-    /* Cristal — frio aço prata (Verdades) */
-    html.bg-cristal{
-      --bg-1:#01060e; --bg-2:#020a16; --bg-3:#030e1e;
-    }
+    /* Cristal — gelo e cristais de neve (Verdades) */
+    html.bg-cristal{ --bg-1:#010408; }
     html.bg-cristal::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(160,200,255,.18), transparent 55%),
-      radial-gradient(55vw 45vh at 15% 35%, rgba(80,140,220,.10), transparent 60%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
+      linear-gradient(180deg, rgba(0,0,0,.70) 0%, rgba(0,0,0,.52) 45%, rgba(0,0,0,.76) 100%),
+      url('https://images.unsplash.com/photo-1482961674540-0b0e8363a005?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
-    /* Chama — laranja intenso (Conflito) */
-    html.bg-chama{
-      --bg-1:#100500; --bg-2:#180800; --bg-3:#200a00;
-    }
+    /* Chama — fogo vivo (Conflito) */
+    html.bg-chama{ --bg-1:#0e0400; }
     html.bg-chama::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(255,110,10,.24), transparent 55%),
-      radial-gradient(55vw 45vh at 80% 20%, rgba(220,70,0,.14), transparent 60%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
+      linear-gradient(180deg, rgba(0,0,0,.65) 0%, rgba(0,0,0,.45) 45%, rgba(0,0,0,.70) 100%),
+      url('https://images.unsplash.com/photo-1499336275702-cdcab885b53c?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
-    /* Véu — roxo abissal (Segredos) */
-    html.bg-veu{
-      --bg-1:#06000e; --bg-2:#0a0018; --bg-3:#0e0022;
-    }
+    /* Véu — nebulosa cósmica roxa (Segredos) */
+    html.bg-veu{ --bg-1:#04000c; }
     html.bg-veu::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(200,20,255,.20), transparent 55%),
-      radial-gradient(55vw 45vh at 20% 40%, rgba(120,0,200,.12), transparent 60%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
+      linear-gradient(180deg, rgba(0,0,0,.68) 0%, rgba(0,0,0,.50) 45%, rgba(0,0,0,.74) 100%),
+      url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
-    /* Vinho — rosa escuro (Casais) */
-    html.bg-vinho{
-      --bg-1:#0e0006; --bg-2:#14000a; --bg-3:#1a000e;
-    }
+    /* Vinho — rosas escuras e pétalas (Casais) */
+    html.bg-vinho{ --bg-1:#0c0004; }
     html.bg-vinho::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(220,20,90,.22), transparent 55%),
-      radial-gradient(55vw 45vh at 75% 30%, rgba(160,10,60,.12), transparent 60%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
+      linear-gradient(180deg, rgba(0,0,0,.70) 0%, rgba(0,0,0,.52) 45%, rgba(0,0,0,.76) 100%),
+      url('https://images.unsplash.com/photo-1504700610630-ac6aba3536d3?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
     /* Vinheta — sem mix-blend-mode (muito custoso em GPU) */
     body::before{
@@ -4706,40 +4682,40 @@
           <div class="profBgTitle">Fundo da Sala</div>
           <div class="bgSwatchRow" id="bgSwatchRow">
             <div class="bgSwatchSection">Grátis</div>
-            <button type="button" class="bgSwatch" data-bg="default" title="Escuridão"
-              style="background:linear-gradient(135deg,#080604,#1a140f)">
+            <button type="button" class="bgSwatch" data-bg="default" title="Padrão"
+              style="background:#080604">
               <span>Padrão</span></button>
             <button type="button" class="bgSwatch" data-bg="abismo" title="Abismo"
-              style="background:linear-gradient(135deg,#040608,#080d18)">
+              style="background:url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=120&q=60&fit=crop') center/cover">
               <span>Abismo</span></button>
             <button type="button" class="bgSwatch" data-bg="floresta" title="Floresta"
-              style="background:linear-gradient(135deg,#040806,#08120a)">
+              style="background:url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=120&q=60&fit=crop') center/cover">
               <span>Floresta</span></button>
             <button type="button" class="bgSwatch" data-bg="oceano" title="Oceano"
-              style="background:linear-gradient(135deg,#030810,#071018)">
+              style="background:url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=120&q=60&fit=crop') center/cover">
               <span>Oceano</span></button>
             <button type="button" class="bgSwatch" data-bg="bruma" title="Bruma"
-              style="background:linear-gradient(135deg,#060408,#0e0a14)">
+              style="background:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=120&q=60&fit=crop') center/cover">
               <span>Bruma</span></button>
             <button type="button" class="bgSwatch" data-bg="brasa" title="Brasa"
-              style="background:linear-gradient(135deg,#080404,#120808)">
+              style="background:url('https://images.unsplash.com/photo-1476673160081-cf065607f449?w=120&q=60&fit=crop') center/cover">
               <span>Brasa</span></button>
 
             <div class="bgSwatchSection" id="bgExclusiveLabel">Exclusivos · Pacotes</div>
             <button type="button" class="bgSwatch bgSwatch--pack" data-bg="ambar" data-pack="pacote-conexao" title="Âmbar — Pacote Conexão"
-              style="background:linear-gradient(135deg,#090600,#130d03)">
+              style="background:url('https://images.unsplash.com/photo-1512908390106-4aeee60e7a27?w=120&q=60&fit=crop') center/cover">
               <span>Âmbar</span><span class="lockIcon">🔒</span></button>
             <button type="button" class="bgSwatch bgSwatch--pack" data-bg="cristal" data-pack="pacote-verdades" title="Cristal — Pacote Verdades"
-              style="background:linear-gradient(135deg,#030508,#070a14)">
+              style="background:url('https://images.unsplash.com/photo-1482961674540-0b0e8363a005?w=120&q=60&fit=crop') center/cover">
               <span>Cristal</span><span class="lockIcon">🔒</span></button>
             <button type="button" class="bgSwatch bgSwatch--pack" data-bg="chama" data-pack="pacote-conflito" title="Chama — Pacote Conflito"
-              style="background:linear-gradient(135deg,#0a0400,#180800)">
+              style="background:url('https://images.unsplash.com/photo-1499336275702-cdcab885b53c?w=120&q=60&fit=crop') center/cover">
               <span>Chama</span><span class="lockIcon">🔒</span></button>
             <button type="button" class="bgSwatch bgSwatch--pack" data-bg="veu" data-pack="pacote-segredos" title="Véu — Pacote Segredos"
-              style="background:linear-gradient(135deg,#040008,#0a0014)">
+              style="background:url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=120&q=60&fit=crop') center/cover">
               <span>Véu</span><span class="lockIcon">🔒</span></button>
             <button type="button" class="bgSwatch bgSwatch--pack" data-bg="vinho" data-pack="pacote-casais" title="Vinho — Pacote Casais"
-              style="background:linear-gradient(135deg,#090004,#130009)">
+              style="background:url('https://images.unsplash.com/photo-1504700610630-ac6aba3536d3?w=120&q=60&fit=crop') center/cover">
               <span>Vinho</span><span class="lockIcon">🔒</span></button>
           </div>
           <div id="bgPackHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
