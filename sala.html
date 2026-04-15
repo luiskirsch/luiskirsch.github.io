@@ -8194,6 +8194,9 @@
           oslBypassLeave = false;
           return;
         }
+        // Só mostra o modal se o ritual foi iniciado (gravação pode ter acontecido)
+        var ritualStarted = window._osl && window._osl.isStarted && window._osl.isStarted();
+        if (!ritualStarted) return;
         e.stopImmediatePropagation();
         oslSaveProduto = null;
         oslHideFields("oslSaveFields");
