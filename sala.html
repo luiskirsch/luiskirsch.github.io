@@ -5402,6 +5402,7 @@
     const playersCollectionRef = collection(db, "salas", roomCode, "players");
 
     let isHost = false;
+    let autoRecordingStarted = false;
     let heartbeatTimer = null;
     let roomUnsub = null;
     let playersUnsub = null;
@@ -5815,6 +5816,16 @@
         lastRevealedCardKey = null;
         setRitualWaitingState();
         return;
+      }
+
+      // Auto-start recording when ritual becomes active (host triggers once)
+      if (isHost && !autoRecordingStarted) {
+        autoRecordingStarted = true;
+        fetch("https://osl-video-server-production.up.railway.app/recording/auto-start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId: roomCode })
+        }).catch(() => {});
       }
 
       const newKey = currentCard ? (currentCard.title || "__card__") : "__waiting__";
@@ -7418,6 +7429,7 @@
     window._osl.getIsHost        = () => isHost;
     window._osl.isStarted        = () => ritualStarted;
     window._osl.getParticipantId = () => participantId;
+    window._osl.getRoomCode      = () => roomCode;
 
     window.addEventListener("pagehide", () => {
       try {
@@ -7679,10 +7691,10 @@
 
     <!-- Modal 4: Salvar Sessão -->
     <div class="osl-modal" id="oslModalSave">
-      <div class="osl-modal-icon">🎥</div>
+      <div class="osl-modal-icon">🔴</div>
       <div class="osl-modal-eyebrow">Antes de sair</div>
-      <div class="osl-modal-title">Deseja salvar este ritual?</div>
-      <div class="osl-modal-desc">Sessões assim não se repetem. Guarde o momento antes de ir embora.</div>
+      <div class="osl-modal-title">Sua sessão foi gravada!</div>
+      <div class="osl-modal-desc">Este momento foi capturado. Salve agora para acessar o vídeo depois.</div>
       <div class="osl-rec-grid" id="oslRecGrid">
         <div class="osl-rec-item" id="oslRec1" onclick="oslSelecionarGravacao('gravacao-simples','6.90',this)">
           <div class="osl-rec-info">
@@ -7718,6 +7730,10 @@
         <button class="osl-btn osl-btn-primary" id="oslSaveSubmit">Confirmar e pagar</button>
       </div>
       <div class="osl-status" id="oslSaveStatus"></div>
+      <div id="oslSaveDownload" style="display:none;margin:8px 0 4px;text-align:center">
+        <a id="oslSaveDownloadLink" href="#" target="_blank" rel="noopener"
+           style="color:#d4af37;font-weight:600;font-size:.95rem;text-decoration:underline">▶ Assistir / Baixar vídeo</a>
+      </div>
       <button class="osl-btn osl-btn-danger" id="oslSaveSair">Sair sem salvar</button>
     </div>
 
@@ -7993,6 +8009,16 @@
 
     // ---- Modal 4: Salvar Sessão ----
 
+    var oslSaveRef       = null;
+    var oslSaveEmailVal  = null;
+    var oslSavePollTimer = null;
+
+    function oslGetRoomCode() {
+      return (window._osl && window._osl.getRoomCode && window._osl.getRoomCode())
+        || (new URLSearchParams(window.location.search)).get("sala")
+        || localStorage.getItem("osl_sala") || "SL-0001";
+    }
+
     window.oslSelecionarGravacao = function (prodId, valor, el) {
       oslSaveProduto = { id: prodId, valor: valor };
       document.querySelectorAll(".osl-rec-item").forEach(function (i) {
@@ -8002,6 +8028,7 @@
       oslShowFields("oslSaveFields");
       oslPrefill("oslSaveNome", "oslSaveEmail");
       document.getElementById("oslSaveStatus").textContent = "";
+      document.getElementById("oslSaveDownload").style.display = "none";
       var btn = document.getElementById("oslSaveSubmit");
       btn.disabled = false;
       btn.textContent = "Confirmar e pagar";
@@ -8011,12 +8038,96 @@
       if (!oslSaveProduto) return;
       var v = oslValidate("oslSaveNome", "oslSaveEmail", "oslSaveStatus");
       if (!v) return;
-      await oslPay(v.nome, v.email, oslSaveProduto.id, oslSaveProduto.valor, "oslSaveStatus", this);
+
+      var statusEl = document.getElementById("oslSaveStatus");
+      var btn = this;
+      btn.disabled = true;
+      statusEl.textContent = "Criando pagamento...";
+
+      try {
+        var res = await fetch(OSL_BASE + "/criar-pagamento", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nome: v.nome, email: v.email,
+            produto: oslSaveProduto.id, valor: oslSaveProduto.valor,
+            roomId: oslGetRoomCode()
+          })
+        });
+        var data = await res.json();
+        if (data && data.ref && data.url) {
+          oslSaveRef      = data.ref;
+          oslSaveEmailVal = v.email;
+          localStorage.setItem("osl_checkout_nome",  v.nome);
+          localStorage.setItem("osl_checkout_email", v.email);
+          window.open(data.url, "_blank");
+          btn.textContent = "✓ Aguardando pagamento";
+          statusEl.textContent = "PIX aberto em nova aba. Aguardando confirmação...";
+          oslStartSavePoll();
+        } else {
+          statusEl.textContent = (data && (data.message || data.error)) || "Erro ao criar pagamento.";
+          btn.disabled = false;
+        }
+      } catch (e) {
+        statusEl.textContent = "Erro de conexão. Tente novamente.";
+        btn.disabled = false;
+      }
     });
 
-    document.getElementById("oslSaveSair").addEventListener("click", function () {
+    function oslStartSavePoll() {
+      var attempts = 0;
+      clearInterval(oslSavePollTimer);
+      oslSavePollTimer = setInterval(async function () {
+        if (!oslSaveRef) { clearInterval(oslSavePollTimer); return; }
+        attempts++;
+        if (attempts > 40) {
+          clearInterval(oslSavePollTimer);
+          document.getElementById("oslSaveStatus").textContent = "Tempo esgotado. Se já pagou, entre em contato.";
+          return;
+        }
+        try {
+          var r = await fetch(OSL_BASE + "/status-pagamento/" + encodeURIComponent(oslSaveRef));
+          var d = await r.json();
+          if (d.approved) {
+            clearInterval(oslSavePollTimer);
+            document.getElementById("oslSaveStatus").textContent = "Pagamento confirmado! Salvando vídeo...";
+            // Claim the recording (stop egress + get download URL)
+            var claimRes = await fetch(OSL_BASE + "/recording/claim", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                roomId: oslGetRoomCode(),
+                ref: oslSaveRef,
+                email: oslSaveEmailVal,
+                type: oslSaveProduto?.id || "gravacao-download"
+              })
+            });
+            var claimData = await claimRes.json();
+            if (claimData.ok && claimData.downloadUrl) {
+              document.getElementById("oslSaveStatus").textContent = "✅ Vídeo salvo com sucesso!";
+              var dlDiv  = document.getElementById("oslSaveDownload");
+              var dlLink = document.getElementById("oslSaveDownloadLink");
+              dlLink.href = claimData.downloadUrl;
+              dlDiv.style.display = "block";
+            } else {
+              document.getElementById("oslSaveStatus").textContent = "Vídeo em processamento. Você receberá por e-mail em breve.";
+            }
+          }
+        } catch (_) {}
+      }, 3000);
+    }
+
+    document.getElementById("oslSaveSair").addEventListener("click", async function () {
+      // Discard recording silently, then leave
+      try {
+        await fetch(OSL_BASE + "/recording/discard", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId: oslGetRoomCode() })
+        });
+      } catch (_) {}
+      clearInterval(oslSavePollTimer);
       oslCloseAll();
-      // Programmatic click com bypass — deixa o módulo processar o sair normalmente
       var lb = document.getElementById("leaveBtn");
       if (lb) {
         oslBypassLeave = true;
