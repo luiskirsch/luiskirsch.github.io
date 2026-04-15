@@ -772,44 +772,32 @@ body{
     <p class="section-sub">Salve o que aconteceu. Sessões assim não se repetem — e têm potencial viral.</p>
   </div>
 
-  <div class="recording-grid">
-    <div class="rec-card">
-      <span class="rec-icon">🎥</span>
-      <div class="rec-name">Simples</div>
-      <ul class="rec-features">
-        <li>Gravação da sessão completa</li>
-        <li>Disponível por 7 dias</li>
-        <li>Visualização online</li>
-      </ul>
-      <div class="rec-price">R$ 6,90</div>
-      <button class="rec-buy-btn" onclick="abrirCheckout('gravacao-simples','Gravação Simples','6.90')">Salvar ritual</button>
-    </div>
-
+  <div class="recording-grid" style="grid-template-columns:repeat(2,1fr);max-width:640px;margin-inline:auto;">
     <div class="rec-card rec-best">
-      <div class="rec-best-badge">Popular</div>
+      <div class="rec-best-badge">Sessão única</div>
       <span class="rec-icon">📥</span>
-      <div class="rec-name">Com Download</div>
+      <div class="rec-name">Download MP4</div>
       <ul class="rec-features">
-        <li>Gravação da sessão completa</li>
+        <li>Gravação completa da sessão</li>
         <li>Download em MP4 — HD</li>
         <li>Acesso permanente no link</li>
         <li>Compartilhe quando quiser</li>
       </ul>
-      <div class="rec-price">R$ 9,90</div>
-      <button class="rec-buy-btn" onclick="abrirCheckout('gravacao-download','Gravação + Download','9.90')">Salvar + baixar</button>
+      <div class="rec-price">R$ 6,90</div>
+      <button class="rec-buy-btn" onclick="abrirCheckout('gravacao-download','Gravação + Download','6.90')">Salvar + baixar</button>
     </div>
 
     <div class="rec-card">
-      <span class="rec-icon">✂️</span>
-      <div class="rec-name">Com Cortes</div>
+      <span class="rec-icon">♾️</span>
+      <div class="rec-name">Plano Mensal</div>
       <ul class="rec-features">
-        <li>Gravação + download em MP4</li>
-        <li>Cortes automáticos nos melhores momentos</li>
-        <li>Versão editada pronta para compartilhar</li>
-        <li>Alto potencial de viralização</li>
+        <li>Gravações ilimitadas por 30 dias</li>
+        <li>Download em MP4 — HD</li>
+        <li>Acesso permanente nos links</li>
+        <li>Ideal para anfitriões frequentes</li>
       </ul>
-      <div class="rec-price">R$ 14,90</div>
-      <button class="rec-buy-btn" onclick="abrirCheckout('gravacao-cortes','Gravação + Cortes','14.90')">Salvar + editar</button>
+      <div class="rec-price">R$ 14,90<small style="font-size:11px;font-weight:400;opacity:.6">/mês</small></div>
+      <button class="rec-buy-btn" onclick="abrirCheckout('gravacao-mensal','Plano Mensal','14.90')">Assinar plano</button>
     </div>
   </div>
 </section>
