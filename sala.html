@@ -1635,26 +1635,25 @@
 
     /* ── Chat Header ─────────────────────────── */
     .chatHeader{
-      display:flex;
+      /* grid garante que a coluna direita nunca transborda */
+      display:grid;
+      grid-template-columns:40px 1fr;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
+      gap:11px;
       padding:12px 20px;
       border-bottom:1px solid var(--line);
       background:rgba(255,255,255,.025);
+      overflow:hidden;          /* impede overflow antes do clip do card */
       position:relative;
       z-index:1;
     }
 
+    /* wrapper legado mantido no HTML mas agora é apenas passthrough */
     .chatHeaderLeft{
-      display:flex;
-      align-items:center;
-      gap:11px;
-      min-width:0;
+      display:contents; /* desaparece do layout, filhos viram grid children diretos */
     }
 
     .chatAvatar{
-      flex-shrink:0;
       width:40px;
       height:40px;
       border-radius:50%;
@@ -1666,6 +1665,11 @@
       color:rgba(215,176,107,.85);
     }
 
+    .chatHeaderInfo{
+      min-width:0;
+      overflow:hidden;
+    }
+
     .chatHeaderInfo h2{
       margin:0 0 2px;
       font-size:15px;
@@ -1673,12 +1677,9 @@
       letter-spacing:.01em;
       color:#f5ede1;
       font-family:inherit;
-    }
-
-    .chatHeaderInfo{
-      flex:1;
-      min-width:0;
+      white-space:nowrap;
       overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     .chatHeaderInfo p{
@@ -1688,7 +1689,6 @@
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      max-width:100%;
     }
 
     /* ── Mensagens ───────────────────────────── */
@@ -1782,6 +1782,7 @@
     /* ── Mensagem própria ────────────────────── */
     .message.me{
       align-self:flex-end;
+      margin-left:auto;  /* fallback mais robusto para right-align em coluna flex */
       background:linear-gradient(160deg, rgba(215,176,107,.22), rgba(175,135,72,.16));
       border:1px solid rgba(215,176,107,.20);
       border-bottom-right-radius:4px;
