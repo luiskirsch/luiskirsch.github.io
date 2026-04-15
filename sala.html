@@ -2403,6 +2403,17 @@
       box-shadow:0 0 0 2px rgba(215,176,107,.18);
     }
 
+    /* Avatares por imagem (Famosos) */
+    .avatarOption--img{
+      background-size:cover !important;
+      background-position:center !important;
+      font-size:0;
+    }
+    .avatarOption--img.active{
+      border-color:rgba(215,176,107,.85);
+      box-shadow:0 0 0 3px rgba(215,176,107,.30);
+    }
+
     /* Botão de foto própria */
     .avatarPhotoBtn{
       grid-column:1/-1;
@@ -4835,6 +4846,15 @@
               <button type="button" class="avatarOption" data-avatar="🃏">🃏</button>
               <button type="button" class="avatarOption" data-avatar="♟️">♟️</button>
 
+              <div class="avatarPickerLabel">Famosos</div>
+              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/hood.jpg"     title="Encapuzado"   style="background-image:url('img/avatars/hood.jpg')"></button>
+              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/actor1.jpg"   title="Personagem"   style="background-image:url('img/avatars/actor1.jpg')"></button>
+              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/actor2.jpg"   title="Personagem"   style="background-image:url('img/avatars/actor2.jpg')"></button>
+              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/mask.jpg"     title="La Casa de Papel" style="background-image:url('img/avatars/mask.jpg')"></button>
+              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/shelby.jpg"   title="Peaky Blinders"   style="background-image:url('img/avatars/shelby.jpg')"></button>
+              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/mirror.jpg"   title="Black Mirror"     style="background-image:url('img/avatars/mirror.jpg')"></button>
+              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/wednesday.jpg" title="Wednesday"       style="background-image:url('img/avatars/wednesday.jpg')"></button>
+
             </div>
           </div>
 
@@ -6542,7 +6562,15 @@
       avatarPicker.addEventListener("click", (e) => {
         const btn = e.target.closest(".avatarOption");
         if (!btn) return;
-        setAvatarSelection(btn.dataset.avatar);
+        if (btn.dataset.avatarImg) {
+          // Avatar por imagem preset (Famosos)
+          setAvatarPhoto(btn.dataset.avatarImg);
+          avatarPicker.querySelectorAll(".avatarOption--img").forEach(b =>
+            b.classList.toggle("active", b === btn));
+        } else {
+          avatarPicker.querySelectorAll(".avatarOption--img").forEach(b => b.classList.remove("active"));
+          setAvatarSelection(btn.dataset.avatar);
+        }
       });
     }
 
