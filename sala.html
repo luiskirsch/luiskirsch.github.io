@@ -6027,6 +6027,46 @@
       updateRitualButtons();
     }
 
+    /* ── Som de giro de carta ─────────────────────────────
+       Sintetizado via Web Audio: sem arquivos externos.
+       swoosh = ruído branco bandpass (papel rasgando o ar)
+       thud   = toque curto de membrana (carta pousando)
+    ──────────────────────────────────────────────────── */
+    function playCardFlip() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const sr = ctx.sampleRate;
+
+        // Swoosh — ruído branco filtrado, 110 ms
+        const swDur = 0.11;
+        const swBuf = ctx.createBuffer(1, sr * swDur | 0, sr);
+        const sd = swBuf.getChannelData(0);
+        for (let i = 0; i < sd.length; i++) {
+          const t = i / sd.length;
+          const env = t < 0.25 ? t / 0.25 : Math.pow(1 - t, 1.4);
+          sd[i] = (Math.random() * 2 - 1) * env;
+        }
+        const swSrc = ctx.createBufferSource();
+        swSrc.buffer = swBuf;
+        const bpf = ctx.createBiquadFilter();
+        bpf.type = "bandpass"; bpf.frequency.value = 2800; bpf.Q.value = 0.7;
+        const swG = ctx.createGain(); swG.gain.value = 0.28;
+        swSrc.connect(bpf); bpf.connect(swG); swG.connect(ctx.destination);
+        swSrc.start();
+
+        // Thud — oscilador de baixa frequência, percutido, 80 ms
+        const osc = ctx.createOscillator();
+        osc.type = "sine"; osc.frequency.value = 160;
+        const thG = ctx.createGain();
+        thG.gain.setValueAtTime(0.18, ctx.currentTime);
+        thG.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        osc.connect(thG); thG.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.08);
+
+        setTimeout(() => ctx.close(), 400);
+      } catch(e) { /* AudioContext não disponível — silencioso */ }
+    }
+
     function fireRevealAnimation(currentCard) {
       if (!ritualCardWrapEl || revealAnimating) {
         applyCardContent(currentCard);
@@ -6034,6 +6074,7 @@
       }
 
       revealAnimating = true;
+      playCardFlip();
       if (revealCardBtn) revealCardBtn.disabled = true;
 
       const isFirstReveal = cardFaceDown;
