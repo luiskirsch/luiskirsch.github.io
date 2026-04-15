@@ -2371,8 +2371,14 @@
 
     .avatarPicker{
       display:grid;
-      grid-template-columns:repeat(4, minmax(0,1fr));
-      gap:8px;
+      grid-template-columns:repeat(8, minmax(0,1fr));
+      gap:6px;
+    }
+
+    .avatarPickerLabel{
+      grid-column:1/-1;
+      font-size:.68rem; letter-spacing:.08em; text-transform:uppercase;
+      color:rgba(243,237,229,.35); margin-top:6px; margin-bottom:2px;
     }
 
     .avatarOption{
@@ -2380,19 +2386,49 @@
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.04);
       color:#fff;
-      min-height:48px;
-      border-radius:12px;
+      min-height:42px;
+      border-radius:10px;
       cursor:pointer;
-      font-size:22px;
+      font-size:20px;
       transition:background .12s ease, border-color .12s ease, transform .12s ease;
+      padding:0;
+      display:flex; align-items:center; justify-content:center;
     }
 
-    .avatarOption:hover{ background:rgba(255,255,255,.09); transform:scale(1.08); }
+    .avatarOption:hover{ background:rgba(255,255,255,.09); transform:scale(1.1); }
 
     .avatarOption.active{
       border-color:rgba(215,176,107,.55);
       background:rgba(215,176,107,.14);
       box-shadow:0 0 0 2px rgba(215,176,107,.18);
+    }
+
+    /* Botão de foto própria */
+    .avatarPhotoBtn{
+      grid-column:1/-1;
+      appearance:none;
+      border:1px dashed rgba(215,176,107,.35);
+      background:rgba(215,176,107,.06);
+      color:rgba(215,176,107,.8);
+      border-radius:10px;
+      cursor:pointer;
+      font-size:.75rem; font-weight:600; letter-spacing:.05em;
+      padding:10px;
+      transition:background .15s, border-color .15s;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .avatarPhotoBtn:hover{ background:rgba(215,176,107,.12); border-color:rgba(215,176,107,.6); }
+    .avatarPhotoBtn.active{
+      border-color:rgba(215,176,107,.85);
+      background:rgba(215,176,107,.18);
+    }
+
+    /* Preview de foto do usuário no avatar */
+    .profileAvatarLarge.has-photo{
+      background-image:var(--avatar-photo);
+      background-size:cover;
+      background-position:center;
+      font-size:0; /* esconde emoji/texto */
     }
 
     .profileEditorActions{ display:flex; gap:10px; flex-wrap:wrap; }
@@ -4742,23 +4778,63 @@
 
           <div class="profileField">
             <span>Avatar</span>
+            <input type="file" id="avatarPhotoInput" accept="image/*" style="display:none">
             <div class="avatarPicker" id="avatarPicker">
+
+              <button type="button" class="avatarPhotoBtn" id="avatarPhotoBtn">
+                📷 Usar minha foto
+              </button>
+
+              <div class="avatarPickerLabel">Místico</div>
               <button type="button" class="avatarOption" data-avatar="🔮">🔮</button>
               <button type="button" class="avatarOption" data-avatar="🕯️">🕯️</button>
               <button type="button" class="avatarOption" data-avatar="👁️">👁️</button>
-              <button type="button" class="avatarOption" data-avatar="🎭">🎭</button>
-              <button type="button" class="avatarOption" data-avatar="🐺">🐺</button>
-              <button type="button" class="avatarOption" data-avatar="🌙">🌙</button>
-              <button type="button" class="avatarOption" data-avatar="🦉">🦉</button>
-              <button type="button" class="avatarOption" data-avatar="⚡">⚡</button>
-              <button type="button" class="avatarOption" data-avatar="🃏">🃏</button>
-              <button type="button" class="avatarOption" data-avatar="🌀">🌀</button>
-              <button type="button" class="avatarOption" data-avatar="🔥">🔥</button>
               <button type="button" class="avatarOption" data-avatar="💀">💀</button>
-              <button type="button" class="avatarOption" data-avatar="🌿">🌿</button>
-              <button type="button" class="avatarOption" data-avatar="⚗️">⚗️</button>
-              <button type="button" class="avatarOption" data-avatar="🎪">🎪</button>
+              <button type="button" class="avatarOption" data-avatar="🌙">🌙</button>
               <button type="button" class="avatarOption" data-avatar="🧿">🧿</button>
+              <button type="button" class="avatarOption" data-avatar="🌀">🌀</button>
+              <button type="button" class="avatarOption" data-avatar="⚗️">⚗️</button>
+
+              <div class="avatarPickerLabel">Personagem</div>
+              <button type="button" class="avatarOption" data-avatar="🧙">🧙</button>
+              <button type="button" class="avatarOption" data-avatar="🧛">🧛</button>
+              <button type="button" class="avatarOption" data-avatar="🥷">🥷</button>
+              <button type="button" class="avatarOption" data-avatar="🦸">🦸</button>
+              <button type="button" class="avatarOption" data-avatar="🦹">🦹</button>
+              <button type="button" class="avatarOption" data-avatar="👻">👻</button>
+              <button type="button" class="avatarOption" data-avatar="🤖">🤖</button>
+              <button type="button" class="avatarOption" data-avatar="👾">👾</button>
+
+              <div class="avatarPickerLabel">Selvagem</div>
+              <button type="button" class="avatarOption" data-avatar="🐺">🐺</button>
+              <button type="button" class="avatarOption" data-avatar="🦁">🦁</button>
+              <button type="button" class="avatarOption" data-avatar="🐉">🐉</button>
+              <button type="button" class="avatarOption" data-avatar="🦊">🦊</button>
+              <button type="button" class="avatarOption" data-avatar="🦅">🦅</button>
+              <button type="button" class="avatarOption" data-avatar="🐍">🐍</button>
+              <button type="button" class="avatarOption" data-avatar="🐙">🐙</button>
+              <button type="button" class="avatarOption" data-avatar="🦋">🦋</button>
+
+              <div class="avatarPickerLabel">Poder</div>
+              <button type="button" class="avatarOption" data-avatar="🔥">🔥</button>
+              <button type="button" class="avatarOption" data-avatar="⚡">⚡</button>
+              <button type="button" class="avatarOption" data-avatar="💥">💥</button>
+              <button type="button" class="avatarOption" data-avatar="⚔️">⚔️</button>
+              <button type="button" class="avatarOption" data-avatar="👑">👑</button>
+              <button type="button" class="avatarOption" data-avatar="🛡️">🛡️</button>
+              <button type="button" class="avatarOption" data-avatar="🪄">🪄</button>
+              <button type="button" class="avatarOption" data-avatar="💎">💎</button>
+
+              <div class="avatarPickerLabel">Natureza & Arte</div>
+              <button type="button" class="avatarOption" data-avatar="🌊">🌊</button>
+              <button type="button" class="avatarOption" data-avatar="🌿">🌿</button>
+              <button type="button" class="avatarOption" data-avatar="🌺">🌺</button>
+              <button type="button" class="avatarOption" data-avatar="🍄">🍄</button>
+              <button type="button" class="avatarOption" data-avatar="❄️">❄️</button>
+              <button type="button" class="avatarOption" data-avatar="🎭">🎭</button>
+              <button type="button" class="avatarOption" data-avatar="🃏">🃏</button>
+              <button type="button" class="avatarOption" data-avatar="♟️">♟️</button>
+
             </div>
           </div>
 
@@ -5320,6 +5396,7 @@
     let openedProfileData = null;
     let selectedAvatarEmoji = "🔮";
     let selectedAvatarColor = "#342718";
+    let selectedAvatarPhoto = null; // base64 data URL quando o usuário sobe uma foto
     let selectedBgTheme = localStorage.getItem("osl_bg") || "default";
 
     let ritualDeck = [];
@@ -5773,9 +5850,13 @@
 
     function setAvatarSelection(emoji) {
       selectedAvatarEmoji = emoji || "🔮";
-      avatarPicker.querySelectorAll(".avatarOption").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.avatar === selectedAvatarEmoji);
-      });
+      if (avatarPicker) {
+        avatarPicker.querySelectorAll(".avatarOption").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.avatar === selectedAvatarEmoji);
+        });
+      }
+      // Selecionar emoji cancela a foto
+      if (selectedAvatarPhoto) setAvatarPhoto(null);
     }
 
     function setColorSelection(color) {
@@ -5785,6 +5866,59 @@
       row.querySelectorAll(".colorSwatch").forEach(sw => {
         sw.classList.toggle("colorSwatch--active", sw.dataset.color === selectedAvatarColor);
       });
+    }
+
+    // Aplica foto ou emoji no elemento do avatar (grande e FAB)
+    function applyAvatarDisplay(el, photoUrl, emoji, color) {
+      if (!el) return;
+      if (photoUrl) {
+        el.style.setProperty("--avatar-photo", `url('${photoUrl}')`);
+        el.classList.add("has-photo");
+        el.textContent = "";
+      } else {
+        el.style.removeProperty("--avatar-photo");
+        el.classList.remove("has-photo");
+        el.textContent = emoji || "🔮";
+        if (color) el.style.background = color;
+      }
+    }
+
+    // Comprime e redimensiona imagem para ≤ 100x100 antes de salvar
+    function compressAvatarImage(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          const SIZE = 120;
+          const canvas = document.createElement("canvas");
+          canvas.width = SIZE; canvas.height = SIZE;
+          const ctx = canvas.getContext("2d");
+          // Recorte quadrado centralizado
+          const s = Math.min(img.width, img.height);
+          const ox = (img.width  - s) / 2;
+          const oy = (img.height - s) / 2;
+          ctx.drawImage(img, ox, oy, s, s, 0, 0, SIZE, SIZE);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL("image/jpeg", 0.72));
+        };
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    function setAvatarPhoto(dataUrl) {
+      selectedAvatarPhoto = dataUrl;
+      const photoBtn = document.getElementById("avatarPhotoBtn");
+      if (photoBtn) {
+        photoBtn.classList.toggle("active", !!dataUrl);
+        photoBtn.textContent = dataUrl ? "✓ Foto selecionada — clique para trocar" : "📷 Usar minha foto";
+      }
+      // Desativa seleção de emoji quando há foto
+      if (dataUrl && avatarPicker) {
+        avatarPicker.querySelectorAll(".avatarOption").forEach(b => b.classList.remove("active"));
+      }
+      // Atualiza preview do avatar grande
+      applyAvatarDisplay(profileAvatarLarge, dataUrl, selectedAvatarEmoji, selectedAvatarColor);
     }
 
     const BG_THEMES = ["default","abismo","floresta","oceano","bruma","brasa","ambar","cristal","chama","veu","vinho"];
@@ -5847,7 +5981,15 @@
       editDisplayName.value = user.displayName || "";
       editUsername.value = user.username || "";
       editBio.value = user.bio || "";
-      setAvatarSelection(user.avatarEmoji || "🔮");
+      // Restaura foto ou emoji
+      selectedAvatarPhoto = user.avatarPhotoUrl || null;
+      const photoBtn = document.getElementById("avatarPhotoBtn");
+      if (photoBtn) {
+        photoBtn.classList.toggle("active", !!selectedAvatarPhoto);
+        photoBtn.textContent = selectedAvatarPhoto ? "✓ Foto selecionada — clique para trocar" : "📷 Usar minha foto";
+      }
+      if (!selectedAvatarPhoto) setAvatarSelection(user.avatarEmoji || "🔮");
+      else if (avatarPicker) avatarPicker.querySelectorAll(".avatarOption").forEach(b => b.classList.remove("active"));
       setColorSelection(user.avatarColor || "#342718");
     }
 
@@ -6148,17 +6290,16 @@
     }
 
     async function fillProfileUI(user, isSelfView) {
-      profileAvatarLarge.textContent = user.avatarEmoji || initials(user.displayName || "Jogador");
-      if (user.avatarColor) profileAvatarLarge.style.background = user.avatarColor;
+      applyAvatarDisplay(profileAvatarLarge, user.avatarPhotoUrl, user.avatarEmoji || initials(user.displayName || "Jogador"), user.avatarColor);
       // Aplica fundo salvo do próprio usuário
       if (isSelfView && user.bgTheme) {
         selectedBgTheme = user.bgTheme;
         localStorage.setItem("osl_bg", user.bgTheme);
         applyBgTheme(user.bgTheme);
       }
-      if (isSelfView && user.avatarEmoji) {
+      if (isSelfView) {
         const fab = document.getElementById("mobileProfileBtn");
-        if (fab) fab.textContent = user.avatarEmoji;
+        if (fab) applyAvatarDisplay(fab, user.avatarPhotoUrl, user.avatarEmoji, user.avatarColor);
       }
       profileNameEl.textContent = user.displayName || "Jogador";
       profileUsernameEl.textContent = `@${user.username || "jogador"}`;
@@ -6399,6 +6540,24 @@
       });
     }
 
+    // Botão "Usar minha foto"
+    const avatarPhotoBtn = document.getElementById("avatarPhotoBtn");
+    const avatarPhotoInput = document.getElementById("avatarPhotoInput");
+    if (avatarPhotoBtn && avatarPhotoInput) {
+      avatarPhotoBtn.addEventListener("click", () => avatarPhotoInput.click());
+      avatarPhotoInput.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          const dataUrl = await compressAvatarImage(file);
+          setAvatarPhoto(dataUrl);
+        } catch (err) {
+          console.error("Erro ao processar foto:", err);
+        }
+        avatarPhotoInput.value = ""; // permite re-selecionar o mesmo arquivo
+      });
+    }
+
     // Tab switcher
     const profTabsNav = document.getElementById("profTabs");
     if (profTabsNav) {
@@ -6497,11 +6656,15 @@
           const username = normalizeUsername(editUsername.value) || "jogador";
           const bio = editBio.value.trim().slice(0, 180);
 
+          const avatarUpdate = selectedAvatarPhoto
+            ? { avatarPhotoUrl: selectedAvatarPhoto, avatarEmoji: null }
+            : { avatarEmoji: selectedAvatarEmoji, avatarPhotoUrl: null };
+
           await updateDoc(userRef, {
             displayName,
             username,
             bio,
-            avatarEmoji: selectedAvatarEmoji,
+            ...avatarUpdate,
             avatarColor: selectedAvatarColor,
             bgTheme: selectedBgTheme,
             lastSeen: serverTimestamp()
@@ -6722,10 +6885,12 @@
         const div = document.createElement("div");
         div.className = "player";
         div.dataset.pid = player.id;
-        const avatarContent = player.avatarEmoji || initials(player.name);
-        const avatarStyle = player.avatarEmoji
-          ? `style="font-size:1.3em;background:${player.avatarColor || "#342718"}"`
-          : (player.avatarColor ? `style="background:${player.avatarColor}"` : "");
+        const avatarContent = player.avatarPhotoUrl ? "" : (player.avatarEmoji || initials(player.name));
+        const avatarStyle = player.avatarPhotoUrl
+          ? `style="background-image:url('${player.avatarPhotoUrl}');background-size:cover;background-position:center;font-size:0"`
+          : (player.avatarEmoji
+              ? `style="font-size:1.3em;background:${player.avatarColor || "#342718"}"`
+              : (player.avatarColor ? `style="background:${player.avatarColor}"` : ""));
 
         div.innerHTML = `
           <div class="playerLeft">
