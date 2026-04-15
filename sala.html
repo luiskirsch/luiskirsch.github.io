@@ -2388,7 +2388,26 @@
     .fxSwatch{
       width:auto;
       min-width:62px;
-      padding:0 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 14px;
+    }
+
+    /* O span de bgSwatch é absolute por padrão — aqui sobrescrevemos
+       para que o texto seja o elemento que dita a largura do swatch */
+    .cardStyleSwatch span:not(.lockIcon),
+    .fxSwatch span:not(.lockIcon){
+      position:static;
+      background:none;
+      padding:0;
+      white-space:nowrap;
+      font-size:9px;
+      font-weight:700;
+      letter-spacing:.07em;
+      text-transform:uppercase;
+      color:#fff;
+      text-shadow:0 1px 4px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.8);
     }
 
     /* ═══════════════════════════════════════
