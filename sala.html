@@ -9146,6 +9146,7 @@
     var mobileChatOverlay= document.getElementById("mobileChatOverlay");
     var mobileHistOverlay= document.getElementById("mobileHistoryOverlay");
     var mobileChatMsgs   = document.getElementById("mobileChatMessages");
+    var mobileChatBody   = mobileChatMsgs ? mobileChatMsgs.parentElement : null; // .mobileDrawerBody — é esse que tem overflow-y:auto
     var mobileHistList   = document.getElementById("mobileHistoryList");
     var mobileMsgInput   = document.getElementById("mobileMsgInput");
     var mobileSendBtn    = document.getElementById("mobileSendBtn");
@@ -9343,11 +9344,12 @@
     }
 
     function scrollChatToBottom(smooth) {
-      if (!mobileChatMsgs) return;
+      var el = mobileChatBody || mobileChatMsgs;
+      if (!el) return;
+      // double-rAF: garante que o browser pintou o novo conteúdo antes de medir scrollHeight
       requestAnimationFrame(function () {
-        mobileChatMsgs.scrollTo({
-          top: mobileChatMsgs.scrollHeight,
-          behavior: smooth ? "smooth" : "instant"
+        requestAnimationFrame(function () {
+          el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "instant" });
         });
       });
     }
@@ -9388,8 +9390,7 @@
         desktopMsgInput.value = mobileMsgInput.value;
         desktopSendBtn.click();
         mobileMsgInput.value = "";
-        // Aguarda o Firestore atualizar o desktopMessages antes de sincronizar
-        setTimeout(function () { syncChatMessages(true); }, 200);
+        mobileMsgInput.focus(); // mantém teclado aberto
       });
 
       mobileMsgInput.addEventListener("keydown", function (e) {
