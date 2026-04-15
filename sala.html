@@ -72,11 +72,15 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#080604">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>O SextoLugar — Sala</title>
 
   <style>
     html{
       visibility:visible;
+      background:#080604; /* preenche safe-areas (notch, home bar) com a cor do site */
     }
 
     :root{
@@ -121,7 +125,11 @@
     html::before{
       content:"";
       position:fixed;
-      inset:0;
+      /* Estende para cobrir safe-areas (notch iOS, barra inferior, barras laterais) */
+      top: calc(-1 * env(safe-area-inset-top, 0px));
+      right: calc(-1 * env(safe-area-inset-right, 0px));
+      bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
+      left: calc(-1 * env(safe-area-inset-left, 0px));
       z-index:-1;
       pointer-events:none;
       background:
