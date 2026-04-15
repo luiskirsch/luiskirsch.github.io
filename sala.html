@@ -6027,43 +6027,54 @@
       updateRitualButtons();
     }
 
-    /* ── Som de giro de carta ─────────────────────────────
-       Sintetizado via Web Audio: sem arquivos externos.
-       swoosh = ruído branco bandpass (papel rasgando o ar)
-       thud   = toque curto de membrana (carta pousando)
+    /* ── Som de carta sendo virada ───────────────────────
+       3 camadas sincronizadas:
+       1. SNAP   — estalo seco do papel sendo liberado (HPF >5 kHz)
+       2. RUSTLE — fricção do papel deslizando (BPF ~3.5 kHz)
+       3. LAND   — batida sutil ao pousar (sine glide 280→60 Hz)
     ──────────────────────────────────────────────────── */
     function playCardFlip() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const sr = ctx.sampleRate;
+        const t0 = ctx.currentTime;
 
-        // Swoosh — ruído branco filtrado, 110 ms
-        const swDur = 0.11;
-        const swBuf = ctx.createBuffer(1, sr * swDur | 0, sr);
-        const sd = swBuf.getChannelData(0);
-        for (let i = 0; i < sd.length; i++) {
-          const t = i / sd.length;
-          const env = t < 0.25 ? t / 0.25 : Math.pow(1 - t, 1.4);
-          sd[i] = (Math.random() * 2 - 1) * env;
+        function noiseBuf(dur, shapeFn) {
+          const buf = ctx.createBuffer(1, sr * dur | 0, sr);
+          const d = buf.getChannelData(0);
+          for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * shapeFn(i / d.length);
+          return buf;
         }
-        const swSrc = ctx.createBufferSource();
-        swSrc.buffer = swBuf;
-        const bpf = ctx.createBiquadFilter();
-        bpf.type = "bandpass"; bpf.frequency.value = 2800; bpf.Q.value = 0.7;
-        const swG = ctx.createGain(); swG.gain.value = 0.28;
-        swSrc.connect(bpf); bpf.connect(swG); swG.connect(ctx.destination);
-        swSrc.start();
 
-        // Thud — oscilador de baixa frequência, percutido, 80 ms
-        const osc = ctx.createOscillator();
-        osc.type = "sine"; osc.frequency.value = 160;
-        const thG = ctx.createGain();
-        thG.gain.setValueAtTime(0.18, ctx.currentTime);
-        thG.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-        osc.connect(thG); thG.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.08);
+        // 1. SNAP — estalo inicial, ataque instantâneo, decay rápido (12 ms)
+        const snSrc = ctx.createBufferSource();
+        snSrc.buffer = noiseBuf(0.012, t => Math.exp(-t * 22));
+        const snHPF = ctx.createBiquadFilter(); snHPF.type = "highpass"; snHPF.frequency.value = 5500;
+        const snPeak = ctx.createBiquadFilter(); snPeak.type = "peaking"; snPeak.frequency.value = 7000; snPeak.gain.value = 9; snPeak.Q.value = 2.5;
+        const snG = ctx.createGain(); snG.gain.value = 0.65;
+        snSrc.connect(snHPF); snHPF.connect(snPeak); snPeak.connect(snG); snG.connect(ctx.destination);
+        snSrc.start(t0);
 
-        setTimeout(() => ctx.close(), 400);
+        // 2. RUSTLE — papel rasgando o ar, BPF estreito em 3.5 kHz (55 ms)
+        const ruSrc = ctx.createBufferSource();
+        ruSrc.buffer = noiseBuf(0.055, t => (t < 0.06 ? t / 0.06 : 1) * Math.pow(1 - t, 2.5));
+        const ruBPF = ctx.createBiquadFilter(); ruBPF.type = "bandpass"; ruBPF.frequency.value = 3500; ruBPF.Q.value = 1.2;
+        const ruNotch = ctx.createBiquadFilter(); ruNotch.type = "notch"; ruNotch.frequency.value = 1200; ruNotch.Q.value = 1.0;
+        const ruG = ctx.createGain(); ruG.gain.value = 0.32;
+        ruSrc.connect(ruBPF); ruBPF.connect(ruNotch); ruNotch.connect(ruG); ruG.connect(ctx.destination);
+        ruSrc.start(t0 + 0.004);
+
+        // 3. LAND — batida ao pousar, sine com glide de frequência (50–120 ms)
+        const osc = ctx.createOscillator(); osc.type = "sine";
+        osc.frequency.setValueAtTime(280, t0 + 0.05);
+        osc.frequency.exponentialRampToValueAtTime(62, t0 + 0.12);
+        const ldG = ctx.createGain();
+        ldG.gain.setValueAtTime(0.14, t0 + 0.05);
+        ldG.gain.exponentialRampToValueAtTime(0.001, t0 + 0.12);
+        osc.connect(ldG); ldG.connect(ctx.destination);
+        osc.start(t0 + 0.05); osc.stop(t0 + 0.13);
+
+        setTimeout(() => ctx.close(), 500);
       } catch(e) { /* AudioContext não disponível — silencioso */ }
     }
 
