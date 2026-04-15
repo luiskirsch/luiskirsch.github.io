@@ -1639,7 +1639,7 @@
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      padding:12px 16px;
+      padding:12px 20px;
       border-bottom:1px solid var(--line);
       background:rgba(255,255,255,.025);
       position:relative;
@@ -1676,6 +1676,7 @@
     }
 
     .chatHeaderInfo{
+      flex:1;
       min-width:0;
       overflow:hidden;
     }
@@ -1687,6 +1688,7 @@
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      max-width:100%;
     }
 
     /* ── Mensagens ───────────────────────────── */
@@ -1694,8 +1696,8 @@
       min-height:0;
       overflow-y:auto;
       overflow-x:hidden;
-      /* padding lateral generoso para bolhas não tocarem o border-radius do card */
-      padding:14px 18px 6px;
+      /* padding lateral deve ultrapassar o border-radius:20px do card */
+      padding:14px 22px 6px;
       display:flex;
       flex-direction:column;
       gap:3px;
@@ -1815,7 +1817,7 @@
     /* ── Composer ────────────────────────────── */
     .chatComposer{
       border-top:1px solid var(--line);
-      padding:10px 12px 12px;
+      padding:10px 16px 14px;
       background:rgba(255,255,255,.015);
       position:relative;
       z-index:1;
