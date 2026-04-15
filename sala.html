@@ -9640,23 +9640,25 @@
 
     var lastStripKey = null; // null forces first build even when player list is empty
 
-    // Cria <video> com MediaStream própria — evita o bug iOS onde dois <video>
-    // com o mesmo srcObject ficam pretos (iOS só renderiza uma instância por MediaStream).
+    // Cria <video> para mobile — atributos iOS definidos ANTES do srcObject (obrigatório no Safari).
     function makeVideoEl(lkTrack, extraStyle) {
       var el = document.createElement("video");
-      var mst = lkTrack.mediaStreamTrack;
-      el.srcObject = mst ? new MediaStream([mst]) : null;
-      if (!el.srcObject && lkTrack.attach) {
-        // Fallback: usa attach() se mediaStreamTrack não estiver disponível
-        return lkTrack.attach();
-      }
-      el.muted = true;
-      el.autoplay = true;
-      el.playsInline = true;
+      // iOS Safari exige playsinline + muted ANTES de srcObject para autoplay inline
+      el.muted        = true;
+      el.autoplay     = true;
+      el.playsInline  = true;
       el.setAttribute("playsinline", "");
       el.setAttribute("webkit-playsinline", "");
       el.setAttribute("autoplay", "");
       if (extraStyle) el.style.cssText = extraStyle;
+      // Usa MediaStream isolada para evitar conflito com o tile desktop (display:none)
+      var mst = lkTrack.mediaStreamTrack;
+      if (mst && mst.readyState !== "ended") {
+        el.srcObject = new MediaStream([mst]);
+      } else {
+        // Fallback: usa mediaStream do track diretamente
+        el.srcObject = lkTrack.mediaStream || null;
+      }
       return el;
     }
 
