@@ -4656,10 +4656,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 20px;
-      overflow-y: auto;
-      padding: max(env(safe-area-inset-top), 32px) 24px max(env(safe-area-inset-bottom), 32px);
-      transition: opacity .5s ease;
+      gap: 14px;
+      overflow: hidden; /* sem rolagem */
+      padding: max(env(safe-area-inset-top), 20px) 24px max(env(safe-area-inset-bottom), 20px);
+      transition: opacity .45s ease;
     }
     #fullscreenGate::before {
       content: "";
@@ -4699,12 +4699,11 @@
     #fullscreenGateIosHint {
       position: relative;
       display: none;
-      margin-top: 20px;
-      padding: 14px 18px;
+      padding: 12px 16px;
       background: rgba(215,176,107,.07);
       border: 1px solid rgba(215,176,107,.2);
-      border-radius: 16px;
-      font-size: 13px;
+      border-radius: 14px;
+      font-size: 12px;
       color: rgba(243,237,229,.65);
       text-align: left;
       line-height: 1.5;
@@ -4714,28 +4713,27 @@
     .iosStep {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      padding: 7px 0;
+      gap: 9px;
+      padding: 5px 0;
     }
     .iosStep + .iosStep {
       border-top: 1px solid rgba(255,255,255,.06);
     }
     .iosStepNum {
       flex-shrink: 0;
-      width: 20px; height: 20px;
+      width: 18px; height: 18px;
       border-radius: 50%;
       background: rgba(215,176,107,.18);
       color: var(--gold);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       display: flex; align-items: center; justify-content: center;
       margin-top: 1px;
     }
     #fullscreenGateCta {
       position: relative;
-      margin-top: 24px;
       flex-shrink: 0;
-      padding: 13px 32px;
+      padding: 12px 32px;
       border: 1px solid rgba(215,176,107,.35);
       border-radius: 50px;
       background: rgba(215,176,107,.08);
@@ -10005,20 +10003,28 @@
       var cta = document.getElementById("fullscreenGateCta");
 
       function enterAndDismiss(e) {
+        e.preventDefault();
         e.stopPropagation();
+
         var el  = document.documentElement;
         var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
         if (req && !isIOS) req.call(el).catch(function () {});
         if (screen.orientation && screen.orientation.lock) {
           screen.orientation.lock("portrait").catch(function () {});
         }
+
+        // Bloqueia todo toque/click no body durante o fade — impede ativar o jogo abaixo
+        document.body.style.pointerEvents = "none";
         gate.classList.add("fading");
-        setTimeout(function () { gate.remove(); }, 520);
+        setTimeout(function () {
+          gate.remove();
+          document.body.style.pointerEvents = "";
+        }, 520);
       }
 
-      // Só o botão CTA fecha o gate
-      cta.addEventListener("click",      enterAndDismiss, { once: true });
-      cta.addEventListener("touchstart", enterAndDismiss, { once: true, passive: false });
+      // Só o botão CTA fecha o gate — usar touchend evita ghost click no jogo abaixo
+      cta.addEventListener("touchend", enterAndDismiss, { once: true, passive: false });
+      cta.addEventListener("click",    enterAndDismiss, { once: true });
     }());
 
     /* ===== ARENA MODE ===== */
