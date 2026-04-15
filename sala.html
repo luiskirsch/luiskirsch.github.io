@@ -6442,15 +6442,20 @@
         const photoUrl = data.avatarPhotoUrl || null;
         selectedAvatarPhoto = photoUrl;
         if (photoUrl) {
+          localStorage.setItem("osl_avatar_photo", photoUrl);
+          localStorage.removeItem("osl_avatar");
           const fab = document.getElementById("mobileProfileBtn");
           if (fab) applyAvatarDisplay(fab, photoUrl, emoji, color);
           updateDesktopProfileBtn(photoUrl, emoji);
-        } else if (emoji) {
-          selectedAvatarEmoji = emoji;
-          const fab = document.getElementById("mobileProfileBtn");
-          if (fab) fab.textContent = emoji;
-          updateDesktopProfileBtn(null, emoji);
-          localStorage.setItem("osl_avatar", emoji);
+        } else {
+          localStorage.removeItem("osl_avatar_photo");
+          if (emoji) {
+            selectedAvatarEmoji = emoji;
+            const fab = document.getElementById("mobileProfileBtn");
+            if (fab) fab.textContent = emoji;
+            updateDesktopProfileBtn(null, emoji);
+            localStorage.setItem("osl_avatar", emoji);
+          }
         }
         if (color) selectedAvatarColor = color;
       }
@@ -6747,6 +6752,12 @@
           const snap = await getDoc(userRef);
           openedProfileData = snap.data();
           await fillProfileUI(openedProfileData, true);
+          if (selectedAvatarPhoto) {
+            localStorage.setItem("osl_avatar_photo", selectedAvatarPhoto);
+            localStorage.removeItem("osl_avatar");
+          } else {
+            localStorage.removeItem("osl_avatar_photo");
+          }
           updateDesktopProfileBtn(selectedAvatarPhoto, selectedAvatarEmoji);
 
           // Sincroniza avatar com o documento do jogador na sala
@@ -8484,17 +8495,22 @@
     var desktopPlayerList= document.getElementById("playerList");
 
     // Dados do próprio jogador (para avatar na strip quando lista estiver vazia)
-    var selfName   = localStorage.getItem("osl_nome") || localStorage.getItem("osl_name") || "Você";
-    var selfAvatar = localStorage.getItem("osl_avatar") || "";
-    var selfColor  = localStorage.getItem("osl_color") || "";
+    var selfName       = localStorage.getItem("osl_nome") || localStorage.getItem("osl_name") || "Você";
+    var selfAvatar     = localStorage.getItem("osl_avatar") || "";
+    var selfAvatarPhoto= localStorage.getItem("osl_avatar_photo") || "";
+    var selfColor      = localStorage.getItem("osl_color") || "";
 
-    // Aplica o emoji dos botões de perfil imediatamente do cache local,
-    // antes de o Firestore responder — evita flash do boneco 👤
-    if (selfAvatar) {
+    // Aplica avatar imediatamente do cache local, antes do Firestore responder — evita flash do boneco 👤
+    {
       var _mobileBtn  = document.getElementById("mobileProfileBtn");
       var _desktopBtn = document.getElementById("myProfileBtn");
-      if (_mobileBtn)  _mobileBtn.textContent  = selfAvatar;
-      if (_desktopBtn) updateDesktopProfileBtn(null, selfAvatar);
+      if (selfAvatarPhoto) {
+        if (_mobileBtn) applyAvatarDisplay(_mobileBtn, selfAvatarPhoto, null, null);
+        if (_desktopBtn) updateDesktopProfileBtn(selfAvatarPhoto, null);
+      } else if (selfAvatar) {
+        if (_mobileBtn)  _mobileBtn.textContent = selfAvatar;
+        if (_desktopBtn) updateDesktopProfileBtn(null, selfAvatar);
+      }
     }
 
     var chatIsOpen = false;
