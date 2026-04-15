@@ -981,8 +981,11 @@
       let nomeSala = obterNomeSala();
       if (!nomeSala) nomeSala = "Sala de Espera";
 
-      const codigoSala = gerarCodigoSala();
-      codigoSalaEl.value = codigoSala;
+      let codigoSala = normalizarCodigoSala(codigoSalaEl.value);
+      if (!codigoSala) {
+        codigoSala = gerarCodigoSala();
+        codigoSalaEl.value = codigoSala;
+      }
 
       await entrarNaSala({ nomeJogador, codigoSala, nomeSala });
     });
