@@ -3936,12 +3936,27 @@
     .tableHead,
     .footerBar,
     .deckInfoBar,
-    .videoColLeft,
-    .videoColRight,
-    .videoSelfSlot,
     .videoLayer,
     .shell > .topbar {
       display: none !important;
+    }
+
+    /* iOS Safari para de decodificar tracks de elementos com display:none.
+       Mantém os tiles de vídeo do desktop "vivos" (minúsculos e transparentes)
+       para que o iOS continue decodificando os tracks — sem isso, os círculos
+       e o thumb mobile ficam pretos mesmo com new MediaStream([mst]). */
+    .videoColLeft,
+    .videoColRight,
+    .videoSelfSlot {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 1px !important;
+      height: 1px !important;
+      overflow: hidden !important;
+      opacity: 0.001 !important;
+      pointer-events: none !important;
+      z-index: -9999 !important;
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -9659,6 +9674,8 @@
         // Fallback: usa mediaStream do track diretamente
         el.srcObject = lkTrack.mediaStream || null;
       }
+      // iOS Safari às vezes precisa de load() explícito ao trocar srcObject
+      el.load();
       return el;
     }
 
