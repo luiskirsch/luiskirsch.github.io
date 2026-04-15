@@ -6716,7 +6716,13 @@
           openedProfileData = snap.data();
           await fillProfileUI(openedProfileData, true);
 
-          await setDoc(playerRef, { name: displayName }, { merge: true });
+          // Sincroniza avatar com o documento do jogador na sala
+          await setDoc(playerRef, {
+            name: displayName,
+            avatarEmoji: selectedAvatarPhoto ? null : (selectedAvatarEmoji || "🔮"),
+            avatarPhotoUrl: selectedAvatarPhoto || null,
+            avatarColor: selectedAvatarColor
+          }, { merge: true });
         } catch (error) {
           console.error(error);
           alert("Não foi possível salvar o perfil.");
@@ -6925,10 +6931,11 @@
           : (player.avatarEmoji
               ? `style="font-size:1.3em;background:${player.avatarColor || "#342718"}"`
               : (player.avatarColor ? `style="background:${player.avatarColor}"` : ""));
+        const photoAttr = player.avatarPhotoUrl ? `data-photo-url="${player.avatarPhotoUrl}"` : "";
 
         div.innerHTML = `
           <div class="playerLeft">
-            <div class="avatar" ${avatarStyle}>${avatarContent}</div>
+            <div class="avatar" ${avatarStyle} ${photoAttr}>${avatarContent}</div>
             <div class="playerMeta">
               <div class="playerName">${escapeHtml(player.name)}</div>
               <div class="playerRole">${player.isHost ? "Anfitrião" : "Participante"}</div>
@@ -7059,7 +7066,8 @@
         userId,
         name: playerName,
         isHost,
-        avatarEmoji: selectedAvatarEmoji || "🔮",
+        avatarEmoji: selectedAvatarPhoto ? null : (selectedAvatarEmoji || "🔮"),
+        avatarPhotoUrl: selectedAvatarPhoto || null,
         avatarColor: selectedAvatarColor || "#342718",
         joinedAt: serverTimestamp(),
         lastSeen: serverTimestamp()
@@ -7154,6 +7162,7 @@
               name: data.name || "Jogador",
               isHost: !!data.isHost,
               avatarEmoji: data.avatarEmoji || null,
+              avatarPhotoUrl: data.avatarPhotoUrl || null,
               avatarColor: data.avatarColor || null,
               joinedAt: data.joinedAt || null,
               lastSeen: data.lastSeen || null
@@ -8654,7 +8663,7 @@
     }
 
     // ── Player strip: sync from desktop player list ───────────────────────────
-    function makeAvatarWrap(initText, nameText, bg, isActive, isSelf, onClickFn, pid) {
+    function makeAvatarWrap(initText, nameText, bg, isActive, isSelf, onClickFn, pid, photoUrl) {
       var wrap = document.createElement("div");
       wrap.className = "mobileAvatarWrap";
 
@@ -8662,8 +8671,15 @@
       av.className = "mobileAvatar" +
         (isActive ? " mobileAvatar--active" : "") +
         (isSelf   ? " mobileAvatar--self"   : "");
-      if (bg) av.style.background = bg;
-      av.textContent = initText;
+      if (photoUrl) {
+        av.style.backgroundImage = "url('" + photoUrl + "')";
+        av.style.backgroundSize = "cover";
+        av.style.backgroundPosition = "center";
+        av.style.fontSize = "0";
+      } else {
+        if (bg) av.style.background = bg;
+        av.textContent = initText;
+      }
       av.dataset.pid = pid || "";
       av.dataset.initText = initText;
       if (onClickFn) av.addEventListener("click", onClickFn);
@@ -8753,9 +8769,10 @@
             var nameText = nameEl  ? nameEl.textContent.trim() : "Jogador";
             var isHost   = !!playerEl.querySelector(".playerHost");
             var pid      = playerEl.dataset.pid || "";
+            var photoUrl = avatarEl ? (avatarEl.dataset.photoUrl || "") : "";
             var wrap = makeAvatarWrap(initText, nameText, "", isHost, false, (function (el) {
               return function () { el.click(); };
-            })(playerEl), pid);
+            })(playerEl), pid, photoUrl);
             mobilePlayerStrip.appendChild(wrap);
           } else {
             // Slot vazio — círculo escuro com anel pulsante
