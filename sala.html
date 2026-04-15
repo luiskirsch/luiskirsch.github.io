@@ -9204,16 +9204,23 @@
     var histIsOpen = false;
     var unreadCount = 0;
 
-    // ── Reposiciona drawer acima do teclado virtual (iOS/Android) ─────────────
-    if (window.visualViewport) {
-      function adjustChatForKeyboard() {
-        if (!chatIsOpen) { mobileChatOverlay.style.paddingBottom = ""; return; }
-        var gap = window.innerHeight
-          - window.visualViewport.offsetTop
-          - window.visualViewport.height;
-        mobileChatOverlay.style.paddingBottom = Math.max(0, gap) + "px";
-        if (mobileChatMsgs) mobileChatMsgs.scrollTop = mobileChatMsgs.scrollHeight;
+    // ── Reposiciona overlay para coincidir com o visualViewport (teclado) ───────
+    // Abordagem: ajusta top+height do overlay para a área visível real.
+    // Mais confiável que paddingBottom em iOS Safari, Chrome Android, etc.
+    function adjustChatForKeyboard() {
+      if (!chatIsOpen) {
+        mobileChatOverlay.style.top = "";
+        mobileChatOverlay.style.height = "";
+        return;
       }
+      var vv = window.visualViewport || null;
+      if (vv) {
+        mobileChatOverlay.style.top    = vv.offsetTop + "px";
+        mobileChatOverlay.style.height = vv.height    + "px";
+      }
+      if (mobileChatMsgs) mobileChatMsgs.scrollTop = mobileChatMsgs.scrollHeight;
+    }
+    if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", adjustChatForKeyboard);
       window.visualViewport.addEventListener("scroll", adjustChatForKeyboard);
     }
@@ -9330,7 +9337,8 @@
     function closeChat() {
       chatIsOpen = false;
       mobileChatOverlay.classList.remove("open");
-      mobileChatOverlay.style.paddingBottom = "";
+      mobileChatOverlay.style.top    = "";
+      mobileChatOverlay.style.height = "";
       if (mobileMsgInput) mobileMsgInput.blur();
     }
 
