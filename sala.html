@@ -4515,7 +4515,8 @@
 
     .mobileDrawer {
       width: 100%;
-      max-height: 72svh;
+      height: 50svh;
+      max-height: 50svh;
       background: #100f0c;
       border-top: 1px solid rgba(255,255,255,.09);
       border-radius: 20px 20px 0 0;
@@ -9169,6 +9170,20 @@
     var histIsOpen = false;
     var unreadCount = 0;
 
+    // ── Reposiciona drawer acima do teclado virtual (iOS/Android) ─────────────
+    if (window.visualViewport) {
+      function adjustChatForKeyboard() {
+        if (!chatIsOpen) { mobileChatOverlay.style.paddingBottom = ""; return; }
+        var gap = window.innerHeight
+          - window.visualViewport.offsetTop
+          - window.visualViewport.height;
+        mobileChatOverlay.style.paddingBottom = Math.max(0, gap) + "px";
+        if (mobileChatMsgs) mobileChatMsgs.scrollTop = mobileChatMsgs.scrollHeight;
+      }
+      window.visualViewport.addEventListener("resize", adjustChatForKeyboard);
+      window.visualViewport.addEventListener("scroll", adjustChatForKeyboard);
+    }
+
     // ── Show/hide based on viewport ───────────────────────────────────────────
     function applyMobileMode(mobile) {
       mobileBar.style.display = mobile ? "flex" : "none";
@@ -9275,12 +9290,14 @@
       syncChatMessages();
       unreadCount = 0;
       mobileChatBadge.classList.remove("visible");
-      if (mobileMsgInput) mobileMsgInput.focus();
+      // Não foca automaticamente — evita teclado abrindo junto com o drawer
     }
 
     function closeChat() {
       chatIsOpen = false;
       mobileChatOverlay.classList.remove("open");
+      mobileChatOverlay.style.paddingBottom = "";
+      if (mobileMsgInput) mobileMsgInput.blur();
     }
 
     function syncChatMessages() {
