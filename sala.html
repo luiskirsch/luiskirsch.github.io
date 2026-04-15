@@ -133,77 +133,99 @@
 
     /* ── Temas de fundo da sala (gratuitos) ────────────────────────────── */
 
+    /* ── Temas de fundo — sobrescrevem as variáveis para que body e html::before mudem juntos ── */
+
     /* Abismo — azul noturno profundo */
-    html.bg-abismo{ background:#040608 !important; }
+    html.bg-abismo{
+      --bg-1:#010610; --bg-2:#030a18; --bg-3:#050e20;
+    }
     html.bg-abismo::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(56,100,200,.09), transparent 55%),
-      radial-gradient(55vw 45vh at 10% 30%, rgba(20,40,100,.05), transparent 60%),
-      linear-gradient(180deg, #040608 0%, #06090f 52%, #080d18 100%); }
+      radial-gradient(80vw 60vh at 50% 0%, rgba(56,100,230,.22), transparent 55%),
+      radial-gradient(55vw 45vh at 10% 30%, rgba(20,50,140,.12), transparent 60%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
 
     /* Floresta — verde esmeralda escuro */
-    html.bg-floresta{ background:#040806 !important; }
+    html.bg-floresta{
+      --bg-1:#010a04; --bg-2:#031008; --bg-3:#05160c;
+    }
     html.bg-floresta::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(40,160,80,.08), transparent 55%),
-      radial-gradient(55vw 45vh at 10% 30%, rgba(20,80,30,.05), transparent 60%),
-      linear-gradient(180deg, #040806 0%, #060d08 52%, #08120a 100%); }
+      radial-gradient(80vw 60vh at 50% 0%, rgba(30,180,70,.20), transparent 55%),
+      radial-gradient(55vw 45vh at 10% 30%, rgba(10,100,30,.12), transparent 60%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
 
     /* Oceano — azul teal abissal */
-    html.bg-oceano{ background:#030810 !important; }
+    html.bg-oceano{
+      --bg-1:#010810; --bg-2:#020e18; --bg-3:#031420;
+    }
     html.bg-oceano::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(0,160,180,.09), transparent 55%),
-      radial-gradient(55vw 45vh at 10% 30%, rgba(0,80,120,.06), transparent 60%),
-      linear-gradient(180deg, #030810 0%, #050c14 52%, #071018 100%); }
+      radial-gradient(80vw 60vh at 50% 0%, rgba(0,180,200,.20), transparent 55%),
+      radial-gradient(55vw 45vh at 10% 30%, rgba(0,100,140,.12), transparent 60%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
 
     /* Bruma — roxo crepuscular */
-    html.bg-bruma{ background:#060408 !important; }
+    html.bg-bruma{
+      --bg-1:#060210; --bg-2:#0a0318; --bg-3:#0e0420;
+    }
     html.bg-bruma::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(140,60,200,.09), transparent 55%),
-      radial-gradient(55vw 45vh at 10% 30%, rgba(80,30,120,.06), transparent 60%),
-      linear-gradient(180deg, #060408 0%, #0a070e 52%, #0e0a14 100%); }
+      radial-gradient(80vw 60vh at 50% 0%, rgba(160,60,240,.20), transparent 55%),
+      radial-gradient(55vw 45vh at 10% 30%, rgba(90,20,160,.12), transparent 60%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
 
     /* Brasa — vermelho brasa / crimson */
-    html.bg-brasa{ background:#080404 !important; }
+    html.bg-brasa{
+      --bg-1:#100202; --bg-2:#160404; --bg-3:#1c0606;
+    }
     html.bg-brasa::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(200,40,40,.09), transparent 55%),
-      radial-gradient(55vw 45vh at 10% 30%, rgba(120,20,20,.06), transparent 60%),
-      linear-gradient(180deg, #080404 0%, #0e0606 52%, #120808 100%); }
+      radial-gradient(80vw 60vh at 50% 0%, rgba(220,40,40,.22), transparent 55%),
+      radial-gradient(55vw 45vh at 10% 30%, rgba(140,20,20,.12), transparent 60%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
 
     /* ── Temas exclusivos de pacotes ── */
 
     /* Âmbar — dourado caloroso (Conexão) */
-    html.bg-ambar{ background:#090600 !important; }
+    html.bg-ambar{
+      --bg-1:#0e0800; --bg-2:#140e00; --bg-3:#1a1200;
+    }
     html.bg-ambar::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(220,150,20,.10), transparent 55%),
-      radial-gradient(55vw 45vh at 85% 25%, rgba(180,100,10,.06), transparent 60%),
-      linear-gradient(180deg, #090600 0%, #0e0a02 52%, #130d03 100%); }
+      radial-gradient(80vw 60vh at 50% 0%, rgba(240,170,20,.22), transparent 55%),
+      radial-gradient(55vw 45vh at 85% 25%, rgba(200,110,10,.12), transparent 60%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
 
     /* Cristal — frio aço prata (Verdades) */
-    html.bg-cristal{ background:#030508 !important; }
+    html.bg-cristal{
+      --bg-1:#01060e; --bg-2:#020a16; --bg-3:#030e1e;
+    }
     html.bg-cristal::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(140,180,220,.10), transparent 55%),
-      radial-gradient(55vw 45vh at 15% 35%, rgba(80,120,180,.07), transparent 60%),
-      linear-gradient(180deg, #030508 0%, #05070e 52%, #070a14 100%); }
+      radial-gradient(80vw 60vh at 50% 0%, rgba(160,200,255,.18), transparent 55%),
+      radial-gradient(55vw 45vh at 15% 35%, rgba(80,140,220,.10), transparent 60%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
 
     /* Chama — laranja intenso (Conflito) */
-    html.bg-chama{ background:#0a0400 !important; }
+    html.bg-chama{
+      --bg-1:#100500; --bg-2:#180800; --bg-3:#200a00;
+    }
     html.bg-chama::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(240,100,10,.12), transparent 55%),
-      radial-gradient(55vw 45vh at 80% 20%, rgba(200,60,0,.07), transparent 60%),
-      linear-gradient(180deg, #0a0400 0%, #120600 52%, #180800 100%); }
+      radial-gradient(80vw 60vh at 50% 0%, rgba(255,110,10,.24), transparent 55%),
+      radial-gradient(55vw 45vh at 80% 20%, rgba(220,70,0,.14), transparent 60%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
 
     /* Véu — roxo abissal (Segredos) */
-    html.bg-veu{ background:#040008 !important; }
+    html.bg-veu{
+      --bg-1:#06000e; --bg-2:#0a0018; --bg-3:#0e0022;
+    }
     html.bg-veu::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(180,20,220,.10), transparent 55%),
-      radial-gradient(55vw 45vh at 20% 40%, rgba(100,0,160,.07), transparent 60%),
-      linear-gradient(180deg, #040008 0%, #07000e 52%, #0a0014 100%); }
+      radial-gradient(80vw 60vh at 50% 0%, rgba(200,20,255,.20), transparent 55%),
+      radial-gradient(55vw 45vh at 20% 40%, rgba(120,0,200,.12), transparent 60%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
 
     /* Vinho — rosa escuro (Casais) */
-    html.bg-vinho{ background:#090004 !important; }
+    html.bg-vinho{
+      --bg-1:#0e0006; --bg-2:#14000a; --bg-3:#1a000e;
+    }
     html.bg-vinho::before{ background:
-      radial-gradient(80vw 60vh at 50% 0%, rgba(200,20,80,.10), transparent 55%),
-      radial-gradient(55vw 45vh at 75% 30%, rgba(140,10,50,.07), transparent 60%),
-      linear-gradient(180deg, #090004 0%, #0e0007 52%, #130009 100%); }
+      radial-gradient(80vw 60vh at 50% 0%, rgba(220,20,90,.22), transparent 55%),
+      radial-gradient(55vw 45vh at 75% 30%, rgba(160,10,60,.12), transparent 60%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%); }
 
     /* Vinheta — sem mix-blend-mode (muito custoso em GPU) */
     body::before{
@@ -5807,7 +5829,15 @@
     function applyBgTheme(theme) {
       const t = BG_THEMES.includes(theme) ? theme : "default";
       BG_THEMES.forEach(k => document.documentElement.classList.remove("bg-" + k));
-      if (t !== "default") document.documentElement.classList.add("bg-" + t);
+      if (t !== "default") {
+        document.documentElement.classList.add("bg-" + t);
+      } else {
+        // Restaura variáveis padrão que o tema pode ter sobrescrito
+        const s = document.documentElement.style;
+        s.removeProperty("--bg-1");
+        s.removeProperty("--bg-2");
+        s.removeProperty("--bg-3");
+      }
     }
 
     function refreshPackSwatches() {
