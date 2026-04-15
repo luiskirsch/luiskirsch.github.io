@@ -5894,6 +5894,25 @@
       });
     }
 
+    // Atualiza o botão "Perfil" do header desktop com foto ou emoji
+    function updateDesktopProfileBtn(photoUrl, emoji) {
+      const btn = document.getElementById("myProfileBtn");
+      if (!btn) return;
+      const badge = btn.querySelector(".badge") || btn.querySelector("#desktopProfileBadge");
+      if (photoUrl) {
+        btn.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = photoUrl;
+        img.style.cssText = "width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0";
+        btn.appendChild(img);
+        btn.appendChild(document.createTextNode("Perfil"));
+        if (badge) btn.appendChild(badge);
+      } else {
+        btn.textContent = (emoji || "👤") + " Perfil";
+        if (badge) btn.appendChild(badge);
+      }
+    }
+
     // Aplica foto ou emoji no elemento do avatar (grande e FAB)
     function applyAvatarDisplay(el, photoUrl, emoji, color) {
       if (!el) return;
@@ -6411,21 +6430,26 @@
         selectedAvatarColor = "#1f86d9";
         const fab = document.getElementById("mobileProfileBtn");
         if (fab) fab.textContent = "🔮";
-        const desktopBtn = document.getElementById("myProfileBtn");
-        if (desktopBtn) desktopBtn.textContent = "🔮 Perfil";
+        updateDesktopProfileBtn(null, "🔮");
         localStorage.setItem("osl_avatar", "🔮");
       } else {
         await updateDoc(userRef, {
           lastSeen: serverTimestamp()
         });
-        const emoji = snap.data().avatarEmoji;
-        const color = snap.data().avatarColor;
-        if (emoji) {
+        const data = snap.data();
+        const emoji = data.avatarEmoji;
+        const color = data.avatarColor;
+        const photoUrl = data.avatarPhotoUrl || null;
+        selectedAvatarPhoto = photoUrl;
+        if (photoUrl) {
+          const fab = document.getElementById("mobileProfileBtn");
+          if (fab) applyAvatarDisplay(fab, photoUrl, emoji, color);
+          updateDesktopProfileBtn(photoUrl, emoji);
+        } else if (emoji) {
           selectedAvatarEmoji = emoji;
           const fab = document.getElementById("mobileProfileBtn");
           if (fab) fab.textContent = emoji;
-          const desktopBtn = document.getElementById("myProfileBtn");
-          if (desktopBtn) desktopBtn.textContent = emoji + " Perfil";
+          updateDesktopProfileBtn(null, emoji);
           localStorage.setItem("osl_avatar", emoji);
         }
         if (color) selectedAvatarColor = color;
@@ -6723,6 +6747,7 @@
           const snap = await getDoc(userRef);
           openedProfileData = snap.data();
           await fillProfileUI(openedProfileData, true);
+          updateDesktopProfileBtn(selectedAvatarPhoto, selectedAvatarEmoji);
 
           // Sincroniza avatar com o documento do jogador na sala
           await setDoc(playerRef, {
@@ -8469,7 +8494,7 @@
       var _mobileBtn  = document.getElementById("mobileProfileBtn");
       var _desktopBtn = document.getElementById("myProfileBtn");
       if (_mobileBtn)  _mobileBtn.textContent  = selfAvatar;
-      if (_desktopBtn) _desktopBtn.textContent  = selfAvatar + " Perfil";
+      if (_desktopBtn) updateDesktopProfileBtn(null, selfAvatar);
     }
 
     var chatIsOpen = false;
