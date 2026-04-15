@@ -4548,6 +4548,40 @@
       flex-shrink: 0;
     }
 
+    /* Header do chat com botão X */
+    .chatDrawerHeader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 10px 0 8px;
+      flex-shrink: 0;
+    }
+    .chatDrawerHeader .mobileDrawerTitle {
+      padding: 0;
+    }
+    .chatDrawerClose {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px; height: 28px;
+      border: none;
+      background: rgba(255,255,255,.07);
+      border-radius: 50%;
+      color: rgba(255,255,255,.55);
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .chatDrawerClose:active {
+      background: rgba(255,255,255,.16);
+      color: rgba(255,255,255,.9);
+    }
+
     .mobileDrawerBody {
       flex: 1;
       overflow-y: auto;
@@ -9572,24 +9606,25 @@
     // Fallback polling — detecta track que já estava pronto antes do observer
     setInterval(mirrorSelfVideo, 800);
 
-    // ── Swipe down to close drawers ───────────────────────────────────────────
-    [mobileChatOverlay, mobileHistOverlay].forEach(function (overlay) {
-      var startY = 0;
-      var drawer = overlay.querySelector(".mobileDrawer");
-      if (!drawer) return;
+    // ── Botão X fecha o chat ──────────────────────────────────────────────────
+    var mobileChatCloseBtn = document.getElementById("mobileChatCloseBtn");
+    if (mobileChatCloseBtn) {
+      mobileChatCloseBtn.addEventListener("click", closeChat);
+    }
 
+    // ── Swipe down to close histórico (mantido apenas no histórico) ───────────
+    (function () {
+      var startY = 0;
+      var drawer = mobileHistOverlay.querySelector(".mobileDrawer");
+      if (!drawer) return;
       drawer.addEventListener("touchstart", function (e) {
         startY = e.touches[0].clientY;
       }, { passive: true });
-
       drawer.addEventListener("touchend", function (e) {
         var dy = e.changedTouches[0].clientY - startY;
-        if (dy > 60) {
-          if (overlay === mobileChatOverlay) closeChat();
-          else closeHistory();
-        }
+        if (dy > 60) closeHistory();
       }, { passive: true });
-    });
+    }());
 
     // ── Botão de perfil (agora na barra inferior) ────────────────────────────
     if (mobileProfileBtn) {
@@ -9689,8 +9724,10 @@
   <!-- ===== MOBILE CHAT OVERLAY ===== -->
   <div id="mobileChatOverlay" class="mobileOverlay" role="dialog" aria-modal="true" aria-label="Chat">
     <div class="mobileDrawer" id="mobileChatDrawer">
-      <div class="mobileDrawerHandle"></div>
-      <div class="mobileDrawerTitle">Chat</div>
+      <div class="chatDrawerHeader">
+        <div class="mobileDrawerTitle">Chat</div>
+        <button class="chatDrawerClose" id="mobileChatCloseBtn" aria-label="Fechar chat">&#x2715;</button>
+      </div>
       <div class="mobileDrawerBody">
         <!-- Messages cloned here by JS -->
         <div id="mobileChatMessages"></div>
