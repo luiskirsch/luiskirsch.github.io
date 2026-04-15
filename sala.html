@@ -4424,6 +4424,8 @@
 
     #mobileStartBtn {
       padding: 11px 6px;
+      width: 70% !important;      /* menor que os outros botões */
+      align-self: center;
       border-radius: 10px;
       background: linear-gradient(160deg, #e2bf7a, #c99a4b 60%, #a87832);
       color: #110c03;
@@ -10088,16 +10090,17 @@
         deactivateArenaMode();
       });
 
-      // Restaura modo arena se a sessão já estava ativa.
-      // No mobile o estado é gerenciado exclusivamente pelo Firebase listener,
-      // então não restauramos via sessionStorage — evita flash da mesa antes
-      // do ritual ser confirmado como iniciado.
       const isMobileDevice = window.matchMedia("(max-width: 640px)").matches ||
-        (window.matchMedia("(max-width: 960px)").matches &&
-         window.matchMedia("(orientation: landscape)").matches &&
-         window.matchMedia("(pointer: coarse)").matches);
+        (window.matchMedia("(pointer: coarse)").matches &&
+         window.matchMedia("(max-width: 960px)").matches);
 
-      if (!isMobileDevice && sessionStorage.getItem("osl_arena") === "1") {
+      if (isMobileDevice) {
+        // No mobile: sempre começa sem arenaMode.
+        // O Firebase listener é a única fonte de verdade — ativa quando started:true.
+        // Isso evita que sessões anteriores (sessionStorage) mostrem a mesa
+        // antes do ritual ser confirmado pelo Firestore.
+        deactivateArenaMode();
+      } else if (sessionStorage.getItem("osl_arena") === "1") {
         activateArenaMode();
       }
     })();
