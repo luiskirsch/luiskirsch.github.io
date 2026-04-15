@@ -2383,6 +2383,91 @@
       color:rgba(243,237,229,.35); margin-top:10px; margin-bottom:2px;
     }
 
+    /* ═══════════════════════════════════════
+       ESTILO DE CARTA
+    ═══════════════════════════════════════ */
+    html.card-dourado .cardBack,
+    html.card-dourado .ritualCardBack{
+      background:linear-gradient(180deg, #2a200c 0%, #140e04 100%);
+      border-color:rgba(215,176,107,.65);
+      box-shadow:0 12px 28px rgba(0,0,0,.45), 0 0 14px rgba(215,176,107,.14);
+    }
+    html.card-obsidiana .cardBack,
+    html.card-obsidiana .ritualCardBack{
+      background:linear-gradient(180deg, #08080c 0%, #040408 100%);
+      border-color:rgba(140,100,220,.30);
+      box-shadow:0 12px 28px rgba(0,0,0,.65), inset 0 0 24px rgba(140,100,220,.05);
+    }
+    html.card-pergaminho .cardBack,
+    html.card-pergaminho .ritualCardBack{
+      background:linear-gradient(180deg, #302414 0%, #201810 100%);
+      border-color:rgba(200,165,110,.40);
+      box-shadow:0 12px 28px rgba(0,0,0,.40);
+    }
+    html.card-neon .cardBack,
+    html.card-neon .ritualCardBack{
+      background:linear-gradient(180deg, #0a0614 0%, #04020e 100%);
+      border-color:rgba(120,70,240,.60);
+      box-shadow:0 12px 28px rgba(0,0,0,.65),
+                 0 0 18px rgba(120,70,240,.30),
+                 inset 0 0 14px rgba(120,70,240,.07);
+    }
+
+    /* ═══════════════════════════════════════
+       EFEITOS VISUAIS — layer fixo sobre tudo
+    ═══════════════════════════════════════ */
+    #visualFxLayer{
+      position:fixed; inset:0;
+      pointer-events:none; z-index:0;
+      overflow:hidden;
+    }
+
+    /* Partículas */
+    @keyframes fxParticleRise{
+      0%   { transform:translateY(0);    opacity:0; }
+      10%  { opacity:.7; }
+      90%  { opacity:.4; }
+      100% { transform:translateY(-100vh); opacity:0; }
+    }
+    html.effect-particulas #visualFxLayer::before{
+      content:'';
+      position:absolute; inset:-10%;
+      background-image:
+        radial-gradient(circle, rgba(215,176,107,.45) 1.5px, transparent 1.5px),
+        radial-gradient(circle, rgba(255,255,255,.18) 1px, transparent 1px);
+      background-size:55px 55px, 80px 80px;
+      background-position:0 0, 27px 27px;
+      animation:fxParticleRise 18s linear infinite;
+      opacity:.5;
+    }
+
+    /* Névoa */
+    @keyframes fxFogDrift{
+      0%,100%{ transform:translate(0,0)   scale(1);   opacity:.55; }
+      33%    { transform:translate(3%,2%) scale(1.04); opacity:.80; }
+      66%    { transform:translate(-2%,1%)scale(1.02); opacity:.65; }
+    }
+    html.effect-nevoa #visualFxLayer::before{
+      content:'';
+      position:absolute; inset:-20%;
+      background:
+        radial-gradient(ellipse 70% 40% at 30% 60%, rgba(80,100,160,.11) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 35% at 72% 35%, rgba(90,60,130,.09) 0%, transparent 70%);
+      animation:fxFogDrift 14s ease-in-out infinite;
+    }
+
+    /* Pulsos de luz */
+    @keyframes fxPulse{
+      0%,100%{ opacity:.18; transform:scale(.92); }
+      50%    { opacity:.55; transform:scale(1.06); }
+    }
+    html.effect-pulsos #visualFxLayer::before{
+      content:'';
+      position:absolute; inset:0;
+      background:radial-gradient(circle at 50% 48%, rgba(215,176,107,.18) 0%, transparent 62%);
+      animation:fxPulse 5s ease-in-out infinite;
+    }
+
     .profLabelFree{
       display:inline-block;
       font-size:10px; letter-spacing:.08em; text-transform:uppercase;
@@ -4549,6 +4634,7 @@
 </head>
 
 <body>
+  <div id="visualFxLayer" aria-hidden="true"></div>
   <main class="page">
     <div class="shell">
 
@@ -4921,6 +5007,55 @@
               <span>Vinho</span><span class="lockIcon">🔒</span></button>
           </div>
           <div id="bgPackHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
+        </div>
+
+        <!-- Estilo de Carta -->
+        <div class="profBgSection hidden" id="profCardSection">
+          <div class="profBgTitle">Estilo de Carta</div>
+          <div class="bgSwatchRow" id="cardStyleRow">
+            <div class="bgSwatchSection">Grátis</div>
+            <button type="button" class="bgSwatch cardStyleSwatch" data-style="padrao" title="Padrão"
+              style="background:linear-gradient(180deg,#261d18,#110d0a)">
+              <span>Padrão</span></button>
+
+            <div class="bgSwatchSection">Exclusivos · Estilo de Carta</div>
+            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="dourado" title="Dourado"
+              style="background:linear-gradient(180deg,#2a200c,#140e04);border-color:rgba(215,176,107,.55)">
+              <span>Dourado</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="obsidiana" title="Obsidiana"
+              style="background:linear-gradient(180deg,#08080c,#040408)">
+              <span>Obsidiana</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="pergaminho" title="Pergaminho"
+              style="background:linear-gradient(180deg,#302414,#201810);border-color:rgba(200,165,110,.40)">
+              <span>Pergaminho</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="neon" title="Neon"
+              style="background:linear-gradient(180deg,#0a0614,#04020e);border-color:rgba(120,70,240,.55)">
+              <span>Neon</span><span class="lockIcon">🔒</span></button>
+          </div>
+          <div id="cardStyleHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
+        </div>
+
+        <!-- Efeitos Visuais -->
+        <div class="profBgSection hidden" id="profFxSection">
+          <div class="profBgTitle">Efeitos Visuais</div>
+          <div class="bgSwatchRow" id="fxStyleRow">
+            <div class="bgSwatchSection">Grátis</div>
+            <button type="button" class="bgSwatch fxSwatch" data-fx="none" title="Sem efeito"
+              style="background:#080608">
+              <span>Nenhum</span></button>
+
+            <div class="bgSwatchSection">Exclusivos · Efeitos Visuais</div>
+            <button type="button" class="bgSwatch fxSwatch fxSwatch--paid" data-fx="particulas" title="Partículas"
+              style="background:radial-gradient(circle,rgba(215,176,107,.4) 1.5px,transparent 1.5px),#080606;background-size:10px 10px,auto">
+              <span>Partículas</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch fxSwatch fxSwatch--paid" data-fx="nevoa" title="Névoa"
+              style="background:radial-gradient(ellipse,rgba(80,100,160,.5),#080a12)">
+              <span>Névoa</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch fxSwatch fxSwatch--paid" data-fx="pulsos" title="Pulsos"
+              style="background:radial-gradient(circle,rgba(215,176,107,.3),#0a0806)">
+              <span>Pulsos</span><span class="lockIcon">🔒</span></button>
+          </div>
+          <div id="fxHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
         </div>
 
         <form class="profileEditor hidden" id="profileEditor">
@@ -6180,6 +6315,81 @@
       });
     }
 
+    /* ── Estilo de Carta ───────────────────────────────── */
+    const CARD_STYLES = ["padrao","dourado","obsidiana","pergaminho","neon"];
+    let selectedCardStyle = localStorage.getItem("osl_card_style") || "padrao";
+
+    function isCardStyleUnlocked(style) {
+      if (style === "padrao") return true;
+      const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
+      return compras.some(c => c.produto === "estilo-carta");
+    }
+
+    function applyCardStyle(style) {
+      const s = CARD_STYLES.includes(style) ? style : "padrao";
+      CARD_STYLES.forEach(k => document.documentElement.classList.remove("card-" + k));
+      if (s !== "padrao") document.documentElement.classList.add("card-" + s);
+    }
+
+    function refreshCardStyleSwatches() {
+      const row = document.getElementById("cardStyleRow");
+      if (!row) return;
+      const unlocked = isCardStyleUnlocked("dourado"); // todos pagos pelo mesmo produto
+      row.querySelectorAll(".cardStyleSwatch--paid").forEach(sw => {
+        sw.classList.toggle("bgSwatch--locked", !unlocked);
+        const lock = sw.querySelector(".lockIcon");
+        if (lock) lock.style.display = unlocked ? "none" : "";
+      });
+    }
+
+    function setCardStyleSelection(style) {
+      if (style !== "padrao" && !isCardStyleUnlocked(style)) return;
+      selectedCardStyle = CARD_STYLES.includes(style) ? style : "padrao";
+      const row = document.getElementById("cardStyleRow");
+      if (row) row.querySelectorAll(".cardStyleSwatch").forEach(sw =>
+        sw.classList.toggle("bgSwatch--active", sw.dataset.style === selectedCardStyle));
+      applyCardStyle(selectedCardStyle);
+    }
+
+    /* ── Efeitos Visuais ───────────────────────────────── */
+    const FX_STYLES = ["none","particulas","nevoa","pulsos"];
+    let selectedFx = localStorage.getItem("osl_fx") || "none";
+
+    function isFxUnlocked() {
+      const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
+      return compras.some(c => c.produto === "efeitos-visuais");
+    }
+
+    function applyVisualEffect(fx) {
+      const f = FX_STYLES.includes(fx) ? fx : "none";
+      FX_STYLES.forEach(k => document.documentElement.classList.remove("effect-" + k));
+      if (f !== "none") document.documentElement.classList.add("effect-" + f);
+    }
+
+    function refreshFxSwatches() {
+      const row = document.getElementById("fxStyleRow");
+      if (!row) return;
+      const unlocked = isFxUnlocked();
+      row.querySelectorAll(".fxSwatch--paid").forEach(sw => {
+        sw.classList.toggle("bgSwatch--locked", !unlocked);
+        const lock = sw.querySelector(".lockIcon");
+        if (lock) lock.style.display = unlocked ? "none" : "";
+      });
+    }
+
+    function setFxSelection(fx) {
+      if (fx !== "none" && !isFxUnlocked()) return;
+      selectedFx = FX_STYLES.includes(fx) ? fx : "none";
+      const row = document.getElementById("fxStyleRow");
+      if (row) row.querySelectorAll(".fxSwatch").forEach(sw =>
+        sw.classList.toggle("bgSwatch--active", sw.dataset.fx === selectedFx));
+      applyVisualEffect(selectedFx);
+    }
+
+    // Aplica na carga inicial
+    applyCardStyle(selectedCardStyle);
+    applyVisualEffect(selectedFx);
+
     function setBgSelection(theme) {
       if (BG_PACK_THEMES[theme] && !isThemeUnlocked(theme)) return; // bloqueado
       selectedBgTheme = BG_THEMES.includes(theme) ? theme : "default";
@@ -6541,6 +6751,36 @@
         }
       }
 
+      // Estilo de Carta
+      const profCardSection = document.getElementById("profCardSection");
+      if (profCardSection) {
+        profCardSection.classList.toggle("hidden", !isSelfView);
+        if (isSelfView) {
+          if (user.cardStyle) {
+            selectedCardStyle = user.cardStyle;
+            localStorage.setItem("osl_card_style", user.cardStyle);
+            applyCardStyle(user.cardStyle);
+          }
+          refreshCardStyleSwatches();
+          setCardStyleSelection(selectedCardStyle);
+        }
+      }
+
+      // Efeitos Visuais
+      const profFxSection = document.getElementById("profFxSection");
+      if (profFxSection) {
+        profFxSection.classList.toggle("hidden", !isSelfView);
+        if (isSelfView) {
+          if (user.visualEffect) {
+            selectedFx = user.visualEffect;
+            localStorage.setItem("osl_fx", user.visualEffect);
+            applyVisualEffect(user.visualEffect);
+          }
+          refreshFxSwatches();
+          setFxSelection(selectedFx);
+        }
+      }
+
       // Show/hide self-only tabs
       document.querySelectorAll(".profTab--selfOnly, .profPane--selfOnly").forEach(el => {
         el.style.display = isSelfView ? "" : "none";
@@ -6845,6 +7085,58 @@
       });
     }
 
+    // Card Style swatches
+    const cardStyleRow = document.getElementById("cardStyleRow");
+    let _cardHintTimer = null;
+    if (cardStyleRow) {
+      cardStyleRow.addEventListener("click", async (e) => {
+        const sw = e.target.closest(".cardStyleSwatch");
+        if (!sw) return;
+        const style = sw.dataset.style;
+        if (style !== "padrao" && !isCardStyleUnlocked(style)) {
+          const hint = document.getElementById("cardStyleHint");
+          if (hint) {
+            hint.textContent = "Exclusivo do produto Estilo de Carta";
+            hint.style.opacity = "1";
+            clearTimeout(_cardHintTimer);
+            _cardHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200);
+          }
+          return;
+        }
+        setCardStyleSelection(style);
+        localStorage.setItem("osl_card_style", style);
+        try {
+          await updateDoc(doc(db, "users", userId), { cardStyle: style, lastSeen: serverTimestamp() });
+        } catch(err) { /* silencioso */ }
+      });
+    }
+
+    // Visual Effect swatches
+    const fxStyleRow = document.getElementById("fxStyleRow");
+    let _fxHintTimer = null;
+    if (fxStyleRow) {
+      fxStyleRow.addEventListener("click", async (e) => {
+        const sw = e.target.closest(".fxSwatch");
+        if (!sw) return;
+        const fx = sw.dataset.fx;
+        if (fx !== "none" && !isFxUnlocked()) {
+          const hint = document.getElementById("fxHint");
+          if (hint) {
+            hint.textContent = "Exclusivo do produto Efeitos Visuais";
+            hint.style.opacity = "1";
+            clearTimeout(_fxHintTimer);
+            _fxHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200);
+          }
+          return;
+        }
+        setFxSelection(fx);
+        localStorage.setItem("osl_fx", fx);
+        try {
+          await updateDoc(doc(db, "users", userId), { visualEffect: fx, lastSeen: serverTimestamp() });
+        } catch(err) { /* silencioso */ }
+      });
+    }
+
     // Copy room code button (Sessão tab)
     const copyRoomCodeBtn = document.getElementById("copyRoomCodeBtn");
     if (copyRoomCodeBtn) {
@@ -6901,10 +7193,16 @@
             ...avatarUpdate,
             avatarColor: selectedAvatarColor,
             bgTheme: selectedBgTheme,
+            cardStyle: selectedCardStyle,
+            visualEffect: selectedFx,
             lastSeen: serverTimestamp()
           });
           localStorage.setItem("osl_bg", selectedBgTheme);
+          localStorage.setItem("osl_card_style", selectedCardStyle);
+          localStorage.setItem("osl_fx", selectedFx);
           applyBgTheme(selectedBgTheme);
+          applyCardStyle(selectedCardStyle);
+          applyVisualEffect(selectedFx);
           if (profileAvatarLarge && !selectedAvatarPhoto) profileAvatarLarge.style.background = selectedAvatarColor;
 
           if (openedProfileUserId === userId) {
