@@ -9218,7 +9218,7 @@
         mobileChatOverlay.style.top    = vv.offsetTop + "px";
         mobileChatOverlay.style.height = vv.height    + "px";
       }
-      if (mobileChatMsgs) mobileChatMsgs.scrollTop = mobileChatMsgs.scrollHeight;
+      scrollChatToBottom(false);
     }
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", adjustChatForKeyboard);
@@ -9342,10 +9342,20 @@
       if (mobileMsgInput) mobileMsgInput.blur();
     }
 
-    function syncChatMessages() {
+    function scrollChatToBottom(smooth) {
+      if (!mobileChatMsgs) return;
+      requestAnimationFrame(function () {
+        mobileChatMsgs.scrollTo({
+          top: mobileChatMsgs.scrollHeight,
+          behavior: smooth ? "smooth" : "instant"
+        });
+      });
+    }
+
+    function syncChatMessages(smooth) {
       if (!mobileChatMsgs || !desktopMessages) return;
       mobileChatMsgs.innerHTML = desktopMessages.innerHTML;
-      mobileChatMsgs.scrollTop = mobileChatMsgs.scrollHeight;
+      scrollChatToBottom(smooth);
     }
 
     mobileChatBtn.addEventListener("click", function () {
@@ -9362,7 +9372,7 @@
     if (desktopMessages) {
       var chatObs = new MutationObserver(function () {
         if (chatIsOpen) {
-          syncChatMessages();
+          syncChatMessages(true);   // smooth: desliza suave como WhatsApp
         } else {
           unreadCount++;
           mobileChatBadge.classList.add("visible");
@@ -9378,7 +9388,8 @@
         desktopMsgInput.value = mobileMsgInput.value;
         desktopSendBtn.click();
         mobileMsgInput.value = "";
-        setTimeout(syncChatMessages, 200);
+        // Aguarda o Firestore atualizar o desktopMessages antes de sincronizar
+        setTimeout(function () { syncChatMessages(true); }, 200);
       });
 
       mobileMsgInput.addEventListener("keydown", function (e) {
