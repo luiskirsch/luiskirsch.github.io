@@ -9887,22 +9887,7 @@
     <div id="fullscreenGateName">O Sexto Lugar</div>
     <div id="fullscreenGateCta">Toque para entrar</div>
     <div id="fullscreenGateIosHint">
-      <div id="fullscreenGateIosSteps">
-        <div class="iosStep">
-          <span class="iosStepNum">1</span>
-          <span>Toque no ícone <strong>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-bottom:2px"><polyline points="16 17 12 21 8 17"/><line x1="12" y1="21" x2="12" y2="3"/><polyline points="20 7 12 3 4 7"/></svg>
-          </strong> na barra inferior do Safari</span>
-        </div>
-        <div class="iosStep">
-          <span class="iosStepNum">2</span>
-          <span>Role para baixo e toque em<br><strong>"Adicionar à Tela de Início"</strong></span>
-        </div>
-        <div class="iosStep">
-          <span class="iosStepNum">3</span>
-          <span>Toque em <strong>"Adicionar"</strong> e abra pelo ícone criado</span>
-        </div>
-      </div>
+      <div id="fullscreenGateIosSteps"><!-- preenchido pelo JS --></div>
       <div id="fullscreenGateIosCta">Toque aqui para continuar sem tela cheia</div>
     </div>
   </div>
@@ -9956,34 +9941,60 @@
       var gate = document.getElementById("fullscreenGate");
       if (!gate) return;
 
-      // Só mostra no mobile
       var isMobile = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
       if (!isMobile) { gate.remove(); return; }
 
-      var isIOS       = /iphone|ipad|ipod/i.test(navigator.userAgent);
-      var isStandalone = window.navigator.standalone === true; // já é PWA
+      var ua           = navigator.userAgent;
+      var isIOS        = /iphone|ipad|ipod/i.test(ua);
+      var isStandalone = window.navigator.standalone === true;
+      var isGoogleApp  = /GSA\//i.test(ua);           // app Google / Google Search
+      var isChromeIOS  = /CriOS\//i.test(ua);         // Chrome no iPhone/iPad
+      var isFirefoxIOS = /FxiOS\//i.test(ua);         // Firefox no iPhone/iPad
+      var isInAppIOS   = isGoogleApp || isFirefoxIOS || (/Instagram|FBAN|FBAV|Twitter|Line|Snapchat/i.test(ua));
 
-      // iOS Safari não suporta requestFullscreen — mostra dica de homescreen
+      var SHARE_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-bottom:1px"><polyline points="16 17 12 21 8 17"/><line x1="12" y1="21" x2="12" y2="3"/><polyline points="20 7 12 3 4 7"/></svg>';
+
+      function step(n, html) {
+        return '<div class="iosStep"><span class="iosStepNum">' + n + '</span><span>' + html + '</span></div>';
+      }
+
       if (isIOS && !isStandalone) {
+        var stepsHtml = "";
+
+        if (isInAppIOS) {
+          // App Google, Instagram, etc — não suporta "Adicionar à Tela Inicial"
+          stepsHtml =
+            step(1, 'Toque nos <strong>3 pontos ⋯</strong> ou no ícone de compartilhar do app') +
+            step(2, 'Escolha <strong>"Abrir no Safari"</strong>') +
+            step(3, 'No Safari: toque em ' + SHARE_SVG + ' e depois em <strong>"Adicionar à Tela de Início"</strong>');
+          document.getElementById("fullscreenGateCta").textContent = "Continuar sem tela cheia";
+        } else if (isChromeIOS) {
+          // Chrome iOS
+          stepsHtml =
+            step(1, 'Toque nos <strong>3 pontos ⋯</strong> no canto inferior direito') +
+            step(2, 'Toque em <strong>"Adicionar à Tela de Início"</strong>') +
+            step(3, 'Toque em <strong>"Adicionar"</strong> e abra pelo ícone criado');
+          document.getElementById("fullscreenGateCta").textContent = "Continuar sem tela cheia";
+        } else {
+          // Safari (padrão)
+          stepsHtml =
+            step(1, 'Toque no ícone ' + SHARE_SVG + ' <strong>na barra inferior</strong> do Safari') +
+            step(2, 'Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong>') +
+            step(3, 'Toque em <strong>"Adicionar"</strong> e abra pelo ícone criado');
+          document.getElementById("fullscreenGateCta").textContent = "Continuar sem tela cheia";
+        }
+
+        document.getElementById("fullscreenGateIosSteps").innerHTML = stepsHtml;
         document.getElementById("fullscreenGateIosHint").style.display = "block";
-        document.getElementById("fullscreenGateCta").textContent = "Toque para continuar";
       }
 
       function enterAndDismiss() {
-        // Tenta fullscreen (Android/Chrome) — falha silenciosa no iOS Safari
         var el  = document.documentElement;
-        var req = el.requestFullscreen
-               || el.webkitRequestFullscreen
-               || el.mozRequestFullScreen
-               || el.msRequestFullscreen;
+        var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
         if (req && !isIOS) req.call(el).catch(function () {});
-
-        // Trava orientação em portrait se a API estiver disponível
         if (screen.orientation && screen.orientation.lock) {
           screen.orientation.lock("portrait").catch(function () {});
         }
-
-        // Fade out e remove
         gate.classList.add("fading");
         setTimeout(function () { gate.remove(); }, 520);
       }
