@@ -9978,7 +9978,14 @@
       if (!isMobile) { gate.remove(); return; }
 
       var ua           = navigator.userAgent;
-      var isIOS        = /iphone|ipad|ipod/i.test(ua);
+      // isIOS via UA + fallback para iPad iOS 13+ (que envia UA de Mac) e modo Desktop
+      var isIOS        = /iphone|ipad|ipod/i.test(ua) ||
+                         (navigator.maxTouchPoints > 1 && /Mac/.test(ua) && !window.MSStream);
+      // Fallback definitivo: se fullscreen API não existe, é iOS Safari
+      var el = document.documentElement;
+      var hasFullscreen = !!(el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen);
+      if (!hasFullscreen) isIOS = true;
+
       var isStandalone = window.navigator.standalone === true;
       var isGoogleApp  = /GSA\//i.test(ua);           // app Google / Google Search
       var isChromeIOS  = /CriOS\//i.test(ua);         // Chrome no iPhone/iPad
@@ -10011,8 +10018,8 @@
         } else {
           // Safari (padrão)
           stepsHtml =
-            step(1, 'Toque no ícone ' + SHARE_SVG + ' <strong>na barra inferior</strong> do Safari') +
-            step(2, 'Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong>') +
+            step(1, 'Toque no ícone ' + SHARE_SVG + ' <strong>na barra do Safari</strong> (superior ou inferior)') +
+            step(2, 'Role e toque em <strong>"Adicionar à Tela de Início"</strong>') +
             step(3, 'Toque em <strong>"Adicionar"</strong> e abra pelo ícone criado');
           document.getElementById("fullscreenGateCta").textContent = "Continuar sem tela cheia";
         }
