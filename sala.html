@@ -7850,8 +7850,21 @@
         } else {
           await deleteDoc(typingRef);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("[OSL] setTyping error:", e);
+      }
     }
+
+    // Bridge para o plain-script mobile: escuta evento customizado
+    document.addEventListener("osl:typing", (e) => {
+      if (e.detail && e.detail.active) {
+        setTyping(true);
+        scheduleTypingStop();
+      } else {
+        clearTimeout(typingTimer);
+        setTyping(false);
+      }
+    });
 
     function scheduleTypingStop() {
       clearTimeout(typingTimer);
@@ -9537,9 +9550,7 @@
         desktopMsgInput.value = mobileMsgInput.value;
         desktopSendBtn.click();
         mobileMsgInput.value = "";
-        if (window._osl && typeof window._osl.setTyping === "function") {
-          window._osl.setTyping(false);
-        }
+        document.dispatchEvent(new CustomEvent("osl:typing", { detail: { active: false } }));
         mobileMsgInput.focus(); // mantém teclado aberto
       });
 
@@ -9548,20 +9559,13 @@
       });
 
       mobileMsgInput.addEventListener("input", function () {
-        if (window._osl && typeof window._osl.setTyping === "function") {
-          if (mobileMsgInput.value.trim()) {
-            window._osl.setTyping(true);
-            window._osl.scheduleTypingStop();
-          } else {
-            window._osl.setTyping(false);
-          }
-        }
+        document.dispatchEvent(new CustomEvent("osl:typing", {
+          detail: { active: mobileMsgInput.value.trim().length > 0 }
+        }));
       });
 
       mobileMsgInput.addEventListener("blur", function () {
-        if (window._osl && typeof window._osl.setTyping === "function") {
-          window._osl.setTyping(false);
-        }
+        document.dispatchEvent(new CustomEvent("osl:typing", { detail: { active: false } }));
       });
     }
 
