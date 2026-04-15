@@ -5856,7 +5856,13 @@
         });
       }
       // Selecionar emoji cancela a foto
-      if (selectedAvatarPhoto) setAvatarPhoto(null);
+      if (selectedAvatarPhoto) {
+        selectedAvatarPhoto = null;
+        const photoBtn = document.getElementById("avatarPhotoBtn");
+        if (photoBtn) { photoBtn.classList.remove("active"); photoBtn.textContent = "📷 Usar minha foto"; }
+      }
+      // Atualiza preview imediatamente
+      applyAvatarDisplay(profileAvatarLarge, null, selectedAvatarEmoji, selectedAvatarColor);
     }
 
     function setColorSelection(color) {
