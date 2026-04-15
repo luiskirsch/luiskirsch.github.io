@@ -4656,10 +4656,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 20px;
       overflow-y: auto;
       padding: max(env(safe-area-inset-top), 32px) 24px max(env(safe-area-inset-bottom), 32px);
       transition: opacity .5s ease;
-      /* não é clicável no todo — só o botão CTA fecha */
     }
     #fullscreenGate::before {
       content: "";
@@ -4670,30 +4670,30 @@
         linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 60%, var(--bg-3) 100%);
       pointer-events: none;
     }
-    #fullscreenGate img {
-      width: 110px;
-      opacity: .92;
+    #fullscreenGateLogo {
       position: relative;
-      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    #fullscreenGate img {
+      width: 100px;
+      opacity: .92;
       filter: drop-shadow(0 0 28px rgba(215,176,107,.25));
     }
     #fullscreenGateName {
-      position: relative;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: .22em;
       text-transform: uppercase;
       color: var(--gold);
       opacity: .7;
-      margin-top: 4px;
-      flex-shrink: 0;
     }
     #fullscreenGateDesc {
       position: relative;
       font-size: 14px;
       color: rgba(243,237,229,.4);
-      margin-top: 28px;
-      flex-shrink: 0;
       letter-spacing: .03em;
     }
     #fullscreenGateIosHint {
@@ -9895,8 +9895,10 @@
 
   <!-- ===== FULLSCREEN GATE ===== -->
   <div id="fullscreenGate">
-    <img src="logo_oficial_fundo_transparente.png" alt="O SextoLugar">
-    <div id="fullscreenGateName">O SextoLugar</div>
+    <div id="fullscreenGateLogo">
+      <img src="logo_oficial_fundo_transparente.png" alt="O SextoLugar">
+      <div id="fullscreenGateName">O SextoLugar</div>
+    </div>
     <div id="fullscreenGateDesc">Para jogar em tela cheia</div>
     <div id="fullscreenGateIosHint">
       <div id="fullscreenGateIosSteps"><!-- preenchido pelo JS --></div>
