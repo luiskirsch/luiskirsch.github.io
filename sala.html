@@ -134,11 +134,9 @@
     /* ── Temas de fundo da sala (gratuitos) ────────────────────────────── */
 
     /* ── Temas com imagem real — overlay escuro preserva legibilidade do UI ── */
-    /* Overlay padrão para todos os temas com imagem */
-    html[class*="bg-"]::before{
-      background-size: cover !important;
-      background-position: center !important;
-      background-repeat: no-repeat !important;
+    /* Quando há um tema ativo, body fica transparente para a imagem no html::before aparecer */
+    html[class*="bg-"] body{
+      background: transparent !important;
     }
 
     /* Abismo — céu noturno estrelado */
