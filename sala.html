@@ -1822,6 +1822,27 @@
       display:none;
     }
 
+    /* ── Três pontinhos animados ─────────────────── */
+    .typingDots{
+      display:inline-flex;
+      align-items:center;
+      gap:3px;
+      vertical-align:middle;
+      margin-left:3px;
+    }
+    .typingDots span{
+      width:4px; height:4px;
+      border-radius:50%;
+      background:currentColor;
+      animation:typingBounce .9s ease-in-out infinite;
+    }
+    .typingDots span:nth-child(2){ animation-delay:.18s; }
+    .typingDots span:nth-child(3){ animation-delay:.36s; }
+    @keyframes typingBounce{
+      0%,60%,100%{ opacity:.25; transform:translateY(0); }
+      30%        { opacity:1;   transform:translateY(-4px); }
+    }
+
     /* ── Composer ────────────────────────────── */
     .chatComposer{
       border-top:1px solid var(--line);
@@ -7616,25 +7637,28 @@
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
+    const DOTS_HTML = `<span class="typingDots"><span></span><span></span><span></span></span>`;
+
     function renderTyping(names) {
-      if (!typingBarEl) return;
+      const mobileBar = document.getElementById("mobileTypingBar");
 
       if (!names.length) {
-        typingBarEl.textContent = "";
+        if (typingBarEl) typingBarEl.innerHTML = "";
+        if (mobileBar)  mobileBar.innerHTML  = "";
         return;
       }
 
-      if (names.length === 1) {
-        typingBarEl.textContent = `${names[0]} está digitando...`;
-        return;
-      }
+      let label;
+      if (names.length === 1)
+        label = `${names[0]} está digitando`;
+      else if (names.length === 2)
+        label = `${names[0]} e ${names[1]} estão digitando`;
+      else
+        label = `${names[0]}, ${names[1]} e mais ${names.length - 2} estão digitando`;
 
-      if (names.length === 2) {
-        typingBarEl.textContent = `${names[0]} e ${names[1]} estão digitando...`;
-        return;
-      }
-
-      typingBarEl.textContent = `${names[0]}, ${names[1]} e mais ${names.length - 2} estão digitando...`;
+      const html = label + DOTS_HTML;
+      if (typingBarEl) typingBarEl.innerHTML = html;
+      if (mobileBar)  mobileBar.innerHTML  = html;
     }
 
     async function ensureRoom() {
@@ -9396,6 +9420,13 @@
       mobileMsgInput.addEventListener("keydown", function (e) {
         if (e.key === "Enter") mobileSendBtn.click();
       });
+
+      mobileMsgInput.addEventListener("input", function () {
+        if (typeof setTyping === "function") {
+          setTyping(true);
+          scheduleTypingStop();
+        }
+      });
     }
 
     // ── History overlay ───────────────────────────────────────────────────────
@@ -9752,6 +9783,7 @@
         <!-- Messages cloned here by JS -->
         <div id="mobileChatMessages"></div>
       </div>
+      <div class="typingBar" id="mobileTypingBar"></div>
       <div class="chatComposer" style="padding:10px 16px max(14px,env(safe-area-inset-bottom)); border-top:1px solid rgba(255,255,255,.08); flex-shrink:0">
         <div class="composerRow" style="display:grid;grid-template-columns:1fr auto;gap:8px">
           <input class="input" id="mobileMsgInput" type="text" maxlength="240" placeholder="Digite uma mensagem..." autocomplete="off" style="font-size:16px">
