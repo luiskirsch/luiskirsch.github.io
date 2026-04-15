@@ -5898,11 +5898,19 @@
     function applyAvatarDisplay(el, photoUrl, emoji, color) {
       if (!el) return;
       if (photoUrl) {
-        el.style.setProperty("--avatar-photo", `url('${photoUrl}')`);
+        // Limpa background shorthand e seta backgroundImage diretamente
+        el.style.background = "none";
+        el.style.backgroundImage = `url('${photoUrl}')`;
+        el.style.backgroundSize = "cover";
+        el.style.backgroundPosition = "center";
+        el.style.fontSize = "0";
         el.classList.add("has-photo");
         el.textContent = "";
       } else {
-        el.style.removeProperty("--avatar-photo");
+        el.style.backgroundImage = "";
+        el.style.backgroundSize = "";
+        el.style.backgroundPosition = "";
+        el.style.fontSize = "";
         el.classList.remove("has-photo");
         el.textContent = emoji || "🔮";
         if (color) el.style.background = color;
@@ -6705,7 +6713,7 @@
           });
           localStorage.setItem("osl_bg", selectedBgTheme);
           applyBgTheme(selectedBgTheme);
-          if (profileAvatarLarge) profileAvatarLarge.style.background = selectedAvatarColor;
+          if (profileAvatarLarge && !selectedAvatarPhoto) profileAvatarLarge.style.background = selectedAvatarColor;
 
           if (openedProfileUserId === userId) {
             playerName = displayName;
