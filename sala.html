@@ -8505,11 +8505,28 @@
       var _mobileBtn  = document.getElementById("mobileProfileBtn");
       var _desktopBtn = document.getElementById("myProfileBtn");
       if (selfAvatarPhoto) {
-        if (_mobileBtn) applyAvatarDisplay(_mobileBtn, selfAvatarPhoto, null, null);
-        if (_desktopBtn) updateDesktopProfileBtn(selfAvatarPhoto, null);
+        // Mobile FAB
+        if (_mobileBtn) {
+          _mobileBtn.style.backgroundImage = "url('" + selfAvatarPhoto + "')";
+          _mobileBtn.style.backgroundSize  = "cover";
+          _mobileBtn.style.backgroundPosition = "center";
+          _mobileBtn.style.fontSize = "0";
+          _mobileBtn.textContent = "";
+        }
+        // Desktop "Perfil" button
+        if (_desktopBtn) {
+          var _badge = _desktopBtn.querySelector(".badge");
+          _desktopBtn.innerHTML = "";
+          var _img = document.createElement("img");
+          _img.src = selfAvatarPhoto;
+          _img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0";
+          _desktopBtn.appendChild(_img);
+          _desktopBtn.appendChild(document.createTextNode("Perfil"));
+          if (_badge) _desktopBtn.appendChild(_badge);
+        }
       } else if (selfAvatar) {
         if (_mobileBtn)  _mobileBtn.textContent = selfAvatar;
-        if (_desktopBtn) updateDesktopProfileBtn(null, selfAvatar);
+        if (_desktopBtn) _desktopBtn.textContent = selfAvatar + " Perfil";
       }
     }
 
