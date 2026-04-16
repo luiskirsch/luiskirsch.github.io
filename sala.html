@@ -9328,11 +9328,6 @@
     var mobileChatBadge  = document.getElementById("mobileChatBadge");
     var mobileVideoThumb = document.getElementById("mobileVideoThumb");
     var mobilePlayerStrip= document.getElementById("mobilePlayerStripInline");
-    // Sinaliza para video.js que estamos em mobile view.
-    // iOS Safari só decodifica um MediaStreamTrack em um único <video> de cada vez.
-    // Com esta flag, appendTrackToTile pula a criação de vídeo nos tiles desktop —
-    // os círculos (syncAvatarVideos) e o thumbnail (mirrorSelfVideo) são os únicos <video> por track.
-    if (mobileVideoThumb) window._oslMobileView = true;
     var mobileCardLabel  = document.getElementById("mobileCardLabel");
     var mobileProfileFab = mobileProfileBtn; // alias — FAB migrou para a barra inferior
 
@@ -9691,25 +9686,41 @@
         var lkTrack = window._oslGetRemoteVideoTrack ? window._oslGetRemoteVideoTrack(pid) : null;
 
         if (!lkTrack) {
-          // Sem vídeo — restaura iniciais se estava mostrando vídeo
           if (avatarEl._oslRemoteTrack) {
+            // Devolve o <video> ao tile desktop antes de limpar
+            var stolenVid = avatarEl.querySelector("video");
+            if (stolenVid) {
+              var desktopMedia = null;
+              document.querySelectorAll(".videoTile").forEach(function(t) {
+                if (t.dataset.identity === pid) desktopMedia = t.querySelector(".videoMedia");
+              });
+              if (desktopMedia) desktopMedia.appendChild(stolenVid);
+              else stolenVid.remove();
+            }
             avatarEl._oslRemoteTrack = null;
             avatarEl.innerHTML = avatarEl.dataset.initText || "?";
           }
           return;
         }
 
-        // Já exibindo este track — nada a fazer
-        if (avatarEl._oslRemoteTrack === lkTrack) return;
+        // Já exibindo este track e vídeo presente — nada a fazer
+        if (avatarEl._oslRemoteTrack === lkTrack && avatarEl.querySelector("video")) return;
+
+        // Pega o <video> já funcional do tile desktop (mesmo elemento, sem duplicar decoder)
+        var desktopVid = null;
+        document.querySelectorAll(".videoTile").forEach(function(t) {
+          if (t.dataset.identity === pid) {
+            var v = t.querySelector(".videoMedia video");
+            if (v) desktopVid = v;
+          }
+        });
+        if (!desktopVid) return; // tile ainda não tem vídeo — interval vai tentar de novo
+
         avatarEl._oslRemoteTrack = lkTrack;
-
         avatarEl.innerHTML = "";
-        var el = makeVideoEl(lkTrack, "width:100%;height:100%;object-fit:cover;border-radius:50%;display:block");
-        avatarEl.appendChild(el);
-
-        var doPlay = function() { el.play().catch(function(){}); };
-        el.addEventListener("loadedmetadata", doPlay, { once: true });
-        requestAnimationFrame(doPlay);
+        desktopVid.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:50%;display:block";
+        avatarEl.appendChild(desktopVid);
+        desktopVid.play().catch(function(){});
       });
     }
 
@@ -9778,8 +9789,6 @@
     syncPlayerStrip();
 
     // ── Self video thumbnail ──────────────────────────────────────────────────
-    // Usa o LiveKit track diretamente no thumbnail visível — evita clonar
-    // srcObject de um elemento display:none (que o browser não renderiza).
     var _mirrorTrack = null;
 
     function mirrorSelfVideo() {
@@ -9788,31 +9797,32 @@
       var lkTrack = window._oslLocalVideoTrack || null;
 
       if (!lkTrack) {
-        // Sem câmera ativa — mostra placeholder
         _mirrorTrack = null;
-        var existingVid = mobileVideoThumb.querySelector("video");
-        if (existingVid) { existingVid.remove(); }
+        // Devolve o <video> ao tile desktop antes de limpar
+        var stolenVid = mobileVideoThumb.querySelector("video");
+        if (stolenVid) {
+          var selfMedia = document.querySelector("#videoSelfSlot .videoMedia");
+          if (selfMedia) selfMedia.appendChild(stolenVid);
+          else stolenVid.remove();
+        }
         if (!mobileVideoThumb.querySelector(".mobileVideoOff")) {
           mobileVideoThumb.innerHTML = '<span class="mobileVideoOff">🎥</span>';
         }
         return;
       }
 
-      // Já temos um elemento para este track — nada a fazer
-      if (lkTrack === _mirrorTrack) return;
+      // Já exibindo este track e vídeo presente — nada a fazer
+      if (lkTrack === _mirrorTrack && mobileVideoThumb.querySelector("video")) return;
+
+      // Pega o <video> já funcional do tile desktop (mesmo elemento, sem duplicar decoder)
+      var desktopVid = document.querySelector("#videoSelfSlot .videoMedia video");
+      if (!desktopVid) return; // tile ainda não tem vídeo — interval vai tentar de novo
+
       _mirrorTrack = lkTrack;
-
-      // Limpa estado anterior
       mobileVideoThumb.innerHTML = "";
-
-      // MediaStream própria → evita o bug iOS onde dois <video> com mesmo srcObject ficam pretos
-      var el = makeVideoEl(lkTrack, "width:100%;height:100%;object-fit:cover;border-radius:inherit;transform:scaleX(-1)");
-      mobileVideoThumb.appendChild(el);
-
-      // Garante play assim que o elemento tiver dados
-      var doPlay = function() { el.play().catch(function(){}); };
-      el.addEventListener("loadedmetadata", doPlay, { once: true });
-      requestAnimationFrame(doPlay);
+      desktopVid.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:inherit;transform:scaleX(-1);display:block";
+      mobileVideoThumb.appendChild(desktopVid);
+      desktopVid.play().catch(function(){});
     }
 
     // Dispara quando video.js expõe o track
