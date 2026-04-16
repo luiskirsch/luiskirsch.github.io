@@ -112,6 +112,23 @@
 
     *{ box-sizing:border-box; }
 
+    /* Remove tap highlight e selecção de texto em toda a página — zero flash no toque */
+    html{
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Elimina o delay de 300ms de double-tap zoom em todos os elementos clicáveis */
+    button, a, label, select,
+    [role="button"], [tabindex],
+    .topActionBtn, .btn, .playerCard, .avatar,
+    .mobileAvatarWrap, .mobileAvatar, .mobileBottomBtn,
+    .videoTile, .ritualCard, .revealPanel {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
     html,body{
       margin:0;
       min-height:100%;
@@ -3706,7 +3723,7 @@
 
     html.arenaMode .exitArenaBtn{
       display:block;
-      animation:fadeInUp .4s .5s both;
+      animation:fadeInUp .25s .1s both;
     }
 
     @keyframes fadeInUp{
@@ -4676,7 +4693,7 @@
       gap: 14px;
       overflow: hidden; /* sem rolagem */
       padding: max(env(safe-area-inset-top), 20px) 24px max(env(safe-area-inset-bottom), 20px);
-      transition: opacity .45s ease;
+      transition: opacity .15s ease;
     }
     #fullscreenGate::before {
       content: "";
@@ -10086,7 +10103,7 @@
         setTimeout(function () {
           gate.remove();
           document.body.style.pointerEvents = "";
-        }, 520);
+        }, 200);
       }
 
       // Só o botão CTA fecha o gate — usar touchend evita ghost click no jogo abaixo
