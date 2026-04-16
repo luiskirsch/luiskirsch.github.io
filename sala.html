@@ -7837,14 +7837,16 @@
 
     async function ensureRoom() {
       const snap = await getDoc(roomRef);
+      const isClosed = snap.exists() && snap.data().status === "closed";
 
-      if (!snap.exists()) {
+      if (!snap.exists() || isClosed) {
         isHost = true;
 
         await setDoc(roomRef, {
           code: roomCode,
           name: roomName,
           status: "waiting",
+          arenaActive: false,
           hostId: participantId,
           hostName: playerName,
           createdAt: serverTimestamp(),
