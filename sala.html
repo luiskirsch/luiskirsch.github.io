@@ -7794,6 +7794,7 @@
 
     function renderTyping(names) {
       const mobileBar = document.getElementById("mobileTypingBar");
+      const wasEmpty  = !(typingBarEl && typingBarEl.firstChild);
 
       if (!names.length) {
         if (typingBarEl) typingBarEl.innerHTML = "";
@@ -7814,6 +7815,18 @@
       const html = label + DOTS_HTML;
       if (typingBarEl) typingBarEl.innerHTML = html;
       if (mobileBar)  mobileBar.innerHTML  = html;
+
+      // Ao aparecer pela primeira vez, sobe as mensagens para não tampar a última
+      if (wasEmpty) {
+        requestAnimationFrame(function() {
+          if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+          if (mobileBar) {
+            const mobileScroll = mobileBar.parentElement &&
+              mobileBar.parentElement.querySelector(".mobileDrawerBody");
+            if (mobileScroll) mobileScroll.scrollTop = mobileScroll.scrollHeight;
+          }
+        });
+      }
     }
 
     async function ensureRoom() {
