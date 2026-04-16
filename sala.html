@@ -9674,8 +9674,6 @@
         // Fallback: usa mediaStream do track diretamente
         el.srcObject = lkTrack.mediaStream || null;
       }
-      // iOS Safari às vezes precisa de load() explícito ao trocar srcObject
-      el.load();
       return el;
     }
 
@@ -9820,6 +9818,8 @@
     }
     // Fallback polling — detecta track que já estava pronto antes do observer
     setInterval(mirrorSelfVideo, 800);
+    // Polling para avatar videos de outros jogadores (guard interno evita recriar desnecessariamente)
+    setInterval(syncAvatarVideos, 1000);
 
     // ── Botão X fecha o chat ──────────────────────────────────────────────────
     var mobileChatCloseBtn = document.getElementById("mobileChatCloseBtn");
