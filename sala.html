@@ -9328,6 +9328,11 @@
     var mobileChatBadge  = document.getElementById("mobileChatBadge");
     var mobileVideoThumb = document.getElementById("mobileVideoThumb");
     var mobilePlayerStrip= document.getElementById("mobilePlayerStripInline");
+    // Sinaliza para video.js que estamos em mobile view.
+    // iOS Safari só decodifica um MediaStreamTrack em um único <video> de cada vez.
+    // Com esta flag, appendTrackToTile pula a criação de vídeo nos tiles desktop —
+    // os círculos (syncAvatarVideos) e o thumbnail (mirrorSelfVideo) são os únicos <video> por track.
+    if (mobileVideoThumb) window._oslMobileView = true;
     var mobileCardLabel  = document.getElementById("mobileCardLabel");
     var mobileProfileFab = mobileProfileBtn; // alias — FAB migrou para a barra inferior
 

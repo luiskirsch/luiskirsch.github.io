@@ -401,6 +401,12 @@ function clearAllVideoTiles() {
 }
 
 function appendTrackToTile(tile, track, participantIdentity) {
+  // On mobile, skip adding video elements to desktop tiles.
+  // iOS Safari can only decode a MediaStreamTrack in one <video> at a time.
+  // Mobile circles (syncAvatarVideos) and the mobile thumb (mirrorSelfVideo) own
+  // the sole <video> elements for each track on mobile.
+  if (track.kind === "video" && window._oslMobileView) return;
+
   const mediaWrap = getMediaWrap(tile);
   const existing = mediaWrap.querySelector(`[data-track-sid="${track.sid}"]`);
   if (existing) return;
