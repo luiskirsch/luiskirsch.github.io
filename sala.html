@@ -7968,12 +7968,16 @@
         startBtn.disabled = !isHost;
         startBtn.textContent = isHost ? (started ? "Ritual iniciado" : "Iniciar Ritual") : "Aguardando anfitrião";
 
-        // Arena Mode: ativa automaticamente quando o ritual começa
-        if (started) {
+        // Arena: somente o host vê o botão
+        const arenaBtn = document.getElementById("arenaBtn");
+        if (arenaBtn) arenaBtn.hidden = !isHost;
+
+        // Arena Mode: controlado pelo host via arenaActive no Firestore → sincroniza todos
+        if (data.arenaActive) {
           if (typeof window.activateArenaMode === "function") window.activateArenaMode();
         } else {
           if (typeof window.deactivateArenaMode === "function") window.deactivateArenaMode();
-          setRitualWaitingState();
+          if (!started) setRitualWaitingState();
         }
 
         await setDoc(playerRef, { isHost }, { merge: true });
@@ -8208,6 +8212,19 @@
     window._osl.getRoomCode      = () => roomCode;
     window._osl.setTyping        = (v) => setTyping(v);
     window._osl.scheduleTypingStop = () => scheduleTypingStop();
+
+    // Arena: host alterna estado global via Firestore
+    window._osl.toggleArena = async () => {
+      if (!isHost) return;
+      const snap = await getDoc(roomRef);
+      if (!snap.exists()) return;
+      await updateDoc(roomRef, { arenaActive: !snap.data().arenaActive });
+    };
+
+    window._osl.deactivateArenaForAll = async () => {
+      if (!isHost) return;
+      await updateDoc(roomRef, { arenaActive: false });
+    };
 
     window.addEventListener("pagehide", () => {
       try {
@@ -10178,21 +10195,29 @@
       window.activateArenaMode   = activateArenaMode;
       window.deactivateArenaMode = deactivateArenaMode;
 
-      // Botão do topbar
+      // Botão do topbar — só visível/funcional para o host (hidden definido em bindRoom)
       document.getElementById("arenaBtn")
-        ?.addEventListener("click", toggleArenaMode);
+        ?.addEventListener("click", () => {
+          window._osl?.toggleArena?.().catch?.(() => {});
+        });
 
-      // Botão de saída flutuante
+      // Botão de saída flutuante — só o host sai e sincroniza para todos
       document.getElementById("exitArenaBtn")
-        ?.addEventListener("click", deactivateArenaMode);
+        ?.addEventListener("click", () => {
+          if (window._osl?.getIsHost?.()) {
+            window._osl.deactivateArenaForAll?.().catch?.(() => {});
+          }
+        });
 
-      // ESC sai da imersão — apenas se nenhum modal estiver aberto
+      // ESC — só o host sai e sincroniza para todos
       document.addEventListener("keydown", (e) => {
         if (e.key !== "Escape") return;
         if (!html.classList.contains("arenaMode")) return;
         const profileModal = document.getElementById("profileModal");
         if (profileModal && !profileModal.classList.contains("hidden")) return;
-        deactivateArenaMode();
+        if (window._osl?.getIsHost?.()) {
+          window._osl.deactivateArenaForAll?.().catch?.(() => {});
+        }
       });
 
       const isMobileDevice = window.matchMedia("(max-width: 640px)").matches ||
