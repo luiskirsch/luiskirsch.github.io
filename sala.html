@@ -5605,7 +5605,7 @@
     const HEARTBEAT_MS = 15000;
     const ACTIVE_WINDOW_MS = 40000;
     const MAX_PLAYERS = 5;
-    const TYPING_ACTIVE_MS = 3500;
+    const TYPING_ACTIVE_MS = 1000;
 
     const roomNameEl = document.getElementById("roomName");
     const roomCodeEl = document.getElementById("roomCode");
@@ -7806,8 +7806,10 @@
         label = `${names[0]} está digitando`;
       else if (names.length === 2)
         label = `${names[0]} e ${names[1]} estão digitando`;
+      else if (names.length === 3)
+        label = `${names[0]}, ${names[1]} e ${names[2]} estão digitando`;
       else
-        label = `${names[0]}, ${names[1]} e mais ${names.length - 2} estão digitando`;
+        label = `${names[0]}, ${names[1]}, ${names[2]} e mais ${names.length - 3} estão digitando`;
 
       const html = label + DOTS_HTML;
       if (typingBarEl) typingBarEl.innerHTML = html;
