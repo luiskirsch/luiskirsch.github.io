@@ -8226,29 +8226,20 @@
       await updateDoc(roomRef, { arenaActive: false });
     };
 
-    window.addEventListener("pagehide", () => {
+    function sendLeaveBeacon() {
       try {
         navigator.sendBeacon?.(
           PanelBridge.baseUrl + "/game/player/leave",
           new Blob(
-            [JSON.stringify({ roomId: roomCode, playerId: participantId })],
+            [JSON.stringify({ roomId: roomCode, playerId: participantId, isHost })],
             { type: "application/json" }
           )
         );
       } catch (e) {}
-    });
+    }
 
-    window.addEventListener("beforeunload", () => {
-      try {
-        navigator.sendBeacon?.(
-          PanelBridge.baseUrl + "/game/player/leave",
-          new Blob(
-            [JSON.stringify({ roomId: roomCode, playerId: participantId })],
-            { type: "application/json" }
-          )
-        );
-      } catch (e) {}
-    });
+    window.addEventListener("pagehide",     sendLeaveBeacon);
+    window.addEventListener("beforeunload", sendLeaveBeacon);
 
     (async function init() {
       try {
