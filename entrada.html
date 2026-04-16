@@ -863,6 +863,38 @@
     window.PanelBridge = PanelBridge;
   </script>
 
+  <!-- Validação do nome da sala via Firestore -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+      authDomain: "osextolugar-game.firebaseapp.com",
+      projectId: "osextolugar-game",
+      storageBucket: "osextolugar-game.firebasestorage.app",
+      messagingSenderId: "947922328721",
+      appId: "1:947922328721:web:989522c99e16ab449f3330"
+    };
+
+    const db = getFirestore(initializeApp(firebaseConfig));
+
+    window.validarEntradaSala = async function (codigoSala, nomeSalaDigitado) {
+      const snap = await getDoc(doc(db, "salas", codigoSala));
+      if (!snap.exists()) return { ok: false, erro: "Sala não encontrada. Verifique o código." };
+
+      const data = snap.data();
+      if (data.status === "closed") return { ok: false, erro: "Esta sala foi encerrada." };
+
+      const armazenado = (data.name || "").trim().toLowerCase();
+      const informado  = nomeSalaDigitado.trim().toLowerCase();
+
+      if (armazenado !== informado) return { ok: false, erro: "Nome da sala incorreto." };
+
+      return { ok: true, nomeSala: data.name || nomeSalaDigitado };
+    };
+  </script>
+
   <script>
     const modalBack    = document.getElementById("modalBack");
     const btnRitual    = document.getElementById("btnRitual");
@@ -993,7 +1025,7 @@
     btnEntrarSala.addEventListener("click", async () => {
       const nomeJogador = obterNomeJogador();
       const codigoSala  = normalizarCodigoSala(codigoSalaEl.value);
-      let nomeSala      = obterNomeSala();
+      const nomeSala    = obterNomeSala();
 
       if (!nomeJogador) {
         setStatus("Digite seu nome para entrar na sala.", "err");
@@ -1007,10 +1039,29 @@
         return;
       }
 
-      codigoSalaEl.value = codigoSala;
-      if (!nomeSala) nomeSala = "Sala de Espera";
+      if (!nomeSala) {
+        setStatus("Digite o nome da sala para entrar.", "err");
+        nomeSalaEl.focus();
+        return;
+      }
 
-      await entrarNaSala({ nomeJogador, codigoSala, nomeSala });
+      codigoSalaEl.value = codigoSala;
+      setStatus("Verificando sala…", "");
+      btnEntrarSala.disabled = true;
+
+      try {
+        const resultado = await window.validarEntradaSala(codigoSala, nomeSala);
+        if (!resultado.ok) {
+          setStatus(resultado.erro, "err");
+          btnEntrarSala.disabled = false;
+          return;
+        }
+        await entrarNaSala({ nomeJogador, codigoSala, nomeSala: resultado.nomeSala });
+      } catch (err) {
+        console.error(err);
+        setStatus("Erro ao verificar a sala. Tente novamente.", "err");
+        btnEntrarSala.disabled = false;
+      }
     });
 
     window.addEventListener("pageshow", () => {
