@@ -7835,12 +7835,33 @@
       }
     }
 
+    async function clearRoomData() {
+      const [msgsSnap, playersSnap, typingSnap, histSnap] = await Promise.all([
+        getDocs(messagesRef),
+        getDocs(playersCollectionRef),
+        getDocs(typingCollectionRef),
+        getDocs(ritualHistoryRef)
+      ]);
+
+      const deletes = [
+        ...msgsSnap.docs.map(d => deleteDoc(d.ref)),
+        ...playersSnap.docs.map(d => deleteDoc(d.ref)),
+        ...typingSnap.docs.map(d => deleteDoc(d.ref)),
+        ...histSnap.docs.map(d => deleteDoc(d.ref)),
+        deleteDoc(ritualRef)
+      ];
+
+      await Promise.allSettled(deletes);
+    }
+
     async function ensureRoom() {
       const snap = await getDoc(roomRef);
       const isClosed = snap.exists() && snap.data().status === "closed";
 
       if (!snap.exists() || isClosed) {
         isHost = true;
+
+        if (isClosed) await clearRoomData();
 
         await setDoc(roomRef, {
           code: roomCode,
