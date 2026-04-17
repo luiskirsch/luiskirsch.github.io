@@ -2,131 +2,160 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Limbo Woods - O Menino Perfeito (SVG)</title>
+    <title>Rover - England 1909</title>
     <style>
-        :root { --main-bg: #070707; --main-black: #000; --glow-white: #fff; }
-        body { margin: 0; overflow: hidden; background: var(--main-bg); }
-        
-        #vignette {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
-            z-index: 50; pointer-events: none;
+        body { margin: 0; overflow: hidden; background: #222; font-family: 'Courier New', monospace; }
+        #ui {
+            position: absolute; bottom: 20px; left: 20px;
+            color: white; background: rgba(0,0,0,0.7);
+            padding: 15px; border-radius: 8px; pointer-events: none;
+            border: 1px solid #444; z-index: 100;
         }
-
-        #game-container {
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh;
-        }
-
-        svg {
-            width: 800px; height: 600px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            background: #111;
-        }
-
-        /* Animação dos Vagalumes (Poeira Atmosférica) */
-        @keyframes fireflyPulse {
-            0% { opacity: 0.2; transform: translateY(0) scale(1); }
-            50% { opacity: 0.8; transform: translateY(-10px) scale(1.1); }
-            100% { opacity: 0.2; transform: translateY(-20px) scale(1); }
-        }
-
-        .firefly {
-            opacity: 0.2;
-            animation: fireflyPulse 3s infinite ease-in-out;
-        }
-
-        /* Animação dos Olhos (Bloom Procedural) */
-        @keyframes eyeGlow {
-            0%, 100% { filter: blur(2px) brightness(1.2); opacity: 0.8; }
-            50% { filter: blur(4px) brightness(1.5); opacity: 1; }
-        }
-
-        #eye-left, #eye-right {
-            filter: blur(2px) brightness(1.2);
-            opacity: 0.8;
-            animation: eyeGlow 2s infinite ease-in-out;
-        }
-
+        .label { color: #aaa; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <div id="vignette"></div>
-    <div id="game-container">
-        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-            
-            <defs>
-                <filter id="bloom">
-                    <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
-                    <feMerge>
-                        <feMergeNode in="blur"/>
-                        <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                </filter>
-            </defs>
-
-            <rect width="800" height="600" fill="#111" />
-            
-            <linearGradient id="fogGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#111" />
-                <stop offset="100%" stop-color="#050505" />
-            </linearGradient>
-            <rect width="800" height="600" fill="url(#fogGradient)" opacity="0.8"/>
-
-            <circle class="firefly" cx="150" cy="150" r="1.5" fill="var(--glow-white)" style="animation-delay: 0s;"/>
-            <circle class="firefly" cx="250" cy="200" r="1.2" fill="var(--glow-white)" style="animation-delay: 1.5s;"/>
-            <circle class="firefly" cx="650" cy="300" r="1.8" fill="var(--glow-white)" style="animation-delay: 0.8s;"/>
-            <circle class="firefly" cx="550" cy="400" r="1.3" fill="var(--glow-white)" style="animation-delay: 2s;"/>
-
-            <g transform="translate(400, 300)">
-                <ellipse cx="0" cy="-60" rx="40" ry="50" fill="var(--main-black)" />
-                <rect x="-8" y="-30" width="16" height="30" rx="5" fill="var(--main-black)" />
-                
-                <circle id="eye-left" cx="-15" cy="-65" r="5" fill="var(--main-black)" stroke="var(--glow-white)" stroke-width="2" filter="url(#bloom)" />
-                <circle id="eye-right" cx="15" cy="-65" r="5" fill="var(--main-black)" stroke="var(--glow-white)" stroke-width="2" filter="url(#bloom)"/>
-
-                <rect x="-30" y="-10" width="60" height="80" rx="20" fill="var(--main-black)" />
-                <ellipse cx="0" cy="70" rx="30" ry="30" fill="var(--main-black)" />
-
-                <path d="M -25 -5 Q -35 25, -25 55" fill="none" stroke="var(--main-black)" stroke-width="8" stroke-linecap="round" />
-                <path d="M 25 -5 Q 35 25, 25 55" fill="none" stroke="var(--main-black)" stroke-width="8" stroke-linecap="round" />
-
-                <rect x="-15" y="80" width="10" height="40" rx="4" fill="var(--main-black)" />
-                <rect x="5" y="80" width="10" height="40" rx="4" fill="var(--main-black)" />
-                <rect x="-25" y="115" width="20" height="8" rx="3" fill="var(--main-black)" />
-                <rect x="5" y="115" width="20" height="8" rx="3" fill="var(--main-black)" />
-            </g>
-
-            <path d="M 0 550 C 150 500, 350 600, 500 550 C 650 500, 800 600, 800 600 V 600 H 0 Z" fill="var(--main-black)" />
-            
-            <path d="M 200 520 Q 205 500, 210 520" fill="none" stroke="var(--main-black)" stroke-width="2" />
-            <path d="M 220 525 Q 225 505, 230 525" fill="none" stroke="var(--main-black)" stroke-width="2" />
-            <path d="M 580 520 Q 585 500, 590 520" fill="none" stroke="var(--main-black)" stroke-width="2" />
-            <path d="M 600 525 Q 605 505, 610 525" fill="none" stroke="var(--main-black)" stroke-width="2" />
-            
-        </svg>
+    <div id="ui">
+        <div class="label">Local original: <span style="color:white">Aldeia de Oakhaven</span></div>
+        <div class="label">Ano: <span style="color:white">1909</span></div>
+        <div style="margin-top:5px">Mova Rover com WASD ou Setas</div>
     </div>
 
-<script>
-    // Script Sênior para Responsive (Opcional, mas recomendado para venda)
-    window.addEventListener('resize', () => {
-        const svg = document.querySelector('svg');
-        const container = document.getElementById('game-container');
-        const ratio = 800 / 600;
+    <script src="https://pixijs.download/release/pixi.min.js"></script>
+
+    <script>
+        // --- CONFIGURAÇÃO SÊNIOR DO PIXI ---
+        const app = new PIXI.Application({
+            width: window.innerWidth,
+            height: window.innerHeight,
+            backgroundColor: 0x1a2b1a, // Verde musgo base da floresta
+            antialias: true,
+            resolution: window.devicePixelRatio || 1,
+        });
+        document.body.appendChild(app.view);
+
+        // --- HIERARQUIA DE CENA (Containers) ---
+        const gameScene = new PIXI.Container();
+        const mapContainer = new PIXI.Container(); // Onde o mundo é desenhado
+        const uiContainer = new PIXI.Container();  // Camada de UI (Opcional no PIXI)
         
-        let width = container.clientWidth;
-        let height = container.clientHeight;
+        gameScene.addChild(mapContainer);
+        app.stage.addChild(gameScene);
+
+        // --- CONFIGURAÇÃO DO MUNDO ---
+        const WORLD_SIZE = 3000; // Tamanho do mapa (pixel)
+        const GRID_SIZE = 50;   // Tamanho base de tiles/construções
         
-        if (width / height > ratio) {
-            width = height * ratio;
-        } else {
-            height = width / ratio;
+        // --- DESENHANDO A CIDADE PROCEDURALMENTE (Simulando Texturas Reais) ---
+        function drawMap() {
+            const mapGraphics = new PIXI.Graphics();
+            mapContainer.addChild(mapGraphics);
+
+            // 1. Chão base (Terra batida misturada com grama)
+            mapGraphics.beginFill(0x2d3a2d);
+            mapGraphics.drawRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+            mapGraphics.endFill();
+
+            // 2. Estradas principais (Caminhos de terra)
+            mapGraphics.beginFill(0x8b7355, 0.8);
+            // Estrada Horizontal Principal
+            mapGraphics.drawRect(0, WORLD_SIZE / 2 - 25, WORLD_SIZE, 50);
+            // Estrada Vertical Principal
+            mapGraphics.drawRect(WORLD_SIZE / 2 - 25, 0, 50, WORLD_SIZE);
+            mapGraphics.endFill();
+
+            // 3. Construções da Aldeia (Marrom/Cinza - Palha/Pedra)
+            const buildingCoords = [
+                {x: 1300, y: 1300}, {x: 1400, y: 1300}, // Casas perto do centro
+                {x: 1550, y: 1300}, {x: 1650, y: 1300},
+                {x: 1300, y: 1550}, {x: 1400, y: 1550},
+                {x: 1550, y: 1550}, {x: 1650, y: 1550},
+                // Igreja/Prefeitura (Maior)
+                {x: 1450, y: 1400, w: 100, h: 100}
+            ];
+
+            mapGraphics.beginFill(0x5d4037); // Cor de madeira escura
+            buildingCoords.forEach(c => {
+                const w = c.w || GRID_SIZE;
+                const h = c.h || GRID_SIZE;
+                mapGraphics.drawRect(c.x, c.y, w, h);
+            });
+            mapGraphics.endFill();
+
+            // Telhados (Cinza)
+            mapGraphics.beginFill(0x424242);
+            buildingCoords.forEach(c => {
+                const w = c.w || GRID_SIZE;
+                const h = c.h || GRID_SIZE;
+                mapGraphics.drawRect(c.x + 5, c.y + 5, w - 10, h - 10);
+            });
+            mapGraphics.endFill();
+
+
+            // 4. Árvores e Vegetação (Círculos verdes densos)
+            mapGraphics.beginFill(0x0d1f0d, 0.9);
+            for (let i = 0; i < 200; i++) {
+                const x = Math.random() * WORLD_SIZE;
+                const y = Math.random() * WORLD_SIZE;
+                // Não colocar árvores no centro da cidade/estradas
+                if (x > 1200 && x < 1800 && y > 1200 && y < 1800) continue;
+                
+                const radius = 10 + Math.random() * 20;
+                mapGraphics.drawCircle(x, y, radius);
+            }
+            mapGraphics.endFill();
         }
+
+        drawMap();
+
+        // --- O JOGADOR (ROVER) ---
+        const rover = new PIXI.Graphics();
+        rover.beginFill(0x3498db); // Azul
+        rover.drawCircle(0, 0, 10); // Raio 10
+        rover.endFill();
         
-        svg.style.width = width + 'px';
-        svg.style.height = height + 'px';
-    });
-</script>
+        // Posição inicial no centro da aldeia
+        rover.x = WORLD_SIZE / 2;
+        rover.y = WORLD_SIZE / 2;
+        
+        mapContainer.addChild(rover);
+
+
+        // --- CONTROLES E MOVIMENTO ---
+        const keys = {};
+        const speed = 5;
+
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        // --- GAME LOOP (60 FPS) ---
+        app.ticker.add((delta) => {
+            // Movimento do Rover
+            if (keys['ArrowUp'] || keys['KeyW']) rover.y -= speed * delta;
+            if (keys['ArrowDown'] || keys['KeyS']) rover.y += speed * delta;
+            if (keys['ArrowLeft'] || keys['KeyA']) rover.x -= speed * delta;
+            if (keys['ArrowRight'] || keys['KeyD']) rover.x += speed * delta;
+
+            // Limites do Mundo (Colisão com a borda do mapa)
+            rover.x = Math.max(10, Math.min(WORLD_SIZE - 10, rover.x));
+            rover.y = Math.max(10, Math.min(WORLD_SIZE - 10, rover.y));
+
+            // --- LÓGICA DA CÂMERA (Seguir o Player) ---
+            // Centraliza a câmera no Rover
+            gameScene.x = -rover.x + app.screen.width / 2;
+            gameScene.y = -rover.y + app.screen.height / 2;
+
+            // Limites da Câmera (Não mostrar além da borda do mapa)
+            gameScene.x = Math.min(0, Math.max(-WORLD_SIZE + app.screen.width, gameScene.x));
+            gameScene.y = Math.min(0, Math.max(-WORLD_SIZE + app.screen.height, gameScene.y));
+        });
+
+        // Ajuste de janela (Responsive Sênior)
+        window.addEventListener('resize', () => {
+            app.renderer.resize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
 </body>
 </html>
