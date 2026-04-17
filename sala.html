@@ -1609,25 +1609,59 @@
     .topMeta__xp{
       display:inline-flex;
       align-items:center;
-      gap:7px;
-      font-size:15px;
+      gap:8px;
+      font-size:13px;
       color:#efe5d6;
+    }
+    .topMeta__xpLevel{
+      font-weight:700;
+      font-size:14px;
+      color:#f0e6d0;
+      letter-spacing:.02em;
+      white-space:nowrap;
+    }
+    .topMeta__xpBarWrap{
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      gap:2px;
     }
     .topMeta__xpBar{
       display:inline-block;
-      width:64px;
-      height:4px;
-      background:rgba(255,255,255,.1);
+      width:90px;
+      height:6px;
+      background:rgba(255,255,255,.08);
       border-radius:999px;
       overflow:hidden;
-      vertical-align:middle;
+      position:relative;
     }
     .topMeta__xpFill{
       display:block;
       height:100%;
-      background:linear-gradient(90deg,rgba(200,150,60,.7),rgba(240,190,80,.95));
+      background:linear-gradient(90deg,#c47e10,#f0b840);
       border-radius:999px;
-      transition:width .6s ease;
+      transition:width .7s cubic-bezier(.4,0,.2,1);
+      position:relative;
+    }
+    .topMeta__xpFill::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.28) 50%,transparent 100%);
+      border-radius:999px;
+    }
+    .topMeta__xpNums{
+      font-size:10px;
+      color:rgba(215,176,107,.65);
+      letter-spacing:.04em;
+      text-align:right;
+      white-space:nowrap;
+    }
+    .topMeta__xpTotal{
+      font-weight:700;
+      font-size:13px;
+      color:var(--gold);
+      white-space:nowrap;
     }
 
     /* Placeholder shown when a column slot has no tile yet */
@@ -5213,9 +5247,12 @@
             <span>Modo: <strong>Ritual</strong></span>
             <span class="topMeta__sep">|</span>
             <span class="topMeta__xp">
-              <span id="xpCardLevel">Nível 1</span>
-              <span class="topMeta__xpBar"><span class="topMeta__xpFill" id="xpCardFill" style="width:0%"></span></span>
-              <strong id="xpCardXp" style="color:var(--gold)">0 XP</strong>
+              <span class="topMeta__xpLevel" id="xpCardLevel">Nível 1</span>
+              <span class="topMeta__xpBarWrap">
+                <span class="topMeta__xpBar"><span class="topMeta__xpFill" id="xpCardFill" style="width:0%"></span></span>
+                <span class="topMeta__xpNums" id="xpCardNums">0 / 100 XP</span>
+              </span>
+              <strong class="topMeta__xpTotal" id="xpCardXp">0 XP</strong>
             </span>
           </div>
 
@@ -8861,12 +8898,17 @@
       const curr = OSL_XP.xpForLevel(lv);
       const next = OSL_XP.xpForNextLevel(lv);
       const pct = next > curr ? Math.round((xp - curr) / (next - curr) * 100) : 100;
-      const levelEl = document.getElementById("xpCardLevel");
-      const fillEl = document.getElementById("xpCardFill");
-      const xpEl = document.getElementById("xpCardXp");
-      if (levelEl) levelEl.textContent = `Nível ${lv}`;
-      if (fillEl) fillEl.style.width = `${pct}%`;
-      if (xpEl) xpEl.textContent = `${xp} XP`;
+      const inLevel = xp - curr;
+      const needed = next - curr;
+      if (document.getElementById("xpCardLevel"))
+        document.getElementById("xpCardLevel").textContent = `Nível ${lv}`;
+      if (document.getElementById("xpCardFill"))
+        document.getElementById("xpCardFill").style.width = `${pct}%`;
+      if (document.getElementById("xpCardXp"))
+        document.getElementById("xpCardXp").textContent = `${xp} XP`;
+      if (document.getElementById("xpCardNums"))
+        document.getElementById("xpCardNums").textContent =
+          next > curr ? `${inLevel} / ${needed} XP` : `MAX`;
     }
 
     function bindUserDoc() {
