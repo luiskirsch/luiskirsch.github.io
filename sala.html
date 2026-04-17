@@ -1411,19 +1411,21 @@
       font-weight:700;
       color:#80d080;
     }
-    .effectPanel__dismiss{
-      background:none;
-      border:1px solid rgba(255,255,255,.2);
+    .effectPanel__confirm{
+      background:rgba(80,180,80,.15);
+      border:1px solid rgba(80,180,80,.45);
       border-radius:8px;
-      color:var(--muted,#a09080);
+      color:#80d080;
       font-size:12px;
-      padding:5px 14px;
+      font-weight:700;
+      letter-spacing:.05em;
+      padding:6px 18px;
       cursor:pointer;
-      transition:border-color .2s,color .2s;
+      transition:background .2s,border-color .2s;
     }
-    .effectPanel__dismiss:hover{
-      border-color:rgba(200,150,60,.6);
-      color:rgba(200,150,60,.9);
+    .effectPanel__confirm:hover{
+      background:rgba(80,180,80,.3);
+      border-color:rgba(80,180,80,.8);
     }
 
     /* ── XP inline na topCenterMeta ─────────────────────────────────── */
@@ -6095,6 +6097,7 @@
     let currentPlayers = [];
     let currentCard = null;
     let activeEffectTimer = null;
+    let currentActiveEffect = null;
 
     // ── Efeitos por carta (indexado pelo title) ───────────────────────────
     // Battlecry: dispara ao revelar. Deathrattle: dispara antes de revelar a próxima.
@@ -6411,7 +6414,8 @@
 
     function updateRitualButtons() {
       const canControl = isHost && ritualStarted;
-      if (revealCardBtn) revealCardBtn.disabled = !canControl || ritualDeck.length === 0;
+      const effectBlocking = !!(currentActiveEffect && !currentActiveEffect.resolved);
+      if (revealCardBtn) revealCardBtn.disabled = !canControl || ritualDeck.length === 0 || effectBlocking;
       if (resetRitualBtn) resetRitualBtn.disabled = !isHost;
     }
 
@@ -6714,7 +6718,9 @@
 
       // Processar efeito ativo
       const effect = data?.activeEffect || null;
+      currentActiveEffect = effect;
       renderActiveEffect(effect);
+      updateRitualButtons();
 
       if (!started) {
         lastRevealedCardKey = null;
@@ -6746,6 +6752,9 @@
     }
 
     // ── UI de Efeitos ─────────────────────────────────────────────────────
+    // Efeitos automáticos (give_xp, next_category): resolvem sozinhos.
+    // Timer: resolve quando chega a zero.
+    // force_player / vote: exigem confirmação do host ("Concluído ✓").
     function renderActiveEffect(effect) {
       const panel = document.getElementById("effectPanel");
       if (!panel) return;
@@ -6760,10 +6769,15 @@
 
       const titleEl = panel.querySelector(".effectPanel__title");
       const bodyEl = panel.querySelector(".effectPanel__body");
-      const dismissBtn = panel.querySelector(".effectPanel__dismiss");
 
       const phaseLabel = effect.phase === "deathrattle" ? "⚰ DEATHRATTLE" : "⚡ BATTLECRY";
       if (titleEl) titleEl.textContent = phaseLabel;
+
+      // Remove botão de conclusão anterior antes de recriar
+      const old = panel.querySelector(".effectPanel__confirm");
+      if (old) old.remove();
+
+      const needsConfirm = ["force_player", "vote"].includes(effect.type);
 
       switch (effect.type) {
         case "force_player": {
@@ -6788,7 +6802,11 @@
               const s = (remaining % 60).toString().padStart(2, "0");
               display.textContent = `${m}:${s}`;
             }
-            if (remaining === 0) clearEffectTimer();
+            if (remaining === 0) {
+              clearEffectTimer();
+              // Timer zerou: resolve automaticamente (apenas host escreve no Firestore)
+              if (isHost) resolveActiveEffect();
+            }
           }, 500);
           break;
         }
@@ -6801,10 +6819,10 @@
           if (bodyEl) bodyEl.innerHTML = `
             <div class="effectPanel__question">${effect.params.question || "Vote:"}</div>
             <div class="effectPanel__voteOptions">
-              ${opts.map((opt, i) => `
+              ${opts.map(opt => `
                 <button class="effectPanel__voteBtn${myVote === opt ? " effectPanel__voteBtn--active" : ""}"
                   onclick="castEffectVote('${opt.replace(/'/g,"\\'")}')">
-                  ${opt} ${voteCounts[opt] ? `<span class="effectPanel__voteCount">${voteCounts[opt]}</span>` : ""}
+                  ${opt}${voteCounts[opt] ? ` <span class="effectPanel__voteCount">${voteCounts[opt]}</span>` : ""}
                 </button>`).join("")}
             </div>`;
           break;
@@ -6812,22 +6830,34 @@
         case "give_xp": {
           if (bodyEl) bodyEl.innerHTML =
             `<span class="effectPanel__xp">+${effect.params.amount || 10} XP</span><br>para todos na sala!`;
-          // Não-host também recebe XP quando deathrattle de give_xp chega via Firestore
           if (!isHost) OSL_XP.award(userRef, null, effect.params.amount).catch(() => {});
+          // Auto-resolve após exibir 3s
+          if (isHost) setTimeout(() => resolveActiveEffect(), 3000);
           break;
         }
         case "next_category": {
           if (bodyEl) bodyEl.innerHTML =
             `Próxima carta será de <strong>${effect.params.category}</strong>`;
+          // Auto-resolve após exibir 3s
+          if (isHost) setTimeout(() => resolveActiveEffect(), 3000);
           break;
         }
         default:
           if (bodyEl) bodyEl.textContent = "";
+          if (isHost) setTimeout(() => resolveActiveEffect(), 1500);
       }
 
+      // Botão "Concluído ✓" apenas para efeitos que precisam de confirmação manual (host)
+      if (needsConfirm && isHost) {
+        const btn = document.createElement("button");
+        btn.className = "effectPanel__confirm";
+        btn.textContent = "Concluído ✓";
+        btn.onclick = resolveActiveEffect;
+        panel.appendChild(btn);
+      }
     }
 
-    async function dismissActiveEffect() {
+    async function resolveActiveEffect() {
       if (!isHost) return;
       await setDoc(ritualRef, { activeEffect: null }, { merge: true });
     }
