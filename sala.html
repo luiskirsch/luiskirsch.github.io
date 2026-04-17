@@ -6455,7 +6455,7 @@
       const canControl = isHost && ritualStarted;
       const effectBlocking = !!(currentActiveEffect && !currentActiveEffect.resolved);
       if (revealCardBtn) revealCardBtn.disabled = !canControl || ritualDeck.length === 0 || effectBlocking;
-      if (resetRitualBtn) resetRitualBtn.disabled = !isHost;
+      if (resetRitualBtn) resetRitualBtn.disabled = !isHost || !ritualStarted;
     }
 
     function setRitualWaitingState() {
