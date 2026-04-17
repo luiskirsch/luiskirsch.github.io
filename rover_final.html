@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Rover: Oakhaven 1909</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #0c0c0c; font-family: 'Garamond', serif; }
+        #ui {
+            position: absolute; top: 20px; left: 20px;
+            color: #d4c4a8; background: rgba(20, 18, 15, 0.95);
+            padding: 20px; border: 1px solid #5d4a37;
+            border-radius: 2px; box-shadow: 0 0 30px rgba(0,0,0,0.8); z-index: 100;
+        }
+        h1 { margin: 0; font-size: 24px; letter-spacing: 4px; color: #fff; text-transform: uppercase; border-bottom: 1px solid #5d4a37; padding-bottom: 5px; }
+        .sub { font-size: 11px; margin-top: 5px; letter-spacing: 1px; color: #8b7355; }
+        #canvas-container { width: 100vw; height: 100vh; cursor: crosshair; }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <h1>Rover</h1>
+        <div class="sub">ESTADO DE OAKHAVEN • 1909</div>
+        <div style="margin-top:15px; font-size: 14px;">Use <b>WASD</b> para caminhar.</div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <script>
+        /** * ROVER ENGINE - STANDALONE BUILD
+         * Desenvolvido para rodar sem dependências externas (Zero-HTTP).
+         */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Configurações do Mundo
+        const world = {
+            width: 3000,
+            height: 3000,
+            gridSize: 128
+        };
+
+        const player = {
+            x: 1500,
+            y: 1500,
+            speed: 5,
+            width: 30,
+            height: 50
+        };
+
+        const keys = {};
+        window.onkeydown = (e) => keys[e.code] = true;
+        window.onkeyup = (e) => keys[e.code] = false;
+
+        // Gerador de Objetos (Casas e NPCs)
+        const entities = [];
+        
+        // Criar Casas (Obstáculos)
+        for(let i=0; i<18; i++) {
+            entities.push({
+                type: 'house',
+                x: 600 + Math.random() * 1800,
+                y: 600 + Math.random() * 1800,
+                w: 120 + Math.random() * 60,
+                h: 100 + Math.random() * 40,
+                color: `rgb(${40 + Math.random()*20}, ${30 + Math.random()*15}, 20)`
+            });
+        }
+
+        // Criar NPCs (Aldeões)
+        for(let i=0; i<12; i++) {
+            entities.push({
+                type: 'npc',
+                x: Math.random() * world.width,
+                y: Math.random() * world.height,
+                w: 20,
+                h: 45
+            });
+        }
+
+        function update() {
+            let nextX = player.x;
+            let nextY = player.y;
+
+            if (keys['KeyW'] || keys['ArrowUp']) nextY -= player.speed;
+            if (keys['KeyS'] || keys['ArrowDown']) nextY += player.speed;
+            if (keys['KeyA'] || keys['ArrowLeft']) nextX -= player.speed;
+            if (keys['KeyD'] || keys['ArrowRight']) nextX += player.speed;
+
+            // Colisão Simples com Casas
+            let collision = false;
+            for (let ent of entities) {
+                if (ent.type === 'house') {
+                    if (nextX + 15 > ent.x - ent.w/2 && nextX - 15 < ent.x + ent.w/2 &&
+                        nextY > ent.y - 20 && nextY - 10 < ent.y + ent.h/2) {
+                        collision = true;
+                    }
+                }
+            }
+
+            if (!collision) {
+                player.x = nextX;
+                player.y = nextY;
+            }
+
+            // Limites do mapa
+            player.x = Math.max(50, Math.min(world.width - 50, player.x));
+            player.y = Math.max(50, Math.min(world.height - 50, player.y));
+        }
+
+        function draw() {
+            // Limpar fundo (Verde Escuro)
+            ctx.fillStyle = '#1e2418';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const camX = canvas.width / 2 - player.x;
+            const camY = canvas.height / 2 - player.y;
+
+            ctx.save();
+            ctx.translate(camX, camY);
+
+            // Desenhar Grama (Grid)
+            ctx.strokeStyle = '#252d1e';
+            for(let x=0; x<world.width; x+=world.gridSize) {
+                for(let y=0; y<world.height; y+=world.gridSize) {
+                    ctx.strokeRect(x, y, world.gridSize, world.gridSize);
+                }
+            }
+
+            // Y-Sorting (Desenhar por ordem de profundidade)
+            const allToDraw = [...entities, { type: 'player', ...player }];
+            allToDraw.sort((a, b) => a.y - b.y);
+
+            allToDraw.forEach(obj => {
+                if (obj.type === 'house') {
+                    // Sombra
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                    ctx.fillRect(obj.x - obj.w/2 + 10, obj.y + 10, obj.w, obj.h);
+                    // Casa
+                    ctx.fillStyle = obj.color;
+                    ctx.fillRect(obj.x - obj.w/2, obj.y - obj.h/2, obj.w, obj.h);
+                    // Telhado (Perspectiva)
+                    ctx.fillStyle = '#2d241a';
+                    ctx.beginPath();
+                    ctx.moveTo(obj.x - obj.w/2, obj.y - obj.h/2);
+                    ctx.lineTo(obj.x, obj.y - obj.h/2 - 30);
+                    ctx.lineTo(obj.x + obj.w/2, obj.y - obj.h/2);
+                    ctx.fill();
+                } 
+                else if (obj.type === 'npc') {
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(obj.x - 5, obj.y - 40, 10, 40); // Corpo
+                    ctx.beginPath(); ctx.arc(obj.x, obj.y - 45, 6, 0, Math.PI*2); ctx.fill(); // Cabeça
+                }
+                else if (obj.type === 'player') {
+                    // Sombra Rover
+                    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                    ctx.beginPath(); ctx.ellipse(obj.x, obj.y, 10, 5, 0, 0, Math.PI*2); ctx.fill();
+                    // Rover (Estilo Limbo)
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(obj.x - 8, obj.y - 35, 16, 35); // Corpo
+                    ctx.beginPath(); ctx.arc(obj.x, obj.y - 42, 11, 0, Math.PI*2); ctx.fill(); // Cabeça
+                    // Olhos Brilhantes
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(obj.x - 5, obj.y - 45, 3, 3);
+                    ctx.fillRect(obj.x + 2, obj.y - 45, 3, 3);
+                }
+            });
+
+            ctx.restore();
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
+</body>
+</html>
