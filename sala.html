@@ -1466,6 +1466,88 @@
       background:rgba(80,180,80,.3);
       border-color:rgba(80,180,80,.8);
     }
+    /* ── Daily Reward Modal ─────────────────────────────────────────── */
+    .dailyRewardModal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.78);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      animation:fadeInBg .3s ease;
+    }
+    @keyframes fadeInBg{from{opacity:0}to{opacity:1}}
+    .dailyRewardCard{
+      background:linear-gradient(145deg,#1a1208,#2a1e0a);
+      border:1px solid rgba(212,168,75,.35);
+      border-radius:20px;
+      padding:36px 32px 28px;
+      text-align:center;
+      max-width:300px;
+      width:88%;
+      box-shadow:0 0 70px rgba(255,180,0,.12);
+      animation:rewardCardIn .42s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes rewardCardIn{
+      from{transform:scale(.72) translateY(24px);opacity:0}
+      to{transform:scale(1) translateY(0);opacity:1}
+    }
+    .dailyRewardCard__flame{font-size:46px;margin-bottom:6px;line-height:1}
+    .dailyRewardCard__title{
+      color:rgba(212,168,75,.7);
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      margin-bottom:4px;
+    }
+    .dailyRewardCard__streak{
+      color:#fff;
+      font-size:32px;
+      font-weight:900;
+      margin-bottom:14px;
+    }
+    .dailyRewardCard__bar{
+      display:flex;
+      justify-content:center;
+      gap:5px;
+      margin-bottom:20px;
+    }
+    .dailyRewardCard__dot{
+      width:26px;height:5px;
+      border-radius:3px;
+      background:rgba(255,255,255,.12);
+      transition:background .3s;
+    }
+    .dailyRewardCard__dot--on{background:#d4a84b}
+    .dailyRewardCard__xp{
+      color:#d4a84b;
+      font-size:56px;
+      font-weight:900;
+      line-height:1;
+      margin-bottom:2px;
+    }
+    .dailyRewardCard__xplabel{
+      color:rgba(255,255,255,.4);
+      font-size:11px;
+      letter-spacing:.1em;
+      margin-bottom:24px;
+    }
+    .dailyRewardCard__btn{
+      background:linear-gradient(135deg,#9a6e0a,#d4a84b);
+      border:none;
+      border-radius:10px;
+      color:#1a1208;
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.1em;
+      padding:13px 0;
+      width:100%;
+      cursor:pointer;
+      transition:filter .2s;
+    }
+    .dailyRewardCard__btn:hover{filter:brightness(1.15)}
     .aiDetectToast{
       display:none;
       align-items:center;
@@ -6602,14 +6684,8 @@
       // Abre a arena automaticamente para todos
       await updateDoc(roomRef, { arenaActive: true });
 
-      // XP: bônus de início de sessão (e bônus diário se aplicável)
+      // XP: bônus de início de sessão
       await OSL_XP.award(userRef, "SESSION_JOIN");
-      const today = new Date().toISOString().slice(0, 10);
-      const lastDate = localStorage.getItem("osl_last_session_date");
-      if (lastDate !== today) {
-        localStorage.setItem("osl_last_session_date", today);
-        await OSL_XP.award(userRef, "DAILY_BONUS");
-      }
 
       await revealNextRitualCard();
       updateRitualButtons();
@@ -7097,6 +7173,57 @@
 
     window.confirmAIDetection = confirmAIDetection;
     window.dismissAIDetection = dismissAIDetection;
+
+    // ── Daily Reward ──────────────────────────────────────────────────
+
+    const DAILY_STREAK_XP = [20, 30, 40, 50, 75, 100, 150];
+
+    async function checkDailyReward() {
+      if (!userId) return;
+      try {
+        const snap = await getDoc(userRef);
+        if (!snap.exists()) return;
+        const data = snap.data();
+
+        const today = new Date().toISOString().slice(0, 10);
+        if ((data.lastDailyReward || "") === today) return;
+
+        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        const streak = (data.lastDailyReward === yesterday) ? (data.dailyStreak || 0) + 1 : 1;
+        const xp = DAILY_STREAK_XP[Math.min(streak - 1, DAILY_STREAK_XP.length - 1)];
+
+        showDailyRewardModal(streak, xp, async () => {
+          await setDoc(userRef, { lastDailyReward: today, dailyStreak: streak }, { merge: true });
+          await OSL_XP.award(userRef, null, xp);
+        });
+      } catch (_) {}
+    }
+
+    function showDailyRewardModal(streak, xp, onCollect) {
+      const icon = streak >= 7 ? "🔥" : streak >= 3 ? "⚡" : "✨";
+      const dots = Array.from({ length: 7 }, (_, i) =>
+        `<div class="dailyRewardCard__dot${i < streak ? " dailyRewardCard__dot--on" : ""}"></div>`
+      ).join("");
+
+      const overlay = document.createElement("div");
+      overlay.className = "dailyRewardModal";
+      overlay.innerHTML = `
+        <div class="dailyRewardCard">
+          <div class="dailyRewardCard__flame">${icon}</div>
+          <div class="dailyRewardCard__title">Recompensa Diária</div>
+          <div class="dailyRewardCard__streak">DIA ${streak}</div>
+          <div class="dailyRewardCard__bar">${dots}</div>
+          <div class="dailyRewardCard__xp">+${xp}</div>
+          <div class="dailyRewardCard__xplabel">XP</div>
+          <button class="dailyRewardCard__btn" id="dailyRewardBtn">COLETAR</button>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      document.getElementById("dailyRewardBtn").addEventListener("click", async () => {
+        overlay.remove();
+        await onCollect();
+      });
+    }
 
     let lastVoteResultTimestamp = 0;
     function showVoteResultOverlay(winner, resolvedAt) {
@@ -9001,6 +9128,7 @@
         bindTyping();
         bindRitual();
         bindUserDoc();
+        checkDailyReward();
       } catch (error) {
         console.error(error);
 
