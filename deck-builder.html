@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Construtor de Deck — O SextoLugar</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0907;
+      --surface: #1a1208;
+      --border: rgba(200,150,60,.22);
+      --fg: #f0e8d8;
+      --muted: #8a7a6a;
+      --gold: #c89630;
+      --green: #60b860;
+      --red: #c05050;
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Georgia', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,6,2,.7);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header__logo {
+      font-size: 13px;
+      letter-spacing: .12em;
+      color: var(--gold);
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+    .header__title {
+      font-size: 16px;
+      letter-spacing: .08em;
+      color: var(--fg);
+    }
+    .header__xp {
+      font-size: 12px;
+      color: var(--green);
+      letter-spacing: .06em;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 0;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+    .sidebar__heading {
+      font-size: 11px;
+      letter-spacing: .1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .deckList { display: flex; flex-direction: column; gap: 6px; }
+    .deckItem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+    .deckItem:hover, .deckItem--active {
+      background: rgba(200,150,60,.1);
+      border-color: rgba(200,150,60,.5);
+    }
+    .deckItem__name { font-size: 14px; }
+    .deckItem__count { font-size: 11px; color: var(--muted); }
+    .deckItem__del {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: color .2s, background .2s;
+    }
+    .deckItem__del:hover { color: var(--red); background: rgba(200,80,80,.1); }
+
+    .btn {
+      background: rgba(200,150,60,.15);
+      border: 1px solid rgba(200,150,60,.4);
+      border-radius: var(--radius);
+      color: var(--gold);
+      font-size: 13px;
+      padding: 10px 16px;
+      cursor: pointer;
+      letter-spacing: .05em;
+      transition: background .2s, border-color .2s;
+      width: 100%;
+      text-align: center;
+    }
+    .btn:hover { background: rgba(200,150,60,.28); border-color: var(--gold); }
+    .btn--green {
+      background: rgba(80,180,80,.15);
+      border-color: rgba(80,180,80,.4);
+      color: var(--green);
+    }
+    .btn--green:hover { background: rgba(80,180,80,.28); border-color: var(--green); }
+    .btn--disabled { opacity: .45; pointer-events: none; }
+
+    /* ── Main ── */
+    .main { display: flex; flex-direction: column; overflow: hidden; }
+
+    .deckEditor {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .deckEditor__toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .deckEditor__nameInput {
+      flex: 1;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--fg);
+      font-size: 15px;
+      padding: 8px 14px;
+      font-family: inherit;
+    }
+    .deckEditor__nameInput:focus { outline: none; border-color: var(--gold); }
+    .deckEditor__count { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+    .deckEditor__body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .cardPool, .deckSlots {
+      overflow-y: auto;
+      padding: 16px;
+    }
+    .cardPool { border-right: 1px solid var(--border); }
+
+    .sectionTitle {
+      font-size: 11px;
+      letter-spacing: .1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .packGroup { margin-bottom: 20px; }
+    .packGroup__name {
+      font-size: 12px;
+      color: var(--gold);
+      letter-spacing: .08em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .cardGrid { display: flex; flex-direction: column; gap: 6px; }
+
+    .cardChip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      gap: 8px;
+    }
+    .cardChip:hover { background: rgba(200,150,60,.09); border-color: rgba(200,150,60,.4); }
+    .cardChip--inDeck {
+      background: rgba(80,180,80,.1);
+      border-color: rgba(80,180,80,.4);
+    }
+    .cardChip__info { flex: 1; min-width: 0; }
+    .cardChip__title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cardChip__type { font-size: 11px; color: var(--muted); }
+    .cardChip__effect { font-size: 10px; color: var(--gold); margin-top: 2px; }
+    .cardChip__action {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--muted);
+      line-height: 1;
+      padding: 2px;
+      flex-shrink: 0;
+    }
+    .cardChip--inDeck .cardChip__action { color: var(--red); }
+
+    .emptyState {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 40px 20px;
+      line-height: 1.7;
+    }
+
+    /* ── Filter bar ── */
+    .filterBar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .filterBtn {
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .filterBtn--active {
+      background: rgba(200,150,60,.18);
+      border-color: rgba(200,150,60,.6);
+      color: var(--gold);
+    }
+
+    /* ── XP / Level display ── */
+    .xpBar {
+      background: rgba(80,180,80,.08);
+      border: 1px solid rgba(80,180,80,.2);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .xpBar__fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 999px;
+      transition: width .5s ease;
+    }
+    .levelDisplay {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .levelDisplay__row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── No deck selected ── */
+    .noDeckState {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      color: var(--muted);
+      gap: 16px;
+      padding: 40px;
+      text-align: center;
+    }
+    .noDeckState__icon { font-size: 48px; }
+    .noDeckState__text { font-size: 14px; line-height: 1.7; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(40,160,80,.9);
+      color: #fff;
+      font-size: 14px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      opacity: 0;
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .toast--visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast--error { background: rgba(200,60,60,.9); }
+
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+      .deckEditor__body { grid-template-columns: 1fr; }
+      .cardPool { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a href="sala.html" class="header__logo">← O SextoLugar</a>
+  <span class="header__title">Construtor de Deck</span>
+  <span class="header__xp" id="headerXp">Carregando...</span>
+</header>
+
+<div class="layout">
+  <!-- Sidebar: lista de decks -->
+  <aside class="sidebar">
+    <div class="sidebar__heading">Meus Decks</div>
+    <div class="deckList" id="deckList">
+      <div class="emptyState">Nenhum deck criado ainda.</div>
+    </div>
+    <button class="btn" id="newDeckBtn">+ Novo Deck</button>
+
+    <div style="margin-top:auto; padding-top:20px;">
+      <div class="sidebar__heading" style="margin-bottom:10px;">Seu Nível</div>
+      <div class="levelDisplay">
+        <div class="levelDisplay__row">
+          <span id="levelLabel">Nível 1</span>
+          <span id="xpLabel">0 XP</span>
+        </div>
+        <div class="xpBar"><div class="xpBar__fill" id="xpBarFill" style="width:0%"></div></div>
+        <div class="levelDisplay__row">
+          <span></span>
+          <span id="xpNextLabel" style="color:var(--muted)">próx: 50 XP</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main: editor de deck -->
+  <main class="main" id="mainArea">
+    <div class="noDeckState">
+      <span class="noDeckState__icon">🃏</span>
+      <p class="noDeckState__text">
+        Selecione um deck na lista<br>ou crie um novo para começar.
+      </p>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import {
+    getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc,
+    collection, addDoc, onSnapshot, serverTimestamp, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+    authDomain: "osextolugar-game.firebaseapp.com",
+    projectId: "osextolugar-game",
+    storageBucket: "osextolugar-game.firebasestorage.app",
+    messagingSenderId: "592088391155",
+    appId: "1:592088391155:web:c2e4f9fba44fb2c0b3e785"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  // ── Card data (espelhado de sala.html) ─────────────────────────────────
+  const BASIC_CARDS = [
+    { type: "Terror psicológico", title: "Presença fraca",   text: "Todos observam em silêncio. O jogador à sua esquerda escolhe quem parece mais vulnerável neste momento e explica o motivo." },
+    { type: "Discussão",          title: "Verdade oculta",   text: "Durante 1 minuto, o grupo deve discutir quem parece estar escondendo algo. Todos precisam opinar." },
+    { type: "Decisão",            title: "Escolha do grupo", text: "Decidam juntos: revelar um segredo agora ou seguir o ritual sem respostas. O anfitrião define a decisão final se houver empate." },
+    { type: "Confissão",          title: "Fale agora",       text: "Um jogador voluntário deve contar algo real, desconfortável ou estranho que nunca contou para o grupo." },
+    { type: "Suspeita",           title: "Algo ruim",        text: "Alguém trouxe algo ruim para esta sala. Cada participante aponta quem mais mudou de comportamento desde o início da chamada." },
+    { type: "Pressão",            title: "30 segundos",      text: "O anfitrião escolhe um jogador. Esse jogador deve responder uma pergunta direta do grupo sem fugir." },
+    { type: "Vínculo",            title: "Conexão",          text: "O grupo escolhe duas pessoas da sala. Elas devem decidir juntas a próxima atitude do ritual." },
+    { type: "Ruptura",            title: "Confiança quebrada", text: "Cada jogador diz em quem menos confiaria para conduzir o ritual até o final." }
+  ];
+
+  const PACK_CARDS = {
+    "pacote-conexao": [
+      { type: "Conexão", title: "Memória favorita",       text: "Cada jogador compartilha uma memória que o faz sentir que pertence a algum lugar. Ninguém interrompe." },
+      { type: "Conexão", title: "Primeira impressão",     text: "O anfitrião escolhe uma pessoa. O grupo revela, um por um, qual foi a primeira impressão que tiveram dela." },
+      { type: "Conexão", title: "Gratidão inesperada",    text: "Alguém do grupo precisa agradecer outra pessoa por algo que nunca disse em voz alta." },
+      { type: "Conexão", title: "Palavra que define",     text: "Cada jogador escolhe uma única palavra que defina como se sente neste exato momento. Sem explicações." },
+      { type: "Conexão", title: "Quem eu admiro",         text: "Sem revelar o nome, cada pessoa descreve alguém que admira no grupo. O grupo tenta adivinhar de quem se trata." },
+      { type: "Conexão", title: "Ponto em comum",         text: "O grupo tem 2 minutos para descobrir algo que todos têm em comum e que nunca foi dito antes." },
+      { type: "Conexão", title: "Carta aberta",           text: "Um voluntário escreve mentalmente uma frase que gostaria de dizer a alguém do grupo — e então diz em voz alta." },
+      { type: "Conexão", title: "Silêncio compartilhado", text: "Todos ficam em silêncio absoluto por 30 segundos, olhando para a câmera. Depois, cada um diz o que sentiu." },
+      { type: "Conexão", title: "O que me une a você",   text: "O anfitrião aponta dois jogadores. Cada um diz uma coisa que acredita ter em comum com o outro." },
+      { type: "Conexão", title: "Abraço virtual",         text: "Cada jogador escreve no chat o nome de uma pessoa da sala que merece apoio hoje. Nenhum comentário é feito — apenas os nomes." },
+      { type: "Conexão", title: "Música da sala",         text: "Se este grupo fosse uma música, qual seria? Cada um sugere uma e explica o porquê em uma frase." },
+      { type: "Conexão", title: "Antes e depois",         text: "Cada jogador completa: 'Antes de entrar aqui hoje eu estava... agora estou...' Sem filtros." }
+    ],
+    "pacote-verdades": [
+      { type: "Verdade", title: "Mentira favorita",    text: "Cada jogador confessa uma mentira pequena que conta com frequência e por que continua contando." },
+      { type: "Verdade", title: "O que eu evito",      text: "Um voluntário revela algo que evita falar sobre si mesmo — e o grupo pode fazer uma única pergunta de acompanhamento." },
+      { type: "Verdade", title: "Discordância silenciosa", text: "Há algo que você concorda publicamente mas discorda em privado. Quem tiver coragem diz em voz alta." },
+      { type: "Verdade", title: "Opinião impopular",   text: "Cada jogador compartilha uma opinião que sabe que o grupo provavelmente não vai gostar de ouvir." },
+      { type: "Verdade", title: "Inveja honesta",      text: "O anfitrião escolhe uma pessoa. Os outros revelam algo que invejam nela — sem suavizar." },
+      { type: "Verdade", title: "O que eu não disse",  text: "Há algo que você pensou mas não disse durante esta sessão? Agora é a hora de dizer." },
+      { type: "Verdade", title: "Contradição pessoal", text: "Cada jogador revela uma coisa que faz e que vai contra seus próprios valores declarados." },
+      { type: "Verdade", title: "Julgamento justo",    text: "O grupo vota: quem está sendo mais autêntico nesta sessão? O mais votado deve responder 'por quê você acha isso?'" },
+      { type: "Verdade", title: "Pergunta que temo",   text: "Um voluntário faz uma pergunta que teme ser feita a ele mesmo. O grupo decide se responde ou devolve." },
+      { type: "Verdade", title: "Coisa que me envergonha", text: "Cada jogador revela algo sobre si que considera um ponto fraco real — algo que raramente admite." },
+      { type: "Verdade", title: "Quem eu julgaria",    text: "O anfitrião descreve uma situação hipotética. Cada jogador diz honestamente como reagiria e por quê." },
+      { type: "Verdade", title: "Crença que abandonei", text: "Cada jogador compartilha algo em que acreditava com força e que hoje não acredita mais. Sem defensiva." },
+      { type: "Verdade", title: "Fronteira testada",   text: "Cada um revela um limite pessoal que já permitiu que alguém ultrapassasse — e se faria isso de novo." },
+      { type: "Verdade", title: "Erro recente",        text: "Alguém do grupo admite o último erro que cometeu e que ainda pensa sobre às vezes." },
+      { type: "Verdade", title: "Versão real",         text: "Cada jogador descreve como acha que os outros o percebem — e então diz como de fato se vê." }
+    ],
+    "pacote-conflito": [
+      { type: "Conflito", title: "Provocação direta",    text: "O anfitrião escolhe dois jogadores. Cada um deve discordar da última coisa que o outro disse — sem amenizar." },
+      { type: "Conflito", title: "Quem manda aqui",      text: "O grupo debate em 1 minuto quem está controlando a dinâmica da sessão. A pessoa mais citada deve reagir." },
+      { type: "Conflito", title: "Interrogatório",       text: "Um jogador escolhido pelo grupo deve responder 3 perguntas seguidas sem desviar do assunto." },
+      { type: "Conflito", title: "Acusação pública",     text: "Cada jogador completa: 'Eu suspeito que [nome] está...' O acusado pode se defender em 30 segundos." },
+      { type: "Conflito", title: "Voto de eliminação",   text: "Se alguém tivesse que sair da sala agora, quem seria? O grupo vota. O mais votado explica por que acha que foi escolhido." },
+      { type: "Conflito", title: "O mais fraco",         text: "Todos apontam quem parece mais hesitante hoje. A pessoa indicada reage com total honestidade." },
+      { type: "Conflito", title: "Linha vermelha",       text: "Cada jogador declara uma coisa que considera inaceitável em qualquer relacionamento. O grupo debate se concorda." },
+      { type: "Conflito", title: "Contraposição",        text: "O anfitrião escolhe uma afirmação dita durante a sessão. Cada jogador deve argumentar contra ela — mesmo que concorde." },
+      { type: "Conflito", title: "Aliança revelada",     text: "O grupo tenta identificar quem está 'aliado' com quem nesta sala. As duplas citadas confirmam ou negam." },
+      { type: "Conflito", title: "Coisa que me irrita",  text: "Cada jogador revela algo que outro participante faz — dentro ou fora do jogo — que o incomoda de verdade." },
+      { type: "Conflito", title: "Batalha de perspectivas", text: "O anfitrião escolhe um tema polêmico. Dois jogadores debatem lados opostos por 90 segundos — sem parar." },
+      { type: "Conflito", title: "Eu não confio em você", text: "Alguém declara, sem filtro, por que desconfia de outra pessoa nesta sala. O nomeado não pode responder até o grupo terminar de ouvir." },
+      { type: "Conflito", title: "Testando lealdade",    text: "O anfitrião cria um dilema: trair um amigo ou assumir uma consequência pública. Cada jogador escolhe e justifica." },
+      { type: "Conflito", title: "Quem daria mais trabalho", text: "O grupo decide: quem seria o parceiro mais difícil em um projeto sério? O mais votado reage sem se defender." },
+      { type: "Conflito", title: "Ruptura planejada",    text: "Cada jogador imagina qual atitude de outro poderia encerrar essa amizade ou dinâmica para sempre — e diz em voz alta." }
+    ],
+    "pacote-segredos": [
+      { type: "Segredo", title: "O que nunca contei",    text: "Um voluntário revela algo que nunca contou para ninguém nesta sala. O grupo ouve em silêncio absoluto." },
+      { type: "Segredo", title: "Dupla identidade",      text: "Cada jogador descreve a versão de si mesmo que mostra para o mundo — e a versão que esconde." },
+      { type: "Segredo", title: "Vergonha enterrada",    text: "Alguém do grupo revela algo que fez e que ainda carrega como peso. Nenhum julgamento é permitido." },
+      { type: "Segredo", title: "Medo real",             text: "Cada jogador revela seu maior medo — não o medo socialmente aceitável, mas o que realmente assusta." },
+      { type: "Segredo", title: "Fantasma do passado",   text: "O anfitrião escolhe alguém. Essa pessoa descreve uma situação do passado que ainda define parte de quem ela é." },
+      { type: "Segredo", title: "O que eu destruí",      text: "Um voluntário conta algo que destruiu — um relacionamento, uma chance, uma versão de si mesmo — sem amenizar." },
+      { type: "Segredo", title: "Desejo proibido",       text: "Cada jogador completa: 'Existe algo que desejo mas que nunca assumiria publicamente...' Ninguém julga." },
+      { type: "Segredo", title: "Máscara social",        text: "O grupo debate qual comportamento de cada pessoa parece ser uma performance. Os apontados reagem com honestidade." },
+      { type: "Segredo", title: "Confissão sem nome",    text: "Cada jogador escreve uma confissão no chat — sem assinar. O anfitrião lê todas em voz alta. O grupo tenta adivinhar quem escreveu cada uma." },
+      { type: "Segredo", title: "A coisa que me define", text: "Cada jogador revela a experiência que mais moldou quem ele é — mesmo que nunca tenha falado sobre ela abertamente." },
+      { type: "Segredo", title: "Traição silenciosa",    text: "Alguém revela uma vez em que se traiu — quando fez algo contra seus próprios princípios e não contou para ninguém." },
+      { type: "Segredo", title: "Carta não enviada",     text: "Cada jogador pensa em uma mensagem que nunca enviou para alguém importante. Lê em voz alta — sem dizer para quem." },
+      { type: "Segredo", title: "Momento de covardia",   text: "Um voluntário conta uma situação em que deveria ter agido e não agiu — e o que isso custou." },
+      { type: "Segredo", title: "Obsessão secreta",      text: "Cada jogador revela algo que pensa com frequência mas nunca menciona — uma ideia fixa, um medo, uma fantasia." },
+      { type: "Segredo", title: "Versão sem filtro",     text: "O anfitrião escolhe um jogador. O grupo tem permissão para fazer uma única pergunta que normalmente seria inadequada." },
+      { type: "Segredo", title: "Peso que carrego",      text: "Um voluntário descreve algo que ainda carrega emocionalmente de uma relação passada — sem identificar a pessoa." },
+      { type: "Segredo", title: "O que eu faria diferente", text: "Cada jogador revela uma decisão que tomou e que, se pudesse, mudaria completamente — e por quê não muda." },
+      { type: "Segredo", title: "Limite invisível",      text: "Cada um revela um limite pessoal que nunca disse em voz alta mas que já foi ultrapassado várias vezes sem que ninguém soubesse." }
+    ],
+    "pacote-casais": [
+      { type: "Casais", title: "Primeira vez que percebi",    text: "Cada um conta o momento exato em que percebeu que o outro era diferente de qualquer pessoa que havia conhecido." },
+      { type: "Casais", title: "O que eu não disse",          text: "Cada parceiro revela algo que pensa sobre o relacionamento e que raramente ou nunca verbalizou." },
+      { type: "Casais", title: "Meu medo de nós",             text: "Cada um completa: 'O que mais me assusta neste relacionamento é...' Sem minimizar." },
+      { type: "Casais", title: "Você me surpreendeu quando",  text: "Cada parceiro conta um momento em que o outro o surpreendeu — positiva ou negativamente." },
+      { type: "Casais", title: "O que eu precisava e não pedi", text: "Cada um revela algo que precisou do outro em algum momento mas não pediu. O outro ouve em silêncio." },
+      { type: "Casais", title: "Versão que você não viu",     text: "Cada parceiro descreve uma versão de si mesmo que o outro ainda não conhece completamente." },
+      { type: "Casais", title: "Momento que quase mudou tudo", text: "Um voluntário conta uma situação em que a relação quase tomou outro rumo — e o que fez a diferença." },
+      { type: "Casais", title: "Expectativa não dita",        text: "Cada um revela uma expectativa sobre o relacionamento que nunca expressou claramente — mas que existe." },
+      { type: "Casais", title: "Coisa que eu aceito mas não gosto", text: "Cada parceiro revela algo no comportamento do outro que aceita, mas que preferiria que fosse diferente." },
+      { type: "Casais", title: "O que me prende aqui",        text: "Cada um responde honestamente: o que faz você escolher esse relacionamento todos os dias — mesmo nos dias difíceis?" },
+      { type: "Casais", title: "Momento de distância",        text: "Cada parceiro identifica um período em que se sentiu distante do outro — sem culpa, apenas com honestidade." },
+      { type: "Casais", title: "Palavra que nos define",      text: "Cada um escolhe uma única palavra para descrever o estado atual do relacionamento. Nenhuma palavra é discutida imediatamente." },
+      { type: "Casais", title: "Pergunta que evito",          text: "Cada parceiro revela uma pergunta que evita fazer ao outro — e o outro decide se responde agora." },
+      { type: "Casais", title: "O que mudou em mim",          text: "Cada um conta como mudou desde que está neste relacionamento — para melhor e para pior." },
+      { type: "Casais", title: "Desejo esquecido",            text: "Cada parceiro revela algo que desejava no início da relação e que foi deixando de lado com o tempo." },
+      { type: "Casais", title: "Se eu pudesse recomeçar",     text: "Cada um completa: 'Se eu pudesse voltar ao início desta relação, eu faria diferente...' e explica por quê." },
+      { type: "Casais", title: "Momento de orgulho",          text: "Cada parceiro conta um momento em que sentiu um orgulho genuíno do outro — algo que talvez nunca tenha dito." },
+      { type: "Casais", title: "O futuro que imagino",        text: "Cada um descreve como imagina esta relação daqui a 5 anos — com honestidade sobre o que espera e o que teme." }
+    ]
+  };
+
+  // Indicadores de efeito por carta
+  const CARD_EFFECT_LABELS = {
+    "30 segundos": "⚡ Force + ⏱ Timer",
+    "Escolha do grupo": "⚡ Votação",
+    "Confiança quebrada": "⚰ +XP",
+    "Ponto em comum": "⚡ Timer 2min",
+    "Silêncio compartilhado": "⚡ Timer 30s",
+    "Carta aberta": "⚰ +XP",
+    "Inveja honesta": "⚡ Force Player",
+    "Julgamento justo": "⚡ Votação",
+    "Contradição pessoal": "⚰ +XP",
+    "Pergunta que temo": "⚡ Force Player",
+    "Provocação direta": "⚡ Force 2 Players",
+    "Interrogatório": "⚡ Force Player",
+    "Voto de eliminação": "⚡ Votação",
+    "O mais fraco": "⚡ Votação",
+    "Batalha de perspectivas": "⚡ Timer 90s",
+    "Eu não confio em você": "⚰ → Conexão",
+    "Acusação pública": "⚡ Force Player",
+    "Quem manda aqui": "⚡ Timer 60s",
+    "O que nunca contei": "⚰ +XP",
+    "Confissão sem nome": "⚰ +XP",
+    "Fantasma do passado": "⚡ Force Player",
+    "Versão sem filtro": "⚡ Force Player",
+    "Medo real": "⚰ +XP",
+    "Meu medo de nós": "⚰ +XP",
+    "Palavra que nos define": "⚡ Votação",
+    "Expectativa não dita": "⚰ +XP",
+    "Pergunta que evito": "⚡ Force + ⚰ +XP"
+  };
+
+  // ── XP helpers ─────────────────────────────────────────────────────────
+  function levelFromXP(xp) { return Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1; }
+  function xpForLevel(lv) { return Math.pow(lv - 1, 2) * 50; }
+  function xpForNextLevel(lv) { return Math.pow(lv, 2) * 50; }
+
+  // ── State ──────────────────────────────────────────────────────────────
+  let userId = null;
+  let userDecks = [];       // [{id, name, cards:[]}]
+  let activeDeckId = null;  // currently open in editor
+  let deckCards = [];       // cards in the deck being edited
+  let deckName = "";
+  let filterType = "all";
+
+  // Cartas disponíveis para o usuário
+  function getOwnedCards() {
+    try {
+      const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
+      const packs = compras.map(c => c.produto);
+      let cards = [...BASIC_CARDS];
+      packs.forEach(p => { if (PACK_CARDS[p]) cards = cards.concat(PACK_CARDS[p]); });
+      return cards;
+    } catch { return [...BASIC_CARDS]; }
+  }
+
+  function getUniqueTypes(cards) {
+    return ["all", ...new Set(cards.map(c => c.type))];
+  }
+
+  // ── Firestore ──────────────────────────────────────────────────────────
+  async function loadDecks(uid) {
+    const snap = await getDocs(collection(db, "users", uid, "decks"));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+
+  async function saveDeck(uid, deckId, name, cards) {
+    const ref = deckId
+      ? doc(db, "users", uid, "decks", deckId)
+      : doc(collection(db, "users", uid, "decks"));
+    await setDoc(ref, { name, cards, updatedAt: serverTimestamp() }, { merge: true });
+    return ref.id;
+  }
+
+  async function deleteDeck(uid, deckId) {
+    await deleteDoc(doc(db, "users", uid, "decks", deckId));
+  }
+
+  // ── UI ─────────────────────────────────────────────────────────────────
+  function showToast(msg, isError = false) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.toggle("toast--error", isError);
+    el.classList.add("toast--visible");
+    setTimeout(() => el.classList.remove("toast--visible"), 2000);
+  }
+
+  function renderXP(xp = 0) {
+    const lv = levelFromXP(xp);
+    const curr = xpForLevel(lv);
+    const next = xpForNextLevel(lv);
+    const pct = next > curr ? Math.round((xp - curr) / (next - curr) * 100) : 100;
+    document.getElementById("levelLabel").textContent = `Nível ${lv}`;
+    document.getElementById("xpLabel").textContent = `${xp} XP`;
+    document.getElementById("xpBarFill").style.width = `${pct}%`;
+    document.getElementById("xpNextLabel").textContent = `próx: ${next} XP`;
+    document.getElementById("headerXp").textContent = `Nível ${lv} · ${xp} XP`;
+  }
+
+  function renderDeckList() {
+    const el = document.getElementById("deckList");
+    if (!userDecks.length) {
+      el.innerHTML = `<div class="emptyState">Nenhum deck criado ainda.</div>`;
+      return;
+    }
+    el.innerHTML = userDecks.map(d => `
+      <div class="deckItem${activeDeckId === d.id ? " deckItem--active" : ""}"
+           onclick="openDeck('${d.id}')">
+        <div>
+          <div class="deckItem__name">${d.name || "Sem nome"}</div>
+          <div class="deckItem__count">${(d.cards || []).length} cartas</div>
+        </div>
+        <button class="deckItem__del" title="Deletar deck"
+          onclick="event.stopPropagation();confirmDeleteDeck('${d.id}')">×</button>
+      </div>
+    `).join("");
+  }
+
+  function renderEditor() {
+    const main = document.getElementById("mainArea");
+    const deck = userDecks.find(d => d.id === activeDeckId);
+    if (!deck && activeDeckId !== "__new__") {
+      main.innerHTML = `
+        <div class="noDeckState">
+          <span class="noDeckState__icon">🃏</span>
+          <p class="noDeckState__text">Selecione um deck na lista<br>ou crie um novo para começar.</p>
+        </div>`;
+      return;
+    }
+
+    const owned = getOwnedCards();
+    const types = getUniqueTypes(owned);
+    const deckTitles = new Set(deckCards.map(c => c.title));
+    const filtered = filterType === "all" ? owned : owned.filter(c => c.type === filterType);
+
+    main.innerHTML = `
+      <div class="deckEditor">
+        <div class="deckEditor__toolbar">
+          <input class="deckEditor__nameInput" id="deckNameInput" placeholder="Nome do deck"
+            value="${deckName}" oninput="deckNameChanged(this.value)">
+          <span class="deckEditor__count">${deckCards.length} carta(s)</span>
+          <button class="btn btn--green" style="width:auto;padding:8px 18px" onclick="saveCurrent()">Salvar</button>
+        </div>
+        <div class="deckEditor__body">
+          <div class="cardPool">
+            <div class="sectionTitle">Cartas disponíveis</div>
+            <div class="filterBar">
+              ${types.map(t => `
+                <button class="filterBtn${filterType === t ? " filterBtn--active" : ""}"
+                  onclick="setFilter('${t}')">
+                  ${t === "all" ? "Todas" : t}
+                </button>`).join("")}
+            </div>
+            <div class="cardGrid">
+              ${filtered.map(card => `
+                <div class="cardChip${deckTitles.has(card.title) ? " cardChip--inDeck" : ""}"
+                     onclick="toggleCard(${JSON.stringify(card).replace(/"/g, '&quot;')})">
+                  <div class="cardChip__info">
+                    <div class="cardChip__title">${card.title}</div>
+                    <div class="cardChip__type">${card.type}</div>
+                    ${CARD_EFFECT_LABELS[card.title] ? `<div class="cardChip__effect">${CARD_EFFECT_LABELS[card.title]}</div>` : ""}
+                  </div>
+                  <button class="cardChip__action" title="${deckTitles.has(card.title) ? "Remover" : "Adicionar"}">
+                    ${deckTitles.has(card.title) ? "−" : "+"}
+                  </button>
+                </div>`).join("")}
+            </div>
+          </div>
+          <div class="deckSlots">
+            <div class="sectionTitle">No deck (${deckCards.length})</div>
+            <div class="cardGrid" id="deckCardGrid">
+              ${deckCards.length === 0
+                ? `<div class="emptyState">Adicione cartas do painel esquerdo.</div>`
+                : deckCards.map(card => `
+                  <div class="cardChip cardChip--inDeck"
+                       onclick="removeCard('${card.title.replace(/'/g,"\\'")}')">
+                    <div class="cardChip__info">
+                      <div class="cardChip__title">${card.title}</div>
+                      <div class="cardChip__type">${card.type}</div>
+                      ${CARD_EFFECT_LABELS[card.title] ? `<div class="cardChip__effect">${CARD_EFFECT_LABELS[card.title]}</div>` : ""}
+                    </div>
+                    <button class="cardChip__action" title="Remover">−</button>
+                  </div>`).join("")}
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Actions ────────────────────────────────────────────────────────────
+  window.openDeck = function(id) {
+    const deck = userDecks.find(d => d.id === id);
+    if (!deck) return;
+    activeDeckId = id;
+    deckCards = [...(deck.cards || [])];
+    deckName = deck.name || "";
+    filterType = "all";
+    renderDeckList();
+    renderEditor();
+  };
+
+  window.deckNameChanged = function(val) { deckName = val; };
+
+  window.setFilter = function(type) {
+    filterType = type;
+    renderEditor();
+  };
+
+  window.toggleCard = function(card) {
+    const idx = deckCards.findIndex(c => c.title === card.title);
+    if (idx >= 0) {
+      deckCards.splice(idx, 1);
+    } else {
+      deckCards.push(card);
+    }
+    renderEditor();
+  };
+
+  window.removeCard = function(title) {
+    deckCards = deckCards.filter(c => c.title !== title);
+    renderEditor();
+  };
+
+  window.saveCurrent = async function() {
+    if (!userId) return showToast("Você precisa estar logado.", true);
+    if (!deckName.trim()) return showToast("Dê um nome ao deck.", true);
+    try {
+      const id = await saveDeck(userId, activeDeckId === "__new__" ? null : activeDeckId, deckName.trim(), deckCards);
+      userDecks = await loadDecks(userId);
+      activeDeckId = id;
+      renderDeckList();
+      renderEditor();
+      showToast("Deck salvo!");
+    } catch(e) {
+      console.error(e);
+      showToast("Erro ao salvar.", true);
+    }
+  };
+
+  window.confirmDeleteDeck = async function(id) {
+    if (!confirm("Deletar este deck?")) return;
+    try {
+      await deleteDeck(userId, id);
+      userDecks = userDecks.filter(d => d.id !== id);
+      if (activeDeckId === id) { activeDeckId = null; deckCards = []; deckName = ""; }
+      renderDeckList();
+      renderEditor();
+      showToast("Deck deletado.");
+    } catch(e) {
+      showToast("Erro ao deletar.", true);
+    }
+  };
+
+  document.getElementById("newDeckBtn").addEventListener("click", () => {
+    activeDeckId = "__new__";
+    deckCards = [];
+    deckName = "";
+    filterType = "all";
+    userDecks = userDecks.map(d => ({ ...d })); // reset active highlight
+    renderDeckList();
+    renderEditor();
+  });
+
+  // ── Auth ───────────────────────────────────────────────────────────────
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+    userId = user.uid;
+
+    const userSnap = await getDoc(doc(db, "users", userId));
+    const userData = userSnap.data() || {};
+    renderXP(userData.xp || 0);
+
+    userDecks = await loadDecks(userId);
+    renderDeckList();
+    renderEditor();
+  });
+</script>
+</body>
+</html>

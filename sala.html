@@ -1325,6 +1325,129 @@
       line-height:1.55;
     }
 
+    /* ── Effect Panel ────────────────────────────────────────────────── */
+    .effectPanel{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      background:rgba(20,10,5,.85);
+      border:1px solid rgba(200,150,60,.45);
+      border-radius:12px;
+      padding:14px 18px;
+      margin:10px 0;
+      backdrop-filter:blur(8px);
+      animation:effectPanelIn .35s ease;
+    }
+    @keyframes effectPanelIn{
+      from{opacity:0;transform:translateY(-8px) scale(.97)}
+      to{opacity:1;transform:translateY(0) scale(1)}
+    }
+    .effectPanel__title{
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.12em;
+      color:rgba(200,150,60,.9);
+      text-transform:uppercase;
+    }
+    .effectPanel__body{
+      font-size:14px;
+      color:var(--fg,#f0e8d8);
+      text-align:center;
+      line-height:1.6;
+    }
+    .effectPanel__highlight{
+      font-size:18px;
+      font-weight:700;
+      color:#f0c060;
+    }
+    .effectPanel__timer{
+      font-size:40px;
+      font-weight:700;
+      font-variant-numeric:tabular-nums;
+      color:#f0c060;
+      line-height:1;
+    }
+    .effectPanel__question{
+      font-size:13px;
+      color:var(--muted,#a09080);
+      margin-bottom:8px;
+    }
+    .effectPanel__voteOptions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      justify-content:center;
+    }
+    .effectPanel__voteBtn{
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:8px;
+      color:var(--fg,#f0e8d8);
+      font-size:13px;
+      padding:6px 12px;
+      cursor:pointer;
+      transition:background .2s,border-color .2s;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .effectPanel__voteBtn:hover{
+      background:rgba(200,150,60,.18);
+      border-color:rgba(200,150,60,.5);
+    }
+    .effectPanel__voteBtn--active{
+      background:rgba(200,150,60,.28);
+      border-color:rgba(200,150,60,.8);
+    }
+    .effectPanel__voteCount{
+      background:rgba(200,150,60,.35);
+      border-radius:999px;
+      font-size:11px;
+      padding:1px 6px;
+    }
+    .effectPanel__xp{
+      font-size:28px;
+      font-weight:700;
+      color:#80d080;
+    }
+    .effectPanel__dismiss{
+      background:none;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:8px;
+      color:var(--muted,#a09080);
+      font-size:12px;
+      padding:5px 14px;
+      cursor:pointer;
+      transition:border-color .2s,color .2s;
+    }
+    .effectPanel__dismiss:hover{
+      border-color:rgba(200,150,60,.6);
+      color:rgba(200,150,60,.9);
+    }
+
+    /* ── XP Toast ────────────────────────────────────────────────────── */
+    .xpToast{
+      position:fixed;
+      bottom:80px;
+      left:50%;
+      transform:translateX(-50%) translateY(20px);
+      background:rgba(80,160,80,.9);
+      color:#fff;
+      font-size:16px;
+      font-weight:700;
+      padding:8px 20px;
+      border-radius:999px;
+      pointer-events:none;
+      opacity:0;
+      transition:opacity .3s,transform .3s;
+      z-index:9999;
+    }
+    .xpToast--visible{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+
     /* Placeholder shown when a column slot has no tile yet */
     .videoColPlaceholder{
       position:relative;
@@ -4988,6 +5111,7 @@
               <div class="tableHeadRight">
                 <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar Próxima Carta</button>
                 <button class="videoBtn primary" id="resetRitualBtn" disabled>Reiniciar ritual</button>
+                <a class="videoBtn" href="deck-builder.html" target="_blank" title="Construtor de Deck" style="text-decoration:none;padding:6px 12px;font-size:12px">🃏 Deck</a>
 
                 <div class="sessionStatus">
                   <span class="dot"></span>
@@ -5015,6 +5139,13 @@
               <div class="cardCenter">
                 <div class="deckInfoBar" id="deckInfo">
                   Aguardando o anfitrião iniciar.
+                </div>
+
+                <!-- ── Effect Panel ─────────────────────────────────── -->
+                <div class="effectPanel" id="effectPanel" style="display:none">
+                  <div class="effectPanel__title">⚡ BATTLECRY</div>
+                  <div class="effectPanel__body"></div>
+                  <button class="effectPanel__dismiss">Dispensar</button>
                 </div>
 
                 <div class="revealPanel">
@@ -5594,7 +5725,8 @@
       where,
       limit,
       orderBy,
-      serverTimestamp
+      serverTimestamp,
+      increment
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
@@ -5953,6 +6085,145 @@
     let ritualStarted = false;
     let ritualUnsub = null;
     let ritualHistoryUnsub = null;
+    let currentPlayers = [];
+    let currentCard = null;
+    let activeEffectTimer = null;
+
+    // ── Efeitos por carta (indexado pelo title) ───────────────────────────
+    // Battlecry: dispara ao revelar. Deathrattle: dispara antes de revelar a próxima.
+    // Chain: deathrattle automático que força uma categoria na próxima carta.
+    const OSL_CARD_EFFECTS = {
+      // Cartas básicas
+      "30 segundos":        { battlecry: { type: "force_player", target: "random", label: "deve responder sem fugir" },
+                              deathrattle: { type: "give_xp", amount: 10 } },
+      "Escolha do grupo":   { battlecry: { type: "vote", question: "O grupo decide:", options: ["Revelar um segredo agora", "Continuar o ritual"] } },
+      "Confiança quebrada": { deathrattle: { type: "give_xp", amount: 10 } },
+      // Conexão
+      "Ponto em comum":     { battlecry: { type: "set_timer", duration: 120 } },
+      "Silêncio compartilhado": { battlecry: { type: "set_timer", duration: 30 } },
+      "Carta aberta":       { deathrattle: { type: "give_xp", amount: 15 } },
+      // Verdade
+      "Inveja honesta":     { battlecry: { type: "force_player", target: "random", label: "está no centro das atenções" } },
+      "Julgamento justo":   { battlecry: { type: "vote", question: "Quem está sendo mais autêntico?" } },
+      "Contradição pessoal": { deathrattle: { type: "give_xp", amount: 15 } },
+      "Pergunta que temo":  { battlecry: { type: "force_player", target: "random", label: "faz a pergunta que teme" } },
+      // Conflito
+      "Provocação direta":  { battlecry: { type: "force_player", target: "two_random", label: "devem se confrontar" } },
+      "Interrogatório":     { battlecry: { type: "force_player", target: "random", label: "está no banco dos réus" } },
+      "Voto de eliminação": { battlecry: { type: "vote", question: "Quem sairia da sala agora?" } },
+      "O mais fraco":       { battlecry: { type: "vote", question: "Quem parece mais hesitante hoje?" } },
+      "Batalha de perspectivas": { battlecry: { type: "set_timer", duration: 90 } },
+      "Eu não confio em você": { deathrattle: { type: "next_category", category: "Conexão" } },
+      "Acusação pública":   { battlecry: { type: "force_player", target: "random", label: "será acusado" } },
+      "Quem manda aqui":    { battlecry: { type: "set_timer", duration: 60 } },
+      // Segredo
+      "O que nunca contei": { deathrattle: { type: "give_xp", amount: 20 } },
+      "Confissão sem nome": { deathrattle: { type: "give_xp", amount: 15 } },
+      "Fantasma do passado": { battlecry: { type: "force_player", target: "random", label: "vai mergulhar no passado" } },
+      "Versão sem filtro":  { battlecry: { type: "force_player", target: "random", label: "recebe a pergunta sem filtro" } },
+      "Medo real":          { deathrattle: { type: "give_xp", amount: 15 } },
+      // Casais
+      "Meu medo de nós":    { deathrattle: { type: "give_xp", amount: 20 } },
+      "Palavra que nos define": { battlecry: { type: "vote", question: "Qual palavra define a relação de vocês?" } },
+      "Expectativa não dita": { deathrattle: { type: "give_xp", amount: 15 } },
+      "Pergunta que evito": { battlecry: { type: "force_player", target: "random", label: "faz a pergunta que evita" },
+                              deathrattle: { type: "give_xp", amount: 10 } }
+    };
+
+    // ── Sistema de XP ─────────────────────────────────────────────────────
+    const OSL_XP = {
+      EVENTS: {
+        SESSION_JOIN: 10,
+        CARD_REVEALED: 5,
+        SESSION_COMPLETE: 50,
+        EFFECT_TRIGGERED: 15,
+        DAILY_BONUS: 20,
+        DEEP_CARD: 20
+      },
+      levelFromXP(xp) {
+        return Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1;
+      },
+      xpForLevel(level) {
+        return Math.pow(level - 1, 2) * 50;
+      },
+      xpForNextLevel(level) {
+        return Math.pow(level, 2) * 50;
+      },
+      progressToNextLevel(xp) {
+        const lv = this.levelFromXP(xp);
+        const curr = this.xpForLevel(lv);
+        const next = this.xpForNextLevel(lv);
+        return next > curr ? (xp - curr) / (next - curr) : 1;
+      },
+      async award(ref, eventKey, customAmount) {
+        const amount = customAmount !== undefined ? customAmount : (this.EVENTS[eventKey] || 0);
+        if (!amount || !ref) return;
+        try {
+          await updateDoc(ref, { xp: increment(amount) });
+          showXpToast(amount);
+        } catch(e) { console.warn("XP award error:", e); }
+      }
+    };
+
+    // ── Effect Engine ─────────────────────────────────────────────────────
+    const OSL_EFFECTS = {
+      // Chamado pelo host para preparar o efeito antes de gravar no Firestore
+      prepare(effect, players, phase) {
+        if (!effect) return null;
+        const base = {
+          id: Math.random().toString(36).slice(2),
+          type: effect.type,
+          phase: phase || "battlecry",
+          label: effect.label || null,
+          params: {},
+          votes: {},
+          resolved: false
+        };
+        switch (effect.type) {
+          case "force_player": {
+            const pool = players.length > 1 ? players.filter(p => p.id !== participantId) : players;
+            if (effect.target === "two_random") {
+              const s = [...pool].sort(() => Math.random() - 0.5);
+              base.params = { targetId: s[0]?.id || "", targetName: s[0]?.name || "Jogador",
+                              targetId2: s[1]?.id || s[0]?.id || "", targetName2: s[1]?.name || s[0]?.name || "Jogador" };
+            } else {
+              const t = pool[Math.floor(Math.random() * pool.length)] || players[0];
+              base.params = { targetId: t?.id || "", targetName: t?.name || "Jogador" };
+            }
+            break;
+          }
+          case "set_timer": {
+            base.params = { duration: effect.duration || 60, startedAt: Date.now() };
+            break;
+          }
+          case "vote": {
+            const opts = effect.options || players.map(p => p.name);
+            base.params = { question: effect.question || "Vote:", options: opts };
+            break;
+          }
+          case "next_category":
+          case "chain_card": {
+            base.params = { category: effect.category || "" };
+            break;
+          }
+          case "give_xp": {
+            base.params = { amount: effect.amount || 10 };
+            break;
+          }
+        }
+        return base;
+      },
+
+      // Prepara battlecry + deathrattle de uma carta
+      prepareCard(card, players) {
+        if (!card) return { battlecry: null, deathrattle: null };
+        const effects = OSL_CARD_EFFECTS[card.title] || {};
+        return {
+          battlecry: effects.battlecry ? this.prepare(effects.battlecry, players, "battlecry") : null,
+          deathrattle: effects.deathrattle ? this.prepare(effects.deathrattle, players, "deathrattle") : null
+        };
+      }
+    };
 
     // ── Cartas por pacote ─────────────────────────────────────────────────
     const OSL_PACK_CARDS = {
@@ -6054,59 +6325,73 @@
       } catch(e) { return []; }
     }
 
-    function buildRitualDeck() {
-      var basicCards = [
-        {
-          type: "Terror psicológico",
-          title: "Presença fraca",
-          text: "Todos observam em silêncio. O jogador à sua esquerda escolhe quem parece mais vulnerável neste momento e explica o motivo."
-        },
-        {
-          type: "Discussão",
-          title: "Verdade oculta",
-          text: "Durante 1 minuto, o grupo deve discutir quem parece estar escondendo algo. Todos precisam opinar."
-        },
-        {
-          type: "Decisão",
-          title: "Escolha do grupo",
-          text: "Decidam juntos: revelar um segredo agora ou seguir o ritual sem respostas. O anfitrião define a decisão final se houver empate."
-        },
-        {
-          type: "Confissão",
-          title: "Fale agora",
-          text: "Um jogador voluntário deve contar algo real, desconfortável ou estranho que nunca contou para o grupo."
-        },
-        {
-          type: "Suspeita",
-          title: "Algo ruim",
-          text: "Alguém trouxe algo ruim para esta sala. Cada participante aponta quem mais mudou de comportamento desde o início da chamada."
-        },
-        {
-          type: "Pressão",
-          title: "30 segundos",
-          text: "O anfitrião escolhe um jogador. Esse jogador deve responder uma pergunta direta do grupo sem fugir."
-        },
-        {
-          type: "Vínculo",
-          title: "Conexão",
-          text: "O grupo escolhe duas pessoas da sala. Elas devem decidir juntas a próxima atitude do ritual."
-        },
-        {
-          type: "Ruptura",
-          title: "Confiança quebrada",
-          text: "Cada jogador diz em quem menos confiaria para conduzir o ritual até o final."
-        }
-      ];
+    // Cartas básicas sempre disponíveis
+    const OSL_BASIC_CARDS = [
+      { type: "Terror psicológico", title: "Presença fraca",
+        text: "Todos observam em silêncio. O jogador à sua esquerda escolhe quem parece mais vulnerável neste momento e explica o motivo." },
+      { type: "Discussão", title: "Verdade oculta",
+        text: "Durante 1 minuto, o grupo deve discutir quem parece estar escondendo algo. Todos precisam opinar." },
+      { type: "Decisão", title: "Escolha do grupo",
+        text: "Decidam juntos: revelar um segredo agora ou seguir o ritual sem respostas. O anfitrião define a decisão final se houver empate." },
+      { type: "Confissão", title: "Fale agora",
+        text: "Um jogador voluntário deve contar algo real, desconfortável ou estranho que nunca contou para o grupo." },
+      { type: "Suspeita", title: "Algo ruim",
+        text: "Alguém trouxe algo ruim para esta sala. Cada participante aponta quem mais mudou de comportamento desde o início da chamada." },
+      { type: "Pressão", title: "30 segundos",
+        text: "O anfitrião escolhe um jogador. Esse jogador deve responder uma pergunta direta do grupo sem fugir." },
+      { type: "Vínculo", title: "Conexão",
+        text: "O grupo escolhe duas pessoas da sala. Elas devem decidir juntas a próxima atitude do ritual." },
+      { type: "Ruptura", title: "Confiança quebrada",
+        text: "Cada jogador diz em quem menos confiaria para conduzir o ritual até o final." }
+    ];
 
+    // Carrega deck customizado de um usuário do Firestore
+    async function loadUserDeck(userId, deckId) {
+      try {
+        const deckRef = doc(db, "users", userId, "decks", deckId);
+        const snap = await getDoc(deckRef);
+        if (!snap.exists()) return null;
+        return snap.data().cards || [];  // array de card objects
+      } catch(e) {
+        console.warn("Erro ao carregar deck customizado:", e);
+        return null;
+      }
+    }
+
+    // Retorna todas as cartas desbloqueadas dos pacotes comprados
+    function getUnlockedPackCards() {
       var unlockedPacks = getUnlockedPacks();
-      var extraCards = [];
+      var cards = [];
       unlockedPacks.forEach(function(packId) {
-        if (OSL_PACK_CARDS[packId]) {
-          extraCards = extraCards.concat(OSL_PACK_CARDS[packId]);
-        }
+        if (OSL_PACK_CARDS[packId]) cards = cards.concat(OSL_PACK_CARDS[packId]);
       });
+      return cards;
+    }
 
-      return shuffleArray(basicCards.concat(extraCards));
+    async function buildRitualDeck() {
+      // Coleta decks customizados de todos os participantes com activeDeckId
+      const customContributions = [];
+      for (const player of currentPlayers) {
+        if (player.userId && player.activeDeckId) {
+          const cards = await loadUserDeck(player.userId, player.activeDeckId);
+          if (cards && cards.length > 0) customContributions.push(...cards);
+        }
+      }
+
+      // Se nenhum player tem deck customizado, usa comportamento padrão (básico + pacotes comprados)
+      if (customContributions.length === 0) {
+        return shuffleArray(OSL_BASIC_CARDS.concat(getUnlockedPackCards()));
+      }
+
+      // Com decks customizados: basic cards + contribuições de todos os decks (deduplicadas por title)
+      const allCards = OSL_BASIC_CARDS.concat(customContributions);
+      const seen = new Set();
+      const deduped = allCards.filter(c => {
+        if (seen.has(c.title)) return false;
+        seen.add(c.title);
+        return true;
+      });
+      return shuffleArray(deduped);
     }
 
     function shuffleArray(array) {
@@ -6160,12 +6445,14 @@
       }
     }
 
-    async function saveRitualState(card) {
+    async function saveRitualState(card, activeEffect, pendingDeathrattle) {
       try {
         await setDoc(ritualRef, {
           started: ritualStarted,
           remainingDeck: ritualDeck,
           currentCard: card || null,
+          activeEffect: activeEffect !== undefined ? (activeEffect || null) : null,
+          pendingDeathrattle: pendingDeathrattle !== undefined ? (pendingDeathrattle || null) : null,
           updatedAt: serverTimestamp(),
           updatedBy: participantId
         }, { merge: true });
@@ -6178,24 +6465,47 @@
       if (!ritualStarted || !isHost || !ritualDeck.length) return;
 
       const nextCard = ritualDeck.shift();
-      await saveRitualState(nextCard);
+      const { battlecry, deathrattle } = OSL_EFFECTS.prepareCard(nextCard, currentPlayers);
+
+      await saveRitualState(nextCard, battlecry, deathrattle);
       await addHistoryItem(nextCard.type, nextCard.title);
+
+      // XP: carta revelada para todos os presentes
+      await OSL_XP.award(userRef, "CARD_REVEALED");
+
+      // Cartas de Segredo/Casais dão XP extra
+      if (["Segredo", "Casais"].includes(nextCard.type)) {
+        await OSL_XP.award(userRef, "DEEP_CARD");
+      }
+
       updateRitualButtons();
     }
 
     async function startRitualDeck() {
       ritualStarted = true;
-      ritualDeck = buildRitualDeck();
+      ritualDeck = await buildRitualDeck();
 
       await setDoc(ritualRef, {
         started: true,
         remainingDeck: ritualDeck,
         currentCard: null,
+        activeEffect: null,
+        pendingDeathrattle: null,
         updatedAt: serverTimestamp(),
         updatedBy: participantId
       }, { merge: true });
 
       await addHistoryItem("Ritual", "O ritual foi iniciado.");
+
+      // XP: bônus de início de sessão (e bônus diário se aplicável)
+      await OSL_XP.award(userRef, "SESSION_JOIN");
+      const today = new Date().toISOString().slice(0, 10);
+      const lastDate = localStorage.getItem("osl_last_session_date");
+      if (lastDate !== today) {
+        localStorage.setItem("osl_last_session_date", today);
+        await OSL_XP.award(userRef, "DAILY_BONUS");
+      }
+
       await revealNextRitualCard();
       updateRitualButtons();
     }
@@ -6204,12 +6514,14 @@
       if (!isHost) return;
 
       ritualStarted = true;
-      ritualDeck = buildRitualDeck();
+      ritualDeck = await buildRitualDeck();
 
       await setDoc(ritualRef, {
         started: true,
         remainingDeck: ritualDeck,
         currentCard: null,
+        activeEffect: null,
+        pendingDeathrattle: null,
         updatedAt: serverTimestamp(),
         updatedBy: participantId
       }, { merge: true });
@@ -6388,10 +6700,15 @@
 
     function renderRitualCardFromState(data) {
       const started = !!data?.started;
-      const currentCard = data?.currentCard || null;
+      const card = data?.currentCard || null;
 
       ritualStarted = started;
+      currentCard = card;
       ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
+
+      // Processar efeito ativo
+      const effect = data?.activeEffect || null;
+      renderActiveEffect(effect);
 
       if (!started) {
         lastRevealedCardKey = null;
@@ -6420,6 +6737,119 @@
       } else {
         applyCardContent(currentCard);
       }
+    }
+
+    // ── UI de Efeitos ─────────────────────────────────────────────────────
+    function renderActiveEffect(effect) {
+      const panel = document.getElementById("effectPanel");
+      if (!panel) return;
+
+      if (!effect || effect.resolved) {
+        panel.style.display = "none";
+        clearEffectTimer();
+        return;
+      }
+
+      panel.style.display = "flex";
+
+      const titleEl = panel.querySelector(".effectPanel__title");
+      const bodyEl = panel.querySelector(".effectPanel__body");
+      const dismissBtn = panel.querySelector(".effectPanel__dismiss");
+
+      const phaseLabel = effect.phase === "deathrattle" ? "⚰ DEATHRATTLE" : "⚡ BATTLECRY";
+      if (titleEl) titleEl.textContent = phaseLabel;
+
+      switch (effect.type) {
+        case "force_player": {
+          const names = effect.params.targetId2
+            ? `${effect.params.targetName} & ${effect.params.targetName2}`
+            : effect.params.targetName;
+          if (bodyEl) bodyEl.innerHTML =
+            `<span class="effectPanel__highlight">${names}</span><br>${effect.label || "está em foco"}`;
+          break;
+        }
+        case "set_timer": {
+          const duration = effect.params.duration || 60;
+          const startedAt = effect.params.startedAt || Date.now();
+          if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__timer" id="effectTimerDisplay">--</span>`;
+          clearEffectTimer();
+          activeEffectTimer = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+            const remaining = Math.max(0, duration - elapsed);
+            const display = document.getElementById("effectTimerDisplay");
+            if (display) {
+              const m = Math.floor(remaining / 60).toString().padStart(2, "0");
+              const s = (remaining % 60).toString().padStart(2, "0");
+              display.textContent = `${m}:${s}`;
+            }
+            if (remaining === 0) clearEffectTimer();
+          }, 500);
+          break;
+        }
+        case "vote": {
+          const opts = effect.params.options || [];
+          const votes = effect.votes || {};
+          const myVote = votes[participantId];
+          const voteCounts = {};
+          Object.values(votes).forEach(v => { voteCounts[v] = (voteCounts[v] || 0) + 1; });
+          if (bodyEl) bodyEl.innerHTML = `
+            <div class="effectPanel__question">${effect.params.question || "Vote:"}</div>
+            <div class="effectPanel__voteOptions">
+              ${opts.map((opt, i) => `
+                <button class="effectPanel__voteBtn${myVote === opt ? " effectPanel__voteBtn--active" : ""}"
+                  onclick="castEffectVote('${opt.replace(/'/g,"\\'")}')">
+                  ${opt} ${voteCounts[opt] ? `<span class="effectPanel__voteCount">${voteCounts[opt]}</span>` : ""}
+                </button>`).join("")}
+            </div>`;
+          break;
+        }
+        case "give_xp": {
+          if (bodyEl) bodyEl.innerHTML =
+            `<span class="effectPanel__xp">+${effect.params.amount || 10} XP</span><br>para todos na sala!`;
+          // Não-host também recebe XP quando deathrattle de give_xp chega via Firestore
+          if (!isHost) OSL_XP.award(userRef, null, effect.params.amount).catch(() => {});
+          break;
+        }
+        case "next_category": {
+          if (bodyEl) bodyEl.innerHTML =
+            `Próxima carta será de <strong>${effect.params.category}</strong>`;
+          break;
+        }
+        default:
+          if (bodyEl) bodyEl.textContent = "";
+      }
+
+      if (dismissBtn) {
+        dismissBtn.style.display = isHost ? "block" : "none";
+        dismissBtn.onclick = dismissActiveEffect;
+      }
+    }
+
+    async function dismissActiveEffect() {
+      if (!isHost) return;
+      await setDoc(ritualRef, { activeEffect: null }, { merge: true });
+    }
+
+    async function castEffectVote(option) {
+      await updateDoc(ritualRef, { [`activeEffect.votes.${participantId}`]: option });
+    }
+    window.castEffectVote = castEffectVote;
+
+    function clearEffectTimer() {
+      if (activeEffectTimer) { clearInterval(activeEffectTimer); activeEffectTimer = null; }
+    }
+
+    // ── Toast de XP ───────────────────────────────────────────────────────
+    function showXpToast(amount) {
+      const toast = document.createElement("div");
+      toast.className = "xpToast";
+      toast.textContent = `+${amount} XP`;
+      document.body.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add("xpToast--visible"));
+      setTimeout(() => {
+        toast.classList.remove("xpToast--visible");
+        setTimeout(() => toast.remove(), 400);
+      }, 1800);
     }
 
     function bindRitual() {
@@ -8019,6 +8449,7 @@
               userId: data.userId || null,
               name: data.name || "Jogador",
               isHost: !!data.isHost,
+              activeDeckId: data.activeDeckId || null,
               avatarEmoji: data.avatarEmoji || null,
               avatarPhotoUrl: data.avatarPhotoUrl || null,
               avatarColor: data.avatarColor || null,
@@ -8028,6 +8459,7 @@
           })
           .filter(isPlayerActive);
 
+        currentPlayers = players;
         renderPlayers(players);
       });
     }
