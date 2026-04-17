@@ -2,29 +2,30 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Resgate 3D - Forest Survival</title>
+    <title>Forest Rescue - Premium Edition</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
-        #ui {
-            position: absolute; top: 20px; width: 100%;
-            display: flex; justify-content: center;
-            pointer-events: none; z-index: 10;
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+        #overlay-ui {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; display: flex; flex-direction: column; justify-content: space-between;
+            padding: 30px; box-sizing: border-box; z-index: 10;
         }
         #timer {
-            background: rgba(0,0,0,0.7); padding: 10px 20px;
-            border-radius: 20px; color: #ff4444; font-size: 24px;
-            border: 2px solid #ff4444; box-shadow: 0 0 15px #ff4444;
+            font-size: 3rem; color: #fff; text-shadow: 0 0 20px #ff0000;
+            font-weight: 800; text-align: right;
         }
-        #instructions {
-            position: absolute; bottom: 20px; width: 100%;
-            text-align: center; color: white; font-size: 14px;
-        }
+        .label { color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 2px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <div id="ui"><div id="timer">03:00</div></div>
-    <div id="instructions">Use as SETAS ou WASD para caminhar</div>
+    <div id="overlay-ui">
+        <div>
+            <div class="label">Status: Perdido</div>
+            <div style="color: #00ffcc; font-weight: bold;">MISSÃO DE RESGATE</div>
+        </div>
+        <div id="timer">03:00</div>
+    </div>
 
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -33,133 +34,148 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- CONFIGURAÇÃO SÊNIOR DA CENA ---
+        // --- SETUP SÊNIOR ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x020502);
-        scene.fog = new THREE.Fog(0x020502, 5, 25); // Névoa para mistério
+        scene.fog = new THREE.FogExp2(0x020502, 0.08);
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.toneMapping = THREE.ReinhardToneMapping;
         renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.body.appendChild(renderer.domElement);
 
-        // --- ILUMINAÇÃO ---
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
-        scene.add(ambientLight);
+        // --- ILUMINAÇÃO CINEMATOGRÁFICA ---
+        const hemiLight = new THREE.HemisphereLight(0x000000, 0x020502, 1);
+        scene.add(hemiLight);
 
-        const spotLight = new THREE.SpotLight(0xffffff, 50);
-        spotLight.position.set(0, 10, 0);
-        spotLight.castShadow = true;
-        scene.add(spotLight);
+        // Lanterna do Menino
+        const flashlight = new THREE.SpotLight(0xffffff, 100, 20, Math.PI/4, 0.5, 1);
+        flashlight.castShadow = true;
+        scene.add(flashlight);
 
-        // --- CHÃO DA FLORESTA ---
-        const floorGeo = new THREE.PlaneGeometry(100, 100);
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a2b1a });
-        const floor = new THREE.Mesh(floorGeo, floorMat);
+        // --- TEXTURAS REAIS (Via Procedural Design) ---
+        const loader = new THREE.TextureLoader();
+        // Usamos um canvas para gerar uma textura de grama/terra sem precisar de arquivos externos
+        const canvas = document.createElement('canvas');
+        canvas.width = 256; canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#1a2b1a'; ctx.fillRect(0,0,256,256);
+        for(let i=0; i<2000; i++) {
+            ctx.fillStyle = `rgba(0,${Math.random()*50},0,0.5)`;
+            ctx.fillRect(Math.random()*256, Math.random()*256, 2, 2);
+        }
+        const grassTex = new THREE.CanvasTexture(canvas);
+        grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;
+        grassTex.repeat.set(50, 50);
+
+        const floor = new THREE.Mesh(
+            new THREE.PlaneGeometry(200, 200),
+            new THREE.MeshStandardMaterial({ map: grassTex, roughness: 0.8 })
+        );
         floor.rotation.x = -Math.PI / 2;
         floor.receiveShadow = true;
         scene.add(floor);
 
-        // --- CRIAÇÃO DO "MENINO" (Estilo Low-Poly Among Us) ---
+        // --- PERSONAGEM PREMIUM ---
         const playerGroup = new THREE.Group();
+        const bodyMat = new THREE.MeshPhysicalMaterial({ 
+            color: 0x0077ff, metalness: 0.6, roughness: 0.2, clearcoat: 1 
+        });
         
-        // Corpo
-        const body = new THREE.Mesh(
-            new THREE.CapsuleGeometry(0.4, 0.6, 4, 12),
-            new THREE.MeshStandardMaterial({ color: 0x3498db })
-        );
-        body.position.y = 0.7;
+        const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 0.5, 8, 16), bodyMat);
+        body.position.y = 0.6;
         body.castShadow = true;
         playerGroup.add(body);
 
-        // Visor (Olhos)
         const visor = new THREE.Mesh(
-            new THREE.BoxGeometry(0.5, 0.2, 0.2),
-            new THREE.MeshStandardMaterial({ color: 0x222222 })
+            new THREE.SphereGeometry(0.2, 16, 16, 0, Math.PI*2, 0, Math.PI/2),
+            new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 1, roughness: 0 })
         );
-        visor.position.set(0, 0.9, 0.35);
+        visor.rotation.x = Math.PI/2;
+        visor.position.set(0, 0.8, 0.2);
         playerGroup.add(visor);
 
         scene.add(playerGroup);
 
-        // --- FAMÍLIA (O Objetivo - Brilhando) ---
-        const familyGeo = new THREE.TorusKnotGeometry(0.4, 0.1, 64, 8);
-        const familyMat = new THREE.MeshStandardMaterial({ color: 0xf1c40f, emissive: 0xf1c40f });
-        const family = new THREE.Mesh(familyGeo, familyMat);
-        family.position.set(15, 1, -15);
-        scene.add(family);
+        // --- VAGALUMES (Partículas Vivas) ---
+        const firefliesGeo = new THREE.BufferGeometry();
+        const firefliesCount = 100;
+        const posArray = new Float32Array(firefliesCount * 3);
+        for(let i=0; i<firefliesCount*3; i++) posArray[i] = (Math.random() - 0.5) * 50;
+        firefliesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const firefliesMat = new THREE.PointsMaterial({ color: 0x00ffcc, size: 0.1, transparent: true, opacity: 0.8 });
+        const fireflies = new THREE.Points(firefliesGeo, firefliesMat);
+        scene.add(fireflies);
 
-        // --- ÁRVORES ---
-        for(let i=0; i<80; i++) {
-            const trunk = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.2, 0.2, 3),
-                new THREE.MeshStandardMaterial({ color: 0x2d1a0d })
+        // --- ÁRVORES REAIS (Troncos com Geometria Variada) ---
+        for(let i=0; i<120; i++) {
+            const h = 3 + Math.random() * 5;
+            const tree = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1 + Math.random()*0.2, 0.3, h),
+                new THREE.MeshStandardMaterial({ color: 0x110500 })
             );
-            const x = (Math.random() - 0.5) * 60;
-            const z = (Math.random() - 0.5) * 60;
-            if(Math.abs(x) < 3 && Math.abs(z) < 3) continue; // Não nasce no player
-
-            trunk.position.set(x, 1.5, z);
-            trunk.castShadow = true;
-            scene.add(trunk);
+            const x = (Math.random() - 0.5) * 80;
+            const z = (Math.random() - 0.5) * 80;
+            if(Math.sqrt(x*x + z*z) < 5) continue;
+            tree.position.set(x, h/2, z);
+            tree.castShadow = true;
+            scene.add(tree);
         }
 
-        // --- CONTROLES E LÓGICA ---
+        // --- LOGICA DE MOVIMENTO PREMIUM ---
         const keys = {};
+        let velocity = new THREE.Vector3();
+        const accel = 0.02, friction = 0.9;
+
         window.addEventListener('keydown', (e) => keys[e.code] = true);
         window.addEventListener('keyup', (e) => keys[e.code] = false);
 
         let timeLeft = 180;
-        const timerDiv = document.getElementById('timer');
-
         setInterval(() => {
             if(timeLeft > 0) {
                 timeLeft--;
-                let m = Math.floor(timeLeft/60);
-                let s = timeLeft%60;
-                timerDiv.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                const m = Math.floor(timeLeft/60), s = timeLeft%60;
+                document.getElementById('timer').innerText = `${m}:${s.toString().padStart(2,'0')}`;
             }
         }, 1000);
 
-        // --- GAME LOOP (60 FPS) ---
         function animate() {
             requestAnimationFrame(animate);
 
-            const speed = 0.15;
-            if (keys['ArrowUp'] || keys['KeyW']) playerGroup.position.z -= speed;
-            if (keys['ArrowDown'] || keys['KeyS']) playerGroup.position.z += speed;
-            if (keys['ArrowLeft'] || keys['KeyA']) playerGroup.position.x -= speed;
-            if (keys['ArrowRight'] || keys['KeyD']) playerGroup.position.x += speed;
+            // Inércia
+            if (keys['ArrowUp'] || keys['KeyW']) velocity.z -= accel;
+            if (keys['ArrowDown'] || keys['KeyS']) velocity.z += accel;
+            if (keys['ArrowLeft'] || keys['KeyA']) velocity.x -= accel;
+            if (keys['ArrowRight'] || keys['KeyD']) velocity.x += accel;
 
-            // Rotação suave do personagem para onde ele caminha
-            if(keys['ArrowLeft'] || keys['KeyA']) playerGroup.rotation.y = Math.PI/2;
-            if(keys['ArrowRight'] || keys['KeyD']) playerGroup.rotation.y = -Math.PI/2;
-            if(keys['ArrowUp'] || keys['KeyW']) playerGroup.rotation.y = 0;
-            if(keys['ArrowDown'] || keys['KeyS']) playerGroup.rotation.y = Math.PI;
+            playerGroup.position.add(velocity);
+            velocity.multiplyScalar(friction); // Desaceleração suave
 
-            // Câmera seguindo (Estilo Third Person)
-            camera.position.set(playerGroup.position.x, playerGroup.position.y + 8, playerGroup.position.z + 8);
+            // Rotação baseada na velocidade
+            if(velocity.length() > 0.01) {
+                const angle = Math.atan2(velocity.x, velocity.z);
+                playerGroup.rotation.y = THREE.MathUtils.lerp(playerGroup.rotation.y, angle, 0.1);
+            }
+
+            // Câmera Dinâmica
+            camera.position.lerp(new THREE.Vector3(playerGroup.position.x, 12, playerGroup.position.z + 10), 0.05);
             camera.lookAt(playerGroup.position);
 
-            // Luz segue o player (lanterna)
-            spotLight.position.set(playerGroup.position.x, 10, playerGroup.position.z);
-            spotLight.target = playerGroup;
+            // Lanterna Dinâmica
+            flashlight.position.copy(playerGroup.position).add(new THREE.Vector3(0, 2, 0));
+            flashlight.target.position.copy(playerGroup.position).add(velocity.clone().multiplyScalar(50));
+            flashlight.target.updateMatrixWorld();
 
-            // Animação da Família
-            family.rotation.y += 0.02;
+            // Animar Vagalumes
+            fireflies.rotation.y += 0.001;
+            fireflies.position.y = Math.sin(Date.now() * 0.001) * 0.5;
 
             renderer.render(scene, camera);
         }
 
         animate();
-
-        // Ajuste de janela
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
