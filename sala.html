@@ -6546,6 +6546,9 @@
 
       await addHistoryItem("Ritual", "O ritual foi iniciado.");
 
+      // Abre a arena automaticamente para todos
+      await updateDoc(roomRef, { arenaActive: true });
+
       // XP: bônus de início de sessão (e bônus diário se aplicável)
       await OSL_XP.award(userRef, "SESSION_JOIN");
       const today = new Date().toISOString().slice(0, 10);
