@@ -1426,46 +1426,32 @@
       color:rgba(200,150,60,.9);
     }
 
-    /* ── XP Card (fixo no canto superior direito) ───────────────────── */
-    .xpCard{
-      position:fixed;
-      top:12px;
-      right:16px;
-      z-index:9000;
+    /* ── XP inline na topCenterMeta ─────────────────────────────────── */
+    .topMeta__sep{
+      color:rgba(255,255,255,.18);
+    }
+    .topMeta__xp{
       display:inline-flex;
       align-items:center;
-      gap:8px;
-      background:rgba(12,8,3,.82);
-      border:1px solid rgba(200,150,60,.3);
-      border-radius:999px;
-      padding:5px 12px 5px 10px;
-      backdrop-filter:blur(8px);
-      white-space:nowrap;
-      pointer-events:none;
+      gap:7px;
+      font-size:15px;
+      color:#efe5d6;
     }
-    .xpCard__level{
-      font-size:11px;
-      font-weight:700;
-      color:rgba(200,150,60,.95);
-      letter-spacing:.06em;
-    }
-    .xpCard__bar{
-      width:60px;
+    .topMeta__xpBar{
+      display:inline-block;
+      width:64px;
       height:4px;
-      background:rgba(255,255,255,.08);
+      background:rgba(255,255,255,.1);
       border-radius:999px;
       overflow:hidden;
+      vertical-align:middle;
     }
-    .xpCard__barFill{
+    .topMeta__xpFill{
+      display:block;
       height:100%;
-      background:linear-gradient(90deg,rgba(200,150,60,.65),rgba(240,190,80,.9));
+      background:linear-gradient(90deg,rgba(200,150,60,.7),rgba(240,190,80,.95));
       border-radius:999px;
       transition:width .6s ease;
-    }
-    .xpCard__xp{
-      font-size:11px;
-      color:var(--muted,#8a7a6a);
-      letter-spacing:.03em;
     }
 
     /* Placeholder shown when a column slot has no tile yet */
@@ -5026,10 +5012,16 @@
         <div class="topCenter">
           <div class="topCenterMeta">
             <span>Sala: <strong id="roomCode">----</strong></span>
-            <span>|</span>
+            <span class="topMeta__sep">|</span>
             <span>Jogadores: <strong id="playerCount">0</strong></span>
-            <span>|</span>
+            <span class="topMeta__sep">|</span>
             <span>Modo: <strong>Ritual</strong></span>
+            <span class="topMeta__sep">|</span>
+            <span class="topMeta__xp">
+              <span id="xpCardLevel">Nível 1</span>
+              <span class="topMeta__xpBar"><span class="topMeta__xpFill" id="xpCardFill" style="width:0%"></span></span>
+              <strong id="xpCardXp" style="color:var(--gold)">0 XP</strong>
+            </span>
           </div>
 
           <div class="recStatusBadge" id="recStatusBadge">
@@ -10704,11 +10696,5 @@
       }
     })();
   </script>
-<!-- ── XP Card (fixo, fora do fluxo) ───────────────────────────────── -->
-<div class="xpCard" id="xpCard" title="Seu progresso de XP">
-  <span class="xpCard__level" id="xpCardLevel">Nível 1</span>
-  <div class="xpCard__bar"><div class="xpCard__barFill" id="xpCardFill" style="width:0%"></div></div>
-  <span class="xpCard__xp" id="xpCardXp">0 XP</span>
-</div>
 </body>
 </html>
