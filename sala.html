@@ -8178,7 +8178,7 @@
         playerListEl.appendChild(div);
       });
 
-      playerCountEl.textContent = String(players.length);
+      if (playerCountEl) playerCountEl.textContent = String(players.length);
       playersEmptyEl.style.display = players.length > 1 ? "none" : "block";
     }
 
