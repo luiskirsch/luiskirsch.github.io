@@ -2,17 +2,14 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Limbo Woods - Menino das Sombras</title>
+    <title>Anatomia Humana - Desenvolvimento Sênior</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; }
-        #ui {
-            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
-            color: #444; font-family: 'serif'; letter-spacing: 5px; pointer-events: none;
-        }
+        body { margin: 0; overflow: hidden; background: #050505; }
+        #info { position: absolute; top: 20px; width: 100%; text-align: center; color: #555; font-family: sans-serif; pointer-events: none; }
     </style>
 </head>
 <body>
-    <div id="ui">03:00</div>
+    <div id="info">ANATOMIA PROCEDURAL - Mova com as SETAS</div>
 
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -21,109 +18,140 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- CENA E NÉVOA ---
+        // --- SETUP AMBIENTE ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050505);
-        scene.fog = new THREE.FogExp2(0x050505, 0.15);
-
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        // --- ILUMINAÇÃO DRAMÁTICA ---
-        const light = new THREE.PointLight(0xffffff, 5, 20);
-        scene.add(light); // Luz que segue o menino
+        // Luzes para destacar a musculatura
+        const light1 = new THREE.DirectionalLight(0xffffff, 2);
+        light1.position.set(5, 10, 5);
+        light1.castShadow = true;
+        scene.add(light1);
+        scene.add(new THREE.AmbientLight(0x404040, 0.5));
 
-        // --- O MENINO (SILHUETA ESTILO LIMBO) ---
-        const boy = new THREE.Group();
-        
-        // Corpo (Preto absoluto)
-        const bodyMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.4, 4, 8), bodyMat);
-        torso.position.y = 0.5;
-        boy.add(torso);
+        // --- CONSTRUÇÃO DO CORPO (GEOMETRIA) ---
+        const skinMat = new THREE.MeshStandardMaterial({ 
+            color: 0x000000, 
+            roughness: 0.7,
+            metalness: 0.1
+        });
 
-        // Olhos Brilhantes (A única coisa que se vê)
-        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const eyeL = new THREE.Mesh(new THREE.CircleGeometry(0.04, 16), eyeMat);
-        const eyeR = new THREE.Mesh(new THREE.CircleGeometry(0.04, 16), eyeMat);
-        eyeL.position.set(-0.08, 0.75, 0.21);
-        eyeR.position.set(0.08, 0.75, 0.21);
-        boy.add(eyeL, eyeR);
+        const bodyGroup = new THREE.Group();
 
-        scene.add(boy);
+        // 1. Tronco (Peito e Abdômen)
+        const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.25, 0.5, 8, 16), skinMat);
+        torso.position.y = 1.1;
+        torso.castShadow = true;
+        bodyGroup.add(torso);
 
-        // --- CHÃO E OBSTÁCULOS (SOMBRAS) ---
-        const floorGeo = new THREE.BoxGeometry(200, 1, 10);
-        const blackMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const floor = new THREE.Mesh(floorGeo, blackMat);
-        floor.position.y = -0.5;
-        scene.add(floor);
+        // 2. Cabeça e Pescoço
+        const headGroup = new THREE.Group();
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.15), skinMat);
+        neck.position.y = 0.4;
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), skinMat);
+        head.position.y = 0.65;
+        head.scale.set(1, 1.2, 1); // Cabeça levemente oval
+        headGroup.add(neck, head);
+        torso.add(headGroup);
 
-        // Árvores Distorcidas (Background)
-        for(let i=0; i<50; i++) {
-            const h = 5 + Math.random() * 10;
-            const tree = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.3, h), blackMat);
-            tree.position.set((Math.random()-0.5)*100, h/2 - 0.5, -2 - Math.random()*5);
-            scene.add(tree);
+        // 3. Braços (Ombro -> Cotovelo -> Mão)
+        function createArm(side) {
+            const armGroup = new THREE.Group();
+            const upperArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.35, 4, 12), skinMat);
+            upperArm.position.y = -0.15;
+            armGroup.add(upperArm);
+
+            const foreArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.06, 0.35, 4, 12), skinMat);
+            foreArm.position.y = -0.35;
+            upperArm.add(foreArm);
+
+            armGroup.position.set(0.3 * side, 0.25, 0);
+            return armGroup;
         }
 
-        // --- PARTÍCULAS DE POEIRA ---
-        const dustGeo = new THREE.BufferGeometry();
-        const dustArr = new Float32Array(500 * 3);
-        for(let i=0; i<1500; i++) dustArr[i] = (Math.random()-0.5) * 40;
-        dustGeo.setAttribute('position', new THREE.BufferAttribute(dustArr, 3));
-        const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({color: 0x444444, size: 0.05}));
-        scene.add(dust);
+        const armL = createArm(-1);
+        const armR = createArm(1);
+        torso.add(armL, armR);
 
-        // --- FÍSICA E MOVIMENTO ---
-        let velocityY = 0;
-        let isGrounded = true;
+        // 4. Pernas (Quadril -> Joelho -> Pé)
+        function createLeg(side) {
+            const legGroup = new THREE.Group();
+            const thigh = new THREE.Mesh(new THREE.CapsuleGeometry(0.1, 0.45, 4, 12), skinMat);
+            thigh.position.y = -0.25;
+            legGroup.add(thigh);
+
+            const shin = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.45, 4, 12), skinMat);
+            shin.position.y = -0.45;
+            thigh.add(shin);
+
+            legGroup.position.set(0.15 * side, -0.3, 0);
+            return legGroup;
+        }
+
+        const legL = createLeg(-1);
+        const legR = createLeg(1);
+        torso.add(legL, legR);
+
+        scene.add(bodyGroup);
+
+        // Chão infinito
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x0a0a0a }));
+        floor.rotation.x = -Math.PI/2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // --- LÓGICA DE MOVIMENTO E ANIMAÇÃO ---
         const keys = {};
-
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
+
+        let walkCycle = 0;
 
         function animate() {
             requestAnimationFrame(animate);
 
-            // Movimento Lateral
-            if(keys['ArrowLeft'] || keys['KeyA']) {
-                boy.position.x -= 0.08;
-                boy.rotation.y = -Math.PI/2;
+            const isMoving = keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'] || keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD'];
+
+            if (isMoving) {
+                walkCycle += 0.12;
+                const moveSpeed = 0.08;
+                
+                // Movimento do Grupo
+                if (keys['ArrowUp'] || keys['KeyW']) bodyGroup.position.z -= moveSpeed;
+                if (keys['ArrowDown'] || keys['KeyS']) bodyGroup.position.z += moveSpeed;
+                if (keys['ArrowLeft'] || keys['KeyA']) bodyGroup.position.x -= moveSpeed;
+                if (keys['ArrowRight'] || keys['KeyD']) bodyGroup.position.x += moveSpeed;
+
+                // Rotação suave para a direção
+                const targetAngle = Math.atan2(keys['ArrowLeft'] || keys['KeyA'] ? -1 : (keys['ArrowRight'] || keys['KeyD'] ? 1 : 0), 
+                                               keys['ArrowUp'] || keys['KeyW'] ? -1 : (keys['ArrowDown'] || keys['KeyS'] ? 1 : 0));
+                // bodyGroup.rotation.y = targetAngle; // Ativar para rotação direta
+
+                // ANIMAÇÃO DE CAMINHADA (Seno para pernas opostas)
+                legL.rotation.x = Math.sin(walkCycle) * 0.5;
+                legR.rotation.x = Math.sin(walkCycle + Math.PI) * 0.5;
+                
+                // Braços movem opostos às pernas
+                armL.rotation.x = Math.sin(walkCycle + Math.PI) * 0.4;
+                armR.rotation.x = Math.sin(walkCycle) * 0.4;
+
+                // Balanço leve do tronco e cabeça
+                torso.position.y = 1.1 + Math.sin(walkCycle * 2) * 0.02;
+                headGroup.rotation.x = Math.sin(walkCycle * 2) * 0.05;
+            } else {
+                // Reset suave para posição de descanso
+                legL.rotation.x = THREE.MathUtils.lerp(legL.rotation.x, 0, 0.1);
+                legR.rotation.x = THREE.MathUtils.lerp(legR.rotation.x, 0, 0.1);
+                armL.rotation.x = THREE.MathUtils.lerp(armL.rotation.x, 0, 0.1);
+                armR.rotation.x = THREE.MathUtils.lerp(armR.rotation.x, 0, 0.1);
             }
-            if(keys['ArrowRight'] || keys['KeyD']) {
-                boy.position.x += 0.08;
-                boy.rotation.y = Math.PI/2;
-            }
 
-            // Pulo (Gravidade Sênior)
-            if((keys['Space'] || keys['ArrowUp'] || keys['KeyW']) && isGrounded) {
-                velocityY = 0.15;
-                isGrounded = false;
-            }
-
-            if(!isGrounded) {
-                boy.position.y += velocityY;
-                velocityY -= 0.008; // Gravidade
-                if(boy.position.y <= 0) {
-                    boy.position.y = 0;
-                    isGrounded = true;
-                }
-            }
-
-            // Câmera segue o estilo Limbo (suave e lateral)
-            camera.position.x = THREE.MathUtils.lerp(camera.position.x, boy.position.x, 0.05);
-            camera.position.y = 1.5;
-            camera.position.z = 6;
-            camera.lookAt(boy.position.x, 1, 0);
-
-            // Luz segue os olhos
-            light.position.set(boy.position.x, 1, 1);
-
-            // Poeira flutuando
-            dust.rotation.y += 0.001;
+            camera.position.lerp(new THREE.Vector3(bodyGroup.position.x, 3, bodyGroup.position.z + 5), 0.05);
+            camera.lookAt(bodyGroup.position.x, 1, bodyGroup.position.z);
 
             renderer.render(scene, camera);
         }
