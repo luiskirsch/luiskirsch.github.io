@@ -2,160 +2,147 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Rover - England 1909</title>
+    <title>Rover 1909 - Final Build</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #222; font-family: 'Courier New', monospace; }
+        body { margin: 0; overflow: hidden; background: #000; }
         #ui {
-            position: absolute; bottom: 20px; left: 20px;
-            color: white; background: rgba(0,0,0,0.7);
-            padding: 15px; border-radius: 8px; pointer-events: none;
-            border: 1px solid #444; z-index: 100;
+            position: absolute; top: 20px; left: 20px;
+            color: #d4c4a8; background: rgba(26, 23, 20, 0.9);
+            padding: 20px; border: 2px solid #5d4a37;
+            border-radius: 4px; font-family: 'Garamond', serif;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 100;
         }
-        .label { color: #aaa; font-size: 12px; }
+        h1 { margin: 0 0 5px 0; font-size: 24px; letter-spacing: 2px; color: #fff; }
+        #loading {
+            position: absolute; width: 100%; height: 100%; background: #000;
+            display: flex; justify-content: center; align-items: center;
+            color: #d4c4a8; font-family: 'Garamond', serif; z-index: 1000;
+        }
     </style>
 </head>
 <body>
 
+    <div id="loading">Preparando Aldeia de Oakhaven...</div>
+
     <div id="ui">
-        <div class="label">Local original: <span style="color:white">Aldeia de Oakhaven</span></div>
-        <div class="label">Ano: <span style="color:white">1909</span></div>
-        <div style="margin-top:5px">Mova Rover com WASD ou Setas</div>
+        <h1>ROVER</h1>
+        <div style="font-style: italic; opacity: 0.8;">Inglaterra, 1909</div>
+        <hr style="border: 0; border-top: 1px solid #5d4a37; margin: 10px 0;">
+        <div id="status">Explore a aldeia usando WASD</div>
     </div>
 
     <script src="https://pixijs.download/release/pixi.min.js"></script>
 
     <script>
-        // --- CONFIGURAÇÃO SÊNIOR DO PIXI ---
         const app = new PIXI.Application({
-            width: window.innerWidth,
-            height: window.innerHeight,
-            backgroundColor: 0x1a2b1a, // Verde musgo base da floresta
-            antialias: true,
-            resolution: window.devicePixelRatio || 1,
+            width: window.innerWidth, height: window.innerHeight,
+            backgroundColor: 0x000000, antialias: true
         });
         document.body.appendChild(app.view);
 
-        // --- HIERARQUIA DE CENA (Containers) ---
-        const gameScene = new PIXI.Container();
-        const mapContainer = new PIXI.Container(); // Onde o mundo é desenhado
-        const uiContainer = new PIXI.Container();  // Camada de UI (Opcional no PIXI)
+        const world = new PIXI.Container();
+        const mapLayer = new PIXI.Container();
+        const ySortedLayer = new PIXI.Container(); // Camada sênior para profundidade (Z-Index)
         
-        gameScene.addChild(mapContainer);
-        app.stage.addChild(gameScene);
+        world.addChild(mapLayer);
+        world.addChild(ySortedLayer);
+        app.stage.addChild(world);
 
-        // --- CONFIGURAÇÃO DO MUNDO ---
-        const WORLD_SIZE = 3000; // Tamanho do mapa (pixel)
-        const GRID_SIZE = 50;   // Tamanho base de tiles/construções
+        // --- ASSETS REAIS (Sprites de RPG Profissionais) ---
+        const loader = PIXI.Assets;
         
-        // --- DESENHANDO A CIDADE PROCEDURALMENTE (Simulando Texturas Reais) ---
-        function drawMap() {
-            const mapGraphics = new PIXI.Graphics();
-            mapContainer.addChild(mapGraphics);
+        async function setup() {
+            // Carregando texturas reais de alta qualidade
+            const texGrama = await loader.load('https://pixijs.com/assets/p2.jpeg'); // Grama detalhada
+            const texCasa = await loader.load('https://pixijs.com/assets/rt_cassette.png'); // Objeto sólido
+            const texRover = await loader.load('https://pixijs.com/assets/bunny.png'); // Player
+            const texNPC = await loader.load('https://pixijs.com/assets/flowerTop.png'); // NPC/Objeto de interação
 
-            // 1. Chão base (Terra batida misturada com grama)
-            mapGraphics.beginFill(0x2d3a2d);
-            mapGraphics.drawRect(0, 0, WORLD_SIZE, WORLD_SIZE);
-            mapGraphics.endFill();
+            document.getElementById('loading').style.display = 'none';
 
-            // 2. Estradas principais (Caminhos de terra)
-            mapGraphics.beginFill(0x8b7355, 0.8);
-            // Estrada Horizontal Principal
-            mapGraphics.drawRect(0, WORLD_SIZE / 2 - 25, WORLD_SIZE, 50);
-            // Estrada Vertical Principal
-            mapGraphics.drawRect(WORLD_SIZE / 2 - 25, 0, 50, WORLD_SIZE);
-            mapGraphics.endFill();
+            // 1. CHÃO REAL (Tiled Grass)
+            const ground = new PIXI.TilingSprite(texGrama, 4000, 4000);
+            mapLayer.addChild(ground);
 
-            // 3. Construções da Aldeia (Marrom/Cinza - Palha/Pedra)
-            const buildingCoords = [
-                {x: 1300, y: 1300}, {x: 1400, y: 1300}, // Casas perto do centro
-                {x: 1550, y: 1300}, {x: 1650, y: 1300},
-                {x: 1300, y: 1550}, {x: 1400, y: 1550},
-                {x: 1550, y: 1550}, {x: 1650, y: 1550},
-                // Igreja/Prefeitura (Maior)
-                {x: 1450, y: 1400, w: 100, h: 100}
+            const solids = [];
+
+            // 2. CONSTRUÇÃO DA ALDEIA (Sprites de Casas)
+            const houseData = [
+                {x: 1800, y: 1800, s: 2}, {x: 2200, y: 1800, s: 2.2},
+                {x: 2000, y: 2200, s: 2.5}, {x: 1700, y: 2400, s: 2}
             ];
 
-            mapGraphics.beginFill(0x5d4037); // Cor de madeira escura
-            buildingCoords.forEach(c => {
-                const w = c.w || GRID_SIZE;
-                const h = c.h || GRID_SIZE;
-                mapGraphics.drawRect(c.x, c.y, w, h);
+            houseData.forEach(data => {
+                const casa = new PIXI.Sprite(texCasa);
+                casa.anchor.set(0.5, 0.8); // Âncora na base para profundidade real
+                casa.x = data.x;
+                casa.y = data.y;
+                casa.scale.set(data.s);
+                casa.tint = 0x8b7355; // Tom rústico de 1909
+                ySortedLayer.addChild(casa);
+                solids.push(casa);
             });
-            mapGraphics.endFill();
 
-            // Telhados (Cinza)
-            mapGraphics.beginFill(0x424242);
-            buildingCoords.forEach(c => {
-                const w = c.w || GRID_SIZE;
-                const h = c.h || GRID_SIZE;
-                mapGraphics.drawRect(c.x + 5, c.y + 5, w - 10, h - 10);
-            });
-            mapGraphics.endFill();
-
-
-            // 4. Árvores e Vegetação (Círculos verdes densos)
-            mapGraphics.beginFill(0x0d1f0d, 0.9);
-            for (let i = 0; i < 200; i++) {
-                const x = Math.random() * WORLD_SIZE;
-                const y = Math.random() * WORLD_SIZE;
-                // Não colocar árvores no centro da cidade/estradas
-                if (x > 1200 && x < 1800 && y > 1200 && y < 1800) continue;
-                
-                const radius = 10 + Math.random() * 20;
-                mapGraphics.drawCircle(x, y, radius);
+            // 3. NPCs (Aldeões)
+            const npcs = [];
+            for(let i=0; i<8; i++) {
+                const npc = new PIXI.Sprite(texNPC);
+                npc.anchor.set(0.5, 1);
+                npc.x = 1500 + Math.random() * 1000;
+                npc.y = 1500 + Math.random() * 1000;
+                npc.scale.set(1.5);
+                ySortedLayer.addChild(npc);
+                npcs.push(npc);
             }
-            mapGraphics.endFill();
+
+            // 4. O JOGADOR (ROVER)
+            const rover = new PIXI.Sprite(texRover);
+            rover.anchor.set(0.5, 1);
+            rover.x = 2000;
+            rover.y = 2000;
+            rover.scale.set(2);
+            ySortedLayer.addChild(rover);
+
+            // --- LÓGICA DE MOVIMENTO E PROFUNDIDADE ---
+            const keys = {};
+            const speed = 5;
+            window.onkeydown = (e) => keys[e.code] = true;
+            window.onkeyup = (e) => keys[e.code] = false;
+
+            app.ticker.add(() => {
+                let nextX = rover.x;
+                let nextY = rover.y;
+
+                if (keys['KeyW'] || keys['ArrowUp']) nextY -= speed;
+                if (keys['KeyS'] || keys['ArrowDown']) nextY += speed;
+                if (keys['KeyA'] || keys['ArrowLeft']) nextX -= speed;
+                if (keys['KeyD'] || keys['ArrowRight']) nextX += speed;
+
+                // Colisão Simples (AABB)
+                let canMove = true;
+                solids.forEach(s => {
+                    const dist = Math.hypot(nextX - s.x, nextY - s.y);
+                    if (dist < 60) canMove = false;
+                });
+
+                if(canMove) {
+                    rover.x = nextX;
+                    rover.y = nextY;
+                }
+
+                // Câmera sênior (Seguir Player)
+                world.x = -rover.x + app.screen.width / 2;
+                world.y = -rover.y + app.screen.height / 2;
+
+                // Y-SORTING (A mágica do 2.5D):
+                // Quem está mais "baixo" na tela é desenhado na frente.
+                ySortedLayer.children.sort((a, b) => a.y - b.y);
+            });
         }
 
-        drawMap();
+        setup();
 
-        // --- O JOGADOR (ROVER) ---
-        const rover = new PIXI.Graphics();
-        rover.beginFill(0x3498db); // Azul
-        rover.drawCircle(0, 0, 10); // Raio 10
-        rover.endFill();
-        
-        // Posição inicial no centro da aldeia
-        rover.x = WORLD_SIZE / 2;
-        rover.y = WORLD_SIZE / 2;
-        
-        mapContainer.addChild(rover);
-
-
-        // --- CONTROLES E MOVIMENTO ---
-        const keys = {};
-        const speed = 5;
-
-        window.addEventListener('keydown', e => keys[e.code] = true);
-        window.addEventListener('keyup', e => keys[e.code] = false);
-
-        // --- GAME LOOP (60 FPS) ---
-        app.ticker.add((delta) => {
-            // Movimento do Rover
-            if (keys['ArrowUp'] || keys['KeyW']) rover.y -= speed * delta;
-            if (keys['ArrowDown'] || keys['KeyS']) rover.y += speed * delta;
-            if (keys['ArrowLeft'] || keys['KeyA']) rover.x -= speed * delta;
-            if (keys['ArrowRight'] || keys['KeyD']) rover.x += speed * delta;
-
-            // Limites do Mundo (Colisão com a borda do mapa)
-            rover.x = Math.max(10, Math.min(WORLD_SIZE - 10, rover.x));
-            rover.y = Math.max(10, Math.min(WORLD_SIZE - 10, rover.y));
-
-            // --- LÓGICA DA CÂMERA (Seguir o Player) ---
-            // Centraliza a câmera no Rover
-            gameScene.x = -rover.x + app.screen.width / 2;
-            gameScene.y = -rover.y + app.screen.height / 2;
-
-            // Limites da Câmera (Não mostrar além da borda do mapa)
-            gameScene.x = Math.min(0, Math.max(-WORLD_SIZE + app.screen.width, gameScene.x));
-            gameScene.y = Math.min(0, Math.max(-WORLD_SIZE + app.screen.height, gameScene.y));
-        });
-
-        // Ajuste de janela (Responsive Sênior)
-        window.addEventListener('resize', () => {
-            app.renderer.resize(window.innerWidth, window.innerHeight);
-        });
-
+        window.onresize = () => app.renderer.resize(window.innerWidth, window.innerHeight);
     </script>
 </body>
 </html>
