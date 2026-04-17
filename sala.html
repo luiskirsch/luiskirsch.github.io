@@ -1317,6 +1317,14 @@
       gap:12px;
     }
 
+    /* Quando o effectPanel está visível, o card encolhe para caber na tela */
+    .cardCenter--effect-open .ritualCardWrap{
+      height:min(38vh, calc(100svh - 420px));
+    }
+    html.arenaMode .cardCenter--effect-open .ritualCardWrap{
+      height:min(38vh, calc(100svh - 380px));
+    }
+
     .deckInfoBar{
       font-size:12px;
       color:var(--muted);
@@ -6937,15 +6945,18 @@
     function renderActiveEffect(effect) {
       const panel = document.getElementById("effectPanel");
       if (!panel) return;
+      const cardCenter = panel.closest(".cardCenter");
 
       if (!effect || effect.resolved) {
         panel.style.display = "none";
+        if (cardCenter) cardCenter.classList.remove("cardCenter--effect-open");
         clearEffectTimer();
         stopAIVAD();
         return;
       }
 
       panel.style.display = "flex";
+      if (cardCenter) cardCenter.classList.add("cardCenter--effect-open");
 
       const titleEl = panel.querySelector(".effectPanel__title");
       const bodyEl = panel.querySelector(".effectPanel__body");
