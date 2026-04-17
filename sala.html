@@ -7004,20 +7004,28 @@
         analyser.fftSize = 256;
         source.connect(analyser);
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        const THRESHOLD = 18;
-        const SILENCE_AFTER_SPEECH_MS = 3500;
+        const THRESHOLD = 40;
+        const MIN_SPEECH_TICKS = 6; // 600ms contínuos acima do threshold para contar como fala
+        const SILENCE_AFTER_SPEECH_MS = 4000;
+        let speechTicks = 0;
         aiVADHasSpoken = false;
         aiVADInterval = setInterval(() => {
           analyser.getByteFrequencyData(dataArray);
           const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
           if (avg > THRESHOLD) {
-            aiVADHasSpoken = true;
-            if (aiVADSilenceTimer) { clearTimeout(aiVADSilenceTimer); aiVADSilenceTimer = null; }
-          } else if (aiVADHasSpoken && !aiVADSilenceTimer) {
-            aiVADSilenceTimer = setTimeout(() => {
-              writeAIDetection("voice", playerName, null);
-              stopAIVAD();
-            }, SILENCE_AFTER_SPEECH_MS);
+            speechTicks++;
+            if (speechTicks >= MIN_SPEECH_TICKS) {
+              aiVADHasSpoken = true;
+              if (aiVADSilenceTimer) { clearTimeout(aiVADSilenceTimer); aiVADSilenceTimer = null; }
+            }
+          } else {
+            speechTicks = 0;
+            if (aiVADHasSpoken && !aiVADSilenceTimer) {
+              aiVADSilenceTimer = setTimeout(() => {
+                writeAIDetection("voice", playerName, null);
+                stopAIVAD();
+              }, SILENCE_AFTER_SPEECH_MS);
+            }
           }
         }, 100);
       } catch (_) { /* microfone negado ou indisponível */ }
