@@ -547,6 +547,8 @@ function setupRoomListeners(room) {
   });
 }
 
+window.isInVideoCall = () => !!lkRoom;
+
 async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);

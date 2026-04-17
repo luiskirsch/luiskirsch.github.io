@@ -6996,6 +6996,7 @@
     async function startAIVAD(effect) {
       stopAIVAD();
       if (!effect?.params?.targetId || participantId !== effect.params.targetId) return;
+      if (typeof window.isInVideoCall !== "function" || !window.isInVideoCall()) return;
       try {
         aiVADStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         aiVADContext = new AudioContext();
