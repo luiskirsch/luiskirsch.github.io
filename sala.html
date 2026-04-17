@@ -5293,7 +5293,7 @@
               </div>
 
               <div class="tableHeadRight">
-                <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar Próxima Carta</button>
+                <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar Primeira Carta</button>
                 <button class="videoBtn primary" id="resetRitualBtn" disabled>Reiniciar ritual</button>
                 <a class="videoBtn" href="deck-builder.html" target="_blank" title="Construtor de Deck" style="text-decoration:none;padding:6px 12px;font-size:12px">🃏 Deck</a>
 
@@ -6600,7 +6600,10 @@
     function updateRitualButtons() {
       const canControl = isHost && ritualStarted;
       const effectBlocking = !!(currentActiveEffect && !currentActiveEffect.resolved);
-      if (revealCardBtn) revealCardBtn.disabled = !canControl || ritualDeck.length === 0 || effectBlocking;
+      if (revealCardBtn) {
+        revealCardBtn.disabled = !canControl || ritualDeck.length === 0 || effectBlocking;
+        revealCardBtn.textContent = (ritualStarted && !currentCard) ? "Revelar Primeira Carta" : "Revelar Próxima Carta";
+      }
       if (resetRitualBtn) resetRitualBtn.disabled = !isHost || !ritualStarted;
     }
 
@@ -6698,7 +6701,6 @@
       // XP: bônus de início de sessão
       await OSL_XP.award(userRef, "SESSION_JOIN");
 
-      await revealNextRitualCard();
       updateRitualButtons();
     }
 
@@ -6719,7 +6721,6 @@
       }, { merge: true });
 
       await addHistoryItem("Ritual", "O ritual foi reiniciado.");
-      await revealNextRitualCard();
       await panelMarkSessionStart();
       updateRitualButtons();
     }
