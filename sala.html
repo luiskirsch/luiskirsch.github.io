@@ -7186,15 +7186,28 @@
         const data = snap.data();
 
         const today = new Date().toISOString().slice(0, 10);
-        if ((data.lastDailyReward || "") === today) return;
+        const alreadyClaimed = (data.lastDailyReward || "") === today;
+        const pendingXp = data.pendingDailyXp || 0;
 
-        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-        const streak = (data.lastDailyReward === yesterday) ? (data.dailyStreak || 0) + 1 : 1;
-        const xp = DAILY_STREAK_XP[Math.min(streak - 1, DAILY_STREAK_XP.length - 1)];
+        // Já coletou hoje e não há XP pendente → não exibe nada
+        if (alreadyClaimed && pendingXp === 0) return;
+
+        let streak, xp;
+        if (alreadyClaimed && pendingXp > 0) {
+          // Fechou o modal antes de coletar: reexibe com os valores já gravados
+          streak = data.dailyStreak || 1;
+          xp = pendingXp;
+        } else {
+          const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+          streak = (data.lastDailyReward === yesterday) ? (data.dailyStreak || 0) + 1 : 1;
+          xp = DAILY_STREAK_XP[Math.min(streak - 1, DAILY_STREAK_XP.length - 1)];
+          // Grava imediatamente para bloquear re-exibição em acessos posteriores
+          await setDoc(userRef, { lastDailyReward: today, dailyStreak: streak, pendingDailyXp: xp }, { merge: true });
+        }
 
         showDailyRewardModal(streak, xp, async () => {
-          await setDoc(userRef, { lastDailyReward: today, dailyStreak: streak }, { merge: true });
           await OSL_XP.award(userRef, null, xp);
+          await setDoc(userRef, { pendingDailyXp: 0 }, { merge: true });
         });
       } catch (_) {}
     }
