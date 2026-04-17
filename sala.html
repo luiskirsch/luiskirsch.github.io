@@ -1552,13 +1552,19 @@
       display:none;
       align-items:center;
       gap:10px;
-      background:rgba(255,200,50,.1);
+      position:fixed;
+      bottom:80px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:1200;
+      background:rgba(20,15,5,.95);
       border:1px solid rgba(255,200,50,.35);
       border-radius:10px;
-      padding:10px 14px;
-      margin-top:8px;
+      padding:10px 16px;
       font-size:12px;
       color:#ffd060;
+      white-space:nowrap;
+      box-shadow:0 4px 24px rgba(0,0,0,.5);
       animation:effectPanelIn .3s ease;
     }
     .aiDetectToast__icon{font-size:15px;flex-shrink:0}
@@ -7047,9 +7053,11 @@
 
     async function resolveActiveEffect(winner) {
       if (!isHost) return;
-      const update = { activeEffect: null };
+      const update = { activeEffect: null, aiDetection: null };
       if (winner) update.voteResult = { winner, resolvedAt: Date.now() };
       await setDoc(ritualRef, update, { merge: true });
+      const toast = document.getElementById("aiDetectToast");
+      if (toast) toast.style.display = "none";
     }
 
     function getVoteWinner(votes) {
