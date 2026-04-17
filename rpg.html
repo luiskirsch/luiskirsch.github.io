@@ -2,153 +2,189 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>RPG de Código - Exemplo</title>
+    <title>RPG 2D de Código Puro</title>
     <style>
         body {
             background-color: #121212;
             color: #e0e0e0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            flex-direction: column;
         }
 
-        #game-container {
-            width: 400px;
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 8px;
-            border: 2px solid #333;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-
-        #screen-text {
-            height: 150px;
-            margin-bottom: 20px;
-            font-size: 18px;
-            line-height: 1.5;
-            overflow-y: auto;
-        }
-
-        #controls {
+        /* O novo contêiner principal */
+        #game-view {
+            width: 440px;
             display: flex;
             flex-direction: column;
             gap: 10px;
+        }
+
+        /* A Grid do Mapa (10x10) */
+        #map-container {
+            width: 400px;
+            height: 400px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            position: relative; /* Para o personagem flutuar sobre ela */
+        }
+
+        /* Estilo para as paredes */
+        .wall { background-color: #333; }
+        /* Estilo para o chão */
+        .floor { background-color: #1a1a1a; }
+        /* Estilo para o objetivo (Tesouro/Porta) */
+        .goal { background-color: #aa8800; }
+
+        /* O Personagem (Um quadrado simples) */
+        #player {
+            width: 36px;
+            height: 36px;
+            background-color: #00ffcc;
+            position: absolute;
+            transition: all 0.1s ease-out; /* Efeito suave de movimento */
+            top: 2px;
+            left: 2px;
+            border-radius: 4px;
+        }
+
+        /* O Log de Texto adaptado */
+        #event-log {
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            height: 60px;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+
+        /* Os Controles Adaptados */
+        #controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
         }
 
         button {
             background: #2c2c2c;
             color: white;
             border: 1px solid #444;
-            padding: 12px;
+            padding: 10px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
-        button:hover {
-            background: #3d3d3d;
-            border-color: #00ffcc;
-            /* Efeito de brilho que você gosta */
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
-        }
+        button:hover { background: #3d3d3d; border-color: #00ffcc; }
 
-        #stats {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #333;
-            font-size: 14px;
-            color: #00ffcc;
-        }
+        #stats { color: #00ffcc; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="screen-text">Carregando aventura...</div>
-    <div id="controls"></div>
-    <div id="stats">HP: <span id="hp">20</span> | Nível: <span id="lvl">1</span></div>
+<div id="game-view">
+    <div id="map-container">
+        </div>
+    <div id="event-log"></div>
+    <div id="stats">HP: 20 | Coords: <span id="coords">0,0</span></div>
+    <div id="controls">
+        <button onclick="move(0, -1)">Cima</button>
+        <button onclick="move(0, 1)">Baixo</button>
+        <button onclick="move(-1, 0)">Esquerda</button>
+        <button onclick="move(1, 0)">Direita</button>
+    </div>
 </div>
 
 <script>
-    // Lógica do jogo (Baseada em Estados)
-    const gameStates = {
-        inicio: {
-            texto: "Você acorda em uma masmorra úmida. Há uma porta de ferro à sua frente e um brilho estranho no canto.",
-            botoes: [
-                { rotulo: "Abrir a porta", proximo: "corredor" },
-                { rotulo: "Investigar o brilho", proximo: "tesouro" }
-            ]
-        },
-        tesouro: {
-            texto: "Era um amuleto antigo! Você sente um poder crescendo em você. (HP Restaurado)",
-            botoes: [
-                { rotulo: "Ir para a porta", proximo: "corredor" }
-            ],
-            acao: () => { player.hp = 20; updateStats(); }
-        },
-        corredor: {
-            texto: "Um corredor longo e escuro. Você ouve passos pesados vindo em sua direção.",
-            botoes: [
-                { rotulo: "Lutar!", proximo: "combate" },
-                { rotulo: "Tentar se esconder", proximo: "esconder" }
-            ]
-        },
-        combate: {
-            texto: "Um Orc surge das sombras! Você saca sua espada.",
-            botoes: [
-                { rotulo: "Atacar (Gasta HP)", proximo: "vitoria" },
-                { rotulo: "Fugir", proximo: "inicio" }
-            ]
-        },
-        vitoria: {
-            texto: "Você derrotou o Orc! O caminho está livre para a saída.",
-            botoes: [
-                { rotulo: "Recomeçar", proximo: "inicio" }
-            ],
-            acao: () => { player.lvl++; player.hp -= 5; updateStats(); }
-        },
-        esconder: {
-            texto: "O Orc passou direto por você. Que sorte! Você encontrou uma saída secreta.",
-            botoes: [
-                { rotulo: "Recomeçar", proximo: "inicio" }
-            ]
+    // Configurações do Mapa (10x10)
+    // 0 = Chão, 1 = Parede, 2 = Objetivo
+    const mapWidth = 10;
+    const mapHeight = 10;
+    const tileSize = 40; // 400px / 10 tiles
+
+    const mapData = [
+        [0,0,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,0,1,1,0,1],
+        [1,0,0,0,1,0,1,0,0,1],
+        [1,0,1,0,0,0,0,0,1,1],
+        [1,0,1,1,1,1,1,0,1,1],
+        [1,0,0,0,0,0,1,0,0,1],
+        [1,1,1,0,1,0,1,1,0,1],
+        [1,0,0,0,1,0,0,0,0,2], // 2 é o objetivo
+        [1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    // Posição inicial do jogador
+    let playerPos = { x: 0, y: 0 };
+
+    // Criar o Mapa no DOM
+    function createMap() {
+        const container = document.getElementById('map-container');
+        for (let y = 0; y < mapHeight; y++) {
+            for (let x = 0; x < mapWidth; x++) {
+                const tile = document.createElement('div');
+                tile.className = mapData[y][x] === 1 ? 'wall' : (mapData[y][x] === 2 ? 'goal' : 'floor');
+                container.appendChild(tile);
+            }
         }
-    };
-
-    let player = { hp: 20, lvl: 1 };
-
-    function updateStats() {
-        document.getElementById('hp').innerText = player.hp;
-        document.getElementById('lvl').innerText = player.lvl;
+        
+        // Adicionar o jogador por último (para flutuar)
+        const playerDiv = document.createElement('div');
+        playerDiv.id = 'player';
+        container.appendChild(playerDiv);
     }
 
-    function renderState(stateKey) {
-        const state = gameStates[stateKey];
-        const screen = document.getElementById('screen-text');
-        const controls = document.getElementById('controls');
+    // Função para mover o jogador
+    function move(dx, dy) {
+        const newX = playerPos.x + dx;
+        const newY = playerPos.y + dy;
+        const log = document.getElementById('event-log');
 
-        // Executa ação se houver (como subir nível ou curar)
-        if (state.acao) state.acao();
+        // 1. Verificar Colisão com Bordas
+        if (newX < 0 || newX >= mapWidth || newY < 0 || newY >= mapHeight) {
+            log.innerText = "Você não pode ir por ali!";
+            return;
+        }
 
-        // Atualiza texto
-        screen.innerText = state.texto;
+        // 2. Verificar Colisão com Paredes (mapData[y][x])
+        if (mapData[newY][newX] === 1) {
+            log.innerText = "Tem uma parede aí!";
+            return;
+        }
 
-        // Limpa e cria novos botões
-        controls.innerHTML = '';
-        state.botoes.forEach(btn => {
-            const b = document.createElement('button');
-            b.innerText = btn.rotulo;
-            b.onclick = () => renderState(btn.proximo);
-            controls.appendChild(b);
-        });
+        // 3. Mover (Atualizar Coordenadas e CSS)
+        playerPos.x = newX;
+        playerPos.y = newY;
+        const playerDiv = document.getElementById('player');
+        
+        // Convertemos as coordenadas da grid em pixels CSS
+        playerDiv.style.left = (playerPos.x * tileSize + 2) + 'px';
+        playerDiv.style.top = (playerPos.y * tileSize + 2) + 'px';
+
+        // 4. Atualizar o Log e Coordenadas no painel
+        log.innerText = `Andando por: [${playerPos.x}, ${playerPos.y}]`;
+        document.getElementById('coords').innerText = `${playerPos.x}, ${playerPos.y}`;
+
+        // 5. Verificar Objetivo
+        if (mapData[newY][newX] === 2) {
+            log.innerText = "Você encontrou o tesouro! Fim da demonstração.";
+        }
     }
 
-    // Iniciar o jogo
-    renderState('inicio');
+    // Inicializar
+    createMap();
+    log = document.getElementById('event-log');
+    log.innerText = "Mova-se pelos corredores úmidos com os botões.";
 </script>
 
 </body>
