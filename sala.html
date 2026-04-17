@@ -1426,42 +1426,46 @@
       color:rgba(200,150,60,.9);
     }
 
-    /* ── XP Card (topo) ──────────────────────────────────────────────── */
+    /* ── XP Card (fixo no canto superior direito) ───────────────────── */
     .xpCard{
+      position:fixed;
+      top:12px;
+      right:16px;
+      z-index:9000;
       display:inline-flex;
       align-items:center;
-      gap:10px;
-      background:rgba(15,10,5,.75);
-      border:1px solid rgba(200,150,60,.28);
+      gap:8px;
+      background:rgba(12,8,3,.82);
+      border:1px solid rgba(200,150,60,.3);
       border-radius:999px;
-      padding:5px 14px 5px 10px;
-      backdrop-filter:blur(6px);
+      padding:5px 12px 5px 10px;
+      backdrop-filter:blur(8px);
       white-space:nowrap;
+      pointer-events:none;
     }
     .xpCard__level{
       font-size:11px;
       font-weight:700;
-      color:rgba(200,150,60,.9);
+      color:rgba(200,150,60,.95);
       letter-spacing:.06em;
-      min-width:48px;
     }
     .xpCard__bar{
-      width:80px;
-      height:5px;
+      width:60px;
+      height:4px;
       background:rgba(255,255,255,.08);
       border-radius:999px;
       overflow:hidden;
     }
     .xpCard__barFill{
       height:100%;
-      background:linear-gradient(90deg,rgba(200,150,60,.7),rgba(240,190,80,.95));
+      background:linear-gradient(90deg,rgba(200,150,60,.65),rgba(240,190,80,.9));
       border-radius:999px;
       transition:width .6s ease;
     }
     .xpCard__xp{
       font-size:11px;
       color:var(--muted,#8a7a6a);
-      letter-spacing:.04em;
+      letter-spacing:.03em;
     }
 
     /* Placeholder shown when a column slot has no tile yet */
@@ -5128,12 +5132,6 @@
                 <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar Próxima Carta</button>
                 <button class="videoBtn primary" id="resetRitualBtn" disabled>Reiniciar ritual</button>
                 <a class="videoBtn" href="deck-builder.html" target="_blank" title="Construtor de Deck" style="text-decoration:none;padding:6px 12px;font-size:12px">🃏 Deck</a>
-
-                <div class="xpCard" id="xpCard" title="Seu progresso de XP">
-                  <span class="xpCard__level" id="xpCardLevel">Nível 1</span>
-                  <div class="xpCard__bar"><div class="xpCard__barFill" id="xpCardFill" style="width:0%"></div></div>
-                  <span class="xpCard__xp" id="xpCardXp">0 XP</span>
-                </div>
 
                 <div class="sessionStatus">
                   <span class="dot"></span>
@@ -10706,5 +10704,11 @@
       }
     })();
   </script>
+<!-- ── XP Card (fixo, fora do fluxo) ───────────────────────────────── -->
+<div class="xpCard" id="xpCard" title="Seu progresso de XP">
+  <span class="xpCard__level" id="xpCardLevel">Nível 1</span>
+  <div class="xpCard__bar"><div class="xpCard__barFill" id="xpCardFill" style="width:0%"></div></div>
+  <span class="xpCard__xp" id="xpCardXp">0 XP</span>
+</div>
 </body>
 </html>
