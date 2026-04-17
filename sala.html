@@ -1426,26 +1426,42 @@
       color:rgba(200,150,60,.9);
     }
 
-    /* ── XP Toast ────────────────────────────────────────────────────── */
-    .xpToast{
-      position:fixed;
-      bottom:80px;
-      left:50%;
-      transform:translateX(-50%) translateY(20px);
-      background:rgba(80,160,80,.9);
-      color:#fff;
-      font-size:16px;
-      font-weight:700;
-      padding:8px 20px;
+    /* ── XP Card (topo) ──────────────────────────────────────────────── */
+    .xpCard{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      background:rgba(15,10,5,.75);
+      border:1px solid rgba(200,150,60,.28);
       border-radius:999px;
-      pointer-events:none;
-      opacity:0;
-      transition:opacity .3s,transform .3s;
-      z-index:9999;
+      padding:5px 14px 5px 10px;
+      backdrop-filter:blur(6px);
+      white-space:nowrap;
     }
-    .xpToast--visible{
-      opacity:1;
-      transform:translateX(-50%) translateY(0);
+    .xpCard__level{
+      font-size:11px;
+      font-weight:700;
+      color:rgba(200,150,60,.9);
+      letter-spacing:.06em;
+      min-width:48px;
+    }
+    .xpCard__bar{
+      width:80px;
+      height:5px;
+      background:rgba(255,255,255,.08);
+      border-radius:999px;
+      overflow:hidden;
+    }
+    .xpCard__barFill{
+      height:100%;
+      background:linear-gradient(90deg,rgba(200,150,60,.7),rgba(240,190,80,.95));
+      border-radius:999px;
+      transition:width .6s ease;
+    }
+    .xpCard__xp{
+      font-size:11px;
+      color:var(--muted,#8a7a6a);
+      letter-spacing:.04em;
     }
 
     /* Placeholder shown when a column slot has no tile yet */
@@ -5113,6 +5129,12 @@
                 <button class="videoBtn primary" id="resetRitualBtn" disabled>Reiniciar ritual</button>
                 <a class="videoBtn" href="deck-builder.html" target="_blank" title="Construtor de Deck" style="text-decoration:none;padding:6px 12px;font-size:12px">🃏 Deck</a>
 
+                <div class="xpCard" id="xpCard" title="Seu progresso de XP">
+                  <span class="xpCard__level" id="xpCardLevel">Nível 1</span>
+                  <div class="xpCard__bar"><div class="xpCard__barFill" id="xpCardFill" style="width:0%"></div></div>
+                  <span class="xpCard__xp" id="xpCardXp">0 XP</span>
+                </div>
+
                 <div class="sessionStatus">
                   <span class="dot"></span>
                   <span id="sessionLabel">Sessão não iniciada</span>
@@ -6124,7 +6146,7 @@
       "Medo real":          { deathrattle: { type: "give_xp", amount: 15 } },
       // Casais
       "Meu medo de nós":    { deathrattle: { type: "give_xp", amount: 20 } },
-      "Palavra que nos define": { battlecry: { type: "vote", question: "Qual palavra define a relação de vocês?" } },
+      "Palavra que nos define": { battlecry: { type: "vote", question: "Qual palavra define a relação de vocês?", options: ["Amor", "Parceria", "Cumplicidade", "Desafio", "Confiança", "Transformação", "Liberdade", "Conexão"] } },
       "Expectativa não dita": { deathrattle: { type: "give_xp", amount: 15 } },
       "Pergunta que evito": { battlecry: { type: "force_player", target: "random", label: "faz a pergunta que evita" },
                               deathrattle: { type: "give_xp", amount: 10 } }
@@ -6160,7 +6182,6 @@
         if (!amount || !ref) return;
         try {
           await updateDoc(ref, { xp: increment(amount) });
-          showXpToast(amount);
         } catch(e) { console.warn("XP award error:", e); }
       }
     };
@@ -6839,18 +6860,6 @@
       if (activeEffectTimer) { clearInterval(activeEffectTimer); activeEffectTimer = null; }
     }
 
-    // ── Toast de XP ───────────────────────────────────────────────────────
-    function showXpToast(amount) {
-      const toast = document.createElement("div");
-      toast.className = "xpToast";
-      toast.textContent = `+${amount} XP`;
-      document.body.appendChild(toast);
-      requestAnimationFrame(() => toast.classList.add("xpToast--visible"));
-      setTimeout(() => {
-        toast.classList.remove("xpToast--visible");
-        setTimeout(() => toast.remove(), 400);
-      }, 1800);
-    }
 
     function bindRitual() {
       if (ritualUnsub) ritualUnsub();
@@ -8392,11 +8401,27 @@
       }, HEARTBEAT_MS);
     }
 
+    function updateXpCard(xp) {
+      const lv = OSL_XP.levelFromXP(xp);
+      const curr = OSL_XP.xpForLevel(lv);
+      const next = OSL_XP.xpForNextLevel(lv);
+      const pct = next > curr ? Math.round((xp - curr) / (next - curr) * 100) : 100;
+      const levelEl = document.getElementById("xpCardLevel");
+      const fillEl = document.getElementById("xpCardFill");
+      const xpEl = document.getElementById("xpCardXp");
+      if (levelEl) levelEl.textContent = `Nível ${lv}`;
+      if (fillEl) fillEl.style.width = `${pct}%`;
+      if (xpEl) xpEl.textContent = `${xp} XP`;
+    }
+
     function bindUserDoc() {
       onSnapshot(doc(db, "users", userId), (snap) => {
         if (!snap.exists()) return;
         const data = snap.data();
         const pending = (data.incomingRequests || []).length;
+
+        // Atualiza XP Card em tempo real
+        updateXpCard(data.xp || 0);
         const mobileProfileBadge  = document.getElementById("mobileProfileBadge");
         const desktopProfileBadge = document.getElementById("desktopProfileBadge");
         if (mobileProfileBadge)  mobileProfileBadge.classList.toggle("visible", pending > 0);
