@@ -10591,6 +10591,7 @@
 
     function syncAvatarVideos() {
       if (!mobilePlayerStrip) return;
+      if (!_mobileUiQuery.matches) return;
       mobilePlayerStrip.querySelectorAll(".mobileAvatar[data-pid]").forEach(function(avatarEl) {
         var pid = avatarEl.dataset.pid;
         if (!pid) return;
@@ -10703,8 +10704,11 @@
     // ── Self video thumbnail ──────────────────────────────────────────────────
     var _mirrorTrack = null;
 
+    var _mobileUiQuery = window.matchMedia("(max-width: 640px),(max-width:960px) and (orientation:landscape) and (pointer:coarse)");
+
     function mirrorSelfVideo() {
       if (!mobileVideoThumb) return;
+      if (!_mobileUiQuery.matches) return;
 
       var lkTrack = window._oslLocalVideoTrack || null;
 
