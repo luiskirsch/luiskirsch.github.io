@@ -1946,6 +1946,29 @@
       text-transform:uppercase;
     }
 
+    /* Variante com foto de perfil */
+    .videoCameraOff--photo{
+      background:none;
+      gap:0;
+    }
+    .videoCameraOff--photo .videoCameraOffIcon,
+    .videoCameraOff--photo .videoCameraOffText{ display:none; }
+    .videoCameraOffBgPhoto{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    /* Variante com emoji / iniciais */
+    .videoCameraOff--emoji .videoCameraOffIcon{
+      width:64px;
+      height:64px;
+      font-size:28px;
+      background:var(--avatar-color, rgba(215,176,107,.12));
+    }
+    .videoCameraOff--emoji .videoCameraOffText{ display:none; }
+
     .videoEmpty{
       display:grid;
       place-items:center;
@@ -8587,7 +8610,46 @@
 
       if (playerCountEl) playerCountEl.textContent = String(players.length);
       playersEmptyEl.style.display = players.length > 1 ? "none" : "block";
+      applyVideoTileAvatars();
     }
+
+    function applyVideoTileAvatars() {
+      const grid = document.getElementById("videoGrid");
+      if (!grid) return;
+      currentPlayers.forEach(player => {
+        if (player.id === participantId) return;
+        const tile = grid.querySelector(`.videoTile[data-identity="${CSS.escape(player.id)}"]`);
+        if (!tile) return;
+        const cameraOff = tile.querySelector(".videoCameraOff");
+        if (!cameraOff) return;
+        cameraOff.classList.remove("videoCameraOff--photo", "videoCameraOff--emoji");
+        if (player.avatarPhotoUrl) {
+          cameraOff.classList.add("videoCameraOff--photo");
+          let img = cameraOff.querySelector(".videoCameraOffBgPhoto");
+          if (!img) {
+            img = document.createElement("img");
+            img.className = "videoCameraOffBgPhoto";
+            cameraOff.insertBefore(img, cameraOff.firstChild);
+          }
+          img.src = player.avatarPhotoUrl;
+        } else {
+          cameraOff.classList.add("videoCameraOff--emoji");
+          const icon = cameraOff.querySelector(".videoCameraOffIcon");
+          if (icon) {
+            icon.textContent = player.avatarEmoji || initials(player.name);
+            if (player.avatarColor) icon.style.setProperty("--avatar-color", player.avatarColor);
+          }
+        }
+      });
+    }
+
+    // Reaplica avatares sempre que tiles forem adicionados ao grid
+    (function() {
+      const grid = document.getElementById("videoGrid");
+      if (!grid) return;
+      new MutationObserver(() => applyVideoTileAvatars())
+        .observe(grid, { childList: true, subtree: true });
+    })();
 
     function renderMessages(docs) {
       messagesEl.innerHTML = "";
