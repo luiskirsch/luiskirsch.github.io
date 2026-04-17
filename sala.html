@@ -6934,8 +6934,9 @@
 
     let lastVoteResultTimestamp = 0;
     function showVoteResultOverlay(winner, resolvedAt) {
-      // Evita re-exibir o mesmo resultado
+      // Só exibe se o resultado for recente (últimos 8s) e ainda não foi mostrado
       if (!winner || resolvedAt === lastVoteResultTimestamp) return;
+      if (Date.now() - resolvedAt > 8000) return;
       lastVoteResultTimestamp = resolvedAt;
 
       const overlay = document.createElement("div");
