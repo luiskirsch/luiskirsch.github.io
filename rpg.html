@@ -1,56 +1,133 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Sênior Voxel Engine</title>
-    <style> body { margin: 0; overflow: hidden; } </style>
+    <meta charset="UTF-8">
+    <title>Limbo Woods - Menino das Sombras</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; }
+        #ui {
+            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+            color: #444; font-family: 'serif'; letter-spacing: 5px; pointer-events: none;
+        }
+    </style>
 </head>
 <body>
+    <div id="ui">03:00</div>
+
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
+
     <script type="module">
         import * as THREE from 'three';
-        import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
 
+        // --- CENA E NÉVOA ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Cor do céu
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
+        scene.background = new THREE.Color(0x050505);
+        scene.fog = new THREE.FogExp2(0x050505, 0.15);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // --- RENDERIZAÇÃO OTIMIZADA (INSTANCING) ---
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshStandardMaterial({ color: 0x55aa55 });
-        const count = 1000; // 1000 blocos
-        const mesh = new THREE.InstancedMesh(geometry, material, count);
+        // --- ILUMINAÇÃO DRAMÁTICA ---
+        const light = new THREE.PointLight(0xffffff, 5, 20);
+        scene.add(light); // Luz que segue o menino
+
+        // --- O MENINO (SILHUETA ESTILO LIMBO) ---
+        const boy = new THREE.Group();
         
-        const dummy = new THREE.Object3D();
-        let i = 0;
-        for (let x = -10; x < 10; x++) {
-            for (let z = -10; z < 10; z++) {
-                dummy.position.set(x, 0, z);
-                dummy.updateMatrix();
-                mesh.setMatrixAt(i++, dummy.matrix);
-            }
+        // Corpo (Preto absoluto)
+        const bodyMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.4, 4, 8), bodyMat);
+        torso.position.y = 0.5;
+        boy.add(torso);
+
+        // Olhos Brilhantes (A única coisa que se vê)
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const eyeL = new THREE.Mesh(new THREE.CircleGeometry(0.04, 16), eyeMat);
+        const eyeR = new THREE.Mesh(new THREE.CircleGeometry(0.04, 16), eyeMat);
+        eyeL.position.set(-0.08, 0.75, 0.21);
+        eyeR.position.set(0.08, 0.75, 0.21);
+        boy.add(eyeL, eyeR);
+
+        scene.add(boy);
+
+        // --- CHÃO E OBSTÁCULOS (SOMBRAS) ---
+        const floorGeo = new THREE.BoxGeometry(200, 1, 10);
+        const blackMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const floor = new THREE.Mesh(floorGeo, blackMat);
+        floor.position.y = -0.5;
+        scene.add(floor);
+
+        // Árvores Distorcidas (Background)
+        for(let i=0; i<50; i++) {
+            const h = 5 + Math.random() * 10;
+            const tree = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.3, h), blackMat);
+            tree.position.set((Math.random()-0.5)*100, h/2 - 0.5, -2 - Math.random()*5);
+            scene.add(tree);
         }
-        scene.add(mesh);
 
-        // Luz
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(5, 10, 7);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
+        // --- PARTÍCULAS DE POEIRA ---
+        const dustGeo = new THREE.BufferGeometry();
+        const dustArr = new Float32Array(500 * 3);
+        for(let i=0; i<1500; i++) dustArr[i] = (Math.random()-0.5) * 40;
+        dustGeo.setAttribute('position', new THREE.BufferAttribute(dustArr, 3));
+        const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({color: 0x444444, size: 0.05}));
+        scene.add(dust);
 
-        // Controles estilo FPS
-        const controls = new PointerLockControls(camera, document.body);
-        document.body.addEventListener('click', () => controls.lock());
-        camera.position.y = 2;
+        // --- FÍSICA E MOVIMENTO ---
+        let velocityY = 0;
+        let isGrounded = true;
+        const keys = {};
+
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
 
         function animate() {
             requestAnimationFrame(animate);
+
+            // Movimento Lateral
+            if(keys['ArrowLeft'] || keys['KeyA']) {
+                boy.position.x -= 0.08;
+                boy.rotation.y = -Math.PI/2;
+            }
+            if(keys['ArrowRight'] || keys['KeyD']) {
+                boy.position.x += 0.08;
+                boy.rotation.y = Math.PI/2;
+            }
+
+            // Pulo (Gravidade Sênior)
+            if((keys['Space'] || keys['ArrowUp'] || keys['KeyW']) && isGrounded) {
+                velocityY = 0.15;
+                isGrounded = false;
+            }
+
+            if(!isGrounded) {
+                boy.position.y += velocityY;
+                velocityY -= 0.008; // Gravidade
+                if(boy.position.y <= 0) {
+                    boy.position.y = 0;
+                    isGrounded = true;
+                }
+            }
+
+            // Câmera segue o estilo Limbo (suave e lateral)
+            camera.position.x = THREE.MathUtils.lerp(camera.position.x, boy.position.x, 0.05);
+            camera.position.y = 1.5;
+            camera.position.z = 6;
+            camera.lookAt(boy.position.x, 1, 0);
+
+            // Luz segue os olhos
+            light.position.set(boy.position.x, 1, 1);
+
+            // Poeira flutuando
+            dust.rotation.y += 0.001;
+
             renderer.render(scene, camera);
         }
+
         animate();
     </script>
 </body>
