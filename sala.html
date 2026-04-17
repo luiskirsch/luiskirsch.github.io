@@ -1411,6 +1411,45 @@
       font-weight:700;
       color:#80d080;
     }
+    .effectPanel__voteProgress{
+      font-size:11px;
+      color:var(--muted,#8a7a6a);
+      letter-spacing:.05em;
+      margin-top:6px;
+    }
+
+    /* ── Overlay resultado de votação ───────────────────────────────── */
+    .voteResultOverlay{
+      position:fixed;
+      inset:0;
+      z-index:99999;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(8,4,2,.88);
+      backdrop-filter:blur(12px);
+      opacity:0;
+      transition:opacity .5s ease;
+      pointer-events:none;
+    }
+    .voteResultOverlay--visible{
+      opacity:1;
+    }
+    .voteResultOverlay__word{
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(48px,8vw,96px);
+      font-weight:700;
+      letter-spacing:.08em;
+      color:#f0e8d8;
+      text-align:center;
+      text-shadow:0 0 60px rgba(200,150,60,.6), 0 0 120px rgba(200,150,60,.3);
+      animation:voteWordIn .6s cubic-bezier(.2,1.4,.4,1) forwards;
+    }
+    @keyframes voteWordIn{
+      from{transform:scale(.6);opacity:0}
+      to{transform:scale(1);opacity:1}
+    }
+
     .effectPanel__confirm{
       background:rgba(80,180,80,.15);
       border:1px solid rgba(80,180,80,.45);
@@ -6722,6 +6761,10 @@
       renderActiveEffect(effect);
       updateRitualButtons();
 
+      // Mostrar resultado de votação
+      const voteResult = data?.voteResult || null;
+      if (voteResult?.winner) showVoteResultOverlay(voteResult.winner, voteResult.resolvedAt);
+
       if (!started) {
         lastRevealedCardKey = null;
         setRitualWaitingState();
@@ -6777,7 +6820,7 @@
       const old = panel.querySelector(".effectPanel__confirm");
       if (old) old.remove();
 
-      const needsConfirm = ["force_player", "vote"].includes(effect.type);
+      const needsConfirm = effect.type === "force_player";
 
       switch (effect.type) {
         case "force_player": {
@@ -6816,6 +6859,9 @@
           const myVote = votes[participantId];
           const voteCounts = {};
           Object.values(votes).forEach(v => { voteCounts[v] = (voteCounts[v] || 0) + 1; });
+          const totalVoted = Object.keys(votes).length;
+          const totalPlayers = currentPlayers.length || 1;
+
           if (bodyEl) bodyEl.innerHTML = `
             <div class="effectPanel__question">${effect.params.question || "Vote:"}</div>
             <div class="effectPanel__voteOptions">
@@ -6824,7 +6870,14 @@
                   onclick="castEffectVote('${opt.replace(/'/g,"\\'")}')">
                   ${opt}${voteCounts[opt] ? ` <span class="effectPanel__voteCount">${voteCounts[opt]}</span>` : ""}
                 </button>`).join("")}
-            </div>`;
+            </div>
+            <div class="effectPanel__voteProgress">${totalVoted}/${totalPlayers} votaram</div>`;
+
+          // Auto-fecha quando todos votaram
+          if (isHost && totalVoted >= totalPlayers) {
+            const winner = getVoteWinner(votes);
+            setTimeout(() => resolveActiveEffect(winner), 600);
+          }
           break;
         }
         case "give_xp": {
@@ -6857,9 +6910,17 @@
       }
     }
 
-    async function resolveActiveEffect() {
+    async function resolveActiveEffect(winner) {
       if (!isHost) return;
-      await setDoc(ritualRef, { activeEffect: null }, { merge: true });
+      const update = { activeEffect: null };
+      if (winner) update.voteResult = { winner, resolvedAt: Date.now() };
+      await setDoc(ritualRef, update, { merge: true });
+    }
+
+    function getVoteWinner(votes) {
+      const counts = {};
+      Object.values(votes).forEach(v => { counts[v] = (counts[v] || 0) + 1; });
+      return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
     }
 
     async function castEffectVote(option) {
@@ -6869,6 +6930,26 @@
 
     function clearEffectTimer() {
       if (activeEffectTimer) { clearInterval(activeEffectTimer); activeEffectTimer = null; }
+    }
+
+    let lastVoteResultTimestamp = 0;
+    function showVoteResultOverlay(winner, resolvedAt) {
+      // Evita re-exibir o mesmo resultado
+      if (!winner || resolvedAt === lastVoteResultTimestamp) return;
+      lastVoteResultTimestamp = resolvedAt;
+
+      const overlay = document.createElement("div");
+      overlay.className = "voteResultOverlay";
+      overlay.innerHTML = `
+        <div class="voteResultOverlay__word">${winner.toUpperCase()}</div>`;
+      document.body.appendChild(overlay);
+
+      requestAnimationFrame(() => overlay.classList.add("voteResultOverlay--visible"));
+
+      setTimeout(() => {
+        overlay.classList.remove("voteResultOverlay--visible");
+        setTimeout(() => overlay.remove(), 700);
+      }, 3500);
     }
 
 
