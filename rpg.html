@@ -2,145 +2,151 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Rover 1909 - Final Build</title>
+    <title>Rover 1909 - Standalone Build</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; }
+        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Georgia', serif; }
         #ui {
             position: absolute; top: 20px; left: 20px;
             color: #d4c4a8; background: rgba(26, 23, 20, 0.9);
             padding: 20px; border: 2px solid #5d4a37;
-            border-radius: 4px; font-family: 'Garamond', serif;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 100;
+            border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 100;
         }
-        h1 { margin: 0 0 5px 0; font-size: 24px; letter-spacing: 2px; color: #fff; }
-        #loading {
-            position: absolute; width: 100%; height: 100%; background: #000;
-            display: flex; justify-content: center; align-items: center;
-            color: #d4c4a8; font-family: 'Garamond', serif; z-index: 1000;
-        }
+        h1 { margin: 0; font-size: 22px; letter-spacing: 3px; color: #fff; text-transform: uppercase; }
+        .info { font-size: 12px; opacity: 0.7; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="loading">Preparando Aldeia de Oakhaven...</div>
-
     <div id="ui">
-        <h1>ROVER</h1>
-        <div style="font-style: italic; opacity: 0.8;">Inglaterra, 1909</div>
-        <hr style="border: 0; border-top: 1px solid #5d4a37; margin: 10px 0;">
-        <div id="status">Explore a aldeia usando WASD</div>
+        <h1>Rover</h1>
+        <div class="info">Oakhaven, Inglaterra | 1909</div>
+        <div id="status">Use WASD para explorar a aldeia.</div>
     </div>
 
     <script src="https://pixijs.download/release/pixi.min.js"></script>
 
     <script>
+        // Inicialização da Engine
         const app = new PIXI.Application({
             width: window.innerWidth, height: window.innerHeight,
-            backgroundColor: 0x000000, antialias: true
+            backgroundColor: 0x242b1a, antialias: true
         });
         document.body.appendChild(app.view);
 
         const world = new PIXI.Container();
-        const mapLayer = new PIXI.Container();
-        const ySortedLayer = new PIXI.Container(); // Camada sênior para profundidade (Z-Index)
-        
-        world.addChild(mapLayer);
+        const ySortedLayer = new PIXI.Container();
         world.addChild(ySortedLayer);
         app.stage.addChild(world);
 
-        // --- ASSETS REAIS (Sprites de RPG Profissionais) ---
-        const loader = PIXI.Assets;
-        
-        async function setup() {
-            // Carregando texturas reais de alta qualidade
-            const texGrama = await loader.load('https://pixijs.com/assets/p2.jpeg'); // Grama detalhada
-            const texCasa = await loader.load('https://pixijs.com/assets/rt_cassette.png'); // Objeto sólido
-            const texRover = await loader.load('https://pixijs.com/assets/bunny.png'); // Player
-            const texNPC = await loader.load('https://pixijs.com/assets/flowerTop.png'); // NPC/Objeto de interação
-
-            document.getElementById('loading').style.display = 'none';
-
-            // 1. CHÃO REAL (Tiled Grass)
-            const ground = new PIXI.TilingSprite(texGrama, 4000, 4000);
-            mapLayer.addChild(ground);
-
-            const solids = [];
-
-            // 2. CONSTRUÇÃO DA ALDEIA (Sprites de Casas)
-            const houseData = [
-                {x: 1800, y: 1800, s: 2}, {x: 2200, y: 1800, s: 2.2},
-                {x: 2000, y: 2200, s: 2.5}, {x: 1700, y: 2400, s: 2}
-            ];
-
-            houseData.forEach(data => {
-                const casa = new PIXI.Sprite(texCasa);
-                casa.anchor.set(0.5, 0.8); // Âncora na base para profundidade real
-                casa.x = data.x;
-                casa.y = data.y;
-                casa.scale.set(data.s);
-                casa.tint = 0x8b7355; // Tom rústico de 1909
-                ySortedLayer.addChild(casa);
-                solids.push(casa);
-            });
-
-            // 3. NPCs (Aldeões)
-            const npcs = [];
-            for(let i=0; i<8; i++) {
-                const npc = new PIXI.Sprite(texNPC);
-                npc.anchor.set(0.5, 1);
-                npc.x = 1500 + Math.random() * 1000;
-                npc.y = 1500 + Math.random() * 1000;
-                npc.scale.set(1.5);
-                ySortedLayer.addChild(npc);
-                npcs.push(npc);
-            }
-
-            // 4. O JOGADOR (ROVER)
-            const rover = new PIXI.Sprite(texRover);
-            rover.anchor.set(0.5, 1);
-            rover.x = 2000;
-            rover.y = 2000;
-            rover.scale.set(2);
-            ySortedLayer.addChild(rover);
-
-            // --- LÓGICA DE MOVIMENTO E PROFUNDIDADE ---
-            const keys = {};
-            const speed = 5;
-            window.onkeydown = (e) => keys[e.code] = true;
-            window.onkeyup = (e) => keys[e.code] = false;
-
-            app.ticker.add(() => {
-                let nextX = rover.x;
-                let nextY = rover.y;
-
-                if (keys['KeyW'] || keys['ArrowUp']) nextY -= speed;
-                if (keys['KeyS'] || keys['ArrowDown']) nextY += speed;
-                if (keys['KeyA'] || keys['ArrowLeft']) nextX -= speed;
-                if (keys['KeyD'] || keys['ArrowRight']) nextX += speed;
-
-                // Colisão Simples (AABB)
-                let canMove = true;
-                solids.forEach(s => {
-                    const dist = Math.hypot(nextX - s.x, nextY - s.y);
-                    if (dist < 60) canMove = false;
-                });
-
-                if(canMove) {
-                    rover.x = nextX;
-                    rover.y = nextY;
-                }
-
-                // Câmera sênior (Seguir Player)
-                world.x = -rover.x + app.screen.width / 2;
-                world.y = -rover.y + app.screen.height / 2;
-
-                // Y-SORTING (A mágica do 2.5D):
-                // Quem está mais "baixo" na tela é desenhado na frente.
-                ySortedLayer.children.sort((a, b) => a.y - b.y);
-            });
+        // --- GERADOR DE SPRITES (Substituindo arquivos externos) ---
+        function createTexture(drawFn, w, h) {
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            drawFn(canvas.getContext('2d'), w, h);
+            return PIXI.Texture.from(canvas);
         }
 
-        setup();
+        // Textura: Grama Rústica
+        const texGrass = createTexture((ctx, w, h) => {
+            ctx.fillStyle = '#2d3621'; ctx.fillRect(0,0,w,h);
+            for(let i=0; i<400; i++) {
+                ctx.fillStyle = `rgba(0,0,0,${Math.random()*0.2})`;
+                ctx.fillRect(Math.random()*w, Math.random()*h, 2, 2);
+            }
+        }, 128, 128);
+
+        // Textura: Casa de Madeira/Pedra 1909
+        const texHouse = createTexture((ctx, w, h) => {
+            ctx.fillStyle = '#4a3b2c'; ctx.fillRect(10, 20, w-20, h-20); // Base
+            ctx.fillStyle = '#2d241a'; ctx.fillRect(30, 40, 20, 30); // Porta
+            ctx.strokeStyle = '#5d4a37'; ctx.lineWidth = 4; ctx.strokeRect(10, 20, w-20, h-20);
+        }, 80, 100);
+
+        // Textura: Rover (O Menino)
+        const texRover = createTexture((ctx, w, h) => {
+            ctx.fillStyle = '#000'; // Silhueta negra estilo Limbo
+            ctx.beginPath(); ctx.arc(w/2, 15, 10, 0, Math.PI*2); ctx.fill(); // Cabeça
+            ctx.fillRect(w/2-8, 25, 16, 25); // Corpo
+            ctx.fillStyle = '#fff'; // Olhos brilhantes
+            ctx.fillRect(w/2-5, 12, 3, 3); ctx.fillRect(w/2+2, 12, 3, 3);
+        }, 32, 64);
+
+        // Textura: NPC
+        const texNPC = createTexture((ctx, w, h) => {
+            ctx.fillStyle = '#1a1510';
+            ctx.beginPath(); ctx.arc(w/2, 20, 8, 0, Math.PI*2); ctx.fill();
+            ctx.fillRect(w/2-6, 30, 12, 20);
+        }, 32, 64);
+
+        // --- CONSTRUÇÃO DO MUNDO ---
+        const WORLD_SIZE = 3000;
+        const ground = new PIXI.TilingSprite(texGrass, WORLD_SIZE, WORLD_SIZE);
+        world.addChildAt(ground, 0);
+
+        const solids = [];
+        
+        // Adicionar Casas
+        for(let i=0; i<15; i++) {
+            const house = new PIXI.Sprite(texHouse);
+            house.anchor.set(0.5, 0.9);
+            house.x = 500 + Math.random() * (WORLD_SIZE - 1000);
+            house.y = 500 + Math.random() * (WORLD_SIZE - 1000);
+            house.scale.set(1.5 + Math.random());
+            ySortedLayer.addChild(house);
+            solids.push(house);
+        }
+
+        // Adicionar NPCs
+        for(let i=0; i<10; i++) {
+            const npc = new PIXI.Sprite(texNPC);
+            npc.anchor.set(0.5, 1);
+            npc.x = Math.random() * WORLD_SIZE;
+            npc.y = Math.random() * WORLD_SIZE;
+            ySortedLayer.addChild(npc);
+        }
+
+        // Adicionar Rover
+        const rover = new PIXI.Sprite(texRover);
+        rover.anchor.set(0.5, 1);
+        rover.x = WORLD_SIZE / 2;
+        rover.y = WORLD_SIZE / 2;
+        ySortedLayer.addChild(rover);
+
+        // --- SISTEMA DE MOVIMENTO E PROFUNDIDADE ---
+        const keys = {};
+        window.onkeydown = (e) => keys[e.code] = true;
+        window.onkeyup = (e) => keys[e.code] = false;
+
+        app.ticker.add((delta) => {
+            let speed = 4 * delta;
+            let nextX = rover.x;
+            let nextY = rover.y;
+
+            if (keys['KeyW']) nextY -= speed;
+            if (keys['KeyS']) nextY += speed;
+            if (keys['KeyA']) nextX -= speed;
+            if (keys['KeyD']) nextX += speed;
+
+            // Colisão AABB simples
+            let collision = false;
+            for (let s of solids) {
+                const dx = nextX - s.x;
+                const dy = nextY - s.y;
+                if (Math.abs(dx) < 50 && Math.abs(dy) < 30) { collision = true; break; }
+            }
+
+            if (!collision) {
+                rover.x = nextX;
+                rover.y = nextY;
+            }
+
+            // Câmera
+            world.x = -rover.x + app.screen.width / 2;
+            world.y = -rover.y + app.screen.height / 2;
+
+            // Z-Index dinâmico (Y-Sorting)
+            ySortedLayer.children.sort((a, b) => a.y - b.y);
+        });
 
         window.onresize = () => app.renderer.resize(window.innerWidth, window.innerHeight);
     </script>
