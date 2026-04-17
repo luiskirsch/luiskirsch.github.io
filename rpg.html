@@ -2,14 +2,14 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Anatomia Procedural Avançada - Desenvolvimento Sênior</title>
+    <title>Limbo - Anatomia Real de Malha Única (Rigged)</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
         #info { position: absolute; top: 20px; width: 100%; text-align: center; color: #444; pointer-events: none; }
     </style>
 </head>
 <body>
-    <div id="info">ANATOMIA 2.5D AVANÇADA - USE SETAS OU WASD</div>
+    <div id="info">ANATOMIA REAL (SINGLE-MESH RIGGED) - Use SETAS</div>
 
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -18,213 +18,168 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- SETUP SÊNIOR ---
+        // --- SETUP AMBIENTE SÊNIOR ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x050505);
-        scene.fog = new THREE.FogExp2(0x050505, 0.15); // Névoa densa
+        scene.fog = new THREE.FogExp2(0x050505, 0.15);
 
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 1.5, 6);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.toneMapping = THREE.ReinhardToneMapping;
+        renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        // Luzes para destacar a musculatura
-        const backLight = new THREE.PointLight(0xffffff, 15, 20);
-        backLight.position.set(-5, 5, -5);
-        scene.add(backLight);
-        scene.add(new THREE.AmbientLight(0x404040, 0.5));
+        // Luzes para destacar a deformação da malha
+        const spotLight = new THREE.SpotLight(0xffffff, 50);
+        spotLight.position.set(0, 5, 3);
+        spotLight.castShadow = true;
+        spotLight.angle = Math.PI/4;
+        scene.add(spotLight);
+        scene.add(new THREE.AmbientLight(0x202020, 0.5));
 
-        // --- CONSTRUÇÃO DO CORPO (ANATOMIA PURA) ---
-        // Material Preto Total
-        const skinMat = new THREE.MeshStandardMaterial({ 
-            color: 0x000000,
-            roughness: 0.8,
-            metalness: 0.1
+        // --- CONSTRUÇÃO DA MALHA ÚNICA (O "CORPO REAL") ---
+        // Em vez de cápsulas, criamos uma geometria contínua (corpo e membros integrados)
+        const bodyGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1.2, 16, 12, true); // (topo, base, altura, segmentos, anéis, aberto)
+        
+        // Ajustamos os vértices para criar a forma orgânica (ombros, cintura)
+        const positions = bodyGeometry.attributes.position;
+        const vertex = new THREE.Vector3();
+        for (let i = 0; i < positions.count; i++) {
+            vertex.fromBufferAttribute(positions, i);
+            const y = vertex.y;
+            
+            // Modelagem Procedural da Silhueta
+            let scale = 1;
+            if (y > 0.4) scale = THREE.MathUtils.lerp(1, 1.5, (y-0.4)/0.2); // Ombros largos
+            if (y < 0.2 && y > -0.2) scale = 0.8; // Cintura fina
+            if (y < -0.4) scale = 1.1; // Quadril
+
+            vertex.x *= scale;
+            vertex.z *= scale;
+            positions.setXYZ(i, vertex.x, vertex.y, vertex.z);
+        }
+
+        // --- CRIAÇÃO DO ESQUELETO (BONES) ---
+        const bones = [];
+        const shoulder = new THREE.Bone();
+        const elbow = new THREE.Bone();
+        const hand = new THREE.Bone();
+
+        shoulder.add(elbow);
+        elbow.add(hand);
+        shoulder.position.y = 0.5; // Posição do ombro na malha
+        elbow.position.y = -0.4;   // Comprimento do bíceps
+        hand.position.y = -0.4;    // Comprimento do antebraço
+        bones.push(shoulder, elbow, hand);
+
+        const skeleton = new THREE.Skeleton(bones);
+
+        // --- SKINNING PROCEDURAL (A MÁGICA DO SÊNIOR) ---
+        // Dizer ao código quais vértices são influenciados por quais ossos
+        const skinIndices = [];
+        const skinWeights = [];
+        for (let i = 0; i < positions.count; i++) {
+            vertex.fromBufferAttribute(positions, i);
+            const y = vertex.y;
+
+            // Vértices do ombro seguem o osso 0, cotovelo o osso 1, mão o osso 2
+            if (y > 0.3) {
+                skinIndices.push(0, 0, 0, 0);
+                skinWeights.push(1, 0, 0, 0);
+            } else if (y > -0.1) {
+                skinIndices.push(1, 0, 0, 0);
+                skinWeights.push(1, 0, 0, 0);
+            } else {
+                skinIndices.push(2, 0, 0, 0);
+                skinWeights.push(1, 0, 0, 0);
+            }
+        }
+        bodyGeometry.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndices, 4));
+        bodyGeometry.setAttribute('skinWeight', new THREE.Float32BufferAttribute(skinWeights, 4));
+
+        // --- MATERIAL E RENDER ---
+        const boyMat = new THREE.MeshStandardMaterial({ 
+            color: 0x000000, 
+            roughness: 0.9, 
+            skinning: true // Ativa a deformação por esqueleto
         });
+        const boyMesh = new THREE.SkinnedMesh(bodyGeometry, boyMat);
+        boyMesh.add(bones[0]); // Adiciona a raiz do esqueleto à malha
+        boyMesh.bind(skeleton);
+        scene.add(boyMesh);
 
-        const boyGroup = new THREE.Group();
-
-        // 1. Tronco (O "Pai" da Hierarquia)
-        const torsoGroup = new THREE.Group();
-        const upperTorso = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.4, 6, 12), skinMat);
-        upperTorso.position.y = 1.0;
-        torsoGroup.add(upperTorso);
-
-        const lowerTorso = new THREE.Mesh(new THREE.CapsuleGeometry(0.18, 0.3, 6, 12), skinMat);
-        lowerTorso.position.y = -0.3;
-        upperTorso.add(lowerTorso); // Filho do UpperTorso
-
-        // 2. Cabeça e Pescoço (Filhos do UpperTorso)
-        const headGroup = new THREE.Group();
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.15), skinMat);
-        neck.position.y = 0.3;
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), skinMat);
-        head.position.y = 0.55;
-        head.scale.set(1, 1.1, 1); // Levemente oval
-        headGroup.add(neck, head);
-        upperTorso.add(headGroup);
-
-        // Olhos Brilhantes (A ÚNICA COISA QUE SE VÊ)
+        // --- OLHOS BRILHANTES (A ÚNICA COISA QUE SE VÊ) ---
         const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const createEye = (x, y) => {
             const eye = new THREE.Mesh(new THREE.CircleGeometry(0.04, 16), eyeMat);
-            eye.position.set(x, y, 0.19);
+            eye.position.set(x, y, 0.21);
             return eye;
         };
-        head.add(createEye(-0.07, 0.1), createEye(0.07, 0.1));
+        boyMesh.add(createEye(-0.08, 0.75), createEye(0.08, 0.75));
 
-        // 3. Braços (Ombro -> Cotovelo -> Mão) - Filhos do UpperTorso
-        function createArm(side) {
-            const armGroup = new THREE.Group();
-            
-            // Ombro
-            const upperArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.06, 0.3, 4, 10), skinMat);
-            upperArm.position.y = -0.15;
-            armGroup.add(upperArm);
 
-            // Cotovelo
-            const foreArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.05, 0.3, 4, 10), skinMat);
-            foreArm.position.y = -0.3;
-            upperArm.add(foreArm);
-
-            armGroup.position.set(0.25 * side, 0.15, 0);
-            return armGroup;
-        }
-
-        const armL = createArm(-1);
-        const armR = createArm(1);
-        upperTorso.add(armL, armR);
-
-        // 4. Pernas (Quadril -> Joelho -> Canela) - Filhos do LowerTorso
-        function createLeg(side) {
-            const legGroup = new THREE.Group();
-            
-            // Coxa (Quadril)
-            const thigh = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.4, 4, 10), skinMat);
-            thigh.position.y = -0.2;
-            legGroup.add(thigh);
-
-            // Joelho
-            const shin = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.4, 4, 10), skinMat);
-            shin.position.y = -0.4;
-            thigh.add(shin);
-
-            legGroup.position.set(0.12 * side, -0.25, 0);
-            return legGroup;
-        }
-
-        const legL = createLeg(-1);
-        const legR = createLeg(1);
-        lowerTorso.add(legL, legR); // Pernas presas ao quadril
-
-        boyGroup.add(torsoGroup);
-        scene.add(boyGroup);
-
-        // Chão de Sombras
-        const floorGeo = new THREE.BoxGeometry(200, 1, 10);
+        // --- CHÃO E AMBIENTE (SOMBRAS ABSOLUTAS) ---
         const blackMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const floor = new THREE.Mesh(floorGeo, blackMat);
-        floor.position.y = -0.5;
+        const floor = new THREE.Mesh(new THREE.BoxGeometry(200, 1, 10), blackMat);
+        floor.position.y = -1.1; // Ajuste para a altura do novo corpo
         scene.add(floor);
 
-        // Árvores Distorcidas (Background Parallax)
-        for(let i=0; i<50; i++) {
+        // Árvores Distorcidas (Background)
+        for(let i=0; i<40; i++) {
             const h = 5 + Math.random() * 15;
-            const tree = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.4, h), blackMat);
-            tree.position.set((Math.random()-0.5)*100, h/2 - 0.5, -3 - Math.random()*10);
+            const tree = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.3, h), blackMat);
+            tree.position.set((Math.random()-0.5)*100, h/2 - 1.1, -3 - Math.random()*10);
             scene.add(tree);
         }
 
-        // --- FÍSICA E ANIMAÇÃO ---
+        // --- CONTROLES E ANIMAÇÃO ---
         const keys = {};
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
 
         let walkCycle = 0;
-        let isGrounded = true;
-        let velocityY = 0;
-        let targetRotationY = Math.PI/2; // Começa olhando para a direita
 
         function animate() {
             requestAnimationFrame(animate);
 
-            const isMoving = keys['ArrowLeft'] || keys['KeyA'] || keys['ArrowRight'] || keys['KeyD'];
+            const isMoving = (keys['ArrowLeft'] || keys['KeyA'] || keys['ArrowRight'] || keys['KeyD']);
 
             if(isMoving) {
-                walkCycle += 0.15; // Velocidade da animação
-                const moveSpeed = 0.1;
+                walkCycle += 0.12;
+                const moveSpeed = 0.08;
                 
-                // Movimento do Grupo
                 if(keys['ArrowLeft'] || keys['KeyA']) {
-                    boyGroup.position.x -= moveSpeed;
-                    targetRotationY = -Math.PI/2;
+                    boyMesh.position.x -= moveSpeed;
+                    boyMesh.rotation.y = -Math.PI/2;
                 }
                 if(keys['ArrowRight'] || keys['KeyD']) {
-                    boyGroup.position.x += moveSpeed;
-                    targetRotationY = Math.PI/2;
+                    boyMesh.position.x += moveSpeed;
+                    boyMesh.rotation.y = Math.PI/2;
                 }
 
-                // ANIMAÇÃO DE CAMINHADA PROCEDURAL (Seno/Cosseno)
-                // Pernas opostas
-                legL.rotation.x = Math.sin(walkCycle) * 0.5;
-                legR.rotation.x = Math.sin(walkCycle + Math.PI) * 0.5;
-                
-                // Braços movem opostos às pernas
-                armL.rotation.x = Math.sin(walkCycle + Math.PI) * 0.4;
-                armR.rotation.x = Math.sin(walkCycle) * 0.4;
-
-                // Balanço leve do tronco e cabeça (Dá peso)
-                torsoGroup.position.y = Math.sin(walkCycle * 2) * 0.03;
-                headGroup.rotation.x = Math.sin(walkCycle * 2) * 0.05;
+                // ANIMAÇÃO DE BRAÇO (DOBRANDO ORGANICAMENTE NO COTOVELO)
+                elbow.rotation.x = Math.sin(walkCycle) * 0.4;
+                hand.rotation.x = Math.sin(walkCycle) * 0.2; // Leve balanço da mão
 
             } else {
-                // Reset suave para posição de descanso
-                legL.rotation.x = THREE.MathUtils.lerp(legL.rotation.x, 0, 0.1);
-                legR.rotation.x = THREE.MathUtils.lerp(legR.rotation.x, 0, 0.1);
-                armL.rotation.x = THREE.MathUtils.lerp(armL.rotation.x, 0, 0.1);
-                armR.rotation.x = THREE.MathUtils.lerp(armR.rotation.x, 0, 0.1);
+                elbow.rotation.x = THREE.MathUtils.lerp(elbow.rotation.x, 0, 0.1);
+                hand.rotation.x = THREE.MathUtils.lerp(hand.rotation.x, 0, 0.1);
             }
 
-            // Pulo (Gravidade Sênior)
-            if((keys['Space'] || keys['ArrowUp'] || keys['KeyW']) && isGrounded) {
-                velocityY = 0.15;
-                isGrounded = false;
-            }
-
-            if(!isGrounded) {
-                boyGroup.position.y += velocityY;
-                velocityY -= 0.008; // Gravidade
-                if(boyGroup.position.y <= 0) {
-                    boyGroup.position.y = 0;
-                    isGrounded = true;
-                }
-            }
-
-            // Polimento de Rotação (Sempre olha para a direção do movimento)
-            boyGroup.rotation.y = THREE.MathUtils.lerp(boyGroup.rotation.y, targetRotationY, 0.1);
-
-            // Câmera segue estilo 2.5D (Lateral suave)
-            camera.position.x = THREE.MathUtils.lerp(camera.position.x, boyGroup.position.x, 0.05);
-            camera.lookAt(boyGroup.position.x, 1, 0);
+            // Câmera segue
+            camera.position.x = THREE.MathUtils.lerp(camera.position.x, boyMesh.position.x, 0.05);
+            camera.lookAt(boyMesh.position.x, 1, 0);
 
             // Luz segue
-            backLight.position.x = boyGroup.position.x - 5;
+            spotLight.position.x = boyMesh.position.x;
+            spotLight.target = boyMesh;
 
             renderer.render(scene, camera);
         }
 
         animate();
-
-        // Responsive Sênior
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
     </script>
 </body>
 </html>
