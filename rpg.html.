@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>RPG de Código - Exemplo</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #game-container {
+            width: 400px;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        #screen-text {
+            height: 150px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            line-height: 1.5;
+            overflow-y: auto;
+        }
+
+        #controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            background: #2c2c2c;
+            color: white;
+            border: 1px solid #444;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #3d3d3d;
+            border-color: #00ffcc;
+            /* Efeito de brilho que você gosta */
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        #stats {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+            font-size: 14px;
+            color: #00ffcc;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="screen-text">Carregando aventura...</div>
+    <div id="controls"></div>
+    <div id="stats">HP: <span id="hp">20</span> | Nível: <span id="lvl">1</span></div>
+</div>
+
+<script>
+    // Lógica do jogo (Baseada em Estados)
+    const gameStates = {
+        inicio: {
+            texto: "Você acorda em uma masmorra úmida. Há uma porta de ferro à sua frente e um brilho estranho no canto.",
+            botoes: [
+                { rotulo: "Abrir a porta", proximo: "corredor" },
+                { rotulo: "Investigar o brilho", proximo: "tesouro" }
+            ]
+        },
+        tesouro: {
+            texto: "Era um amuleto antigo! Você sente um poder crescendo em você. (HP Restaurado)",
+            botoes: [
+                { rotulo: "Ir para a porta", proximo: "corredor" }
+            ],
+            acao: () => { player.hp = 20; updateStats(); }
+        },
+        corredor: {
+            texto: "Um corredor longo e escuro. Você ouve passos pesados vindo em sua direção.",
+            botoes: [
+                { rotulo: "Lutar!", proximo: "combate" },
+                { rotulo: "Tentar se esconder", proximo: "esconder" }
+            ]
+        },
+        combate: {
+            texto: "Um Orc surge das sombras! Você saca sua espada.",
+            botoes: [
+                { rotulo: "Atacar (Gasta HP)", proximo: "vitoria" },
+                { rotulo: "Fugir", proximo: "inicio" }
+            ]
+        },
+        vitoria: {
+            texto: "Você derrotou o Orc! O caminho está livre para a saída.",
+            botoes: [
+                { rotulo: "Recomeçar", proximo: "inicio" }
+            ],
+            acao: () => { player.lvl++; player.hp -= 5; updateStats(); }
+        },
+        esconder: {
+            texto: "O Orc passou direto por você. Que sorte! Você encontrou uma saída secreta.",
+            botoes: [
+                { rotulo: "Recomeçar", proximo: "inicio" }
+            ]
+        }
+    };
+
+    let player = { hp: 20, lvl: 1 };
+
+    function updateStats() {
+        document.getElementById('hp').innerText = player.hp;
+        document.getElementById('lvl').innerText = player.lvl;
+    }
+
+    function renderState(stateKey) {
+        const state = gameStates[stateKey];
+        const screen = document.getElementById('screen-text');
+        const controls = document.getElementById('controls');
+
+        // Executa ação se houver (como subir nível ou curar)
+        if (state.acao) state.acao();
+
+        // Atualiza texto
+        screen.innerText = state.texto;
+
+        // Limpa e cria novos botões
+        controls.innerHTML = '';
+        state.botoes.forEach(btn => {
+            const b = document.createElement('button');
+            b.innerText = btn.rotulo;
+            b.onclick = () => renderState(btn.proximo);
+            controls.appendChild(b);
+        });
+    }
+
+    // Iniciar o jogo
+    renderState('inicio');
+</script>
+
+</body>
+</html>
