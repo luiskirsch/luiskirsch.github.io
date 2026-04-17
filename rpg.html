@@ -2,184 +2,131 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Limbo - Anatomia Real de Malha Única (Rigged)</title>
+    <title>Limbo Woods - O Menino Perfeito (SVG)</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
-        #info { position: absolute; top: 20px; width: 100%; text-align: center; color: #444; pointer-events: none; }
+        :root { --main-bg: #070707; --main-black: #000; --glow-white: #fff; }
+        body { margin: 0; overflow: hidden; background: var(--main-bg); }
+        
+        #vignette {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+            z-index: 50; pointer-events: none;
+        }
+
+        #game-container {
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh;
+        }
+
+        svg {
+            width: 800px; height: 600px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            background: #111;
+        }
+
+        /* Animação dos Vagalumes (Poeira Atmosférica) */
+        @keyframes fireflyPulse {
+            0% { opacity: 0.2; transform: translateY(0) scale(1); }
+            50% { opacity: 0.8; transform: translateY(-10px) scale(1.1); }
+            100% { opacity: 0.2; transform: translateY(-20px) scale(1); }
+        }
+
+        .firefly {
+            opacity: 0.2;
+            animation: fireflyPulse 3s infinite ease-in-out;
+        }
+
+        /* Animação dos Olhos (Bloom Procedural) */
+        @keyframes eyeGlow {
+            0%, 100% { filter: blur(2px) brightness(1.2); opacity: 0.8; }
+            50% { filter: blur(4px) brightness(1.5); opacity: 1; }
+        }
+
+        #eye-left, #eye-right {
+            filter: blur(2px) brightness(1.2);
+            opacity: 0.8;
+            animation: eyeGlow 2s infinite ease-in-out;
+        }
+
     </style>
 </head>
 <body>
-    <div id="info">ANATOMIA REAL (SINGLE-MESH RIGGED) - Use SETAS</div>
 
-    <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
-    </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-
-        // --- SETUP AMBIENTE SÊNIOR ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050505);
-        scene.fog = new THREE.FogExp2(0x050505, 0.15);
-
-        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 1.5, 6);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
-
-        // Luzes para destacar a deformação da malha
-        const spotLight = new THREE.SpotLight(0xffffff, 50);
-        spotLight.position.set(0, 5, 3);
-        spotLight.castShadow = true;
-        spotLight.angle = Math.PI/4;
-        scene.add(spotLight);
-        scene.add(new THREE.AmbientLight(0x202020, 0.5));
-
-        // --- CONSTRUÇÃO DA MALHA ÚNICA (O "CORPO REAL") ---
-        // Em vez de cápsulas, criamos uma geometria contínua (corpo e membros integrados)
-        const bodyGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1.2, 16, 12, true); // (topo, base, altura, segmentos, anéis, aberto)
-        
-        // Ajustamos os vértices para criar a forma orgânica (ombros, cintura)
-        const positions = bodyGeometry.attributes.position;
-        const vertex = new THREE.Vector3();
-        for (let i = 0; i < positions.count; i++) {
-            vertex.fromBufferAttribute(positions, i);
-            const y = vertex.y;
+    <div id="vignette"></div>
+    <div id="game-container">
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
             
-            // Modelagem Procedural da Silhueta
-            let scale = 1;
-            if (y > 0.4) scale = THREE.MathUtils.lerp(1, 1.5, (y-0.4)/0.2); // Ombros largos
-            if (y < 0.2 && y > -0.2) scale = 0.8; // Cintura fina
-            if (y < -0.4) scale = 1.1; // Quadril
+            <defs>
+                <filter id="bloom">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+                    <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
 
-            vertex.x *= scale;
-            vertex.z *= scale;
-            positions.setXYZ(i, vertex.x, vertex.y, vertex.z);
-        }
+            <rect width="800" height="600" fill="#111" />
+            
+            <linearGradient id="fogGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#111" />
+                <stop offset="100%" stop-color="#050505" />
+            </linearGradient>
+            <rect width="800" height="600" fill="url(#fogGradient)" opacity="0.8"/>
 
-        // --- CRIAÇÃO DO ESQUELETO (BONES) ---
-        const bones = [];
-        const shoulder = new THREE.Bone();
-        const elbow = new THREE.Bone();
-        const hand = new THREE.Bone();
+            <circle class="firefly" cx="150" cy="150" r="1.5" fill="var(--glow-white)" style="animation-delay: 0s;"/>
+            <circle class="firefly" cx="250" cy="200" r="1.2" fill="var(--glow-white)" style="animation-delay: 1.5s;"/>
+            <circle class="firefly" cx="650" cy="300" r="1.8" fill="var(--glow-white)" style="animation-delay: 0.8s;"/>
+            <circle class="firefly" cx="550" cy="400" r="1.3" fill="var(--glow-white)" style="animation-delay: 2s;"/>
 
-        shoulder.add(elbow);
-        elbow.add(hand);
-        shoulder.position.y = 0.5; // Posição do ombro na malha
-        elbow.position.y = -0.4;   // Comprimento do bíceps
-        hand.position.y = -0.4;    // Comprimento do antebraço
-        bones.push(shoulder, elbow, hand);
-
-        const skeleton = new THREE.Skeleton(bones);
-
-        // --- SKINNING PROCEDURAL (A MÁGICA DO SÊNIOR) ---
-        // Dizer ao código quais vértices são influenciados por quais ossos
-        const skinIndices = [];
-        const skinWeights = [];
-        for (let i = 0; i < positions.count; i++) {
-            vertex.fromBufferAttribute(positions, i);
-            const y = vertex.y;
-
-            // Vértices do ombro seguem o osso 0, cotovelo o osso 1, mão o osso 2
-            if (y > 0.3) {
-                skinIndices.push(0, 0, 0, 0);
-                skinWeights.push(1, 0, 0, 0);
-            } else if (y > -0.1) {
-                skinIndices.push(1, 0, 0, 0);
-                skinWeights.push(1, 0, 0, 0);
-            } else {
-                skinIndices.push(2, 0, 0, 0);
-                skinWeights.push(1, 0, 0, 0);
-            }
-        }
-        bodyGeometry.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndices, 4));
-        bodyGeometry.setAttribute('skinWeight', new THREE.Float32BufferAttribute(skinWeights, 4));
-
-        // --- MATERIAL E RENDER ---
-        const boyMat = new THREE.MeshStandardMaterial({ 
-            color: 0x000000, 
-            roughness: 0.9, 
-            skinning: true // Ativa a deformação por esqueleto
-        });
-        const boyMesh = new THREE.SkinnedMesh(bodyGeometry, boyMat);
-        boyMesh.add(bones[0]); // Adiciona a raiz do esqueleto à malha
-        boyMesh.bind(skeleton);
-        scene.add(boyMesh);
-
-        // --- OLHOS BRILHANTES (A ÚNICA COISA QUE SE VÊ) ---
-        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const createEye = (x, y) => {
-            const eye = new THREE.Mesh(new THREE.CircleGeometry(0.04, 16), eyeMat);
-            eye.position.set(x, y, 0.21);
-            return eye;
-        };
-        boyMesh.add(createEye(-0.08, 0.75), createEye(0.08, 0.75));
-
-
-        // --- CHÃO E AMBIENTE (SOMBRAS ABSOLUTAS) ---
-        const blackMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const floor = new THREE.Mesh(new THREE.BoxGeometry(200, 1, 10), blackMat);
-        floor.position.y = -1.1; // Ajuste para a altura do novo corpo
-        scene.add(floor);
-
-        // Árvores Distorcidas (Background)
-        for(let i=0; i<40; i++) {
-            const h = 5 + Math.random() * 15;
-            const tree = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.3, h), blackMat);
-            tree.position.set((Math.random()-0.5)*100, h/2 - 1.1, -3 - Math.random()*10);
-            scene.add(tree);
-        }
-
-        // --- CONTROLES E ANIMAÇÃO ---
-        const keys = {};
-        window.addEventListener('keydown', e => keys[e.code] = true);
-        window.addEventListener('keyup', e => keys[e.code] = false);
-
-        let walkCycle = 0;
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            const isMoving = (keys['ArrowLeft'] || keys['KeyA'] || keys['ArrowRight'] || keys['KeyD']);
-
-            if(isMoving) {
-                walkCycle += 0.12;
-                const moveSpeed = 0.08;
+            <g transform="translate(400, 300)">
+                <ellipse cx="0" cy="-60" rx="40" ry="50" fill="var(--main-black)" />
+                <rect x="-8" y="-30" width="16" height="30" rx="5" fill="var(--main-black)" />
                 
-                if(keys['ArrowLeft'] || keys['KeyA']) {
-                    boyMesh.position.x -= moveSpeed;
-                    boyMesh.rotation.y = -Math.PI/2;
-                }
-                if(keys['ArrowRight'] || keys['KeyD']) {
-                    boyMesh.position.x += moveSpeed;
-                    boyMesh.rotation.y = Math.PI/2;
-                }
+                <circle id="eye-left" cx="-15" cy="-65" r="5" fill="var(--main-black)" stroke="var(--glow-white)" stroke-width="2" filter="url(#bloom)" />
+                <circle id="eye-right" cx="15" cy="-65" r="5" fill="var(--main-black)" stroke="var(--glow-white)" stroke-width="2" filter="url(#bloom)"/>
 
-                // ANIMAÇÃO DE BRAÇO (DOBRANDO ORGANICAMENTE NO COTOVELO)
-                elbow.rotation.x = Math.sin(walkCycle) * 0.4;
-                hand.rotation.x = Math.sin(walkCycle) * 0.2; // Leve balanço da mão
+                <rect x="-30" y="-10" width="60" height="80" rx="20" fill="var(--main-black)" />
+                <ellipse cx="0" cy="70" rx="30" ry="30" fill="var(--main-black)" />
 
-            } else {
-                elbow.rotation.x = THREE.MathUtils.lerp(elbow.rotation.x, 0, 0.1);
-                hand.rotation.x = THREE.MathUtils.lerp(hand.rotation.x, 0, 0.1);
-            }
+                <path d="M -25 -5 Q -35 25, -25 55" fill="none" stroke="var(--main-black)" stroke-width="8" stroke-linecap="round" />
+                <path d="M 25 -5 Q 35 25, 25 55" fill="none" stroke="var(--main-black)" stroke-width="8" stroke-linecap="round" />
 
-            // Câmera segue
-            camera.position.x = THREE.MathUtils.lerp(camera.position.x, boyMesh.position.x, 0.05);
-            camera.lookAt(boyMesh.position.x, 1, 0);
+                <rect x="-15" y="80" width="10" height="40" rx="4" fill="var(--main-black)" />
+                <rect x="5" y="80" width="10" height="40" rx="4" fill="var(--main-black)" />
+                <rect x="-25" y="115" width="20" height="8" rx="3" fill="var(--main-black)" />
+                <rect x="5" y="115" width="20" height="8" rx="3" fill="var(--main-black)" />
+            </g>
 
-            // Luz segue
-            spotLight.position.x = boyMesh.position.x;
-            spotLight.target = boyMesh;
+            <path d="M 0 550 C 150 500, 350 600, 500 550 C 650 500, 800 600, 800 600 V 600 H 0 Z" fill="var(--main-black)" />
+            
+            <path d="M 200 520 Q 205 500, 210 520" fill="none" stroke="var(--main-black)" stroke-width="2" />
+            <path d="M 220 525 Q 225 505, 230 525" fill="none" stroke="var(--main-black)" stroke-width="2" />
+            <path d="M 580 520 Q 585 500, 590 520" fill="none" stroke="var(--main-black)" stroke-width="2" />
+            <path d="M 600 525 Q 605 505, 610 525" fill="none" stroke="var(--main-black)" stroke-width="2" />
+            
+        </svg>
+    </div>
 
-            renderer.render(scene, camera);
+<script>
+    // Script Sênior para Responsive (Opcional, mas recomendado para venda)
+    window.addEventListener('resize', () => {
+        const svg = document.querySelector('svg');
+        const container = document.getElementById('game-container');
+        const ratio = 800 / 600;
+        
+        let width = container.clientWidth;
+        let height = container.clientHeight;
+        
+        if (width / height > ratio) {
+            width = height * ratio;
+        } else {
+            height = width / ratio;
         }
-
-        animate();
-    </script>
+        
+        svg.style.width = width + 'px';
+        svg.style.height = height + 'px';
+    });
+</script>
 </body>
 </html>
