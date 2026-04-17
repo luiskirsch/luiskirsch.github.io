@@ -6167,7 +6167,7 @@
         const amount = customAmount !== undefined ? customAmount : (this.EVENTS[eventKey] || 0);
         if (!amount || !ref) return;
         try {
-          await updateDoc(ref, { xp: increment(amount) });
+          await setDoc(ref, { xp: increment(amount) }, { merge: true });
         } catch(e) { console.warn("XP award error:", e); }
       }
     };
@@ -8420,8 +8420,8 @@
         if (!snap.exists()) return;
 
         const data = snap.data();
-        roomNameEl.textContent = data.name || roomName;
-        roomCodeEl.textContent = data.code || roomCode;
+        if (roomNameEl) roomNameEl.textContent = data.name || roomName;
+        if (roomCodeEl) roomCodeEl.textContent = data.code || roomCode;
 
         const started = data.status === "started";
         roomStatusEl.textContent = started ? "Ritual em andamento" : "Aguardando jogadores";
@@ -8709,8 +8709,8 @@
 
     (async function init() {
       try {
-        roomNameEl.textContent = roomName;
-        roomCodeEl.textContent = roomCode;
+        if (roomNameEl) roomNameEl.textContent = roomName;
+        if (roomCodeEl) roomCodeEl.textContent = roomCode;
         roomStatusEl.textContent = "Conectando";
         footerStatusEl.textContent = "Conectando";
 
