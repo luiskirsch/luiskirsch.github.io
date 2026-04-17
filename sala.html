@@ -1466,6 +1466,45 @@
       background:rgba(80,180,80,.3);
       border-color:rgba(80,180,80,.8);
     }
+    .aiDetectToast{
+      display:none;
+      align-items:center;
+      gap:10px;
+      background:rgba(255,200,50,.1);
+      border:1px solid rgba(255,200,50,.35);
+      border-radius:10px;
+      padding:10px 14px;
+      margin-top:8px;
+      font-size:12px;
+      color:#ffd060;
+      animation:effectPanelIn .3s ease;
+    }
+    .aiDetectToast__icon{font-size:15px;flex-shrink:0}
+    .aiDetectToast__text{flex:1;line-height:1.4}
+    .aiDetectToast__confirm{
+      background:rgba(80,180,80,.15);
+      border:1px solid rgba(80,180,80,.45);
+      border-radius:6px;
+      color:#80d080;
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.04em;
+      padding:4px 12px;
+      cursor:pointer;
+      transition:background .2s;
+      flex-shrink:0;
+    }
+    .aiDetectToast__confirm:hover{background:rgba(80,180,80,.3)}
+    .aiDetectToast__dismiss{
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:6px;
+      color:rgba(255,255,255,.45);
+      font-size:11px;
+      padding:4px 10px;
+      cursor:pointer;
+      flex-shrink:0;
+    }
 
     /* ── XP inline na topCenterMeta ─────────────────────────────────── */
     .topMeta__sep{
@@ -5195,6 +5234,13 @@
                   <div class="effectPanel__title">⚡ BATTLECRY</div>
                   <div class="effectPanel__body"></div>
                 </div>
+                <!-- ── AI Detection Toast (visível apenas ao host) ──── -->
+                <div class="aiDetectToast" id="aiDetectToast">
+                  <span class="aiDetectToast__icon">🤖</span>
+                  <span class="aiDetectToast__text" id="aiDetectToastMsg"></span>
+                  <button class="aiDetectToast__confirm" onclick="confirmAIDetection()">Confirmar</button>
+                  <button class="aiDetectToast__dismiss" onclick="dismissAIDetection()">Ignorar</button>
+                </div>
 
                 <div class="revealPanel">
                   <!-- Sombra da carta projetada sobre a mesa -->
@@ -6138,6 +6184,13 @@
     let activeEffectTimer = null;
     let currentActiveEffect = null;
 
+    // ── AI Detection state ────────────────────────────────────────────
+    let aiVADStream = null;
+    let aiVADContext = null;
+    let aiVADInterval = null;
+    let aiVADHasSpoken = false;
+    let aiVADSilenceTimer = null;
+
     // ── Efeitos por carta (indexado pelo title) ───────────────────────────
     // Battlecry: dispara ao revelar. Deathrattle: dispara antes de revelar a próxima.
     // Chain: deathrattle automático que força uma categoria na próxima carta.
@@ -6762,6 +6815,7 @@
       const effect = data?.activeEffect || null;
       currentActiveEffect = effect;
       renderActiveEffect(effect);
+      checkAIDetection(data?.aiDetection);
       updateRitualButtons();
 
       // Mostrar resultado de votação
@@ -6808,6 +6862,7 @@
       if (!effect || effect.resolved) {
         panel.style.display = "none";
         clearEffectTimer();
+        stopAIVAD();
         return;
       }
 
@@ -6832,6 +6887,7 @@
             : effect.params.targetName;
           if (bodyEl) bodyEl.innerHTML =
             `<span class="effectPanel__highlight">${names}</span><br>${effect.label || "está em foco"}`;
+          startAIVAD(effect);
           break;
         }
         case "set_timer": {
@@ -6934,6 +6990,104 @@
     function clearEffectTimer() {
       if (activeEffectTimer) { clearInterval(activeEffectTimer); activeEffectTimer = null; }
     }
+
+    // ── AI Detection: VAD + Chat ──────────────────────────────────────
+
+    async function startAIVAD(effect) {
+      stopAIVAD();
+      if (!effect?.params?.targetId || participantId !== effect.params.targetId) return;
+      try {
+        aiVADStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        aiVADContext = new AudioContext();
+        const source = aiVADContext.createMediaStreamSource(aiVADStream);
+        const analyser = aiVADContext.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        const THRESHOLD = 18;
+        const SILENCE_AFTER_SPEECH_MS = 3500;
+        aiVADHasSpoken = false;
+        aiVADInterval = setInterval(() => {
+          analyser.getByteFrequencyData(dataArray);
+          const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+          if (avg > THRESHOLD) {
+            aiVADHasSpoken = true;
+            if (aiVADSilenceTimer) { clearTimeout(aiVADSilenceTimer); aiVADSilenceTimer = null; }
+          } else if (aiVADHasSpoken && !aiVADSilenceTimer) {
+            aiVADSilenceTimer = setTimeout(() => {
+              writeAIDetection("voice", playerName, null);
+              stopAIVAD();
+            }, SILENCE_AFTER_SPEECH_MS);
+          }
+        }, 100);
+      } catch (_) { /* microfone negado ou indisponível */ }
+    }
+
+    function stopAIVAD() {
+      clearInterval(aiVADInterval); aiVADInterval = null;
+      clearTimeout(aiVADSilenceTimer); aiVADSilenceTimer = null;
+      aiVADHasSpoken = false;
+      if (aiVADStream) { aiVADStream.getTracks().forEach(t => t.stop()); aiVADStream = null; }
+      if (aiVADContext) { aiVADContext.close().catch(() => {}); aiVADContext = null; }
+    }
+
+    async function writeAIDetection(source, name, message) {
+      try {
+        await setDoc(ritualRef, {
+          aiDetection: { source, playerName: name, message: message || null, detectedAt: Date.now() }
+        }, { merge: true });
+      } catch (_) {}
+    }
+
+    async function evaluateChatResponse(text) {
+      if (!currentActiveEffect || currentActiveEffect.type !== "force_player") return;
+      if (participantId !== currentActiveEffect.params?.targetId) return;
+      const cardText = currentCard?.text || currentCard?.title || "";
+      if (!cardText || !text) return;
+      try {
+        const accessToken = localStorage.getItem("osl_access_token") || "";
+        const resp = await fetch(BACKEND_BASE_URL_OSL + "/ai/evaluate-response", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + accessToken },
+          body: JSON.stringify({ cardText, playerMessage: text })
+        });
+        const data = await resp.json();
+        if (data.ok && data.valid && (data.confidence ?? 70) >= 60) {
+          await writeAIDetection("chat", playerName, text);
+        }
+      } catch (_) {}
+    }
+
+    function checkAIDetection(aiDetection) {
+      if (!isHost) return;
+      const toast = document.getElementById("aiDetectToast");
+      const msg = document.getElementById("aiDetectToastMsg");
+      if (!toast || !msg) return;
+      if (!aiDetection?.detectedAt || Date.now() - aiDetection.detectedAt > 30000) {
+        toast.style.display = "none";
+        return;
+      }
+      msg.textContent = aiDetection.source === "voice"
+        ? `IA detectou que ${aiDetection.playerName} terminou de falar`
+        : `IA aprovou resposta de ${aiDetection.playerName} no chat`;
+      toast.style.display = "flex";
+    }
+
+    async function confirmAIDetection() {
+      await resolveActiveEffect();
+      await setDoc(ritualRef, { aiDetection: null }, { merge: true });
+      const toast = document.getElementById("aiDetectToast");
+      if (toast) toast.style.display = "none";
+    }
+
+    async function dismissAIDetection() {
+      await setDoc(ritualRef, { aiDetection: null }, { merge: true });
+      const toast = document.getElementById("aiDetectToast");
+      if (toast) toast.style.display = "none";
+    }
+
+    window.confirmAIDetection = confirmAIDetection;
+    window.dismissAIDetection = dismissAIDetection;
 
     let lastVoteResultTimestamp = 0;
     function showVoteResultOverlay(winner, resolvedAt) {
@@ -8643,6 +8797,8 @@
         text,
         createdAt: serverTimestamp()
       });
+
+      evaluateChatResponse(text);
 
       await updateDoc(roomRef, {
         updatedAt: serverTimestamp()
