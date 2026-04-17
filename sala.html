@@ -7082,7 +7082,10 @@
       if (!effect?.params?.targetId || participantId !== effect.params.targetId) return;
       if (typeof window.isInVideoCall !== "function" || !window.isInVideoCall()) return;
       try {
-        aiVADStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        const stream = typeof window.getLocalAudioMediaStream === "function"
+          ? window.getLocalAudioMediaStream() : null;
+        if (!stream) return;
+        aiVADStream = stream;
         aiVADContext = new AudioContext();
         const source = aiVADContext.createMediaStreamSource(aiVADStream);
         const analyser = aiVADContext.createAnalyser();
@@ -7120,7 +7123,7 @@
       clearInterval(aiVADInterval); aiVADInterval = null;
       clearTimeout(aiVADSilenceTimer); aiVADSilenceTimer = null;
       aiVADHasSpoken = false;
-      if (aiVADStream) { aiVADStream.getTracks().forEach(t => t.stop()); aiVADStream = null; }
+      aiVADStream = null; // não para os tracks — pertencem ao LiveKit
       if (aiVADContext) { aiVADContext.close().catch(() => {}); aiVADContext = null; }
     }
 

@@ -548,6 +548,10 @@ function setupRoomListeners(room) {
 }
 
 window.isInVideoCall = () => !!lkRoom;
+window.getLocalAudioMediaStream = () => {
+  if (!localAudioTrack?.mediaStreamTrack) return null;
+  return new MediaStream([localAudioTrack.mediaStreamTrack]);
+};
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
   const controller = new AbortController();
