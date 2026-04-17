@@ -2,205 +2,164 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Resgate na Floresta - Versão Sênior</title>
+    <title>Resgate 3D - Forest Survival</title>
     <style>
-        :root {
-            --bg-color: #0b1a0b;
-            --forest-green: #1a331a;
-            --player-color: #3498db; /* Azul para o menino */
-            --family-color: #f1c40f; /* Amarelo para a família */
-            --tree-color: #0d1f0d;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: white;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
         #ui {
-            margin-bottom: 15px;
-            text-align: center;
-            width: 400px;
-            display: flex;
-            justify-content: space-between;
+            position: absolute; top: 20px; width: 100%;
+            display: flex; justify-content: center;
+            pointer-events: none; z-index: 10;
         }
-
-        #timer { font-size: 24px; color: #e74c3c; font-weight: bold; }
-
-        #viewport {
-            position: relative;
-            width: 400px;
-            height: 400px;
-            background-color: var(--forest-green);
-            border: 4px solid #2d5a2d;
-            border-radius: 10px;
-            background-image: radial-gradient(#2d5a2d 1px, transparent 1px);
-            background-size: 20px 20px;
+        #timer {
+            background: rgba(0,0,0,0.7); padding: 10px 20px;
+            border-radius: 20px; color: #ff4444; font-size: 24px;
+            border: 2px solid #ff4444; box-shadow: 0 0 15px #ff4444;
         }
-
-        .entity {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            transition: all 0.1s linear;
-        }
-
-        #player { background-color: var(--player-color); box-shadow: 0 0 10px var(--player-color); z-index: 10; }
-        #family { background-color: var(--family-color); box-shadow: 0 0 15px var(--family-color); z-index: 5; }
-        .tree { background-color: var(--tree-color); border-radius: 50%; }
-
-        #overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
+        #instructions {
+            position: absolute; bottom: 20px; width: 100%;
+            text-align: center; color: white; font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <div id="ui">
-        <div>Menino Perdido</div>
-        <div id="timer">03:00</div>
-    </div>
+    <div id="ui"><div id="timer">03:00</div></div>
+    <div id="instructions">Use as SETAS ou WASD para caminhar</div>
 
-    <div id="viewport">
-        <div id="overlay">
-            <h1 id="msg">FIM DE JOGO</h1>
-            <button onclick="location.reload()" style="padding: 10px 20px; cursor: pointer;">Tentar Novamente</button>
-        </div>
-        <div id="player" class="entity"></div>
-        <div id="family" class="entity"></div>
-    </div>
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
 
-    <p style="margin-top: 20px; color: #666;">Use as setas do teclado para se mover pela floresta!</p>
+    <script type="module">
+        import * as THREE from 'three';
 
-<script>
-    // Configurações e Estado
-    const CONFIG = {
-        gridSize: 20,
-        mapLimit: 380,
-        totalTime: 180, // 3 minutos em segundos
-    };
+        // --- CONFIGURAÇÃO SÊNIOR DA CENA ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x020502);
+        scene.fog = new THREE.Fog(0x020502, 5, 25); // Névoa para mistério
 
-    let state = {
-        player: { x: 20, y: 20 },
-        family: { x: 340, y: 340 },
-        timeLeft: CONFIG.totalTime,
-        isGameOver: false,
-        trees: []
-    };
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
 
-    // Inicialização
-    const playerEl = document.getElementById('player');
-    const familyEl = document.getElementById('family');
-    const timerEl = document.getElementById('timer');
-    const overlay = document.getElementById('overlay');
-    const msgEl = document.getElementById('msg');
+        // --- ILUMINAÇÃO ---
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        scene.add(ambientLight);
 
-    function init() {
-        // Gerar árvores (obstáculos) aleatórios
-        for(let i=0; i < 40; i++) {
-            let tx = Math.floor(Math.random() * 19) * 20;
-            let ty = Math.floor(Math.random() * 19) * 20;
-            
-            // Não colocar árvore em cima do player ou da família
-            if ((tx < 60 && ty < 60) || (tx > 300 && ty > 300)) continue;
+        const spotLight = new THREE.SpotLight(0xffffff, 50);
+        spotLight.position.set(0, 10, 0);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
 
-            const tree = document.createElement('div');
-            tree.className = 'entity tree';
-            tree.style.left = tx + 'px';
-            tree.style.top = ty + 'px';
-            document.getElementById('viewport').appendChild(tree);
-            state.trees.push({x: tx, y: ty});
-        }
+        // --- CHÃO DA FLORESTA ---
+        const floorGeo = new THREE.PlaneGeometry(100, 100);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a2b1a });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // --- CRIAÇÃO DO "MENINO" (Estilo Low-Poly Among Us) ---
+        const playerGroup = new THREE.Group();
         
-        updateView();
-        startTimer();
-    }
+        // Corpo
+        const body = new THREE.Mesh(
+            new THREE.CapsuleGeometry(0.4, 0.6, 4, 12),
+            new THREE.MeshStandardMaterial({ color: 0x3498db })
+        );
+        body.position.y = 0.7;
+        body.castShadow = true;
+        playerGroup.add(body);
 
-    function startTimer() {
-        const countdown = setInterval(() => {
-            if (state.isGameOver) {
-                clearInterval(countdown);
-                return;
-            }
-            
-            state.timeLeft--;
-            let mins = Math.floor(state.timeLeft / 60);
-            let secs = state.timeLeft % 60;
-            timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        // Visor (Olhos)
+        const visor = new THREE.Mesh(
+            new THREE.BoxGeometry(0.5, 0.2, 0.2),
+            new THREE.MeshStandardMaterial({ color: 0x222222 })
+        );
+        visor.position.set(0, 0.9, 0.35);
+        playerGroup.add(visor);
 
-            if (state.timeLeft <= 0) {
-                endGame("VOCÊ SE PERDEU NA ESCURIDÃO...");
-                clearInterval(countdown);
+        scene.add(playerGroup);
+
+        // --- FAMÍLIA (O Objetivo - Brilhando) ---
+        const familyGeo = new THREE.TorusKnotGeometry(0.4, 0.1, 64, 8);
+        const familyMat = new THREE.MeshStandardMaterial({ color: 0xf1c40f, emissive: 0xf1c40f });
+        const family = new THREE.Mesh(familyGeo, familyMat);
+        family.position.set(15, 1, -15);
+        scene.add(family);
+
+        // --- ÁRVORES ---
+        for(let i=0; i<80; i++) {
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.2, 0.2, 3),
+                new THREE.MeshStandardMaterial({ color: 0x2d1a0d })
+            );
+            const x = (Math.random() - 0.5) * 60;
+            const z = (Math.random() - 0.5) * 60;
+            if(Math.abs(x) < 3 && Math.abs(z) < 3) continue; // Não nasce no player
+
+            trunk.position.set(x, 1.5, z);
+            trunk.castShadow = true;
+            scene.add(trunk);
+        }
+
+        // --- CONTROLES E LÓGICA ---
+        const keys = {};
+        window.addEventListener('keydown', (e) => keys[e.code] = true);
+        window.addEventListener('keyup', (e) => keys[e.code] = false);
+
+        let timeLeft = 180;
+        const timerDiv = document.getElementById('timer');
+
+        setInterval(() => {
+            if(timeLeft > 0) {
+                timeLeft--;
+                let m = Math.floor(timeLeft/60);
+                let s = timeLeft%60;
+                timerDiv.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
             }
         }, 1000);
-    }
 
-    function updateView() {
-        playerEl.style.left = state.player.x + 'px';
-        playerEl.style.top = state.player.y + 'px';
-        familyEl.style.left = state.family.x + 'px';
-        familyEl.style.top = state.family.y + 'px';
-    }
+        // --- GAME LOOP (60 FPS) ---
+        function animate() {
+            requestAnimationFrame(animate);
 
-    function movePlayer(dx, dy) {
-        if (state.isGameOver) return;
+            const speed = 0.15;
+            if (keys['ArrowUp'] || keys['KeyW']) playerGroup.position.z -= speed;
+            if (keys['ArrowDown'] || keys['KeyS']) playerGroup.position.z += speed;
+            if (keys['ArrowLeft'] || keys['KeyA']) playerGroup.position.x -= speed;
+            if (keys['ArrowRight'] || keys['KeyD']) playerGroup.position.x += speed;
 
-        const nextX = state.player.x + (dx * CONFIG.gridSize);
-        const nextY = state.player.y + (dy * CONFIG.gridSize);
+            // Rotação suave do personagem para onde ele caminha
+            if(keys['ArrowLeft'] || keys['KeyA']) playerGroup.rotation.y = Math.PI/2;
+            if(keys['ArrowRight'] || keys['KeyD']) playerGroup.rotation.y = -Math.PI/2;
+            if(keys['ArrowUp'] || keys['KeyW']) playerGroup.rotation.y = 0;
+            if(keys['ArrowDown'] || keys['KeyS']) playerGroup.rotation.y = Math.PI;
 
-        // Colisão com Bordas
-        if (nextX < 0 || nextX > CONFIG.mapLimit || nextY < 0 || nextY > CONFIG.mapLimit) return;
+            // Câmera seguindo (Estilo Third Person)
+            camera.position.set(playerGroup.position.x, playerGroup.position.y + 8, playerGroup.position.z + 8);
+            camera.lookAt(playerGroup.position);
 
-        // Colisão com Árvores
-        const hitTree = state.trees.some(t => t.x === nextX && t.y === nextY);
-        if (hitTree) return;
+            // Luz segue o player (lanterna)
+            spotLight.position.set(playerGroup.position.x, 10, playerGroup.position.z);
+            spotLight.target = playerGroup;
 
-        state.player.x = nextX;
-        state.player.y = nextY;
-        
-        updateView();
-        checkVictory();
-    }
+            // Animação da Família
+            family.rotation.y += 0.02;
 
-    function checkVictory() {
-        if (state.player.x === state.family.x && state.player.y === state.family.y) {
-            endGame("VOCÊ ACHOU SUA FAMÍLIA!");
+            renderer.render(scene, camera);
         }
-    }
 
-    function endGame(message) {
-        state.isGameOver = true;
-        msgEl.innerText = message;
-        overlay.style.display = 'flex';
-    }
+        animate();
 
-    // Input Listeners
-    window.addEventListener('keydown', (e) => {
-        switch(e.key) {
-            case 'ArrowUp':    movePlayer(0, -1); break;
-            case 'ArrowDown':  movePlayer(0, 1);  break;
-            case 'ArrowLeft':  movePlayer(-1, 0); break;
-            case 'ArrowRight': movePlayer(1, 0);  break;
-        }
-    });
-
-    init();
-</script>
+        // Ajuste de janela
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
