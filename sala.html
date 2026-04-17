@@ -6273,10 +6273,7 @@
     let currentActiveEffect = null;
 
     // ── AI Detection state ────────────────────────────────────────────
-    let aiVADStream = null;
-    let aiVADContext = null;
-    let aiVADInterval = null;
-    let aiVADHasSpoken = false;
+    let aiVADStopFn = null;
     let aiVADSilenceTimer = null;
 
     // ── Efeitos por carta (indexado pelo title) ───────────────────────────
@@ -7077,54 +7074,28 @@
 
     // ── AI Detection: VAD + Chat ──────────────────────────────────────
 
-    async function startAIVAD(effect) {
+    function startAIVAD(effect) {
       stopAIVAD();
       if (!effect?.params?.targetId || participantId !== effect.params.targetId) return;
       if (typeof window.isInVideoCall !== "function" || !window.isInVideoCall()) return;
-      try {
-        const stream = typeof window.getLocalAudioMediaStream === "function"
-          ? window.getLocalAudioMediaStream() : null;
-        if (!stream) return;
-        aiVADStream = stream;
-        aiVADContext = new AudioContext();
-        const source = aiVADContext.createMediaStreamSource(aiVADStream);
-        const analyser = aiVADContext.createAnalyser();
-        analyser.fftSize = 256;
-        source.connect(analyser);
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        const THRESHOLD = 40;
-        const MIN_SPEECH_TICKS = 6; // 600ms contínuos acima do threshold para contar como fala
-        const SILENCE_AFTER_SPEECH_MS = 4000;
-        let speechTicks = 0;
-        aiVADHasSpoken = false;
-        aiVADInterval = setInterval(() => {
-          analyser.getByteFrequencyData(dataArray);
-          const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-          if (avg > THRESHOLD) {
-            speechTicks++;
-            if (speechTicks >= MIN_SPEECH_TICKS) {
-              aiVADHasSpoken = true;
-              if (aiVADSilenceTimer) { clearTimeout(aiVADSilenceTimer); aiVADSilenceTimer = null; }
-            }
-          } else {
-            speechTicks = 0;
-            if (aiVADHasSpoken && !aiVADSilenceTimer) {
-              aiVADSilenceTimer = setTimeout(() => {
-                writeAIDetection("voice", playerName, null);
-                stopAIVAD();
-              }, SILENCE_AFTER_SPEECH_MS);
-            }
-          }
-        }, 100);
-      } catch (_) { /* microfone negado ou indisponível */ }
+      if (typeof window.watchLocalSpeaking !== "function") return;
+      let hasSpoken = false;
+      aiVADStopFn = window.watchLocalSpeaking((isSpeaking) => {
+        if (isSpeaking) {
+          hasSpoken = true;
+          if (aiVADSilenceTimer) { clearTimeout(aiVADSilenceTimer); aiVADSilenceTimer = null; }
+        } else if (hasSpoken && !aiVADSilenceTimer) {
+          aiVADSilenceTimer = setTimeout(() => {
+            writeAIDetection("voice", playerName, null);
+            stopAIVAD();
+          }, 4000);
+        }
+      });
     }
 
     function stopAIVAD() {
-      clearInterval(aiVADInterval); aiVADInterval = null;
+      if (aiVADStopFn) { aiVADStopFn(); aiVADStopFn = null; }
       clearTimeout(aiVADSilenceTimer); aiVADSilenceTimer = null;
-      aiVADHasSpoken = false;
-      aiVADStream = null; // não para os tracks — pertencem ao LiveKit
-      if (aiVADContext) { aiVADContext.close().catch(() => {}); aiVADContext = null; }
     }
 
     async function writeAIDetection(source, name, message) {

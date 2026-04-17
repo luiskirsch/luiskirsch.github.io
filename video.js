@@ -548,9 +548,17 @@ function setupRoomListeners(room) {
 }
 
 window.isInVideoCall = () => !!lkRoom;
-window.getLocalAudioMediaStream = () => {
-  if (!localAudioTrack?.mediaStreamTrack) return null;
-  return new MediaStream([localAudioTrack.mediaStreamTrack]);
+
+// Registra callback chamado com (isSpeaking: boolean) quando o participante local fala/para de falar.
+// Retorna função para cancelar o listener.
+window.watchLocalSpeaking = (cb) => {
+  if (!lkRoom) return () => {};
+  const handler = (speakers) => {
+    const speaking = speakers.some(p => p.identity === participantId);
+    cb(speaking);
+  };
+  lkRoom.on(RoomEvent.ActiveSpeakersChanged, handler);
+  return () => lkRoom.off(RoomEvent.ActiveSpeakersChanged, handler);
 };
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
