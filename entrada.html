@@ -879,6 +879,12 @@
 
     const db = getFirestore(initializeApp(firebaseConfig));
 
+    window.verificarCodigoDisponivel = async function (codigoSala) {
+      const snap = await getDoc(doc(db, "salas", codigoSala));
+      if (!snap.exists()) return true;
+      return snap.data().status === "closed";
+    };
+
     window.validarEntradaSala = async function (codigoSala, nomeSalaDigitado) {
       const snap = await getDoc(doc(db, "salas", codigoSala));
       if (!snap.exists()) return { ok: false, erro: "Sala não encontrada. Verifique o código." };
@@ -1018,6 +1024,23 @@
         codigoSala = gerarCodigoSala();
         codigoSalaEl.value = codigoSala;
       }
+
+      // Verificar se o código já está em uso
+      setStatus("Verificando código…", "");
+      btnCriarSala.disabled = true;
+      try {
+        const disponivel = await window.verificarCodigoDisponivel(codigoSala);
+        if (!disponivel) {
+          const sugestao = gerarCodigoSala();
+          codigoSalaEl.value = sugestao;
+          setStatus(`Código já em uso. Sugestão: ${sugestao}`, "err");
+          btnCriarSala.disabled = false;
+          return;
+        }
+      } catch {
+        // Se falhar a verificação, continua e deixa sala.html lidar
+      }
+      btnCriarSala.disabled = false;
 
       await entrarNaSala({ nomeJogador, codigoSala, nomeSala });
     });
