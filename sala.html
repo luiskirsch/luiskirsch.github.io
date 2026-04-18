@@ -1681,6 +1681,91 @@
       text-overflow:ellipsis;white-space:nowrap;
     }
 
+    /* ── Session Recap ───────────────────────────────────────────── */
+    @keyframes recapIn{
+      from{opacity:0;transform:scale(.94) translateY(16px)}
+      to{opacity:1;transform:scale(1) translateY(0)}
+    }
+    .recapOverlay{
+      position:fixed;inset:0;z-index:10001;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.88);
+      backdrop-filter:blur(14px);
+      animation:fadeInBg .4s ease;
+      padding:20px;
+    }
+    .recapOverlay.closing{animation:fadeOutBg .3s ease forwards}
+    .recapOverlay.closing .recapCard{animation:rewardCardOut .3s cubic-bezier(.36,0,.66,-.56) forwards}
+    .recapCard{
+      background:linear-gradient(150deg,#0c0804,#1a1006,#0c0804);
+      border:1px solid rgba(212,168,75,.4);
+      border-radius:22px;
+      padding:36px 28px 28px;
+      max-width:380px;width:100%;
+      box-shadow:0 0 100px rgba(212,168,75,.12),0 24px 60px rgba(0,0,0,.7);
+      animation:recapIn .5s cubic-bezier(.2,1,.4,1);
+      position:relative;overflow:hidden;
+    }
+    .recapCard::before{
+      content:"";
+      position:absolute;inset:0;
+      background:radial-gradient(ellipse at 50% -10%,rgba(212,168,75,.08),transparent 65%);
+      pointer-events:none;
+    }
+    .recapCard__eyebrow{
+      color:rgba(212,168,75,.6);
+      font-size:10px;font-weight:700;
+      letter-spacing:.2em;text-transform:uppercase;
+      text-align:center;margin-bottom:6px;
+    }
+    .recapCard__title{
+      color:#f0e8d8;
+      font-size:22px;font-weight:900;
+      text-align:center;
+      letter-spacing:.05em;
+      margin-bottom:28px;
+    }
+    .recapStats{
+      display:grid;grid-template-columns:1fr 1fr;
+      gap:10px;margin-bottom:24px;
+    }
+    .recapStat{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:12px;
+      padding:14px 12px;
+      text-align:center;
+    }
+    .recapStat__icon{font-size:22px;margin-bottom:5px}
+    .recapStat__value{
+      color:#f0e8d8;font-size:18px;font-weight:900;
+      line-height:1;margin-bottom:3px;
+    }
+    .recapStat__label{
+      color:rgba(255,255,255,.35);
+      font-size:10px;letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+    .recapStat--wide{grid-column:1/-1}
+    .recapCard__actions{display:flex;flex-direction:column;gap:8px}
+    .recapCard__btn{
+      border:none;border-radius:10px;
+      font-size:13px;font-weight:900;
+      letter-spacing:.08em;padding:13px 0;
+      width:100%;cursor:pointer;transition:filter .2s;
+    }
+    .recapCard__btn--primary{
+      background:linear-gradient(135deg,#9a6e0a,#d4a84b);
+      color:#1a1208;
+    }
+    .recapCard__btn--primary:hover{filter:brightness(1.12)}
+    .recapCard__btn--ghost{
+      background:rgba(255,255,255,.06);
+      color:rgba(255,255,255,.5);
+      border:1px solid rgba(255,255,255,.1);
+    }
+    .recapCard__btn--ghost:hover{background:rgba(255,255,255,.1)}
+
     .aiDetectToast__dismiss{
       background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.12);
@@ -6905,6 +6990,8 @@
 
       await addHistoryItem("Ritual", "O ritual foi iniciado.");
       await assignSecretMissions(currentPlayers);
+      // Store session start time for recap duration
+      await setDoc(ritualRef, { sessionStartedAt: Date.now() }, { merge: true });
 
       // Abre a arena automaticamente para todos
       await updateDoc(roomRef, { arenaActive: true });
@@ -7355,7 +7442,8 @@
       if (!ritualStarted) return;
       try {
         await setDoc(ritualRef, {
-          [`reactions.${participantId}`]: { emoji, name: playerName, ts: Date.now() }
+          [`reactions.${participantId}`]: { emoji, name: playerName, ts: Date.now() },
+          [`reactionCounts.${participantId}`]: increment(1)
         }, { merge: true });
       } catch (_) {}
     }
@@ -7390,6 +7478,108 @@
     }
 
     window.sendReaction = sendReaction;
+
+    // ── Session Recap ─────────────────────────────────────────────────────
+    async function showSessionRecap(onNewSession) {
+      // Fetch data in parallel
+      const [histSnap, msgsSnap, ritualSnap] = await Promise.all([
+        getDocs(query(ritualHistoryRef, orderBy("createdAt", "asc"))),
+        getDocs(query(messagesRef, orderBy("createdAt", "asc"))),
+        getDoc(ritualRef)
+      ]);
+
+      const histItems = histSnap.docs.map(d => d.data());
+      const cardsRevealed = histItems.filter(h => h.type && h.type !== "Ritual").length;
+
+      // Duration
+      let durationStr = "—";
+      const ritualData = ritualSnap?.data?.() || {};
+      if (ritualData.sessionStartedAt) {
+        const mins = Math.round((Date.now() - ritualData.sessionStartedAt) / 60000);
+        durationStr = mins < 1 ? "< 1 min" : `${mins} min`;
+      }
+
+      // Most popular reaction emoji
+      const reactions = ritualData.reactions || {};
+      const emojiTally = {};
+      Object.values(reactions).forEach(r => { if (r?.emoji) emojiTally[r.emoji] = (emojiTally[r.emoji] || 0) + 1; });
+      const topEmoji = Object.entries(emojiTally).sort((a,b) => b[1]-a[1])[0]?.[0] || null;
+
+      // Most expressive player (most reactions sent)
+      const reactionCounts = ritualData.reactionCounts || {};
+      let topReactor = null, topCount = 0;
+      Object.entries(reactionCounts).forEach(([pid, n]) => {
+        if (n > topCount) { topCount = n; topReactor = pid; }
+      });
+      const topReactorName = currentPlayers.find(p => p.id === topReactor)?.name || null;
+
+      // Most active chatter
+      const msgCountByPlayer = {};
+      msgsSnap.docs.forEach(d => {
+        const aid = d.data().authorId;
+        if (aid) msgCountByPlayer[aid] = (msgCountByPlayer[aid] || 0) + 1;
+      });
+      let topChatter = null, topMsgCount = 0;
+      Object.entries(msgCountByPlayer).forEach(([pid, n]) => {
+        if (n > topMsgCount) { topMsgCount = n; topChatter = pid; }
+      });
+      const topChatterName = currentPlayers.find(p => p.id === topChatter)?.name || null;
+
+      // Render modal
+      const overlay = document.createElement("div");
+      overlay.className = "recapOverlay";
+
+      const statReactor = topReactorName
+        ? `<div class="recapStat"><div class="recapStat__icon">🎭</div><div class="recapStat__value">${escapeHtml(topReactorName)}</div><div class="recapStat__label">Mais expressivo</div></div>`
+        : "";
+      const statChatter = topChatterName
+        ? `<div class="recapStat"><div class="recapStat__icon">💬</div><div class="recapStat__value">${escapeHtml(topChatterName)}</div><div class="recapStat__label">Mais no chat</div></div>`
+        : "";
+      const statEmoji = topEmoji
+        ? `<div class="recapStat"><div class="recapStat__icon">${topEmoji}</div><div class="recapStat__value">Favorita</div><div class="recapStat__label">Reação do grupo</div></div>`
+        : "";
+      const newSessionBtn = onNewSession
+        ? `<button class="recapCard__btn recapCard__btn--primary" id="recapNewBtn">NOVA SESSÃO</button>`
+        : "";
+
+      overlay.innerHTML = `
+        <div class="recapCard">
+          <div class="recapCard__eyebrow">Fim do Ritual</div>
+          <div class="recapCard__title">Recap da Sessão</div>
+          <div class="recapStats">
+            <div class="recapStat">
+              <div class="recapStat__icon">🃏</div>
+              <div class="recapStat__value">${cardsRevealed}</div>
+              <div class="recapStat__label">Cartas reveladas</div>
+            </div>
+            <div class="recapStat">
+              <div class="recapStat__icon">⏱</div>
+              <div class="recapStat__value">${durationStr}</div>
+              <div class="recapStat__label">Duração</div>
+            </div>
+            ${statReactor}${statChatter}${statEmoji}
+          </div>
+          <div class="recapCard__actions">
+            ${newSessionBtn}
+            <button class="recapCard__btn recapCard__btn--ghost" id="recapCloseBtn">FECHAR</button>
+          </div>
+        </div>`;
+
+      document.body.appendChild(overlay);
+
+      const closeRecap = () => {
+        overlay.classList.add("closing");
+        setTimeout(() => overlay.remove(), 300);
+      };
+
+      document.getElementById("recapCloseBtn").addEventListener("click", closeRecap);
+      if (onNewSession) {
+        document.getElementById("recapNewBtn").addEventListener("click", () => {
+          closeRecap();
+          onNewSession();
+        });
+      }
+    }
 
     // ── Secret Missions ───────────────────────────────────────────────────
     const SECRET_MISSIONS = [
@@ -9484,8 +9674,13 @@
 
     if (resetRitualBtn) {
       resetRitualBtn.addEventListener("click", () => {
-        const ok = confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?");
-        if (ok) resetRitualDeck().catch(console.error);
+        if (ritualStarted) {
+          // Show recap before resetting if session is in progress
+          showSessionRecap(() => resetRitualDeck().catch(console.error)).catch(console.error);
+        } else {
+          const ok = confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?");
+          if (ok) resetRitualDeck().catch(console.error);
+        }
       });
     }
 
