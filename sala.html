@@ -11862,23 +11862,6 @@
         html.classList.add("arenaMode");
         sessionStorage.setItem("osl_arena", "1");
 
-        // Move arenaControls to body so position:fixed is always viewport-relative
-        // (arenaLift applies transform to .layout which would otherwise hijack the containing block)
-        const ctrl = document.getElementById("arenaControls");
-        if (ctrl && ctrl.parentNode !== document.body) {
-          ctrl._arenaParent  = ctrl.parentNode;
-          ctrl._arenaNextSib = ctrl.nextSibling;
-          document.body.appendChild(ctrl);
-        }
-
-        // Re-sync reactionBar visibility after DOM move — the Firebase ritual listener
-        // may have fired before the move, so the class needs to be reapplied.
-        const reactionBar = document.getElementById("reactionBar");
-        if (reactionBar) {
-          const started = !!window._osl?.isStarted?.();
-          reactionBar.classList.toggle("reactionBar--visible", started);
-        }
-
         const btn = document.getElementById("arenaBtn");
         if (btn) {
           btn.textContent = "✕ Arena";
@@ -11893,14 +11876,6 @@
       function deactivateArenaMode() {
         html.classList.remove("arenaMode");
         sessionStorage.removeItem("osl_arena");
-
-        // Return arenaControls to its original DOM position
-        const ctrl = document.getElementById("arenaControls");
-        if (ctrl && ctrl._arenaParent) {
-          ctrl._arenaParent.insertBefore(ctrl, ctrl._arenaNextSib || null);
-          delete ctrl._arenaParent;
-          delete ctrl._arenaNextSib;
-        }
 
         const btn = document.getElementById("arenaBtn");
         if (btn) {
