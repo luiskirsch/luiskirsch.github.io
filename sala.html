@@ -1660,24 +1660,26 @@
     }
     .missionCard__btn:hover{filter:brightness(1.15)}
     .missionBadge{
-      position:fixed;bottom:76px;right:16px;
+      position:fixed;top:64px;right:14px;
       z-index:1100;
       background:rgba(10,7,3,.92);
       border:1px solid rgba(180,140,60,.38);
       border-radius:12px;
-      padding:8px 12px;
+      padding:7px 11px;
       cursor:pointer;
       display:flex;align-items:center;gap:7px;
-      opacity:0;transform:translateX(20px);
+      opacity:0;transform:translateX(12px);
       transition:opacity .3s ease,transform .3s ease;
       pointer-events:none;
       backdrop-filter:blur(10px);
+      max-width:220px;
     }
     .missionBadge--visible{opacity:1;transform:translateX(0);pointer-events:auto}
-    .missionBadge__icon{font-size:16px;flex-shrink:0}
+    .missionBadge--done{border-color:rgba(80,200,80,.4)}
+    .missionBadge__icon{font-size:15px;flex-shrink:0}
     .missionBadge__text{
       font-size:11px;color:rgba(255,255,255,.55);
-      max-width:160px;overflow:hidden;
+      overflow:hidden;
       text-overflow:ellipsis;white-space:nowrap;
     }
 
@@ -4277,8 +4279,7 @@
       display:none;
       position:fixed;
       bottom:14px;
-      left:50%;
-      transform:translateX(-50%);
+      left:16px;
       z-index:100;
       appearance:none;
       border:1px solid rgba(215,176,107,.22);
@@ -4313,8 +4314,28 @@
     }
 
     @keyframes fadeInUp{
-      from{ opacity:0; transform:translateX(-50%) translateY(8px); }
-      to{   opacity:1; transform:translateX(-50%) translateY(0); }
+      from{ opacity:0; transform:translateY(8px); }
+      to{   opacity:1; transform:translateY(0); }
+    }
+
+    /* In arena mode, escape the overflow:hidden cardCenter */
+    html.arenaMode .reactionBar{
+      position:fixed;
+      bottom:16px;
+      left:50%;
+      transform:translateX(-50%);
+      margin:0;
+      transition:opacity .3s ease;
+    }
+    html.arenaMode .reactionBar:not(.reactionBar--visible){
+      opacity:0;
+      pointer-events:none;
+      transform:translateX(-50%);
+    }
+    html.arenaMode .reactionBar.reactionBar--visible{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateX(-50%);
     }
 
     /* @media <= 640px: empilha colunas de vídeo horizontalmente */
@@ -5706,12 +5727,12 @@
 
                 <!-- ── Reaction Bar ────────────────────────────────── -->
                 <div class="reactionBar" id="reactionBar">
-                  <button class="reactionBar__btn" onclick="sendReaction('😂')" title="Haha">😂</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('❤️')" title="Amor">❤️</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('😮')" title="Uau">😮</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('👏')" title="Palmas">👏</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('🔥')" title="Fogo">🔥</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('💀')" title="Morto">💀</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('😂',this)" title="Haha">😂</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('❤️',this)" title="Amor">❤️</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('😮',this)" title="Uau">😮</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('👏',this)" title="Palmas">👏</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('🔥',this)" title="Fogo">🔥</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('💀',this)" title="Morto">💀</button>
                 </div>
               </div>
 
@@ -7438,11 +7459,15 @@
     // ── Reactions ─────────────────────────────────────────────────────
     const shownReactions = new Map(); // pid → ts last shown
 
-    async function sendReaction(emoji) {
+    async function sendReaction(emoji, sourceEl) {
       if (!ritualStarted) return;
+      const ts = Date.now();
+      // Mark locally so the snapshot echo doesn't spawn a second float
+      shownReactions.set(participantId, ts);
+      spawnReactionFloat(participantId, emoji, sourceEl);
       try {
         await setDoc(ritualRef, {
-          [`reactions.${participantId}`]: { emoji, name: playerName, ts: Date.now() },
+          [`reactions.${participantId}`]: { emoji, name: playerName, ts },
           [`reactionCounts.${participantId}`]: increment(1)
         }, { merge: true });
       } catch (_) {}
@@ -7455,24 +7480,37 @@
         if (!r?.ts || now - r.ts > 4500) return;
         if (shownReactions.get(pid) === r.ts) return;
         shownReactions.set(pid, r.ts);
-        spawnReactionFloat(pid, r.emoji);
+        spawnReactionFloat(pid, r.emoji, null);
       });
     }
 
-    function spawnReactionFloat(pid, emoji) {
+    function spawnReactionFloat(pid, emoji, fallbackEl) {
       const grid = document.getElementById("videoGrid");
       const selfSlot = document.getElementById("videoSelfSlot");
       let tile = (pid === participantId)
         ? selfSlot?.querySelector(".videoTile")
         : grid?.querySelector(`.videoTile[data-identity="${CSS.escape(pid)}"]`);
-      if (!tile) return;
-      const rect = tile.getBoundingClientRect();
-      if (!rect.width) return;
+      // Fallback: use the clicked button → reactionBar → center of screen
+      const origin = tile || fallbackEl || document.getElementById("reactionBar");
+      const rect = origin?.getBoundingClientRect();
+      if (!rect?.width && !rect?.height) {
+        // absolute center fallback
+        const float = document.createElement("span");
+        float.className = "reactionFloat";
+        float.textContent = emoji;
+        float.style.left = (window.innerWidth * 0.5) + "px";
+        float.style.top  = (window.innerHeight * 0.5) + "px";
+        document.body.appendChild(float);
+        setTimeout(() => float.remove(), 1800);
+        return;
+      }
       const float = document.createElement("span");
       float.className = "reactionFloat";
       float.textContent = emoji;
-      float.style.left = (rect.left + rect.width * (0.15 + Math.random() * 0.55)) + "px";
-      float.style.top  = (rect.top  + rect.height * 0.35) + "px";
+      float.style.left = (rect.left + rect.width * (0.1 + Math.random() * 0.7)) + "px";
+      float.style.top  = tile
+        ? (rect.top  + rect.height * 0.35) + "px"
+        : (rect.top - 10) + "px";
       document.body.appendChild(float);
       setTimeout(() => float.remove(), 1800);
     }
@@ -7639,6 +7677,7 @@
         if (mission.assignedAt === missionShownTs) return;
         missionShownTs = mission.assignedAt;
         currentSecretMission = mission.text;
+        missionCompleted = false;
         showSecretMissionModal(mission.text);
         updateMissionBadge(mission.text);
       });
@@ -7677,6 +7716,60 @@
       }
       document.getElementById("missionBadgeText").textContent = text;
       badge.classList.add("missionBadge--visible");
+    }
+
+    let missionCompleted = false;
+
+    function getMissionKeyword() {
+      if (!currentSecretMission) return null;
+      const m = currentSecretMission.match(/'([^']+)'/);
+      return m ? m[1] : null;
+    }
+
+    function normalize(str) {
+      return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function checkMissionChatCompletion(text) {
+      if (!currentSecretMission || missionCompleted) return;
+      const keyword = getMissionKeyword();
+      if (!keyword) return;
+      if (normalize(text).includes(normalize(keyword))) {
+        completeMission();
+      }
+    }
+
+    function completeMission() {
+      if (missionCompleted) return;
+      missionCompleted = true;
+      const badge = document.getElementById("missionBadge");
+      if (badge) {
+        badge.classList.add("missionBadge--done");
+        const icon = badge.querySelector(".missionBadge__icon");
+        if (icon) icon.textContent = "✅";
+        const txt = badge.querySelector(".missionBadge__text");
+        if (txt) txt.textContent = "Missão cumprida!";
+      }
+      // Show success toast
+      const toast = document.createElement("div");
+      toast.style.cssText = `
+        position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);
+        z-index:9999;background:rgba(20,50,20,.95);border:1px solid rgba(80,200,80,.45);
+        border-radius:10px;padding:10px 18px;color:#80d080;font-size:13px;font-weight:700;
+        letter-spacing:.04em;white-space:nowrap;opacity:0;
+        transition:opacity .25s ease,transform .25s ease;
+      `;
+      toast.textContent = "✅ Missão secreta cumprida!";
+      document.body.appendChild(toast);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        toast.style.opacity = "1";
+        toast.style.transform = "translateX(-50%) translateY(0)";
+      }));
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(-50%) translateY(10px)";
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
     }
 
     async function evaluateChatResponse(text) {
@@ -9550,6 +9643,7 @@
       });
 
       evaluateChatResponse(text);
+      checkMissionChatCompletion(text);
 
       await updateDoc(roomRef, {
         updatedAt: serverTimestamp()
