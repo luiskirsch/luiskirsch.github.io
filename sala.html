@@ -4289,42 +4289,30 @@
     }
 
     /* --- Botão para sair do Arena Mode --- */
+    /* exitArenaBtn lives inside .reactionBar — shown only in arena mode */
     .exitArenaBtn{
       display:none;
-      position:fixed;
-      bottom:14px;
-      left:16px;
-      z-index:100;
       appearance:none;
-      border:1px solid rgba(215,176,107,.22);
-      background:rgba(8,6,4,.82);
-      color:rgba(243,237,229,.45);
-      padding:5px 16px;
-      border-radius:10px;
+      background:none;
+      border:none;
+      border-right:1px solid rgba(255,255,255,.1);
+      color:rgba(243,237,229,.4);
+      padding:4px 10px 4px 4px;
+      margin-right:4px;
       font:inherit;
       font-size:11px;
-      letter-spacing:.06em;
+      letter-spacing:.05em;
       cursor:pointer;
-      background:#0c0906;
-      transition:transform 90ms var(--ease-snap), color 90ms var(--ease-snap), border-color 90ms var(--ease-snap);
-      will-change:transform;
-      pointer-events:auto;
+      white-space:nowrap;
+      flex-shrink:0;
+      transition:color 120ms ease;
     }
 
-    .exitArenaBtn:hover{
-      transform:translateY(-1px);
-      color:rgba(243,237,229,.88);
-      border-color:rgba(215,176,107,.48);
-    }
-
-    .exitArenaBtn:active{
-      transform:scale(0.95);
-      transition-duration:50ms;
-    }
+    .exitArenaBtn:hover{ color:rgba(243,237,229,.88); }
+    .exitArenaBtn:active{ opacity:.6; }
 
     html.arenaMode .exitArenaBtn{
       display:block;
-      animation:fadeInUp .25s .1s both;
     }
 
     @keyframes fadeInUp{
@@ -4340,6 +4328,7 @@
       transform:translateX(-50%);
       margin:0;
       transition:opacity .3s ease;
+      animation:fadeInUp .25s .1s both;
     }
     html.arenaMode .reactionBar:not(.reactionBar--visible){
       opacity:0;
@@ -5741,6 +5730,7 @@
 
                 <!-- ── Reaction Bar ────────────────────────────────── -->
                 <div class="reactionBar" id="reactionBar">
+                  <button id="exitArenaBtn" class="exitArenaBtn">← Sair</button>
                   <button class="reactionBar__btn" onclick="sendReaction('😂',this)" title="Haha">😂</button>
                   <button class="reactionBar__btn" onclick="sendReaction('❤️',this)" title="Amor">❤️</button>
                   <button class="reactionBar__btn" onclick="sendReaction('😮',this)" title="Uau">😮</button>
@@ -11037,9 +11027,6 @@
 
   })();
   </script>
-
-  <!-- Botão discreto de saída do Arena Mode -->
-  <button id="exitArenaBtn" class="exitArenaBtn">← Sair da imersão</button>
 
   <!-- ===== MOBILE LAYOUT CONTROLLER ===== -->
   <script>
