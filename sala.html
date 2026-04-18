@@ -9925,7 +9925,9 @@
       if (!isHost) return;
       const snap = await getDoc(roomRef);
       if (!snap.exists()) return;
-      await updateDoc(roomRef, { arenaActive: !snap.data().arenaActive });
+      const currentlyActive = snap.data().arenaActive;
+      if (!currentlyActive && !ritualStarted) return; // só ativa se ritual iniciado
+      await updateDoc(roomRef, { arenaActive: !currentlyActive });
     };
 
     window._osl.deactivateArenaForAll = async () => {
