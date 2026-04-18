@@ -4317,18 +4317,22 @@
       to{   opacity:1; transform:translateY(0); }
     }
 
-    /* Normal mode: wrapper is invisible to layout */
-    .arenaControls{ display:contents; }
-
-    /* Arena mode: wrapper becomes the fixed centered row */
-    html.arenaMode .arenaControls{
+    /* Normal mode: wrapper is a centered flex row (exit btn hidden) */
+    .arenaControls{
       display:flex;
       align-items:center;
+      justify-content:center;
       gap:8px;
+    }
+
+    /* Arena mode: whole wrapper moves to fixed center of viewport */
+    html.arenaMode .arenaControls{
       position:fixed;
       bottom:16px;
-      left:50%;
-      transform:translateX(-50%);
+      left:0;
+      right:0;
+      margin:0 auto;
+      width:fit-content;
       z-index:100;
       animation:fadeInUp .25s .1s both;
     }
@@ -11857,6 +11861,16 @@
       function activateArenaMode() {
         html.classList.add("arenaMode");
         sessionStorage.setItem("osl_arena", "1");
+
+        // Move arenaControls to body so position:fixed is always viewport-relative
+        // (arenaLift applies transform to .layout which would otherwise hijack the containing block)
+        const ctrl = document.getElementById("arenaControls");
+        if (ctrl && ctrl.parentNode !== document.body) {
+          ctrl._arenaParent  = ctrl.parentNode;
+          ctrl._arenaNextSib = ctrl.nextSibling;
+          document.body.appendChild(ctrl);
+        }
+
         const btn = document.getElementById("arenaBtn");
         if (btn) {
           btn.textContent = "✕ Arena";
@@ -11871,6 +11885,15 @@
       function deactivateArenaMode() {
         html.classList.remove("arenaMode");
         sessionStorage.removeItem("osl_arena");
+
+        // Return arenaControls to its original DOM position
+        const ctrl = document.getElementById("arenaControls");
+        if (ctrl && ctrl._arenaParent) {
+          ctrl._arenaParent.insertBefore(ctrl, ctrl._arenaNextSib || null);
+          delete ctrl._arenaParent;
+          delete ctrl._arenaNextSib;
+        }
+
         const btn = document.getElementById("arenaBtn");
         if (btn) {
           btn.textContent = "⚔ Arena";
