@@ -1624,6 +1624,55 @@
       flex-shrink:0;
     }
 
+    /* ── Reaction Bar ─────────────────────────────────────────────── */
+    .reactionBar{
+      display:flex;
+      justify-content:center;
+      gap:2px;
+      padding:5px 8px;
+      background:rgba(10,5,2,.82);
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:30px;
+      backdrop-filter:blur(12px);
+      margin:6px auto 0;
+      width:fit-content;
+      opacity:0;
+      transform:translateY(6px);
+      transition:opacity .3s ease, transform .3s ease;
+      pointer-events:none;
+    }
+    .reactionBar--visible{
+      opacity:1;
+      transform:translateY(0);
+      pointer-events:auto;
+    }
+    .reactionBar__btn{
+      background:none;
+      border:none;
+      font-size:20px;
+      cursor:pointer;
+      padding:5px 7px;
+      border-radius:10px;
+      line-height:1;
+      transition:transform .15s, background .15s;
+      will-change:transform;
+    }
+    .reactionBar__btn:hover{background:rgba(255,255,255,.1);transform:scale(1.38)}
+    .reactionBar__btn:active{transform:scale(.82)}
+    @keyframes reactionFloat{
+      0%  {opacity:0;transform:translateY(0) scale(.7)}
+      12% {opacity:1;transform:translateY(-14px) scale(1.5)}
+      100%{opacity:0;transform:translateY(-90px) scale(1.1)}
+    }
+    .reactionFloat{
+      position:fixed;
+      font-size:32px;
+      pointer-events:none;
+      z-index:9990;
+      animation:reactionFloat 1.7s cubic-bezier(.2,.8,.3,1) forwards;
+      will-change:transform,opacity;
+    }
+
     /* ── XP inline na topCenterMeta ─────────────────────────────────── */
     .topMeta__sep{
       color:rgba(255,255,255,.18);
@@ -5501,6 +5550,16 @@
 
                 <!-- Self video: centralizado abaixo da carta -->
                 <div class="videoSelfSlot" id="videoSelfSlot"></div>
+
+                <!-- ── Reaction Bar ────────────────────────────────── -->
+                <div class="reactionBar" id="reactionBar">
+                  <button class="reactionBar__btn" onclick="sendReaction('😂')" title="Haha">😂</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('❤️')" title="Amor">❤️</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('😮')" title="Uau">😮</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('👏')" title="Palmas">👏</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('🔥')" title="Fogo">🔥</button>
+                  <button class="reactionBar__btn" onclick="sendReaction('💀')" title="Morto">💀</button>
+                </div>
               </div>
 
               <!-- Right column: friend tiles 3 & 4 -->
@@ -6989,6 +7048,11 @@
       checkAIDetection(data?.aiDetection);
       updateRitualButtons();
 
+      // Reações em tempo real
+      renderReactions(data?.reactions);
+      const reactionBar = document.getElementById("reactionBar");
+      if (reactionBar) reactionBar.classList.toggle("reactionBar--visible", started);
+
       // Mostrar resultado de votação
       const voteResult = data?.voteResult || null;
       if (voteResult?.winner) showVoteResultOverlay(voteResult.winner, voteResult.resolvedAt);
@@ -7213,6 +7277,49 @@
         }, { merge: true });
       } catch (_) {}
     }
+
+    // ── Reactions ─────────────────────────────────────────────────────
+    const shownReactions = new Map(); // pid → ts last shown
+
+    async function sendReaction(emoji) {
+      if (!ritualStarted) return;
+      try {
+        await setDoc(ritualRef, {
+          [`reactions.${participantId}`]: { emoji, name: playerName, ts: Date.now() }
+        }, { merge: true });
+      } catch (_) {}
+    }
+
+    function renderReactions(reactions) {
+      if (!reactions) return;
+      const now = Date.now();
+      Object.entries(reactions).forEach(([pid, r]) => {
+        if (!r?.ts || now - r.ts > 4500) return;
+        if (shownReactions.get(pid) === r.ts) return;
+        shownReactions.set(pid, r.ts);
+        spawnReactionFloat(pid, r.emoji);
+      });
+    }
+
+    function spawnReactionFloat(pid, emoji) {
+      const grid = document.getElementById("videoGrid");
+      const selfSlot = document.getElementById("videoSelfSlot");
+      let tile = (pid === participantId)
+        ? selfSlot?.querySelector(".videoTile")
+        : grid?.querySelector(`.videoTile[data-identity="${CSS.escape(pid)}"]`);
+      if (!tile) return;
+      const rect = tile.getBoundingClientRect();
+      if (!rect.width) return;
+      const float = document.createElement("span");
+      float.className = "reactionFloat";
+      float.textContent = emoji;
+      float.style.left = (rect.left + rect.width * (0.15 + Math.random() * 0.55)) + "px";
+      float.style.top  = (rect.top  + rect.height * 0.35) + "px";
+      document.body.appendChild(float);
+      setTimeout(() => float.remove(), 1800);
+    }
+
+    window.sendReaction = sendReaction;
 
     async function evaluateChatResponse(text) {
       if (!currentActiveEffect || currentActiveEffect.type !== "force_player") return;
