@@ -1659,43 +1659,6 @@
       cursor:pointer;transition:filter .2s;
     }
     .missionCard__btn:hover{filter:brightness(1.15)}
-    .missionBadge{
-      position:fixed;top:64px;right:14px;
-      z-index:1100;
-      background:rgba(10,7,3,.92);
-      border:1px solid rgba(180,140,60,.38);
-      border-radius:12px;
-      padding:7px 11px;
-      cursor:pointer;
-      display:flex;align-items:center;gap:7px;
-      opacity:0;transform:translateX(12px);
-      transition:opacity .3s ease,transform .3s ease;
-      pointer-events:none;
-      backdrop-filter:blur(10px);
-      max-width:220px;
-    }
-    .missionBadge--visible{opacity:1;transform:translateX(0);pointer-events:auto}
-    .missionBadge--done{border-color:rgba(80,200,80,.4)}
-    .missionBadge__icon{font-size:15px;flex-shrink:0}
-    .missionBadge__text{
-      font-size:11px;color:rgba(255,255,255,.55);
-      overflow:hidden;
-      text-overflow:ellipsis;white-space:nowrap;
-    }
-    .missionBadge__selfBtn{
-      background:rgba(80,200,80,.12);
-      border:1px solid rgba(80,200,80,.3);
-      border-radius:6px;
-      color:#80d080;
-      font-size:10px;
-      font-weight:700;
-      padding:2px 7px;
-      cursor:pointer;
-      flex-shrink:0;
-      transition:background .15s;
-      white-space:nowrap;
-    }
-    .missionBadge__selfBtn:hover{background:rgba(80,200,80,.28)}
 
     /* ── Session Recap ───────────────────────────────────────────── */
     @keyframes recapIn{
@@ -1841,6 +1804,41 @@
       animation:reactionFloat 1.7s cubic-bezier(.2,.8,.3,1) forwards;
       will-change:transform,opacity;
     }
+
+    /* ── Missão secreta inline na topCenterMeta ─────────────────────── */
+    .topMeta__mission{
+      display:none;
+      align-items:center;
+      gap:5px;
+      font-size:11px;
+      color:rgba(255,255,255,.45);
+      max-width:200px;
+      cursor:pointer;
+      transition:color .2s;
+    }
+    .topMeta__mission:hover{color:rgba(255,255,255,.8)}
+    .topMeta__mission--visible{display:inline-flex}
+    .topMeta__mission--done{color:rgba(80,200,80,.75)!important}
+    .topMeta__mission__icon{font-size:13px;flex-shrink:0;line-height:1}
+    .topMeta__mission__text{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .topMeta__mission__btn{
+      background:rgba(80,200,80,.12);
+      border:1px solid rgba(80,200,80,.28);
+      border-radius:5px;
+      color:#80d080;
+      font-size:10px;
+      font-weight:700;
+      padding:1px 6px;
+      cursor:pointer;
+      flex-shrink:0;
+      transition:background .15s;
+      white-space:nowrap;
+    }
+    .topMeta__mission__btn:hover{background:rgba(80,200,80,.28)}
 
     /* ── XP inline na topCenterMeta ─────────────────────────────────── */
     .topMeta__sep{
@@ -5502,6 +5500,11 @@
               </span>
               <strong class="topMeta__xpTotal" id="xpCardXp">0 XP</strong>
             </span>
+            <span class="topMeta__sep" id="missionSep" style="display:none">|</span>
+            <span class="topMeta__mission" id="missionBadge">
+              <span class="topMeta__mission__icon">🎯</span>
+              <span class="topMeta__mission__text" id="missionBadgeText"></span>
+            </span>
           </div>
 
           <div class="recStatusBadge" id="recStatusBadge">
@@ -7745,26 +7748,28 @@
     }
 
     function updateMissionBadge(text) {
-      let badge = document.getElementById("missionBadge");
-      if (!badge) {
-        badge = document.createElement("div");
-        badge.id = "missionBadge";
-        badge.className = "missionBadge";
-        badge.innerHTML = `<span class="missionBadge__icon">🎯</span><span class="missionBadge__text" id="missionBadgeText"></span>`;
-        badge.addEventListener("click", (e) => {
-          if (e.target.closest(".missionBadge__selfBtn")) return;
-          if (currentSecretMission) showSecretMissionModal(currentSecretMission);
-        });
-        document.body.appendChild(badge);
-      }
-      document.getElementById("missionBadgeText").textContent = text;
-      badge.classList.add("missionBadge--visible");
-      // Self-report button for missions without auto-detection
-      const existing = badge.querySelector(".missionBadge__selfBtn");
+      const badge = document.getElementById("missionBadge");
+      const sep   = document.getElementById("missionSep");
+      const txt   = document.getElementById("missionBadgeText");
+      if (!badge || !txt) return;
+
+      txt.textContent = text;
+      badge.classList.remove("topMeta__mission--done");
+      badge.classList.add("topMeta__mission--visible");
+      if (sep) sep.style.display = "";
+
+      // Wire click to open mission modal (once)
+      badge.onclick = (e) => {
+        if (e.target.closest(".topMeta__mission__btn")) return;
+        if (currentSecretMission) showSecretMissionModal(currentSecretMission);
+      };
+
+      // Self-report button
+      const existing = badge.querySelector(".topMeta__mission__btn");
       if (existing) existing.remove();
       if (getMissionDetectionType() === "self_report") {
         const btn = document.createElement("button");
-        btn.className = "missionBadge__selfBtn";
+        btn.className = "topMeta__mission__btn";
         btn.textContent = "✓ Cumpri";
         btn.onclick = (e) => { e.stopPropagation(); completeMission(); };
         badge.appendChild(btn);
@@ -7847,10 +7852,11 @@
       stopMissionVoiceDetection();
       const badge = document.getElementById("missionBadge");
       if (badge) {
-        badge.classList.add("missionBadge--done");
-        const icon = badge.querySelector(".missionBadge__icon");
+        badge.classList.add("topMeta__mission--done");
+        badge.querySelector(".topMeta__mission__btn")?.remove();
+        const icon = badge.querySelector(".topMeta__mission__icon");
         if (icon) icon.textContent = "✅";
-        const txt = badge.querySelector(".missionBadge__text");
+        const txt = document.getElementById("missionBadgeText");
         if (txt) txt.textContent = "Missão cumprida!";
       }
       // Show success toast
