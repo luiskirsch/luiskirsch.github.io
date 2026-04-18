@@ -1613,6 +1613,74 @@
       flex-shrink:0;
     }
     .aiDetectToast__confirm:hover{background:rgba(80,180,80,.3)}
+    /* ── Secret Mission ──────────────────────────────────────────── */
+    .missionModal{
+      position:fixed;inset:0;z-index:10000;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.82);
+      backdrop-filter:blur(10px);
+      animation:fadeInBg .3s ease;
+    }
+    .missionModal.closing{animation:fadeOutBg .25s ease forwards}
+    .missionModal.closing .missionCard{animation:rewardCardOut .25s cubic-bezier(.36,0,.66,-.56) forwards}
+    .missionCard{
+      background:linear-gradient(145deg,#0d0a06,#1e1506);
+      border:1px solid rgba(180,140,60,.55);
+      border-radius:18px;
+      padding:32px 28px 28px;
+      text-align:center;
+      max-width:320px;
+      width:88%;
+      box-shadow:0 0 80px rgba(180,140,60,.14);
+      animation:rewardCardIn .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    .missionCard__label{
+      color:rgba(180,140,60,.75);
+      font-size:10px;font-weight:700;
+      letter-spacing:.18em;text-transform:uppercase;
+      margin-bottom:8px;
+    }
+    .missionCard__icon{font-size:46px;margin-bottom:12px;line-height:1}
+    .missionCard__text{
+      color:#f0e8d8;font-size:16px;
+      line-height:1.65;font-weight:500;
+      margin-bottom:16px;
+    }
+    .missionCard__sub{
+      color:rgba(255,255,255,.28);
+      font-size:11px;letter-spacing:.04em;
+      margin-bottom:22px;
+    }
+    .missionCard__btn{
+      background:linear-gradient(135deg,#6a4a08,#b88030);
+      border:none;border-radius:8px;
+      color:#0d0a06;font-size:12px;font-weight:900;
+      letter-spacing:.1em;padding:11px 0;width:100%;
+      cursor:pointer;transition:filter .2s;
+    }
+    .missionCard__btn:hover{filter:brightness(1.15)}
+    .missionBadge{
+      position:fixed;bottom:76px;right:16px;
+      z-index:1100;
+      background:rgba(10,7,3,.92);
+      border:1px solid rgba(180,140,60,.38);
+      border-radius:12px;
+      padding:8px 12px;
+      cursor:pointer;
+      display:flex;align-items:center;gap:7px;
+      opacity:0;transform:translateX(20px);
+      transition:opacity .3s ease,transform .3s ease;
+      pointer-events:none;
+      backdrop-filter:blur(10px);
+    }
+    .missionBadge--visible{opacity:1;transform:translateX(0);pointer-events:auto}
+    .missionBadge__icon{font-size:16px;flex-shrink:0}
+    .missionBadge__text{
+      font-size:11px;color:rgba(255,255,255,.55);
+      max-width:160px;overflow:hidden;
+      text-overflow:ellipsis;white-space:nowrap;
+    }
+
     .aiDetectToast__dismiss{
       background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.12);
@@ -6836,6 +6904,7 @@
       }, { merge: true });
 
       await addHistoryItem("Ritual", "O ritual foi iniciado.");
+      await assignSecretMissions(currentPlayers);
 
       // Abre a arena automaticamente para todos
       await updateDoc(roomRef, { arenaActive: true });
@@ -6863,6 +6932,7 @@
       }, { merge: true });
 
       await addHistoryItem("Ritual", "O ritual foi reiniciado.");
+      await assignSecretMissions(currentPlayers);
       await panelMarkSessionStart();
       updateRitualButtons();
     }
@@ -7320,6 +7390,104 @@
     }
 
     window.sendReaction = sendReaction;
+
+    // ── Secret Missions ───────────────────────────────────────────────────
+    const SECRET_MISSIONS = [
+      "Faça alguém rir pelo menos uma vez durante a sessão.",
+      "Diga algo verdadeiro sobre você que ninguém aqui sabe.",
+      "Use a palavra 'silêncio' em uma frase de forma natural.",
+      "Faça uma pergunta de volta toda vez que te perguntarem algo.",
+      "Não diga 'não' diretamente por pelo menos 2 cartas.",
+      "Seja o último a falar em pelo menos uma discussão.",
+      "Mude o assunto de forma natural pelo menos uma vez.",
+      "Discorde de algo que todos pareçam concordar.",
+      "Complimente alguém de forma sincera antes da próxima carta.",
+      "Conte uma pequena mentira inofensiva sem que ninguém perceba.",
+      "Faça alguém concordar com você pelo menos duas vezes.",
+      "Evite usar o nome de qualquer pessoa por 2 cartas seguidas.",
+      "Mencione um lugar que você quer visitar antes do fim da sessão.",
+      "Faça {nome} rir antes da próxima carta.",
+      "Descubra algo que {nome} nunca contou para ninguém na sala.",
+      "Convença {nome} a concordar com você em algo.",
+      "Faça {nome} fazer uma pergunta pessoal para alguém.",
+      "Diga o nome de {nome} pelo menos 3 vezes de forma natural.",
+      "Faça {nome} mudar de opinião sobre qualquer assunto.",
+      "Elogie {nome} na frente de todos antes da sessão acabar.",
+    ];
+
+    let currentSecretMission = null;
+    let missionShownTs = 0;
+
+    async function assignSecretMissions(players) {
+      if (!isHost || players.length < 1) return;
+      const shuffled = [...SECRET_MISSIONS].sort(() => Math.random() - .5);
+      for (let i = 0; i < players.length; i++) {
+        const player = players[i];
+        let text = shuffled[i % shuffled.length];
+        if (text.includes("{nome}")) {
+          const others = players.filter(p => p.id !== player.id);
+          const target = others.length
+            ? others[Math.floor(Math.random() * others.length)]
+            : players[(i + 1) % players.length];
+          text = text.replace("{nome}", target.name);
+        }
+        try {
+          await setDoc(
+            doc(db, "salas", roomCode, "players", player.id),
+            { secretMission: { text, assignedAt: Date.now() } },
+            { merge: true }
+          );
+        } catch (_) {}
+      }
+    }
+
+    function bindMyMission() {
+      onSnapshot(playerRef, (snap) => {
+        if (!snap.exists()) return;
+        const mission = snap.data()?.secretMission;
+        if (!mission?.text || !mission?.assignedAt) return;
+        if (mission.assignedAt === missionShownTs) return;
+        missionShownTs = mission.assignedAt;
+        currentSecretMission = mission.text;
+        showSecretMissionModal(mission.text);
+        updateMissionBadge(mission.text);
+      });
+    }
+
+    function showSecretMissionModal(text) {
+      document.querySelector(".missionModal")?.remove();
+      const modal = document.createElement("div");
+      modal.className = "missionModal";
+      modal.innerHTML = `
+        <div class="missionCard">
+          <div class="missionCard__label">Missão Secreta</div>
+          <div class="missionCard__icon">🎯</div>
+          <div class="missionCard__text">${escapeHtml(text)}</div>
+          <div class="missionCard__sub">Apenas você pode ver isso</div>
+          <button class="missionCard__btn" id="missionCloseBtn">ENTENDIDO</button>
+        </div>`;
+      document.body.appendChild(modal);
+      document.getElementById("missionCloseBtn").addEventListener("click", () => {
+        modal.classList.add("closing");
+        setTimeout(() => modal.remove(), 250);
+      });
+    }
+
+    function updateMissionBadge(text) {
+      let badge = document.getElementById("missionBadge");
+      if (!badge) {
+        badge = document.createElement("div");
+        badge.id = "missionBadge";
+        badge.className = "missionBadge";
+        badge.innerHTML = `<span class="missionBadge__icon">🎯</span><span class="missionBadge__text" id="missionBadgeText"></span>`;
+        badge.addEventListener("click", () => {
+          if (currentSecretMission) showSecretMissionModal(currentSecretMission);
+        });
+        document.body.appendChild(badge);
+      }
+      document.getElementById("missionBadgeText").textContent = text;
+      badge.classList.add("missionBadge--visible");
+    }
 
     async function evaluateChatResponse(text) {
       if (!currentActiveEffect || currentActiveEffect.type !== "force_player") return;
@@ -9385,6 +9553,7 @@
         bindTyping();
         bindRitual();
         bindUserDoc();
+        bindMyMission();
         checkDailyReward();
       } catch (error) {
         console.error(error);
