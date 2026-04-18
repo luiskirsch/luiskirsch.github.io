@@ -1682,6 +1682,20 @@
       overflow:hidden;
       text-overflow:ellipsis;white-space:nowrap;
     }
+    .missionBadge__selfBtn{
+      background:rgba(80,200,80,.12);
+      border:1px solid rgba(80,200,80,.3);
+      border-radius:6px;
+      color:#80d080;
+      font-size:10px;
+      font-weight:700;
+      padding:2px 7px;
+      cursor:pointer;
+      flex-shrink:0;
+      transition:background .15s;
+      white-space:nowrap;
+    }
+    .missionBadge__selfBtn:hover{background:rgba(80,200,80,.28)}
 
     /* ── Session Recap ───────────────────────────────────────────── */
     @keyframes recapIn{
@@ -7481,24 +7495,42 @@
         if (shownReactions.get(pid) === r.ts) return;
         shownReactions.set(pid, r.ts);
         spawnReactionFloat(pid, r.emoji, null);
-        // Mission: "Faça alguém rir" → detect 😂 from another player
-        if (pid !== participantId && r.emoji === "😂") checkMissionReactionCompletion("laugh");
-        // Mission: "Faça alguém reagir com ❤️" etc. — extendable
+        if (pid !== participantId) checkMissionFromReaction(pid, r.emoji);
       });
     }
 
-    // Maps mission text patterns to a type string
+    // ── Mission detection engine ──────────────────────────────────────────
+
+    // Returns the detection strategy for the current mission
     function getMissionDetectionType() {
       if (!currentSecretMission) return null;
       const m = normalize(currentSecretMission);
       if (getMissionKeyword()) return "keyword";
-      if (m.includes("rir") || m.includes("gargalh") || m.includes("ri ")) return "laugh";
-      return null;
+      // laugh_target: "Faça {nome} rir" (has player name + "rir")
+      if ((m.includes("rir") || m.includes("ri ") || m.includes("gargalh")) && getMissionTargetPlayer()) return "laugh_target";
+      // laugh: "Faça alguém rir" (no specific target)
+      if (m.includes("rir") || m.includes("ri ") || m.includes("gargalh")) return "laugh";
+      // name_count: "Diga o nome de ... pelo menos 3 vezes"
+      if ((m.includes("nome") || m.includes("diga")) && m.includes("vez") && getMissionTargetPlayer()) return "name_count";
+      // heart: "elogie", "complimente" → proxy: target sends ❤️ back
+      if ((m.includes("elogie") || m.includes("complimet") || m.includes("elogio")) && getMissionTargetPlayer()) return "heart_target";
+      return "self_report";
     }
 
-    function checkMissionReactionCompletion(type) {
+    // Finds the target player mentioned in the mission text
+    function getMissionTargetPlayer() {
+      if (!currentSecretMission) return null;
+      return currentPlayers.find(p => p.id !== participantId && currentSecretMission.includes(p.name)) || null;
+    }
+
+    function checkMissionFromReaction(fromPid, emoji) {
       if (missionCompleted) return;
-      if (getMissionDetectionType() === type) completeMission();
+      const type = getMissionDetectionType();
+      if (!type || type === "keyword" || type === "self_report" || type === "name_count") return;
+      if (type === "laugh" && emoji === "😂") { completeMission(); return; }
+      const target = getMissionTargetPlayer();
+      if (type === "laugh_target" && emoji === "😂" && target?.id === fromPid) { completeMission(); return; }
+      if (type === "heart_target" && emoji === "❤️" && target?.id === fromPid) { completeMission(); return; }
     }
 
     function spawnReactionFloat(pid, emoji, fallbackEl) {
@@ -7695,6 +7727,7 @@
         missionShownTs = mission.assignedAt;
         currentSecretMission = mission.text;
         missionCompleted = false;
+        missionNameMentionCount = 0;
         stopMissionVoiceDetection();
         showSecretMissionModal(mission.text);
         updateMissionBadge(mission.text);
@@ -7728,17 +7761,29 @@
         badge.id = "missionBadge";
         badge.className = "missionBadge";
         badge.innerHTML = `<span class="missionBadge__icon">🎯</span><span class="missionBadge__text" id="missionBadgeText"></span>`;
-        badge.addEventListener("click", () => {
+        badge.addEventListener("click", (e) => {
+          if (e.target.closest(".missionBadge__selfBtn")) return;
           if (currentSecretMission) showSecretMissionModal(currentSecretMission);
         });
         document.body.appendChild(badge);
       }
       document.getElementById("missionBadgeText").textContent = text;
       badge.classList.add("missionBadge--visible");
+      // Self-report button for missions without auto-detection
+      const existing = badge.querySelector(".missionBadge__selfBtn");
+      if (existing) existing.remove();
+      if (getMissionDetectionType() === "self_report") {
+        const btn = document.createElement("button");
+        btn.className = "missionBadge__selfBtn";
+        btn.textContent = "✓ Cumpri";
+        btn.onclick = (e) => { e.stopPropagation(); completeMission(); };
+        badge.appendChild(btn);
+      }
     }
 
     let missionCompleted = false;
     let missionSpeechRec = null;
+    let missionNameMentionCount = 0;
 
     function getMissionKeyword() {
       if (!currentSecretMission) return null;
@@ -7752,9 +7797,21 @@
 
     function checkMissionChatCompletion(text) {
       if (!currentSecretMission || missionCompleted) return;
-      const keyword = getMissionKeyword();
-      if (!keyword) return;
-      if (normalize(text).includes(normalize(keyword))) completeMission();
+      const type = getMissionDetectionType();
+      if (type === "keyword") {
+        const keyword = getMissionKeyword();
+        if (keyword && normalize(text).includes(normalize(keyword))) completeMission();
+      } else if (type === "name_count") {
+        const target = getMissionTargetPlayer();
+        if (target) {
+          const n = normalize(target.name);
+          const matches = normalize(text).match(new RegExp(n, "g"));
+          if (matches) {
+            missionNameMentionCount += matches.length;
+            if (missionNameMentionCount >= 3) completeMission();
+          }
+        }
+      }
     }
 
     function startMissionVoiceDetection() {
