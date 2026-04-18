@@ -1028,11 +1028,17 @@
       // Verificar se o código já está em uso
       setStatus("Verificando código…", "");
       btnCriarSala.disabled = true;
-      const disponivel = await window.verificarCodigoDisponivel(codigoSala);
-      if (!disponivel) {
-        const sugestao = gerarCodigoSala();
-        codigoSalaEl.value = sugestao;
-        setStatus(`Código já em uso. Sugestão: ${sugestao}`, "err");
+      try {
+        const disponivel = await window.verificarCodigoDisponivel(codigoSala);
+        if (!disponivel) {
+          const sugestao = gerarCodigoSala();
+          codigoSalaEl.value = sugestao;
+          setStatus(`Código já em uso. Sugestão: ${sugestao}`, "err");
+          btnCriarSala.disabled = false;
+          return;
+        }
+      } catch (err) {
+        setStatus("Erro ao verificar código: " + (err?.message || err), "err");
         btnCriarSala.disabled = false;
         return;
       }
