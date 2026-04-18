@@ -7678,8 +7678,10 @@
         missionShownTs = mission.assignedAt;
         currentSecretMission = mission.text;
         missionCompleted = false;
+        stopMissionVoiceDetection();
         showSecretMissionModal(mission.text);
         updateMissionBadge(mission.text);
+        startMissionVoiceDetection();
       });
     }
 
@@ -7719,6 +7721,7 @@
     }
 
     let missionCompleted = false;
+    let missionSpeechRec = null;
 
     function getMissionKeyword() {
       if (!currentSecretMission) return null;
@@ -7734,14 +7737,50 @@
       if (!currentSecretMission || missionCompleted) return;
       const keyword = getMissionKeyword();
       if (!keyword) return;
-      if (normalize(text).includes(normalize(keyword))) {
-        completeMission();
+      if (normalize(text).includes(normalize(keyword))) completeMission();
+    }
+
+    function startMissionVoiceDetection() {
+      const keyword = getMissionKeyword();
+      if (!keyword || missionCompleted) return;
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return;
+      stopMissionVoiceDetection();
+      const rec = new SR();
+      rec.lang = "pt-BR";
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.onresult = (e) => {
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (normalize(t).includes(normalize(keyword))) {
+            completeMission();
+            stopMissionVoiceDetection();
+            return;
+          }
+        }
+      };
+      rec.onerror = () => {};
+      rec.onend = () => {
+        // Auto-restart unless mission done or cleared
+        if (!missionCompleted && getMissionKeyword()) {
+          try { rec.start(); } catch (_) {}
+        }
+      };
+      try { rec.start(); missionSpeechRec = rec; } catch (_) {}
+    }
+
+    function stopMissionVoiceDetection() {
+      if (missionSpeechRec) {
+        try { missionSpeechRec.onend = null; missionSpeechRec.stop(); } catch (_) {}
+        missionSpeechRec = null;
       }
     }
 
     function completeMission() {
       if (missionCompleted) return;
       missionCompleted = true;
+      stopMissionVoiceDetection();
       const badge = document.getElementById("missionBadge");
       if (badge) {
         badge.classList.add("missionBadge--done");
