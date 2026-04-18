@@ -11871,6 +11871,14 @@
           document.body.appendChild(ctrl);
         }
 
+        // Re-sync reactionBar visibility after DOM move — the Firebase ritual listener
+        // may have fired before the move, so the class needs to be reapplied.
+        const reactionBar = document.getElementById("reactionBar");
+        if (reactionBar) {
+          const started = !!window._osl?.isStarted?.();
+          reactionBar.classList.toggle("reactionBar--visible", started);
+        }
+
         const btn = document.getElementById("arenaBtn");
         if (btn) {
           btn.textContent = "✕ Arena";
