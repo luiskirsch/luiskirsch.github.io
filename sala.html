@@ -4317,16 +4317,14 @@
       to{   opacity:1; transform:translateY(0); }
     }
 
-    /* Normal mode: wrapper is a centered flex row (exit btn hidden) */
-    .arenaControls{
+    /* Normal mode: wrapper is invisible to layout */
+    .arenaControls{ display:contents; }
+
+    /* Arena mode: wrapper becomes the fixed centered row */
+    html.arenaMode .arenaControls{
       display:flex;
       align-items:center;
-      justify-content:center;
       gap:8px;
-    }
-
-    /* Arena mode: whole wrapper moves to fixed center of viewport */
-    html.arenaMode .arenaControls{
       position:fixed;
       bottom:16px;
       left:0;
