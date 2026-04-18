@@ -4287,23 +4287,22 @@
     }
 
     /* --- Botão para sair do Arena Mode --- */
-    /* exitArenaBtn lives inside .reactionBar — shown only in arena mode */
+    /* exitArenaBtn — sibling of .reactionBar inside .arenaControls */
     .exitArenaBtn{
       display:none;
       appearance:none;
-      background:none;
-      border:none;
-      border-right:1px solid rgba(255,255,255,.1);
-      color:rgba(243,237,229,.4);
-      padding:4px 10px 4px 4px;
-      margin-right:4px;
+      background:rgba(10,5,2,.82);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:30px;
+      color:rgba(243,237,229,.45);
+      padding:5px 14px;
       font:inherit;
       font-size:11px;
       letter-spacing:.05em;
       cursor:pointer;
       white-space:nowrap;
-      flex-shrink:0;
-      transition:color 120ms ease;
+      transition:color 120ms ease, border-color 120ms ease;
+      backdrop-filter:blur(12px);
     }
 
     .exitArenaBtn:hover{ color:rgba(243,237,229,.88); }
@@ -4318,25 +4317,36 @@
       to{   opacity:1; transform:translateY(0); }
     }
 
-    /* In arena mode, escape the overflow:hidden cardCenter */
-    html.arenaMode .reactionBar{
+    /* Normal mode: wrapper is invisible to layout */
+    .arenaControls{ display:contents; }
+
+    /* Arena mode: wrapper becomes the fixed centered row */
+    html.arenaMode .arenaControls{
+      display:flex;
+      align-items:center;
+      gap:8px;
       position:fixed;
       bottom:16px;
       left:50%;
       transform:translateX(-50%);
+      z-index:100;
+      animation:fadeInUp .25s .1s both;
+    }
+
+    /* reactionBar: static inside the wrapper in arena mode */
+    html.arenaMode .reactionBar{
+      position:static;
+      transform:none;
       margin:0;
       transition:opacity .3s ease;
-      animation:fadeInUp .25s .1s both;
     }
     html.arenaMode .reactionBar:not(.reactionBar--visible){
       opacity:0;
       pointer-events:none;
-      transform:translateX(-50%);
     }
     html.arenaMode .reactionBar.reactionBar--visible{
       opacity:1;
       pointer-events:auto;
-      transform:translateX(-50%);
     }
 
     /* @media <= 640px: empilha colunas de vídeo horizontalmente */
@@ -5732,14 +5742,18 @@
                 <div class="videoSelfSlot" id="videoSelfSlot"></div>
 
                 <!-- ── Reaction Bar ────────────────────────────────── -->
-                <div class="reactionBar" id="reactionBar">
+                <!-- arenaControls: transparent wrapper in normal mode,
+                     fixed centered flex row in arena mode -->
+                <div class="arenaControls" id="arenaControls">
                   <button id="exitArenaBtn" class="exitArenaBtn">← Sair</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('😂',this)" title="Haha">😂</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('❤️',this)" title="Amor">❤️</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('😮',this)" title="Uau">😮</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('👏',this)" title="Palmas">👏</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('🔥',this)" title="Fogo">🔥</button>
-                  <button class="reactionBar__btn" onclick="sendReaction('💀',this)" title="Morto">💀</button>
+                  <div class="reactionBar" id="reactionBar">
+                    <button class="reactionBar__btn" onclick="sendReaction('😂',this)" title="Haha">😂</button>
+                    <button class="reactionBar__btn" onclick="sendReaction('❤️',this)" title="Amor">❤️</button>
+                    <button class="reactionBar__btn" onclick="sendReaction('😮',this)" title="Uau">😮</button>
+                    <button class="reactionBar__btn" onclick="sendReaction('👏',this)" title="Palmas">👏</button>
+                    <button class="reactionBar__btn" onclick="sendReaction('🔥',this)" title="Fogo">🔥</button>
+                    <button class="reactionBar__btn" onclick="sendReaction('💀',this)" title="Morto">💀</button>
+                  </div>
                 </div>
               </div>
 
