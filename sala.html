@@ -1351,6 +1351,14 @@
       from{opacity:0;transform:translateY(-8px) scale(.97)}
       to{opacity:1;transform:translateY(0) scale(1)}
     }
+    @keyframes effectPanelOut{
+      from{opacity:1;transform:translateY(0) scale(1)}
+      to{opacity:0;transform:translateY(-6px) scale(.97)}
+    }
+    .effectPanel--closing{
+      animation:effectPanelOut .22s ease forwards;
+      pointer-events:none;
+    }
     .effectPanel__title{
       font-size:11px;
       font-weight:700;
@@ -1486,6 +1494,13 @@
       animation:fadeInBg .3s ease;
     }
     @keyframes fadeInBg{from{opacity:0}to{opacity:1}}
+    @keyframes fadeOutBg{from{opacity:1}to{opacity:0}}
+    @keyframes rewardCardOut{
+      from{transform:scale(1) translateY(0);opacity:1}
+      to{transform:scale(.72) translateY(24px);opacity:0}
+    }
+    .dailyRewardModal.closing{animation:fadeOutBg .25s ease forwards}
+    .dailyRewardModal.closing .dailyRewardCard{animation:rewardCardOut .25s cubic-bezier(.36,0,.66,-.56) forwards}
     .dailyRewardCard{
       background:linear-gradient(145deg,#1a1208,#2a1e0a);
       border:1px solid rgba(212,168,75,.35);
@@ -1557,13 +1572,13 @@
     }
     .dailyRewardCard__btn:hover{filter:brightness(1.15)}
     .aiDetectToast{
-      display:none;
+      display:flex;
       align-items:center;
       gap:10px;
       position:fixed;
       bottom:80px;
       left:50%;
-      transform:translateX(-50%);
+      transform:translateX(-50%) translateY(10px);
       z-index:1200;
       background:rgba(20,15,5,.95);
       border:1px solid rgba(255,200,50,.35);
@@ -1573,7 +1588,14 @@
       color:#ffd060;
       white-space:nowrap;
       box-shadow:0 4px 24px rgba(0,0,0,.5);
-      animation:effectPanelIn .3s ease;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .25s ease, transform .25s ease;
+    }
+    .aiDetectToast--visible{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateX(-50%) translateY(0);
     }
     .aiDetectToast__icon{font-size:15px;flex-shrink:0}
     .aiDetectToast__text{flex:1;line-height:1.4}
@@ -4262,7 +4284,7 @@
     }
 
     .revealPanel--shake {
-      animation: tableShake .22s cubic-bezier(0.4,0,0.2,1) both !important;
+      animation: tableShake .32s cubic-bezier(0.4,0,0.2,1) both !important;
     }
 
     /* Aura dourada que pulsa quando a nova carta aparece */
@@ -6338,6 +6360,7 @@
     let currentPlayers = [];
     let currentCard = null;
     let activeEffectTimer = null;
+    let effectPanelCloseTimer = null;
     let currentActiveEffect = null;
 
     // ── AI Detection state ────────────────────────────────────────────
@@ -6893,7 +6916,7 @@
             revealPanelEl.classList.remove("revealPanel--shake");
             void revealPanelEl.offsetWidth;
             revealPanelEl.classList.add("revealPanel--shake");
-            setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 240);
+            setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 340);
           }
         }, 250);
 
@@ -6927,7 +6950,7 @@
             revealPanelEl.classList.remove("revealPanel--shake");
             void revealPanelEl.offsetWidth;
             revealPanelEl.classList.add("revealPanel--shake");
-            setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 240);
+            setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 340);
           }
         }, 275);
 
@@ -7009,13 +7032,26 @@
       const cardCenter = panel.closest(".cardCenter");
 
       if (!effect || effect.resolved) {
-        panel.style.display = "none";
-        if (cardCenter) cardCenter.classList.remove("cardCenter--effect-open");
+        if (panel.style.display !== "none") {
+          if (effectPanelCloseTimer) clearTimeout(effectPanelCloseTimer);
+          panel.classList.add("effectPanel--closing");
+          if (cardCenter) cardCenter.classList.remove("cardCenter--effect-open");
+          effectPanelCloseTimer = setTimeout(() => {
+            panel.style.display = "none";
+            panel.classList.remove("effectPanel--closing");
+            effectPanelCloseTimer = null;
+          }, 220);
+        }
         clearEffectTimer();
         stopAIVAD();
         return;
       }
 
+      if (effectPanelCloseTimer) {
+        clearTimeout(effectPanelCloseTimer);
+        effectPanelCloseTimer = null;
+        panel.classList.remove("effectPanel--closing");
+      }
       panel.style.display = "flex";
       if (cardCenter) cardCenter.classList.add("cardCenter--effect-open");
 
@@ -7126,7 +7162,7 @@
       if (winner) update.voteResult = { winner, resolvedAt: Date.now() };
       await setDoc(ritualRef, update, { merge: true });
       const toast = document.getElementById("aiDetectToast");
-      if (toast) toast.style.display = "none";
+      if (toast) toast.classList.remove("aiDetectToast--visible");
     }
 
     function getVoteWinner(votes) {
@@ -7203,26 +7239,26 @@
       const msg = document.getElementById("aiDetectToastMsg");
       if (!toast || !msg) return;
       if (!aiDetection?.detectedAt || Date.now() - aiDetection.detectedAt > 30000) {
-        toast.style.display = "none";
+        toast.classList.remove("aiDetectToast--visible");
         return;
       }
       msg.textContent = aiDetection.source === "voice"
         ? `IA detectou que ${aiDetection.playerName} terminou de falar`
         : `IA aprovou resposta de ${aiDetection.playerName} no chat`;
-      toast.style.display = "flex";
+      toast.classList.add("aiDetectToast--visible");
     }
 
     async function confirmAIDetection() {
       await resolveActiveEffect();
       await setDoc(ritualRef, { aiDetection: null }, { merge: true });
       const toast = document.getElementById("aiDetectToast");
-      if (toast) toast.style.display = "none";
+      if (toast) toast.classList.remove("aiDetectToast--visible");
     }
 
     async function dismissAIDetection() {
       await setDoc(ritualRef, { aiDetection: null }, { merge: true });
       const toast = document.getElementById("aiDetectToast");
-      if (toast) toast.style.display = "none";
+      if (toast) toast.classList.remove("aiDetectToast--visible");
     }
 
     window.confirmAIDetection = confirmAIDetection;
@@ -7287,8 +7323,11 @@
       document.body.appendChild(overlay);
 
       document.getElementById("dailyRewardBtn").addEventListener("click", async () => {
-        overlay.remove();
-        await onCollect();
+        overlay.classList.add("closing");
+        setTimeout(async () => {
+          overlay.remove();
+          await onCollect();
+        }, 250);
       });
     }
 
@@ -7305,7 +7344,7 @@
         <div class="voteResultOverlay__word">${winner.toUpperCase()}</div>`;
       document.body.appendChild(overlay);
 
-      requestAnimationFrame(() => overlay.classList.add("voteResultOverlay--visible"));
+      requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add("voteResultOverlay--visible")));
 
       setTimeout(() => {
         overlay.classList.remove("voteResultOverlay--visible");
