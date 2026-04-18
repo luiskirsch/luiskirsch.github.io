@@ -7481,7 +7481,24 @@
         if (shownReactions.get(pid) === r.ts) return;
         shownReactions.set(pid, r.ts);
         spawnReactionFloat(pid, r.emoji, null);
+        // Mission: "Faça alguém rir" → detect 😂 from another player
+        if (pid !== participantId && r.emoji === "😂") checkMissionReactionCompletion("laugh");
+        // Mission: "Faça alguém reagir com ❤️" etc. — extendable
       });
+    }
+
+    // Maps mission text patterns to a type string
+    function getMissionDetectionType() {
+      if (!currentSecretMission) return null;
+      const m = normalize(currentSecretMission);
+      if (getMissionKeyword()) return "keyword";
+      if (m.includes("rir") || m.includes("gargalh") || m.includes("ri ")) return "laugh";
+      return null;
+    }
+
+    function checkMissionReactionCompletion(type) {
+      if (missionCompleted) return;
+      if (getMissionDetectionType() === type) completeMission();
     }
 
     function spawnReactionFloat(pid, emoji, fallbackEl) {
