@@ -1821,13 +1821,12 @@
       to  {opacity:0;transform:scale(.4) translateY(-6px)}
     }
     .videoTile__feeling{
-      position:absolute;
-      top:4px;right:4px;
-      width:54px;height:54px;
-      z-index:20;
+      position:fixed;
+      width:56px;height:56px;
+      z-index:9995;
       pointer-events:none;
       animation:feelingIn .45s cubic-bezier(.2,1,.4,1) both;
-      filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
+      filter:drop-shadow(0 2px 8px rgba(0,0,0,.65));
     }
     .videoTile__feeling svg { width:100% !important; height:100% !important; }
     .videoTile__feeling--out{
@@ -7867,32 +7866,54 @@
       });
     }
 
-    function showFeelingBadge(tile, emoji) {
-      const prev = tile.querySelector(".videoTile__feeling");
+    // pid → badge element ativo
+    const _feelingBadges = new Map();
+
+    function showFeelingBadge(tile, emoji, pid) {
+      // Remove badge anterior deste jogador
+      const prev = _feelingBadges.get(pid);
       if (prev) {
         prev._lottie?.destroy();
         clearTimeout(prev._hideTimer);
+        window.removeEventListener("resize", prev._onResize);
         prev.remove();
       }
 
       const badge = document.createElement("div");
       badge.className = "videoTile__feeling";
-      tile.appendChild(badge);
 
+      // Posiciona fixed no canto superior direito do tile
+      const place = () => {
+        const r = tile.getBoundingClientRect();
+        if (!r.width) return;
+        badge.style.left = (r.right - 60) + "px";
+        badge.style.top  = (r.top  +  4) + "px";
+      };
+      place();
+      document.body.appendChild(badge);
+      _feelingBadges.set(pid, badge);
+
+      // Carrega animação Lottie
       const code = EMOJI_LOTTIE[emoji];
       if (code) {
         badge._lottie = loadLottieInto(badge, code, true);
       } else {
-        // emoji sem mapeamento: fallback texto com feelingIn
-        badge.style.fontSize = "26px";
-        badge.style.lineHeight = "54px";
-        badge.style.textAlign = "center";
+        badge.style.cssText += ";font-size:26px;line-height:56px;text-align:center";
         badge.textContent = emoji;
       }
 
+      // Reposiciona em resize (ex: entrar/sair fullscreen)
+      badge._onResize = place;
+      window.addEventListener("resize", badge._onResize);
+
       badge._hideTimer = setTimeout(() => {
         badge.classList.add("videoTile__feeling--out");
-        setTimeout(() => { badge._lottie?.destroy(); badge.remove(); }, 460);
+        setTimeout(() => {
+          badge._lottie?.destroy();
+          window.removeEventListener("resize", badge._onResize);
+          badge.remove();
+          _feelingBadges.delete(pid);
+        }, 460);
       }, 8000);
     }
 
@@ -7906,7 +7927,7 @@
 
       // Arena mode + tile visível → badge persistente no canto do vídeo
       if (isArena && tile) {
-        showFeelingBadge(tile, emoji);
+        showFeelingBadge(tile, emoji, pid);
         return;
       }
 
