@@ -7876,7 +7876,7 @@
         prev._lottie?.destroy();
         clearTimeout(prev._hideTimer);
         window.removeEventListener("resize", prev._onResize);
-        prev.remove();
+        prev.remove(); // remove instantâneo — sem fade-out
       }
 
       const badge = document.createElement("div");
@@ -7914,7 +7914,7 @@
           badge.remove();
           _feelingBadges.delete(pid);
         }, 460);
-      }, 8000);
+      }, 3000);
     }
 
     function spawnReactionFloat(pid, emoji, fallbackEl) {
