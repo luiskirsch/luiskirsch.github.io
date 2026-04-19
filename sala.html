@@ -7364,6 +7364,7 @@
 
     // ── Lê pacotes comprados do localStorage ─────────────────────────────
     function getUnlockedPacks() {
+      if (window._isPrestige) return Object.keys(OSL_PACK_CARDS);
       try {
         var compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
         return compras.map(function(c){ return c.produto; });
@@ -8823,6 +8824,7 @@
     function isThemeUnlocked(theme) {
       const requiredPack = BG_PACK_THEMES[theme];
       if (!requiredPack) return true; // temas grátis sempre liberados
+      if (window._isPrestige) return true;
       const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
       return compras.some(c => c.produto === requiredPack);
     }
@@ -8858,6 +8860,7 @@
 
     function isCardStyleUnlocked(style) {
       if (style === "padrao") return true;
+      if (window._isPrestige) return true;
       const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
       return compras.some(c => c.produto === "estilo-carta");
     }
@@ -8893,6 +8896,7 @@
     let selectedFx = localStorage.getItem("osl_fx") || "none";
 
     function isFxUnlocked() {
+      if (window._isPrestige) return true;
       const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
       return compras.some(c => c.produto === "efeitos-visuais");
     }
@@ -12143,6 +12147,7 @@
     // ── Verifica passe mensal ativo ──
     async function checkMonthlyPass(email) {
       if (!email) return null;
+      if (window._isPrestige) return { active: true, expiresAt: 9999999999999, type: "prestige" };
       try {
         var r = await fetch(REC_BASE + "/recording/pass/" + encodeURIComponent(email));
         var d = await r.json();
@@ -12178,9 +12183,10 @@
         if (savedEmail) {
           var pass = await checkMonthlyPass(savedEmail);
           if (pass) {
-            var expDate = new Date(pass.expiresAt).toLocaleDateString("pt-BR");
             if (passBadge) {
-              passBadge.textContent = "✅ Passe mensal ativo até " + expDate + " — gravação gratuita!";
+              passBadge.textContent = pass.type === "prestige"
+                ? "⬡ Nível 50 — gravações incluídas permanentemente"
+                : "✅ Passe mensal ativo até " + new Date(pass.expiresAt).toLocaleDateString("pt-BR") + " — gravação gratuita!";
               passBadge.style.display = "block";
             }
             if (planGrid) planGrid.style.display = "none";
