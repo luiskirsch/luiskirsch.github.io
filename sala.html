@@ -1805,6 +1805,30 @@
       will-change:transform,opacity;
     }
 
+    /* ── Arena feeling badge — persistente no canto do video tile ── */
+    @keyframes feelingIn{
+      0%  {opacity:0;transform:scale(.2) rotate(-20deg)}
+      60% {transform:scale(1.3) rotate(6deg)}
+      100%{opacity:1;transform:scale(1) rotate(0)}
+    }
+    @keyframes feelingOut{
+      from{opacity:1;transform:scale(1)}
+      to  {opacity:0;transform:scale(.4) translateY(-6px)}
+    }
+    .videoTile__feeling{
+      position:absolute;
+      top:6px;right:6px;
+      font-size:26px;
+      line-height:1;
+      z-index:20;
+      pointer-events:none;
+      animation:feelingIn .45s cubic-bezier(.2,1,.4,1) forwards;
+      filter:drop-shadow(0 2px 6px rgba(0,0,0,.7));
+    }
+    .videoTile__feeling--out{
+      animation:feelingOut .45s ease forwards;
+    }
+
     /* ── Missão secreta inline na topCenterMeta ─────────────────────── */
     .topMeta__mission{
       display:none;
@@ -7816,17 +7840,42 @@
       if (type === "heart_target" && emoji === "❤️" && target?.id === fromPid) { completeMission(); return; }
     }
 
+    function showFeelingBadge(tile, emoji) {
+      // Remove badge anterior neste tile (só um sentimento por vez)
+      const prev = tile.querySelector(".videoTile__feeling");
+      if (prev) {
+        clearTimeout(prev._hideTimer);
+        prev.remove();
+      }
+      const badge = document.createElement("span");
+      badge.className = "videoTile__feeling";
+      badge.textContent = emoji;
+      tile.appendChild(badge);
+      // Fade-out após 8s
+      badge._hideTimer = setTimeout(() => {
+        badge.classList.add("videoTile__feeling--out");
+        setTimeout(() => badge.remove(), 460);
+      }, 8000);
+    }
+
     function spawnReactionFloat(pid, emoji, fallbackEl) {
-      const grid = document.getElementById("videoGrid");
+      const isArena = document.documentElement.classList.contains("arenaMode");
+      const grid     = document.getElementById("videoGrid");
       const selfSlot = document.getElementById("videoSelfSlot");
-      let tile = (pid === participantId)
+      const tile = (pid === participantId)
         ? selfSlot?.querySelector(".videoTile")
         : grid?.querySelector(`.videoTile[data-identity="${CSS.escape(pid)}"]`);
-      // Fallback: use the clicked button → reactionBar → center of screen
+
+      // Arena mode + tile visível → badge persistente no canto do vídeo
+      if (isArena && tile) {
+        showFeelingBadge(tile, emoji);
+        return;
+      }
+
+      // Fora de arena OU sem tile de vídeo → float animado (comportamento original)
       const origin = tile || fallbackEl || document.getElementById("reactionBar");
-      const rect = origin?.getBoundingClientRect();
+      const rect   = origin?.getBoundingClientRect();
       if (!rect?.width && !rect?.height) {
-        // absolute center fallback
         const float = document.createElement("span");
         float.className = "reactionFloat";
         float.textContent = emoji;
@@ -7841,7 +7890,7 @@
       float.textContent = emoji;
       float.style.left = (rect.left + rect.width * (0.1 + Math.random() * 0.7)) + "px";
       float.style.top  = tile
-        ? (rect.top  + rect.height * 0.35) + "px"
+        ? (rect.top + rect.height * 0.35) + "px"
         : (rect.top - 10) + "px";
       document.body.appendChild(float);
       setTimeout(() => float.remove(), 1800);
