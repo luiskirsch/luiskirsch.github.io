@@ -1808,7 +1808,7 @@
     /* ── Arena feeling badge — persistente no canto do video tile ── */
     @keyframes feelingIn{
       0%  {opacity:0;transform:scale(.2) rotate(-20deg)}
-      60% {transform:scale(1.3) rotate(6deg)}
+      60% {transform:scale(1.35) rotate(6deg)}
       100%{opacity:1;transform:scale(1) rotate(0)}
     }
     @keyframes feelingOut{
@@ -1822,11 +1822,68 @@
       line-height:1;
       z-index:20;
       pointer-events:none;
-      animation:feelingIn .45s cubic-bezier(.2,1,.4,1) forwards;
       filter:drop-shadow(0 2px 6px rgba(0,0,0,.7));
+      transform-origin:center;
     }
     .videoTile__feeling--out{
-      animation:feelingOut .45s ease forwards;
+      animation:feelingOut .45s ease forwards !important;
+    }
+
+    /* 😂 — gargalha: chacoalha e soluça */
+    @keyframes emojiLaugh{
+      0%  {transform:rotate(-10deg) scale(1.05)}
+      20% {transform:rotate(10deg)  scale(1.12) translateY(-3px)}
+      40% {transform:rotate(-8deg)  scale(1.04)}
+      60% {transform:rotate(8deg)   scale(1.1)  translateY(-2px)}
+      80% {transform:rotate(-5deg)  scale(1.05)}
+      100%{transform:rotate(0deg)   scale(1)}
+    }
+    /* ❤️ — batimento cardíaco real */
+    @keyframes emojiHeartbeat{
+      0%  {transform:scale(1)}
+      10% {transform:scale(1.35)}
+      20% {transform:scale(1.1)}
+      30% {transform:scale(1.28)}
+      50% {transform:scale(1)}
+      100%{transform:scale(1)}
+    }
+    /* 😮 — inspira e expira de surpresa */
+    @keyframes emojiWow{
+      0%  {transform:scale(1)}
+      15% {transform:scale(1.28) translateY(-4px)}
+      30% {transform:scale(0.92)}
+      50% {transform:scale(1.12) translateY(-2px)}
+      75% {transform:scale(0.96)}
+      100%{transform:scale(1)}
+    }
+    /* 👏 — palmas reais: comprime horizontalmente */
+    @keyframes emojiClap{
+      0%  {transform:scaleX(1)   rotate(0deg)}
+      25% {transform:scaleX(.7)  rotate(-12deg)}
+      50% {transform:scaleX(1)   rotate(0deg)}
+      75% {transform:scaleX(.72) rotate(10deg)}
+      100%{transform:scaleX(1)   rotate(0deg)}
+    }
+    /* 🔥 — chama: oscila e cresce */
+    @keyframes emojiFire{
+      0%  {transform:scale(1)    skewX(0deg)  translateY(0)}
+      20% {transform:scale(1.15) skewX(-5deg) translateY(-3px)}
+      40% {transform:scale(0.95) skewX(4deg)  translateY(1px)}
+      60% {transform:scale(1.12) skewX(-4deg) translateY(-2px)}
+      80% {transform:scale(0.97) skewX(3deg)  translateY(0)}
+      100%{transform:scale(1)    skewX(0deg)  translateY(0)}
+    }
+    /* 💀 — ossos chacoalham */
+    @keyframes emojiSkull{
+      0%  {transform:rotate(0deg)   scale(1)}
+      10% {transform:rotate(-12deg) scale(1.08)}
+      20% {transform:rotate(12deg)  scale(1.08)}
+      30% {transform:rotate(-10deg) scale(1.05)}
+      40% {transform:rotate(10deg)  scale(1.05)}
+      50% {transform:rotate(-6deg)  scale(1.02)}
+      60% {transform:rotate(6deg)   scale(1.02)}
+      80% {transform:rotate(-2deg)}
+      100%{transform:rotate(0deg)   scale(1)}
     }
 
     /* ── Missão secreta inline na topCenterMeta ─────────────────────── */
@@ -7840,18 +7897,37 @@
       if (type === "heart_target" && emoji === "❤️" && target?.id === fromPid) { completeMission(); return; }
     }
 
+    const EMOJI_ANIM = {
+      "😂": { name:"emojiLaugh",    dur:"0.38s", timing:"ease-in-out" },
+      "❤️": { name:"emojiHeartbeat",dur:"0.9s",  timing:"ease-in-out" },
+      "😮": { name:"emojiWow",      dur:"1.1s",  timing:"ease-in-out" },
+      "👏": { name:"emojiClap",     dur:"0.45s", timing:"ease-in-out" },
+      "🔥": { name:"emojiFire",     dur:"0.55s", timing:"ease-in-out" },
+      "💀": { name:"emojiSkull",    dur:"0.5s",  timing:"ease-in-out" },
+    };
+
     function showFeelingBadge(tile, emoji) {
-      // Remove badge anterior neste tile (só um sentimento por vez)
       const prev = tile.querySelector(".videoTile__feeling");
-      if (prev) {
-        clearTimeout(prev._hideTimer);
-        prev.remove();
-      }
+      if (prev) { clearTimeout(prev._hideTimer); prev.remove(); }
+
       const badge = document.createElement("span");
       badge.className = "videoTile__feeling";
       badge.textContent = emoji;
+      // Fase 1: entry
+      badge.style.animation = "feelingIn .45s cubic-bezier(.2,1,.4,1) forwards";
       tile.appendChild(badge);
-      // Fade-out após 8s
+
+      // Fase 2: animação de personalidade em loop após o entry
+      badge.addEventListener("animationend", () => {
+        if (badge.classList.contains("videoTile__feeling--out")) return;
+        const cfg = EMOJI_ANIM[emoji];
+        if (cfg) {
+          badge.style.animation = `${cfg.name} ${cfg.dur} ${cfg.timing} infinite`;
+        } else {
+          badge.style.animation = "none";
+        }
+      }, { once: true });
+
       badge._hideTimer = setTimeout(() => {
         badge.classList.add("videoTile__feeling--out");
         setTimeout(() => badge.remove(), 460);
@@ -7885,15 +7961,26 @@
         setTimeout(() => float.remove(), 1800);
         return;
       }
+      const FLOAT_STYLE = {
+        "😂":{ dur:"1.5s", size:"36px" },
+        "❤️":{ dur:"1.9s", size:"32px" },
+        "😮":{ dur:"1.7s", size:"34px" },
+        "👏":{ dur:"1.4s", size:"34px" },
+        "🔥":{ dur:"1.6s", size:"38px" },
+        "💀":{ dur:"1.8s", size:"30px" },
+      };
+      const fs = FLOAT_STYLE[emoji] || { dur:"1.7s", size:"32px" };
       const float = document.createElement("span");
       float.className = "reactionFloat";
       float.textContent = emoji;
+      float.style.fontSize = fs.size;
+      float.style.animationDuration = fs.dur;
       float.style.left = (rect.left + rect.width * (0.1 + Math.random() * 0.7)) + "px";
       float.style.top  = tile
         ? (rect.top + rect.height * 0.35) + "px"
         : (rect.top - 10) + "px";
       document.body.appendChild(float);
-      setTimeout(() => float.remove(), 1800);
+      setTimeout(() => float.remove(), parseFloat(fs.dur) * 1000 + 100);
     }
 
     window.sendReaction = sendReaction;
