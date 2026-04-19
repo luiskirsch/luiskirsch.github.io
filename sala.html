@@ -10250,6 +10250,7 @@
 
     function updateXpCard(xp) {
       _currentXp = xp;
+      try { localStorage.setItem("osl_xp_cache", String(xp)); } catch(_) {}
       const lv    = OSL_XP.levelFromXP(xp);
       const info  = OSL_XP.titleForLevel(lv);
       const curr  = OSL_XP.xpForLevel(lv);
@@ -10868,6 +10869,12 @@
 
         currentPlayers = players;
         renderPlayers(players);
+        try {
+          localStorage.setItem("osl_players_cache", JSON.stringify(
+            players.map(p => ({ id: p.id, name: p.name, isHost: p.isHost,
+              avatarEmoji: p.avatarEmoji, avatarPhotoUrl: p.avatarPhotoUrl, avatarColor: p.avatarColor }))
+          ));
+        } catch(_) {}
       });
     }
 
@@ -11120,19 +11127,30 @@
         roomStatusEl.textContent = "Conectando";
         footerStatusEl.textContent = "Conectando";
 
-        await ensureUserProfile();
-        await ensureRoom();
+        // Renderiza do cache local antes de qualquer round-trip Firestore
+        const _cachedXp = parseInt(localStorage.getItem("osl_xp_cache") || "0", 10);
+        if (_cachedXp > 0) updateXpCard(_cachedXp);
+        try {
+          const _cachedPlayers = JSON.parse(localStorage.getItem("osl_players_cache") || "[]");
+          if (_cachedPlayers.length) renderPlayers(_cachedPlayers);
+        } catch (_) {}
+
+        // Registra listeners realtime imediatamente — Firestore serve do
+        // IndexedDB cache em <50ms e atualiza com o servidor em background
+        bindRoom();
+        bindPlayers();
+        bindUserDoc();
+        bindMessages();
+        bindTyping();
+        bindRitual();
+        bindMyMission();
+
+        // ensureUserProfile e ensureRoom são independentes — rodam em paralelo
+        await Promise.all([ensureUserProfile(), ensureRoom()]);
         await upsertSelf();
 
         setRitualWaitingState();
         startHeartbeat();
-        bindRoom();
-        bindPlayers();
-        bindMessages();
-        bindTyping();
-        bindRitual();
-        bindUserDoc();
-        bindMyMission();
         checkDailyReward();
 
         // Painel de níveis ao clicar no indicador de XP
