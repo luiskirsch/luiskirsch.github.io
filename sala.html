@@ -5719,6 +5719,7 @@
     overflow:hidden;
     animation:lvlPanelIn .38s cubic-bezier(.2,1,.4,1);
     box-shadow:0 -12px 60px rgba(0,0,0,.7),0 0 0 1px rgba(212,168,75,.08) inset;
+    will-change:transform;
   }
 
   /* ── Header ── */
@@ -5801,6 +5802,8 @@
   /* ── Level list ── */
   .lvlPanel__body{
     overflow-y:auto;flex:1;padding:0 0 24px;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
     scrollbar-width:thin;scrollbar-color:rgba(212,168,75,.2) transparent;
   }
   .lvlPanel__body::-webkit-scrollbar{ width:4px; }
@@ -7181,6 +7184,30 @@
     // ── XP atual e nível anterior — estado reativo ────────────────────────
     let _xpPrevLevel = 0;
     let _currentXp   = 0;
+    let _isPrestige  = false;
+
+    const PRESTIGE_PRODUTOS = [
+      "carta-bloqueada","carta-final","segunda-chance",
+      "gravacao-download","gravacao-mensal","sala-premium","modo-ritual",
+      "pacote-conexao","pacote-verdades","pacote-conflito","pacote-segredos","pacote-casais",
+      "tema-sala","estilo-carta","efeitos-visuais"
+    ];
+
+    function applyPrestigeUnlocks() {
+      window._isPrestige = true;
+      let compras = [];
+      try { compras = JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch(e){}
+      const existingProds = new Set(compras.map(function(c){ return c.produto; }));
+      PRESTIGE_PRODUTOS.forEach(function(prod) {
+        if (!existingProds.has(prod)) {
+          compras.push({ ref: "prestige_lv50", produto: prod, titulo: "Prestígio Nv.50", tipo: "prestige", valor: 0, ts: Date.now() });
+        }
+      });
+      localStorage.setItem("osl_compras", JSON.stringify(compras));
+      refreshPackSwatches();
+      refreshCardStyleSwatches();
+      refreshFxSwatches();
+    }
 
     // ── Effect Engine ─────────────────────────────────────────────────────
     const OSL_EFFECTS = {
@@ -10345,11 +10372,11 @@
 
       document.body.appendChild(overlay);
 
-      // Scroll para o nível atual
-      requestAnimationFrame(() => {
+      // Scroll para o nível atual — aguarda a animação de entrada terminar (380ms)
+      setTimeout(() => {
         const row = overlay.querySelector("#lvlPanel__currentRow");
         if (row) row.scrollIntoView({ block:"center", behavior:"smooth" });
-      });
+      }, 390);
 
       const close = () => {
         overlay.classList.add("closing");
@@ -10568,7 +10595,14 @@
         if (lv >= 10) grant("level_10");
         if (lv >= 20) grant("level_20");
         if (lv >= 30) grant("level_30");
-        if (lv >= 50) grant("level_50");
+        if (lv >= 50) {
+          grant("level_50");
+          if (!_isPrestige) {
+            _isPrestige = true;
+            applyPrestigeUnlocks();
+            setDoc(doc(db, "users", userId), { prestige: true }, { merge: true }).catch(function(){});
+          }
+        }
       }
       function onTensionCritical() {
         grant("critical_heat");
@@ -10742,6 +10776,12 @@
         if (!snap.exists()) return;
         const data = snap.data();
         const pending = (data.incomingRequests || []).length;
+
+        // Prestige: se o usuário já tem prestige no Firestore, aplica imediatamente
+        if (data.prestige === true && !_isPrestige) {
+          _isPrestige = true;
+          applyPrestigeUnlocks();
+        }
 
         // Inicializa conquistas na primeira leitura (sem trigger de level-up)
         if (_firstSnapshot) {
@@ -11759,6 +11799,9 @@
           return;
         }
 
+        // Prestige Nv.50 — sem paywalls
+        if (window._isPrestige) return;
+
         oslRevealCount++;
         sessionStorage.setItem("osl_rev", String(oslRevealCount));
 
@@ -11789,7 +11832,7 @@
     var deckInfo = document.getElementById("deckInfo");
     if (deckInfo) {
       var deckObs = new MutationObserver(function () {
-        if (!oslScShown && deckInfo.textContent.includes("deck chegou ao fim")) {
+        if (!window._isPrestige && !oslScShown && deckInfo.textContent.includes("deck chegou ao fim")) {
           setTimeout(oslShowSC, 900);
         }
       });
@@ -11805,6 +11848,8 @@
           oslBypassLeave = false;
           return;
         }
+        // Prestige Nv.50 — sem paywalls na saída
+        if (window._isPrestige) return;
         // Só mostra o modal se o ritual foi iniciado (gravação pode ter acontecido)
         var ritualStarted = window._osl && window._osl.isStarted && window._osl.isStarted();
         if (!ritualStarted) return;
