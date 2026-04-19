@@ -5693,6 +5693,205 @@
   .pressureNotif--out { animation:rewardCardOut .35s ease forwards; }
 
   /* ═══════════════════════════════════════════════════════════════════
+     FEATURE: PAINEL DE NÍVEIS
+  ═══════════════════════════════════════════════════════════════════ */
+  @keyframes lvlPanelIn  { from{opacity:0;transform:translateY(100%)} to{opacity:1;transform:translateY(0)} }
+  @keyframes lvlPanelOut { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(100%)} }
+
+  .lvlPanelOverlay{
+    position:fixed;inset:0;z-index:11500;
+    background:rgba(0,0,0,.72);backdrop-filter:blur(14px);
+    display:flex;align-items:flex-end;justify-content:center;
+    padding:0 0 0;
+    animation:fadeInBg .25s ease;
+  }
+  .lvlPanelOverlay.closing{ animation:fadeOutBg .28s ease forwards; }
+  .lvlPanelOverlay.closing .lvlPanel{ animation:lvlPanelOut .28s cubic-bezier(.4,0,1,1) forwards; }
+
+  .lvlPanel{
+    width:100%;max-width:560px;
+    max-height:90svh;
+    display:flex;flex-direction:column;
+    background:linear-gradient(180deg,#111008 0%,#0c0a06 100%);
+    border:1px solid rgba(212,168,75,.28);
+    border-bottom:none;
+    border-radius:24px 24px 0 0;
+    overflow:hidden;
+    animation:lvlPanelIn .38s cubic-bezier(.2,1,.4,1);
+    box-shadow:0 -12px 60px rgba(0,0,0,.7),0 0 0 1px rgba(212,168,75,.08) inset;
+  }
+
+  /* ── Header ── */
+  .lvlPanel__header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 20px 0;flex-shrink:0;
+  }
+  .lvlPanel__headerTitle{
+    color:rgba(212,168,75,.7);font-size:10px;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;
+  }
+  .lvlPanel__close{
+    appearance:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+    border-radius:50%;width:28px;height:28px;
+    color:rgba(255,255,255,.45);font-size:13px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s,color .15s;
+  }
+  .lvlPanel__close:hover{ background:rgba(255,255,255,.12);color:#fff; }
+
+  /* ── Hero ── */
+  .lvlPanel__hero{
+    padding:20px 24px 18px;flex-shrink:0;
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .lvlPanel__heroTop{
+    display:flex;align-items:center;gap:16px;margin-bottom:16px;
+  }
+  .lvlPanel__heroIcon{
+    font-size:48px;line-height:1;
+    filter:drop-shadow(0 0 14px rgba(212,168,75,.5));
+    flex-shrink:0;
+  }
+  .lvlPanel__heroMeta{ min-width:0; }
+  .lvlPanel__heroEyebrow{
+    color:rgba(212,168,75,.6);font-size:9px;font-weight:700;
+    letter-spacing:.2em;text-transform:uppercase;margin-bottom:3px;
+  }
+  .lvlPanel__heroLevelNum{
+    font-size:36px;font-weight:900;line-height:1;
+    background:linear-gradient(135deg,#c47e10,#f0b840,#ffd870);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .lvlPanel__heroTitle{
+    color:#f0e8d8;font-size:18px;font-weight:900;
+    letter-spacing:.05em;text-transform:uppercase;margin-top:2px;
+  }
+  .lvlPanel__heroTier{
+    color:rgba(255,255,255,.3);font-size:11px;margin-top:4px;
+  }
+
+  .lvlPanel__xpSection{ padding-top:2px; }
+  .lvlPanel__xpLabel{
+    display:flex;justify-content:space-between;
+    color:rgba(255,255,255,.38);font-size:11px;margin-bottom:6px;
+  }
+  .lvlPanel__xpLabel strong{ color:#f0b840; }
+  .lvlPanel__xpTrack{
+    height:8px;background:rgba(255,255,255,.07);
+    border-radius:999px;overflow:hidden;margin-bottom:6px;
+  }
+  .lvlPanel__xpBar{
+    height:100%;border-radius:999px;
+    background:linear-gradient(90deg,#9a6e0a,#d4a84b,#f0c060);
+    transition:width .7s cubic-bezier(.4,0,.2,1);
+    position:relative;
+  }
+  .lvlPanel__xpBar::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
+    animation:xpShimmer 2s linear infinite;
+  }
+  @keyframes xpShimmer{
+    from{transform:translateX(-100%)} to{transform:translateX(200%)}
+  }
+  .lvlPanel__xpSub{
+    color:rgba(255,255,255,.25);font-size:10px;text-align:right;
+  }
+
+  /* ── Level list ── */
+  .lvlPanel__body{
+    overflow-y:auto;flex:1;padding:0 0 24px;
+    scrollbar-width:thin;scrollbar-color:rgba(212,168,75,.2) transparent;
+  }
+  .lvlPanel__body::-webkit-scrollbar{ width:4px; }
+  .lvlPanel__body::-webkit-scrollbar-thumb{ background:rgba(212,168,75,.2);border-radius:2px; }
+
+  .lvlPanel__tierHeader{
+    padding:14px 20px 8px;
+    color:rgba(255,255,255,.22);font-size:10px;font-weight:700;
+    letter-spacing:.18em;text-transform:uppercase;
+    position:sticky;top:0;
+    background:linear-gradient(180deg,#0c0a06 70%,transparent);
+    z-index:2;
+  }
+  .lvlPanel__tierHeader span{
+    padding:2px 8px;border-radius:20px;font-size:9px;
+  }
+  .lvlPanel__tierHeader--bronze span{ background:rgba(205,127,50,.14);color:#cd7f32; }
+  .lvlPanel__tierHeader--silver span{ background:rgba(192,192,192,.1);color:#c8c8c8; }
+  .lvlPanel__tierHeader--gold   span{
+    background:rgba(212,168,75,.14);
+    background:linear-gradient(135deg,rgba(196,126,16,.18),rgba(240,184,64,.18));
+    color:#f0b840;
+  }
+  .lvlPanel__tierHeader--prestige span{
+    background:linear-gradient(135deg,rgba(130,0,200,.18),rgba(212,168,75,.18));
+    color:#d4a8ff;
+  }
+
+  .lvlPanel__lvlRow{
+    display:flex;align-items:center;gap:12px;
+    padding:9px 20px;
+    transition:background .15s;position:relative;
+  }
+  .lvlPanel__lvlRow:hover{ background:rgba(255,255,255,.03); }
+
+  .lvlPanel__lvlRow--current{
+    background:rgba(212,168,75,.07) !important;
+    border-left:2px solid rgba(212,168,75,.6);
+  }
+  .lvlPanel__lvlRow--locked{ opacity:.32;pointer-events:none; }
+  .lvlPanel__lvlRow--milestone{ background:rgba(212,168,75,.03); }
+
+  .lvlPanel__lvlNum{
+    width:28px;text-align:center;flex-shrink:0;
+    color:rgba(255,255,255,.25);font-size:12px;font-weight:700;
+  }
+  .lvlPanel__lvlRow--current  .lvlPanel__lvlNum{ color:#f0b840; }
+  .lvlPanel__lvlRow--unlocked .lvlPanel__lvlNum{ color:rgba(255,255,255,.4); }
+
+  .lvlPanel__lvlIcon{ font-size:22px;flex-shrink:0;width:28px;text-align:center; }
+
+  .lvlPanel__lvlInfo{ min-width:0;flex:1; }
+  .lvlPanel__lvlTitle{
+    color:#ede0cc;font-size:14px;font-weight:700;letter-spacing:.02em;
+  }
+  .lvlPanel__lvlRow--locked .lvlPanel__lvlTitle{ color:rgba(255,255,255,.4); }
+  .lvlPanel__lvlUnlock{
+    margin-top:3px;
+    display:flex;align-items:center;gap:5px;
+    background:rgba(212,168,75,.1);border:1px solid rgba(212,168,75,.18);
+    border-radius:6px;padding:3px 8px;
+    color:rgba(240,200,120,.75);font-size:10px;
+    width:fit-content;
+  }
+  .lvlPanel__lvlUnlock--done{
+    background:rgba(80,180,80,.08);border-color:rgba(80,180,80,.2);
+    color:rgba(120,220,120,.7);
+  }
+
+  .lvlPanel__lvlBadge{
+    flex-shrink:0;
+    width:18px;height:18px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;
+  }
+  .lvlPanel__lvlBadge--done{ background:rgba(80,200,80,.2);color:#80d080; }
+  .lvlPanel__lvlBadge--current{
+    background:linear-gradient(135deg,#9a6e0a,#d4a84b);color:#1a1208;
+    font-weight:900;font-size:8px;
+  }
+  .lvlPanel__lvlBadge--locked{ background:rgba(255,255,255,.06);color:rgba(255,255,255,.2); }
+
+  /* ── Make xpLevel clickable ── */
+  .topMeta__xpLevel{
+    cursor:pointer;
+    border-radius:6px;padding:1px 4px;margin:-1px -4px;
+    transition:background .15s;
+  }
+  .topMeta__xpLevel:hover{ background:rgba(255,255,255,.08); }
+
+  /* ═══════════════════════════════════════════════════════════════════
      FEATURE: CARD COMPARTILHÁVEL — Share button in recap
   ═══════════════════════════════════════════════════════════════════ */
   .recapCard__btn--share {
@@ -6979,8 +7178,9 @@
       }
     };
 
-    // ── Nível anterior — para detectar level-up em tempo real ────────────
+    // ── XP atual e nível anterior — estado reativo ────────────────────────
     let _xpPrevLevel = 0;
+    let _currentXp   = 0;
 
     // ── Effect Engine ─────────────────────────────────────────────────────
     const OSL_EFFECTS = {
@@ -10017,6 +10217,7 @@
     }
 
     function updateXpCard(xp) {
+      _currentXp = xp;
       const lv    = OSL_XP.levelFromXP(xp);
       const info  = OSL_XP.titleForLevel(lv);
       const curr  = OSL_XP.xpForLevel(lv);
@@ -10041,6 +10242,122 @@
         showLevelUpModal(lv, info);
       }
       _xpPrevLevel = lv;
+    }
+
+    function showLevelPanel(currentXp) {
+      const lv      = OSL_XP.levelFromXP(currentXp);
+      const info    = OSL_XP.titleForLevel(lv);
+      const curr    = OSL_XP.xpForLevel(lv);
+      const next    = OSL_XP.xpForNextLevel(lv);
+      const pct     = next > curr ? Math.round((currentXp - curr) / (next - curr) * 100) : 100;
+      const inLv    = currentXp - curr;
+      const needed  = next - curr;
+
+      const TIERS = [
+        { key:"bronze",   label:"Bronze",   range:[1,10]  },
+        { key:"silver",   label:"Prata",    range:[11,20] },
+        { key:"gold",     label:"Ouro",     range:[21,30] },
+        { key:"prestige", label:"Prestígio",range:[31,50] },
+      ];
+
+      const overlay = document.createElement("div");
+      overlay.className = "lvlPanelOverlay";
+
+      const tierHTML = TIERS.map(tier => {
+        const rows = [];
+        for (let i = tier.range[0]; i <= tier.range[1]; i++) {
+          const t        = OSL_XP.titleForLevel(i);
+          const isNow    = i === lv;
+          const isDone   = i < lv;
+          const isLocked = i > lv;
+          const hasMile  = !!t.unlock;
+          let rowClass   = "lvlPanel__lvlRow";
+          if (isNow)    rowClass += " lvlPanel__lvlRow--current";
+          if (isDone)   rowClass += " lvlPanel__lvlRow--unlocked";
+          if (isLocked) rowClass += " lvlPanel__lvlRow--locked";
+          if (hasMile)  rowClass += " lvlPanel__lvlRow--milestone";
+
+          const badgeHTML = isNow
+            ? `<div class="lvlPanel__lvlBadge lvlPanel__lvlBadge--current">▶</div>`
+            : isDone
+              ? `<div class="lvlPanel__lvlBadge lvlPanel__lvlBadge--done">✓</div>`
+              : `<div class="lvlPanel__lvlBadge lvlPanel__lvlBadge--locked">🔒</div>`;
+
+          const unlockHTML = hasMile
+            ? `<div class="lvlPanel__lvlUnlock${isDone ? " lvlPanel__lvlUnlock--done" : ""}">
+                 ${isDone ? "✓" : "🔓"} ${escapeHtml(t.unlock)}
+               </div>`
+            : "";
+
+          rows.push(`
+            <div class="${rowClass}" ${isNow ? 'id="lvlPanel__currentRow"' : ""}>
+              <div class="lvlPanel__lvlNum">${i}</div>
+              <div class="lvlPanel__lvlIcon">${t.icon}</div>
+              <div class="lvlPanel__lvlInfo">
+                <div class="lvlPanel__lvlTitle">${escapeHtml(t.title)}</div>
+                ${unlockHTML}
+              </div>
+              ${badgeHTML}
+            </div>`);
+        }
+        return `
+          <div class="lvlPanel__tierHeader lvlPanel__tierHeader--${tier.key}">
+            <span>${tier.label} · Níveis ${tier.range[0]}–${tier.range[1]}</span>
+          </div>
+          ${rows.join("")}`;
+      }).join("");
+
+      const xpNextLabel = lv >= 50
+        ? `<strong>Nível máximo</strong>`
+        : `<strong>${inLv}</strong> / ${needed} XP para o próximo`;
+
+      overlay.innerHTML = `
+        <div class="lvlPanel">
+          <div class="lvlPanel__header">
+            <div class="lvlPanel__headerTitle">Sua Jornada</div>
+            <button class="lvlPanel__close" id="lvlPanelClose">✕</button>
+          </div>
+          <div class="lvlPanel__hero">
+            <div class="lvlPanel__heroTop">
+              <div class="lvlPanel__heroIcon">${info.icon}</div>
+              <div class="lvlPanel__heroMeta">
+                <div class="lvlPanel__heroEyebrow">Nível atual</div>
+                <div class="lvlPanel__heroLevelNum">${lv}</div>
+                <div class="lvlPanel__heroTitle">${escapeHtml(info.title)}</div>
+                <div class="lvlPanel__heroTier">${escapeHtml(info.tier.charAt(0).toUpperCase() + info.tier.slice(1))} · ${currentXp} XP total</div>
+              </div>
+            </div>
+            <div class="lvlPanel__xpSection">
+              <div class="lvlPanel__xpLabel">
+                <span>Progresso para o próximo nível</span>
+                ${xpNextLabel}
+              </div>
+              <div class="lvlPanel__xpTrack">
+                <div class="lvlPanel__xpBar" style="width:${pct}%"></div>
+              </div>
+              <div class="lvlPanel__xpSub">${pct}% concluído</div>
+            </div>
+          </div>
+          <div class="lvlPanel__body" id="lvlPanelBody">
+            ${tierHTML}
+          </div>
+        </div>`;
+
+      document.body.appendChild(overlay);
+
+      // Scroll para o nível atual
+      requestAnimationFrame(() => {
+        const row = overlay.querySelector("#lvlPanel__currentRow");
+        if (row) row.scrollIntoView({ block:"center", behavior:"smooth" });
+      });
+
+      const close = () => {
+        overlay.classList.add("closing");
+        setTimeout(() => overlay.remove(), 300);
+      };
+
+      overlay.querySelector("#lvlPanelClose").addEventListener("click", close);
+      overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
     }
 
     function showLevelUpModal(lv, info) {
@@ -10770,6 +11087,11 @@
         bindUserDoc();
         bindMyMission();
         checkDailyReward();
+
+        // Painel de níveis ao clicar no indicador de XP
+        document.getElementById("xpCardLevel")?.addEventListener("click", () => {
+          showLevelPanel(_currentXp);
+        });
       } catch (error) {
         console.error(error);
 
