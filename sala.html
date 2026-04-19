@@ -4311,7 +4311,7 @@
     html.arenaMode .exitArenaBtn{
       display:block;
       position:absolute;
-      left:16px;
+      left:0;
     }
 
     @keyframes fadeInUp{
@@ -4322,16 +4322,17 @@
     /* Normal mode: wrapper is invisible to layout */
     .arenaControls{ display:contents; }
 
-    /* Arena mode: wrapper becomes the fixed full-width row */
+    /* Arena mode: wrapper is fixed, aligned to the mainArea column
+       left = page-padding(14) + sidebar(290) + gap(14) = 318px
+       right = page-padding(14) + rightColumn(360) + gap(14) = 388px */
     html.arenaMode .arenaControls{
       display:flex;
       align-items:center;
       justify-content:center;
       position:fixed;
       bottom:16px;
-      left:0;
-      right:0;
-      width:100%;
+      left:318px;
+      right:388px;
       z-index:100;
       animation:fadeInUp .25s .1s both;
     }
