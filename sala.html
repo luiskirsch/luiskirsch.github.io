@@ -5485,6 +5485,195 @@
     #mobileVideoThumb { width: 40px !important; height: 54px !important; }
   }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     FEATURE: XP LEVELS — Level-Up Modal
+  ═══════════════════════════════════════════════════════════════════ */
+  @keyframes levelUpIn {
+    0%   { opacity:0; transform:scale(.7) translateY(30px); }
+    60%  { transform:scale(1.05) translateY(-4px); }
+    100% { opacity:1; transform:scale(1) translateY(0); }
+  }
+  @keyframes levelUpGlow {
+    0%,100% { box-shadow:0 0 40px rgba(212,168,75,.15),0 24px 60px rgba(0,0,0,.7); }
+    50%      { box-shadow:0 0 90px rgba(212,168,75,.5),0 24px 80px rgba(0,0,0,.85); }
+  }
+  .levelUpOverlay {
+    position:fixed;inset:0;z-index:11000;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.84);backdrop-filter:blur(18px);
+    animation:fadeInBg .35s ease;padding:20px;
+  }
+  .levelUpOverlay.closing { animation:fadeOutBg .3s ease forwards; }
+  .levelUpOverlay.closing .levelUpCard { animation:rewardCardOut .3s cubic-bezier(.36,0,.66,-.56) forwards; }
+  .levelUpCard {
+    background:linear-gradient(150deg,#0c0804,#1c1208,#0c0804);
+    border:1px solid rgba(212,168,75,.55);
+    border-radius:26px;padding:48px 32px 32px;
+    max-width:360px;width:100%;text-align:center;
+    animation:levelUpIn .65s cubic-bezier(.2,1,.4,1), levelUpGlow 2.2s ease-in-out .65s infinite;
+    position:relative;overflow:hidden;
+  }
+  .levelUpCard::before {
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% -20%,rgba(212,168,75,.14),transparent 65%);
+    pointer-events:none;
+  }
+  .levelUpCard__badge { font-size:54px;line-height:1;margin-bottom:10px;filter:drop-shadow(0 0 18px rgba(212,168,75,.6)); }
+  .levelUpCard__eyebrow {
+    color:rgba(212,168,75,.7);font-size:10px;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;margin-bottom:8px;
+  }
+  .levelUpCard__level {
+    font-size:60px;font-weight:900;line-height:1;margin-bottom:4px;
+    background:linear-gradient(135deg,#c47e10,#f0b840,#ffd870,#c47e10);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .levelUpCard__title {
+    color:#f0e8d8;font-size:22px;font-weight:900;
+    letter-spacing:.07em;text-transform:uppercase;margin-bottom:22px;
+  }
+  .levelUpCard__unlock {
+    background:rgba(212,168,75,.08);border:1px solid rgba(212,168,75,.22);
+    border-radius:12px;padding:14px 16px;margin-bottom:24px;
+    color:rgba(240,220,170,.8);font-size:13px;line-height:1.5;
+  }
+  .levelUpCard__unlock strong {
+    color:#f0b840;display:block;font-size:10px;
+    letter-spacing:.16em;text-transform:uppercase;margin-bottom:4px;
+  }
+  .levelUpCard__close {
+    border:none;border-radius:10px;width:100%;cursor:pointer;
+    background:linear-gradient(135deg,#9a6e0a,#d4a84b);
+    color:#1a1208;font-size:13px;font-weight:900;
+    letter-spacing:.08em;padding:14px 0;transition:filter .2s;
+  }
+  .levelUpCard__close:hover { filter:brightness(1.14); }
+
+  /* XP tier colors */
+  .topMeta__xpLevel[data-tier="silver"] { color:#c8c8c8; }
+  .topMeta__xpLevel[data-tier="gold"]   {
+    background:linear-gradient(135deg,#c47e10,#f0b840);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .topMeta__xpLevel[data-tier="prestige"] {
+    background:linear-gradient(135deg,#c47e10,#f0b840,#ffd870,#c47e10);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     FEATURE: TEMPERATURA DA SALA — Tension Meter
+  ═══════════════════════════════════════════════════════════════════ */
+  .tensionMeter {
+    position:absolute;left:0;
+    display:none;align-items:center;gap:7px;
+    padding:5px 11px;
+    background:rgba(10,5,2,.78);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:20px;backdrop-filter:blur(10px);
+    transition:border-color .6s,box-shadow .6s;
+    white-space:nowrap;
+  }
+  html.arenaMode .tensionMeter { display:flex; }
+  .tensionMeter__label { font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.3); }
+  .tensionMeter__bar { width:55px;height:4px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden; }
+  .tensionMeter__fill {
+    height:100%;width:0%;border-radius:999px;
+    background:linear-gradient(90deg,#3a7fd5,#56b3c7);
+    transition:width .9s cubic-bezier(.4,0,.2,1),background .9s;
+  }
+  .tensionMeter__fill--warm { background:linear-gradient(90deg,#c47e10,#f0b840) !important; }
+  .tensionMeter__fill--hot  { background:linear-gradient(90deg,#c43010,#f04820) !important; }
+  .tensionMeter__icon { font-size:13px;transition:all .4s; }
+  .tensionMeter--critical {
+    border-color:rgba(200,50,20,.5) !important;
+    box-shadow:0 0 22px rgba(200,50,20,.3) !important;
+    animation:tensionPulse 1.1s ease-in-out infinite;
+  }
+  @keyframes tensionPulse {
+    0%,100% { box-shadow:0 0 10px rgba(200,50,20,.2); }
+    50%      { box-shadow:0 0 32px rgba(200,50,20,.55); }
+  }
+  .momentoCriticoNotif {
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10300;
+    background:linear-gradient(135deg,#1a0500,#300a00);
+    border:1px solid rgba(255,80,20,.5);border-radius:18px;
+    padding:22px 36px;text-align:center;
+    box-shadow:0 0 70px rgba(200,50,20,.5);
+    backdrop-filter:blur(14px);
+    animation:recapIn .4s cubic-bezier(.2,1,.4,1);
+  }
+  .momentoCriticoNotif--out { animation:rewardCardOut .35s ease forwards; }
+  .momentoCriticoNotif__label {
+    color:rgba(255,120,60,.8);font-size:10px;font-weight:700;
+    letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px;
+  }
+  .momentoCriticoNotif__title { color:#ffd0b0;font-size:20px;font-weight:900;letter-spacing:.04em; }
+  .momentoCriticoNotif__sub { color:rgba(255,200,160,.55);font-size:12px;margin-top:6px; }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     FEATURE: CONQUISTAS — Achievement Toast
+  ═══════════════════════════════════════════════════════════════════ */
+  @keyframes achieveIn  { from{opacity:0;transform:translateX(130%)} to{opacity:1;transform:translateX(0)} }
+  @keyframes achieveOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(130%)} }
+  .achieveToast {
+    position:fixed;right:20px;z-index:10500;
+    display:flex;align-items:center;gap:14px;
+    background:linear-gradient(135deg,#0c0804,#1a1208);
+    border:1px solid rgba(212,168,75,.4);border-radius:16px;
+    padding:14px 18px;max-width:310px;
+    box-shadow:0 8px 40px rgba(0,0,0,.65),0 0 32px rgba(212,168,75,.1);
+    animation:achieveIn .5s cubic-bezier(.2,1,.4,1);
+  }
+  .achieveToast--out { animation:achieveOut .4s ease forwards; }
+  .achieveToast__icon { font-size:32px;flex-shrink:0; }
+  .achieveToast__body { min-width:0; }
+  .achieveToast__eyebrow {
+    color:rgba(212,168,75,.7);font-size:9px;font-weight:700;
+    letter-spacing:.2em;text-transform:uppercase;margin-bottom:3px;
+  }
+  .achieveToast__name { color:#f0e8d8;font-size:14px;font-weight:900; }
+  .achieveToast__desc { color:rgba(255,255,255,.42);font-size:11px;margin-top:2px; }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     FEATURE: PRESSÃO SOCIAL — Vote mechanic
+  ═══════════════════════════════════════════════════════════════════ */
+  .pressureBtn {
+    position:absolute;right:0;
+    display:none;appearance:none;
+    background:rgba(160,30,10,.18);
+    border:1px solid rgba(220,60,20,.32);
+    border-radius:20px;
+    color:rgba(255,170,120,.65);
+    padding:5px 12px;font:inherit;font-size:10px;font-weight:700;
+    letter-spacing:.05em;cursor:pointer;white-space:nowrap;
+    transition:all 150ms;backdrop-filter:blur(8px);
+  }
+  .pressureBtn:hover { background:rgba(200,50,20,.3);color:rgba(255,200,160,.9);border-color:rgba(220,80,30,.6); }
+  html.arenaMode .pressureBtn { display:block; }
+  .pressureBtn--voted { opacity:.5;pointer-events:none; }
+  .pressureNotif {
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10200;
+    background:rgba(140,15,0,.94);border:1px solid rgba(255,70,30,.4);
+    border-radius:18px;padding:22px 36px;
+    color:#ffd0b0;font-size:19px;font-weight:900;
+    text-align:center;letter-spacing:.04em;
+    backdrop-filter:blur(14px);
+    box-shadow:0 0 70px rgba(200,50,20,.45);
+    animation:recapIn .4s cubic-bezier(.2,1,.4,1);
+  }
+  .pressureNotif__sub { color:rgba(255,190,150,.5);font-size:12px;font-weight:400;margin-top:6px; }
+  .pressureNotif--out { animation:rewardCardOut .35s ease forwards; }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     FEATURE: CARD COMPARTILHÁVEL — Share button in recap
+  ═══════════════════════════════════════════════════════════════════ */
+  .recapCard__btn--share {
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.13);
+    color:rgba(255,255,255,.55);
+  }
+  .recapCard__btn--share:hover { background:rgba(255,255,255,.13);color:rgba(255,255,255,.85); }
+
   </style>
 </head>
 
@@ -5745,6 +5934,12 @@
                      fixed centered flex row in arena mode -->
                 <div class="arenaControls" id="arenaControls">
                   <button id="exitArenaBtn" class="exitArenaBtn">← Sair</button>
+                  <!-- Temperatura da Sala -->
+                  <div class="tensionMeter" id="tensionMeter">
+                    <span class="tensionMeter__icon" id="tensionIcon">🧊</span>
+                    <span class="tensionMeter__label">Tensão</span>
+                    <div class="tensionMeter__bar"><div class="tensionMeter__fill" id="tensionFill"></div></div>
+                  </div>
                   <div class="reactionBar" id="reactionBar">
                     <button class="reactionBar__btn" onclick="sendReaction('😂',this)" title="Haha">😂</button>
                     <button class="reactionBar__btn" onclick="sendReaction('❤️',this)" title="Amor">❤️</button>
@@ -5753,6 +5948,8 @@
                     <button class="reactionBar__btn" onclick="sendReaction('🔥',this)" title="Fogo">🔥</button>
                     <button class="reactionBar__btn" onclick="sendReaction('💀',this)" title="Morto">💀</button>
                   </div>
+                  <!-- Pressão Social -->
+                  <button class="pressureBtn" id="pressureBtn" title="Votar para continuar">🔥 Quer mais</button>
                 </div>
               </div>
 
@@ -6669,7 +6866,66 @@
         SESSION_COMPLETE: 50,
         EFFECT_TRIGGERED: 15,
         DAILY_BONUS: 20,
-        DEEP_CARD: 20
+        DEEP_CARD: 20,
+        MISSION_COMPLETE: 30,
+        PRESSURE_VOTE: 3,
+        REACTION_SENT: 1
+      },
+      // 50 títulos temáticos — Bronze(1-10) · Prata(11-20) · Ouro(21-30) · Prestígio(31-50)
+      TITLES: [
+        { title:"Curioso",              icon:"🌱", tier:"bronze"  },
+        { title:"Iniciado",             icon:"🕯️",  tier:"bronze"  },
+        { title:"Aprendiz",             icon:"📖", tier:"bronze"  },
+        { title:"Observador",           icon:"👁️",  tier:"bronze"  },
+        { title:"Explorador",           icon:"🗺️",  tier:"bronze",  unlock:"4 novas reações desbloqueadas: 😤 🤩 🥺 👀" },
+        { title:"Intérprete",           icon:"🔍", tier:"bronze"  },
+        { title:"Analista",             icon:"🧠", tier:"bronze"  },
+        { title:"Psicólogo",            icon:"🪞", tier:"bronze"  },
+        { title:"Revelador",            icon:"🔓", tier:"bronze"  },
+        { title:"Guardião",             icon:"🛡️",  tier:"bronze",  unlock:"Emblema Guardião exibido no seu perfil" },
+        { title:"Vidente",              icon:"🔮", tier:"silver"  },
+        { title:"Confessor",            icon:"🗝️",  tier:"silver"  },
+        { title:"Decodificador",        icon:"⚙️",  tier:"silver"  },
+        { title:"Intuitivo",            icon:"⚡", tier:"silver"  },
+        { title:"Provocador",           icon:"🌀", tier:"silver",  unlock:"+10 XP bônus por sessão completa" },
+        { title:"Desvelador",           icon:"🌙", tier:"silver"  },
+        { title:"Estrategista",         icon:"♟️",  tier:"silver"  },
+        { title:"Manipulador",          icon:"🎭", tier:"silver"  },
+        { title:"Arquiteto",            icon:"📐", tier:"silver"  },
+        { title:"Oráculo",              icon:"🌟", tier:"silver",  unlock:"Acesso ao Modo Eco — resumo narrativo pós-sessão" },
+        { title:"Sussurrador",          icon:"🌬️",  tier:"gold"    },
+        { title:"Catalisador",          icon:"💥", tier:"gold"    },
+        { title:"Espelho",              icon:"🫧", tier:"gold"    },
+        { title:"Sombra",               icon:"🌑", tier:"gold"    },
+        { title:"Confrontador",         icon:"⚔️",  tier:"gold",    unlock:"Carta de Impulso — use 1× por sessão" },
+        { title:"Alquimista",           icon:"⚗️",  tier:"gold"    },
+        { title:"Ritualista",           icon:"🕍", tier:"gold"    },
+        { title:"Sacerdote",            icon:"🔯", tier:"gold"    },
+        { title:"Xamã",                 icon:"🦅", tier:"gold"    },
+        { title:"Hierofante",           icon:"👑", tier:"gold",    unlock:"Borda dourada permanente no perfil" },
+        { title:"Iluminado",            icon:"✨", tier:"prestige" },
+        { title:"Transcendente",        icon:"🌌", tier:"prestige" },
+        { title:"Ancestral",            icon:"🏛️",  tier:"prestige" },
+        { title:"Voz do Abismo",        icon:"🕳️",  tier:"prestige" },
+        { title:"Guardião do Segredo",  icon:"🔐", tier:"prestige", unlock:"Carta visual exclusiva Nível 35" },
+        { title:"Tecelão",              icon:"🕸️",  tier:"prestige" },
+        { title:"Escultor de Almas",    icon:"🗿", tier:"prestige" },
+        { title:"Navegador",            icon:"🧭", tier:"prestige" },
+        { title:"Portador da Chave",    icon:"🗝️",  tier:"prestige" },
+        { title:"Mestre das Sombras",   icon:"🌒", tier:"prestige", unlock:"Visual exclusivo de carta Obsidiana Dark" },
+        { title:"Portador do Fogo",     icon:"🔥", tier:"prestige" },
+        { title:"Arquivista Eterno",    icon:"📜", tier:"prestige" },
+        { title:"Cronista",             icon:"⌛", tier:"prestige" },
+        { title:"Sentinela",            icon:"🗼", tier:"prestige" },
+        { title:"Arauto",               icon:"📯", tier:"prestige" },
+        { title:"Profeta",              icon:"🌠", tier:"prestige" },
+        { title:"Deus das Perguntas",   icon:"❓", tier:"prestige" },
+        { title:"Além do Nome",         icon:"∞",  tier:"prestige" },
+        { title:"O Inominável",         icon:"👁️",  tier:"prestige" },
+        { title:"O Sexto",              icon:"⬡",  tier:"prestige", unlock:"Prestígio máximo — título único e efeitos lendários" }
+      ],
+      titleForLevel(lv) {
+        return this.TITLES[Math.min(lv - 1, this.TITLES.length - 1)];
       },
       levelFromXP(xp) {
         return Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1;
@@ -6694,6 +6950,9 @@
         } catch(e) { console.warn("XP award error:", e); }
       }
     };
+
+    // ── Nível anterior — para detectar level-up em tempo real ────────────
+    let _xpPrevLevel = 0;
 
     // ── Effect Engine ─────────────────────────────────────────────────────
     const OSL_EFFECTS = {
@@ -6946,6 +7205,7 @@
     function setRitualWaitingState() {
       ritualStarted = false;
       ritualDeck = [];
+      OSL_TENSION.stop();
 
       if (ritualCardType) ritualCardType.textContent = "CARTA 01";
       if (ritualCardTitle) ritualCardTitle.textContent = "SILÊNCIO";
@@ -7012,6 +7272,14 @@
         await OSL_XP.award(userRef, "DEEP_CARD");
       }
 
+      // Hooks: Tensão + Conquistas + reset Pressão
+      OSL_TENSION.heat(12);
+      OSL_ACHIEVEMENTS.onCardRevealed(
+        (await getDocs(ritualHistoryRef)).size,
+        nextCard.type
+      );
+      resetPressureBtn();
+
       updateRitualButtons();
     }
 
@@ -7039,6 +7307,12 @@
 
       // XP: bônus de início de sessão
       await OSL_XP.award(userRef, "SESSION_JOIN");
+
+      // Hooks: Tensão + Pressão Social
+      OSL_TENSION.startDecay();
+      resetPressureBtn();
+      initPressureBtn();
+      bindSocialPressure();
 
       updateRitualButtons();
     }
@@ -7482,9 +7756,12 @@
     async function sendReaction(emoji, sourceEl) {
       if (!ritualStarted) return;
       const ts = Date.now();
-      // Mark locally so the snapshot echo doesn't spawn a second float
       shownReactions.set(participantId, ts);
       spawnReactionFloat(participantId, emoji, sourceEl);
+      // Hook: Tensão + Conquistas + XP
+      OSL_TENSION.heat(8);
+      OSL_ACHIEVEMENTS.onReaction(emoji);
+      if (userRef) OSL_XP.award(userRef, "REACTION_SENT");
       try {
         await setDoc(ritualRef, {
           [`reactions.${participantId}`]: { emoji, name: playerName, ts },
@@ -7635,6 +7912,11 @@
         ? `<button class="recapCard__btn recapCard__btn--primary" id="recapNewBtn">NOVA SESSÃO</button>`
         : "";
 
+      // Conquista de sessão completa
+      const durationMins = ritualData.sessionStartedAt
+        ? Math.round((Date.now() - ritualData.sessionStartedAt) / 60000) : 0;
+      OSL_ACHIEVEMENTS.onSessionComplete(durationMins, false);
+
       overlay.innerHTML = `
         <div class="recapCard">
           <div class="recapCard__eyebrow">Fim do Ritual</div>
@@ -7654,6 +7936,7 @@
           </div>
           <div class="recapCard__actions">
             ${newSessionBtn}
+            <button class="recapCard__btn recapCard__btn--share" id="recapShareBtn">📤 COMPARTILHAR</button>
             <button class="recapCard__btn recapCard__btn--ghost" id="recapCloseBtn">FECHAR</button>
           </div>
         </div>`;
@@ -7666,6 +7949,14 @@
       };
 
       document.getElementById("recapCloseBtn").addEventListener("click", closeRecap);
+      document.getElementById("recapShareBtn").addEventListener("click", () => {
+        shareSessionCard({
+          cards: cardsRevealed,
+          duration: durationStr,
+          topEmoji,
+          playerCount: currentPlayers.length
+        });
+      });
       if (onNewSession) {
         document.getElementById("recapNewBtn").addEventListener("click", () => {
           closeRecap();
@@ -9613,31 +9904,429 @@
     }
 
     function updateXpCard(xp) {
-      const lv = OSL_XP.levelFromXP(xp);
-      const curr = OSL_XP.xpForLevel(lv);
-      const next = OSL_XP.xpForNextLevel(lv);
-      const pct = next > curr ? Math.round((xp - curr) / (next - curr) * 100) : 100;
-      const inLevel = xp - curr;
+      const lv    = OSL_XP.levelFromXP(xp);
+      const info  = OSL_XP.titleForLevel(lv);
+      const curr  = OSL_XP.xpForLevel(lv);
+      const next  = OSL_XP.xpForNextLevel(lv);
+      const pct   = next > curr ? Math.round((xp - curr) / (next - curr) * 100) : 100;
+      const inLv  = xp - curr;
       const needed = next - curr;
-      if (document.getElementById("xpCardLevel"))
-        document.getElementById("xpCardLevel").textContent = `Nível ${lv}`;
+      const lvEl  = document.getElementById("xpCardLevel");
+      if (lvEl) {
+        lvEl.textContent = `${info.icon} Nv.${lv} ${info.title}`;
+        lvEl.dataset.tier = info.tier;
+      }
       if (document.getElementById("xpCardFill"))
         document.getElementById("xpCardFill").style.width = `${pct}%`;
       if (document.getElementById("xpCardXp"))
         document.getElementById("xpCardXp").textContent = `${xp} XP`;
       if (document.getElementById("xpCardNums"))
         document.getElementById("xpCardNums").textContent =
-          next > curr ? `${inLevel} / ${needed} XP` : `MAX`;
+          next > curr ? `${inLv} / ${needed} XP` : `MAX`;
+      // Detectar level-up
+      if (_xpPrevLevel > 0 && lv > _xpPrevLevel) {
+        showLevelUpModal(lv, info);
+      }
+      _xpPrevLevel = lv;
+    }
+
+    function showLevelUpModal(lv, info) {
+      const overlay = document.createElement("div");
+      overlay.className = "levelUpOverlay";
+      const unlockBlock = info.unlock
+        ? `<div class="levelUpCard__unlock"><strong>Desbloqueado</strong>${escapeHtml(info.unlock)}</div>`
+        : "";
+      overlay.innerHTML = `
+        <div class="levelUpCard">
+          <div class="levelUpCard__badge">${info.icon}</div>
+          <div class="levelUpCard__eyebrow">Subiu de nível</div>
+          <div class="levelUpCard__level">${lv}</div>
+          <div class="levelUpCard__title">${escapeHtml(info.title)}</div>
+          ${unlockBlock}
+          <button class="levelUpCard__close">Continuar →</button>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector(".levelUpCard__close").addEventListener("click", () => {
+        overlay.classList.add("closing");
+        setTimeout(() => overlay.remove(), 320);
+      });
+      // Auto-fechar em 8s se o usuário não clicar
+      setTimeout(() => { if (overlay.isConnected) overlay.querySelector(".levelUpCard__close").click(); }, 8000);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // FEATURE: TEMPERATURA DA SALA — Tension Meter
+    // ═══════════════════════════════════════════════════════════════════════
+    const OSL_TENSION = (() => {
+      let value = 0;
+      let criticalFired = false;
+      let decayInterval = null;
+
+      const ICONS = ["🧊","❄️","🌡️","🌶️","🔥"];
+      const THRESHOLDS = { warm: 40, hot: 70, critical: 100 };
+
+      function getIcon(v) {
+        if (v < 25)  return ICONS[0];
+        if (v < 45)  return ICONS[1];
+        if (v < 65)  return ICONS[2];
+        if (v < 85)  return ICONS[3];
+        return ICONS[4];
+      }
+
+      function render() {
+        const fill = document.getElementById("tensionFill");
+        const icon = document.getElementById("tensionIcon");
+        const meter = document.getElementById("tensionMeter");
+        if (!fill || !icon || !meter) return;
+        fill.style.width = Math.min(value, 100) + "%";
+        fill.classList.toggle("tensionMeter__fill--warm", value >= THRESHOLDS.warm && value < THRESHOLDS.hot);
+        fill.classList.toggle("tensionMeter__fill--hot",  value >= THRESHOLDS.hot);
+        meter.classList.toggle("tensionMeter--critical",  value >= THRESHOLDS.critical);
+        icon.textContent = getIcon(value);
+      }
+
+      function heat(amount) {
+        value = Math.min(100, value + amount);
+        render();
+        if (value >= THRESHOLDS.critical && !criticalFired) {
+          criticalFired = true;
+          fireMomentoCritico();
+        }
+      }
+
+      function fireMomentoCritico() {
+        const n = document.createElement("div");
+        n.className = "momentoCriticoNotif";
+        n.innerHTML = `
+          <div class="momentoCriticoNotif__label">⚡ Momento Crítico</div>
+          <div class="momentoCriticoNotif__title">A sala está em chamas</div>
+          <div class="momentoCriticoNotif__sub">Tensão máxima atingida pelo grupo</div>`;
+        document.body.appendChild(n);
+        // Award XP + conquista
+        if (userRef) OSL_XP.award(userRef, null, 15);
+        OSL_ACHIEVEMENTS.onTensionCritical();
+        setTimeout(() => {
+          n.classList.add("momentoCriticoNotif--out");
+          setTimeout(() => n.remove(), 400);
+          // Reset tension after critical so meter can build again
+          value = 10;
+          criticalFired = false;
+          render();
+        }, 4000);
+      }
+
+      function startDecay() {
+        decayInterval = setInterval(() => {
+          if (value > 0) { value = Math.max(0, value - 1.5); render(); }
+        }, 3000);
+      }
+
+      function stop() {
+        clearInterval(decayInterval);
+        value = 0; criticalFired = false; render();
+      }
+
+      return { heat, startDecay, stop };
+    })();
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // FEATURE: CONQUISTAS — Achievement System
+    // ═══════════════════════════════════════════════════════════════════════
+    const OSL_ACHIEVEMENTS = (() => {
+      const BADGES = [
+        { id:"first_session",   icon:"🎴", name:"Primeiro Ritual",         desc:"Completou sua primeira sessão",             xp:50  },
+        { id:"ten_cards",       icon:"📚", name:"Dez Camadas",             desc:"Revelou 10 cartas em uma sessão",           xp:30  },
+        { id:"fire_streak",     icon:"🔥", name:"Faísca",                  desc:"Enviou 5 reações 🔥 em uma sessão",          xp:20  },
+        { id:"deep_card_3",     icon:"🌑", name:"Abismo",                  desc:"Revelou 3 cartas Segredo em uma sessão",    xp:40  },
+        { id:"critical_heat",   icon:"🌋", name:"Erupção",                 desc:"Tensão da sala atingiu o máximo",           xp:35  },
+        { id:"pressure_5",      icon:"👊", name:"Pressão Social",          desc:"Votou 'quer mais' 5 vezes",                 xp:25  },
+        { id:"mission_3",       icon:"🎯", name:"Agente",                  desc:"Completou 3 missões secretas",              xp:60  },
+        { id:"level_10",        icon:"🛡️",  name:"Guardião",                desc:"Atingiu o Nível 10",                        xp:100 },
+        { id:"level_20",        icon:"🌟", name:"Oráculo",                 desc:"Atingiu o Nível 20",                        xp:200 },
+        { id:"level_30",        icon:"👑", name:"Hierofante",              desc:"Atingiu o Nível 30",                        xp:500 },
+        { id:"level_50",        icon:"⬡",  name:"O Sexto",                 desc:"Atingiu o Nível 50 — Prestígio máximo",     xp:2000},
+        { id:"night_owl",       icon:"🦉", name:"Coruja",                  desc:"Jogou após meia-noite",                     xp:15  },
+        { id:"marathon",        icon:"⏳", name:"Maratona",                desc:"Sessão com 45+ minutos",                    xp:45  },
+        { id:"reactor_king",    icon:"🎭", name:"Rei das Reações",         desc:"Enviou mais reações em uma sessão",         xp:30  },
+        { id:"silent_watcher",  icon:"👤", name:"Observador Silencioso",   desc:"Revelou 5 cartas sem enviar reações",       xp:20  },
+      ];
+
+      let _unlocked = new Set();
+      let _sessionReactions = 0;
+      let _sessionFireReactions = 0;
+      let _pressureVotes = 0;
+      let _missionsCompleted = 0;
+
+      function init(unlockedIds) {
+        _unlocked = new Set(unlockedIds || []);
+        // Check night-owl on init
+        if (new Date().getHours() >= 0 && new Date().getHours() < 5) grant("night_owl");
+      }
+
+      async function grant(id) {
+        if (_unlocked.has(id)) return;
+        const badge = BADGES.find(b => b.id === id);
+        if (!badge) return;
+        _unlocked.add(id);
+        // Salva no Firestore
+        if (userRef) {
+          try {
+            await setDoc(userRef, {
+              achievements: { [id]: { unlockedAt: Date.now() } }
+            }, { merge: true });
+            await OSL_XP.award(userRef, null, badge.xp);
+          } catch(e) { console.warn("Achievement save error:", e); }
+        }
+        showToast(badge);
+      }
+
+      let _toastQueue = [];
+      let _toastShowing = false;
+      function showToast(badge) {
+        _toastQueue.push(badge);
+        if (!_toastShowing) flushToast();
+      }
+      function flushToast() {
+        if (!_toastQueue.length) { _toastShowing = false; return; }
+        _toastShowing = true;
+        const badge = _toastQueue.shift();
+        const t = document.createElement("div");
+        t.className = "achieveToast";
+        // Stack position
+        const existing = document.querySelectorAll(".achieveToast").length;
+        t.style.bottom = (20 + existing * 80) + "px";
+        t.innerHTML = `
+          <div class="achieveToast__icon">${badge.icon}</div>
+          <div class="achieveToast__body">
+            <div class="achieveToast__eyebrow">Conquista Desbloqueada</div>
+            <div class="achieveToast__name">${escapeHtml(badge.name)}</div>
+            <div class="achieveToast__desc">${escapeHtml(badge.desc)} · +${badge.xp} XP</div>
+          </div>`;
+        document.body.appendChild(t);
+        setTimeout(() => {
+          t.classList.add("achieveToast--out");
+          setTimeout(() => { t.remove(); flushToast(); }, 420);
+        }, 3800);
+      }
+
+      // Chamados em pontos estratégicos do código existente
+      function onReaction(emoji) {
+        _sessionReactions++;
+        if (emoji === "🔥") { _sessionFireReactions++; if (_sessionFireReactions >= 5) grant("fire_streak"); }
+        if (_sessionReactions >= 1) grant("reactor_king"); // marcador — cumulativo via Firestore
+      }
+      function onCardRevealed(count, type) {
+        if (count >= 10)  grant("ten_cards");
+        if (type === "Segredo") {
+          _sessionDeepCards = (_sessionDeepCards || 0) + 1;
+          if (_sessionDeepCards >= 3) grant("deep_card_3");
+        }
+      }
+      function onSessionComplete(durationMin, isFirst) {
+        if (isFirst) grant("first_session");
+        if (durationMin >= 45) grant("marathon");
+      }
+      function onPressureVote() {
+        _pressureVotes++;
+        if (_pressureVotes >= 5) grant("pressure_5");
+      }
+      function onMissionComplete() {
+        _missionsCompleted++;
+        if (_missionsCompleted >= 3) grant("mission_3");
+      }
+      function onLevelUp(lv) {
+        if (lv >= 10) grant("level_10");
+        if (lv >= 20) grant("level_20");
+        if (lv >= 30) grant("level_30");
+        if (lv >= 50) grant("level_50");
+      }
+      function onTensionCritical() {
+        grant("critical_heat");
+      }
+      function onNoReactionCards(count) {
+        if (count >= 5) grant("silent_watcher");
+      }
+
+      return { init, grant, onReaction, onCardRevealed, onSessionComplete, onPressureVote, onMissionComplete, onLevelUp, onTensionCritical };
+    })();
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // FEATURE: PRESSÃO SOCIAL — Vote mechanic
+    // ═══════════════════════════════════════════════════════════════════════
+    let _pressureVotedThisCard = false;
+
+    function initPressureBtn() {
+      const btn = document.getElementById("pressureBtn");
+      if (!btn) return;
+      btn.addEventListener("click", async () => {
+        if (_pressureVotedThisCard) return;
+        _pressureVotedThisCard = true;
+        btn.classList.add("pressureBtn--voted");
+        btn.textContent = "✓ Votado";
+        // Award XP a quem votou
+        if (userRef) OSL_XP.award(userRef, "PRESSURE_VOTE");
+        OSL_ACHIEVEMENTS.onPressureVote();
+        // Escreve voto no Firestore
+        try {
+          await setDoc(ritualRef, {
+            socialPressure: {
+              ts: Date.now(),
+              votedBy: playerName,
+              roomCode
+            }
+          }, { merge: true });
+        } catch(e) { console.warn("Pressure vote error:", e); }
+        // Heat up tension meter
+        OSL_TENSION.heat(20);
+      });
+    }
+
+    function resetPressureBtn() {
+      _pressureVotedThisCard = false;
+      const btn = document.getElementById("pressureBtn");
+      if (btn) { btn.classList.remove("pressureBtn--voted"); btn.textContent = "🔥 Quer mais"; }
+    }
+
+    function showPressureNotif(voterName) {
+      // Mostra apenas para quem está na carta (todos veem, cria pressão)
+      const n = document.createElement("div");
+      n.className = "pressureNotif";
+      n.innerHTML = `
+        A sala quer mais
+        <div class="pressureNotif__sub">${escapeHtml(voterName)} votou para continuar</div>`;
+      document.body.appendChild(n);
+      OSL_TENSION.heat(18);
+      setTimeout(() => {
+        n.classList.add("pressureNotif--out");
+        setTimeout(() => n.remove(), 380);
+      }, 3500);
+    }
+
+    function bindSocialPressure() {
+      // Escuta mudanças em socialPressure no ritual
+      if (!ritualRef) return;
+      let _lastPressureTs = 0;
+      onSnapshot(ritualRef, (snap) => {
+        if (!snap.exists()) return;
+        const d = snap.data();
+        const sp = d.socialPressure;
+        if (sp && sp.ts && sp.ts > _lastPressureTs) {
+          _lastPressureTs = sp.ts;
+          if (sp.votedBy !== playerName) showPressureNotif(sp.votedBy);
+        }
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // FEATURE: CARD COMPARTILHÁVEL — Canvas share image
+    // ═══════════════════════════════════════════════════════════════════════
+    async function shareSessionCard(stats) {
+      const { cards, duration, topEmoji, playerCount } = stats;
+      const canvas = document.createElement("canvas");
+      canvas.width = 800; canvas.height = 800;
+      const ctx = canvas.getContext("2d");
+
+      // Background
+      const bg = ctx.createLinearGradient(0, 0, 0, 800);
+      bg.addColorStop(0, "#0c0804");
+      bg.addColorStop(0.5, "#1a1006");
+      bg.addColorStop(1, "#0c0804");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, 800, 800);
+
+      // Gold border
+      ctx.strokeStyle = "rgba(212,168,75,0.55)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(16, 16, 768, 768, 32);
+      ctx.stroke();
+
+      // Gold glow inner
+      const glow = ctx.createRadialGradient(400, 0, 0, 400, 0, 500);
+      glow.addColorStop(0, "rgba(212,168,75,0.1)");
+      glow.addColorStop(1, "transparent");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, 800, 800);
+
+      // Logo / eyebrow
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(212,168,75,0.6)";
+      ctx.font = "700 13px system-ui, sans-serif";
+      ctx.letterSpacing = "3px";
+      ctx.fillText("O SEXTOLUGAR", 400, 100);
+
+      // Title
+      ctx.fillStyle = "#f0e8d8";
+      ctx.font = "900 52px system-ui, sans-serif";
+      ctx.fillText("Ritual Concluído", 400, 175);
+
+      // Divider
+      ctx.strokeStyle = "rgba(212,168,75,0.2)";
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(80, 210); ctx.lineTo(720, 210); ctx.stroke();
+
+      // Stats grid — 4 cells
+      const drawStat = (icon, value, label, cx, cy) => {
+        ctx.font = "48px system-ui";
+        ctx.fillStyle = "#f0e8d8";
+        ctx.fillText(icon, cx, cy);
+        ctx.font = "900 40px system-ui, sans-serif";
+        ctx.fillStyle = "#f0e8d8";
+        ctx.fillText(value, cx, cy + 56);
+        ctx.font = "400 15px system-ui, sans-serif";
+        ctx.fillStyle = "rgba(255,255,255,0.35)";
+        ctx.fillText(label.toUpperCase(), cx, cy + 80);
+      };
+
+      drawStat("🃏", String(cards),       "cartas",     200, 310);
+      drawStat("⏱",  String(duration),    "duração",    600, 310);
+      drawStat(topEmoji || "🎭", "Favorita",  "reação",     200, 510);
+      drawStat("👥",  String(playerCount), "jogadores",  600, 510);
+
+      // Bottom divider
+      ctx.strokeStyle = "rgba(212,168,75,0.15)";
+      ctx.beginPath(); ctx.moveTo(80, 630); ctx.lineTo(720, 630); ctx.stroke();
+
+      // Tagline
+      ctx.fillStyle = "rgba(212,168,75,0.5)";
+      ctx.font = "400 16px system-ui, sans-serif";
+      ctx.fillText("sextolugar.com.br", 400, 680);
+
+      // Share or download
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], "osl-recap.png", { type: "image/png" });
+        if (navigator.canShare?.({ files: [file] })) {
+          try { await navigator.share({ files: [file], title: "O SextoLugar — Ritual Concluído" }); return; }
+          catch(e) { /* fallback to download */ }
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "osl-recap.png"; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      }, "image/png");
     }
 
     function bindUserDoc() {
+      let _firstSnapshot = true;
       onSnapshot(doc(db, "users", userId), (snap) => {
         if (!snap.exists()) return;
         const data = snap.data();
         const pending = (data.incomingRequests || []).length;
 
-        // Atualiza XP Card em tempo real
-        updateXpCard(data.xp || 0);
+        // Inicializa conquistas na primeira leitura (sem trigger de level-up)
+        if (_firstSnapshot) {
+          _firstSnapshot = false;
+          const xp = data.xp || 0;
+          _xpPrevLevel = OSL_XP.levelFromXP(xp);
+          OSL_ACHIEVEMENTS.init(Object.keys(data.achievements || {}));
+        }
+
+        // Atualiza XP Card em tempo real + detecta level-up
+        const xp = data.xp || 0;
+        const newLv = OSL_XP.levelFromXP(xp);
+        updateXpCard(xp);
+        if (newLv > _xpPrevLevel && _xpPrevLevel > 0) OSL_ACHIEVEMENTS.onLevelUp(newLv);
+
         const mobileProfileBadge  = document.getElementById("mobileProfileBadge");
         const desktopProfileBadge = document.getElementById("desktopProfileBadge");
         if (mobileProfileBadge)  mobileProfileBadge.classList.toggle("visible", pending > 0);
