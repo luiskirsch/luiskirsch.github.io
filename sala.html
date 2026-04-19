@@ -5700,7 +5700,7 @@
 
   .lvlPanelOverlay{
     position:fixed;inset:0;z-index:11500;
-    background:rgba(0,0,0,.72);backdrop-filter:blur(14px);
+    background:rgba(0,0,0,.72);backdrop-filter:blur(4px);
     display:flex;align-items:flex-end;justify-content:center;
     padding:0 0 0;
     animation:fadeInBg .25s ease;
@@ -5804,6 +5804,7 @@
     overflow-y:auto;flex:1;padding:0 0 24px;
     overscroll-behavior:contain;
     -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
     scrollbar-width:thin;scrollbar-color:rgba(212,168,75,.2) transparent;
   }
   .lvlPanel__body::-webkit-scrollbar{ width:4px; }
@@ -10372,11 +10373,13 @@
 
       document.body.appendChild(overlay);
 
-      // Scroll para o nível atual — aguarda a animação de entrada terminar (380ms)
-      setTimeout(() => {
+      // Libera o layer de GPU após a animação de entrada e scrolls para o nível atual
+      const panel = overlay.querySelector(".lvlPanel");
+      panel.addEventListener("animationend", () => {
+        panel.style.willChange = "auto";
         const row = overlay.querySelector("#lvlPanel__currentRow");
         if (row) row.scrollIntoView({ block:"center", behavior:"smooth" });
-      }, 390);
+      }, { once: true });
 
       const close = () => {
         overlay.classList.add("closing");
