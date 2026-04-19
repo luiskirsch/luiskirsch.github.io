@@ -1335,6 +1335,12 @@
       text-align:center;padding:24px 10px;
       color:rgba(255,255,255,.2);font-size:12px;font-style:italic;
     }
+    .specObservingNotice{
+      align-items:center;justify-content:center;gap:6px;
+      padding:7px 16px;background:rgba(212,168,75,.07);
+      border-top:1px solid rgba(212,168,75,.14);
+      font-size:10px;color:rgba(212,168,75,.75);text-align:center;flex-shrink:0;
+    }
     .specFooter{
       display:flex;justify-content:space-between;align-items:center;
       padding:9px 16px;border-top:1px solid rgba(255,255,255,.04);
@@ -6593,6 +6599,9 @@
           <div class="specEmpty" id="specEmpty">Ritual ainda não iniciado</div>
         </div>
       </div>
+      <div class="specObservingNotice" id="specObservingNotice" style="display:none">
+        <span>👁 Você está observando esta sala — invisível aos jogadores</span>
+      </div>
       <div class="specFooter">
         <span><span class="specFooterDot"></span>Modo espectador</span>
         <span id="specFooterTime">↻ tempo real</span>
@@ -10409,7 +10418,13 @@
       if (!grid) return;
       currentPlayers.forEach(player => {
         if (player.id === participantId) return;
-        const tile = grid.querySelector(`.videoTile[data-identity="${CSS.escape(player.id)}"]`);
+        // Cria tile placeholder para jogadores que ainda não publicaram vídeo no LiveKit
+        let tile = grid.querySelector(`.videoTile[data-identity="${CSS.escape(player.id)}"]`);
+        if (!tile && typeof window._oslGetOrCreateVideoTile === "function") {
+          const label = player.name + (player.isHost ? " [Anfitrião]" : "");
+          tile = window._oslGetOrCreateVideoTile(player.id, label);
+          tile.dataset.placeholder = "1";
+        }
         if (!tile) return;
         const cameraOff = tile.querySelector(".videoCameraOff");
         if (!cameraOff) return;
@@ -11754,8 +11769,9 @@
         }, () => {})
       );
 
-      // Conecta ao LiveKit da sala espectada em subscribe-only (sem publicar)
-      _specConnectLK(targetId);
+      // Só observa via Firestore — não conecta ao LiveKit para não aparecer nos cards
+      const observingNotice = document.getElementById("specObservingNotice");
+      if (observingNotice) observingNotice.style.display = "flex";
     }
 
     function closeSpecUnsubs() {
@@ -11765,6 +11781,8 @@
 
     function closeSpectatorPanel() {
       closeSpecUnsubs();
+      const observingNotice = document.getElementById("specObservingNotice");
+      if (observingNotice) observingNotice.style.display = "none";
       if (_specLkRoom) { try { _specLkRoom.disconnect(); } catch(_) {} _specLkRoom = null; }
       _specPlayers = [];
       const overlay = document.getElementById("specOverlay");
@@ -11975,7 +11993,8 @@
         await Promise.all([ensureUserProfile(), ensureRoom()]);
         if (!_isSpectator) await upsertSelf();
 
-        setRitualWaitingState();
+        // Só redefine o estado inicial se o ritual ainda não foi carregado do cache
+        if (!ritualStarted) setRitualWaitingState();
         if (!_isSpectator) startHeartbeat();
         checkDailyReward();
         startMultiPoller();

@@ -887,6 +887,12 @@ window.addEventListener("beforeunload", () => {
   }
 });
 
+// Cria ou retorna tile de vídeo para um participante — usado por sala.html para
+// mostrar placeholder do perfil antes do LiveKit publicar tracks.
+window._oslGetOrCreateVideoTile = function(identity, labelText) {
+  return getOrCreateVideoTile(identity, labelText);
+};
+
 // Retorna o track de vídeo ativo de um participante remoto pelo identity.
 // Usado pelo mobile para attach direto em elementos visíveis (display:none quebra iOS).
 window._oslGetRemoteVideoTrack = function(identity) {
