@@ -4310,8 +4310,8 @@
 
     html.arenaMode .exitArenaBtn{
       display:block;
-      position:absolute;
-      left:0;
+      position:fixed;
+      bottom:16px;
     }
 
     @keyframes fadeInUp{
@@ -4322,17 +4322,13 @@
     /* Normal mode: wrapper is invisible to layout */
     .arenaControls{ display:contents; }
 
-    /* Arena mode: wrapper is fixed, aligned to the mainArea column
-       left = page-padding(14) + sidebar(290) + gap(14) = 318px
-       right = page-padding(14) + rightColumn(360) + gap(14) = 388px */
+    /* Arena mode: left/right set dynamically by syncArenaControls() via JS */
     html.arenaMode .arenaControls{
       display:flex;
       align-items:center;
       justify-content:center;
       position:fixed;
       bottom:16px;
-      left:318px;
-      right:388px;
       z-index:100;
       animation:fadeInUp .25s .1s both;
     }
@@ -11861,6 +11857,17 @@
     (function () {
       const html = document.documentElement;
 
+      function syncArenaControls() {
+        const cc = document.querySelector('.cardCenter');
+        const ac = document.getElementById('arenaControls');
+        const sair = document.getElementById('exitArenaBtn');
+        if (!cc || !ac) return;
+        const r = cc.getBoundingClientRect();
+        ac.style.left  = r.left + 'px';
+        ac.style.right = (window.innerWidth - r.right) + 'px';
+        if (sair) sair.style.left = (r.left - 16) + 'px';
+      }
+
       function activateArenaMode() {
         html.classList.add("arenaMode");
         sessionStorage.setItem("osl_arena", "1");
@@ -11874,6 +11881,8 @@
         if (!document.fullscreenElement) {
           document.documentElement.requestFullscreen?.().catch(() => {});
         }
+
+        requestAnimationFrame(syncArenaControls);
       }
 
       function deactivateArenaMode() {
@@ -11941,6 +11950,10 @@
       } else if (sessionStorage.getItem("osl_arena") === "1") {
         activateArenaMode();
       }
+
+      window.addEventListener('resize', () => {
+        if (html.classList.contains('arenaMode')) syncArenaControls();
+      });
     })();
   </script>
 </body>
