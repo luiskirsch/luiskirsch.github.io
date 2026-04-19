@@ -4310,6 +4310,8 @@
 
     html.arenaMode .exitArenaBtn{
       display:block;
+      position:absolute;
+      left:16px;
     }
 
     @keyframes fadeInUp{
@@ -4320,20 +4322,20 @@
     /* Normal mode: wrapper is invisible to layout */
     .arenaControls{ display:contents; }
 
-    /* Arena mode: wrapper becomes the fixed centered row */
+    /* Arena mode: wrapper becomes the fixed full-width row */
     html.arenaMode .arenaControls{
       display:flex;
       align-items:center;
-      gap:8px;
+      justify-content:center;
       position:fixed;
       bottom:16px;
       left:0;
       right:0;
-      margin:0 auto;
-      width:fit-content;
+      width:100%;
       z-index:100;
       animation:fadeInUp .25s .1s both;
     }
+
 
     /* reactionBar: static inside the wrapper in arena mode */
     html.arenaMode .reactionBar{
