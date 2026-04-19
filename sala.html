@@ -1208,6 +1208,125 @@
       background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.1);
     }
 
+    /* ===== MODO ESPECTADOR ===== */
+    .spectatorBadge{
+      position:fixed;top:14px;left:50%;transform:translateX(-50%);
+      z-index:9999;pointer-events:none;
+      background:rgba(0,0,0,.75);border:1px solid rgba(215,176,107,.4);
+      border-radius:20px;padding:5px 14px;
+      font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+      color:#d4a84b;backdrop-filter:blur(6px);
+    }
+
+    /* ===== MODAL PEDIDO DE ENTRADA ===== */
+    @keyframes joinModalIn  { from{opacity:0;transform:translateY(100%)} to{opacity:1;transform:translateY(0)} }
+    @keyframes joinModalOut { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(100%)} }
+
+    .joinOverlay{
+      position:fixed;inset:0;z-index:12000;
+      background:rgba(0,0,0,.75);backdrop-filter:blur(4px);
+      display:flex;align-items:flex-end;justify-content:center;
+      animation:fadeInBg .2s ease;
+    }
+    .joinOverlay.closing{ animation:fadeOutBg .22s ease forwards; }
+    .joinOverlay.closing .joinPanel{ animation:joinModalOut .22s cubic-bezier(.4,0,1,1) forwards; }
+
+    .joinPanel{
+      width:100%;max-width:480px;
+      background:linear-gradient(180deg,#111008,#0c0a06);
+      border:1px solid rgba(212,168,75,.25);border-bottom:none;
+      border-radius:20px 20px 0 0;
+      padding:24px 24px 32px;
+      animation:joinModalIn .32s cubic-bezier(.2,1,.4,1);
+      will-change:transform;
+    }
+    .joinPanel__title{
+      font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+      color:rgba(212,168,75,.65);margin-bottom:16px;
+    }
+    .joinPanel__room{
+      font-size:18px;font-weight:900;color:#f0e8d8;margin-bottom:4px;
+    }
+    .joinPanel__meta{
+      font-size:12px;color:rgba(255,255,255,.35);margin-bottom:20px;
+    }
+    .joinPanel__label{
+      font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+      color:rgba(255,255,255,.35);margin-bottom:6px;
+    }
+    .joinPanel__input{
+      width:100%;box-sizing:border-box;
+      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+      border-radius:10px;padding:10px 14px;
+      color:#f0e8d8;font-size:14px;outline:none;
+      transition:border-color .15s;margin-bottom:16px;
+    }
+    .joinPanel__input:focus{ border-color:rgba(212,168,75,.5); }
+    .joinPanel__actions{ display:flex;gap:10px; }
+    .joinPanel__btn{
+      flex:1;padding:11px;border-radius:10px;
+      font-size:13px;font-weight:700;letter-spacing:.06em;cursor:pointer;
+      border:none;transition:opacity .12s,transform .1s;
+    }
+    .joinPanel__btn:active{ transform:scale(.97); }
+    .joinPanel__btn--primary{
+      background:linear-gradient(135deg,#9a6e0a,#d4a84b);color:#1a1208;
+    }
+    .joinPanel__btn--primary:disabled{ opacity:.4;cursor:not-allowed;transform:none; }
+    .joinPanel__btn--secondary{
+      background:rgba(255,255,255,.06);color:rgba(255,255,255,.55);
+      border:1px solid rgba(255,255,255,.1);
+    }
+    .joinPanel__status{
+      margin-top:14px;font-size:12px;text-align:center;
+      color:rgba(255,255,255,.45);min-height:18px;
+    }
+    .joinPanel__status--err{ color:#e87070; }
+    .joinPanel__status--ok{ color:#60c870; }
+
+    /* ===== ALERTA HOST — PEDIDO DE ENTRADA ===== */
+    @keyframes hostAlertIn{ from{opacity:0;transform:translateY(-12px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+    .hostJoinAlert{
+      position:fixed;top:72px;right:18px;z-index:12000;
+      background:linear-gradient(135deg,#111008,#0c0a06);
+      border:1px solid rgba(212,168,75,.35);border-radius:14px;
+      padding:14px 16px;width:280px;
+      box-shadow:0 8px 32px rgba(0,0,0,.6);
+      animation:hostAlertIn .28s cubic-bezier(.2,1,.4,1);
+      will-change:transform;
+    }
+    .hostJoinAlert__title{
+      font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+      color:rgba(212,168,75,.65);margin-bottom:6px;
+    }
+    .hostJoinAlert__name{
+      font-size:15px;font-weight:800;color:#f0e8d8;margin-bottom:10px;
+    }
+    .hostJoinAlert__msg{
+      font-size:11px;color:rgba(255,255,255,.4);margin-bottom:12px;
+    }
+    .hostJoinAlert__btns{ display:flex;gap:8px; }
+    .hostJoinAlert__btn{
+      flex:1;padding:8px;border-radius:8px;
+      font-size:12px;font-weight:700;cursor:pointer;border:none;
+      transition:opacity .1s;
+    }
+    .hostJoinAlert__btn:active{ opacity:.7; }
+    .hostJoinAlert__btn--approve{ background:rgba(80,200,120,.18);color:#60c870;border:1px solid rgba(80,200,120,.3); }
+    .hostJoinAlert__btn--deny{ background:rgba(220,60,60,.12);color:#e87070;border:1px solid rgba(220,60,60,.2); }
+
+    /* Botão de spectate em cada sala */
+    .multiRoom{ position:relative; }
+    .multiSpectateBtn{
+      appearance:none;background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.1);border-radius:6px;
+      color:rgba(255,255,255,.35);font-size:13px;cursor:pointer;
+      padding:4px 7px;flex-shrink:0;
+      transition:background 80ms,color 80ms;
+    }
+    .multiSpectateBtn:hover{ background:rgba(212,168,75,.12);color:#d4a84b;border-color:rgba(212,168,75,.25); }
+
     /* ===== GAME TABLE VIDEO LAYER ===== */
 
     /* Fixed overlay — covers the entire viewport, pointer-events off by default */
@@ -6313,6 +6432,36 @@
     </div>
   </main>
 
+  <!-- ESPECTADOR badge -->
+  <div class="spectatorBadge" id="spectatorBadge" style="display:none">👁 OBSERVANDO</div>
+
+  <!-- MODAL: pedido de entrada -->
+  <div class="joinOverlay" id="joinOverlay" style="display:none" aria-modal="true" role="dialog">
+    <div class="joinPanel" id="joinPanel">
+      <div class="joinPanel__title">Entrar na partida</div>
+      <div class="joinPanel__room" id="joinRoomName"></div>
+      <div class="joinPanel__meta" id="joinRoomMeta"></div>
+      <div class="joinPanel__label">Seu nome</div>
+      <input class="joinPanel__input" id="joinNameInput" maxlength="40" autocomplete="off">
+      <div class="joinPanel__actions">
+        <button class="joinPanel__btn joinPanel__btn--secondary" id="joinCancelBtn">Cancelar</button>
+        <button class="joinPanel__btn joinPanel__btn--primary" id="joinSendBtn">Enviar pedido</button>
+      </div>
+      <div class="joinPanel__status" id="joinStatus"></div>
+    </div>
+  </div>
+
+  <!-- ALERTA HOST: pedido de entrada recebido -->
+  <div class="hostJoinAlert" id="hostJoinAlert" style="display:none">
+    <div class="hostJoinAlert__title">Pedido de entrada</div>
+    <div class="hostJoinAlert__name" id="hostAlertName"></div>
+    <div class="hostJoinAlert__msg">quer participar da sua sala.</div>
+    <div class="hostJoinAlert__btns">
+      <button class="hostJoinAlert__btn hostJoinAlert__btn--deny"    id="hostDenyBtn">Recusar</button>
+      <button class="hostJoinAlert__btn hostJoinAlert__btn--approve" id="hostApproveBtn">Aprovar</button>
+    </div>
+  </div>
+
   <!-- ===== VIDEO LAYER (focus bar, fixed bottom-center) ===== -->
   <div class="videoLayer">
 
@@ -6855,9 +7004,13 @@
       .trim()
       .slice(0, 50);
 
-    localStorage.setItem("osl_nome", playerName);
-    localStorage.setItem("osl_sala", roomCode);
-    localStorage.setItem("osl_nome_sala", roomName);
+    const _isSpectator = params.get("spectator") === "1";
+
+    if (!_isSpectator) {
+      localStorage.setItem("osl_nome", playerName);
+      localStorage.setItem("osl_sala", roomCode);
+      localStorage.setItem("osl_nome_sala", roomName);
+    }
 
     function getParticipantId() {
       let id = sessionStorage.getItem("osl_participant_id");
@@ -10906,8 +11059,9 @@
         footerStatusEl.textContent = started ? "Ritual iniciado" : "Aguardando início";
 
         isHost = data.hostId === participantId;
-        startBtn.disabled = !isHost;
+        startBtn.disabled = !isHost || _isSpectator;
         startBtn.textContent = isHost ? (started ? "Ritual iniciado" : "Iniciar Ritual") : "Aguardando anfitrião";
+        if (isHost && !_isSpectator) connectHostSse();
 
         // Arena: somente o host vê o botão
         const arenaBtn = document.getElementById("arenaBtn");
@@ -11214,7 +11368,6 @@
 
     function renderLiveRooms(rooms) {
       const body    = document.getElementById("multiBody");
-      const empty   = document.getElementById("multiEmpty");
       const countEl = document.getElementById("multiCount");
       if (!body) return;
 
@@ -11227,31 +11380,50 @@
       }
 
       body.innerHTML = others.map(r => {
-        const full    = r.playerCount >= 5;
-        const live    = r.sessionActive;
-        const badge   = full
+        const full = r.playerCount >= 5;
+        const live = r.sessionActive;
+        const badge = full
           ? '<span class="multiRoomBadge multiRoomBadge--full">LOTADA</span>'
           : live
             ? '<span class="multiRoomBadge multiRoomBadge--live">🔴 AO VIVO</span>'
             : '<span class="multiRoomBadge multiRoomBadge--open">ABERTA</span>';
         const cls = full ? " multiRoom--full" : "";
+        const safeName = (r.name || "Sala").replace(/"/g,"&quot;");
         return `<div class="multiRoom${cls}"
-                  data-code="${r.roomId}"
-                  data-name="${(r.name || "Sala").replace(/"/g,"&quot;")}">
+                  data-code="${r.roomId}" data-name="${safeName}"
+                  data-host="${(r.host||"").replace(/"/g,"&quot;")}"
+                  data-count="${r.playerCount||0}" data-live="${live}">
           <div class="multiRoomInfo">
             <div class="multiRoomName">${r.name || r.roomId}</div>
-            <div class="multiRoomMeta">${r.playerCount || 0}/5 jogadores · ${r.host || "anfitrião"}</div>
+            <div class="multiRoomMeta">${r.playerCount||0}/5 jogadores · ${r.host || "anfitrião"}</div>
           </div>
           ${badge}
+          <button class="multiSpectateBtn" title="Assistir em stand-by">👁</button>
         </div>`;
       }).join("");
 
+      body.querySelectorAll(".multiSpectateBtn").forEach(btn => {
+        btn.addEventListener("click", e => {
+          e.stopPropagation();
+          const row  = btn.closest(".multiRoom");
+          const code = row.dataset.code;
+          const name = row.dataset.name;
+          window.open(
+            `sala.html?sala=${encodeURIComponent(code)}&nome=${encodeURIComponent(playerName)}&nomeSala=${encodeURIComponent(name)}&spectator=1`,
+            "_blank"
+          );
+        });
+      });
+
       body.querySelectorAll(".multiRoom:not(.multiRoom--full)").forEach(el => {
-        el.addEventListener("click", () => {
-          const code = el.dataset.code;
-          const name = el.dataset.name;
-          const url  = `sala.html?sala=${encodeURIComponent(code)}&nome=${encodeURIComponent(playerName)}&nomeSala=${encodeURIComponent(name)}`;
-          window.open(url, "_blank");
+        el.addEventListener("click", e => {
+          if (e.target.classList.contains("multiSpectateBtn")) return;
+          openJoinModal({
+            roomId:      el.dataset.code,
+            name:        el.dataset.name,
+            host:        el.dataset.host,
+            playerCount: parseInt(el.dataset.count) || 0
+          });
         });
       });
     }
@@ -11265,6 +11437,155 @@
       _multiPollTimer = setInterval(tick, 15000);
       document.getElementById("multiRefreshBtn")?.addEventListener("click", tick);
     }
+
+    // ── Join Modal ────────────────────────────────────────────────────────────
+    let _joinTarget     = null; // room object being joined
+    let _joinPollTimer  = null;
+
+    function openJoinModal(room) {
+      _joinTarget = room;
+      const overlay = document.getElementById("joinOverlay");
+      const nameInput = document.getElementById("joinNameInput");
+      document.getElementById("joinRoomName").textContent = room.name;
+      document.getElementById("joinRoomMeta").textContent =
+        `${room.playerCount}/5 jogadores · anfitrião: ${room.host || "—"}`;
+      document.getElementById("joinStatus").textContent = "";
+      document.getElementById("joinStatus").className = "joinPanel__status";
+      document.getElementById("joinSendBtn").disabled = false;
+      document.getElementById("joinSendBtn").textContent = "Enviar pedido";
+      nameInput.value = playerName;
+      overlay.style.display = "flex";
+    }
+
+    function closeJoinModal() {
+      const overlay = document.getElementById("joinOverlay");
+      clearInterval(_joinPollTimer);
+      overlay.classList.add("closing");
+      setTimeout(() => { overlay.style.display = "none"; overlay.classList.remove("closing"); }, 230);
+      _joinTarget = null;
+    }
+
+    function setJoinStatus(msg, type) {
+      const el = document.getElementById("joinStatus");
+      el.textContent = msg;
+      el.className = "joinPanel__status" + (type ? " joinPanel__status--" + type : "");
+    }
+
+    async function sendJoinRequest() {
+      if (!_joinTarget) return;
+      const name = document.getElementById("joinNameInput").value.trim() || playerName;
+      const btn  = document.getElementById("joinSendBtn");
+      btn.disabled = true;
+      btn.textContent = "Enviando…";
+      setJoinStatus("", "");
+
+      try {
+        const res = await fetch(MULTI_SERVER + "/game/room/request-join", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roomId:     _joinTarget.roomId,
+            roomName:   _joinTarget.name,
+            playerId:   participantId,
+            playerName: name
+          })
+        });
+        const d = await res.json();
+
+        if (!d.ok) {
+          const msgs = { SALA_CHEIA: "Sala lotada.", NOME_JA_EM_USO: `Nome em uso. Tente: ${d.suggestion||"outro nome"}`, SALA_NAO_ENCONTRADA: "Sala não encontrada." };
+          setJoinStatus(msgs[d.code] || "Erro ao enviar pedido.", "err");
+          btn.disabled = false; btn.textContent = "Enviar pedido";
+          return;
+        }
+
+        setJoinStatus(d.hostOnline ? "Aguardando aprovação do anfitrião…" : "Pedido enviado. Aguardando anfitrião…", "");
+        btn.textContent = "Aguardando…";
+        pollJoinApproval(_joinTarget.roomId, _joinTarget.name, name);
+      } catch (_) {
+        setJoinStatus("Erro de conexão.", "err");
+        btn.disabled = false; btn.textContent = "Enviar pedido";
+      }
+    }
+
+    function pollJoinApproval(targetRoomId, targetRoomName, joinName) {
+      let attempts = 0;
+      clearInterval(_joinPollTimer);
+      _joinPollTimer = setInterval(async () => {
+        attempts++;
+        if (attempts > 20) { // 60s
+          clearInterval(_joinPollTimer);
+          setJoinStatus("Tempo esgotado. Tente novamente.", "err");
+          document.getElementById("joinSendBtn").disabled = false;
+          document.getElementById("joinSendBtn").textContent = "Reenviar";
+          return;
+        }
+        try {
+          const r = await fetch(MULTI_SERVER + `/game/room/${encodeURIComponent(targetRoomId)}`);
+          const d = await r.json();
+          if (!d.ok || !d.room) return;
+          const approved = (d.room.players || []).some(p => p.playerId === participantId);
+          if (approved) {
+            clearInterval(_joinPollTimer);
+            setJoinStatus("✅ Aprovado! Entrando na sala…", "ok");
+            setTimeout(() => {
+              closeJoinModal();
+              window.location.href = `sala.html?sala=${encodeURIComponent(targetRoomId)}&nome=${encodeURIComponent(joinName)}&nomeSala=${encodeURIComponent(targetRoomName)}`;
+            }, 800);
+          }
+        } catch (_) {}
+      }, 3000);
+    }
+
+    document.getElementById("joinCancelBtn")?.addEventListener("click", closeJoinModal);
+    document.getElementById("joinSendBtn")?.addEventListener("click", sendJoinRequest);
+    document.getElementById("joinOverlay")?.addEventListener("click", e => {
+      if (e.target === document.getElementById("joinOverlay")) closeJoinModal();
+    });
+
+    // ── Host SSE — recebe pedidos de entrada ──────────────────────────────────
+    let _hostSseSource = null;
+    let _pendingJoinId = null;
+
+    function connectHostSse() {
+      if (_hostSseSource) return;
+      _hostSseSource = new EventSource(MULTI_SERVER + `/game/room/${encodeURIComponent(roomCode)}/host-sse`);
+      _hostSseSource.onmessage = e => {
+        try {
+          const d = JSON.parse(e.data);
+          if (d.event === "join_request") showHostJoinAlert(d.playerId, d.playerName);
+        } catch (_) {}
+      };
+      _hostSseSource.onerror = () => {
+        _hostSseSource?.close();
+        _hostSseSource = null;
+        // Reconecta após 10s se ainda for host
+        setTimeout(() => { if (isHost) connectHostSse(); }, 10000);
+      };
+    }
+
+    function showHostJoinAlert(playerId, name) {
+      _pendingJoinId = playerId;
+      document.getElementById("hostAlertName").textContent = name;
+      document.getElementById("hostJoinAlert").style.display = "block";
+    }
+
+    async function respondJoin(approved) {
+      document.getElementById("hostJoinAlert").style.display = "none";
+      if (!_pendingJoinId) return;
+      const endpoint = approved ? "/game/room/approve-join" : "/game/room/deny-join";
+      try {
+        await fetch(MULTI_SERVER + endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId: roomCode, playerId: _pendingJoinId })
+        });
+      } catch (_) {}
+      _pendingJoinId = null;
+    }
+
+    document.getElementById("hostApproveBtn")?.addEventListener("click", () => respondJoin(true));
+    document.getElementById("hostDenyBtn")?.addEventListener("click",    () => respondJoin(false));
 
     (async function init() {
       try {
@@ -11281,6 +11602,16 @@
           if (_cachedPlayers.length) renderPlayers(_cachedPlayers);
         } catch (_) {}
 
+        // Modo espectador: badge visível, controles desabilitados
+        if (_isSpectator) {
+          const badge = document.getElementById("spectatorBadge");
+          if (badge) badge.style.display = "block";
+          ["startBtn","revealCardBtn","resetRitualBtn","sendBtn","messageInput"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.disabled = true; el.title = "Modo observador"; }
+          });
+        }
+
         // Registra listeners realtime imediatamente — Firestore serve do
         // IndexedDB cache em <50ms e atualiza com o servidor em background
         bindRoom();
@@ -11293,12 +11624,15 @@
 
         // ensureUserProfile e ensureRoom são independentes — rodam em paralelo
         await Promise.all([ensureUserProfile(), ensureRoom()]);
-        await upsertSelf();
+        if (!_isSpectator) await upsertSelf();
 
         setRitualWaitingState();
-        startHeartbeat();
+        if (!_isSpectator) startHeartbeat();
         checkDailyReward();
         startMultiPoller();
+
+        // Conecta SSE do host para receber pedidos de entrada
+        if (isHost) connectHostSse();
 
         // Painel de níveis ao clicar no indicador de XP
         document.getElementById("xpCardLevel")?.addEventListener("click", () => {
