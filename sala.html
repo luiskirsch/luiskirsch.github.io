@@ -1303,12 +1303,17 @@
     }
     .specPlayer{
       background:rgba(255,255,255,.03);border:1px solid rgba(215,176,107,.1);
-      border-radius:10px;padding:10px 6px;text-align:center;
+      border-radius:12px;overflow:hidden;text-align:center;
     }
-    .specPlayerAvatar{ font-size:26px;line-height:1;margin-bottom:5px; }
+    .specPlayerAvatar{
+      font-size:26px;line-height:1;
+      height:80px;display:flex;align-items:center;justify-content:center;
+      background:rgba(255,255,255,.04);position:relative;overflow:hidden;
+    }
     .specPlayerName{
       font-size:10px;font-weight:600;color:rgba(255,255,255,.6);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      padding:6px 6px 7px;
     }
     .specPlayerName--host{ color:#d4a84b; }
 
@@ -7051,6 +7056,7 @@
   </script>
 
   <script type="module">
+    import { Room as LKRoom, RoomEvent as LKRoomEvent } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import {
       getFirestore,
@@ -11599,12 +11605,120 @@
     }
 
     // ── Painel Espectador ─────────────────────────────────────────────────────
-    let _specUnsubs = [];
+    const SPEC_LK_URL     = "wss://osextolugar-eqa7q1iz.livekit.cloud";
+    const SPEC_TOKEN_URL  = "https://osl-video-server-production.up.railway.app/token";
+
+    let _specUnsubs   = [];
+    let _specLkRoom   = null;
+    let _specPlayers  = [];   // cache dos jogadores p/ reattach de vídeo
+
+    function _specAvatarStyle(p) {
+      if (p.avatarPhotoUrl) return `background-image:url('${p.avatarPhotoUrl}');background-size:cover;background-position:center;font-size:0`;
+      if (p.avatarColor)    return `background:${p.avatarColor}`;
+      return "";
+    }
+    function _specAvatarContent(p) {
+      return p.avatarPhotoUrl ? "" : (p.avatarEmoji || "🔮");
+    }
+
+    function _specRenderPlayers(players) {
+      _specPlayers = players;
+      const grid = document.getElementById("specPlayers");
+      if (!grid) return;
+      if (!players.length) {
+        grid.innerHTML = '<div class="specEmpty">Sem jogadores ativos</div>';
+        return;
+      }
+      grid.innerHTML = players.map(p => `
+        <div class="specPlayer" data-pid="${p.id || ""}">
+          <div class="specPlayerAvatar" style="${_specAvatarStyle(p)}">${_specAvatarContent(p)}</div>
+          <div class="specPlayerName${p.isHost ? " specPlayerName--host" : ""}">${p.name || "Jogador"}${p.isHost ? " ★" : ""}</div>
+        </div>`).join("");
+      document.getElementById("specFooterTime").textContent =
+        `${players.length} jogador${players.length !== 1 ? "es" : ""} · tempo real`;
+      // Reattach vídeos já recebidos
+      if (_specLkRoom) _specAttachAllVideos();
+    }
+
+    function _specAttachVideo(playerId) {
+      const card = document.querySelector(`#specPlayers .specPlayer[data-pid="${CSS.escape(playerId)}"]`);
+      if (!card) return;
+      const avatarEl = card.querySelector(".specPlayerAvatar");
+      if (!avatarEl || avatarEl._specHasVideo) return;
+
+      if (!_specLkRoom) return;
+      const participant = _specLkRoom.remoteParticipants.get(playerId);
+      if (!participant) return;
+
+      for (const pub of participant.trackPublications.values()) {
+        if (pub.kind !== "video" || !pub.track || pub.isMuted) continue;
+        const video = document.createElement("video");
+        video.autoplay = true; video.playsInline = true; video.muted = true;
+        video.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px 12px 0 0;";
+        const mst = pub.track.mediaStreamTrack;
+        video.srcObject = mst && mst.readyState !== "ended"
+          ? new MediaStream([mst]) : (pub.track.mediaStream || null);
+        video.play().catch(() => {});
+        avatarEl.style.cssText = "position:relative;overflow:hidden;font-size:0;background:none;";
+        avatarEl.innerHTML = "";
+        avatarEl.appendChild(video);
+        avatarEl._specHasVideo = true;
+        break;
+      }
+    }
+
+    function _specDetachVideo(playerId) {
+      const card = document.querySelector(`#specPlayers .specPlayer[data-pid="${CSS.escape(playerId)}"]`);
+      if (!card) return;
+      const avatarEl = card.querySelector(".specPlayerAvatar");
+      if (!avatarEl || !avatarEl._specHasVideo) return;
+      avatarEl._specHasVideo = false;
+      // Restaura foto/emoji
+      const p = _specPlayers.find(x => x.id === playerId);
+      if (p) {
+        avatarEl.style.cssText = _specAvatarStyle(p);
+        avatarEl.innerHTML = _specAvatarContent(p);
+      } else {
+        avatarEl.innerHTML = "";
+      }
+    }
+
+    function _specAttachAllVideos() {
+      _specPlayers.forEach(p => { if (p.id) _specAttachVideo(p.id); });
+    }
+
+    async function _specConnectLK(targetRoomId) {
+      try {
+        const specIdentity = `spec_${participantId}`;
+        const r = await fetch(`${SPEC_TOKEN_URL}?room=${encodeURIComponent(targetRoomId)}&user=${encodeURIComponent(specIdentity)}`);
+        const d = await r.json();
+        if (!d.ok || !d.token) return;
+
+        _specLkRoom = new LKRoom({ adaptiveStream: true, dynacast: false });
+
+        _specLkRoom.on(LKRoomEvent.TrackSubscribed, (track, _pub, participant) => {
+          if (track.kind === "video") _specAttachVideo(participant.identity);
+        });
+        _specLkRoom.on(LKRoomEvent.TrackUnsubscribed, (_track, _pub, participant) => {
+          _specDetachVideo(participant.identity);
+        });
+        _specLkRoom.on(LKRoomEvent.TrackMuted, (_pub, participant) => {
+          _specDetachVideo(participant.identity);
+        });
+        _specLkRoom.on(LKRoomEvent.TrackUnmuted, (_pub, participant) => {
+          _specAttachVideo(participant.identity);
+        });
+
+        await _specLkRoom.connect(SPEC_LK_URL, d.token, { autoSubscribe: true });
+        // Attach tracks já presentes na sala
+        _specAttachAllVideos();
+      } catch (_) {}
+    }
 
     function openSpectatorPanel(room) {
       document.getElementById("specTitle").textContent = room.name || room.roomId;
       document.getElementById("specPlayers").innerHTML = '<div class="specEmpty">Conectando…</div>';
-      document.getElementById("specCardWrap").innerHTML = '<div class="specEmpty" id="specEmpty">Ritual ainda não iniciado</div>';
+      document.getElementById("specCardWrap").innerHTML = '<div class="specEmpty">Ritual ainda não iniciado</div>';
       document.getElementById("specStatusDot").className = "specStatusDot";
       document.getElementById("specStatusText").textContent = "Conectando…";
       document.getElementById("specOverlay").style.display = "flex";
@@ -11612,49 +11726,36 @@
       closeSpecUnsubs();
 
       const targetId = room.roomId;
-      const pRef  = query(collection(db, "salas", targetId, "players"), orderBy("joinedAt", "asc"));
-      const rRef  = doc(db, "salas", targetId, "ritual", "state");
+      const pRef = query(collection(db, "salas", targetId, "players"), orderBy("joinedAt", "asc"));
+      const rRef = doc(db, "salas", targetId, "ritual", "state");
 
       _specUnsubs.push(
         onSnapshot(pRef, snap => {
-          const players = snap.docs.map(d => d.data());
-          const grid = document.getElementById("specPlayers");
-          if (!grid) return;
-          if (!players.length) {
-            grid.innerHTML = '<div class="specEmpty">Sem jogadores ativos</div>';
-            return;
-          }
-          grid.innerHTML = players.map(p => `
-            <div class="specPlayer">
-              <div class="specPlayerAvatar">${p.avatarEmoji || "🔮"}</div>
-              <div class="specPlayerName${p.isHost ? " specPlayerName--host" : ""}">${p.name || "Jogador"}${p.isHost ? " ★" : ""}</div>
-            </div>`).join("");
-          document.getElementById("specFooterTime").textContent =
-            `${players.length} jogador${players.length !== 1 ? "es" : ""} · tempo real`;
+          _specRenderPlayers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
         }, () => {}),
 
         onSnapshot(rRef, snap => {
-          const data  = snap.exists() ? snap.data() : null;
-          const started  = data?.started || false;
-          const card     = data?.currentCard || null;
-          const dot      = document.getElementById("specStatusDot");
+          const data    = snap.exists() ? snap.data() : null;
+          const started = data?.started || false;
+          const card    = data?.currentCard || null;
+          const dot     = document.getElementById("specStatusDot");
           const statusTx = document.getElementById("specStatusText");
-          const wrap     = document.getElementById("specCardWrap");
+          const wrap    = document.getElementById("specCardWrap");
           if (!dot || !wrap) return;
-          dot.className = "specStatusDot" + (started ? " specStatusDot--live" : "");
+          dot.className   = "specStatusDot" + (started ? " specStatusDot--live" : "");
           statusTx.textContent = started ? "Ritual em andamento" : "Aguardando início";
-          if (card) {
-            wrap.innerHTML = `
-              <div class="specCard">
+          wrap.innerHTML  = card
+            ? `<div class="specCard">
                 <div class="specCardType">${(card.type || "Ritual").toUpperCase()}</div>
                 <div class="specCardTitle">${card.title || ""}</div>
                 <div class="specCardText">${card.text || ""}</div>
-              </div>`;
-          } else {
-            wrap.innerHTML = `<div class="specEmpty">${started ? "Aguardando próxima carta…" : "Ritual ainda não iniciado"}</div>`;
-          }
+               </div>`
+            : `<div class="specEmpty">${started ? "Aguardando próxima carta…" : "Ritual ainda não iniciado"}</div>`;
         }, () => {})
       );
+
+      // Conecta ao LiveKit da sala espectada em subscribe-only (sem publicar)
+      _specConnectLK(targetId);
     }
 
     function closeSpecUnsubs() {
@@ -11664,6 +11765,8 @@
 
     function closeSpectatorPanel() {
       closeSpecUnsubs();
+      if (_specLkRoom) { try { _specLkRoom.disconnect(); } catch(_) {} _specLkRoom = null; }
+      _specPlayers = [];
       const overlay = document.getElementById("specOverlay");
       overlay.classList.add("closing");
       setTimeout(() => { overlay.style.display = "none"; overlay.classList.remove("closing"); }, 220);
