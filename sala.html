@@ -1122,13 +1122,13 @@
 
     .rightColumn{
       display:grid;
-      grid-template-rows:1fr;
+      grid-template-rows:1fr 1fr;
       gap:14px;
       min-height:0;
     }
 
     .rightColumn .historyCard{
-      height:100%;
+      min-height:0;
     }
 
     .rightColumn .historyDeckMini{
@@ -1137,6 +1137,75 @@
 
     .rightColumn .historyBody{
       grid-template-columns:1fr;
+    }
+
+    /* ===== PAINEL MULTIPLAYER ===== */
+    .multiCard{
+      display:grid;grid-template-rows:auto 1fr;min-height:0;
+    }
+    .multiHead{
+      display:flex;align-items:center;gap:10px;
+      padding:14px 18px;border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.02);flex-shrink:0;
+    }
+    .multiHead h3{
+      margin:0;font-size:13px;font-weight:700;
+      letter-spacing:.14em;text-transform:uppercase;
+      color:rgba(215,176,107,.8);flex:1;
+    }
+    .multiCount{
+      font-size:11px;font-weight:700;
+      background:rgba(215,176,107,.13);color:#d4a84b;
+      border:1px solid rgba(215,176,107,.22);
+      border-radius:20px;padding:2px 8px;
+    }
+    .multiRefresh{
+      appearance:none;background:transparent;border:none;
+      color:rgba(255,255,255,.3);font-size:14px;cursor:pointer;
+      line-height:1;padding:2px 4px;transition:color 100ms;
+    }
+    .multiRefresh:hover{ color:rgba(215,176,107,.8); }
+
+    .multiBody{
+      overflow-y:auto;overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:thin;scrollbar-color:rgba(215,176,107,.18) transparent;
+    }
+    .multiBody::-webkit-scrollbar{ width:3px; }
+    .multiBody::-webkit-scrollbar-thumb{ background:rgba(215,176,107,.18);border-radius:2px; }
+
+    .multiEmpty{
+      padding:28px 18px;text-align:center;
+      color:rgba(255,255,255,.22);font-size:12px;
+    }
+    .multiRoom{
+      display:flex;align-items:center;gap:12px;
+      padding:11px 18px;cursor:pointer;
+      border-bottom:1px solid rgba(255,255,255,.04);
+      transition:background 50ms ease-out;
+    }
+    .multiRoom:hover{ background:rgba(255,255,255,.03); }
+    .multiRoom--full{ opacity:.4;pointer-events:none; }
+    .multiRoomInfo{ flex:1;min-width:0; }
+    .multiRoomName{
+      font-size:13px;font-weight:700;color:#f0e8d8;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .multiRoomMeta{
+      font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;
+    }
+    .multiRoomBadge{
+      font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+      border-radius:20px;padding:3px 8px;flex-shrink:0;
+    }
+    .multiRoomBadge--live{
+      background:rgba(220,50,50,.18);color:#e87070;border:1px solid rgba(220,50,50,.28);
+    }
+    .multiRoomBadge--open{
+      background:rgba(80,200,120,.1);color:#60c870;border:1px solid rgba(80,200,120,.2);
+    }
+    .multiRoomBadge--full{
+      background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.1);
     }
 
     /* ===== GAME TABLE VIDEO LAYER ===== */
@@ -6222,6 +6291,17 @@
               </div>
             </div>
           </section>
+
+          <section class="card multiCard">
+            <div class="multiHead">
+              <h3>Partidas Rolando</h3>
+              <span class="multiCount" id="multiCount">0</span>
+              <button class="multiRefresh" id="multiRefreshBtn" title="Atualizar">↺</button>
+            </div>
+            <div class="multiBody" id="multiBody">
+              <div class="multiEmpty" id="multiEmpty">Buscando partidas…</div>
+            </div>
+          </section>
         </section>
 
       </section>
@@ -11120,6 +11200,72 @@
     window.addEventListener("pagehide",     sendLeaveBeacon);
     window.addEventListener("beforeunload", sendLeaveBeacon);
 
+    // ── Partidas Rolando ─────────────────────────────────────────────────────
+    const MULTI_SERVER = window.PANEL_SERVER_BASE || "https://osl-video-server-production.up.railway.app";
+    let _multiPollTimer = null;
+
+    async function fetchLiveRooms() {
+      try {
+        const r = await fetch(MULTI_SERVER + "/game/rooms");
+        const d = await r.json();
+        return Array.isArray(d.rooms) ? d.rooms : [];
+      } catch (_) { return []; }
+    }
+
+    function renderLiveRooms(rooms) {
+      const body    = document.getElementById("multiBody");
+      const empty   = document.getElementById("multiEmpty");
+      const countEl = document.getElementById("multiCount");
+      if (!body) return;
+
+      const others = rooms.filter(r => r.roomId !== roomCode);
+      if (countEl) countEl.textContent = others.length;
+
+      if (!others.length) {
+        body.innerHTML = '<div class="multiEmpty">Nenhuma partida ativa no momento.</div>';
+        return;
+      }
+
+      body.innerHTML = others.map(r => {
+        const full    = r.playerCount >= 5;
+        const live    = r.sessionActive;
+        const badge   = full
+          ? '<span class="multiRoomBadge multiRoomBadge--full">LOTADA</span>'
+          : live
+            ? '<span class="multiRoomBadge multiRoomBadge--live">🔴 AO VIVO</span>'
+            : '<span class="multiRoomBadge multiRoomBadge--open">ABERTA</span>';
+        const cls = full ? " multiRoom--full" : "";
+        return `<div class="multiRoom${cls}"
+                  data-code="${r.roomId}"
+                  data-name="${(r.name || "Sala").replace(/"/g,"&quot;")}">
+          <div class="multiRoomInfo">
+            <div class="multiRoomName">${r.name || r.roomId}</div>
+            <div class="multiRoomMeta">${r.playerCount || 0}/5 jogadores · ${r.host || "anfitrião"}</div>
+          </div>
+          ${badge}
+        </div>`;
+      }).join("");
+
+      body.querySelectorAll(".multiRoom:not(.multiRoom--full)").forEach(el => {
+        el.addEventListener("click", () => {
+          const code = el.dataset.code;
+          const name = el.dataset.name;
+          const url  = `sala.html?sala=${encodeURIComponent(code)}&nome=${encodeURIComponent(playerName)}&nomeSala=${encodeURIComponent(name)}`;
+          window.open(url, "_blank");
+        });
+      });
+    }
+
+    function startMultiPoller() {
+      const tick = async () => {
+        const rooms = await fetchLiveRooms();
+        renderLiveRooms(rooms);
+      };
+      tick();
+      _multiPollTimer = setInterval(tick, 15000);
+      document.getElementById("multiRefreshBtn")?.addEventListener("click", tick);
+    }
+
     (async function init() {
       try {
         if (roomNameEl) roomNameEl.textContent = roomName;
@@ -11152,6 +11298,7 @@
         setRitualWaitingState();
         startHeartbeat();
         checkDailyReward();
+        startMultiPoller();
 
         // Painel de níveis ao clicar no indicador de XP
         document.getElementById("xpCardLevel")?.addEventListener("click", () => {
