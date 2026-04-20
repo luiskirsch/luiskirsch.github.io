@@ -9045,6 +9045,16 @@
 
     const DAILY_STREAK_XP = [20, 30, 40, 50, 75, 100, 150];
 
+    function todayLocal() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function yesterdayLocal() {
+      const d = new Date(Date.now() - 86400000);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
     async function checkDailyReward() {
       if (!userId) return;
       try {
@@ -9052,7 +9062,7 @@
         if (!snap.exists()) return;
         const data = snap.data();
 
-        const today = new Date().toISOString().slice(0, 10);
+        const today = todayLocal();
         const alreadyClaimed = (data.lastDailyReward || "") === today;
         const pendingXp = data.pendingDailyXp || 0;
 
@@ -9065,7 +9075,7 @@
           streak = data.dailyStreak || 1;
           xp = pendingXp;
         } else {
-          const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+          const yesterday = yesterdayLocal();
           streak = (data.lastDailyReward === yesterday) ? (data.dailyStreak || 0) + 1 : 1;
           xp = DAILY_STREAK_XP[Math.min(streak - 1, DAILY_STREAK_XP.length - 1)];
           // Grava imediatamente para bloquear re-exibição em acessos posteriores
