@@ -7330,7 +7330,9 @@
       panelRoomBooted = true;
 
       try {
-        await PanelBridge.playerLeave(roomCode, participantId).catch(() => {});
+        // Não chama playerLeave antes de entrar: ambas as abas compartilham o
+        // mesmo participantId (localStorage), então o leave removeria a aba 1 do
+        // painel, deixando a sala vazia → servidor fecharia a sala no Firestore.
         await PanelBridge.roomCreate(roomCode, roomName, playerName);
         await PanelBridge.playerJoin(roomCode, participantId, playerName);
       } catch (error) {
@@ -11248,7 +11250,7 @@
           if (typeof window.activateArenaMode === "function") window.activateArenaMode();
         } else {
           if (typeof window.deactivateArenaMode === "function") window.deactivateArenaMode();
-          if (!started) setRitualWaitingState();
+          if (!started && !ritualStarted) setRitualWaitingState();
         }
 
         await setDoc(playerRef, { isHost }, { merge: true });
