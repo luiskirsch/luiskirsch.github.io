@@ -1161,11 +1161,24 @@
       border-radius:20px;padding:2px 8px;
     }
     .multiRefresh{
-      appearance:none;background:transparent;border:none;
-      color:rgba(255,255,255,.3);font-size:14px;cursor:pointer;
-      line-height:1;padding:2px 4px;transition:color 100ms;
+      appearance:none;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      width:28px;height:28px;border-radius:8px;padding:0;
+      background:rgba(215,176,107,.06);
+      border:1px solid rgba(215,176,107,.18);
+      color:rgba(215,176,107,.55);
+      transition:background 120ms,border-color 120ms,color 120ms,transform 120ms;
     }
-    .multiRefresh:hover{ color:rgba(215,176,107,.8); }
+    .multiRefresh svg{ width:13px;height:13px;display:block;transition:transform 600ms cubic-bezier(.4,0,.2,1); }
+    .multiRefresh:hover{
+      background:rgba(215,176,107,.13);
+      border-color:rgba(215,176,107,.4);
+      color:rgba(215,176,107,.9);
+      transform:scale(1.07);
+    }
+    .multiRefresh:active{ transform:scale(.94); }
+    .multiRefresh.spinning svg{ animation:multiSpin 600ms linear; }
+    @keyframes multiSpin{ to{ transform:rotate(360deg); } }
 
     .multiBody{
       overflow-y:auto;overscroll-behavior:contain;
@@ -6557,7 +6570,12 @@
             <div class="multiHead">
               <h3>Partidas Rolando</h3>
               <span class="multiCount" id="multiCount">0</span>
-              <button class="multiRefresh" id="multiRefreshBtn" title="Atualizar">↺</button>
+              <button class="multiRefresh" id="multiRefreshBtn" title="Atualizar">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M13.5 8A5.5 5.5 0 1 1 10.3 3.1"/>
+                  <polyline points="10.5 1 10.5 4 13.5 4"/>
+                </svg>
+              </button>
             </div>
             <div class="multiBody" id="multiBody">
               <div class="multiEmpty" id="multiEmpty">Buscando partidas…</div>
@@ -11800,13 +11818,25 @@
     });
 
     function startMultiPoller() {
+      const btn = document.getElementById("multiRefreshBtn");
       const tick = async () => {
         const rooms = await fetchLiveRooms();
         renderLiveRooms(rooms);
       };
+      const triggerRefresh = async () => {
+        if (btn) {
+          btn.classList.add("spinning");
+          btn.disabled = true;
+          btn.addEventListener("animationend", () => {
+            btn.classList.remove("spinning");
+            btn.disabled = false;
+          }, { once: true });
+        }
+        await tick();
+      };
       tick();
       _multiPollTimer = setInterval(tick, 15000);
-      document.getElementById("multiRefreshBtn")?.addEventListener("click", tick);
+      btn?.addEventListener("click", triggerRefresh);
     }
 
     // ── Join Modal ────────────────────────────────────────────────────────────
