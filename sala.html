@@ -7482,6 +7482,8 @@
 
     let ritualDeck = [];
     let ritualStarted = false;
+    let ritualCardsRevealedCount = 0;
+    let missionsAssigned = false;
     let ritualUnsub = null;
     let ritualHistoryUnsub = null;
     let currentPlayers = [];
@@ -7950,6 +7952,7 @@
           currentCard: card || null,
           activeEffect: activeEffect !== undefined ? (activeEffect || null) : null,
           pendingDeathrattle: pendingDeathrattle !== undefined ? (pendingDeathrattle || null) : null,
+          cardsRevealedCount: ritualCardsRevealedCount,
           updatedAt: serverTimestamp(),
           updatedBy: participantId
         }, { merge: true });
@@ -7962,10 +7965,16 @@
       if (!ritualStarted || !isHost || !ritualDeck.length) return;
 
       const nextCard = ritualDeck.shift();
+      ritualCardsRevealedCount++;
       const { battlecry, deathrattle } = OSL_EFFECTS.prepareCard(nextCard, currentPlayers);
 
       await saveRitualState(nextCard, battlecry, deathrattle);
       await addHistoryItem(nextCard.type, nextCard.title);
+
+      if (ritualCardsRevealedCount === 2 && !missionsAssigned) {
+        missionsAssigned = true;
+        await assignSecretMissions(currentPlayers);
+      }
 
       // XP: carta revelada para todos os presentes
       await OSL_XP.award(userRef, "CARD_REVEALED");
@@ -8000,8 +8009,9 @@
         updatedBy: participantId
       }, { merge: true });
 
+      ritualCardsRevealedCount = 0;
+      missionsAssigned = false;
       await addHistoryItem("Ritual", "O ritual foi iniciado.");
-      await assignSecretMissions(currentPlayers);
       // Store session start time for recap duration
       await setDoc(ritualRef, { sessionStartedAt: Date.now() }, { merge: true });
 
@@ -8036,8 +8046,9 @@
         updatedBy: participantId
       }, { merge: true });
 
+      ritualCardsRevealedCount = 0;
+      missionsAssigned = false;
       await addHistoryItem("Ritual", "O ritual foi reiniciado.");
-      await assignSecretMissions(currentPlayers);
       await panelMarkSessionStart();
       updateRitualButtons();
     }
@@ -8215,6 +8226,8 @@
       ritualStarted = started;
       currentCard = card;
       ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
+      ritualCardsRevealedCount = data?.cardsRevealedCount || 0;
+      if (ritualCardsRevealedCount >= 2) missionsAssigned = true;
 
       // Processar efeito ativo
       const effect = data?.activeEffect || null;
