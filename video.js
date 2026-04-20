@@ -11,6 +11,7 @@ const LIVEKIT_URL = "wss://osextolugar-eqa7q1iz.livekit.cloud";
 const SALES_PAGE_URL = "./vendas.html";
 
 const joinVideoBtn = document.getElementById("joinVideoBtn");
+const joinAudioBtn = document.getElementById("joinAudioBtn");
 const leaveVideoBtn = document.getElementById("leaveVideoBtn");
 const toggleMicBtn = document.getElementById("toggleMicBtn");
 const toggleCamBtn = document.getElementById("toggleCamBtn");
@@ -66,6 +67,7 @@ let localAudioTrack = null;
 let localVideoTrack = null;
 let micEnabled = true;
 let camEnabled = true;
+let audioOnlyMode = false;
 let focusedIdentity = null;
 let panelVideoActive = false;
 
@@ -686,6 +688,7 @@ async function joinVideoCall() {
 
   try {
     joinVideoBtn.disabled = true;
+    if (joinAudioBtn) joinAudioBtn.disabled = true;
 
     if (!lkRoom) {
       // Nem preview existe — conecta do zero
@@ -732,12 +735,14 @@ async function joinVideoCall() {
 
     micEnabled = true;
     camEnabled = true;
+    audioOnlyMode = false;
     refreshLocalVisualState();
 
     toggleMicBtn.disabled = false;
     toggleCamBtn.disabled = false;
     leaveVideoBtn.disabled = false;
     joinVideoBtn.disabled = true;
+    if (joinAudioBtn) joinAudioBtn.disabled = true;
 
     toggleMicBtn.textContent = "🎤 Mutar";
     toggleCamBtn.textContent = "📷 Off";
@@ -751,6 +756,7 @@ async function joinVideoCall() {
     // Se estava em preview, volta para o estado de preview
     isInPreview = !!lkRoom;
     joinVideoBtn.disabled = false;
+    if (joinAudioBtn) joinAudioBtn.disabled = false;
     toggleMicBtn.disabled = true;
     toggleCamBtn.disabled = true;
     leaveVideoBtn.disabled = true;
@@ -781,6 +787,74 @@ async function joinVideoCall() {
   }
 }
 
+async function joinAudioOnlyCall() {
+  if (lkRoom && !isInPreview) return;
+
+  try {
+    joinVideoBtn.disabled = true;
+    if (joinAudioBtn) joinAudioBtn.disabled = true;
+
+    if (!lkRoom) {
+      videoStatusEl.textContent = "Conectando microfone...";
+      const token = await requestToken();
+
+      lkRoom = new Room({ adaptiveStream: true, dynacast: true });
+      setupRoomListeners(lkRoom);
+
+      await lkRoom.connect(LIVEKIT_URL, token, { autoSubscribe: true });
+
+      for (const participant of lkRoom.remoteParticipants.values()) {
+        renderExistingParticipantTracks(participant);
+      }
+    } else {
+      videoStatusEl.textContent = "Ativando microfone...";
+    }
+
+    localAudioTrack = await createLocalAudioTrack();
+    await lkRoom.localParticipant.publishTrack(localAudioTrack);
+
+    localVideoTrack = null;
+    isInPreview = false;
+    audioOnlyMode = true;
+    micEnabled = true;
+    camEnabled = false;
+
+    // Cria tile com avatar (sem vídeo)
+    getOrCreateVideoTile(participantId, `${playerName} (você)`);
+
+    refreshLocalVisualState();
+
+    toggleMicBtn.disabled = false;
+    toggleCamBtn.disabled = false;
+    leaveVideoBtn.disabled = false;
+    joinVideoBtn.disabled = true;
+    if (joinAudioBtn) joinAudioBtn.disabled = true;
+
+    toggleMicBtn.textContent = "🎤 Mutar";
+    toggleCamBtn.textContent = "📷 Ligar cam";
+    videoStatusEl.textContent = "Microfone ativo.";
+    updateVideoGridLayout();
+
+    await markPanelVideo(true);
+  } catch (error) {
+    console.error("Erro ao entrar com áudio:", error);
+
+    isInPreview = !!lkRoom;
+    joinVideoBtn.disabled = false;
+    if (joinAudioBtn) joinAudioBtn.disabled = false;
+    toggleMicBtn.disabled = true;
+    toggleCamBtn.disabled = true;
+    leaveVideoBtn.disabled = true;
+    audioOnlyMode = false;
+
+    if (isInPreview) {
+      updatePreviewStatus();
+    } else {
+      videoStatusEl.textContent = "Não foi possível ativar microfone.";
+    }
+  }
+}
+
 async function leaveVideoCall() {
   try {
     // Unpublica e para as tracks locais, mas mantém a conexão com o room
@@ -807,14 +881,16 @@ async function leaveVideoCall() {
 
   micEnabled = true;
   camEnabled = true;
+  audioOnlyMode = false;
 
   toggleMicBtn.disabled = true;
   toggleCamBtn.disabled = true;
   leaveVideoBtn.disabled = true;
   joinVideoBtn.disabled = false;
+  if (joinAudioBtn) joinAudioBtn.disabled = false;
 
   toggleMicBtn.textContent = "🎤 Mutar";
-  toggleCamBtn.textContent = "📷 Off";
+  toggleCamBtn.textContent = "📷 Câmera";
 
   // Volta ao modo preview se ainda conectado, ou desconecta se room sumiu
   if (lkRoom) {
@@ -842,6 +918,31 @@ async function toggleMic() {
 }
 
 async function toggleCam() {
+  // Em modo só-áudio, primeiro clique liga a câmera
+  if (audioOnlyMode && !localVideoTrack) {
+    try {
+      toggleCamBtn.disabled = true;
+      localVideoTrack = await createLocalVideoTrack();
+      await lkRoom.localParticipant.publishTrack(localVideoTrack);
+      window._oslLocalVideoTrack = localVideoTrack;
+
+      const myTile = getOrCreateVideoTile(participantId, `${playerName} (você)`);
+      appendTrackToTile(myTile, localVideoTrack, participantId);
+
+      camEnabled = true;
+      audioOnlyMode = false;
+      toggleCamBtn.textContent = "📷 Off";
+      videoStatusEl.textContent = "Conectado.";
+      refreshLocalVisualState();
+    } catch (err) {
+      console.error("Erro ao ligar câmera:", err);
+      videoStatusEl.textContent = "Não foi possível ligar a câmera.";
+    } finally {
+      toggleCamBtn.disabled = false;
+    }
+    return;
+  }
+
   if (!localVideoTrack) return;
 
   camEnabled = !camEnabled;
@@ -857,6 +958,10 @@ async function toggleCam() {
 
 joinVideoBtn?.addEventListener("click", () => {
   joinVideoCall().catch(console.error);
+});
+
+joinAudioBtn?.addEventListener("click", () => {
+  joinAudioOnlyCall().catch(console.error);
 });
 
 toggleMicBtn?.addEventListener("click", () => {
