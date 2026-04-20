@@ -3978,34 +3978,13 @@
          fix mais confiável para backface-visibility no iOS Safari */
       transform:translateZ(1px);
 
-      /* Papel grosso escuro — camadas de textura simulada */
-      background:
-        /* Grão de papel — ruído simulado com gradientes cruzados */
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 2px,
-          rgba(255,255,255,.008) 2px,
-          rgba(255,255,255,.008) 4px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 3px,
-          rgba(255,255,255,.006) 3px,
-          rgba(255,255,255,.006) 6px
-        ),
-        /* Luz rente ao topo (reflexo de fonte acima) */
-        radial-gradient(ellipse 80% 30% at 50% -10%, rgba(255,248,220,.18), transparent 60%),
-        /* Brilho central suave — papel envelhecido */
-        radial-gradient(ellipse 60% 60% at 50% 40%, rgba(205,163,92,.07), transparent 70%),
-        /* Vinheta — escurece bordas */
-        radial-gradient(ellipse 90% 90% at 50% 50%, transparent 45%, rgba(0,0,0,.55) 100%),
-        /* Cor de fundo — pedra escura quente */
-        linear-gradient(160deg, #1e1810 0%, #16110b 30%, #0f0c08 60%, #0a0806 100%);
+      background-color: #0a0806;
+      background-image: url('./frente-carta.png?v=1');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
 
-      /* Frame dourado ornamentado */
-      border: 2px solid rgba(215,176,107,.90);
+      border: none;
       box-shadow:
         inset 0 0 0 1px rgba(215,176,107,.20),
         inset 0 0 50px rgba(5,3,1,.55),
@@ -6473,7 +6452,6 @@
                     <div class="revealGlow" id="revealGlow"></div>
                     <div class="ritualCardWrap ritualCardWrap--facedown" id="ritualCardWrap">
                     <article class="ritualVisualCard silenceCard">
-                      <div class="ritualCardCornerFrame" aria-hidden="true"><svg viewBox="0 0 500 700" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5"><defs><linearGradient id="fcGold" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#9a7228"/><stop offset="30%" stop-color="#d4a84b"/><stop offset="55%" stop-color="#f0d060"/><stop offset="80%" stop-color="#d4a84b"/><stop offset="100%" stop-color="#9a7228"/></linearGradient><linearGradient id="fcGoldH" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#9a7228"/><stop offset="30%" stop-color="#d4a84b"/><stop offset="55%" stop-color="#f0d060"/><stop offset="80%" stop-color="#d4a84b"/><stop offset="100%" stop-color="#9a7228"/></linearGradient></defs><rect x="6" y="6" width="488" height="688" rx="16" fill="none" stroke="url(#fcGold)" stroke-width="1.2" opacity="0.6"/><rect x="14" y="14" width="472" height="672" rx="11" fill="none" stroke="url(#fcGold)" stroke-width="0.5" opacity="0.35"/><g id="fcCorner" opacity="0.88"><polygon points="20,20 28,15 36,20 28,25" fill="url(#fcGold)"/><path d="M16,32 Q14,44 18,52 Q20,57 16,63" fill="none" stroke="url(#fcGold)" stroke-width="1.1"/><path d="M32,16 Q44,14 52,18 Q57,20 63,16" fill="none" stroke="url(#fcGold)" stroke-width="1.1"/><ellipse cx="21" cy="50" rx="4.5" ry="2" transform="rotate(22 21 50)" fill="#1d2b12" opacity="0.7"/><ellipse cx="50" cy="21" rx="4.5" ry="2" transform="rotate(68 50 21)" fill="#1d2b12" opacity="0.7"/><circle cx="18" cy="54" r="1" fill="#2c3f1a" opacity="0.6"/><circle cx="54" cy="18" r="1" fill="#2c3f1a" opacity="0.6"/></g><use href="#fcCorner" transform="translate(500,0) scale(-1,1)"/><use href="#fcCorner" transform="translate(0,700) scale(1,-1)"/><use href="#fcCorner" transform="translate(500,700) scale(-1,-1)"/><line x1="60" y1="155" x2="440" y2="155" stroke="url(#fcGoldH)" stroke-width="0.35" opacity="0.18"/><line x1="60" y1="545" x2="440" y2="545" stroke="url(#fcGoldH)" stroke-width="0.35" opacity="0.18"/></svg></div>
                       <div class="ritualCardFrame">
                         <div class="ritualTopOrnaments">
                           <div class="ritualLine"></div>
