@@ -497,6 +497,7 @@ function updatePreviewStatus() {
 // Registra todos os listeners de eventos do room (preview e ativo compartilham)
 function setupRoomListeners(room) {
   room.on(RoomEvent.ParticipantConnected, (participant) => {
+    if (participant.identity.startsWith("spec_")) return;
     getOrCreateVideoTile(
       participant.identity,
       buildParticipantLabel(participant, false)
@@ -508,6 +509,7 @@ function setupRoomListeners(room) {
 
   room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
     if (participant.identity === participantId) return;
+    if (participant.identity.startsWith("spec_")) return;
 
     const tile = getOrCreateVideoTile(
       participant.identity,

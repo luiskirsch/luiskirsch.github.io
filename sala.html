@@ -10419,13 +10419,7 @@
       if (!grid) return;
       currentPlayers.forEach(player => {
         if (player.id === participantId) return;
-        // Cria tile placeholder para jogadores que ainda não publicaram vídeo no LiveKit
-        let tile = grid.querySelector(`.videoTile[data-identity="${CSS.escape(player.id)}"]`);
-        if (!tile && typeof window._oslGetOrCreateVideoTile === "function") {
-          const label = player.name + (player.isHost ? " [Anfitrião]" : "");
-          tile = window._oslGetOrCreateVideoTile(player.id, label);
-          tile.dataset.placeholder = "1";
-        }
+        const tile = grid.querySelector(`.videoTile[data-identity="${CSS.escape(player.id)}"]`);
         if (!tile) return;
         const cameraOff = tile.querySelector(".videoCameraOff");
         if (!cameraOff) return;
@@ -11770,7 +11764,9 @@
         }, () => {})
       );
 
-      // Só observa via Firestore — não conecta ao LiveKit para não aparecer nos cards
+      // Conecta LiveKit em modo subscribe-only para ver os vídeos
+      // Usa prefixo spec_ — video.js filtra este prefixo e não cria tile
+      _specConnectLK(targetId);
       const observingNotice = document.getElementById("specObservingNotice");
       if (observingNotice) observingNotice.style.display = "flex";
     }
@@ -11994,8 +11990,7 @@
         await Promise.all([ensureUserProfile(), ensureRoom()]);
         if (!_isSpectator) await upsertSelf();
 
-        // Só redefine o estado inicial se o ritual ainda não foi carregado do cache
-        if (!ritualStarted) setRitualWaitingState();
+        // Estado inicial do ritual é gerenciado pelo bindRitual via onSnapshot
         if (!_isSpectator) startHeartbeat();
         checkDailyReward();
         startMultiPoller();
