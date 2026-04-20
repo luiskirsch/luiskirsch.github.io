@@ -163,10 +163,16 @@ function assignSlots() {
     videoGridEl.querySelectorAll(".videoTile:not(.videoTile--self)")
   );
 
-  // Reposiciona tiles nos containers corretos
-  nonSelfTiles.forEach((t) => t.remove());
-  nonSelfTiles.slice(0, 2).forEach((t) => videoColLeftEl.appendChild(t));
-  nonSelfTiles.slice(2, 4).forEach((t) => videoColRightEl.appendChild(t));
+  // Move tiles sem remover do DOM primeiro — remover <video> do DOM
+  // causa o browser pausar/resetar o stream, gerando tela preta.
+  nonSelfTiles.slice(0, 2).forEach((t) => {
+    if (t.parentElement !== videoColLeftEl) videoColLeftEl.appendChild(t);
+  });
+  nonSelfTiles.slice(2, 4).forEach((t) => {
+    if (t.parentElement !== videoColRightEl) videoColRightEl.appendChild(t);
+  });
+  // Slots além do 4º ficam ocultos (limite de layout)
+  nonSelfTiles.slice(4).forEach((t) => t.remove());
 
   // Mostra/esconde placeholders conforme quantidade de tiles em cada coluna
   const lc = videoColLeftEl.querySelectorAll(".videoTile").length;

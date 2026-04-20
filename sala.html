@@ -11281,6 +11281,9 @@
 
         currentPlayers = players;
         renderPlayers(players);
+        // Retry: LiveKit pode criar o tile após bindPlayers disparar.
+        // Reaplica avatares depois que o tile existir com certeza.
+        setTimeout(() => applyVideoTileAvatars(), 800);
         try {
           localStorage.setItem("osl_players_cache", JSON.stringify(
             players.map(p => ({ id: p.id, name: p.name, isHost: p.isHost,
