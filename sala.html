@@ -7189,10 +7189,12 @@
     }
 
     function getParticipantId() {
-      let id = sessionStorage.getItem("osl_participant_id");
-      if (!id) {
-        id = sessionStorage.getItem("osl_player_id");
-      }
+      // "reload" mantém o ID da sessão (F5). Qualquer outra navegação
+      // (primeira carga, aba duplicada) gera um ID novo para evitar
+      // conflito de identity no LiveKit quando duas abas abrem a mesma sala.
+      const navType = performance.getEntriesByType("navigation")[0]?.type;
+      const isReload = navType === "reload";
+      let id = isReload ? sessionStorage.getItem("osl_participant_id") : null;
       if (!id) {
         id = "p_" + Math.random().toString(36).slice(2, 11);
       }
