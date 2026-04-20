@@ -8656,7 +8656,7 @@
     window.sendReaction = sendReaction;
 
     // ── Session Recap ─────────────────────────────────────────────────────
-    async function showSessionRecap(onNewSession) {
+    async function showSessionRecap(onNewSession, primaryLabel = "NOVA SESSÃO") {
       // Fetch data in parallel
       const [histSnap, msgsSnap, ritualSnap] = await Promise.all([
         getDocs(query(ritualHistoryRef, orderBy("createdAt", "asc"))),
@@ -8715,7 +8715,7 @@
         ? `<div class="recapStat"><div class="recapStat__icon">${topEmoji}</div><div class="recapStat__value">Favorita</div><div class="recapStat__label">Reação do grupo</div></div>`
         : "";
       const newSessionBtn = onNewSession
-        ? `<button class="recapCard__btn recapCard__btn--primary" id="recapNewBtn">NOVA SESSÃO</button>`
+        ? `<button class="recapCard__btn recapCard__btn--primary" id="recapNewBtn">${primaryLabel}</button>`
         : "";
 
       // Conquista de sessão completa
@@ -11542,8 +11542,12 @@
     }
 
     leaveBtn.addEventListener("click", () => {
-      const ok = confirm("Deseja sair da sala?");
-      if (ok) leaveRoom(true);
+      if (ritualStarted) {
+        showSessionRecap(() => leaveRoom(true), "SAIR DA SALA").catch(console.error);
+      } else {
+        const ok = confirm("Deseja sair da sala?");
+        if (ok) leaveRoom(true);
+      }
     });
 
     // ── Expõe funções do módulo para o mobile JS (evita .click() sintético) ──
