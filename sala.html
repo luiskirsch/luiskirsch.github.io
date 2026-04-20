@@ -303,6 +303,13 @@
       text-transform:uppercase;
       color:var(--muted);
     }
+    .eyebrow__status{
+      animation:statusPulse 2s ease-in-out infinite;
+    }
+    @keyframes statusPulse{
+      0%,100%{opacity:1}
+      50%{opacity:.35}
+    }
 
     .roomTitle{
       margin:0;
@@ -6277,7 +6284,7 @@
 
       <header class="topbar">
         <div class="brandWrap">
-          <p class="eyebrow">Sala do Ritual · <span id="roomName">Aguardando...</span></p>
+          <p class="eyebrow">Sala do Ritual · <span id="gameStatus" class="eyebrow__status">Espera</span></p>
           <h1 class="roomTitle">O SextoLugar</h1>
         </div>
 
@@ -8229,6 +8236,8 @@
       const card = data?.currentCard || null;
 
       ritualStarted = started;
+      const gameStatusEl = document.getElementById("gameStatus");
+      if (gameStatusEl) gameStatusEl.textContent = started ? "Jogando" : "Espera";
       currentCard = card;
       ritualDeck = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
       ritualCardsRevealedCount = data?.cardsRevealedCount || 0;
