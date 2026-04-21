@@ -4915,6 +4915,18 @@
     display: none;
   }
 
+  /* Video overlay: position/z-index fora da media query para que o JS possa
+     forçar display:flex mesmo quando a media query não está ativa */
+  #mobileVideoOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(0,0,0,.60);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    align-items: flex-end;
+  }
+
   /* ================================================================
      MOBILE LAYOUT — max-width: 640px
      Inspired by the compact smartphone mockup:
@@ -13904,9 +13916,21 @@
 
     // ── Botão de perfil (agora na barra inferior) ────────────────────────────
     if (mobileProfileBtn) {
-      mobileProfileBtn.addEventListener("click", function () {
+      function doOpenProfile() {
+        // 1) Tenta via módulo ES (carrega dados do Firebase)
         document.dispatchEvent(new CustomEvent("osl:openSelfProfile"));
-      });
+        if (window._osl && typeof window._osl.openSelfProfile === "function") {
+          try { window._osl.openSelfProfile(); } catch(e) {}
+        }
+        // 2) Fallback: abre o modal diretamente mesmo sem dados carregados
+        var modal = document.getElementById("profileModal");
+        if (modal) modal.classList.remove("hidden");
+      }
+      mobileProfileBtn.addEventListener("touchend", function (e) {
+        e.preventDefault();
+        doOpenProfile();
+      }, { passive: false });
+      mobileProfileBtn.addEventListener("click", doOpenProfile);
     }
 
     // ── Video overlay — abre ao tocar no VOCÊ ────────────────────────────────
@@ -13928,9 +13952,9 @@
           });
         }
       }
-      ov.classList.add("open");
+      // Força visibilidade independente do estado da media query CSS
       ov.style.display = "flex";
-      ov.style.alignItems = "flex-end";
+      ov.classList.add("open");
     }
 
     function closeVideoOverlay() {
@@ -13938,13 +13962,15 @@
       if (!ov) return;
       ov.classList.remove("open");
       ov.style.display = "";
-      ov.style.alignItems = "";
     }
 
     if (mobileVideoThumb) {
-      mobileVideoThumb.addEventListener("click", function () {
-        openVideoOverlay();
-      });
+      function doOpenVideo() { openVideoOverlay(); }
+      mobileVideoThumb.addEventListener("touchend", function (e) {
+        e.preventDefault();
+        doOpenVideo();
+      }, { passive: false });
+      mobileVideoThumb.addEventListener("click", doOpenVideo);
     }
 
     var videoOverlay = document.getElementById("mobileVideoOverlay");
