@@ -11734,6 +11734,7 @@
     window._osl.setTyping        = (v) => setTyping(v);
     window._osl.scheduleTypingStop = () => scheduleTypingStop();
     window._osl.openSelfProfile  = () => openProfile({ userId, name: playerName, isHost });
+    document.addEventListener("osl:openSelfProfile", () => openProfile({ userId, name: playerName, isHost }).catch(console.error));
 
     // Arena: host alterna estado global via Firestore
     window._osl.toggleArena = async () => {
@@ -13904,36 +13905,40 @@
     // ── Botão de perfil (agora na barra inferior) ────────────────────────────
     if (mobileProfileBtn) {
       mobileProfileBtn.addEventListener("click", function () {
-        if (window._osl?.openSelfProfile) window._osl.openSelfProfile();
+        document.dispatchEvent(new CustomEvent("osl:openSelfProfile"));
       });
     }
 
     // ── Video overlay — abre ao tocar no VOCÊ ────────────────────────────────
-    var videoOverlay = document.getElementById("mobileVideoOverlay");
-    var videoDrawerBtns = document.getElementById("mobileVideoDrawerBtns");
-
     function openVideoOverlay() {
-      if (!videoOverlay) return;
-      // Popula os botões do desktop no drawer
-      if (videoDrawerBtns) {
+      var ov = document.getElementById("mobileVideoOverlay");
+      if (!ov) return;
+      var btns = document.getElementById("mobileVideoDrawerBtns");
+      if (btns) {
         var desktopBar = document.querySelector(".videoControlBar");
         if (desktopBar) {
-          videoDrawerBtns.innerHTML = "";
+          btns.innerHTML = "";
           desktopBar.querySelectorAll("button").forEach(function (btn) {
             var clone = btn.cloneNode(true);
             clone.addEventListener("click", function () {
               btn.click();
               closeVideoOverlay();
             });
-            videoDrawerBtns.appendChild(clone);
+            btns.appendChild(clone);
           });
         }
       }
-      videoOverlay.classList.add("open");
+      ov.classList.add("open");
+      ov.style.display = "flex";
+      ov.style.alignItems = "flex-end";
     }
 
     function closeVideoOverlay() {
-      if (videoOverlay) videoOverlay.classList.remove("open");
+      var ov = document.getElementById("mobileVideoOverlay");
+      if (!ov) return;
+      ov.classList.remove("open");
+      ov.style.display = "";
+      ov.style.alignItems = "";
     }
 
     if (mobileVideoThumb) {
@@ -13942,6 +13947,7 @@
       });
     }
 
+    var videoOverlay = document.getElementById("mobileVideoOverlay");
     if (videoOverlay) {
       videoOverlay.addEventListener("click", function (e) {
         if (e.target === videoOverlay) closeVideoOverlay();
