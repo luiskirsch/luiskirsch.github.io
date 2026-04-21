@@ -9165,7 +9165,7 @@
     async function evaluateChatResponse(text) {
       if (!currentActiveEffect || currentActiveEffect.type !== "force_player") return;
       if (participantId !== currentActiveEffect.params?.targetId) return;
-      if (!text || text.trim().length < 8) return;
+      if (!text || text.trim().length < 4) return;
       await writeAIDetection("chat", playerName, text);
     }
 
