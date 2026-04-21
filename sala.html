@@ -7461,7 +7461,17 @@
     // Battlecry: dispara ao revelar. Deathrattle: dispara antes de revelar a próxima.
     // Chain: deathrattle automático que força uma categoria na próxima carta.
     const OSL_CARD_EFFECTS = {
-      // Cartas básicas
+      // Cartas básicas (títulos atuais)
+      "Pressão Real":         { battlecry: { type: "force_player", target: "random", label: "deve responder sem fugir" },
+                                deathrattle: { type: "give_xp", amount: 10 } },
+      "Decisão Coletiva":     { battlecry: { type: "vote", question: "O grupo decide:", options: ["Revelar um segredo agora", "Continuar o ritual"] } },
+      "Ruptura":              { deathrattle: { type: "give_xp", amount: 10 } },
+      "Confissão Forçada":    { battlecry: { type: "force_player", target: "random", label: "deve confessar algo real" },
+                                deathrattle: { type: "give_xp", amount: 15 } },
+      "Voto da Sala":         { battlecry: { type: "vote", question: "Quem está sendo mais genuíno?" } },
+      "Primeiro Suspeito":    { battlecry: { type: "force_player", target: "random", label: "está no banco dos suspeitos" } },
+      "Conexão Obrigatória":  { battlecry: { type: "set_timer", duration: 90 } },
+      // Títulos antigos (mantidos para salas em andamento)
       "30 segundos":        { battlecry: { type: "force_player", target: "random", label: "deve responder sem fugir" },
                               deathrattle: { type: "give_xp", amount: 10 } },
       "Escolha do grupo":   { battlecry: { type: "vote", question: "O grupo decide:", options: ["Revelar um segredo agora", "Continuar o ritual"] } },
@@ -8140,6 +8150,7 @@
         currentCard: null,
         activeEffect: null,
         pendingDeathrattle: null,
+        cardsRevealedCount: 0,
         updatedAt: serverTimestamp(),
         updatedBy: participantId
       }, { merge: true });
@@ -8177,6 +8188,7 @@
         currentCard: null,
         activeEffect: null,
         pendingDeathrattle: null,
+        cardsRevealedCount: 0,
         updatedAt: serverTimestamp(),
         updatedBy: participantId
       }, { merge: true });
