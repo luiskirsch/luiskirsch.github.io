@@ -334,14 +334,7 @@
 
     .ritualFinalPhrase{ font-size:13px; line-height:1.35; letter-spacing:.10em; text-transform:uppercase; color:rgba(215,176,107,.75); text-shadow:0 1px 3px rgba(0,0,0,.7); font-family:ui-sans-serif, system-ui, sans-serif; }
 
-    .ritualFingerprint{ position:relative; width:44px; height:52px; flex-shrink:0; opacity:.65; }
-    .ritualFingerprint .finger{ position:absolute; inset:0; border:1.5px solid rgba(215,176,107,.80); border-color:rgba(215,176,107,.80) rgba(215,176,107,.80) transparent rgba(215,176,107,.80); border-radius:50% 50% 30% 30% / 60% 60% 38% 38%; transform-origin:center; }
-    .ritualFingerprint .finger1{ inset:0px; }
-    .ritualFingerprint .finger2{ inset:6px; }
-    .ritualFingerprint .finger3{ inset:12px; }
-    .ritualFingerprint .finger4{ inset:18px; }
-    .ritualFingerprint .finger5{ inset:24px; }
-    .ritualFingerprint .finger6{ inset:30px; }
+    .ritualFingerprint{ flex-shrink:0; opacity:.65; width:44px; height:52px; }
 
     .ritualBottomOrnaments{ width:100%; display:flex; justify-content:space-between; align-items:flex-end; gap:10px; }
     .ritualBottomSet{ width:35%; display:flex; flex-direction:column; gap:4px; }
@@ -409,13 +402,17 @@
 
                 <p class="ritualFinalPhrase" id="ritualFinalPhrase"></p>
 
-                <div class="ritualFingerprint">
-                  <div class="finger finger1"></div>
-                  <div class="finger finger2"></div>
-                  <div class="finger finger3"></div>
-                  <div class="finger finger4"></div>
-                  <div class="finger finger5"></div>
-                </div>
+                <svg class="ritualFingerprint" viewBox="0 0 44 52" fill="none" stroke="rgba(215,176,107,.82)" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                  <path d="M20,31 C19,26 25,26 24,31"/>
+                  <path d="M17,34 C15,26 29,26 27,34"/>
+                  <path d="M14,37 C11,26 33,26 30,37 Q31,43 30,50"/>
+                  <path d="M14,37 Q13,43 14,50"/>
+                  <path d="M11,40 C7,25 37,25 33,40 Q35,47 33,52"/>
+                  <path d="M11,40 Q10,47 9,52"/>
+                  <path d="M8,43 C3,23 41,23 36,43"/>
+                  <path d="M5,46 C-1,21 45,21 39,46"/>
+                  <path d="M2,49 C-4,19 48,19 42,49"/>
+                </svg>
 
                 <div class="ritualBottomOrnaments">
                   <div class="ritualBottomSet left"><span></span><span></span><span></span></div>
