@@ -4050,7 +4050,7 @@
       position:relative;
       z-index:4;
       height:100%;
-      padding:16px 22px;
+      padding:42px 24px 18px;
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -4123,8 +4123,8 @@
 
     .ritualMainInstruction{
       margin:0;
-      font-size:clamp(0.72rem, 1.6vh, 1rem);
-      line-height:1.4;
+      font-size:clamp(0.82rem, 1.9vh, 1.05rem);
+      line-height:1.5;
       text-align:center;
       color:rgba(245,238,220,.92);
       text-shadow: 0 2px 2px rgba(255,255,255,.05), 0 -1px 1px rgba(0,0,0,.9);
@@ -4164,8 +4164,8 @@
 
     .ritualRuleText{
       margin:0;
-      font-size:clamp(9px, 1.1vh, 12px);
-      line-height:1.35;
+      font-size:clamp(10px, 1.25vh, 13px);
+      line-height:1.45;
       color:rgba(240,232,210,.90);
       text-shadow: 0 2px 2px rgba(255,255,255,.05), 0 -1px 1px rgba(0,0,0,.9);
     }
@@ -4206,11 +4206,13 @@
     .ritualFinalPhrase{
       margin:0;
       font-size:clamp(8px, 1vh, 10px);
-      line-height:1.35;
-      letter-spacing:.10em;
+      line-height:1.4;
+      letter-spacing:.04em;
       text-transform:uppercase;
       color:rgba(215,176,107,.82);
       text-shadow: 0 2px 2px rgba(255,255,255,.05), 0 -1px 1px rgba(0,0,0,.9);
+      max-width:100%;
+      overflow-wrap:break-word;
     }
 
     .ritualFingerprint{
@@ -7735,7 +7737,7 @@
           rule: "O escolhido ouve tudo antes de reagir." },
         { type: "Conexão", title: "Obrigado",
           text: "Alguém precisa agradecer outra pessoa desta sala por algo que nunca disse em voz alta. Com detalhes.",
-          phrase: "Gratidão não dita é um presente que nunca chegou." },
+          phrase: "Gratidão não dita nunca chega." },
         { type: "Conexão", title: "Uma Só Palavra",
           text: "Cada jogador escolhe uma palavra que descreve como se sente agora. Nenhuma explicação. Nenhum comentário.",
           subrule: "Quando todos falarem, observem os padrões." },
@@ -7744,23 +7746,23 @@
           rule: "O admirado confirma ou nega ser quem descreveram." },
         { type: "Conexão", title: "Ponto em Comum",
           text: "O grupo tem 2 minutos para descobrir algo que todos têm em comum — mas que nunca foi dito antes nesta sala.",
-          phrase: "O que nos une é sempre maior do que o que nos separa." },
+          phrase: "O que nos une supera o que nos separa." },
         { type: "Conexão", title: "Carta Aberta",
           text: "Um voluntário formula uma frase que gostaria de dizer a alguém desta sala — e então diz em voz alta, de verdade." },
         { type: "Conexão", title: "30 Segundos de Presença",
           text: "Todos ficam em silêncio absoluto por 30 segundos, olhando para a câmera. Depois, cada um diz uma coisa que observou.",
-          phrase: "Presença plena é o maior presente que você pode dar." },
+          phrase: "Presença plena é o maior presente." },
         { type: "Conexão", title: "O Que Nos Une",
           text: "O anfitrião aponta dois jogadores. Cada um diz algo que acredita ter em comum com o outro — sem combinar.",
           rule: "O outro confirma ou corrige com honestidade." },
         { type: "Conexão", title: "Apoio Visível",
           text: "Cada jogador escreve no chat o nome de alguém da sala que mais precisa de apoio hoje. Sem explicações. Só os nomes.",
-          phrase: "Ver alguém de verdade já é uma forma de cuidado." },
+          phrase: "Ver alguém de verdade já é cuidado." },
         { type: "Conexão", title: "A Música da Sala",
           text: "Se este grupo fosse uma música, qual seria? Cada um sugere uma e justifica em uma única frase." },
         { type: "Conexão", title: "Antes e Depois",
           text: "Cada jogador completa: 'Antes de entrar aqui hoje eu estava... Agora estou...' Sem filtros.",
-          phrase: "O encontro muda as pessoas. Às vezes imperceptivelmente." }
+          phrase: "O encontro muda. Às vezes imperceptivelmente." }
       ],
       "pacote-verdades": [
         { type: "Verdade", title: "Mentira Favorita",
@@ -7771,11 +7773,11 @@
           rule: "O grupo pode fazer apenas uma pergunta — sem desvio permitido." },
         { type: "Verdade", title: "Discordância Silenciosa",
           text: "Há algo que você concorda publicamente mas discorda em privado? Quem tiver coragem fala agora.",
-          phrase: "A maior mentira que contamos é a que fazemos com o silêncio." },
+          phrase: "Silêncio pode ser a maior mentira." },
         { type: "Verdade", title: "Opinião Impopular",
           text: "Cada jogador compartilha uma opinião que sabe que o grupo provavelmente não vai gostar de ouvir.",
           rule: "Ninguém pode responder imediatamente. Processem primeiro.",
-          phrase: "A verdade incômoda vale mais do que o conforto da mentira." },
+          phrase: "A verdade incômoda vale mais." },
         { type: "Verdade", title: "Inveja Honesta",
           text: "O anfitrião escolhe uma pessoa. Os outros revelam algo que invejam nela — sem elogios disfarçados.",
           rule: "O escolhido ouve em silêncio e depois diz o que sentiu." },
@@ -7787,13 +7789,13 @@
           rule: "Sem justificativas. Apenas o reconhecimento." },
         { type: "Verdade", title: "Julgamento Justo",
           text: "O grupo vota: quem está sendo mais autêntico nesta sessão? O mais votado responde: 'Por que acham isso?'",
-          phrase: "Autenticidade é reconhecida antes de ser explicada." },
+          phrase: "Autenticidade se nota antes de ser dita." },
         { type: "Verdade", title: "A Pergunta que Temo",
           text: "Um voluntário faz ao grupo uma pergunta que teme que alguém lhe faça. O grupo decide se devolve." },
         { type: "Verdade", title: "Ponto Fraco Real",
           text: "Cada jogador revela um ponto fraco genuíno — não o fraquinho aceitável, mas o que raramente admite.",
           rule: "Vaidade e ironia não são respostas válidas.",
-          phrase: "Força não é esconder a vulnerabilidade. É trazê-la à luz." },
+          phrase: "Força é trazer a vulnerabilidade à luz." },
         { type: "Verdade", title: "Reação Honesta",
           text: "O anfitrião descreve uma situação difícil. Cada jogador diz honestamente como reagiria — mesmo que não goste." },
         { type: "Verdade", title: "Crença que Abandonei",
@@ -7801,13 +7803,13 @@
           rule: "Sem defesa. Só a honestidade sobre a mudança." },
         { type: "Verdade", title: "Fronteira Testada",
           text: "Cada um revela um limite pessoal que já deixou alguém ultrapassar — e se faria isso de novo.",
-          phrase: "Nossas fronteiras dizem mais sobre nós do que nossas virtudes." },
+          phrase: "Fronteiras revelam mais do que virtudes." },
         { type: "Verdade", title: "Erro que Persiste",
           text: "Alguém do grupo admite o último erro que cometeu e que ainda pensa nele com frequência.",
           rule: "O grupo não dá conselhos. Apenas ouve." },
         { type: "Verdade", title: "Espelho Duplo",
           text: "Cada jogador descreve como acredita que os outros o veem — e depois diz como realmente se vê.",
-          phrase: "A distância entre as duas versões é onde vive a ilusão." }
+          phrase: "A ilusão vive entre as duas versões." }
       ],
       "pacote-conflito": [
         { type: "Conflito", title: "Discordância Direta",
@@ -7821,13 +7823,13 @@
           rule: "Respostas com menos de 2 frases não valem." },
         { type: "Conflito", title: "Acusação Pública",
           text: "Cada jogador completa: 'Eu suspeito que [nome] está...' O nomeado pode se defender em 30 segundos.",
-          phrase: "A acusação mais perigosa é a que contém um grão de verdade." },
+          phrase: "Toda acusação tem um grão de verdade." },
         { type: "Conflito", title: "Voto de Eliminação",
           text: "Se alguém tivesse que sair da sala agora, quem seria? O grupo vota. O mais votado explica por que acha que foi escolhido.",
           rule: "O anfitrião não pode se abster." },
         { type: "Conflito", title: "O Mais Hesitante",
           text: "Todos nomeiam quem parece mais evasivo nesta sessão. A pessoa indicada reage sem amenizar.",
-          phrase: "Hesitação é a sombra de uma verdade que ainda não foi dita." },
+          phrase: "Hesitação é uma verdade por dizer." },
         { type: "Conflito", title: "Linha Vermelha",
           text: "Cada jogador declara o que considera absolutamente inaceitável em qualquer relação. O grupo debate se concorda.",
           rule: "Ninguém pode criticar a linha do outro. Só questionar." },
@@ -7846,7 +7848,7 @@
           rule: "O grupo vota quem foi mais convincente — não quem tem razão." },
         { type: "Conflito", title: "Desconfiança Declarada",
           text: "Alguém declara sem filtro por que desconfia de outra pessoa nesta sala. O nomeado ouve tudo antes de responder.",
-          phrase: "Desconfiança não declarada é uma ferida que só cresce." },
+          phrase: "Desconfiança em silêncio sempre cresce." },
         { type: "Conflito", title: "Dilema de Lealdade",
           text: "O anfitrião cria um dilema: trair um amigo ou assumir uma consequência pública. Cada jogador escolhe e justifica.",
           rule: "Nenhuma resposta é julgada. Mas todas são ouvidas." },
@@ -7861,7 +7863,7 @@
         { type: "Segredo", title: "O Que Nunca Contei",
           text: "Um voluntário revela algo que nunca contou para ninguém nesta sala. O grupo ouve em silêncio absoluto.",
           rule: "Sem perguntas após. Apenas aceitação.",
-          phrase: "Segredos revelados perdem o poder de nos aprisionar." },
+          phrase: "Segredos revelados perdem seu poder." },
         { type: "Segredo", title: "Duas Versões",
           text: "Cada jogador descreve a versão de si mesmo que mostra ao mundo — e a versão que esconde com mais cuidado.",
           phrase: "A máscara protege. Mas também aprisiona." },
@@ -7870,13 +7872,13 @@
           rule: "O grupo permanece em silêncio por 10 segundos após." },
         { type: "Segredo", title: "Medo Real",
           text: "Cada jogador revela seu maior medo — não o medo aceitável, mas o que realmente assusta quando está sozinho.",
-          phrase: "O medo que não nomeamos é o que mais nos controla." },
+          phrase: "O medo sem nome é o que mais controla." },
         { type: "Segredo", title: "Fantasma do Passado",
           text: "O anfitrião escolhe um jogador. Essa pessoa descreve uma situação do passado que ainda define parte de quem ela é.",
           rule: "O grupo pode fazer apenas uma pergunta ao final." },
         { type: "Segredo", title: "O Que Eu Destruí",
           text: "Um voluntário conta algo que destruiu — um relacionamento, uma chance, uma versão de si mesmo. Sem amenizar.",
-          phrase: "Admitir a destruição é o primeiro ato de reconstrução." },
+          phrase: "Admitir é o primeiro ato de reconstrução." },
         { type: "Segredo", title: "Desejo Não Assumido",
           text: "Cada jogador completa: 'Existe algo que desejo mas que nunca assumiria publicamente...' Ninguém pode julgar.",
           rule: "Quem interromper perde a vez de falar." },
@@ -7900,7 +7902,7 @@
           rule: "O grupo não oferece consolo imediato." },
         { type: "Segredo", title: "Ideia Fixa",
           text: "Cada jogador revela algo que pensa com frequência mas nunca menciona — uma ideia recorrente, um medo, uma fantasia.",
-          phrase: "O que ocupa nossa mente em silêncio define quem somos." },
+          phrase: "O que pensamos em silêncio nos define." },
         { type: "Segredo", title: "Pergunta Sem Censura",
           text: "O anfitrião escolhe um jogador. O grupo faz uma pergunta que normalmente seria inadequada. Uma. Só uma.",
           rule: "O escolhido pode responder, recusar ou devolver a pergunta." },
@@ -7917,7 +7919,7 @@
       "pacote-casais": [
         { type: "Casais", title: "O Momento Exato",
           text: "Cada um conta o momento exato em que percebeu que o outro era diferente de qualquer pessoa que já conheceu.",
-          phrase: "Há um instante antes e um instante depois. E tudo muda." },
+          phrase: "Há um antes e um depois. Tudo muda." },
         { type: "Casais", title: "O Não Dito",
           text: "Cada parceiro revela algo que pensa sobre o relacionamento e que raramente ou nunca verbalizou. O outro só ouve.",
           rule: "Sem defesa. Sem explicações imediatas." },
@@ -7929,10 +7931,10 @@
         { type: "Casais", title: "O Que Não Pedi",
           text: "Cada um revela algo que precisou do outro em algum momento mas não pediu. O outro ouve em silêncio absoluto.",
           rule: "Sem 'mas eu não sabia'. Só escuta.",
-          phrase: "Precisar do outro e não pedir é uma solidão dentro do amor." },
+          phrase: "Pedir também é um ato de amor." },
         { type: "Casais", title: "A Versão que Você Não Viu",
           text: "Cada parceiro descreve uma versão de si mesmo que o outro ainda não conhece completamente.",
-          phrase: "Nenhuma pessoa é completamente conhecida. E está tudo bem." },
+          phrase: "Nenhuma pessoa é completamente conhecida." },
         { type: "Casais", title: "Quase Tudo Diferente",
           text: "Um voluntário conta uma situação em que a relação quase tomou outro rumo — e o que fez a diferença.",
           rule: "O outro ouve sem interromper." },
@@ -7950,7 +7952,7 @@
           rule: "O outro não pode contestar. Só receber." },
         { type: "Casais", title: "Uma Palavra Para Nós",
           text: "Cada um escolhe uma palavra para descrever o estado atual do relacionamento. Nenhuma palavra é discutida por 2 minutos.",
-          phrase: "Às vezes uma palavra diz mais do que uma conversa inteira." },
+          phrase: "Uma palavra às vezes diz mais do que tudo." },
         { type: "Casais", title: "A Pergunta que Evito",
           text: "Cada parceiro revela uma pergunta que evita fazer ao outro. O outro decide se responde agora ou pede tempo." },
         { type: "Casais", title: "Como Eu Mudei",
@@ -7959,7 +7961,7 @@
         { type: "Casais", title: "O Que Ficou Para Trás",
           text: "Cada parceiro revela algo que desejava no início da relação e que foi deixando de lado com o tempo.",
           rule: "O outro ouve sem explicar por que aconteceu.",
-          phrase: "O que abrimos mão diz muito sobre o que escolhemos." },
+          phrase: "O que abrimos mão revela o que escolhemos." },
         { type: "Casais", title: "Se Eu Pudesse Recomeçar",
           text: "Cada um completa: 'Se eu pudesse voltar ao início desta relação, eu faria diferente...' Com honestidade real.",
           rule: "Não é crítica. É descoberta." },
@@ -7993,7 +7995,7 @@
         phrase: "Suspeita sem prova ainda é suspeita." },
       { type: "Confissão", title: "Confissão Forçada",
         text: "Um voluntário revela algo desconfortável, real e que nunca contou ao grupo. O grupo ouve sem interromper.",
-        phrase: "Coragem não é ausência do medo. É falar mesmo assim." },
+        phrase: "Coragem é falar mesmo com medo." },
       { type: "Decisão", title: "Decisão Coletiva",
         text: "O grupo tem 60 segundos para decidir: revelar um segredo agora ou seguir em frente. Unanimidade obrigatória.",
         rule: "Se não houver consenso, o anfitrião decide sozinho." },
@@ -8009,7 +8011,7 @@
       { type: "Tensão", title: "Ruptura",
         text: "Cada jogador nomeia alguém em quem confiaria menos para guardar um segredo. Sem amenizar.",
         rule: "O mais citado responde: 'Por que acham isso?'",
-        phrase: "Confiança ganha-se devagar. Perde-se num segundo." }
+        phrase: "Confiança é lenta. Traição é instantânea." }
     ];
 
     // Carrega deck customizado de um usuário do Firestore
