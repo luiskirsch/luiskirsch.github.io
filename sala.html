@@ -5319,9 +5319,11 @@
       box-shadow: 0 -4px 30px rgba(0,0,0,.50), 0 -1px 0 rgba(215,176,107,.08);
     }
 
-    /* Compensação: empurra a carta para cima do bottom bar */
+    /* Compensação: empurra a carta para cima do bottom bar.
+       padding-bottom espelha a altura do player strip (que cresce com safe-area-inset-top)
+       para manter a carta visualmente centrada na tela. */
     .gameTableGrid { padding: 0 !important; }
-    .layout { padding-bottom: 108px; }
+    .layout { padding-bottom: max(108px, calc(max(10px, env(safe-area-inset-top)) + 83px)); }
 
     /* ── Ícones esquerda ── */
     .mobileNavIcons {
@@ -11731,6 +11733,7 @@
     window._osl.getRoomCode      = () => roomCode;
     window._osl.setTyping        = (v) => setTyping(v);
     window._osl.scheduleTypingStop = () => scheduleTypingStop();
+    window._osl.openSelfProfile  = () => openProfile({ userId, name: playerName, isHost });
 
     // Arena: host alterna estado global via Firestore
     window._osl.toggleArena = async () => {
@@ -13346,7 +13349,7 @@
 
   document.addEventListener("DOMContentLoaded", function () {
   (function () {
-    var IS_MOBILE = window.matchMedia("(max-width: 640px), (max-width: 960px) and (orientation: landscape) and (pointer: coarse)");
+    var IS_MOBILE = window.matchMedia("(max-width: 640px), (max-width: 960px) and (pointer: coarse)");
 
     // ── Element refs ──────────────────────────────────────────────────────────
     var mobileBar        = document.getElementById("mobileBottomBar");
@@ -13901,8 +13904,7 @@
     // ── Botão de perfil (agora na barra inferior) ────────────────────────────
     if (mobileProfileBtn) {
       mobileProfileBtn.addEventListener("click", function () {
-        var btn = document.getElementById("myProfileBtn");
-        if (btn) btn.click();
+        if (window._osl?.openSelfProfile) window._osl.openSelfProfile();
       });
     }
 
