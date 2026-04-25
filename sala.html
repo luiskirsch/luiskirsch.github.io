@@ -3973,24 +3973,12 @@
       overflow:hidden;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
-      /* translateZ(1px) força a face frontal no próprio layer de GPU —
-         fix mais confiável para backface-visibility no iOS Safari */
       transform:translateZ(1px);
-
-      background-color: #0a0806;
+      background-color: #070604;
       background-image: url('./frente-carta.png?v=2');
       background-size: cover;
       background-position: center center;
       background-repeat: no-repeat;
-
-      border: none;
-      box-shadow:
-        inset 0 0 50px rgba(5,3,1,.55),
-        0 0 0 1px rgba(60,40,8,.95),
-        0 0 0 4px rgba(160,115,32,.70),
-        0 0 0 6px rgba(40,26,5,.98),
-        0 0 0 8px rgba(215,176,107,.32),
-        0 0 60px rgba(215,176,107,.06);
     }
 
     .ritualVisualCard::before{ content:none; }
