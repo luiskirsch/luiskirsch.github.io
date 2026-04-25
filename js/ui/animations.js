@@ -66,12 +66,7 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
   // Promove ao layer GPU ANTES de adicionar a classe de animação
   ritualCardWrapEl.style.willChange = 'transform';
 
-  // Esconde o frame de texto — troca de conteúdo fica invisível durante todo o giro
   const cardFrame = ritualCardWrapEl.querySelector('.ritualCardFrame');
-  if (cardFrame) {
-    cardFrame.style.transition = 'none';
-    cardFrame.style.opacity = '0';
-  }
 
   requestAnimationFrame(() => {
   ritualCardWrapEl.classList.remove("ritualCardWrap--flipping", "ritualCardWrap--first-reveal", "ritualCardWrap--facedown");
@@ -114,12 +109,16 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
 
   if (isFirstReveal) {
     ritualCardWrapEl.classList.add("ritualCardWrap--first-reveal");
+    // Apaga texto quando frente passa os 90° (~200ms)
+    setTimeout(() => { if (cardFrame) { cardFrame.style.transition = 'opacity 80ms ease'; cardFrame.style.opacity = '0'; } }, 200);
     setTimeout(() => applyCardContentFn(currentCard), 500);
     setTimeout(glow, 900);
     setTimeout(shake, 1450);
     setTimeout(finalize, 1600);
   } else {
     ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
+    // Apaga texto quando frente passa os 90° (~250ms)
+    setTimeout(() => { if (cardFrame) { cardFrame.style.transition = 'opacity 80ms ease'; cardFrame.style.opacity = '0'; } }, 250);
     setTimeout(() => applyCardContentFn(currentCard), 700);
     setTimeout(glow, 1400);
     setTimeout(shake, 1800);
