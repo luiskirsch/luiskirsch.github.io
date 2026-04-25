@@ -3904,126 +3904,62 @@
        CARTA FÍSICA — textura, profundidade, luz real
     ============================================================ */
 
-    /* Wrapper — sem will-change nem filter: ambos achatam preserve-3d */
+    /* ── Card wrapper ── */
     .ritualCardWrap{
       position:relative;
       height:55vh;
       aspect-ratio:5/7;
       flex-shrink:0;
-      transform: rotateX(3deg);
-      -webkit-transform-style: preserve-3d;
-      transform-style: preserve-3d;
-      transition: transform 320ms var(--ease-spring);
+      -webkit-transform-style:preserve-3d;
+      transform-style:preserve-3d;
+      transition:transform 320ms var(--ease-spring);
     }
 
-    .ritualCardWrap:hover{
-      transform: rotateX(0.5deg) translateY(-8px) scale(1.015);
-    }
-
-    /* Carta de costas — mantém rotateY(180deg) mesmo no hover */
     .ritualCardWrap--facedown,
-    .ritualCardWrap--facedown:hover {
-      transform: rotateY(180deg) !important;
+    .ritualCardWrap--facedown:hover{
+      transform:rotateY(180deg) !important;
     }
 
-    /* Sombra fica nas faces (não no wrapper) para não quebrar 3D */
+    /* ── Ambas as faces: preenchem o wrapper exatamente ── */
     .ritualVisualCard,
     .ritualCardBack{
-      animation:whiteGlowPulseCard 7s ease-in-out infinite;
-    }
-
-    .ritualCardWrap:hover .ritualVisualCard,
-    .ritualCardWrap:hover .ritualCardBack{
-      animation-play-state:paused;
-      box-shadow:
-        0 24px 40px rgba(0,0,0,.70),
-        0 0 8px  rgba(255,255,255,.38),
-        0 0 28px rgba(255,255,255,.24),
-        0 0 60px rgba(255,255,255,.12),
-        inset 0 0 18px rgba(255,255,255,.20);
-    }
-
-    /* Verso da carta — espelho da frente, rotacionado 180° no Y */
-    .ritualCardBack{
       position:absolute;
-      inset:0;
+      top:0; left:0;
+      width:100%;
+      height:100%;
       border-radius:20px;
       overflow:hidden;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
-      transform:rotateY(180deg);
-      background-color: #070604;
-      background-image: url('./verso-carta.png?v=8');
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
-    }
-    .cardBackSvg{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      display:block;
-    }
-
-    .ritualVisualCard{
-      width:100%;
-      height:100%;
-      position:relative;
-      border-radius:20px;
-      overflow:hidden;
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-      transform:translateZ(1px);
-      background-color:#0a0806;
-      background-image:url('./frente-carta.png?v=2');
       background-size:cover;
       background-position:center center;
       background-repeat:no-repeat;
-      border:none;
-      box-shadow:
-        inset 0 0 50px rgba(5,3,1,.55),
-        0 0 0 1px rgba(60,40,8,.95),
-        0 0 0 4px rgba(160,115,32,.70),
-        0 0 0 6px rgba(40,26,5,.98),
-        0 0 0 8px rgba(215,176,107,.32),
-        0 28px 60px rgba(0,0,0,.85),
-        0 0 60px rgba(215,176,107,.06);
     }
 
-    .ritualVisualCard::before{ content:none; }
+    /* ── Frente ── */
+    .ritualVisualCard{
+      background-color:#0a0806;
+      background-image:url('./frente-carta.png?v=2');
+    }
 
-    /* Reflexo de luz — como brilho de verniz/laminação */
-    .ritualVisualCard::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius:20px;
-      background:
-        /* Reflexo diagonal forte no canto sup-esq */
-        linear-gradient(
-          135deg,
-          rgba(255,255,255,.13) 0%,
-          rgba(255,255,255,.04) 20%,
-          transparent 45%
-        ),
-        /* Brilho suave na borda inferior */
-        linear-gradient(
-          to bottom,
-          transparent 75%,
-          rgba(215,176,107,.06) 100%
-        );
-      pointer-events:none;
-      z-index:3;
+    /* ── Verso ── */
+    .ritualCardBack{
+      background-color:#070604;
+      background-image:url('./verso-carta.png?v=8');
+      transform:rotateY(180deg);
     }
 
     .ritualCardVegOverlay{ display:none; }
 
+    /* ── Conteúdo de texto sobre a frente ── */
     .ritualCardFrame{
-      position:relative;
-      z-index:4;
+      position:absolute;
+      top:0; left:0;
+      width:100%;
       height:100%;
+      z-index:4;
       padding:42px 24px 18px;
+      box-sizing:border-box;
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -4538,19 +4474,17 @@
       min-height:0;
       overflow:hidden;
       justify-content:flex-start;
-      gap:0;
     }
 
     html.arenaMode .deckInfoBar{
       display:none;
     }
 
-    /* A carta cresce para preencher o espaço vertical disponível */
     html.arenaMode .revealPanel{
       flex:1;
       min-height:0;
       overflow:visible;
-      padding:8px;
+      padding:20px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -4558,7 +4492,6 @@
 
     html.arenaMode .revealStage{
       width:100%;
-      max-height:50vh;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -4568,11 +4501,6 @@
       height:55vh;
       width:auto;
       aspect-ratio:5/7;
-    }
-
-    html.arenaMode .ritualVisualCard{
-      width:100%;
-      height:100%;
     }
 
     html.arenaMode .ritualCardMainTitle{
