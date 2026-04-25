@@ -7,6 +7,9 @@ import { bindUserDoc, bindRoom, bindPlayers, bindTyping, bindMessages, bindRoomE
 import { bindMyMission } from "./game/missions.js";
 import { bindRitual } from "./game/cards.js";
 import { checkDailyReward, updateXpCard } from "./game/rewards.js";
+import { sendReaction, castEffectVote, confirmAIDetection, dismissAIDetection } from "./game/effects.js";
+import { startSession, leaveRoom } from "./ui/room.js";
+import { revealNextRitualCard, resetRitualDeck } from "./game/cards.js";
 
 // ── Identidade ────────────────────────────────────────────────────────────────
 S.participantId = getParticipantId();
@@ -59,14 +62,14 @@ window.addEventListener("keydown",     enableAudio, { once: true });
 
 // ── Expõe funções para código não-módulo (mobile script) ─────────────────────
 window._osl = window._osl || {};
-window._osl.startGame   = () => import("./ui/room.js").then(m => m.startSession().catch(console.error));
-window._osl.revealCard  = () => import("./game/cards.js").then(m => m.revealNextRitualCard().catch(console.error));
-window._osl.resetDeck   = () => import("./game/cards.js").then(m => m.resetRitualDeck().catch(console.error));
+window._osl.startGame   = () => startSession().catch(console.error);
+window._osl.revealCard  = () => revealNextRitualCard().catch(console.error);
+window._osl.resetDeck   = () => resetRitualDeck().catch(console.error);
 window._osl.getIsHost        = () => S.isHost;
 window._osl.isStarted        = () => S.ritualStarted;
 window._osl.getParticipantId = () => S.participantId;
 window._osl.getRoomCode      = () => S.roomCode;
-window._osl.setTyping        = (v) => import("./ui/room.js").then(m => m.setTyping(v));
+window._osl.setTyping          = (v) => import("./ui/room.js").then(m => m.setTyping(v));
 window._osl.scheduleTypingStop = () => import("./ui/room.js").then(m => m.scheduleTypingStop());
 window._osl.openSelfProfile  = () => openProfile({ userId: S.userId, name: S.playerName, isHost: S.isHost }).catch(console.error);
 window.oslOpenProfile        = window._osl.openSelfProfile; // atalho para scripts não-módulo
@@ -87,11 +90,11 @@ window._osl.deactivateArenaForAll = async () => {
   await updateDoc(S.roomRef, { arenaActive: false });
 };
 
-// Expõe sendReaction para uso inline no HTML
-window.sendReaction = (...args) => import("./game/effects.js").then(m => m.sendReaction(...args));
-window.castEffectVote = (...args) => import("./game/effects.js").then(m => m.castEffectVote(...args));
-window.confirmAIDetection = () => import("./game/effects.js").then(m => m.confirmAIDetection());
-window.dismissAIDetection = () => import("./game/effects.js").then(m => m.dismissAIDetection());
+// Expõe para uso inline no HTML (onclick="sendReaction(...)", etc.)
+window.sendReaction       = sendReaction;
+window.castEffectVote     = castEffectVote;
+window.confirmAIDetection = confirmAIDetection;
+window.dismissAIDetection = dismissAIDetection;
 
 // ── Inicialização principal ───────────────────────────────────────────────────
 (async function init() {

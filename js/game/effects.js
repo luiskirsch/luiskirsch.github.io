@@ -1,6 +1,6 @@
 // Motor de efeitos, votação, AI VAD, reações, tensão, conquistas e pressão social
 import { S } from "../state.js";
-import { setDoc, updateDoc, increment } from "../firebase.js";
+import { setDoc, updateDoc, increment, onSnapshot } from "../firebase.js";
 import { escapeHtml } from "../utils.js";
 import { spawnReactionFloat } from "../ui/animations.js";
 import { OSL_XP_EVENTS, OSL_XP_TITLES } from "../constants.js";
@@ -183,8 +183,6 @@ export function resetPressureBtn() {
 export function bindSocialPressure() {
   if (!S.ritualRef) return;
   let _lastPressureTs = 0;
-  const { onSnapshot } = window.__oslFirestoreFns || {};
-  if (!onSnapshot) return;
   onSnapshot(S.ritualRef, (snap) => {
     if (!snap.exists()) return;
     const sp = snap.data().socialPressure;
