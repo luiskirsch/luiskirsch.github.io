@@ -4793,34 +4793,34 @@
     }
 
     @keyframes theFlip {
-      /* Roda ao redor da aresta direita — translateX desloca o pivot para a borda */
-      0%   { transform: translateX(0)     rotateY(0deg)   translateY(0px)   scale(1);    }
-      10%  { transform: translateX(6%)    rotateY(36deg)  translateY(-40px) scale(1.04); }
-      25%  { transform: translateX(12%)   rotateY(90deg)  translateY(-68px) scale(1.08); }
-      50%  { transform: translateX(0)     rotateY(180deg) translateY(-68px) scale(1.08); }
-      75%  { transform: translateX(-12%)  rotateY(270deg) translateY(-68px) scale(1.08); }
-      90%  { transform: translateX(-4%)   rotateY(348deg) translateY(-12px) scale(1.02); }
-      97%  { transform: translateX(-1%)   rotateY(357deg) translateY(2px)   scale(1.002);}
-      100% { transform: translateX(0)     rotateY(360deg) translateY(0px)   scale(1);    }
+      /* Sobe e encolhe → gira no ar → cai e cresce */
+      0%   { transform: translateY(0px)   scale(1.00) rotateY(0deg);   }
+      12%  { transform: translateY(-24px) scale(0.88) rotateY(40deg);  }
+      25%  { transform: translateY(-44px) scale(0.72) rotateY(90deg);  }
+      50%  { transform: translateY(-48px) scale(0.68) rotateY(180deg); }
+      75%  { transform: translateY(-44px) scale(0.72) rotateY(270deg); }
+      88%  { transform: translateY(-18px) scale(0.90) rotateY(340deg); }
+      95%  { transform: translateY(3px)   scale(1.02) rotateY(358deg); }
+      100% { transform: translateY(0px)   scale(1.00) rotateY(360deg); }
     }
 
     @keyframes theFlipFirstReveal {
-      0%   { transform: translateX(0)     rotateY(180deg) translateY(0px)   scale(1);    }
-      15%  { transform: translateX(-10%)  rotateY(230deg) translateY(-40px) scale(1.05); }
-      35%  { transform: translateX(-12%)  rotateY(270deg) translateY(-68px) scale(1.08); }
-      75%  { transform: translateX(-4%)   rotateY(345deg) translateY(-12px) scale(1.02); }
-      90%  { transform: translateX(-1%)   rotateY(357deg) translateY(2px)   scale(1.002);}
-      100% { transform: translateX(0)     rotateY(360deg) translateY(0px)   scale(1);    }
+      0%   { transform: translateY(0px)   scale(1.00) rotateY(180deg); }
+      15%  { transform: translateY(-28px) scale(0.85) rotateY(230deg); }
+      35%  { transform: translateY(-46px) scale(0.70) rotateY(275deg); }
+      65%  { transform: translateY(-46px) scale(0.70) rotateY(330deg); }
+      85%  { transform: translateY(-14px) scale(0.92) rotateY(354deg); }
+      100% { transform: translateY(0px)   scale(1.00) rotateY(360deg); }
     }
 
     .ritualCardWrap--flipping {
-      animation: theFlip 2.0s cubic-bezier(0.22,0.61,0.36,1) forwards !important;
+      animation: theFlip 2.2s cubic-bezier(0.37,0,0.63,1) forwards !important;
       pointer-events: none;
       transition: none !important;
     }
 
     .ritualCardWrap--first-reveal {
-      animation: theFlipFirstReveal 1.6s cubic-bezier(0.22,0.61,0.36,1) forwards !important;
+      animation: theFlipFirstReveal 1.8s cubic-bezier(0.37,0,0.63,1) forwards !important;
       pointer-events: none;
       transition: none !important;
     }

@@ -110,7 +110,7 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
 
   if (isFirstReveal) {
     ritualCardWrapEl.classList.add("ritualCardWrap--first-reveal");
-    setTimeout(glow, 900);
+    setTimeout(glow, 1000);
   } else {
     ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
     setTimeout(glow, 1400);
