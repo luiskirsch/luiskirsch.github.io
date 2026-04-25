@@ -24,7 +24,7 @@ export function binaryPortrait(canvas, src, opts = {}) {
 
     // --- amostra a imagem no grid de chars ---
     // Centraliza o rosto na metade esquerda
-    const faceW = Math.floor(COLS * 0.36);
+    const faceW = Math.floor(COLS * 0.22);
     const faceH = ROWS;
 
     const sampler = document.createElement('canvas');
