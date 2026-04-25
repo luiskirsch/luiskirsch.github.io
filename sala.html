@@ -4792,46 +4792,52 @@
       transform: rotateY(180deg);
     }
 
-    @keyframes theFlip {
-      /* 1. Sobe em direção ao usuário → 2. Encolhe no ar para girar → 3. Cai e cresce */
-      0%   { transform: translateY(0px)   scale(1.00) rotateY(0deg);   }
-      10%  { transform: translateY(-32px) scale(1.22) rotateY(20deg);  }
-      22%  { transform: translateY(-54px) scale(0.76) rotateY(80deg);  }
-      50%  { transform: translateY(-58px) scale(0.70) rotateY(180deg); }
-      78%  { transform: translateY(-54px) scale(0.76) rotateY(280deg); }
-      90%  { transform: translateY(-20px) scale(0.92) rotateY(348deg); }
-      96%  { transform: translateY(3px)   scale(0.98) rotateY(358deg); }
-      100% { transform: translateY(0px)   scale(1.00) rotateY(360deg); }
+    /* ── RITUAL DISSOLVE ─────────────────────────────────────────────── */
+
+    /* Fase 1 — implode para ponto de luz */
+    @keyframes ritualDissolveOut {
+      0%   { transform: scale(1.00) translateY(0px);   opacity:1; }
+      18%  { transform: scale(1.08) translateY(-20px); opacity:1; }
+      100% { transform: scale(0.00) translateY(-26px); opacity:0; }
     }
 
-    @keyframes theFlipFirstReveal {
-      0%   { transform: translateY(0px)   scale(1.00) rotateY(180deg); }
-      12%  { transform: translateY(-36px) scale(1.20) rotateY(215deg); }
-      28%  { transform: translateY(-56px) scale(0.74) rotateY(270deg); }
-      65%  { transform: translateY(-56px) scale(0.72) rotateY(330deg); }
-      85%  { transform: translateY(-18px) scale(0.92) rotateY(354deg); }
-      100% { transform: translateY(0px)   scale(1.00) rotateY(360deg); }
+    /* Fase 2 — explode do ponto de luz revelando a nova carta */
+    @keyframes ritualDissolveIn {
+      0%   { transform: scale(0.00) translateY(-26px); opacity:0; }
+      20%  { transform: scale(0.06) translateY(-24px); opacity:0.5; }
+      75%  { transform: scale(1.05) translateY(-6px);  opacity:1; }
+      100% { transform: scale(1.00) translateY(0px);   opacity:1; }
     }
 
-    .ritualCardWrap--flipping {
-      animation: theFlip 2.2s cubic-bezier(0.37,0,0.63,1) forwards !important;
-      pointer-events: none;
-      transition: none !important;
+    /* Flash dourado que se expande no momento da troca */
+    @keyframes ritualBurst {
+      0%   { transform:scale(0.05); opacity:1;   }
+      55%  { transform:scale(1.60); opacity:0.6; }
+      100% { transform:scale(3.00); opacity:0;   }
     }
 
-    .ritualCardWrap--first-reveal {
-      animation: theFlipFirstReveal 1.8s cubic-bezier(0.37,0,0.63,1) forwards !important;
-      pointer-events: none;
-      transition: none !important;
+    .ritualCardWrap--dissolve-out {
+      animation: ritualDissolveOut 0.55s cubic-bezier(0.55,0,1,1) forwards !important;
+      pointer-events:none;
+      transition:none !important;
     }
 
-    /* Durante o flip, pausar o glow pulsante das faces para evitar
-       repaint de box-shadow em cada frame (ganho crítico de performance) */
-    .ritualCardWrap--flipping .ritualVisualCard,
-    .ritualCardWrap--flipping .ritualCardBack,
-    .ritualCardWrap--first-reveal .ritualVisualCard,
-    .ritualCardWrap--first-reveal .ritualCardBack {
-      animation-play-state: paused !important;
+    .ritualCardWrap--dissolve-in {
+      animation: ritualDissolveIn 0.85s cubic-bezier(0,0,0.35,1) forwards !important;
+      pointer-events:none;
+      transition:none !important;
+    }
+
+    .revealGlow--burst {
+      animation: ritualBurst 0.70s cubic-bezier(0,0,0.4,1) forwards !important;
+    }
+
+    /* Pausa glow pulsante das faces durante a animação */
+    .ritualCardWrap--dissolve-out .ritualVisualCard,
+    .ritualCardWrap--dissolve-out .ritualCardBack,
+    .ritualCardWrap--dissolve-in .ritualVisualCard,
+    .ritualCardWrap--dissolve-in .ritualCardBack {
+      animation-play-state:paused !important;
     }
 
     /* Tremida da mesa quando a carta vai de lado */
@@ -4857,16 +4863,19 @@
 
     .revealGlow {
       position:absolute;
-      inset:-32px;
-      border-radius:40px;
+      inset:-60px;
+      border-radius:50%;
       pointer-events:none;
       background:radial-gradient(ellipse at center,
-        rgba(215,176,107,.68) 0%,
-        rgba(215,176,107,.28) 30%,
-        transparent 65%
+        rgba(255,240,160,1.00)  0%,
+        rgba(215,176,107,.90) 18%,
+        rgba(180,130, 40,.55) 40%,
+        rgba(140, 90, 20,.20) 65%,
+        transparent 80%
       );
       opacity:0;
-      z-index:0;
+      z-index:20;
+      transform:scale(0);
     }
 
     .revealGlow--active {

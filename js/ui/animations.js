@@ -45,11 +45,9 @@ export function playCardFlip() {
 
 // ── Animação de revelação de carta (flip 3D) ──────────────────────────────────
 export function fireRevealAnimation(currentCard, applyCardContentFn) {
-  const ritualCardWrapEl   = document.getElementById("ritualCardWrap");
-  const ritualCardShadowEl = document.getElementById("ritualCardShadow");
-  const revealPanelEl      = document.querySelector(".revealPanel");
-  const revealGlowEl       = document.getElementById("revealGlow");
-  const revealCardBtn      = document.getElementById("revealCardBtn");
+  const ritualCardWrapEl = document.getElementById("ritualCardWrap");
+  const revealGlowEl    = document.getElementById("revealGlow");
+  const revealCardBtn   = document.getElementById("revealCardBtn");
 
   if (!ritualCardWrapEl || S.revealAnimating) {
     applyCardContentFn(currentCard);
@@ -57,65 +55,52 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
   }
 
   S.revealAnimating = true;
-  playCardFlip();
   if (revealCardBtn) revealCardBtn.disabled = true;
+  if (S.cardFaceDown) S.cardFaceDown = false;
 
-  const isFirstReveal = S.cardFaceDown;
-  if (isFirstReveal) S.cardFaceDown = false;
-
-  // Promove ao layer GPU ANTES de adicionar a classe de animação
-  ritualCardWrapEl.style.willChange = 'transform';
+  ritualCardWrapEl.style.willChange = 'transform, opacity';
 
   const cardFrame = ritualCardWrapEl.querySelector('.ritualCardFrame');
-  // Esconde o texto instantaneamente — o servidor pode atualizar o DOM a qualquer momento
   if (cardFrame) { cardFrame.style.transition = 'none'; cardFrame.style.opacity = '0'; }
 
-  requestAnimationFrame(() => {
-  ritualCardWrapEl.classList.remove("ritualCardWrap--flipping", "ritualCardWrap--first-reveal", "ritualCardWrap--facedown");
+  // Remove facedown state
+  ritualCardWrapEl.classList.remove("ritualCardWrap--facedown",
+    "ritualCardWrap--dissolve-out", "ritualCardWrap--dissolve-in");
   void ritualCardWrapEl.offsetWidth;
 
-  if (ritualCardShadowEl) {
-    ritualCardShadowEl.classList.remove("ritualCardShadow--animating");
-    void ritualCardShadowEl.offsetWidth;
-    ritualCardShadowEl.classList.add("ritualCardShadow--animating");
-  }
+  // ── FASE 1: implode (0.55s) ───────────────────────────────────────────────
+  ritualCardWrapEl.classList.add("ritualCardWrap--dissolve-out");
 
-  function glow() {
-    if (!revealGlowEl) return;
-    revealGlowEl.classList.remove("revealGlow--active");
-    void revealGlowEl.offsetWidth;
-    revealGlowEl.classList.add("revealGlow--active");
-  }
+  setTimeout(() => {
+    // ── PONTO ZERO: escuro total — troca conteúdo + dispara burst dourado ──
+    ritualCardWrapEl.classList.remove("ritualCardWrap--dissolve-out");
+    void ritualCardWrapEl.offsetWidth;
 
-  function finalize() {
-    ritualCardWrapEl.classList.remove("ritualCardWrap--flipping", "ritualCardWrap--first-reveal");
-    ritualCardWrapEl.style.willChange = '';
-    if (ritualCardShadowEl) ritualCardShadowEl.classList.remove("ritualCardShadow--animating");
-    if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
-    // Revela o novo texto exatamente ao fim da animação
-    if (cardFrame) {
-      cardFrame.style.transition = 'opacity 300ms ease';
-      cardFrame.style.opacity = '1';
-    }
-    S.revealAnimating = false;
-    document.dispatchEvent(new CustomEvent("osl:updateRitualButtons"));
-  }
-
-  function onAnimEnd() {
-    ritualCardWrapEl.removeEventListener('animationend', onAnimEnd);
+    playCardFlip();
     applyCardContentFn(currentCard);
-    finalize();
-  }
-  ritualCardWrapEl.addEventListener('animationend', onAnimEnd);
 
-  if (isFirstReveal) {
-    ritualCardWrapEl.classList.add("ritualCardWrap--first-reveal");
-    setTimeout(glow, 1000);
-  } else {
-    ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
-    setTimeout(glow, 1400);
-  }
-  }); // fecha requestAnimationFrame
+    if (revealGlowEl) {
+      revealGlowEl.classList.remove("revealGlow--active", "revealGlow--burst");
+      void revealGlowEl.offsetWidth;
+      revealGlowEl.classList.add("revealGlow--burst");
+    }
+
+    // ── FASE 2: explode (0.85s) ──────────────────────────────────────────
+    ritualCardWrapEl.classList.add("ritualCardWrap--dissolve-in");
+
+    setTimeout(() => {
+      ritualCardWrapEl.classList.remove("ritualCardWrap--dissolve-in");
+      ritualCardWrapEl.style.willChange = '';
+      if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--burst");
+      if (cardFrame) {
+        cardFrame.style.transition = 'opacity 280ms ease';
+        cardFrame.style.opacity = '1';
+      }
+      S.revealAnimating = false;
+      document.dispatchEvent(new CustomEvent("osl:updateRitualButtons"));
+    }, 850);
+
+  }, 550);
 }
 
 // ── Lottie helper ─────────────────────────────────────────────────────────────
