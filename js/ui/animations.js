@@ -78,14 +78,6 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
     ritualCardShadowEl.classList.add("ritualCardShadow--animating");
   }
 
-  function shake() {
-    if (!revealPanelEl) return;
-    revealPanelEl.classList.remove("revealPanel--shake");
-    void revealPanelEl.offsetWidth;
-    revealPanelEl.classList.add("revealPanel--shake");
-    setTimeout(() => revealPanelEl.classList.remove("revealPanel--shake"), 340);
-  }
-
   function glow() {
     if (!revealGlowEl) return;
     revealGlowEl.classList.remove("revealGlow--active");
@@ -98,31 +90,34 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
     ritualCardWrapEl.style.willChange = '';
     if (ritualCardShadowEl) ritualCardShadowEl.classList.remove("ritualCardShadow--animating");
     if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
-    // Revela o texto suavemente após a carta pousar
+    // Revela o novo texto exatamente ao fim da animação
     if (cardFrame) {
-      cardFrame.style.transition = 'opacity 280ms ease';
+      cardFrame.style.transition = 'opacity 300ms ease';
       cardFrame.style.opacity = '1';
     }
     S.revealAnimating = false;
     document.dispatchEvent(new CustomEvent("osl:updateRitualButtons"));
   }
 
+  // animationend garante que o texto aparece no frame exato em que a animação termina
+  function onAnimEnd() {
+    ritualCardWrapEl.removeEventListener('animationend', onAnimEnd);
+    finalize();
+  }
+  ritualCardWrapEl.addEventListener('animationend', onAnimEnd);
+
   if (isFirstReveal) {
     ritualCardWrapEl.classList.add("ritualCardWrap--first-reveal");
-    // Apaga texto quando frente passa os 90° (~200ms)
+    // Texto visível enquanto frente mostra; apaga ao passar 90°
     setTimeout(() => { if (cardFrame) { cardFrame.style.transition = 'opacity 80ms ease'; cardFrame.style.opacity = '0'; } }, 200);
+    // Aplica novo conteúdo enquanto a frente está oculta
     setTimeout(() => applyCardContentFn(currentCard), 500);
     setTimeout(glow, 900);
-    setTimeout(shake, 1450);
-    setTimeout(finalize, 1600);
   } else {
     ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
-    // Apaga texto quando frente passa os 90° (~250ms)
     setTimeout(() => { if (cardFrame) { cardFrame.style.transition = 'opacity 80ms ease'; cardFrame.style.opacity = '0'; } }, 250);
     setTimeout(() => applyCardContentFn(currentCard), 700);
     setTimeout(glow, 1400);
-    setTimeout(shake, 1800);
-    setTimeout(finalize, 2000);
   }
   }); // fecha requestAnimationFrame
 }
