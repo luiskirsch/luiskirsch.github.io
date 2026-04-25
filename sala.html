@@ -937,59 +937,33 @@
       position:relative;
       overflow:visible;
 
-      /* ── Bancada de madeira escura polida ── */
       background:
-        /* Reflexo de luz diagonal — verniz polido */
-        linear-gradient(148deg,
-          rgba(255,230,160,.10) 0%,
-          rgba(255,230,160,.04) 18%,
-          transparent 40%,
-          transparent 70%,
-          rgba(255,200,100,.03) 100%
+        linear-gradient(160deg, rgba(255,235,170,.13) 0%, rgba(255,220,140,.04) 22%, transparent 45%),
+        repeating-linear-gradient(91deg,
+          transparent 0px, transparent 14px,
+          rgba(0,0,0,.05) 14px, rgba(0,0,0,.05) 15px,
+          transparent 15px, transparent 32px,
+          rgba(190,110,30,.03) 32px, rgba(190,110,30,.03) 33px
         ),
-        /* Grão fino — fibras verticais primárias */
-        repeating-linear-gradient(
-          90.6deg,
-          transparent 0px,       transparent 11px,
-          rgba(0,0,0,.06)  11px, rgba(0,0,0,.06)  12px,
-          transparent      12px, transparent      24px,
-          rgba(180,100,30,.04) 24px, rgba(180,100,30,.04) 25px
+        repeating-linear-gradient(89deg,
+          transparent 0px, transparent 52px,
+          rgba(0,0,0,.06) 52px, rgba(0,0,0,.06) 54px,
+          transparent 54px, transparent 110px,
+          rgba(0,0,0,.04) 110px, rgba(0,0,0,.04) 112px
         ),
-        /* Grão médio — veios mais largos */
-        repeating-linear-gradient(
-          89.4deg,
-          transparent 0px,      transparent 38px,
-          rgba(0,0,0,.08) 38px, rgba(0,0,0,.08) 40px,
-          transparent     40px, transparent     80px,
-          rgba(0,0,0,.05) 80px, rgba(0,0,0,.05) 82px
+        radial-gradient(ellipse 120% 110% at 50% 50%,
+          transparent 50%, rgba(0,0,0,.22) 100%
         ),
-        /* Vinheta de borda — profundidade e espessura */
-        radial-gradient(ellipse 110% 100% at 50% 50%,
-          transparent 55%,
-          rgba(0,0,0,.28) 100%
-        ),
-        /* Gradiente de perspectiva — superfície inclinada */
-        linear-gradient(188deg,
-          #5a3418 0%,
-          #45280f 20%,
-          #331d0a 50%,
-          #261508 80%,
-          #1a0e05 100%
-        );
+        linear-gradient(185deg, #6b3d1a 0%, #4e2c0e 25%, #3a1f09 55%, #281406 100%);
 
-      /* Borda — moldura de madeira com friso dourado */
-      border:1px solid rgba(140,85,30,.45);
-      outline:1px solid rgba(0,0,0,.6);
-      outline-offset:-3px;
-
-      /* Sombra — bancada sobre a mesa */
+      border: 1px solid rgba(160,100,35,.50);
       box-shadow:
-        inset 0 1px 0 rgba(255,210,120,.14),   /* topo polido */
-        inset 0 -3px 14px rgba(0,0,0,.45),      /* profundidade base */
-        inset 4px 0 16px rgba(0,0,0,.22),        /* lateral esquerda */
-        inset -4px 0 16px rgba(0,0,0,.22),       /* lateral direita */
-        0 28px 64px rgba(0,0,0,.65),             /* sombra projetada */
-        0 6px 18px rgba(0,0,0,.40);
+        inset 0 1px 0 rgba(255,215,130,.18),
+        inset 0 -2px 12px rgba(0,0,0,.35),
+        inset 3px 0 12px rgba(0,0,0,.15),
+        inset -3px 0 12px rgba(0,0,0,.15),
+        0 32px 72px rgba(0,0,0,.60),
+        0 8px 24px rgba(0,0,0,.35);
     }
 
     /* Reflexo central suave — superfície envernizada */
@@ -3953,40 +3927,24 @@
         repeating-linear-gradient(37deg,  transparent 0px, transparent 26px, rgba(0,0,0,.04) 26px, rgba(0,0,0,.04) 27px),
         radial-gradient(ellipse 88% 82% at 50% 50%, transparent 42%, rgba(0,0,0,.52) 100%),
         linear-gradient(170deg, #1c1612 0%, #0f0c09 45%, #080604 100%);
-      /* Borda dourada + espessura de carta física */
+      /* Borda dourada limpa */
       box-shadow:
-        /* Espessura — borda lateral direita/inferior */
-        3px 3px 0 rgba(100,72,18,.90),
-        6px 6px 0 rgba(80,56,12,.80),
-        9px 9px 0 rgba(60,42,8,.65),
-        11px 11px 0 rgba(40,28,4,.45),
-        /* Borda dourada */
         inset 0 0 60px rgba(0,0,0,.55),
         0 0 0 1px rgba(50,35,8,.95),
         0 0 0 4px rgba(155,110,30,.68),
         0 0 0 6px rgba(30,20,4,.98),
-        0 0 0 9px rgba(210,168,72,.30),
-        /* Sombra projetada */
-        14px 20px 50px rgba(0,0,0,.70);
-      transition:box-shadow 380ms ease, transform 380ms var(--ease-spring);
+        0 0 0 9px rgba(210,168,72,.28);
+      transition: box-shadow 300ms ease;
     }
 
     .ritualCardWrap:not(.ritualCardWrap--facedown):hover .ritualVisualCard{
       box-shadow:
-        /* Espessura mais pronunciada no hover */
-        4px 4px 0 rgba(110,80,20,.90),
-        8px 8px 0 rgba(88,62,14,.80),
-        12px 12px 0 rgba(66,46,9,.65),
-        14px 14px 0 rgba(44,30,5,.45),
-        /* Borda dourada brilhando */
         inset 0 0 60px rgba(0,0,0,.45),
         0 0 0 1px rgba(50,35,8,.95),
         0 0 0 4px rgba(200,155,50,.85),
         0 0 0 6px rgba(30,20,4,.98),
         0 0 0 9px rgba(220,178,82,.55),
-        0 0 70px rgba(200,160,60,.20),
-        /* Sombra mais alta no hover */
-        16px 34px 65px rgba(0,0,0,.75);
+        0 0 80px rgba(200,160,60,.22);
     }
 
     /* Cantos decorativos dourados */
@@ -7501,30 +7459,65 @@
         if (sair) sair.style.left = (r.left - 16) + 'px';
       }
 
-      /* ── Holographic tilt effect ── */
+      /* ── Holographic tilt — lerp suave via rAF ── */
       (function(){
         const wrap = document.getElementById('ritualCardWrap');
         if (!wrap) return;
         const visual = wrap.querySelector('.ritualVisualCard');
 
+        let raf = null;
+        let rx = 0, ry = 0, rs = 1, ry_off = 0;
+        let txRx = 0, txRy = 0, txS = 1;
+        let over = false;
+
+        function lerp(a, b, t){ return a + (b - a) * t; }
+
+        function tick(){
+          const tRx  = over ? txRx : 0;
+          const tRy  = over ? txRy : 0;
+          const tS   = over ? 1.04 : 1;
+          const tY   = over ? -10  : 0;
+
+          rx = lerp(rx,   tRx, over ? 0.10 : 0.06);
+          ry = lerp(ry,   tRy, over ? 0.10 : 0.06);
+          rs = lerp(rs,   tS,  over ? 0.10 : 0.06);
+          ry_off = lerp(ry_off, tY, over ? 0.10 : 0.06);
+
+          wrap.style.transform =
+            `perspective(1000px) rotateX(${rx.toFixed(3)}deg) rotateY(${ry.toFixed(3)}deg) scale(${rs.toFixed(4)}) translateY(${ry_off.toFixed(2)}px)`;
+
+          const done = !over
+            && Math.abs(rx) < 0.02
+            && Math.abs(ry) < 0.02
+            && Math.abs(rs - 1) < 0.001
+            && Math.abs(ry_off) < 0.1;
+
+          if (done){
+            wrap.style.transform = '';
+            raf = null;
+          } else {
+            raf = requestAnimationFrame(tick);
+          }
+        }
+
         wrap.addEventListener('mousemove', function(e){
           if (wrap.classList.contains('ritualCardWrap--facedown')) return;
           const r = wrap.getBoundingClientRect();
-          const x = e.clientX - r.left;
-          const y = e.clientY - r.top;
-          const rx = -((y / r.height) - 0.5) * 22;
-          const ry =  ((x / r.width)  - 0.5) * 18;
-          wrap.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.04) translateY(-8px)`;
-          if (visual) {
-            visual.style.setProperty('--mx', (x / r.width  * 100).toFixed(1) + '%');
-            visual.style.setProperty('--my', (y / r.height * 100).toFixed(1) + '%');
+          const nx = (e.clientX - r.left) / r.width;
+          const ny = (e.clientY - r.top)  / r.height;
+          txRx = -(ny - 0.5) * 20;
+          txRy =  (nx - 0.5) * 16;
+          over = true;
+          if (visual){
+            visual.style.setProperty('--mx', (nx * 100).toFixed(1) + '%');
+            visual.style.setProperty('--my', (ny * 100).toFixed(1) + '%');
           }
+          if (!raf) raf = requestAnimationFrame(tick);
         });
 
         wrap.addEventListener('mouseleave', function(){
-          wrap.style.transition = 'transform 500ms var(--ease-spring)';
-          wrap.style.transform = '';
-          setTimeout(()=>{ wrap.style.transition = ''; }, 520);
+          over = false;
+          if (!raf) raf = requestAnimationFrame(tick);
         });
       })();
 
