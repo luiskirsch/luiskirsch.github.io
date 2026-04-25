@@ -67,6 +67,8 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
   ritualCardWrapEl.style.willChange = 'transform';
 
   const cardFrame = ritualCardWrapEl.querySelector('.ritualCardFrame');
+  // Esconde o texto instantaneamente — o servidor pode atualizar o DOM a qualquer momento
+  if (cardFrame) { cardFrame.style.transition = 'none'; cardFrame.style.opacity = '0'; }
 
   requestAnimationFrame(() => {
   ritualCardWrapEl.classList.remove("ritualCardWrap--flipping", "ritualCardWrap--first-reveal", "ritualCardWrap--facedown");
@@ -99,24 +101,18 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
     document.dispatchEvent(new CustomEvent("osl:updateRitualButtons"));
   }
 
-  // animationend garante que o texto aparece no frame exato em que a animação termina
   function onAnimEnd() {
     ritualCardWrapEl.removeEventListener('animationend', onAnimEnd);
+    applyCardContentFn(currentCard);
     finalize();
   }
   ritualCardWrapEl.addEventListener('animationend', onAnimEnd);
 
   if (isFirstReveal) {
     ritualCardWrapEl.classList.add("ritualCardWrap--first-reveal");
-    // Texto visível enquanto frente mostra; apaga ao passar 90°
-    setTimeout(() => { if (cardFrame) { cardFrame.style.transition = 'opacity 80ms ease'; cardFrame.style.opacity = '0'; } }, 200);
-    // Aplica novo conteúdo enquanto a frente está oculta
-    setTimeout(() => applyCardContentFn(currentCard), 500);
     setTimeout(glow, 900);
   } else {
     ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
-    setTimeout(() => { if (cardFrame) { cardFrame.style.transition = 'opacity 80ms ease'; cardFrame.style.opacity = '0'; } }, 250);
-    setTimeout(() => applyCardContentFn(currentCard), 700);
     setTimeout(glow, 1400);
   }
   }); // fecha requestAnimationFrame
