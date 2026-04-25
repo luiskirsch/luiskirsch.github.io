@@ -98,14 +98,14 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
 
   if (isFirstReveal) {
     ritualCardWrapEl.classList.add("ritualCardWrap--first-reveal");
-    setTimeout(() => { applyCardContentFn(currentCard); shake(); }, 250);
-    setTimeout(glow, 600);
-    setTimeout(finalize, 1000);
+    setTimeout(() => { applyCardContentFn(currentCard); shake(); }, 300);
+    setTimeout(glow, 900);
+    setTimeout(finalize, 1600);
   } else {
     ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
-    setTimeout(() => { applyCardContentFn(currentCard); shake(); }, 275);
-    setTimeout(glow, 825);
-    setTimeout(finalize, 1150);
+    setTimeout(() => { applyCardContentFn(currentCard); shake(); }, 350);
+    setTimeout(glow, 1400);
+    setTimeout(finalize, 2000);
   }
 }
 
