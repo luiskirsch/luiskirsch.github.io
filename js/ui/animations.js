@@ -110,8 +110,8 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
     setTimeout(finalize, 1600);
   } else {
     ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
-    // Troca conteúdo a 50% da animação (1000ms) — verso está completamente de frente
-    setTimeout(() => applyCardContentFn(currentCard), 1000);
+    // Troca conteúdo ~30% da animação (600ms) — verso completamente de frente, frente oculta
+    setTimeout(() => applyCardContentFn(currentCard), 600);
     setTimeout(glow, 1400);
     setTimeout(shake, 1800);
     setTimeout(finalize, 2000);
