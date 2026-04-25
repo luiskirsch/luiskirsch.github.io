@@ -1018,5 +1018,15 @@ window._oslGetRemoteVideoTrack = function(identity) {
   return null;
 };
 
+// Expõe controles para scripts não-módulo (mobile overlay, etc.)
+window.oslVideoControls = {
+  joinVideo:  () => joinVideoCall().catch(console.error),
+  joinAudio:  () => joinAudioOnlyCall().catch(console.error),
+  toggleMic:  () => toggleMic().catch(console.error),
+  toggleCam:  () => toggleCam().catch(console.error),
+  leaveVideo: () => leaveVideoCall().catch(console.error),
+  isInCall:   () => !!lkRoom,
+};
+
 // Conecta silenciosamente ao entrar na sala — permite ver quem já está em vídeo
 startPreview().catch(() => {});
