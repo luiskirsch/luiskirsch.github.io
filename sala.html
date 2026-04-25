@@ -3891,9 +3891,40 @@
       transform-style:preserve-3d;
       transition:transform 380ms var(--ease-spring);
       contain:layout style;
-      /* Preenche a aresta visível a 90° com a cor do verso */
-      background-color:#070604;
       border-radius:20px;
+    }
+
+    /* ── Arestas laterais 3D — ficam visíveis a 90° como um objeto físico ── */
+    .ritualCardWrap::before,
+    .ritualCardWrap::after{
+      content:'';
+      position:absolute;
+      top:4%;
+      height:92%;
+      width:10px;
+      border-radius:4px;
+      background:linear-gradient(to bottom,
+        #3a2610 0%,
+        #211508 35%,
+        #1a1007 50%,
+        #211508 65%,
+        #3a2610 100%
+      );
+      box-shadow:inset 0 0 4px rgba(0,0,0,.6);
+    }
+
+    /* Aresta direita — visível quando card está em ~90° */
+    .ritualCardWrap::before{
+      right:0;
+      transform-origin:right center;
+      transform:rotateY(90deg);
+    }
+
+    /* Aresta esquerda — visível quando card está em ~270° */
+    .ritualCardWrap::after{
+      left:0;
+      transform-origin:left center;
+      transform:rotateY(-90deg);
     }
 
     .ritualCardWrap:not(.ritualCardWrap--facedown):hover{
