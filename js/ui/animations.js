@@ -103,13 +103,17 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
 
   if (isFirstReveal) {
     ritualCardWrapEl.classList.add("ritualCardWrap--first-reveal");
-    setTimeout(() => { applyCardContentFn(currentCard); shake(); }, 300);
+    // Troca conteúdo a 50% da animação (800ms) — verso está completamente de frente
+    setTimeout(() => applyCardContentFn(currentCard), 800);
     setTimeout(glow, 900);
+    setTimeout(shake, 1450);
     setTimeout(finalize, 1600);
   } else {
     ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
-    setTimeout(() => { applyCardContentFn(currentCard); shake(); }, 350);
+    // Troca conteúdo a 50% da animação (1000ms) — verso está completamente de frente
+    setTimeout(() => applyCardContentFn(currentCard), 1000);
     setTimeout(glow, 1400);
+    setTimeout(shake, 1800);
     setTimeout(finalize, 2000);
   }
   }); // fecha requestAnimationFrame
