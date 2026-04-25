@@ -3890,8 +3890,10 @@
       -webkit-transform-style:preserve-3d;
       transform-style:preserve-3d;
       transition:transform 380ms var(--ease-spring);
-      /* Delimita reflow ao wrapper — não propaga layout para cima */
       contain:layout style;
+      /* Preenche a aresta visível a 90° com a cor do verso */
+      background-color:#070604;
+      border-radius:20px;
     }
 
     .ritualCardWrap:not(.ritualCardWrap--facedown):hover{

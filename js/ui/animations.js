@@ -63,10 +63,16 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
   const isFirstReveal = S.cardFaceDown;
   if (isFirstReveal) S.cardFaceDown = false;
 
-  // Promove ao layer GPU ANTES de adicionar a classe de animação — elimina o delay de compositing
+  // Promove ao layer GPU ANTES de adicionar a classe de animação
   ritualCardWrapEl.style.willChange = 'transform';
 
-  // Aguarda um frame para o browser criar o layer, depois dispara a animação
+  // Esconde o frame de texto — troca de conteúdo fica invisível durante todo o giro
+  const cardFrame = ritualCardWrapEl.querySelector('.ritualCardFrame');
+  if (cardFrame) {
+    cardFrame.style.transition = 'none';
+    cardFrame.style.opacity = '0';
+  }
+
   requestAnimationFrame(() => {
   ritualCardWrapEl.classList.remove("ritualCardWrap--flipping", "ritualCardWrap--first-reveal", "ritualCardWrap--facedown");
   void ritualCardWrapEl.offsetWidth;
@@ -94,24 +100,27 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
 
   function finalize() {
     ritualCardWrapEl.classList.remove("ritualCardWrap--flipping", "ritualCardWrap--first-reveal");
-    ritualCardWrapEl.style.willChange = '';  // libera o layer GPU
+    ritualCardWrapEl.style.willChange = '';
     if (ritualCardShadowEl) ritualCardShadowEl.classList.remove("ritualCardShadow--animating");
     if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
+    // Revela o texto suavemente após a carta pousar
+    if (cardFrame) {
+      cardFrame.style.transition = 'opacity 280ms ease';
+      cardFrame.style.opacity = '1';
+    }
     S.revealAnimating = false;
     document.dispatchEvent(new CustomEvent("osl:updateRitualButtons"));
   }
 
   if (isFirstReveal) {
     ritualCardWrapEl.classList.add("ritualCardWrap--first-reveal");
-    // Troca conteúdo a 50% da animação (800ms) — verso está completamente de frente
-    setTimeout(() => applyCardContentFn(currentCard), 800);
+    setTimeout(() => applyCardContentFn(currentCard), 500);
     setTimeout(glow, 900);
     setTimeout(shake, 1450);
     setTimeout(finalize, 1600);
   } else {
     ritualCardWrapEl.classList.add("ritualCardWrap--flipping");
-    // Troca conteúdo ~30% da animação (600ms) — verso completamente de frente, frente oculta
-    setTimeout(() => applyCardContentFn(currentCard), 600);
+    setTimeout(() => applyCardContentFn(currentCard), 700);
     setTimeout(glow, 1400);
     setTimeout(shake, 1800);
     setTimeout(finalize, 2000);
