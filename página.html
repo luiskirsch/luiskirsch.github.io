@@ -1,4 +1,4 @@
-<!DOCTYPE html>  <html lang="pt-br">    <head>        <meta charset="UTF-8" />      
+﻿<!DOCTYPE html>  <html lang="pt-br">    <head>        <meta charset="UTF-8" />      
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />      
   <title>Prelúdio Jogos — Boas-vindas</title>    <link rel="icon" type="image/png" href="./favicon.png">    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />      
   <meta http-equiv="Pragma" content="no-cache" />      
@@ -1286,7 +1286,7 @@ tested: true
 <div class="tfGhost" id="tfGhost"></div>  
 </div>    </div>   <div class="moonWrap" aria-hidden="true">
   <div class="moonGlow"></div>
-  <img src="./lua_site_transparente.png" alt="" class="moon" referrerpolicy="no-referrer">
+  <img loading="lazy" src="./lua_site_transparente.png" alt="" class="moon" referrerpolicy="no-referrer">
 </div>       
   <!-- PAINEL DE CONTA (ESQUERDA) -->
 <div class="accountPanel" id="accountPanel" aria-label="Acesso à conta">
@@ -1319,7 +1319,7 @@ tested: true
           <div class="kicker">      
             <span class="dot"></span>      
             <span>Uma experiência psicológica em cartas físicas</span>      
-          </div>  <div class="titleRow">  <img class="titleLogo"      
+          </div>  <div class="titleRow">  <img loading="lazy" class="titleLogo"      
 src="./logo_oficial_fundo_transparente.png"      
 alt="Logo oficial Prelúdio Jogos"      
 referrerpolicy="no-referrer">    <h1 class="title">Prelúdio<br>Jogos</h1>      
@@ -3107,5 +3107,6 @@ onAuthStateChanged(auth, (user) => {
   updateAccountUI(user);
 });
 </script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

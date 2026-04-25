@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -262,6 +262,7 @@ body::after {
 
 }
 </style>
+<link rel="prefetch" href="/entrada.html">
 </head>
 
 <body>
@@ -390,5 +391,6 @@ body::after {
   setInterval(update, 1000);
 })();
 </script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -151,7 +151,7 @@ REVELAR
 </div>
 
 <div class="card back" id="card">
-  <img src="verso-carta.jpg" alt="verso">
+  <img loading="lazy" src="verso-carta.jpg" alt="verso">
 </div>
 
 </div>
@@ -191,7 +191,7 @@ function flipTo(showBack, text) {
     // Fase 2: trocar conteúdo com a carta "fechada"
     if (showBack) {
       cardEl.className = "card back fold"
-      cardEl.innerHTML = '<img src="verso-carta.jpg" alt="verso">'
+      cardEl.innerHTML = '<img loading="lazy" src="verso-carta.jpg" alt="verso">'
     } else {
       cardEl.className = "card front fold"
       cardEl.innerText = text
@@ -244,5 +244,6 @@ deckBtn.onclick = reveal
 
 </script>
 
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

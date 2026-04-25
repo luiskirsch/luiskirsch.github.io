@@ -1,6 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<link rel="preconnect" href="https://www.googleapis.com">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta charset="UTF-8" />
   <!-- Viewport fixo 1080×1920 — exatamente o que o LiveKit Egress renderiza -->
   <meta name="viewport" content="width=1080, initial-scale=1.0" />
@@ -402,7 +406,7 @@
 
                 <p class="ritualFinalPhrase" id="ritualFinalPhrase"></p>
 
-                <img class="ritualFingerprint" src="./digital.png" alt="" aria-hidden="true"/>
+                <img loading="lazy" class="ritualFingerprint" src="./digital.png" alt="" aria-hidden="true"/>
 
                 <div class="ritualBottomOrnaments">
                   <div class="ritualBottomSet left"><span></span><span></span><span></span></div>
@@ -648,5 +652,6 @@
 
     connect().catch(e => console.error("recording error:", e));
   </script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

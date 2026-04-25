@@ -1,7 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <script>
+
+<link rel="preconnect" href="https://www.googleapis.com">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">  <script>
     (async function protegerSala() {
       const BASE = "https://osl-video-server-production.up.railway.app";
 
@@ -2291,7 +2295,6 @@
         inset 0 0 10px rgba(255,255,255,.05);
       animation:whiteGlowPulse 7s ease-in-out infinite;
     }
-
 
     /* Pseudo-elements limpos — sem ruído visual */
     .videoColPlaceholder::before,
@@ -4658,7 +4661,6 @@
       animation:fadeInUp .25s .1s both;
     }
 
-
     /* reactionBar: static inside the wrapper in arena mode */
     html.arenaMode .reactionBar{
       position:static;
@@ -6221,6 +6223,7 @@
     <div class="shell">
 
       <header class="topbar">
+
         <div class="brandWrap">
           <p class="eyebrow">Sala do Ritual · <span id="gameStatus" class="eyebrow__status">Espera</span></p>
           <h1 class="roomTitle">O SextoLugar</h1>
@@ -6429,7 +6432,7 @@
 
                         <p class="ritualFinalPhrase" id="ritualCardPhrase" style="display:none"></p>
 
-                        <img class="ritualFingerprint" src="./digital.png" alt="" aria-hidden="true"/>
+                        <img loading="lazy" class="ritualFingerprint" src="./digital.png" alt="" aria-hidden="true"/>
 
                         <div class="ritualBottomOrnaments">
                           <div class="ritualBottomSet left">
@@ -6940,7 +6943,6 @@
 
   <!-- PanelBridge → js/api.js (window.PanelBridge definido pelo módulo) -->
 
-
   <!-- Lógica do jogo → js/init.js -->
   <script type="module" src="js/init.js"></script>
 
@@ -7299,7 +7301,7 @@
   <!-- ===== FULLSCREEN GATE ===== -->
   <div id="fullscreenGate">
     <div id="fullscreenGateLogo">
-      <img src="logo_oficial_fundo_transparente.png" alt="O SextoLugar">
+      <img loading="lazy" src="logo_oficial_fundo_transparente.png" alt="O SextoLugar">
       <div id="fullscreenGateName">O SextoLugar</div>
     </div>
     <div id="fullscreenGateDesc">Para jogar em tela cheia</div>
@@ -7604,5 +7606,6 @@
       });
     })();
   </script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>
