@@ -63,6 +63,11 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
   const isFirstReveal = S.cardFaceDown;
   if (isFirstReveal) S.cardFaceDown = false;
 
+  // Promove ao layer GPU ANTES de adicionar a classe de animação — elimina o delay de compositing
+  ritualCardWrapEl.style.willChange = 'transform';
+
+  // Aguarda um frame para o browser criar o layer, depois dispara a animação
+  requestAnimationFrame(() => {
   ritualCardWrapEl.classList.remove("ritualCardWrap--flipping", "ritualCardWrap--first-reveal", "ritualCardWrap--facedown");
   void ritualCardWrapEl.offsetWidth;
 
@@ -89,10 +94,10 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
 
   function finalize() {
     ritualCardWrapEl.classList.remove("ritualCardWrap--flipping", "ritualCardWrap--first-reveal");
+    ritualCardWrapEl.style.willChange = '';  // libera o layer GPU
     if (ritualCardShadowEl) ritualCardShadowEl.classList.remove("ritualCardShadow--animating");
     if (revealGlowEl) revealGlowEl.classList.remove("revealGlow--active");
     S.revealAnimating = false;
-    // Atualiza botões de ritual
     document.dispatchEvent(new CustomEvent("osl:updateRitualButtons"));
   }
 
@@ -107,6 +112,7 @@ export function fireRevealAnimation(currentCard, applyCardContentFn) {
     setTimeout(glow, 1400);
     setTimeout(finalize, 2000);
   }
+  }); // fecha requestAnimationFrame
 }
 
 // ── Lottie helper ─────────────────────────────────────────────────────────────

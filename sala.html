@@ -3890,6 +3890,8 @@
       -webkit-transform-style:preserve-3d;
       transform-style:preserve-3d;
       transition:transform 380ms var(--ease-spring);
+      /* Delimita reflow ao wrapper — não propaga layout para cima */
+      contain:layout style;
     }
 
     .ritualCardWrap:not(.ritualCardWrap--facedown):hover{
@@ -3901,7 +3903,7 @@
       transform:rotateY(180deg) !important;
     }
 
-    /* ── Ambas as faces: preenchem o wrapper exatamente ── */
+    /* ── Ambas as faces: GPU layer próprio ── */
     .ritualVisualCard,
     .ritualCardBack{
       position:absolute;
@@ -3915,6 +3917,8 @@
       background-size:cover;
       background-position:center center;
       background-repeat:no-repeat;
+      /* Layer GPU dedicado — evita repaint durante preserve-3d */
+      will-change:transform;
     }
 
     /* ── Frente — layout premium CSS ── */
@@ -4810,13 +4814,13 @@
     }
 
     .ritualCardWrap--flipping {
-      animation: theFlip 2.0s cubic-bezier(0.4,0,0.2,1) forwards !important;
+      animation: theFlip 2.0s cubic-bezier(0.22,0.61,0.36,1) forwards !important;
       pointer-events: none;
       transition: none !important;
     }
 
     .ritualCardWrap--first-reveal {
-      animation: theFlipFirstReveal 1.6s cubic-bezier(0.4,0,0.2,1) forwards !important;
+      animation: theFlipFirstReveal 1.6s cubic-bezier(0.22,0.61,0.36,1) forwards !important;
       pointer-events: none;
       transition: none !important;
     }
@@ -7469,7 +7473,15 @@
 
         function lerp(a, b, t){ return a + (b - a) * t; }
 
+        function isFlipping(){
+          return wrap.classList.contains('ritualCardWrap--flipping') ||
+                 wrap.classList.contains('ritualCardWrap--first-reveal');
+        }
+
         function tick(){
+          // Pausa tilt durante o flip — evita conflito de transform
+          if (isFlipping()){ raf = requestAnimationFrame(tick); return; }
+
           const tRx  = over ? txRx : 0;
           const tRy  = over ? txRy : 0;
           const tS   = over ? 1.04 : 1;
@@ -7499,6 +7511,7 @@
 
         wrap.addEventListener('mousemove', function(e){
           if (wrap.classList.contains('ritualCardWrap--facedown')) return;
+          if (isFlipping()) return;
           const r = wrap.getBoundingClientRect();
           const nx = (e.clientX - r.left) / r.width;
           const ny = (e.clientY - r.top)  / r.height;
