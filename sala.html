@@ -4788,38 +4788,33 @@
 
     /* Carta sobe alto, gira com suavidade absoluta, pousa com impacto */
     @keyframes theFlip {
-      /* Decolagem — sobe antes de começar a girar */
-      0%   { transform: rotateX(3deg) rotateY(0deg)   translateY(0px)   scale(1);    }
-      14%  { transform: rotateX(1deg) rotateY(50deg)  translateY(-60px) scale(1.05); }
-      /* Girada elevada — altura constante */
-      25%  { transform: rotateX(0deg) rotateY(90deg)  translateY(-78px) scale(1.07); }
-      50%  { transform: rotateX(0deg) rotateY(180deg) translateY(-75px) scale(1.07); }
-      75%  { transform: rotateX(0deg) rotateY(270deg) translateY(-78px) scale(1.07); }
-      /* Descida suave */
-      86%  { transform: rotateX(1deg) rotateY(338deg) translateY(-28px) scale(1.04); }
-      /* Impacto na mesa — leve bounce */
-      93%  { transform: rotateX(5deg) rotateY(355deg) translateY(6px)   scale(1.01); }
-      100% { transform: rotateX(3deg) rotateY(360deg) translateY(0px)   scale(1);    }
+      0%   { transform: rotateY(0deg)   translateY(0px)    scale(1);     }
+      10%  { transform: rotateY(28deg)  translateY(-38px)  scale(1.04);  }
+      25%  { transform: rotateY(90deg)  translateY(-72px)  scale(1.08);  }
+      50%  { transform: rotateY(180deg) translateY(-70px)  scale(1.08);  }
+      75%  { transform: rotateY(270deg) translateY(-72px)  scale(1.08);  }
+      90%  { transform: rotateY(348deg) translateY(-14px)  scale(1.02);  }
+      97%  { transform: rotateY(357deg) translateY(2px)    scale(1.002); }
+      100% { transform: rotateY(360deg) translateY(0px)    scale(1);     }
     }
 
-    /* Primeira virada — parte do verso (180°) e revela a frente (360°) */
     @keyframes theFlipFirstReveal {
-      0%   { transform: rotateX(3deg) rotateY(180deg) translateY(0px)   scale(1);    }
-      14%  { transform: rotateX(1deg) rotateY(230deg) translateY(-60px) scale(1.05); }
-      25%  { transform: rotateX(0deg) rotateY(270deg) translateY(-78px) scale(1.07); }
-      60%  { transform: rotateX(0deg) rotateY(340deg) translateY(-28px) scale(1.04); }
-      80%  { transform: rotateX(5deg) rotateY(355deg) translateY(6px)   scale(1.01); }
-      100% { transform: rotateX(3deg) rotateY(360deg) translateY(0px)   scale(1);    }
+      0%   { transform: rotateY(180deg) translateY(0px)    scale(1);     }
+      12%  { transform: rotateY(218deg) translateY(-38px)  scale(1.04);  }
+      30%  { transform: rotateY(270deg) translateY(-72px)  scale(1.08);  }
+      75%  { transform: rotateY(340deg) translateY(-14px)  scale(1.02);  }
+      90%  { transform: rotateY(357deg) translateY(2px)    scale(1.002); }
+      100% { transform: rotateY(360deg) translateY(0px)    scale(1);     }
     }
 
     .ritualCardWrap--flipping {
-      animation: theFlip 1.4s ease-in-out forwards !important;
+      animation: theFlip 2.0s cubic-bezier(0.4,0,0.2,1) forwards !important;
       pointer-events: none;
       transition: none !important;
     }
 
     .ritualCardWrap--first-reveal {
-      animation: theFlipFirstReveal 1.0s ease-in-out forwards !important;
+      animation: theFlipFirstReveal 1.6s cubic-bezier(0.4,0,0.2,1) forwards !important;
       pointer-events: none;
       transition: none !important;
     }
