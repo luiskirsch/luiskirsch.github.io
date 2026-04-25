@@ -3908,15 +3908,12 @@
     .ritualCardWrap{
       position:relative;
       height:55vh;
-      aspect-ratio:2568/3480;
+      aspect-ratio:5/7;
       flex-shrink:0;
       transform: rotateX(3deg);
       -webkit-transform-style: preserve-3d;
       transform-style: preserve-3d;
       transition: transform 320ms var(--ease-spring);
-      background-image: url('./frente-carta.png?v=3');
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
     }
 
     .ritualCardWrap:hover{
@@ -3978,7 +3975,11 @@
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
       transform:translateZ(1px);
-      background: transparent;
+      background-color: #0a0806;
+      background-image: url('./frente-carta.png?v=3');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
     }
 
     .ritualVisualCard::before{ content:none; }
@@ -4559,7 +4560,7 @@
     html.arenaMode .ritualCardWrap{
       height:55vh;
       width:auto;
-      aspect-ratio:2568/3480;
+      aspect-ratio:5/7;
       transform:rotateX(0deg);
     }
 
