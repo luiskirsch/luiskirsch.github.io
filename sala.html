@@ -3916,7 +3916,7 @@
     }
 
     .ritualCardWrap:not(.ritualCardWrap--facedown):hover{
-      transform:translateY(-16px) scale(1.03);
+      transition:transform 80ms linear;
     }
 
     .ritualCardWrap--facedown,
@@ -4000,15 +4000,27 @@
       z-index:1;
     }
 
-    /* Reflexo de verniz */
+    /* Reflexo holográfico dinâmico — posição via JS (--mx, --my) */
     .ritualVisualCard::after{
       content:"";
       position:absolute;
       inset:0;
       border-radius:20px;
-      background:linear-gradient(135deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.02) 18%, transparent 42%);
+      background:
+        radial-gradient(
+          circle at var(--mx,50%) var(--my,50%),
+          rgba(255,230,120,.18) 0%,
+          rgba(255,200,80,.08) 25%,
+          transparent 60%
+        ),
+        linear-gradient(135deg, rgba(255,255,255,.06) 0%, transparent 40%);
       pointer-events:none;
-      z-index:2;
+      z-index:5;
+      opacity:0;
+      transition:opacity 250ms ease;
+    }
+    .ritualCardWrap:hover .ritualVisualCard::after{
+      opacity:1;
     }
 
     /* ── Verso ── */
@@ -7488,6 +7500,33 @@
         ac.style.right = (window.innerWidth - r.right) + 'px';
         if (sair) sair.style.left = (r.left - 16) + 'px';
       }
+
+      /* ── Holographic tilt effect ── */
+      (function(){
+        const wrap = document.getElementById('ritualCardWrap');
+        if (!wrap) return;
+        const visual = wrap.querySelector('.ritualVisualCard');
+
+        wrap.addEventListener('mousemove', function(e){
+          if (wrap.classList.contains('ritualCardWrap--facedown')) return;
+          const r = wrap.getBoundingClientRect();
+          const x = e.clientX - r.left;
+          const y = e.clientY - r.top;
+          const rx = -((y / r.height) - 0.5) * 22;
+          const ry =  ((x / r.width)  - 0.5) * 18;
+          wrap.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.04) translateY(-8px)`;
+          if (visual) {
+            visual.style.setProperty('--mx', (x / r.width  * 100).toFixed(1) + '%');
+            visual.style.setProperty('--my', (y / r.height * 100).toFixed(1) + '%');
+          }
+        });
+
+        wrap.addEventListener('mouseleave', function(){
+          wrap.style.transition = 'transform 500ms var(--ease-spring)';
+          wrap.style.transform = '';
+          setTimeout(()=>{ wrap.style.transition = ''; }, 520);
+        });
+      })();
 
       function activateArenaMode() {
         html.classList.add("arenaMode");
