@@ -3910,25 +3910,18 @@
       height:55vh;
       aspect-ratio:5/7;
       flex-shrink:0;
-      transform:rotateX(6deg) rotateY(-2deg);
       -webkit-transform-style:preserve-3d;
       transform-style:preserve-3d;
-      transition:transform 380ms var(--ease-spring),
-                 box-shadow 380ms ease;
-      filter:drop-shadow(0 28px 40px rgba(0,0,0,.70))
-             drop-shadow(0 6px 16px rgba(0,0,0,.50));
+      transition:transform 380ms var(--ease-spring);
     }
 
     .ritualCardWrap:not(.ritualCardWrap--facedown):hover{
-      transform:rotateX(1deg) rotateY(0deg) translateY(-14px) scale(1.03);
-      filter:drop-shadow(0 44px 56px rgba(0,0,0,.75))
-             drop-shadow(0 10px 24px rgba(180,140,50,.18));
+      transform:translateY(-16px) scale(1.03);
     }
 
     .ritualCardWrap--facedown,
     .ritualCardWrap--facedown:hover{
       transform:rotateY(180deg) !important;
-      filter:none;
     }
 
     /* ── Ambas as faces: preenchem o wrapper exatamente ── */
@@ -3960,26 +3953,40 @@
         repeating-linear-gradient(37deg,  transparent 0px, transparent 26px, rgba(0,0,0,.04) 26px, rgba(0,0,0,.04) 27px),
         radial-gradient(ellipse 88% 82% at 50% 50%, transparent 42%, rgba(0,0,0,.52) 100%),
         linear-gradient(170deg, #1c1612 0%, #0f0c09 45%, #080604 100%);
-      /* Borda dourada multicamada */
+      /* Borda dourada + espessura de carta física */
       box-shadow:
+        /* Espessura — borda lateral direita/inferior */
+        3px 3px 0 rgba(100,72,18,.90),
+        6px 6px 0 rgba(80,56,12,.80),
+        9px 9px 0 rgba(60,42,8,.65),
+        11px 11px 0 rgba(40,28,4,.45),
+        /* Borda dourada */
         inset 0 0 60px rgba(0,0,0,.55),
         0 0 0 1px rgba(50,35,8,.95),
         0 0 0 4px rgba(155,110,30,.68),
         0 0 0 6px rgba(30,20,4,.98),
         0 0 0 9px rgba(210,168,72,.30),
-        0 0 50px rgba(180,140,50,.07);
-      transition:box-shadow 380ms ease;
+        /* Sombra projetada */
+        14px 20px 50px rgba(0,0,0,.70);
+      transition:box-shadow 380ms ease, transform 380ms var(--ease-spring);
     }
 
     .ritualCardWrap:not(.ritualCardWrap--facedown):hover .ritualVisualCard{
       box-shadow:
+        /* Espessura mais pronunciada no hover */
+        4px 4px 0 rgba(110,80,20,.90),
+        8px 8px 0 rgba(88,62,14,.80),
+        12px 12px 0 rgba(66,46,9,.65),
+        14px 14px 0 rgba(44,30,5,.45),
+        /* Borda dourada brilhando */
         inset 0 0 60px rgba(0,0,0,.45),
         0 0 0 1px rgba(50,35,8,.95),
         0 0 0 4px rgba(200,155,50,.85),
         0 0 0 6px rgba(30,20,4,.98),
         0 0 0 9px rgba(220,178,82,.55),
-        0 0 70px rgba(200,160,60,.22),
-        0 0 120px rgba(180,140,50,.10);
+        0 0 70px rgba(200,160,60,.20),
+        /* Sombra mais alta no hover */
+        16px 34px 65px rgba(0,0,0,.75);
     }
 
     /* Cantos decorativos dourados */
