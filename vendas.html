@@ -34,29 +34,29 @@ body{
 .binary-banner{
   position:relative;
   width:100%;
-  height:140px;
+  height:170px;
   overflow:hidden;
-  background:#040303;
-  border-bottom:1px solid rgba(230,192,123,.12);
+  background:linear-gradient(90deg,#060404 0%,#0a0806 40%,#080605 100%);
+  border-bottom:1px solid rgba(230,192,123,.10);
 }
 #binaryPortrait{
   position:absolute;
-  right:0; top:0;
+  inset:0;
+  width:100%;
   height:100%;
-  width:auto;
   display:block;
-  /* fade lateral: visível no centro, some nas bordas */
-  mask-image:linear-gradient(to right, transparent 0%, black 18%, black 88%, transparent 100%);
-  -webkit-mask-image:linear-gradient(to right, transparent 0%, black 18%, black 88%, transparent 100%);
+  /* fade: aparece da esquerda, some suavemente na direita */
+  mask-image:linear-gradient(to right, black 0%, black 40%, transparent 100%);
+  -webkit-mask-image:linear-gradient(to right, black 0%, black 40%, transparent 100%);
 }
 .binary-banner__label{
   position:absolute;
-  left:32px; bottom:16px;
+  right:32px; bottom:14px;
   font-family:ui-serif,Georgia,serif;
-  font-size:11px;
-  letter-spacing:.28em;
+  font-size:10px;
+  letter-spacing:.30em;
   text-transform:uppercase;
-  color:rgba(230,192,123,.55);
+  color:rgba(230,192,123,.38);
   pointer-events:none;
 }
 
