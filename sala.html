@@ -3936,10 +3936,49 @@
       background-repeat:no-repeat;
     }
 
-    /* ── Frente ── */
+    /* ── Frente — layout premium CSS ── */
     .ritualVisualCard{
-      background-color:#0a0806;
-      background-image:url('./frente-carta.png?v=2');
+      /* Base pedra escura */
+      background:
+        radial-gradient(ellipse 70% 55% at 0%   0%,   rgba(22,52,16,.30) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 100%  0%,   rgba(22,52,16,.24) 0%, transparent 52%),
+        radial-gradient(ellipse 65% 52% at 0%   100%,  rgba(22,52,16,.26) 0%, transparent 54%),
+        radial-gradient(ellipse 58% 48% at 100% 100%,  rgba(22,52,16,.20) 0%, transparent 50%),
+        radial-gradient(ellipse 65% 45% at 50%  42%,   rgba(180,130,40,.05) 0%, transparent 65%),
+        repeating-linear-gradient(127deg, transparent 0px, transparent 18px, rgba(255,255,255,.007) 18px, rgba(255,255,255,.007) 19px),
+        repeating-linear-gradient(37deg,  transparent 0px, transparent 26px, rgba(0,0,0,.04) 26px, rgba(0,0,0,.04) 27px),
+        radial-gradient(ellipse 88% 82% at 50% 50%, transparent 42%, rgba(0,0,0,.52) 100%),
+        linear-gradient(170deg, #1c1612 0%, #0f0c09 45%, #080604 100%);
+      /* Borda dourada multicamada */
+      box-shadow:
+        inset 0 0 60px rgba(0,0,0,.55),
+        0 0 0 1px rgba(50,35,8,.95),
+        0 0 0 4px rgba(155,110,30,.68),
+        0 0 0 6px rgba(30,20,4,.98),
+        0 0 0 9px rgba(210,168,72,.30),
+        0 0 50px rgba(180,140,50,.07);
+    }
+
+    /* Cantos decorativos dourados */
+    .ritualVisualCard::before{
+      content:"";
+      position:absolute;
+      inset:12px;
+      border-radius:14px;
+      border:1px solid rgba(210,168,72,.22);
+      pointer-events:none;
+      z-index:1;
+    }
+
+    /* Reflexo de verniz */
+    .ritualVisualCard::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:20px;
+      background:linear-gradient(135deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.02) 18%, transparent 42%);
+      pointer-events:none;
+      z-index:2;
     }
 
     /* ── Verso ── */
