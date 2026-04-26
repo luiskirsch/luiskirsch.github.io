@@ -1058,17 +1058,16 @@ body{
 
     // Scatter aleatório simples — como o thefacebook
     const chars = [];
-    const N = 320; // número total de tokens
+    const N = 500;
     for (let i = 0; i < N; i++) {
-      // Distribuição: concentra mais perto do retrato, espalha para direita
-      const xFrac = Math.pow(Math.random(), 1.6); // mais tokens no início
-      const x = imgW * 0.6 + xFrac * (W * 0.72);
+      const xFrac = Math.pow(Math.random(), 1.4);
+      const x = xFrac * (W * 0.82); // começa do canto esquerdo
       if (x > W * 0.82) continue;
       const y = Math.random() * H;
       // Tamanho cresce com x
       const sz = Math.floor(8 + (x / W) * 10 + Math.random() * 6);
       // Opacidade: maior perto do retrato, some longe
-      const fade = 1 - ((x - imgW * 0.6) / (W * 0.72));
+      const fade = 1 - (x / (W * 0.82));
       const alpha = (0.12 + fade * 0.32) * (0.5 + Math.random() * 0.5);
       const color = x < W * 0.4
         ? `rgba(255,250,225,${alpha.toFixed(3)})`
