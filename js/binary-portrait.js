@@ -1,8 +1,8 @@
 export function binaryPortrait(canvas, src) {
-  const CW = 4;   // char width  px — menor = mais nitidez na silhueta
-  const CH = 7;   // char height px
+  const CW = 3;   // char width  px
+  const CH = 6;   // char height px
   const FPS = 10;
-  const THR = 0.36;
+  const THR = 0.45;
 
   const img = new Image();
   img.crossOrigin = 'anonymous';
@@ -31,11 +31,15 @@ export function binaryPortrait(canvas, src) {
       b[i] = (px[o]*0.299 + px[o+1]*0.587 + px[o+2]*0.114) / 255;
     }
 
-    // Normaliza contraste — estica o range para usar o máximo de 0→1
+    // 1. Normaliza range
     let lo = 1, hi = 0;
     for (let i = 0; i < b.length; i++) { if (b[i] < lo) lo = b[i]; if (b[i] > hi) hi = b[i]; }
     const range = hi - lo || 1;
     for (let i = 0; i < b.length; i++) b[i] = (b[i] - lo) / range;
+
+    // 2. Curva sigmoide — acentua bordas e separa rosto do fundo nitidamente
+    const K = 9; // sharpness (maior = mais duro)
+    for (let i = 0; i < b.length; i++) b[i] = 1 / (1 + Math.exp(-K * (b[i] - 0.5)));
 
     // Grade de chars 0/1
     const ch = new Uint8Array(FC * FR);
