@@ -37,16 +37,24 @@ body{
   height:130px;
   overflow:hidden;
   background:
-    /* Camada dourada — nasce no canto esquerdo, acompanha o retrato, dissolve */
-    radial-gradient(ellipse 55% 120% at 7% 50%,
-      rgba(185,138,45,.38) 0%,
-      rgba(145,105,30,.22) 30%,
-      rgba(90,65,15,.10)  60%,
-      transparent 85%
+    /* Cobertura sólida sobre o retrato — esconde binários completamente */
+    linear-gradient(to right,
+      #040303 0%,
+      #040303 7%,
+      rgba(4,3,3,.95) 11%,
+      rgba(4,3,3,.70) 15%,
+      transparent 22%
     ),
-    /* Toque quente atrás dos binários centrais */
-    radial-gradient(ellipse 40% 80% at 35% 50%,
-      rgba(120,88,22,.12) 0%,
+    /* Brilho dourado que nasce junto ao retrato */
+    radial-gradient(ellipse 52% 120% at 9% 50%,
+      rgba(185,138,45,.55) 0%,
+      rgba(145,105,30,.32) 28%,
+      rgba(90,65,15,.12)  58%,
+      transparent 82%
+    ),
+    /* Toque quente no centro */
+    radial-gradient(ellipse 38% 80% at 32% 50%,
+      rgba(120,88,22,.10) 0%,
       transparent 75%
     ),
     #040303;
@@ -1044,8 +1052,8 @@ body{
 
     // Gera chars com posição, tamanho e opacidade baseados na distância ao retrato
     const chars = [];
-    const cols = Math.floor(W / 18);
-    const rows = Math.floor(H / 12);
+    const cols = Math.ceil(W / 18) + 1;
+    const rows = Math.ceil(H / 12) + 1;
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
