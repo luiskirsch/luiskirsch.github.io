@@ -101,15 +101,6 @@ export function binaryPortrait(canvas, src) {
     }
 
     draw();
-
-    const fN = Math.max(1, Math.floor(FC * FR * 0.03));
-    setInterval(() => {
-      for (let i = 0; i < fN; i++) {
-        const idx = Math.floor(Math.random() * FC * FR);
-        if (b[idx] >= THR) ch[idx] ^= 1;
-      }
-      draw();
-    }, 1000 / FPS);
   };
 
   img.src = src;
