@@ -1025,11 +1025,7 @@ body{
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 <script type="module">
   import { binaryPortrait } from './js/binary-portrait.js';
-  binaryPortrait(
-    document.getElementById('binaryPortrait'),
-    './img/luis.jpg',
-    { charW: 6, charH: 10, fps: 10, threshold: 0.12 }
-  );
+  binaryPortrait(document.getElementById('binaryPortrait'), './img/luis.jpg');
 </script>
 </body>
 </html>
