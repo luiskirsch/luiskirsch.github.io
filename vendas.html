@@ -36,8 +36,21 @@ body{
   width:100%;
   height:130px;
   overflow:hidden;
-  background:#040303;
-  border-bottom:1px solid rgba(230,192,123,.08);
+  background:
+    /* Camada dourada — nasce no canto esquerdo, acompanha o retrato, dissolve */
+    radial-gradient(ellipse 55% 120% at 7% 50%,
+      rgba(185,138,45,.38) 0%,
+      rgba(145,105,30,.22) 30%,
+      rgba(90,65,15,.10)  60%,
+      transparent 85%
+    ),
+    /* Toque quente atrás dos binários centrais */
+    radial-gradient(ellipse 40% 80% at 35% 50%,
+      rgba(120,88,22,.12) 0%,
+      transparent 75%
+    ),
+    #040303;
+  border-bottom:1px solid rgba(230,192,123,.10);
 }
 #binaryScatter{
   position:absolute;
