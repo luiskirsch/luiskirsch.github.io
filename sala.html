@@ -325,6 +325,17 @@
       font-family:Georgia, "Times New Roman", serif;
     }
 
+    .roomTitle__bin{
+      display:block;
+      font-family:"Courier New", monospace;
+      font-size:clamp(7px, .7vw, 9px);
+      font-weight:400;
+      letter-spacing:.08em;
+      color:rgba(215,176,107,.45);
+      line-height:1.6;
+      margin-bottom:3px;
+    }
+
     .topCenterMeta{
       display:flex;
       justify-content:center;
@@ -6260,7 +6271,10 @@
 
         <div class="brandWrap">
           <p class="eyebrow">Sala do Ritual · <span id="gameStatus" class="eyebrow__status">Espera</span></p>
-          <h1 class="roomTitle">SextoLugar</h1>
+          <h1 class="roomTitle">
+            <span class="roomTitle__bin" id="roomTitleBin"></span>
+            SextoLugar
+          </h1>
         </div>
 
         <div class="topCenter">
@@ -7559,6 +7573,17 @@
           over = false;
           if (!raf) raf = requestAnimationFrame(tick);
         });
+      })();
+
+      /* ── Binary room title ── */
+      (function(){
+        const el = document.getElementById('roomTitleBin');
+        if (!el) return;
+        const text = 'SextoLugar';
+        const bin = Array.from(text)
+          .map(c => c.charCodeAt(0).toString(2).padStart(8,'0'))
+          .join(' ');
+        el.textContent = bin;
       })();
 
       function activateArenaMode() {
