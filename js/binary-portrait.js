@@ -1,8 +1,8 @@
 export function binaryPortrait(canvas, src) {
-  const CW = 5;   // char width  px
-  const CH = 8;   // char height px
+  const CW = 4;   // char width  px — menor = mais nitidez na silhueta
+  const CH = 7;   // char height px
   const FPS = 10;
-  const THR = 0.38; // após normalização: corta o fundo escuro, mantém o rosto
+  const THR = 0.36;
 
   const img = new Image();
   img.crossOrigin = 'anonymous';
@@ -41,20 +41,26 @@ export function binaryPortrait(canvas, src) {
     const ch = new Uint8Array(FC * FR);
     for (let i = 0; i < ch.length; i++) ch[i] = Math.random() > .5 ? 1 : 0;
 
-    // Scatter — tokens binários espalhados, somem para a direita
-    const tok = ['0','1','01','10','00','11','010','101','001','1010','0101','1100','10','01'];
+    // Scatter — cobre o banner inteiro, vai sumindo suavemente para a direita
+    const tok = ['0','1','01','10','00','11','010','101','001','1010','0101','1100','10','01','1','0'];
     const sc = [];
-    const N = Math.floor(W / CW * (H / CH) * 0.025);
-    for (let i = 0; i < N; i++) {
-      const x = Math.random() * W;
-      const decay = Math.max(0, 1 - (x / W) * 1.6);
-      const a = (Math.random() * 0.13 + 0.04) * decay;
-      if (a > 0.006) sc.push({
-        x, y: Math.random() * H,
-        t: tok[Math.floor(Math.random() * tok.length)],
-        sz: Math.floor(Math.random() * 6 + 8),
-        a
-      });
+    // Grade uniforme + posição aleatória dentro de cada célula
+    const SCW = 22, SCH = 14; // espaçamento da grade do scatter
+    for (let gy = 0; gy < Math.ceil(H / SCH); gy++) {
+      for (let gx = 0; gx < Math.ceil(W / SCW); gx++) {
+        const x = gx * SCW + Math.random() * SCW;
+        const y = gy * SCH + Math.random() * SCH;
+        // Fade: começa a sumir a partir do rosto, chega a 0 em ~75% do banner
+        const xFrac = Math.max(0, x / W);
+        const decay = Math.max(0, 1 - xFrac * 1.35);
+        const a = (Math.random() * 0.11 + 0.03) * decay;
+        if (a > 0.005) sc.push({
+          x, y,
+          t: tok[Math.floor(Math.random() * tok.length)],
+          sz: Math.floor(Math.random() * 3 + 7), // 7–9px — pequenos
+          a
+        });
+      }
     }
 
     const ctx = canvas.getContext('2d');
@@ -76,14 +82,14 @@ export function binaryPortrait(canvas, src) {
         for (let c = 0; c < FC; c++) {
           const v = b[r * FC + c];
           if (v < THR) continue;
-          // Silhueta sólida: pixels acima do threshold ficam bem visíveis
-          const a = 0.55 + v * 0.45; // 0.55–1.0 (sem variar demais)
+          // Opaco e nítido — sem variar muito
+          const a = Math.min(0.72 + v * 0.28, 1);
           ctx.globalAlpha = 1;
-          ctx.fillStyle = v > .72
-            ? `rgba(255,254,238,${a.toFixed(3)})`
-            : v > .50
-            ? `rgba(235,200,120,${a.toFixed(3)})`
-            : `rgba(190,148,70,${(a*.85).toFixed(3)})`;
+          ctx.fillStyle = v > .70
+            ? `rgba(255,254,240,${a.toFixed(3)})`
+            : v > .48
+            ? `rgba(238,205,128,${a.toFixed(3)})`
+            : `rgba(195,152,72,${a.toFixed(3)})`;
           ctx.fillText(ch[r * FC + c] ? '1' : '0', c * CW, r * CH);
         }
       }
