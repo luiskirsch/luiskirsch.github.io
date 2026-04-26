@@ -2,7 +2,7 @@ export function binaryPortrait(canvas, src) {
   const CW = 5;   // char width  px
   const CH = 8;   // char height px
   const FPS = 10;
-  const THR = 0.10; // brightness threshold
+  const THR = 0.38; // após normalização: corta o fundo escuro, mantém o rosto
 
   const img = new Image();
   img.crossOrigin = 'anonymous';
@@ -30,6 +30,12 @@ export function binaryPortrait(canvas, src) {
       const o = i * 4;
       b[i] = (px[o]*0.299 + px[o+1]*0.587 + px[o+2]*0.114) / 255;
     }
+
+    // Normaliza contraste — estica o range para usar o máximo de 0→1
+    let lo = 1, hi = 0;
+    for (let i = 0; i < b.length; i++) { if (b[i] < lo) lo = b[i]; if (b[i] > hi) hi = b[i]; }
+    const range = hi - lo || 1;
+    for (let i = 0; i < b.length; i++) b[i] = (b[i] - lo) / range;
 
     // Grade de chars 0/1
     const ch = new Uint8Array(FC * FR);
@@ -70,13 +76,14 @@ export function binaryPortrait(canvas, src) {
         for (let c = 0; c < FC; c++) {
           const v = b[r * FC + c];
           if (v < THR) continue;
-          const a = Math.pow(v, 0.42);
+          // Silhueta sólida: pixels acima do threshold ficam bem visíveis
+          const a = 0.55 + v * 0.45; // 0.55–1.0 (sem variar demais)
           ctx.globalAlpha = 1;
-          ctx.fillStyle = v > .65
-            ? `rgba(255,252,235,${a.toFixed(3)})`
-            : v > .35
-            ? `rgba(230,196,115,${a.toFixed(3)})`
-            : `rgba(160,122,52,${(a*.72).toFixed(3)})`;
+          ctx.fillStyle = v > .72
+            ? `rgba(255,254,238,${a.toFixed(3)})`
+            : v > .50
+            ? `rgba(235,200,120,${a.toFixed(3)})`
+            : `rgba(190,148,70,${(a*.85).toFixed(3)})`;
           ctx.fillText(ch[r * FC + c] ? '1' : '0', c * CW, r * CH);
         }
       }
