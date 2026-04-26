@@ -1088,6 +1088,15 @@ body{
       }
     }
 
+    // Extras saindo do corpo — cluster denso na borda direita do retrato
+    for (let i = 0; i < 55; i++) {
+      const x = imgW * 0.75 + Math.random() * imgW * 0.55;
+      const y = Math.random() * H;
+      const sz = Math.floor(7 + Math.random() * 6);
+      const alpha = (0.18 + Math.random() * 0.22).toFixed(3);
+      chars.push({ x, y, sz, color: `rgba(255,248,215,${alpha})`, txt: tokens[Math.floor(Math.random()*tokens.length)] });
+    }
+
     chars.forEach(c => {
       ctx.globalAlpha = 1;
       ctx.font = `${c.sz}px "Courier New",monospace`;
