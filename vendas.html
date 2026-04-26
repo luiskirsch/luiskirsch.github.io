@@ -39,27 +39,13 @@ body{
   background:#040303;
   border-bottom:1px solid rgba(230,192,123,.08);
 }
-#binaryPortrait{
+#binaryScatter{
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
   display:block;
-  /* face visível à esquerda, some suavemente até preto */
-  mask-image:linear-gradient(to right,
-    black 0%,
-    black 12%,
-    rgba(0,0,0,.85) 28%,
-    rgba(0,0,0,.40) 52%,
-    transparent 78%
-  );
-  -webkit-mask-image:linear-gradient(to right,
-    black 0%,
-    black 12%,
-    rgba(0,0,0,.85) 28%,
-    rgba(0,0,0,.40) 52%,
-    transparent 78%
-  );
+  z-index:1;
 }
 .binary-banner__label{
   position:absolute;
@@ -631,7 +617,8 @@ body{
 
 <!-- BINARY PORTRAIT BANNER -->
 <div class="binary-banner">
-  <img src="./img/luis.png" alt="" style="height:100%;width:auto;display:block;">
+  <canvas id="binaryScatter"></canvas>
+  <img src="./img/luis.png" alt="" style="height:100%;width:auto;display:block;position:relative;z-index:2;">
   <span class="binary-banner__label">Luis Kirsch · Criador</span>
 </div>
 
@@ -1024,7 +1011,72 @@ body{
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 <script type="module">
-  // binary portrait pausado
+  (function() {
+    const canvas = document.getElementById('binaryScatter');
+    if (!canvas) return;
+    const W = canvas.parentElement.offsetWidth;
+    const H = canvas.parentElement.offsetHeight;
+    canvas.width  = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // Largura da imagem no banner (aprox)
+    const imgW = H; // imagem é quadrada
+
+    const tokens = [
+      '0','1','01','10','00','11','010','101','001','110','100',
+      '1010','0101','1100','0011','1001','0110','10','01','1','0',
+      '11001','01010','10110','00101'
+    ];
+
+    // Gera chars com posição, tamanho e opacidade baseados na distância ao retrato
+    const chars = [];
+    const cols = Math.floor(W / 18);
+    const rows = Math.floor(H / 12);
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * 18 + Math.random() * 14 - 4;
+        const y = row * 12 + Math.random() * 10 - 2;
+
+        // Distância normalizada a partir da borda direita do retrato
+        const dist = Math.max(0, x - imgW * 0.85) / (W - imgW);
+
+        // Curva de fade: denso junto ao retrato, some ~70% do banner
+        if (dist > 0.72) continue;
+        const fade = 1 - (dist / 0.72);
+
+        // Tamanho varia: maior e mais visível próximo, menor e sutil longe
+        const sz = Math.floor(6 + fade * 8 + Math.random() * 4); // 6–18px
+
+        // Opacidade base × fade — maior junto ao retrato
+        const baseAlpha = 0.08 + fade * 0.38;
+        const alpha = baseAlpha * (0.6 + Math.random() * 0.4);
+
+        // Cor: branco-dourado próximo, âmbar distante
+        const bright = fade > 0.6;
+        const color = bright
+          ? `rgba(255,248,220,${alpha.toFixed(3)})`
+          : `rgba(210,170,80,${alpha.toFixed(3)})`;
+
+        chars.push({
+          x, y,
+          txt: tokens[Math.floor(Math.random() * tokens.length)],
+          sz,
+          color,
+          bold: fade > 0.55 && Math.random() > 0.5
+        });
+      }
+    }
+
+    // Render único (estático)
+    chars.forEach(c => {
+      ctx.globalAlpha = 1;
+      ctx.font = `${c.bold ? 'bold ' : ''}${c.sz}px "Courier New",monospace`;
+      ctx.fillStyle = c.color;
+      ctx.fillText(c.txt, c.x, c.y);
+    });
+  })();
 </script>
 </body>
 </html>
