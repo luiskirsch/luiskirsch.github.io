@@ -1058,21 +1058,33 @@ body{
 
     // Scatter aleatório simples — como o thefacebook
     const chars = [];
-    const N = 500;
-    for (let i = 0; i < N; i++) {
-      const xFrac = Math.pow(Math.random(), 1.4);
-      const x = xFrac * (W * 0.82); // começa do canto esquerdo
-      if (x > W * 0.82) continue;
-      const y = Math.random() * H;
-      // Tamanho cresce com x
-      const sz = Math.floor(8 + (x / W) * 10 + Math.random() * 6);
-      // Opacidade: maior perto do retrato, some longe
-      const fade = 1 - (x / (W * 0.82));
-      const alpha = (0.12 + fade * 0.32) * (0.5 + Math.random() * 0.5);
-      const color = x < W * 0.4
-        ? `rgba(255,250,225,${alpha.toFixed(3)})`
-        : `rgba(210,172,78,${alpha.toFixed(3)})`;
-      chars.push({ x, y, sz, color, txt: tokens[Math.floor(Math.random()*tokens.length)] });
+    // Jittered grid — uma célula por posição, sem clusters nem buracos
+    const cellW = 34, cellH = 18;
+    const cols  = Math.ceil(W * 0.83 / cellW);
+    const rows  = Math.ceil(H / cellH);
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        // Centro da célula + jitter aleatório dentro dela
+        const x = col * cellW + Math.random() * cellW;
+        const y = row * cellH + Math.random() * cellH;
+        const xFrac = x / W;
+
+        // Tamanho: 7px no canto esquerdo → 16px no pico (30% do banner)
+        const sz = Math.floor(7 + Math.min(xFrac / 0.30, 1) * 9 + Math.random() * 3);
+
+        // Opacidade: sutil no canto (atrás do retrato), plena no centro, some no fim
+        const fade = 1 - (xFrac / 0.83);
+        const inPortrait = x < imgW;
+        const base = inPortrait ? 0.08 + (x / imgW) * 0.14 : 0.10 + fade * 0.28;
+        const alpha = base * (0.6 + Math.random() * 0.4);
+
+        const color = xFrac < 0.38
+          ? `rgba(255,250,225,${alpha.toFixed(3)})`
+          : `rgba(210,172,78,${alpha.toFixed(3)})`;
+
+        chars.push({ x, y, sz, color, txt: tokens[Math.floor(Math.random()*tokens.length)] });
+      }
     }
 
     chars.forEach(c => {
