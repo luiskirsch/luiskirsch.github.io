@@ -6271,9 +6271,8 @@
 
         <div class="brandWrap">
           <p class="eyebrow">Sala do Ritual · <span id="gameStatus" class="eyebrow__status">Espera</span></p>
-          <h1 class="roomTitle">
-            <span class="roomTitle__bin" id="roomTitleBin"></span>
-            SextoLugar
+          <h1 class="roomTitle" style="line-height:1;">
+            <canvas id="roomTitleCanvas" style="display:block;max-width:100%;"></canvas>
           </h1>
         </div>
 
@@ -7575,15 +7574,56 @@
         });
       })();
 
-      /* ── Binary room title ── */
+      /* ── Binary room title — letras formadas por 0s e 1s ── */
       (function(){
-        const el = document.getElementById('roomTitleBin');
-        if (!el) return;
-        const text = 'SextoLugar';
-        const bin = Array.from(text)
-          .map(c => c.charCodeAt(0).toString(2).padStart(8,'0'))
-          .join(' ');
-        el.textContent = bin;
+        const canvas = document.getElementById('roomTitleCanvas');
+        if (!canvas) return;
+
+        const TEXT   = 'SextoLugar';
+        const CW     = 5;   // largura de cada char binário em px
+        const CH     = 8;   // altura de cada char binário em px
+        const FSAMP  = 72;  // font size para amostrar
+
+        // 1. Renderiza o texto numa canvas oculta para obter o bitmap
+        const hid = document.createElement('canvas');
+        const hCtx = hid.getContext('2d');
+        hCtx.font = `800 ${FSAMP}px Georgia,"Times New Roman",serif`;
+        const tw = Math.ceil(hCtx.measureText(TEXT).width) + 16;
+        hid.width  = tw;
+        hid.height = Math.ceil(FSAMP * 1.25);
+        hCtx.fillStyle = '#000';
+        hCtx.fillRect(0, 0, hid.width, hid.height);
+        hCtx.fillStyle = '#fff';
+        hCtx.font = `800 ${FSAMP}px Georgia,"Times New Roman",serif`;
+        hCtx.textBaseline = 'top';
+        hCtx.fillText(TEXT, 8, 4);
+
+        const px   = hCtx.getImageData(0, 0, hid.width, hid.height).data;
+        const COLS = Math.floor(hid.width  / CW);
+        const ROWS = Math.floor(hid.height / CH);
+
+        // 2. Dimensiona o canvas visível
+        canvas.width  = COLS * CW;
+        canvas.height = ROWS * CH;
+
+        const ctx = canvas.getContext('2d');
+        ctx.font = `bold ${CH - 1}px "Courier New",monospace`;
+        ctx.textBaseline = 'top';
+
+        // 3. Para cada célula, se o pixel for claro → desenha 0 ou 1
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            const sx  = c * CW + Math.floor(CW / 2);
+            const sy  = r * CH + Math.floor(CH / 2);
+            const idx = (sy * hid.width + sx) * 4;
+            if (px[idx] > 100) {
+              const bright = px[idx] / 255;
+              const a = (0.65 + bright * 0.35).toFixed(2);
+              ctx.fillStyle = `rgba(246,239,228,${a})`;
+              ctx.fillText(Math.random() > .5 ? '1' : '0', c * CW, r * CH);
+            }
+          }
+        }
       })();
 
       function activateArenaMode() {
