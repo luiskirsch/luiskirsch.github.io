@@ -37,27 +37,16 @@ body{
   height:130px;
   overflow:hidden;
   background:
-    /* Cobertura sólida sobre o retrato — esconde binários completamente */
     linear-gradient(to right,
-      #040303 0%,
-      #040303 7%,
-      rgba(4,3,3,.95) 11%,
-      rgba(4,3,3,.70) 15%,
-      transparent 22%
-    ),
-    /* Brilho dourado que nasce junto ao retrato */
-    radial-gradient(ellipse 52% 120% at 9% 50%,
-      rgba(185,138,45,.55) 0%,
-      rgba(145,105,30,.32) 28%,
-      rgba(90,65,15,.12)  58%,
-      transparent 82%
-    ),
-    /* Toque quente no centro */
-    radial-gradient(ellipse 38% 80% at 32% 50%,
-      rgba(120,88,22,.10) 0%,
-      transparent 75%
-    ),
-    #040303;
+      #040303        0%,
+      #040303        10%,
+      rgba(120,88,25,.32) 20%,
+      rgba(155,115,35,.38) 32%,
+      rgba(110,80,20,.22) 50%,
+      rgba(50,36,8,.08)  68%,
+      transparent    82%,
+      #040303        100%
+    );
   border-bottom:1px solid rgba(230,192,123,.10);
 }
 #binaryScatter{
@@ -67,6 +56,23 @@ body{
   height:100%;
   display:block;
   z-index:1;
+  /* Binários só visíveis após o retrato, somem no final */
+  mask-image:linear-gradient(to right,
+    transparent 0%,
+    transparent 11%,
+    rgba(0,0,0,.5) 16%,
+    black 22%,
+    black 78%,
+    transparent 94%
+  );
+  -webkit-mask-image:linear-gradient(to right,
+    transparent 0%,
+    transparent 11%,
+    rgba(0,0,0,.5) 16%,
+    black 22%,
+    black 78%,
+    transparent 94%
+  );
 }
 .binary-banner__label{
   position:absolute;
