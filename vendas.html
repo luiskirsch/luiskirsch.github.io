@@ -1056,45 +1056,33 @@ body{
       '11001','01010','10110','00101'
     ];
 
-    // Grid único — começa do x=0, tamanho e espaçamento crescem com x
     const chars = [];
-    const FADE_END = 0.78; // some em 78% da largura do banner
 
-    // Número de colunas fixo, mas o espaçamento entre elas cresce com x
-    const totalCols = 110;
-    const rows = Math.ceil(H / 10) + 1;
+    // Grid espaçado — 16px vertical, espaçamento horizontal cresce com x
+    for (let y = 8; y < H; y += 16) {
+      for (let x = 4; x < W * 0.76; x += 4) {
+        const xFrac = x / W;
+        // Espaçamento horizontal cresce exponencialmente — denso perto, espaçado longe
+        const spacing = 10 + Math.pow(xFrac, 0.9) * 26;
+        if (x % Math.round(spacing) > spacing * 0.45 && Math.random() > 0.3) continue;
 
-    for (let col = 0; col < totalCols; col++) {
-      // Posição x proporcional (espaçamento cresce: mais denso perto, mais espaçado longe)
-      const t = col / totalCols; // 0→1
-      const x = W * FADE_END * (Math.pow(t, 0.65)) + (Math.random() - 0.5) * 8;
-      if (x > W * FADE_END) continue;
+        const inPortrait = x < imgW;
+        // Tamanho: 5px atrás do retrato → 14px no pico
+        const sz = Math.floor(inPortrait ? 5 + (x/imgW) * 3 : 7 + xFrac * 7 + Math.random() * 2);
+        // Opacidade: leve atrás, médio depois, some perto do fim
+        const fade = 1 - (xFrac / 0.76);
+        const alpha = (inPortrait ? 0.12 + (x/imgW)*0.14 : 0.10 + fade * 0.30)
+                      * (0.6 + Math.random() * 0.4);
+        const color = xFrac < 0.38
+          ? `rgba(255,248,220,${alpha.toFixed(3)})`
+          : `rgba(210,170,80,${alpha.toFixed(3)})`;
 
-      const xFrac = x / W; // fração do banner total
-
-      // Tamanho: cresce de 4px (esquerda) até 18px (meio) com easing
-      const sz = Math.floor(4 + Math.pow(xFrac / FADE_END, 0.6) * 14 + Math.random() * 3);
-
-      // Opacidade: fraca atrás do retrato (xFrac<0.12), forte no meio, some no fim
-      const inPortrait = xFrac < (imgW / W);
-      const fade = 1 - (xFrac / FADE_END);
-      const baseAlpha = inPortrait
-        ? (0.22 + (xFrac / (imgW/W)) * 0.18)  // 0.22→0.40 atrás do retrato
-        : (0.12 + fade * 0.38);                 // 0.12→0.50 depois
-      const alpha = baseAlpha * (0.5 + Math.random() * 0.5);
-
-      const bright = xFrac < 0.40;
-      const color = bright
-        ? `rgba(255,248,220,${alpha.toFixed(3)})`
-        : `rgba(210,170,80,${alpha.toFixed(3)})`;
-
-      for (let row = 0; row < rows; row++) {
-        const y = row * 10 + (Math.random() - 0.5) * 8;
         chars.push({
-          x: x + (Math.random() - 0.5) * 4,
-          y, sz, color,
+          x: x + (Math.random()-0.5)*6,
+          y: y + (Math.random()-0.5)*10,
+          sz, color,
           txt: tokens[Math.floor(Math.random() * tokens.length)],
-          bold: !inPortrait && xFrac < 0.3 && Math.random() > 0.6
+          bold: !inPortrait && xFrac < 0.28 && Math.random() > 0.55
         });
       }
     }
