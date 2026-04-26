@@ -38,14 +38,14 @@ body{
   overflow:hidden;
   background:
     linear-gradient(to right,
-      rgba(100,72,18,.28)  0%,
-      rgba(140,102,28,.42) 12%,
-      rgba(160,118,32,.48) 28%,
-      rgba(140,102,28,.38) 44%,
-      rgba(90,65,16,.20)   60%,
-      rgba(40,28,6,.06)    76%,
-      transparent          88%,
-      #040303              100%
+      rgba(175,128,35,.52)  0%,
+      rgba(155,112,30,.44)  10%,
+      rgba(130,94,24,.34)   22%,
+      rgba(100,72,18,.22)   40%,
+      rgba(60,44,10,.10)    60%,
+      rgba(20,14,3,.03)     76%,
+      transparent           86%,
+      #040303               100%
     );
   border-bottom:1px solid rgba(230,192,123,.10);
 }
@@ -1058,15 +1058,16 @@ body{
 
     // Scatter aleatório simples — como o thefacebook
     const chars = [];
-    // Jittered grid — uma célula por posição, sem clusters nem buracos
-    const cellW = 34, cellH = 18;
-    const cols  = Math.ceil(W * 0.83 / cellW);
+    // Jittered grid — células menores perto do retrato (mais denso), maiores longe
+    const cellH = 18;
+    const cols  = Math.ceil(W * 0.83 / 28);
     const rows  = Math.ceil(H / cellH);
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        // Centro da célula + jitter aleatório dentro dela
-        const x = col * cellW + Math.random() * cellW;
+        // Espaçamento cresce com x — mais denso perto do retrato
+        const cw = 20 + (col / cols) * 18; // 20px perto → 38px longe
+        const x = col * 28 + Math.random() * cw;
         const y = row * cellH + Math.random() * cellH;
         const xFrac = x / W;
 
