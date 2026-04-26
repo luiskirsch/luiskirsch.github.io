@@ -56,22 +56,22 @@ body{
   height:100%;
   display:block;
   z-index:1;
-  /* Binários só visíveis após o retrato, somem no final */
+  /* Atrás do retrato: chars fracos e pequenos; depois: pleno; some no fim */
   mask-image:linear-gradient(to right,
-    transparent 0%,
-    transparent 11%,
-    rgba(0,0,0,.5) 16%,
-    black 22%,
-    black 78%,
-    transparent 94%
+    rgba(0,0,0,.18) 0%,
+    rgba(0,0,0,.25) 8%,
+    rgba(0,0,0,.65) 16%,
+    black           24%,
+    black           78%,
+    transparent     94%
   );
   -webkit-mask-image:linear-gradient(to right,
-    transparent 0%,
-    transparent 11%,
-    rgba(0,0,0,.5) 16%,
-    black 22%,
-    black 78%,
-    transparent 94%
+    rgba(0,0,0,.18) 0%,
+    rgba(0,0,0,.25) 8%,
+    rgba(0,0,0,.65) 16%,
+    black           24%,
+    black           78%,
+    transparent     94%
   );
 }
 .binary-banner__label{
@@ -1056,41 +1056,50 @@ body{
       '11001','01010','10110','00101'
     ];
 
-    // Gera chars com posição, tamanho e opacidade baseados na distância ao retrato
     const chars = [];
-    const cols = Math.ceil(W / 18) + 1;
-    const rows = Math.ceil(H / 12) + 1;
+    // Zona do retrato: grid denso com chars PEQUENOS e fracos
+    const smCols = Math.ceil(imgW / 9) + 1;
+    const smRows = Math.ceil(H / 9) + 1;
+    for (let row = 0; row < smRows; row++) {
+      for (let col = 0; col < smCols; col++) {
+        const x = col * 9 + Math.random() * 7 - 2;
+        const y = row * 9 + Math.random() * 7 - 2;
+        const xFrac = x / imgW; // 0 = esquerda, 1 = borda direita do retrato
+        // Tamanho cresce de 4px (esquerda) até 8px (borda direita)
+        const sz = Math.floor(4 + xFrac * 4 + Math.random() * 2);
+        // Opacidade muito baixa — não atrapalha o retrato
+        const alpha = (0.04 + xFrac * 0.10) * (0.5 + Math.random() * 0.5);
+        chars.push({
+          x, y,
+          txt: ['0','1','01','10','00','11'][Math.floor(Math.random()*6)],
+          sz,
+          color: `rgba(220,185,90,${alpha.toFixed(3)})`,
+          bold: false
+        });
+      }
+    }
 
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < cols; col++) {
-        const x = col * 18 + Math.random() * 14 - 4;
+    // Zona após o retrato: chars maiores e mais visíveis em degradê
+    const lgCols = Math.ceil((W - imgW) / 18) + 1;
+    const lgRows = Math.ceil(H / 12) + 1;
+    for (let row = 0; row < lgRows; row++) {
+      for (let col = 0; col < lgCols; col++) {
+        const x = imgW + col * 18 + Math.random() * 14 - 4;
         const y = row * 12 + Math.random() * 10 - 2;
-
-        // Distância normalizada a partir da borda direita do retrato
-        const dist = Math.max(0, x - imgW * 0.85) / (W - imgW);
-
-        // Curva de fade: denso junto ao retrato, some ~70% do banner
+        const dist = (x - imgW) / (W - imgW); // 0 = junto ao retrato, 1 = fim
         if (dist > 0.72) continue;
         const fade = 1 - (dist / 0.72);
-
-        // Tamanho varia: maior e mais visível próximo, menor e sutil longe
-        const sz = Math.floor(6 + fade * 8 + Math.random() * 4); // 6–18px
-
-        // Opacidade base × fade — maior junto ao retrato
-        const baseAlpha = 0.08 + fade * 0.38;
+        const sz = Math.floor(8 + fade * 10 + Math.random() * 4);
+        const baseAlpha = 0.10 + fade * 0.38;
         const alpha = baseAlpha * (0.6 + Math.random() * 0.4);
-
-        // Cor: branco-dourado próximo, âmbar distante
         const bright = fade > 0.6;
-        const color = bright
-          ? `rgba(255,248,220,${alpha.toFixed(3)})`
-          : `rgba(210,170,80,${alpha.toFixed(3)})`;
-
         chars.push({
           x, y,
           txt: tokens[Math.floor(Math.random() * tokens.length)],
           sz,
-          color,
+          color: bright
+            ? `rgba(255,248,220,${alpha.toFixed(3)})`
+            : `rgba(210,170,80,${alpha.toFixed(3)})`,
           bold: fade > 0.55 && Math.random() > 0.5
         });
       }
