@@ -1088,6 +1088,15 @@ body{
       }
     }
 
+    // 10 tokens saindo de trás da imagem em direção à direita
+    for (let i = 0; i < 10; i++) {
+      const x = imgW * 0.55 + Math.random() * imgW * 0.40;
+      const y = Math.random() * H;
+      const sz = Math.floor(6 + Math.random() * 5);
+      const alpha = (0.12 + Math.random() * 0.14).toFixed(3);
+      chars.push({ x, y, sz, color: `rgba(255,248,215,${alpha})`, txt: tokens[Math.floor(Math.random()*tokens.length)] });
+    }
+
     // Extras rente à borda direita do retrato — como saindo dele
     for (let i = 0; i < 35; i++) {
       const x = imgW * 0.88 + Math.random() * imgW * 0.28;
