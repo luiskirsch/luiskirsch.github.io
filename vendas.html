@@ -1056,54 +1056,45 @@ body{
       '11001','01010','10110','00101'
     ];
 
+    // Grid único — começa do x=0, tamanho e espaçamento crescem com x
     const chars = [];
-    // Zona do retrato: grid denso com chars PEQUENOS e fracos
-    const smCols = Math.ceil(imgW / 9) + 1;
-    const smRows = Math.ceil(H / 9) + 1;
-    for (let row = 0; row < smRows; row++) {
-      for (let col = 0; col < smCols; col++) {
-        const x = col * 9 + Math.random() * 7 - 2;
-        const y = row * 9 + Math.random() * 7 - 2;
-        const xFrac = x / imgW; // 0 = esquerda, 1 = borda direita do retrato
-        // Tamanho cresce de 4px (esquerda) até 8px (borda direita)
-        const sz = Math.floor(4 + xFrac * 4 + Math.random() * 2);
-        // Visível atrás do retrato, crescendo levemente para a direita
-        const alpha = (0.26 + xFrac * 0.24) * (0.5 + Math.random() * 0.5);
-        chars.push({
-          x, y,
-          txt: ['0','1','01','10','00','11'][Math.floor(Math.random()*6)],
-          sz,
-          color: `rgba(220,185,90,${alpha.toFixed(3)})`,
-          bold: false
-        });
-      }
-    }
+    const FADE_END = 0.78; // some em 78% da largura do banner
 
-    // Zona após o retrato: chars CRESCEM com a distância, opacidade em degradê
-    const lgSpacing = 24; // mais espaçados = menos aglomerado
-    const lgCols = Math.ceil((W - imgW) / lgSpacing) + 1;
-    const lgRows = Math.ceil(H / 16) + 1;
-    for (let row = 0; row < lgRows; row++) {
-      for (let col = 0; col < lgCols; col++) {
-        const x = imgW + col * lgSpacing + (Math.random() - 0.5) * 16;
-        const y = row * 16 + (Math.random() - 0.5) * 12;
-        const dist = (x - imgW) / (W - imgW); // 0 = junto ao retrato, 1 = fim
-        if (dist > 0.74) continue;
-        // Opacidade: alta perto do retrato, some na direita
-        const fade = 1 - (dist / 0.74);
-        const baseAlpha = 0.08 + fade * 0.40;
-        const alpha = baseAlpha * (0.55 + Math.random() * 0.45);
-        // Tamanho CRESCE com a distância (pequeno perto, maior longe)
-        const sz = Math.floor(6 + dist * 14 + Math.random() * 3);
-        const bright = dist < 0.35;
+    // Número de colunas fixo, mas o espaçamento entre elas cresce com x
+    const totalCols = 110;
+    const rows = Math.ceil(H / 10) + 1;
+
+    for (let col = 0; col < totalCols; col++) {
+      // Posição x proporcional (espaçamento cresce: mais denso perto, mais espaçado longe)
+      const t = col / totalCols; // 0→1
+      const x = W * FADE_END * (Math.pow(t, 0.65)) + (Math.random() - 0.5) * 8;
+      if (x > W * FADE_END) continue;
+
+      const xFrac = x / W; // fração do banner total
+
+      // Tamanho: cresce de 4px (esquerda) até 18px (meio) com easing
+      const sz = Math.floor(4 + Math.pow(xFrac / FADE_END, 0.6) * 14 + Math.random() * 3);
+
+      // Opacidade: fraca atrás do retrato (xFrac<0.12), forte no meio, some no fim
+      const inPortrait = xFrac < (imgW / W);
+      const fade = 1 - (xFrac / FADE_END);
+      const baseAlpha = inPortrait
+        ? (0.22 + (xFrac / (imgW/W)) * 0.18)  // 0.22→0.40 atrás do retrato
+        : (0.12 + fade * 0.38);                 // 0.12→0.50 depois
+      const alpha = baseAlpha * (0.5 + Math.random() * 0.5);
+
+      const bright = xFrac < 0.40;
+      const color = bright
+        ? `rgba(255,248,220,${alpha.toFixed(3)})`
+        : `rgba(210,170,80,${alpha.toFixed(3)})`;
+
+      for (let row = 0; row < rows; row++) {
+        const y = row * 10 + (Math.random() - 0.5) * 8;
         chars.push({
-          x, y,
+          x: x + (Math.random() - 0.5) * 4,
+          y, sz, color,
           txt: tokens[Math.floor(Math.random() * tokens.length)],
-          sz,
-          color: bright
-            ? `rgba(255,248,220,${alpha.toFixed(3)})`
-            : `rgba(210,170,80,${alpha.toFixed(3)})`,
-          bold: dist < 0.2 && Math.random() > 0.5
+          bold: !inPortrait && xFrac < 0.3 && Math.random() > 0.6
         });
       }
     }
