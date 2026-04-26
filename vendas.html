@@ -58,17 +58,17 @@ body{
   z-index:1;
   /* Atrás do retrato: chars fracos e pequenos; depois: pleno; some no fim */
   mask-image:linear-gradient(to right,
-    rgba(0,0,0,.18) 0%,
-    rgba(0,0,0,.25) 8%,
-    rgba(0,0,0,.65) 16%,
+    rgba(0,0,0,.45) 0%,
+    rgba(0,0,0,.55) 8%,
+    rgba(0,0,0,.80) 16%,
     black           24%,
     black           78%,
     transparent     94%
   );
   -webkit-mask-image:linear-gradient(to right,
-    rgba(0,0,0,.18) 0%,
-    rgba(0,0,0,.25) 8%,
-    rgba(0,0,0,.65) 16%,
+    rgba(0,0,0,.45) 0%,
+    rgba(0,0,0,.55) 8%,
+    rgba(0,0,0,.80) 16%,
     black           24%,
     black           78%,
     transparent     94%
@@ -1067,8 +1067,8 @@ body{
         const xFrac = x / imgW; // 0 = esquerda, 1 = borda direita do retrato
         // Tamanho cresce de 4px (esquerda) até 8px (borda direita)
         const sz = Math.floor(4 + xFrac * 4 + Math.random() * 2);
-        // Opacidade muito baixa — não atrapalha o retrato
-        const alpha = (0.04 + xFrac * 0.10) * (0.5 + Math.random() * 0.5);
+        // Fraco mas visível atrás do retrato
+        const alpha = (0.18 + xFrac * 0.22) * (0.5 + Math.random() * 0.5);
         chars.push({
           x, y,
           txt: ['0','1','01','10','00','11'][Math.floor(Math.random()*6)],
