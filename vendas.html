@@ -1056,41 +1056,29 @@ body{
       '11001','01010','10110','00101'
     ];
 
+    // Scatter aleatório simples — como o thefacebook
     const chars = [];
-
-    // Grid espaçado — 16px vertical, espaçamento horizontal cresce com x
-    for (let y = 8; y < H; y += 16) {
-      for (let x = 4; x < W * 0.76; x += 4) {
-        const xFrac = x / W;
-        // Espaçamento horizontal cresce exponencialmente — denso perto, espaçado longe
-        const spacing = 10 + Math.pow(xFrac, 0.9) * 26;
-        if (x % Math.round(spacing) > spacing * 0.45 && Math.random() > 0.3) continue;
-
-        const inPortrait = x < imgW;
-        // Tamanho: 5px atrás do retrato → 14px no pico
-        const sz = Math.floor(inPortrait ? 5 + (x/imgW) * 3 : 7 + xFrac * 7 + Math.random() * 2);
-        // Opacidade: leve atrás, médio depois, some perto do fim
-        const fade = 1 - (xFrac / 0.76);
-        const alpha = (inPortrait ? 0.12 + (x/imgW)*0.14 : 0.10 + fade * 0.30)
-                      * (0.6 + Math.random() * 0.4);
-        const color = xFrac < 0.38
-          ? `rgba(255,248,220,${alpha.toFixed(3)})`
-          : `rgba(210,170,80,${alpha.toFixed(3)})`;
-
-        chars.push({
-          x: x + (Math.random()-0.5)*6,
-          y: y + (Math.random()-0.5)*10,
-          sz, color,
-          txt: tokens[Math.floor(Math.random() * tokens.length)],
-          bold: !inPortrait && xFrac < 0.28 && Math.random() > 0.55
-        });
-      }
+    const N = 320; // número total de tokens
+    for (let i = 0; i < N; i++) {
+      // Distribuição: concentra mais perto do retrato, espalha para direita
+      const xFrac = Math.pow(Math.random(), 1.6); // mais tokens no início
+      const x = imgW * 0.6 + xFrac * (W * 0.72);
+      if (x > W * 0.82) continue;
+      const y = Math.random() * H;
+      // Tamanho cresce com x
+      const sz = Math.floor(8 + (x / W) * 10 + Math.random() * 6);
+      // Opacidade: maior perto do retrato, some longe
+      const fade = 1 - ((x - imgW * 0.6) / (W * 0.72));
+      const alpha = (0.12 + fade * 0.32) * (0.5 + Math.random() * 0.5);
+      const color = x < W * 0.4
+        ? `rgba(255,250,225,${alpha.toFixed(3)})`
+        : `rgba(210,172,78,${alpha.toFixed(3)})`;
+      chars.push({ x, y, sz, color, txt: tokens[Math.floor(Math.random()*tokens.length)] });
     }
 
-    // Render único (estático)
     chars.forEach(c => {
       ctx.globalAlpha = 1;
-      ctx.font = `${c.bold ? 'bold ' : ''}${c.sz}px "Courier New",monospace`;
+      ctx.font = `${c.sz}px "Courier New",monospace`;
       ctx.fillStyle = c.color;
       ctx.fillText(c.txt, c.x, c.y);
     });
