@@ -7579,48 +7579,53 @@
         const canvas = document.getElementById('roomTitleCanvas');
         if (!canvas) return;
 
-        const TEXT   = 'SextoLugar';
-        const CW     = 5;   // largura de cada char binário em px
-        const CH     = 8;   // altura de cada char binário em px
-        const FSAMP  = 72;  // font size para amostrar
+        const TEXT  = 'SextoLugar';
+        const CW    = 4;    // char width px
+        const CH    = 6;    // char height px
+        const FSAMP = 160;  // fonte de amostragem — alta resolução
 
-        // 1. Renderiza o texto numa canvas oculta para obter o bitmap
-        const hid = document.createElement('canvas');
+        // 1. Renderiza o texto em grande numa canvas oculta
+        const hid  = document.createElement('canvas');
         const hCtx = hid.getContext('2d');
-        hCtx.font = `800 ${FSAMP}px Georgia,"Times New Roman",serif`;
-        const tw = Math.ceil(hCtx.measureText(TEXT).width) + 16;
+        hCtx.font  = `800 ${FSAMP}px Georgia,"Times New Roman",serif`;
+        const tw   = Math.ceil(hCtx.measureText(TEXT).width) + FSAMP * 0.3;
         hid.width  = tw;
-        hid.height = Math.ceil(FSAMP * 1.25);
+        hid.height = Math.ceil(FSAMP * 1.15);
         hCtx.fillStyle = '#000';
         hCtx.fillRect(0, 0, hid.width, hid.height);
         hCtx.fillStyle = '#fff';
         hCtx.font = `800 ${FSAMP}px Georgia,"Times New Roman",serif`;
-        hCtx.textBaseline = 'top';
-        hCtx.fillText(TEXT, 8, 4);
+        hCtx.textBaseline = 'alphabetic';
+        hCtx.fillText(TEXT, FSAMP * 0.05, FSAMP * 0.88);
 
         const px   = hCtx.getImageData(0, 0, hid.width, hid.height).data;
         const COLS = Math.floor(hid.width  / CW);
         const ROWS = Math.floor(hid.height / CH);
 
-        // 2. Dimensiona o canvas visível
+        // 2. Canvas visível — CSS escala para caber no header
         canvas.width  = COLS * CW;
         canvas.height = ROWS * CH;
+        canvas.style.cssText = 'display:block;width:100%;height:auto;max-height:52px;';
 
         const ctx = canvas.getContext('2d');
         ctx.font = `bold ${CH - 1}px "Courier New",monospace`;
         ctx.textBaseline = 'top';
 
-        // 3. Para cada célula, se o pixel for claro → desenha 0 ou 1
+        // 3. Amostra média de brilho por célula (mais preciso que ponto único)
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
-            const sx  = c * CW + Math.floor(CW / 2);
-            const sy  = r * CH + Math.floor(CH / 2);
-            const idx = (sy * hid.width + sx) * 4;
-            if (px[idx] > 100) {
-              const bright = px[idx] / 255;
-              const a = (0.65 + bright * 0.35).toFixed(2);
+            let sum = 0, n = 0;
+            for (let dy = 0; dy < CH; dy++) {
+              for (let dx = 0; dx < CW; dx++) {
+                const idx = ((r*CH+dy) * hid.width + (c*CW+dx)) * 4;
+                sum += px[idx]; n++;
+              }
+            }
+            const avg = sum / n;
+            if (avg > 80) {
+              const a = (0.55 + (avg/255) * 0.45).toFixed(2);
               ctx.fillStyle = `rgba(246,239,228,${a})`;
-              ctx.fillText(Math.random() > .5 ? '1' : '0', c * CW, r * CH);
+              ctx.fillText(Math.random() > .5 ? '1' : '0', c*CW, r*CH);
             }
           }
         }
