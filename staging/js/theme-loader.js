@@ -5,21 +5,38 @@
   window.__OSL_THEME_LOADED__ = true;
 
   var DEFAULT_THEME = 'default';
-  var STORAGE_KEY = 'osl_theme_override';
+  var OVERRIDE_KEY  = 'osl_theme_override';
+  var CACHE_KEY     = 'osl_active_theme_cached';
 
-  function resolveThemeName() {
+  // True when the resolved theme came from a manual override (URL or storage),
+  // meaning active-theme.js (Firestore) must NOT replace it.
+  var manualOverride = false;
+  var currentThemeId = null;
+
+  function readUrlOverride() {
     try {
       var u = new URL(window.location.href);
-      var t = u.searchParams.get('theme');
-      if (t) return t;
-    } catch (e) {}
+      return u.searchParams.get('theme');
+    } catch (e) { return null; }
+  }
 
-    try {
-      var s = localStorage.getItem(STORAGE_KEY);
-      if (s) return s;
-    } catch (e) {}
+  function readStorageOverride() {
+    try { return localStorage.getItem(OVERRIDE_KEY); } catch (e) { return null; }
+  }
 
-    if (window.OSL_ACTIVE_THEME) return window.OSL_ACTIVE_THEME;
+  function readCache() {
+    try { return localStorage.getItem(CACHE_KEY); } catch (e) { return null; }
+  }
+
+  function resolveInitialThemeName() {
+    var urlTheme = readUrlOverride();
+    if (urlTheme) { manualOverride = true; return urlTheme; }
+
+    var stored = readStorageOverride();
+    if (stored) { manualOverride = true; return stored; }
+
+    var cached = readCache();
+    if (cached) return cached;
 
     return DEFAULT_THEME;
   }
@@ -29,8 +46,7 @@
     var src = (script && script.src) || '';
     var base = src.replace(/js\/theme-loader\.js.*$/, '');
     if (!base) {
-      var path = window.location.pathname.replace(/[^/]*$/, '');
-      base = path;
+      base = window.location.pathname.replace(/[^/]*$/, '');
     }
     return base + 'themes/';
   }
@@ -48,6 +64,10 @@
   function applyBodyClasses(theme) {
     var run = function () {
       if (!document.body) return;
+      // remove previous theme class if changing
+      Array.prototype.slice.call(document.body.classList).forEach(function (c) {
+        if (c.indexOf('osl-theme-') === 0) document.body.classList.remove(c);
+      });
       document.body.classList.add('osl-theme', 'osl-theme-' + (theme.id || 'unknown'));
       if (theme.bodyClass) {
         String(theme.bodyClass).split(/\s+/).forEach(function (c) {
@@ -107,6 +127,7 @@
     applyCopy(theme);
     applyImages(theme);
     window.OSL_THEME = theme;
+    currentThemeId = theme.id || null;
     try {
       document.dispatchEvent(new CustomEvent('osl-theme-applied', { detail: theme }));
     } catch (e) {}
@@ -120,13 +141,14 @@
       });
   }
 
-  var name = resolveThemeName();
+  // Initial resolve
+  var initialName = resolveInitialThemeName();
 
-  loadTheme(name)
+  loadTheme(initialName)
     .then(applyTheme)
     .catch(function (err) {
-      if (name !== DEFAULT_THEME) {
-        console.warn('[osl-theme] failed to load "' + name + '", falling back to default:', err);
+      if (initialName !== DEFAULT_THEME) {
+        console.warn('[osl-theme] failed to load "' + initialName + '", falling back to default:', err);
         loadTheme(DEFAULT_THEME).then(applyTheme).catch(function (e2) {
           console.warn('[osl-theme] default fallback also failed:', e2);
         });
@@ -135,14 +157,32 @@
       }
     });
 
+  // Public helpers (used by StagingBanner long-press, dev console, admin tool)
   window.OSL_setTheme = function (themeName, persist) {
     if (persist) {
-      try { localStorage.setItem(STORAGE_KEY, themeName); } catch (e) {}
+      try { localStorage.setItem(OVERRIDE_KEY, themeName); } catch (e) {}
+      manualOverride = true;
     }
     return loadTheme(themeName).then(applyTheme);
   };
 
   window.OSL_clearThemeOverride = function () {
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    try { localStorage.removeItem(OVERRIDE_KEY); } catch (e) {}
+    manualOverride = false;
+    // Re-apply whichever non-override source resolves now
+    var next = readCache() || DEFAULT_THEME;
+    return loadTheme(next).then(applyTheme).catch(function () {});
+  };
+
+  // Active-theme integration: active-theme.js calls this when Firestore resolves.
+  // We only apply if no manual override is in effect AND the new theme is
+  // different from what's currently rendered (avoid pointless refetch).
+  window.OSL_applyActiveTheme = function (themeId) {
+    if (!themeId) return Promise.resolve();
+    if (manualOverride) return Promise.resolve();
+    if (currentThemeId === themeId) return Promise.resolve();
+    return loadTheme(themeId).then(applyTheme).catch(function (err) {
+      console.warn('[osl-theme] active-theme apply failed for "' + themeId + '":', err);
+    });
   };
 })();

@@ -1,25 +1,14 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+// Game-runtime Firebase wrapper. Imports the shared app from firebase-app.js
+// and re-exports the Firestore/auth functions used across the room modules.
+
+import { db, auth } from "./firebase-app.js";
 import {
-  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
+  doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
   collection, addDoc, onSnapshot, query, where, limit, orderBy,
   serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { S } from "./state.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
-  authDomain: "osextolugar-game.firebaseapp.com",
-  projectId: "osextolugar-game",
-  storageBucket: "osextolugar-game.firebasestorage.app",
-  messagingSenderId: "947922328721",
-  appId: "1:947922328721:web:989522c99e16ab449f3330",
-  measurementId: "G-D6HG779ZFR"
-};
-
-const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
-const auth = getAuth(app);
 
 // Popula state com as referências Firebase após inicialização
 function initFirebaseRefs() {

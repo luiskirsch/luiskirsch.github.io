@@ -96,8 +96,84 @@ Outras páginas (`sala.html`, `jogo.html`, etc.) ainda usam o `theme-loader` aut
 
 1. Cria `staging/themes/<evento>.json` com os overrides necessários (basta o que muda; o que não estiver no JSON usa o `default`).
 2. Testa via `?theme=<evento>` em staging.
-3. Quando aprovado, configura `activeFrom`/`activeUntil` no JSON e (Sprint 5) aponta o Firestore pra ele.
-4. Promove pra prod copiando `themes/<evento>.json`, eventuais novos assets e qualquer mudança em HTMLs.
+3. Quando aprovado, ativa via [`/staging/admin-theme.html`](admin-theme.html) (ou direto no Firestore Console — campos do doc `config/activeTheme` documentados abaixo).
+4. Promove pra prod copiando `themes/<evento>.json`, eventuais novos assets e qualquer mudança em HTMLs (**NÃO copiar `js/firebase-config.js`** — ver seção de promoção).
+
+## Ativação dinâmica via Firestore (Sprint 5)
+
+`js/active-theme.js` é carregado depois do `theme-loader.js` em `vendas.html` e `entrada.html`. Ele lê o doc `config/activeTheme` no Firestore e, se houver evento sazonal ativo na janela de datas atual, troca o tema em runtime sem deploy.
+
+### Esquema do doc `config/activeTheme`
+
+```jsonc
+{
+  "themeId":         "valentines-2026",   // qual tema usar quando dentro da janela
+  "activeFrom":      "2026-05-25",        // YYYY-MM-DD ou ISO datetime; null = ativa imediato
+  "activeUntil":     "2026-06-15",        // null = ativa permanente
+  "fallbackThemeId": "default",           // qual tema usar fora da janela
+  "updatedAt":       <serverTimestamp>,
+  "updatedBy":       "luish@..."
+}
+```
+
+Lógica:
+- Se `now >= activeFrom` e `now <= activeUntil` (ou se ambos forem null), aplica `themeId`.
+- Caso contrário, aplica `fallbackThemeId`.
+- Override manual via `?theme=` ou `localStorage.osl_theme_override` **sempre vence** o doc.
+
+### Cache no cliente
+
+`active-theme.js` grava o último `themeId` resolvido em `localStorage.osl_active_theme_cached`. Em visitas subsequentes o `theme-loader.js` lê esse cache **antes** de o Firestore responder, eliminando o flash de default → sazonal.
+
+### Painel admin
+
+[`/staging/admin-theme.html`](admin-theme.html) — página protegida por Cloudflare Access + Firebase Auth. Permite editar o doc sem abrir o Firestore Console. Login com qualquer usuário Firebase do projeto.
+
+Botões:
+- **Salvar** — grava o doc com os valores do form.
+- **Aplicar agora (30d)** — preenche `activeFrom = hoje` e `activeUntil = hoje + 30 dias`.
+- **Desativar evento** — zera tudo, volta a `default`.
+
+## Setup Firebase staging (Sprint 5 hand-off)
+
+Hoje `staging/js/firebase-config.js` ainda aponta pro **projeto de produção** (`osextolugar-game`). Significa que o admin tool e o `active-theme.js` em staging escrevem/lêem na mesma DB que prod. Não usa pra publicar evento sem ter certeza.
+
+Pra isolar:
+
+1. **Cria o projeto** `sextolugar-staging` em https://console.firebase.google.com
+   - Add Web App → copia as 6 credenciais (`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`)
+2. **Habilita Firestore** no projeto staging — modo "Production" com regras default (ajustamos depois).
+3. **Habilita Authentication** → método Email/Password. Cria pelo menos 1 usuário admin no console.
+4. **Edita** `staging/js/firebase-config.js`:
+   - Substitui as credenciais
+   - Muda `__isStagingProject` pra `true`
+5. **Cria o doc inicial** `config/activeTheme` no Firestore staging — pode ser via `admin-theme.html` (clica Salvar com defaults) ou no Console manualmente.
+6. **Commit + push.** A partir daqui, staging escreve/lê só no Firestore staging, isolado de prod.
+
+## Promoção staging → produção
+
+Fluxo geral: `cp staging/<arquivo> ./<arquivo>` pros HTMLs, JSONs e assets aprovados.
+
+**NUNCA copiar:**
+
+| Arquivo | Por quê |
+|---|---|
+| `staging/js/firebase-config.js` | Tem credenciais de staging (ou de fallback prod, mas com flag de marcador) — promover sobrescreveria a config real de prod |
+| `staging/_staging.js` | É o banner laranja — só faz sentido em staging |
+| `staging/admin-theme.html` | Admin tool, não é página pública |
+| `staging/README.md` | Doc deste ambiente |
+
+**Sempre tirar:**
+- `<meta name="robots" content="noindex, nofollow">` dos HTMLs ao copiar (foi adicionado só pra staging não vazar no Google).
+- Tag `<script src="_staging.js" defer></script>` dos HTMLs.
+
+> A promoção idealmente deveria ser scriptada — fica como TODO. Por enquanto, é cirúrgica via `cp` + remoção das tags.
+
+Quando o evento sazonal estiver pronto pra produção:
+1. Copia themes JSON novos pra `/themes/`.
+2. Copia mudanças em HTMLs (sem as tags acima).
+3. Copia `js/active-theme.js`, `js/firebase-app.js`, `js/firebase-config.js` (do **prod**, não do staging) e a versão atualizada de `js/firebase.js` na primeira promoção do Sprint 5.
+4. Cria/atualiza o doc `config/activeTheme` no Firestore **prod** (`osextolugar-game`) com os mesmos valores que estavam funcionando em staging.
 
 ## Configuração do Cloudflare Access (one-time setup)
 

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<script src="_staging.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[STAGING] OSL · Admin Theme</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Sora', system-ui, -apple-system, sans-serif;
+  background: #0b0809;
+  color: #f5f7fb;
+  min-height: 100vh;
+  padding: 80px 20px 60px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 22px; letter-spacing: 2px; font-weight: 800; margin-bottom: 4px; }
+.lede { color: rgba(255,255,255,.55); font-size: 13px; margin-bottom: 32px; }
+.warn {
+  background: rgba(255,90,0,.12);
+  border: 1px solid rgba(255,90,0,.42);
+  color: #ffc59c;
+  padding: 14px 18px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.warn strong { color: #ff8a44; letter-spacing: 1px; }
+.card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.card h2 { font-size: 13px; letter-spacing: 2px; color: #e6c07b; margin-bottom: 18px; font-weight: 700; }
+label { display: block; font-size: 11px; letter-spacing: 1.5px; color: rgba(255,255,255,.6); margin-bottom: 6px; }
+input, select {
+  width: 100%; height: 44px;
+  background: rgba(0,0,0,.3);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  color: #fff;
+  padding: 0 14px;
+  font-size: 14px;
+  font-family: inherit;
+  margin-bottom: 16px;
+}
+input:focus, select:focus { outline: none; border-color: #e6c07b; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+button {
+  height: 44px;
+  border: none; border-radius: 10px;
+  background: #e6c07b;
+  color: #000;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  padding: 0 22px;
+  font-family: inherit;
+}
+button:hover { filter: brightness(1.1); }
+button:disabled { opacity: .4; cursor: not-allowed; }
+button.secondary { background: rgba(255,255,255,.06); color: #fff; }
+button.danger    { background: rgba(224,85,85,.18); color: #ff9090; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.status {
+  font-size: 12px;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  display: none;
+}
+.status.show { display: block; }
+.status.ok    { background: rgba(110,201,138,.12); color: #6ec98a; border: 1px solid rgba(110,201,138,.3); }
+.status.err   { background: rgba(224,85,85,.12);  color: #ff9090; border: 1px solid rgba(224,85,85,.3); }
+.meta { font-size: 11px; color: rgba(255,255,255,.42); margin-top: 14px; }
+.meta code { background: rgba(255,255,255,.06); padding: 1px 6px; border-radius: 4px; }
+#loginCard input { margin-bottom: 12px; }
+#appCard { display: none; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>OSL · Admin Theme</h1>
+  <p class="lede">Controla o documento <code style="background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px">config/activeTheme</code> que site e app lêem em tempo real.</p>
+
+  <div id="warnFallback" class="warn" style="display:none">
+    <strong>ATENÇÃO</strong> · Este painel está conectado ao Firestore de <strong>PRODUÇÃO</strong> (o projeto staging ainda não foi configurado em <code>js/firebase-config.js</code>). Mudanças aqui afetam <strong>usuários reais</strong>. Cancele se isso não é intencional.
+  </div>
+
+  <div id="loginCard" class="card">
+    <h2>Autenticação</h2>
+    <label>E-mail</label>
+    <input id="email" type="email" autocomplete="username">
+    <label>Senha</label>
+    <input id="password" type="password" autocomplete="current-password">
+    <div class="actions">
+      <button id="btnLogin">Entrar</button>
+    </div>
+    <div id="loginStatus" class="status"></div>
+  </div>
+
+  <div id="appCard" class="card">
+    <h2>Tema Ativo</h2>
+
+    <label>Theme ID</label>
+    <select id="themeId">
+      <option value="default">default</option>
+      <option value="valentines-2026">valentines-2026</option>
+    </select>
+
+    <div class="row">
+      <div>
+        <label>Active From (YYYY-MM-DD)</label>
+        <input id="activeFrom" type="date">
+      </div>
+      <div>
+        <label>Active Until (YYYY-MM-DD)</label>
+        <input id="activeUntil" type="date">
+      </div>
+    </div>
+
+    <label>Fallback Theme ID (quando fora da janela)</label>
+    <select id="fallbackThemeId">
+      <option value="default">default</option>
+    </select>
+
+    <div class="actions">
+      <button id="btnSave">Salvar</button>
+      <button id="btnApplyNow" class="secondary" title="Define activeFrom = agora, activeUntil = +30 dias">Aplicar agora (30d)</button>
+      <button id="btnDisable" class="danger" title="Limpa o evento — volta a default sem janela">Desativar evento</button>
+      <button id="btnLogout" class="secondary" style="margin-left:auto">Sair</button>
+    </div>
+
+    <div id="saveStatus" class="status"></div>
+
+    <div class="meta" id="metaInfo"></div>
+  </div>
+</div>
+
+<script type="module">
+import { db, auth, IS_REAL_STAGING_PROJECT, FIREBASE_PROJECT_ID } from './js/firebase-app.js';
+import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+
+const $ = (id) => document.getElementById(id);
+const docRef = doc(db, 'config', 'activeTheme');
+
+function show(el, msg, kind) {
+  el.textContent = msg;
+  el.className = 'status show ' + (kind || '');
+}
+function clear(el) { el.className = 'status'; el.textContent = ''; }
+
+if (!IS_REAL_STAGING_PROJECT) {
+  $('warnFallback').style.display = 'block';
+}
+$('metaInfo').innerHTML = `Firestore: <code>${FIREBASE_PROJECT_ID}</code>`;
+
+// ---------- auth ----------
+$('btnLogin').addEventListener('click', async () => {
+  clear($('loginStatus'));
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  if (!email || !password) { show($('loginStatus'), 'Preencha e-mail e senha.', 'err'); return; }
+  $('btnLogin').disabled = true;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (err) {
+    show($('loginStatus'), 'Falha no login: ' + (err.code || err.message), 'err');
+    $('btnLogin').disabled = false;
+  }
+});
+
+$('btnLogout').addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    $('loginCard').style.display = 'none';
+    $('appCard').style.display = 'block';
+    await loadActiveTheme();
+  } else {
+    $('loginCard').style.display = 'block';
+    $('appCard').style.display = 'none';
+    $('btnLogin').disabled = false;
+  }
+});
+
+// ---------- form ----------
+function toDateInputValue(value) {
+  if (!value) return '';
+  if (typeof value?.toDate === 'function') value = value.toDate();
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toISOString().slice(0, 10);
+}
+
+async function loadActiveTheme() {
+  try {
+    const snap = await getDoc(docRef);
+    const data = snap.exists() ? snap.data() : {};
+    $('themeId').value         = data.themeId         ?? 'default';
+    $('fallbackThemeId').value = data.fallbackThemeId ?? 'default';
+    $('activeFrom').value      = toDateInputValue(data.activeFrom);
+    $('activeUntil').value     = toDateInputValue(data.activeUntil);
+    if (data.updatedAt) {
+      const ts = data.updatedAt.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt);
+      $('metaInfo').innerHTML += ` · última atualização: ${ts.toLocaleString('pt-BR')}`;
+      if (data.updatedBy) $('metaInfo').innerHTML += ` por <code>${data.updatedBy}</code>`;
+    }
+  } catch (err) {
+    show($('saveStatus'), 'Falha ao ler doc: ' + err.message, 'err');
+  }
+}
+
+async function writeDoc(payload) {
+  payload.updatedAt = serverTimestamp();
+  payload.updatedBy = auth.currentUser?.email ?? 'unknown';
+  await setDoc(docRef, payload, { merge: true });
+}
+
+$('btnSave').addEventListener('click', async () => {
+  clear($('saveStatus'));
+  $('btnSave').disabled = true;
+  try {
+    await writeDoc({
+      themeId:         $('themeId').value,
+      fallbackThemeId: $('fallbackThemeId').value,
+      activeFrom:      $('activeFrom').value || null,
+      activeUntil:     $('activeUntil').value || null,
+    });
+    show($('saveStatus'), 'Salvo. Clientes vão pegar na próxima carga (cache local atualiza primeiro).', 'ok');
+  } catch (err) {
+    show($('saveStatus'), 'Falha ao salvar: ' + err.message, 'err');
+  } finally {
+    $('btnSave').disabled = false;
+  }
+});
+
+$('btnApplyNow').addEventListener('click', async () => {
+  const today = new Date();
+  const plus30 = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+  $('activeFrom').value  = today.toISOString().slice(0, 10);
+  $('activeUntil').value = plus30.toISOString().slice(0, 10);
+  show($('saveStatus'), 'Datas preenchidas — clica em Salvar pra aplicar.', 'ok');
+});
+
+$('btnDisable').addEventListener('click', async () => {
+  if (!confirm('Desativar evento e voltar a default?')) return;
+  clear($('saveStatus'));
+  try {
+    await writeDoc({
+      themeId: 'default',
+      fallbackThemeId: 'default',
+      activeFrom: null,
+      activeUntil: null,
+    });
+    $('themeId').value = 'default';
+    $('activeFrom').value = '';
+    $('activeUntil').value = '';
+    show($('saveStatus'), 'Evento desativado.', 'ok');
+  } catch (err) {
+    show($('saveStatus'), 'Falha: ' + err.message, 'err');
+  }
+});
+</script>
+
+</body>
+</html>
