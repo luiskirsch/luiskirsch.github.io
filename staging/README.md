@@ -32,11 +32,72 @@ Adicionalmente, todos os HTMLs daqui têm:
 
 ```
 staging/
-  *.html          ← cópias dos HTMLs de produção (com noindex + banner)
-  *.png, *.jpg    ← assets duplicados (paths relativos preservados)
-  _staging.js     ← injeta o banner e o prefixo de título
-  README.md       ← este arquivo
+  *.html              ← cópias dos HTMLs de produção (com noindex + banner)
+  *.png, *.jpg        ← assets duplicados (paths relativos preservados)
+  img/                ← assets de imagem do site (cópia de /img/)
+  js/                 ← módulos JS do site (cópia de /js/)
+  js/theme-loader.js  ← carregador de temas sazonais (Sprint 2)
+  themes/             ← definições de temas
+    default.json
+    valentines-2026.json
+  _staging.js         ← injeta banner e prefixo de título
+  README.md           ← este arquivo
 ```
+
+## Sistema de temas (Sprint 2)
+
+Páginas em staging carregam `js/theme-loader.js` no `<head>`. Ele lê o tema ativo na seguinte ordem de prioridade:
+
+1. `?theme=<id>` na URL — override pra preview
+2. `localStorage.osl_theme_override` — persiste entre páginas
+3. `window.OSL_ACTIVE_THEME` — preenchido pelo Firestore (Sprint 5)
+4. `default`
+
+E aplica três coisas: **CSS variables** em `:root`, **classes** no `<body>` (pra ativar decorações via CSS) e **textos/imagens** via atributos `data-theme-key` / `data-theme-img` no HTML.
+
+### Arquivos de tema (JSON)
+
+```jsonc
+{
+  "id": "valentines-2026",
+  "name": "Dia dos Namorados 2026",
+  "activeFrom": "2026-05-25",      // Sprint 5 lê isso pra ligar/desligar
+  "activeUntil": "2026-06-15",
+  "cssVars": { "--gold": "#ff5f7e", ... },
+  "bodyClass": "theme-valentines",  // CSS pode usar .theme-valentines pra decorar
+  "copy": {
+    "vendas.heroTitle": "Para os dois ficarem.<br>Não para passarem o tempo."
+  },
+  "images": {
+    "vendas.heroBanner": "./img/luis.png"
+  }
+}
+```
+
+### Como testar um tema (preview)
+
+```
+https://preludiojogos.com.br/staging/vendas.html?theme=valentines-2026
+https://preludiojogos.com.br/staging/entrada.html?theme=valentines-2026
+```
+
+Ou no DevTools console: `OSL_setTheme('valentines-2026', true)` (persiste em localStorage). Pra limpar: `OSL_clearThemeOverride()`.
+
+### Cobertura atual de marcação
+
+| Página | Elementos marcados |
+|---|---|
+| `vendas.html` | hero eyebrow / title / sub / cta / note + imagem do banner |
+| `entrada.html` | título / subtítulo / whisper |
+
+Outras páginas (`sala.html`, `jogo.html`, etc.) ainda usam o `theme-loader` automaticamente quando incluído, mas não têm `data-theme-key` marcado — só herdam as `cssVars`. Estender conforme demanda.
+
+### Como adicionar um novo evento sazonal
+
+1. Cria `staging/themes/<evento>.json` com os overrides necessários (basta o que muda; o que não estiver no JSON usa o `default`).
+2. Testa via `?theme=<evento>` em staging.
+3. Quando aprovado, configura `activeFrom`/`activeUntil` no JSON e (Sprint 5) aponta o Firestore pra ele.
+4. Promove pra prod copiando `themes/<evento>.json`, eventuais novos assets e qualquer mudança em HTMLs.
 
 ## Configuração do Cloudflare Access (one-time setup)
 

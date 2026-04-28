@@ -6,6 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SEXTOLUGAR — Loja</title>
+<script src="js/theme-loader.js"></script>
 <link rel="icon" href="./favicon.png">
 <link rel="preload" href="./img/luis.png" as="image" fetchpriority="high">
 <style>
@@ -649,7 +650,7 @@ body{
 <!-- BINARY PORTRAIT BANNER -->
 <div class="binary-banner">
   <canvas id="binaryScatter"></canvas>
-  <img src="./img/luis.png" alt="" fetchpriority="high" decoding="sync" style="height:100%;width:auto;display:block;position:relative;z-index:2;opacity:0.82;filter:sepia(0.25) brightness(0.90);">
+  <img src="./img/luis.png" data-theme-img="vendas.heroBanner" alt="" fetchpriority="high" decoding="sync" style="height:100%;width:auto;display:block;position:relative;z-index:2;opacity:0.82;filter:sepia(0.25) brightness(0.90);">
   <span class="binary-banner__label">Luis Kirsch · Criador</span>
 </div>
 
@@ -660,9 +661,9 @@ body{
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-eyebrow">Prelúdio Jogos · 2026</div>
-  <h1>Jogar é grátis.<br>Ir fundo tem preço.</h1>
-  <p class="hero-sub">Entre, crie uma sala, jogue com seu grupo — sem pagar nada. Os pacotes existem para quem quer que a experiência vá mais longe.</p>
+  <div class="hero-eyebrow" data-theme-key="vendas.heroEyebrow">Prelúdio Jogos · 2026</div>
+  <h1 data-theme-key="vendas.heroTitle">Jogar é grátis.<br>Ir fundo tem preço.</h1>
+  <p class="hero-sub" data-theme-key="vendas.heroSub">Entre, crie uma sala, jogue com seu grupo — sem pagar nada. Os pacotes existem para quem quer que a experiência vá mais longe.</p>
 
   <div class="hero-free">
     <span class="hero-free-item">Criar e entrar em salas</span>
@@ -671,8 +672,8 @@ body{
     <span class="hero-free-item">Sessões completas</span>
   </div>
 
-  <a href="./entrada.html" class="hero-btn">Jogar Agora — Grátis</a>
-  <p class="hero-note">Sem assinatura · Grátis para sempre</p>
+  <a href="./entrada.html" class="hero-btn" data-theme-key="vendas.heroCta">Jogar Agora — Grátis</a>
+  <p class="hero-note" data-theme-key="vendas.heroNote">Sem assinatura · Grátis para sempre</p>
 </section>
 
 <div class="divider"></div>
