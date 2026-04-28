@@ -1,0 +1,398 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<script src="_staging.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SEXTOLUGAR — Em Breve</title>
+<link rel="icon" href="./favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+}
+
+body {
+  height: 100svh;
+  height: 100vh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  color: #f5f7fb;
+  font-family: 'Sora', system-ui, -apple-system, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -5%,  rgba(38,118,240,.16), transparent 52%),
+    radial-gradient(ellipse 55% 45% at 12% 88%,  rgba(18, 80,180,.10), transparent 52%),
+    radial-gradient(ellipse 45% 35% at 88% 72%,  rgba(28, 90,200,.07), transparent 50%),
+    linear-gradient(175deg, #050810 0%, #020408 40%, #000000 100%);
+}
+
+/* Vignette */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 110% 110% at 50% 50%, transparent 38%, rgba(0,0,0,.62) 100%);
+  z-index: 0;
+}
+
+/* Top/bottom edge glow */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,.025) 0%,
+      transparent 14%,
+      transparent 86%,
+      rgba(255,255,255,.018) 100%
+    );
+  mix-blend-mode: screen;
+  z-index: 0;
+}
+
+/* ─── Animações ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 8px 32px rgba(0,0,0,.28); }
+  50%       { box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 8px 32px rgba(0,0,0,.28), 0 0 18px rgba(72,183,244,.08); }
+}
+
+@keyframes progressShimmer {
+  from { background-position: -200% center; }
+  to   { background-position: 200% center;  }
+}
+
+/* ─── Layout ─── */
+.page {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100svh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding:
+    max(20px, env(safe-area-inset-top))
+    max(22px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom))
+    max(22px, env(safe-area-inset-left));
+  overflow: hidden;
+  gap: clamp(6px, 1.4vh, 14px);
+}
+
+/* ─── Eyebrow ─── */
+.eyebrow {
+  font-size: clamp(15px, 1.7vh, 24px);
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: rgba(210,224,248,.65);
+  animation: fadeUp .55s cubic-bezier(.22,1,.36,1) .05s both;
+  margin-bottom: clamp(8px, 1.6vh, 20px);
+}
+
+/* ─── Título ─── */
+.title {
+  line-height: 1;
+  font-weight: 900;
+  text-align: center;
+  animation: fadeUp .60s cubic-bezier(.22,1,.36,1) .12s both;
+}
+
+.title .line1 {
+  display: block;
+  font-size: clamp(26px, 3.6vh, 50px);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: rgba(245,247,251,.85);
+}
+
+.title .line2 {
+  display: block;
+  font-size: clamp(42px, 7.8vh, 108px);
+  font-weight: 900;
+  letter-spacing: -.03em;
+  line-height: 1;
+  background: linear-gradient(175deg, #ffffff 0%, #e8effd 40%, #c8daf5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  padding: 0 4px; /* evita clip nas laterais */
+}
+
+/* ─── Grid countdown ─── */
+.countdown {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(8px, 1.2vw, 14px);
+  width: min(100%, 660px);
+  animation: fadeUp .65s cubic-bezier(.22,1,.36,1) .22s both;
+}
+
+.time-box {
+  border-radius: clamp(16px, 2vw, 22px);
+  padding: clamp(12px, 1.8vh, 20px) clamp(8px, 1.2vw, 14px) clamp(10px, 1.5vh, 16px);
+  background:
+    linear-gradient(160deg, rgba(255,255,255,.052), rgba(255,255,255,.016)),
+    radial-gradient(circle at 50% 0%, rgba(90,170,255,.08), transparent 58%);
+  border: 1px solid rgba(255,255,255,.09);
+  text-align: center;
+  animation: pulseGlow 4s ease-in-out infinite;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.time-value {
+  display: block;
+  font-size: clamp(32px, 5.8vh, 76px);
+  font-weight: 900;
+  letter-spacing: -.06em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  background: linear-gradient(180deg, #ffffff 0%, #ddeeff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.time-label {
+  display: block;
+  margin-top: clamp(4px, .7vh, 8px);
+  font-size: clamp(9px, 1.1vh, 12px);
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: rgba(200,218,245,.65);
+  font-weight: 700;
+}
+
+/* ─── Status ─── */
+.soon {
+  font-size: clamp(24px, 4.5vh, 62px);
+  font-weight: 900;
+  letter-spacing: -.03em;
+  animation: fadeUp .65s cubic-bezier(.22,1,.36,1) .32s both;
+}
+
+.launch-line {
+  font-size: clamp(10px, 1.3vh, 14px);
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: rgba(195,215,242,.60);
+  animation: fadeUp .65s cubic-bezier(.22,1,.36,1) .38s both;
+}
+
+/* ─── Barra de progresso ─── */
+.progress-wrap {
+  width: min(100%, 580px);
+  animation: fadeIn .8s ease .48s both;
+}
+
+.progress {
+  height: clamp(5px, .8vh, 8px);
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4a9eff 0%, #8fd9ff 50%, #c8f0ff 100%);
+  background-size: 200% auto;
+  animation: progressShimmer 3s linear infinite;
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+
+/* ─── Footer ─── */
+.footer-note {
+  font-size: clamp(9px, 1.1vh, 12px);
+  color: rgba(195,215,242,.38);
+  letter-spacing: .20em;
+  text-transform: uppercase;
+  animation: fadeIn .8s ease .56s both;
+}
+
+/* ═══════════════════════════════════════
+   MOBILE — tudo em 1 tela, sem scroll
+═══════════════════════════════════════ */
+@media (max-width: 560px) {
+
+  .page {
+    gap: clamp(5px, 1.8vw, 10px);
+    padding:
+      max(14px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(14px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .countdown {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+
+  .time-box {
+    border-radius: 18px;
+  }
+
+}
+</style>
+<link rel="prefetch" href="/entrada.html">
+</head>
+
+<body>
+<main class="page">
+
+  <p class="eyebrow">Pronto para</p>
+
+  <h1 class="title">
+    <span class="line1">O</span>
+    <span class="line2">SEXTOLUGAR?</span>
+  </h1>
+
+  <div class="countdown">
+    <div class="time-box">
+      <span class="time-value" id="days">00</span>
+      <span class="time-label">Dias</span>
+    </div>
+    <div class="time-box">
+      <span class="time-value" id="hours">00</span>
+      <span class="time-label">Horas</span>
+    </div>
+    <div class="time-box">
+      <span class="time-value" id="minutes">00</span>
+      <span class="time-label">Minutos</span>
+    </div>
+    <div class="time-box">
+      <span class="time-value" id="seconds">00</span>
+      <span class="time-label">Segundos</span>
+    </div>
+  </div>
+
+  <p class="soon" id="statusText">Em breve!</p>
+  <p class="launch-line">Lançamento em 30 de junho de 2026 às 20h</p>
+
+  <div class="progress-wrap">
+    <div class="progress">
+      <span id="progressBar"></span>
+    </div>
+  </div>
+
+  <p class="footer-note">Prelúdio Jogos &bull; Contagem oficial</p>
+
+</main>
+
+<script>
+(function(){
+  const TARGET         = new Date('2026-06-30T20:00:00-03:00').getTime();
+  const START_REFERENCE= new Date('2026-03-12T00:00:00-03:00').getTime();
+
+  const daysEl      = document.getElementById('days');
+  const hoursEl     = document.getElementById('hours');
+  const minutesEl   = document.getElementById('minutes');
+  const secondsEl   = document.getElementById('seconds');
+  const progressBar = document.getElementById('progressBar');
+  const statusText  = document.getElementById('statusText');
+
+  let audioCtx = null, audioEnabled = false, lastSecond = null;
+
+  function enableAudio(){
+    if (audioEnabled) return;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    try {
+      audioCtx = new Ctx();
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+      audioEnabled = true;
+    } catch(e){}
+  }
+  window.addEventListener('pointerdown', enableAudio, { once: true });
+  window.addEventListener('touchstart',  enableAudio, { once: true });
+
+  function playTick(){
+    if (!audioEnabled || !audioCtx) return;
+    try {
+      const t    = audioCtx.currentTime;
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const flt  = audioCtx.createBiquadFilter();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1850, t);
+      osc.frequency.exponentialRampToValueAtTime(1320, t + .018);
+      flt.type = 'bandpass';
+      flt.frequency.setValueAtTime(2100, t);
+      flt.Q.setValueAtTime(5.5, t);
+      gain.gain.setValueAtTime(.00001, t);
+      gain.gain.exponentialRampToValueAtTime(.075, t + .0025);
+      gain.gain.exponentialRampToValueAtTime(.00001, t + .022);
+      osc.connect(flt); flt.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(t); osc.stop(t + .028);
+    } catch(e){}
+  }
+
+  function pad(n){ return String(Math.max(0, n)).padStart(2, '0'); }
+
+  function update(){
+    const now  = Date.now();
+    const diff = TARGET - now;
+
+    if (diff <= 0){
+      daysEl.textContent = hoursEl.textContent = minutesEl.textContent = secondsEl.textContent = '00';
+      statusText.textContent = 'Chegou a hora.';
+      progressBar.style.width = '100%';
+      return;
+    }
+
+    const total   = Math.floor(diff / 1000);
+    const days    = Math.floor(total / 86400);
+    const hours   = Math.floor((total % 86400) / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const seconds = total % 60;
+
+    daysEl.textContent    = pad(days);
+    hoursEl.textContent   = pad(hours);
+    minutesEl.textContent = pad(minutes);
+    secondsEl.textContent = pad(seconds);
+
+    if (lastSecond !== null && seconds !== lastSecond) playTick();
+    lastSecond = seconds;
+
+    const range    = TARGET - START_REFERENCE;
+    const elapsed  = now   - START_REFERENCE;
+    progressBar.style.width = (Math.max(0, Math.min(1, elapsed / range)) * 100).toFixed(2) + '%';
+  }
+
+  update();
+  setInterval(update, 1000);
+})();
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>

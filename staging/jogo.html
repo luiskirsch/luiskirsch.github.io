@@ -1,0 +1,609 @@
+﻿<!DOCTYPE html>  
+<html lang="pt-br">  
+<head>
+<meta name="robots" content="noindex, nofollow">
+<script src="_staging.js" defer></script>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />  
+  <title>SEXTOLUGAR — Jogo</title>  
+
+  <link rel="icon" href="./favicon.png">
+  
+  <style>  
+    :root{  
+      --bg:#050505;  
+      --gold:#e6c07b;  
+      --muted:#a7a7a7;  
+      --card:rgba(255,255,255,.045);  
+      --line:rgba(230,192,123,.22);  
+      --shadow:rgba(0,0,0,.55);  
+      --ok:#9be37a;  
+      --danger:#ff4d4d;  
+    }  
+  
+    *{ box-sizing:border-box; }  
+    html,body{ height:100%; }  
+  
+    body{  
+      margin:0;  
+      min-height:100svh;  
+      display:grid;  
+      place-items:center;  
+      padding:24px;  
+      padding-left:max(24px, env(safe-area-inset-left));  
+      padding-right:max(24px, env(safe-area-inset-right));  
+      padding-top:max(24px, env(safe-area-inset-top));  
+      padding-bottom:max(24px, env(safe-area-inset-bottom));  
+      background:  
+        radial-gradient(1200px 700px at 50% 20%, rgba(230,192,123,.10), transparent 55%),  
+        radial-gradient(900px 560px at 18% 15%, rgba(255,255,255,.06), transparent 60%),  
+        radial-gradient(900px 560px at 82% 75%, rgba(255,255,255,.05), transparent 62%),  
+        var(--bg);  
+      color:#f2f2f2;  
+      font-family: ui-serif, Georgia, "Times New Roman", serif;  
+      overflow-x:hidden;  
+    }  
+  
+    body::before{  
+      content:"";  
+      position:fixed;  
+      inset:-20%;  
+      pointer-events:none;  
+      background:  
+        radial-gradient(700px 360px at 50% 35%, rgba(230,192,123,.08), transparent 60%),  
+        radial-gradient(900px 480px at 60% 70%, rgba(255,255,255,.05), transparent 65%);  
+      filter: blur(12px);  
+      opacity:.72;  
+      animation: pulseGlow 4.8s ease-in-out infinite;  
+    }  
+
+    @keyframes pulseGlow{  
+      0%,100%{ opacity:.58; transform:translateY(0) scale(1); }  
+      50%{ opacity:.92; transform:translateY(-6px) scale(1.01); }  
+    }  
+  
+    .wrap{  
+      width:100%;  
+      max-width:980px;  
+      display:grid;  
+      gap:16px;  
+      align-items:center;  
+      justify-items:center;  
+      text-align:center;  
+      position:relative;  
+      z-index:1;  
+    }  
+  
+    h1{  
+      margin:0;  
+      letter-spacing:.18em;  
+      line-height:1.05;  
+      font-weight:700;  
+      color:var(--gold);  
+      text-transform:uppercase;  
+      font-size:clamp(26px, 5.2vw, 62px);  
+      text-shadow: 0 18px 60px var(--shadow);  
+    }  
+  
+    .subtitle{  
+      margin:0;  
+      max-width:74ch;  
+      font-size:clamp(14px, 2.2vw, 18px);  
+      opacity:.88;  
+      color:#eaeaea;  
+    }  
+  
+    .card{  
+      width:100%;  
+      max-width:900px;  
+      padding:clamp(18px, 3vw, 34px);  
+      border-radius:20px;  
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));  
+      border:1px solid rgba(255,255,255,.08);  
+      box-shadow: 0 28px 80px rgba(0,0,0,.55);  
+      backdrop-filter: blur(10px);  
+      position:relative;  
+      overflow:hidden;  
+    }  
+
+    .card::after{  
+      content:"";  
+      position:absolute;  
+      inset:0;  
+      pointer-events:none;  
+      background: radial-gradient(700px 240px at 50% 0%, rgba(230,192,123,.10), transparent 60%);  
+      opacity:.8;  
+    }  
+  
+    .row{  
+      position:relative;  
+      z-index:1;  
+      display:grid;  
+      gap:14px;  
+      justify-items:center;  
+    }  
+  
+    .timer{  
+      font-variant-numeric: tabular-nums;  
+      font-size: clamp(44px, 8vw, 90px);  
+      letter-spacing:.06em;  
+      color:#fff;  
+      text-shadow: 0 22px 70px rgba(0,0,0,.6);  
+      margin:0;  
+    }  
+  
+    .progressWrap{  
+      width:min(760px, 92%);  
+      height:12px;  
+      background: rgba(255,255,255,.08);  
+      border:1px solid rgba(255,255,255,.10);  
+      border-radius:999px;  
+      overflow:hidden;  
+      box-shadow: inset 0 0 30px rgba(0,0,0,.35);  
+    }  
+
+    .progress{  
+      height:100%;  
+      width:0%;  
+      background: linear-gradient(90deg, rgba(230,192,123,.15), rgba(230,192,123,.55), rgba(230,192,123,.15));  
+      transition: width .25s linear;  
+    }  
+  
+    .status{  
+      margin:0;  
+      font-size:13px;  
+      color:rgba(255,255,255,.65);  
+      letter-spacing:.02em;  
+    }  
+  
+    .actions{  
+      display:flex;  
+      flex-wrap:wrap;  
+      gap:12px;  
+      justify-content:center;  
+      margin-top:6px;  
+    }  
+  
+    button{  
+      border:1px solid rgba(230,192,123,.22);  
+      background: rgba(0,0,0,.25);  
+      color:rgba(230,192,123,.92);  
+      padding:12px 18px;  
+      border-radius:14px;  
+      cursor:pointer;  
+      font-family: inherit;  
+      letter-spacing:.12em;  
+      text-transform:uppercase;  
+      min-width:180px;  
+      transition: transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease;  
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);  
+    }  
+
+    button:hover{ transform: translateY(-1px); border-color:rgba(230,192,123,.34); }  
+    button:active{ transform: translateY(0); opacity:.9; }  
+  
+    .tiny{  
+      margin-top:8px;  
+      font-size:12px;  
+      color:rgba(255,255,255,.55);  
+    }  
+  
+    .toggle{  
+      display:flex;  
+      gap:10px;  
+      align-items:center;  
+      justify-content:center;  
+      margin-top:8px;  
+      flex-wrap:wrap;  
+    }  
+  
+    .pill{  
+      border:1px solid rgba(255,255,255,.10);  
+      background: rgba(255,255,255,.04);  
+      color: rgba(255,255,255,.78);  
+      padding:8px 12px;  
+      border-radius:999px;  
+      font-size:12px;  
+      letter-spacing:.08em;  
+      text-transform:uppercase;  
+      cursor:pointer;  
+      user-select:none;  
+    }  
+
+    .pill strong{ color: var(--gold); }  
+  
+    @media (max-width:520px){  
+      button{ min-width:150px; }  
+      .card{ border-radius:18px; }  
+    }  
+
+    .footer{
+      width:100%;
+      max-width:980px;
+      margin:14px auto 0;
+      text-align:center;
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.42);
+      pointer-events:none;
+      padding: 0 10px;
+    }
+
+    .footer .brand{
+      color:rgba(230,192,123,.85);
+      font-weight:700;
+    }
+  </style>  
+</head>  
+  
+<body>  
+  <main class="wrap">  
+    <h1>SEXTOLUGAR</h1>  
+    <p class="subtitle">Timer do jogo (cartas físicas). O som só funciona depois do primeiro toque/clique.</p>  
+  
+    <section class="card">  
+      <div class="row">  
+        <p class="timer" id="timerText">05:00</p>  
+  
+        <div class="progressWrap">  
+          <div class="progress" id="progressBar"></div>  
+        </div>  
+  
+        <p class="status" id="status">Status: pronto.</p>  
+  
+        <div class="toggle">  
+          <div class="pill" id="soundToggle">SOM: <strong>ON</strong></div>  
+          <div class="pill" id="modeToggle">MODO: <strong>RODADA</strong></div>  
+        </div>  
+  
+        <div class="actions">  
+          <button id="btnStart">Iniciar</button>  
+          <button id="btnPause">Pausar</button>  
+          <button id="btnReset">Reset</button>  
+          <button id="btnVoltar">Voltar</button>  
+        </div>  
+  
+        <div class="tiny">  
+          Ajuste rápido: clique em “Modo” para alternar (Rodada / Contagem regressiva longa).  
+        </div>  
+      </div>  
+    </section>  
+
+    <footer class="footer">
+      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+    </footer>
+  </main>  
+  
+  <script>
+    window.PANEL_SERVER_BASE = "http://localhost:3000";
+  </script>
+
+  <script>
+    const PanelBridge = (() => {
+      const SERVER_BASE =
+        window.PANEL_SERVER_BASE ||
+        localStorage.getItem("PANEL_SERVER_BASE") ||
+        "http://localhost:3000";
+
+      async function post(path, data = {}) {
+        try {
+          const res = await fetch(SERVER_BASE + path, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+          });
+
+          const json = await res.json().catch(() => null);
+
+          if (!res.ok) {
+            console.error("PanelBridge erro:", path, json || res.status);
+            return { ok: false, error: json || res.status };
+          }
+
+          return json || { ok: true };
+        } catch (error) {
+          console.error("PanelBridge falha:", path, error);
+          return { ok: false, error: error.message || String(error) };
+        }
+      }
+
+      function normalizeRoomId(roomId) {
+        return String(roomId || "").trim();
+      }
+
+      function normalizePlayerId(playerId) {
+        return String(playerId || "").trim();
+      }
+
+      function normalizePlayerName(playerName) {
+        return String(playerName || "").trim();
+      }
+
+      return {
+        baseUrl: SERVER_BASE,
+
+        async roomCreate(roomId, name = "", host = "") {
+          return post("/game/room/create", {
+            roomId: normalizeRoomId(roomId),
+            name: String(name || "").trim(),
+            host: String(host || "").trim()
+          });
+        },
+
+        async playerJoin(roomId, playerId, playerName = "") {
+          return post("/game/player/join", {
+            roomId: normalizeRoomId(roomId),
+            playerId: normalizePlayerId(playerId),
+            playerName: normalizePlayerName(playerName)
+          });
+        },
+
+        async playerLeave(roomId, playerId) {
+          return post("/game/player/leave", {
+            roomId: normalizeRoomId(roomId),
+            playerId: normalizePlayerId(playerId)
+          });
+        },
+
+        async sessionStart(roomId) {
+          return post("/game/session/start", {
+            roomId: normalizeRoomId(roomId)
+          });
+        },
+
+        async sessionEnd(roomId) {
+          return post("/game/session/end", {
+            roomId: normalizeRoomId(roomId)
+          });
+        },
+
+        async video(roomId, active) {
+          return post("/game/video", {
+            roomId: normalizeRoomId(roomId),
+            active: !!active
+          });
+        },
+
+        async recording(roomId, active) {
+          return post("/game/recording", {
+            roomId: normalizeRoomId(roomId),
+            active: !!active
+          });
+        },
+
+        async paymentApproved(player, value, roomId = "") {
+          return post("/payment/approved", {
+            player: String(player || "").trim(),
+            value: Number(value || 0),
+            roomId: normalizeRoomId(roomId)
+          });
+        },
+
+        async licenseIssued(player, licenseCode) {
+          return post("/license/issued", {
+            player: String(player || "").trim(),
+            licenseCode: String(licenseCode || "").trim()
+          });
+        },
+
+        async accessGranted(player, roomId = "") {
+          return post("/access/granted", {
+            player: String(player || "").trim(),
+            roomId: normalizeRoomId(roomId)
+          });
+        },
+
+        async accessFailed(player, reason = "") {
+          return post("/access/failed", {
+            player: String(player || "").trim(),
+            reason: String(reason || "").trim()
+          });
+        },
+
+        async affiliateConversion(affiliate, buyer) {
+          return post("/affiliate/conversion", {
+            affiliate: String(affiliate || "").trim(),
+            buyer: String(buyer || "").trim()
+          });
+        }
+      };
+    })();
+
+    window.PanelBridge = PanelBridge;
+  </script>
+  
+  <script>  
+    let audioCtx = null;  
+    let soundEnabled = true;  
+    let gameBooted = false;
+    let sessionStartedInPanel = false;
+
+    const roomId =
+      sessionStorage.getItem("osl_room_id") ||
+      ("ritual-" + Math.random().toString(36).slice(2, 8));
+
+    const playerId =
+      sessionStorage.getItem("osl_player_id") ||
+      ("player-" + Math.random().toString(36).slice(2, 10));
+
+    const playerName =
+      sessionStorage.getItem("osl_player_name") || "Jogador";
+
+    sessionStorage.setItem("osl_room_id", roomId);
+    sessionStorage.setItem("osl_player_id", playerId);
+    sessionStorage.setItem("osl_player_name", playerName);
+
+    async function bootPanelConnection() {
+      if (gameBooted) return;
+      gameBooted = true;
+
+      await PanelBridge.roomCreate(roomId, "Sala do Jogo", playerName);
+      await PanelBridge.playerJoin(roomId, playerId, playerName);
+      await PanelBridge.video(roomId, false);
+      await PanelBridge.recording(roomId, false);
+    }
+
+    async function markSessionStart() {
+      if (sessionStartedInPanel) return;
+      sessionStartedInPanel = true;
+      await PanelBridge.sessionStart(roomId);
+    }
+
+    async function markSessionPause() {
+      await PanelBridge.video(roomId, false);
+    }
+
+    async function markSessionReset() {
+      sessionStartedInPanel = false;
+      await PanelBridge.sessionEnd(roomId);
+    }
+
+    async function markLeavingGame() {
+      await PanelBridge.playerLeave(roomId, playerId);
+      if (sessionStartedInPanel) {
+        await PanelBridge.sessionEnd(roomId);
+      }
+    }
+  
+    function ensureAudio() {  
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();  
+      if (audioCtx.state === "suspended") audioCtx.resume();  
+    }  
+  
+    function tickSound() {  
+      if (!soundEnabled || !audioCtx) return;  
+      const o = audioCtx.createOscillator();  
+      const g = audioCtx.createGain();  
+      o.type = "square";  
+      o.frequency.value = 1200;  
+      g.gain.setValueAtTime(0.0001, audioCtx.currentTime);  
+      g.gain.exponentialRampToValueAtTime(0.03, audioCtx.currentTime + 0.005);  
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.03);  
+      o.connect(g);  
+      g.connect(audioCtx.destination);  
+      o.start();  
+      o.stop(audioCtx.currentTime + 0.035);  
+    }  
+  
+    document.addEventListener("click", () => ensureAudio(), { once: true });  
+  
+    const timerText = document.getElementById("timerText");  
+    const statusEl = document.getElementById("status");  
+    const progressBar = document.getElementById("progressBar");  
+  
+    const btnStart = document.getElementById("btnStart");  
+    const btnPause = document.getElementById("btnPause");  
+    const btnReset = document.getElementById("btnReset");  
+    const btnVoltar = document.getElementById("btnVoltar");  
+  
+    const soundToggle = document.getElementById("soundToggle");  
+    const modeToggle = document.getElementById("modeToggle");  
+  
+    let mode = "rodada";  
+    let totalSeconds = 5 * 60;  
+    let remaining = totalSeconds;  
+    let interval = null;  
+    let paused = true;  
+  
+    function fmt(sec){  
+      const m = String(Math.floor(sec / 60)).padStart(2,"0");  
+      const s = String(sec % 60).padStart(2,"0");  
+      return `${m}:${s}`;  
+    }  
+  
+    function setUI(){  
+      timerText.textContent = fmt(remaining);  
+      const pct = ((totalSeconds - remaining) / totalSeconds) * 100;  
+      progressBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;  
+    }  
+  
+    async function start(){  
+      await bootPanelConnection();
+      await markSessionStart();
+
+      ensureAudio();  
+      if (!paused) return;  
+      paused = false;  
+      statusEl.textContent = "Status: rodando…";  
+      clearInterval(interval);  
+      interval = setInterval(() => {  
+        if (remaining <= 0){  
+          clearInterval(interval);  
+          paused = true;  
+          remaining = 0;  
+          setUI();  
+          statusEl.textContent = "Status: tempo esgotado.";  
+          PanelBridge.sessionEnd(roomId);
+          sessionStartedInPanel = false;
+          return;  
+        }  
+        remaining--;  
+        tickSound();  
+        setUI();  
+      }, 1000);  
+    }  
+  
+    async function pause(){  
+      if (paused) return;  
+      paused = true;  
+      clearInterval(interval);  
+      statusEl.textContent = "Status: pausado.";  
+      await markSessionPause();
+    }  
+  
+    async function reset(){  
+      await pause();  
+      remaining = totalSeconds;  
+      setUI();  
+      statusEl.textContent = "Status: pronto.";  
+      await markSessionReset();
+    }  
+  
+    function applyMode(){  
+      if (mode === "rodada") totalSeconds = 5 * 60;  
+      if (mode === "longo")  totalSeconds = 60 * 60;  
+      remaining = totalSeconds;  
+      setUI();  
+      statusEl.textContent = "Status: pronto.";  
+    }  
+  
+    btnStart.addEventListener("click", start);  
+    btnPause.addEventListener("click", pause);  
+    btnReset.addEventListener("click", reset);  
+
+    btnVoltar.addEventListener("click", async () => {
+      await markLeavingGame();
+      window.location.href = "./entrada.html";
+    });  
+  
+    soundToggle.addEventListener("click", () => {  
+      ensureAudio();  
+      soundEnabled = !soundEnabled;  
+      soundToggle.innerHTML = soundEnabled ? "SOM: <strong>ON</strong>" : "SOM: <strong>OFF</strong>";  
+    });  
+  
+    modeToggle.addEventListener("click", () => {  
+      mode = (mode === "rodada") ? "longo" : "rodada";  
+      modeToggle.innerHTML = (mode === "rodada") ? "MODO: <strong>RODADA</strong>" : "MODO: <strong>LONGO</strong>";  
+      applyMode();  
+    });  
+
+    window.addEventListener("beforeunload", () => {
+      navigator.sendBeacon?.(
+        PanelBridge.baseUrl + "/game/player/leave",
+        new Blob(
+          [JSON.stringify({ roomId, playerId })],
+          { type: "application/json" }
+        )
+      );
+    });
+  
+    setUI();
+    bootPanelConnection();
+  </script>  
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+</body>  
+</html>

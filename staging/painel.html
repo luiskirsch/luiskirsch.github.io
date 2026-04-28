@@ -1,0 +1,1679 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<script src="_staging.js" defer></script>
+<link rel="preconnect" href="https://www.googleapis.com">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel | SEXTOLUGAR</title>
+
+  <style>
+    *{ box-sizing:border-box; }
+
+    :root{
+      --bg:#050507;
+      --bg-soft:#0b0b10;
+      --panel:rgba(255,255,255,.05);
+      --panel-2:rgba(255,255,255,.04);
+      --panel-3:rgba(255,255,255,.03);
+      --line:rgba(255,255,255,.08);
+      --line-strong:rgba(230,192,123,.16);
+      --gold:#e6c07b;
+      --gold-2:#c99c4a;
+      --text:#fff;
+      --muted:rgba(255,255,255,.62);
+      --ok:#82d996;
+      --err:#ff6b6b;
+      --shadow:0 30px 80px rgba(0,0,0,.45);
+      --shadow-strong:0 30px 100px rgba(0,0,0,.58);
+      --radius-xl:26px;
+      --radius-lg:20px;
+      --radius-md:16px;
+      --radius-sm:14px;
+    }
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      background:
+        radial-gradient(900px 360px at 50% 0%, rgba(230,192,123,.09), transparent 60%),
+        radial-gradient(700px 320px at 10% 20%, rgba(255,255,255,.03), transparent 60%),
+        linear-gradient(180deg,#08080b 0%, #050507 100%);
+      color:var(--text);
+      font-family:"Segoe UI",system-ui,sans-serif;
+    }
+
+    body{
+      padding:28px 16px 40px;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:1220px;
+      margin:0 auto;
+      display:grid;
+      gap:18px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      padding:24px;
+      border-radius:var(--radius-xl);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)),
+        radial-gradient(700px 240px at 50% 0%, rgba(230,192,123,.12), transparent 60%);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow-strong);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:linear-gradient(90deg, transparent, rgba(230,192,123,.08), transparent);
+      opacity:.35;
+    }
+
+    .heroTop{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:32px;
+      letter-spacing:-.03em;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .heroBadges{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .heroBadge{
+      min-height:38px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color:#f3e2be;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+
+    .heroBadge.active{
+      border-color:rgba(130,217,150,.22);
+      color:#dffbe7;
+      background:rgba(130,217,150,.10);
+    }
+
+    .heroBadge.inactive{
+      border-color:rgba(255,107,107,.18);
+      color:#ffd9d9;
+      background:rgba(255,107,107,.08);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.02fr 1fr;
+      gap:18px;
+    }
+
+    .stack{
+      display:grid;
+      gap:18px;
+      min-width:0;
+    }
+
+    .card{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025)),
+        rgba(255,255,255,.02);
+      border:1px solid var(--line);
+      border-radius:var(--radius-lg);
+      padding:22px;
+      box-shadow:var(--shadow);
+      min-width:0;
+    }
+
+    .card.premium{
+      border-color:var(--line-strong);
+      background:
+        radial-gradient(500px 180px at 50% 0%, rgba(230,192,123,.08), transparent 65%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)),
+        rgba(255,255,255,.02);
+    }
+
+    .sectionHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      margin-bottom:16px;
+      flex-wrap:wrap;
+    }
+
+    .sectionTitle{
+      margin:0;
+      font-size:19px;
+      color:var(--gold);
+      letter-spacing:.03em;
+    }
+
+    .sectionSub{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .box{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:var(--radius-sm);
+      padding:14px;
+      margin-bottom:12px;
+    }
+
+    .label{
+      font-size:11px;
+      color:var(--gold);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+
+    .value{
+      margin-top:6px;
+      font-size:15px;
+      word-break:break-word;
+      line-height:1.55;
+    }
+
+    .status{
+      margin-top:14px;
+      font-size:14px;
+      min-height:22px;
+      line-height:1.5;
+    }
+
+    .ok{ color:var(--ok); }
+    .err{ color:var(--err); }
+
+    .field{
+      display:grid;
+      gap:8px;
+      margin-bottom:12px;
+    }
+
+    .field label{
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--gold);
+    }
+
+    .field input{
+      min-height:52px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.28);
+      color:#fff;
+      padding:12px 14px;
+      font-size:15px;
+      outline:none;
+      width:100%;
+      transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .field input:focus{
+      border-color:rgba(230,192,123,.30);
+      box-shadow:0 0 0 3px rgba(230,192,123,.08);
+      background:rgba(0,0,0,.34);
+    }
+
+    .field input::placeholder{
+      color:rgba(255,255,255,.34);
+    }
+
+    .btnRow{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    button{
+      width:100%;
+      min-height:52px;
+      border:none;
+      border-radius:14px;
+      background:linear-gradient(135deg,#e6c07b,#c99c4a);
+      font-weight:800;
+      cursor:pointer;
+      font-size:15px;
+      color:#000;
+      padding:0 14px;
+      transition:transform .12s ease, opacity .18s ease, box-shadow .18s ease;
+      box-shadow:0 12px 32px rgba(201,156,74,.22);
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+    }
+
+    button.secondary{
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      border:1px solid var(--line);
+      box-shadow:none;
+    }
+
+    button.danger{
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      border:1px solid var(--line);
+      box-shadow:none;
+    }
+
+    button[disabled]{
+      opacity:.6;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .helper{
+      margin-top:8px;
+      font-size:12px;
+      color:rgba(255,255,255,.52);
+      line-height:1.55;
+    }
+
+    .licenseBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:36px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color:#fff;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+
+    .licenseBadge.active{
+      background:rgba(130,217,150,.10);
+      border-color:rgba(130,217,150,.20);
+      color:#dcfae5;
+    }
+
+    .licenseBadge.inactive{
+      background:rgba(255,107,107,.08);
+      border-color:rgba(255,107,107,.16);
+      color:#ffd7d7;
+    }
+
+    .balanceHero{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:14px;
+      margin-bottom:16px;
+    }
+
+    .balanceCard{
+      background:
+        radial-gradient(320px 120px at 50% 0%, rgba(230,192,123,.12), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)),
+        rgba(255,255,255,.02);
+      border:1px solid rgba(230,192,123,.14);
+      border-radius:18px;
+      padding:18px;
+      min-width:0;
+    }
+
+    .balanceLabel{
+      font-size:11px;
+      color:var(--gold);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+    }
+
+    .balanceValue{
+      margin-top:8px;
+      font-size:38px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1;
+    }
+
+    .balanceHint{
+      margin-top:10px;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .miniStatGrid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .miniStat{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      min-width:0;
+    }
+
+    .miniStat .number{
+      font-size:24px;
+      font-weight:800;
+      margin-top:6px;
+    }
+
+    .progressWrap{
+      margin:14px 0 4px;
+      display:grid;
+      gap:8px;
+    }
+
+    .progressTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      font-size:13px;
+      color:var(--muted);
+      flex-wrap:wrap;
+    }
+
+    .progressBar{
+      height:14px;
+      border-radius:999px;
+      overflow:hidden;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      position:relative;
+    }
+
+    .progressFill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background:linear-gradient(90deg,#c99c4a,#e6c07b,#f0d6a0);
+      box-shadow:0 0 18px rgba(230,192,123,.28);
+      transition:width .25s ease;
+    }
+
+    .highlightBox{
+      background:
+        radial-gradient(260px 100px at 50% 0%, rgba(230,192,123,.08), transparent 60%),
+        rgba(255,255,255,.03);
+      border:1px solid rgba(230,192,123,.12);
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:12px;
+    }
+
+    .linkRow{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 180px;
+      gap:10px;
+      align-items:stretch;
+    }
+
+    .linkBox{
+      min-height:52px;
+      display:flex;
+      align-items:center;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.24);
+      overflow:hidden;
+      font-size:14px;
+      color:#fff;
+      word-break:break-all;
+    }
+
+    .historyList{
+      display:grid;
+      gap:12px;
+      margin-top:8px;
+    }
+
+    .historyItem{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .historyTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .historyType{
+      font-size:11px;
+      color:var(--gold);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+
+    .historyDate{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .historyMain{
+      font-size:17px;
+      line-height:1.45;
+      font-weight:800;
+    }
+
+    .historyMeta{
+      margin-top:8px;
+      font-size:13px;
+      color:rgba(255,255,255,.72);
+      line-height:1.55;
+    }
+
+    .historyEmpty{
+      background:var(--panel-2);
+      border:1px dashed var(--line);
+      border-radius:16px;
+      padding:18px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .summaryText{
+      line-height:1.7;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .summaryText strong{
+      color:#fff;
+    }
+
+    @media (max-width: 980px){
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .balanceHero{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 720px){
+      .btnRow{
+        grid-template-columns:1fr;
+      }
+
+      .miniStatGrid{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .linkRow{
+        grid-template-columns:1fr;
+      }
+
+      .heroTop{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+    }
+
+    @media (max-width: 520px){
+      .miniStatGrid{
+        grid-template-columns:1fr;
+      }
+
+      .hero h1{
+        font-size:26px;
+      }
+
+      .balanceValue{
+        font-size:32px;
+      }
+
+      .card,
+      .hero{
+        padding:18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <section class="hero">
+      <div class="heroTop">
+        <div>
+          <h1>Seu painel</h1>
+          <div class="muted">
+            Gerencie sua conta, sua licença e sua área de afiliado do
+            <strong style="color:#e6c07b;">SEXTOLUGAR</strong>.
+          </div>
+        </div>
+
+        <div class="heroBadges">
+          <div class="heroBadge" id="heroUserBadge">Conta conectada</div>
+          <div class="heroBadge inactive" id="heroAccessBadge">Sem acesso</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="stack">
+        <div class="card premium">
+          <div class="sectionHeader">
+            <div>
+              <h2 class="sectionTitle">Conta e acesso</h2>
+              <div class="sectionSub">Seu vínculo de licença e a liberação do jogo são gerenciados aqui.</div>
+            </div>
+
+            <div class="licenseBadge inactive" id="licenseBadge">Licença inativa</div>
+          </div>
+
+          <div class="box">
+            <div class="label">Nome</div>
+            <div class="value" id="nome">Carregando...</div>
+          </div>
+
+          <div class="box">
+            <div class="label">Usuário</div>
+            <div class="value" id="username">Carregando...</div>
+          </div>
+
+          <div class="box">
+            <div class="label">Email</div>
+            <div class="value" id="email">Carregando...</div>
+          </div>
+
+          <div class="box">
+            <div class="label">Licença atual</div>
+            <div class="value" id="license">Não vinculada</div>
+          </div>
+
+          <div class="field">
+            <label for="licenseInput">Código da licença</label>
+            <input
+              id="licenseInput"
+              type="text"
+              placeholder="Ex.: OSL-XXXX-XXXX-XXXX-XXXX-XXXX"
+              autocomplete="off"
+            />
+          </div>
+
+          <button id="linkLicenseBtn">Vincular licença</button>
+
+          <div class="helper" id="licenseHelper">
+            Esta licença ficará vinculada à conta logada e não poderá ser usada por outra conta.
+          </div>
+
+          <div class="status" id="status">Carregando painel...</div>
+
+          <div class="btnRow">
+            <button id="playBtn" disabled>Entrar no jogo</button>
+            <button class="secondary" id="refreshBtn">Atualizar painel</button>
+          </div>
+
+          <button class="danger" id="logoutBtn" style="margin-top:10px;">Sair</button>
+        </div>
+
+        <div class="card">
+          <h2 class="sectionTitle">Histórico de ganhos</h2>
+          <div class="historyList" id="historyList">
+            <div class="historyEmpty">Carregando histórico...</div>
+          </div>
+        </div>
+
+        <div class="card" id="comprasCard">
+          <h2 class="sectionTitle">Meus pacotes e compras</h2>
+          <div class="sectionSub" style="color:rgba(255,255,255,.55);font-size:13px;margin-bottom:14px;">Conteúdos desbloqueados — disponíveis em qualquer dispositivo.</div>
+          <div id="comprasList">
+            <div class="historyEmpty">Carregando...</div>
+          </div>
+          <a href="./vendas.html" style="display:inline-block;margin-top:14px;font-size:13px;color:#e6c07b;text-decoration:none;">+ Ver pacotes disponíveis</a>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card premium">
+          <div class="sectionHeader">
+            <div>
+              <h2 class="sectionTitle">Afiliado</h2>
+              <div class="sectionSub">Compartilhe seu link, acumule moedas e solicite saques.</div>
+            </div>
+          </div>
+
+          <div class="balanceHero">
+            <div class="balanceCard">
+              <div class="balanceLabel">Saldo em moedas</div>
+              <div class="balanceValue" id="coins">0</div>
+              <div class="balanceHint">
+                Você recebe <strong style="color:#e6c07b;">10 moedas</strong> por venda aprovada pelo seu link.
+              </div>
+            </div>
+
+            <div class="balanceCard">
+              <div class="balanceLabel">Saldo sacável</div>
+              <div class="balanceValue" id="withdrawableCoins">0</div>
+              <div class="balanceHint">
+                Com <strong style="color:#e6c07b;">100 moedas</strong>, você pode solicitar
+                <strong style="color:#e6c07b;">R$ 90,00</strong> via Pix.
+              </div>
+            </div>
+          </div>
+
+          <div class="progressWrap">
+            <div class="progressTop">
+              <span>Progresso para saque</span>
+              <span id="progressText">0 / 100 moedas</span>
+            </div>
+            <div class="progressBar">
+              <div class="progressFill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <div class="miniStatGrid">
+            <div class="miniStat">
+              <div class="label">Indicações aprovadas</div>
+              <div class="number" id="referralsApproved">0</div>
+            </div>
+
+            <div class="miniStat">
+              <div class="label">Indicações pendentes</div>
+              <div class="number" id="referralsPending">0</div>
+            </div>
+          </div>
+
+          <div class="highlightBox">
+            <div class="box" style="margin-bottom:12px;">
+              <div class="label">Seu código</div>
+              <div class="value" id="refCode">Carregando...</div>
+            </div>
+
+            <div class="label" style="margin-bottom:8px;">Seu link de indicação</div>
+            <div class="linkRow">
+              <div class="linkBox" id="refLink">Carregando...</div>
+              <button class="secondary" id="copyLinkBtn">Copiar link</button>
+            </div>
+          </div>
+
+          <div class="box">
+            <div class="label">Comissão aprovada</div>
+            <div class="value" id="commissionApproved">R$ 0,00</div>
+          </div>
+
+          <div class="box">
+            <div class="label">Total já pago</div>
+            <div class="value" id="totalPaidOut">R$ 0,00</div>
+          </div>
+
+          <div class="field">
+            <label for="pixKeyInput">Chave Pix</label>
+            <input
+              id="pixKeyInput"
+              type="text"
+              placeholder="Digite sua chave Pix"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="btnRow">
+            <button id="savePixBtn">Salvar Pix</button>
+            <button id="withdrawBtn">Solicitar saque de R$ 90,00</button>
+          </div>
+
+          <div class="helper">
+            O saque fica disponível quando você atingir o mínimo de
+            <strong style="color:#e6c07b;">100 moedas sacáveis</strong> e tiver uma chave Pix cadastrada.
+          </div>
+
+          <div class="status" id="affiliateStatus"></div>
+        </div>
+
+        <div class="card">
+          <h2 class="sectionTitle">Resumo</h2>
+          <div class="summaryText">
+            Sua conta pode ter uma <strong>licença vinculada</strong> e também participar do
+            <strong>sistema de indicação</strong>. O acesso ao jogo é liberado quando a licença é validada
+            e o token desta conta está ativo neste navegador.
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+      authDomain: "osextolugar-game.firebaseapp.com",
+      projectId: "osextolugar-game",
+      storageBucket: "osextolugar-game.firebasestorage.app",
+      messagingSenderId: "947922328721",
+      appId: "1:947922328721:web:989522c99e16ab449f3330",
+      measurementId: "G-D6HG779ZFR"
+    };
+
+    const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+
+    // Acorda o servidor Render silenciosamente ao carregar a página
+    fetch(`${BACKEND_BASE_URL}/health`).catch(() => {});
+
+    // Fetch com timeout + retry automático
+    async function fetchComRetry(url, options = {}, { tentativas = 3, timeoutMs = 18000 } = {}) {
+      let ultimoErro;
+      for (let i = 0; i < tentativas; i++) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+        try {
+          const res = await fetch(url, { ...options, signal: ctrl.signal });
+          clearTimeout(timer);
+          return res;
+        } catch (err) {
+          clearTimeout(timer);
+          ultimoErro = err;
+          if (i < tentativas - 1) {
+            setStatus(`Servidor iniciando, aguardando… (tentativa ${i + 2}/${tentativas})`);
+            await new Promise(r => setTimeout(r, 4000));
+          }
+        }
+      }
+      throw ultimoErro;
+    }
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const nomeEl = document.getElementById("nome");
+    const usernameEl = document.getElementById("username");
+    const emailEl = document.getElementById("email");
+    const licenseEl = document.getElementById("license");
+    const statusEl = document.getElementById("status");
+    const playBtn = document.getElementById("playBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const linkLicenseBtn = document.getElementById("linkLicenseBtn");
+    const licenseInput = document.getElementById("licenseInput");
+    const licenseHelper = document.getElementById("licenseHelper");
+    const licenseBadgeEl = document.getElementById("licenseBadge");
+    const heroAccessBadgeEl = document.getElementById("heroAccessBadge");
+    const heroUserBadgeEl = document.getElementById("heroUserBadge");
+
+    const coinsEl = document.getElementById("coins");
+    const withdrawableCoinsEl = document.getElementById("withdrawableCoins");
+    const referralsApprovedEl = document.getElementById("referralsApproved");
+    const referralsPendingEl = document.getElementById("referralsPending");
+    const refCodeEl = document.getElementById("refCode");
+    const refLinkEl = document.getElementById("refLink");
+    const commissionApprovedEl = document.getElementById("commissionApproved");
+    const totalPaidOutEl = document.getElementById("totalPaidOut");
+    const pixKeyInput = document.getElementById("pixKeyInput");
+    const savePixBtn = document.getElementById("savePixBtn");
+    const copyLinkBtn = document.getElementById("copyLinkBtn");
+    const withdrawBtn = document.getElementById("withdrawBtn");
+    const affiliateStatusEl = document.getElementById("affiliateStatus");
+    const historyListEl = document.getElementById("historyList");
+    const progressFillEl = document.getElementById("progressFill");
+    const progressTextEl = document.getElementById("progressText");
+
+    let currentUser = null;
+    let currentProfile = null;
+    let currentAffiliate = null;
+    let isProcessingLicense = false;
+    let isProcessingAffiliate = false;
+
+    function setStatus(text, type = "") {
+      statusEl.textContent = text;
+      statusEl.className = "status";
+      if (type) statusEl.classList.add(type);
+    }
+
+    function setAffiliateStatus(text, type = "") {
+      affiliateStatusEl.textContent = text;
+      affiliateStatusEl.className = "status";
+      if (type) affiliateStatusEl.classList.add(type);
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      }).format(Number(value || 0));
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "-";
+
+      let dateValue = null;
+
+      if (typeof value === "string" || typeof value === "number") {
+        dateValue = new Date(value);
+      } else if (value?.seconds) {
+        dateValue = new Date(value.seconds * 1000);
+      } else if (typeof value?.toDate === "function") {
+        dateValue = value.toDate();
+      }
+
+      if (!dateValue || Number.isNaN(dateValue.getTime())) return "-";
+
+      return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short"
+      }).format(dateValue);
+    }
+
+    function normalizeLicenseCode(value) {
+      return String(value || "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "")
+        .replace(/[^A-Z0-9-]/g, "");
+    }
+
+    function getLocalLicenseCode() {
+      return localStorage.getItem("osl_license_code") || "";
+    }
+
+    function getLocalAccessToken() {
+      return localStorage.getItem("osl_access_token") || "";
+    }
+
+    function getLocalLicenseEmail() {
+      return localStorage.getItem("osl_license_email") || "";
+    }
+
+    function clearLocalSessionTokens() {
+      localStorage.removeItem("osl_access_token");
+      localStorage.removeItem("osl_access_expires_at");
+      localStorage.removeItem("osl_license_token");
+      localStorage.removeItem("osl_license_code");
+      localStorage.removeItem("osl_license_email");
+    }
+
+    function canEnterGame(profileData) {
+      return !!profileData?.access?.active && !!getLocalAccessToken();
+    }
+
+    function syncLicenseInput(profileData = null) {
+      const code =
+        profileData?.licenseCode ||
+        getLocalLicenseCode() ||
+        "";
+      licenseInput.value = code;
+    }
+
+    function updateAccessBadges(profileData, firebaseUser) {
+      const hasAccess = canEnterGame(profileData);
+
+      heroUserBadgeEl.textContent = firebaseUser?.email ? "Conta conectada" : "Conta";
+      heroUserBadgeEl.className = "heroBadge";
+
+      if (hasAccess) {
+        heroAccessBadgeEl.textContent = "Acesso liberado";
+        heroAccessBadgeEl.className = "heroBadge active";
+
+        licenseBadgeEl.textContent = "Licença ativa";
+        licenseBadgeEl.className = "licenseBadge active";
+      } else {
+        heroAccessBadgeEl.textContent = "Sem acesso";
+        heroAccessBadgeEl.className = "heroBadge inactive";
+
+        licenseBadgeEl.textContent = "Licença inativa";
+        licenseBadgeEl.className = "licenseBadge inactive";
+      }
+    }
+
+    function refreshUI(profileData, firebaseUser) {
+      currentProfile = profileData;
+
+      nomeEl.textContent =
+        profileData?.displayName ||
+        localStorage.getItem("osl_nome") ||
+        firebaseUser?.displayName ||
+        "-";
+
+      usernameEl.textContent = profileData?.username
+        ? "@" + profileData.username
+        : (localStorage.getItem("osl_username")
+            ? "@" + localStorage.getItem("osl_username")
+            : "-");
+
+      emailEl.textContent =
+        profileData?.email ||
+        firebaseUser?.email ||
+        getLocalLicenseEmail() ||
+        "-";
+
+      licenseEl.textContent =
+        profileData?.licenseCode ||
+        getLocalLicenseCode() ||
+        "Não vinculada";
+
+      syncLicenseInput(profileData);
+      updateAccessBadges(profileData, firebaseUser);
+
+      if (canEnterGame(profileData)) {
+        setStatus("Acesso liberado.", "ok");
+        playBtn.disabled = false;
+        linkLicenseBtn.disabled = false;
+        linkLicenseBtn.textContent = "Atualizar acesso";
+        licenseHelper.textContent = "Sua conta já está liberada e a licença está vinculada a ela.";
+        return;
+      }
+
+      if (profileData?.licenseLinked && !getLocalAccessToken()) {
+        setStatus("Conta com licença vinculada, mas sem acesso ativo neste navegador.", "err");
+        playBtn.disabled = true;
+        linkLicenseBtn.disabled = false;
+        linkLicenseBtn.textContent = "Restaurar acesso";
+        licenseHelper.textContent = "Use o código da licença da própria conta para restaurar o acesso neste navegador.";
+        return;
+      }
+
+      setStatus("Sem acesso ativo.", "err");
+      playBtn.disabled = true;
+      linkLicenseBtn.disabled = false;
+      linkLicenseBtn.textContent = "Vincular licença";
+      licenseHelper.textContent = "A licença será vinculada de forma exclusiva à conta logada.";
+    }
+
+    function refreshAffiliateUI(affiliate) {
+      currentAffiliate = affiliate || null;
+
+      if (!affiliate) {
+        coinsEl.textContent = "0";
+        withdrawableCoinsEl.textContent = "0";
+        referralsApprovedEl.textContent = "0";
+        referralsPendingEl.textContent = "0";
+        refCodeEl.textContent = "-";
+        refLinkEl.textContent = "-";
+        commissionApprovedEl.textContent = formatMoney(0);
+        totalPaidOutEl.textContent = formatMoney(0);
+        pixKeyInput.value = "";
+        progressFillEl.style.width = "0%";
+        progressTextEl.textContent = "0 / 100 moedas";
+        withdrawBtn.disabled = true;
+        return;
+      }
+
+      const coins = Number(affiliate.coins || 0);
+      const withdrawableCoins = Number(affiliate.withdrawableCoins || 0);
+      const referralsApproved = Number(affiliate.referralsApproved || 0);
+      const referralsPending = Number(affiliate.referralsPending || 0);
+      const progress = Math.max(0, Math.min(100, withdrawableCoins));
+
+      coinsEl.textContent = String(coins);
+      withdrawableCoinsEl.textContent = String(withdrawableCoins);
+      referralsApprovedEl.textContent = String(referralsApproved);
+      referralsPendingEl.textContent = String(referralsPending);
+      refCodeEl.textContent = affiliate.refCode || "-";
+      refLinkEl.textContent = affiliate.referralLink || "-";
+      commissionApprovedEl.textContent = formatMoney(affiliate.commissionApproved || 0);
+      totalPaidOutEl.textContent = formatMoney(affiliate.totalPaidOutBRL || 0);
+      pixKeyInput.value = affiliate.pixKey || "";
+      progressFillEl.style.width = progress + "%";
+      progressTextEl.textContent = `${withdrawableCoins} / 100 moedas`;
+
+      withdrawBtn.disabled =
+        withdrawableCoins < 100 ||
+        !String(affiliate.pixKey || "").trim();
+    }
+
+    function renderHistory(items) {
+      if (!Array.isArray(items) || !items.length) {
+        historyListEl.innerHTML = `
+          <div class="historyEmpty">
+            Ainda não há ganhos registrados na sua conta.
+          </div>
+        `;
+        return;
+      }
+
+      historyListEl.innerHTML = items.map((item) => {
+        const type = String(item.type || item.status || "ganho");
+        const createdAt = item.createdAt || item.approvedAt || item.date || null;
+        const buyerEmail = item.buyerEmail || "";
+        const coins = Number(item.coinsAwarded || item.coins || 0);
+        const amountBRL = Number(item.commissionAmount || item.amountBRL || 0);
+        const externalReference = item.externalReference || item.referralId || "-";
+
+        return `
+          <div class="historyItem">
+            <div class="historyTop">
+              <div class="historyType">${type}</div>
+              <div class="historyDate">${formatDateTime(createdAt)}</div>
+            </div>
+
+            <div class="historyMain">
+              ${coins > 0 ? `+${coins} moedas` : formatMoney(amountBRL)}
+            </div>
+
+            <div class="historyMeta">
+              ${buyerEmail ? `Comprador: ${buyerEmail}<br>` : ""}
+              ${amountBRL > 0 ? `Comissão: ${formatMoney(amountBRL)}<br>` : ""}
+              Referência: ${externalReference}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadAffiliateHistory(user) {
+      if (!user) return;
+
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}/afiliado/historico/${user.uid}`);
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok || !Array.isArray(data.history)) {
+          renderHistory([]);
+          return;
+        }
+
+        renderHistory(data.history);
+      } catch (err) {
+        console.error(err);
+        renderHistory([]);
+      }
+    }
+
+    async function ensureUserProfile(user) {
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+
+      if (snap.exists()) return snap.data();
+
+      const displayName =
+        localStorage.getItem("osl_nome") ||
+        user.displayName ||
+        "Jogador";
+
+      const email =
+        user.email ||
+        getLocalLicenseEmail() ||
+        "";
+
+      const username =
+        localStorage.getItem("osl_username") ||
+        String(email).split("@")[0] ||
+        "jogador";
+
+      const profileData = {
+        uid: user.uid,
+        userId: user.uid,
+        email,
+        displayName,
+        username,
+        avatarEmoji: "🔮",
+        bio: "Novo participante do ritual.",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        licenseLinked: false,
+        licenseCode: "",
+        product: "",
+        access: {
+          active: false
+        },
+        stats: {
+          gamesPlayed: 0,
+          wins: 0
+        },
+        friends: [],
+        incomingRequests: [],
+        outgoingRequests: []
+      };
+
+      await setDoc(userRef, profileData, { merge: true });
+
+      return {
+        ...profileData,
+        createdAt: null,
+        updatedAt: null
+      };
+    }
+
+    async function saveProfileAccess(user, payload) {
+      const userRef = doc(db, "users", user.uid);
+
+      await setDoc(userRef, {
+        email: payload.email || user.email || "",
+        licenseLinked: true,
+        licenseCode: payload.licenseCode || "",
+        product: payload.product || "osl_ritual_completo",
+        access: {
+          active: true
+        },
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      const refreshedSnap = await getDoc(userRef);
+      if (refreshedSnap.exists()) {
+        refreshUI(refreshedSnap.data(), user);
+      }
+    }
+
+    async function markProfileWithoutAccess(user) {
+      const userRef = doc(db, "users", user.uid);
+
+      await setDoc(userRef, {
+        access: {
+          active: false
+        },
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      const refreshedSnap = await getDoc(userRef);
+      if (refreshedSnap.exists()) {
+        refreshUI(refreshedSnap.data(), user);
+      }
+    }
+
+    async function validateCurrentAccessTokenForUser(user) {
+      const accessToken = getLocalAccessToken();
+      if (!accessToken) return false;
+
+      try {
+        const res = await fetchComRetry(
+          `${BACKEND_BASE_URL}/verificar-acesso`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ accessToken })
+          },
+          { tentativas: 2, timeoutMs: 12000 }
+        );
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.liberado) return false;
+        return true;
+      } catch (err) {
+        // Servidor offline → assume token local como válido se existir
+        console.warn("Servidor offline ao verificar acesso, usando local:", err);
+        return !!accessToken;
+      }
+    }
+
+    async function tryRestoreWithCode(user, rawCode) {
+      const typedCode = normalizeLicenseCode(rawCode);
+
+      if (!typedCode) {
+        setStatus("Digite o código da licença.", "err");
+        return false;
+      }
+
+      // Se o perfil já tem a licença vinculada, pula a validação e vai direto para emitir acesso
+      const alreadyLinked = currentProfile?.licenseLinked &&
+        normalizeLicenseCode(currentProfile?.licenseCode || "") === typedCode;
+
+      if (!alreadyLinked) {
+        setStatus("Validando código da licença...");
+
+        const verifyRes = await fetchComRetry(
+          `${BACKEND_BASE_URL}/validar-codigo-licenca`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ licenseCode: typedCode, uid: user.uid, email: user.email || "" })
+          }
+        );
+
+        const verifyData = await verifyRes.json().catch(() => ({}));
+
+        if (!verifyRes.ok || !verifyData.valid) {
+          if (verifyData?.error === "LICENCA_JA_VINCULADA_A_OUTRA_CONTA") {
+            setStatus("Esta licença já está vinculada a outra conta.", "err");
+          } else if (verifyData?.error === "LICENCA_INATIVA") {
+            setStatus("Licença encontrada mas marcada como inativa. Entre em contato com o suporte.", "err");
+          } else {
+            setStatus(`Código inválido ou não encontrado. (${verifyData?.error || "erro"})`, "err");
+          }
+          return false;
+        }
+      }
+
+      setStatus("Emitindo acesso...");
+
+      const accessRes = await fetchComRetry(
+        `${BACKEND_BASE_URL}/emitir-acesso-por-codigo`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ licenseCode: typedCode, uid: user.uid, email: user.email || "" })
+        },
+        { tentativas: 4, timeoutMs: 25000 }
+      );
+
+      const accessData = await accessRes.json().catch(() => ({}));
+
+      if (!accessRes.ok || !accessData.accessToken) {
+        if (accessData?.error === "LICENCA_JA_VINCULADA_A_OUTRA_CONTA") {
+          setStatus("Esta licença já está vinculada a outra conta.", "err");
+        } else if (accessData?.error === "LICENCA_INATIVA") {
+          setStatus("Licença inativa. Entre em contato com o suporte.", "err");
+        } else {
+          setStatus(`Não foi possível emitir o acesso. (${accessData?.error || "erro"})`, "err");
+        }
+        return false;
+      }
+
+      localStorage.setItem("osl_access_token", accessData.accessToken);
+      localStorage.setItem("osl_access_expires_at", String(accessData.expiresAt || ""));
+      localStorage.setItem("osl_license_code", verifyData.licenseCode || typedCode);
+      localStorage.setItem("osl_license_email", verifyData.email || user.email || "");
+
+      await saveProfileAccess(user, {
+        licenseCode: verifyData.licenseCode || typedCode,
+        email: verifyData.email || user.email || "",
+        product: verifyData.product || "osl_ritual_completo"
+      });
+
+      setStatus("Licença vinculada com sucesso. Acesso liberado.", "ok");
+      return true;
+    }
+
+    async function restoreAccess(user, silent = false) {
+      if (isProcessingLicense) return;
+      isProcessingLicense = true;
+
+      try {
+        linkLicenseBtn.disabled = true;
+        playBtn.disabled = true;
+
+        const typedCode = normalizeLicenseCode(licenseInput.value);
+        if (typedCode) {
+          const restoredByTypedCode = await tryRestoreWithCode(user, typedCode);
+          if (restoredByTypedCode) return;
+        }
+
+        const profileCode = normalizeLicenseCode(currentProfile?.licenseCode || "");
+        if (profileCode && profileCode !== typedCode) {
+          const restoredByProfileCode = await tryRestoreWithCode(user, profileCode);
+          if (restoredByProfileCode) return;
+        }
+
+        if (!silent) {
+          setStatus("Nenhuma licença válida foi encontrada para esta conta. Cole o código da licença para continuar.", "err");
+        }
+      } catch (err) {
+        console.error(err);
+        setStatus("Erro ao restaurar licença.", "err");
+      } finally {
+        isProcessingLicense = false;
+        linkLicenseBtn.disabled = false;
+      }
+    }
+
+    async function loadAffiliate(user) {
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}/afiliado/garantir`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            uid: user.uid,
+            email: user.email || "",
+            nome: currentProfile?.displayName || user.displayName || "Jogador"
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.affiliate) {
+          setAffiliateStatus("Não foi possível carregar a área de afiliado.", "err");
+          refreshAffiliateUI(null);
+          return;
+        }
+
+        refreshAffiliateUI(data.affiliate);
+        setAffiliateStatus("Área de afiliado carregada.", "ok");
+      } catch (err) {
+        console.error(err);
+        setAffiliateStatus("Erro ao carregar área de afiliado.", "err");
+        refreshAffiliateUI(null);
+      }
+    }
+
+    async function loadCompras(user) {
+      const comprasListEl = document.getElementById("comprasList");
+      if (!comprasListEl) return;
+      try {
+        const idToken = await user.getIdToken();
+        const res = await fetch(`${BACKEND_BASE_URL}/minhas-compras`, {
+          headers: { "Authorization": "Bearer " + idToken }
+        });
+        const data = await res.json().catch(function(){ return {}; });
+        const compras = Array.isArray(data.compras) ? data.compras : [];
+
+        // Também sincroniza no localStorage
+        let localCompras = [];
+        try { localCompras = JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch(e){}
+        const localRefs = new Set(localCompras.map(function(c){ return c.ref; }));
+        compras.forEach(function(c){ if (!localRefs.has(c.ref)) localCompras.push(c); });
+        localStorage.setItem("osl_compras", JSON.stringify(localCompras));
+
+        if (!compras.length) {
+          comprasListEl.innerHTML = '<div class="historyEmpty">Nenhuma compra registrada ainda.</div>';
+          return;
+        }
+
+        const tipoLabel = { pack: "Pacote", consumable: "Sessão", cosmetic: "Cosmético", license: "Licença" };
+        comprasListEl.innerHTML = compras.map(function(c) {
+          const d = new Date(c.ts);
+          const dataStr = d.toLocaleDateString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric" });
+          const tipo = tipoLabel[c.tipo] || c.tipo || "—";
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)">' +
+            '<div><div style="font-size:14px;color:#e6c07b;font-weight:600">' + c.titulo + '</div>' +
+            '<div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px">' + tipo + ' · ' + dataStr + '</div></div>' +
+            '<div style="font-size:13px;color:rgba(255,255,255,.7)">R$ ' + (c.valor || "—") + '</div>' +
+            '</div>';
+        }).join("");
+      } catch(e) {
+        if (comprasListEl) comprasListEl.innerHTML = '<div class="historyEmpty">Erro ao carregar compras.</div>';
+      }
+    }
+
+    async function loadAll(user) {
+      const profile = await ensureUserProfile(user);
+      refreshUI(profile, user);
+      // Afiliado e compras em paralelo — não bloqueia UI
+      Promise.all([
+        loadAffiliate(user),
+        loadAffiliateHistory(user),
+        loadCompras(user)
+      ]).catch(console.error);
+    }
+
+    async function copyText(text) {
+      if (!text) return false;
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        return ok;
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "./login.html";
+        return;
+      }
+
+      currentUser = user;
+
+      try {
+        await loadAll(user);
+
+        const currentAccessIsValidForThisUser = await validateCurrentAccessTokenForUser(user);
+
+        if (currentAccessIsValidForThisUser) {
+          if (currentProfile && !currentProfile?.access?.active) {
+            await saveProfileAccess(user, {
+              licenseCode: currentProfile?.licenseCode || getLocalLicenseCode() || "",
+              email: currentProfile?.email || user.email || "",
+              product: currentProfile?.product || "osl_ritual_completo"
+            });
+          } else {
+            refreshUI(currentProfile, user);
+            setStatus("Acesso liberado.", "ok");
+            playBtn.disabled = false;
+          }
+          return;
+        }
+
+        clearLocalSessionTokens();
+
+        if (currentProfile?.access?.active) {
+          await markProfileWithoutAccess(user);
+        }
+
+        refreshUI(currentProfile, user);
+      } catch (err) {
+        console.error(err);
+        setStatus("Erro ao carregar perfil.", "err");
+        playBtn.disabled = true;
+      }
+    });
+
+    linkLicenseBtn.addEventListener("click", async () => {
+      if (!currentUser) return;
+      await restoreAccess(currentUser, false);
+    });
+
+    refreshBtn.addEventListener("click", async () => {
+      if (!currentUser) return;
+      try {
+        refreshBtn.disabled = true;
+        setStatus("Atualizando painel...");
+        setAffiliateStatus("Atualizando área de afiliado...");
+
+        await loadAll(currentUser);
+
+        const stillValid = await validateCurrentAccessTokenForUser(currentUser);
+
+        if (stillValid) {
+          setStatus("Painel atualizado.", "ok");
+          playBtn.disabled = false;
+        } else {
+          clearLocalSessionTokens();
+          if (currentProfile?.access?.active) {
+            await markProfileWithoutAccess(currentUser);
+          }
+          setStatus("Painel atualizado. Acesso não ativo neste navegador.", "err");
+        }
+      } catch (err) {
+        console.error(err);
+        setStatus("Erro ao atualizar painel.", "err");
+      } finally {
+        refreshBtn.disabled = false;
+      }
+    });
+
+    playBtn.addEventListener("click", async () => {
+      if (!currentProfile || !currentUser) {
+        setStatus("Perfil ainda não carregado.", "err");
+        return;
+      }
+
+      const stillValidForThisUser = await validateCurrentAccessTokenForUser(currentUser);
+
+      if (!stillValidForThisUser) {
+        clearLocalSessionTokens();
+        await markProfileWithoutAccess(currentUser);
+        setStatus("Seu acesso não pertence a esta conta neste navegador. Vincule a licença antes de entrar.", "err");
+        return;
+      }
+
+      window.location.href = "./entrada.html";
+    });
+
+    copyLinkBtn.addEventListener("click", async () => {
+      if (!currentAffiliate?.referralLink) {
+        setAffiliateStatus("Seu link ainda não está disponível.", "err");
+        return;
+      }
+
+      const ok = await copyText(currentAffiliate.referralLink);
+      if (ok) {
+        setAffiliateStatus("Link de indicação copiado.", "ok");
+      } else {
+        setAffiliateStatus("Não foi possível copiar o link.", "err");
+      }
+    });
+
+    savePixBtn.addEventListener("click", async () => {
+      if (!currentUser || isProcessingAffiliate) return;
+
+      const pixKey = String(pixKeyInput.value || "").trim();
+
+      if (!pixKey) {
+        setAffiliateStatus("Digite sua chave Pix.", "err");
+        return;
+      }
+
+      try {
+        isProcessingAffiliate = true;
+        savePixBtn.disabled = true;
+        setAffiliateStatus("Salvando chave Pix...");
+
+        const res = await fetch(`${BACKEND_BASE_URL}/afiliado/pix`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            uid: currentUser.uid,
+            pixKey
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          setAffiliateStatus("Não foi possível salvar a chave Pix.", "err");
+          return;
+        }
+
+        await loadAffiliate(currentUser);
+        setAffiliateStatus("Chave Pix salva com sucesso.", "ok");
+      } catch (err) {
+        console.error(err);
+        setAffiliateStatus("Erro ao salvar a chave Pix.", "err");
+      } finally {
+        isProcessingAffiliate = false;
+        savePixBtn.disabled = false;
+      }
+    });
+
+    withdrawBtn.addEventListener("click", async () => {
+      if (!currentUser || isProcessingAffiliate) return;
+
+      try {
+        isProcessingAffiliate = true;
+        withdrawBtn.disabled = true;
+        setAffiliateStatus("Solicitando saque...");
+
+        const res = await fetch(`${BACKEND_BASE_URL}/afiliado/solicitar-saque`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            uid: currentUser.uid
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          if (data?.error === "PIX_NAO_CADASTRADO") {
+            setAffiliateStatus("Cadastre sua chave Pix antes de solicitar saque.", "err");
+          } else if (data?.error === "SALDO_INSUFICIENTE") {
+            setAffiliateStatus("Você ainda não tem 100 moedas disponíveis para saque.", "err");
+          } else {
+            setAffiliateStatus("Não foi possível solicitar o saque.", "err");
+          }
+          return;
+        }
+
+        await loadAffiliate(currentUser);
+        await loadAffiliateHistory(currentUser);
+        setAffiliateStatus("Solicitação de saque criada com sucesso.", "ok");
+      } catch (err) {
+        console.error(err);
+        setAffiliateStatus("Erro ao solicitar saque.", "err");
+      } finally {
+        isProcessingAffiliate = false;
+        withdrawBtn.disabled = false;
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        clearLocalSessionTokens();
+        await signOut(auth);
+      } catch (err) {
+        console.error(err);
+      }
+      window.location.href = "./login.html";
+    });
+  </script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>

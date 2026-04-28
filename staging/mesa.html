@@ -1,0 +1,251 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<script src="_staging.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O SextoLugar — Ritual</title>
+
+<style>
+
+body{
+margin:0;
+background:#020406;
+color:#f5f7fb;
+font-family:Inter,system-ui;
+display:flex;
+flex-direction:column;
+align-items:center;
+min-height:100vh;
+}
+
+.top{
+width:100%;
+padding:20px;
+text-align:center;
+font-size:28px;
+font-weight:800;
+letter-spacing:-.03em;
+}
+
+.players{
+display:flex;
+gap:14px;
+margin-bottom:20px;
+flex-wrap:wrap;
+justify-content:center;
+}
+
+.player{
+background:rgba(255,255,255,.05);
+padding:10px 16px;
+border-radius:20px;
+border:1px solid rgba(255,255,255,.08);
+font-size:14px;
+}
+
+.table{
+width:min(900px,90%);
+background:radial-gradient(circle at center,#111 0%,#050709 80%);
+border-radius:30px;
+padding:40px;
+box-shadow:0 30px 80px rgba(0,0,0,.6);
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:30px;
+}
+
+.deck{
+width:140px;
+height:200px;
+background:linear-gradient(180deg,#1e7cc2,#0b4b7e);
+border-radius:14px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:800;
+letter-spacing:.2em;
+cursor:pointer;
+transition:transform .15s;
+}
+
+.deck:hover{
+transform:scale(1.05);
+}
+
+/* Flip card */
+.card{
+width:200px;
+height:280px;
+border-radius:16px;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+transition:transform .3s ease-in;
+transform-origin:center;
+}
+
+.card.fold{
+transform:scaleX(0);
+}
+
+.card.back{
+background:#0d1117;
+border:1px solid rgba(255,255,255,.12);
+}
+
+.card.back img{
+width:70%;
+opacity:.9;
+pointer-events:none;
+}
+
+.card.front{
+background:rgba(255,255,255,.04);
+border:1px solid rgba(255,255,255,.1);
+text-align:center;
+padding:20px;
+font-size:18px;
+line-height:1.5;
+}
+
+.history{
+margin-top:30px;
+width:min(900px,90%);
+}
+
+.history h3{
+margin-bottom:10px;
+}
+
+.historyList{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+}
+
+.historyCard{
+background:rgba(255,255,255,.04);
+border:1px solid rgba(255,255,255,.08);
+padding:8px 12px;
+border-radius:10px;
+font-size:13px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="top">
+O SextoLugar
+</div>
+
+<div class="players" id="players"></div>
+
+<div class="table">
+
+<div class="deck" id="deck">
+REVELAR
+</div>
+
+<div class="card back" id="card">
+  <img loading="lazy" src="verso-carta.jpg" alt="verso">
+</div>
+
+</div>
+
+<div class="history">
+
+<h3>Cartas reveladas</h3>
+
+<div class="historyList" id="history"></div>
+
+</div>
+
+<script>
+
+const deck = [
+"Uma presença observa alguém da mesa.",
+"Um segredo antigo vem à tona.",
+"Alguém deve revelar algo verdadeiro.",
+"Um jogador perde a próxima rodada.",
+"Todos fecham os olhos por 10 segundos.",
+"O ritual exige silêncio.",
+"Uma escolha deve ser feita.",
+"Algo mudou na sala."
+]
+
+const cardEl    = document.getElementById("card")
+const historyEl = document.getElementById("history")
+const deckBtn   = document.getElementById("deck")
+
+let flipping = false
+
+function flipTo(showBack, text) {
+  // Fase 1: dobrar a carta (scaleX 0)
+  cardEl.classList.add("fold")
+
+  setTimeout(() => {
+    // Fase 2: trocar conteúdo com a carta "fechada"
+    if (showBack) {
+      cardEl.className = "card back fold"
+      cardEl.innerHTML = '<img loading="lazy" src="verso-carta.jpg" alt="verso">'
+    } else {
+      cardEl.className = "card front fold"
+      cardEl.innerText = text
+    }
+
+    // Forçar reflow para a transição funcionar na direção inversa
+    cardEl.getBoundingClientRect()
+
+    // Fase 3: desdobrar — troca a transição para ease-out
+    cardEl.style.transition = "transform .3s ease-out"
+    cardEl.classList.remove("fold")
+
+    setTimeout(() => {
+      cardEl.style.transition = ""
+      flipping = false
+    }, 320)
+  }, 310)
+}
+
+function reveal() {
+  if (flipping) return
+  flipping = true
+
+  const random = deck[Math.floor(Math.random() * deck.length)]
+
+  if (cardEl.classList.contains("back")) {
+    // Carta está no verso: revelar frente
+    flipTo(false, random)
+    addHistory(random)
+  } else {
+    // Carta está na frente: voltar ao verso primeiro, depois revelar nova
+    flipTo(true, null)
+    setTimeout(() => {
+      if (flipping) return
+      flipping = true
+      flipTo(false, random)
+      addHistory(random)
+    }, 700)
+  }
+}
+
+function addHistory(text) {
+  const h = document.createElement("div")
+  h.className = "historyCard"
+  h.innerText = text
+  historyEl.appendChild(h)
+}
+
+deckBtn.onclick = reveal
+
+</script>
+
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>

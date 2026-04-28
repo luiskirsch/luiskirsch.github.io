@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<script src="_staging.js" defer></script>
+<link rel="preconnect" href="https://www.googleapis.com">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento pendente | SEXTOLUGAR</title>
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#0b0b0f;
+      color:#fff;
+      font-family:"Segoe UI",sans-serif;
+      padding:24px;
+    }
+    .box{
+      width:min(560px, 100%);
+      background:#12121a;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      padding:32px 24px;
+      text-align:center;
+      box-shadow:0 0 40px rgba(0,0,0,.45);
+    }
+    h1{
+      margin:0 0 12px;
+      font-size:30px;
+    }
+    p{
+      color:rgba(255,255,255,.75);
+      line-height:1.6;
+      margin:0 0 12px;
+    }
+    .status{
+      margin-top:18px;
+      font-size:15px;
+      color:rgba(255,255,255,.88);
+      min-height:24px;
+    }
+    .small{
+      margin-top:10px;
+      font-size:13px;
+      color:rgba(255,255,255,.55);
+    }
+    .btn{
+      margin-top:18px;
+      padding:14px 18px;
+      border:none;
+      border-radius:10px;
+      background:linear-gradient(135deg,#e6c07b,#c99c4a);
+      color:#000;
+      font-weight:700;
+      cursor:pointer;
+      font-size:16px;
+      text-decoration:none;
+      display:inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h1>Pagamento pendente</h1>
+  <p>Estamos aguardando a confirmação do seu pagamento.</p>
+  <p>Assim que ele for aprovado, seu acesso será liberado automaticamente.</p>
+
+  <div class="status" id="status">Verificando pagamento...</div>
+  <div class="small" id="small"></div>
+
+  <a class="btn" href="./vendas.html">Voltar para vendas</a>
+</div>
+
+<script>
+(async function () {
+  const statusEl = document.getElementById("status");
+  const smallEl = document.getElementById("small");
+
+  const ref =
+    localStorage.getItem("osl_checkout_ref") ||
+    new URLSearchParams(window.location.search).get("external_reference") ||
+    "";
+
+  if (!ref) {
+    statusEl.textContent = "Não foi possível localizar a referência do pagamento.";
+    return;
+  }
+
+  let tentativas = 0;
+  const maxTentativas = 60; // 5 minutos, checando a cada 5 segundos
+
+  async function verificar() {
+    try {
+      tentativas += 1;
+      statusEl.textContent = "Verificando confirmação do pagamento...";
+      smallEl.textContent = `Tentativa ${tentativas} de ${maxTentativas}`;
+
+      const res = await fetch(`https://osl-video-server.onrender.com/status-pagamento/${encodeURIComponent(ref)}`);
+      const data = await res.json();
+
+      if (res.ok && data.approved && data.paymentId) {
+        statusEl.textContent = "Pagamento aprovado. Redirecionando...";
+        window.location.href = `./sucesso.html?payment_id=${encodeURIComponent(data.paymentId)}&status=approved`;
+        return;
+      }
+
+      if (tentativas >= maxTentativas) {
+        statusEl.textContent = "Ainda não houve confirmação automática.";
+        smallEl.textContent = "Se você já pagou, aguarde mais alguns instantes e recarregue esta página.";
+        return;
+      }
+
+      setTimeout(verificar, 5000);
+    } catch (error) {
+      console.error(error);
+      if (tentativas >= maxTentativas) {
+        statusEl.textContent = "Não foi possível verificar o pagamento agora.";
+        smallEl.textContent = "Recarregue a página em alguns instantes.";
+        return;
+      }
+      setTimeout(verificar, 5000);
+    }
+  }
+
+  verificar();
+})();
+</script>
+
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>
