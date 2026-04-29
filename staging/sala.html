@@ -6326,6 +6326,7 @@
             <button class="topActionBtn" id="oslShopFab" title="Ver pacotes de cartas">🎴 Loja</button>
             <button class="topActionBtn" id="arenaBtn" title="Alternar Modo Arena">⚔ Arena</button>
             <button class="topActionBtn streamModeBtn" id="streamModeBtn" hidden title="Ativar Modo Transmissão (Shift+S)">📡 Transmissão</button>
+            <button class="topActionBtn liveBtn" id="liveBtn" hidden title="Iniciar transmissão ao vivo">🔴 Live</button>
             <button class="topActionBtn" id="myProfileBtn">👤 Perfil<span class="badge" id="desktopProfileBadge"></span></button>
             <button class="topActionBtn iconOnly" id="leaveBtn" aria-label="Sair da sala">⇢</button>
           </div>
@@ -7320,6 +7321,123 @@
   <!-- ===== RECORDING CONTROL ===== -->
   <!-- ===== RECORDING CONTROL =====-->
   <script src="js/ui/recording.js"></script>
+
+  <!-- ===== LIVE STREAMING MODAL ===== -->
+  <style>
+    .liveOverlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,.78); z-index:2100;
+      align-items:center; justify-content:center; padding:20px;
+    }
+    .liveOverlay.open { display:flex; }
+    .liveModal {
+      background:linear-gradient(180deg, #1a1410 0%, #0f0a08 100%);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px; padding:24px;
+      max-width:480px; width:100%; color:#f0e8d8;
+      box-shadow:0 20px 60px rgba(0,0,0,.6);
+    }
+    .liveModal h2 { margin:0 0 8px; font-size:20px; color:#ff5252; }
+    .liveModal p  { margin:0 0 14px; color:rgba(240,232,216,.7); font-size:13px; line-height:1.4; }
+    .liveModal label { display:block; margin:14px 0 6px; font-size:12px; color:rgba(240,232,216,.6); text-transform:uppercase; letter-spacing:.5px; }
+    .liveModal select, .liveModal input[type="password"], .liveModal input[type="text"] {
+      width:100%; padding:11px 13px; box-sizing:border-box;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.13);
+      border-radius:9px; color:#f0e8d8; font-size:14px; font-family:inherit;
+    }
+    .liveModal select:focus, .liveModal input:focus {
+      outline:none; border-color:rgba(255,82,82,.5);
+    }
+    .liveModal-hint {
+      margin-top:6px; font-size:11px; color:rgba(240,232,216,.45); line-height:1.4;
+    }
+    .liveModal-actions {
+      display:flex; gap:10px; margin-top:20px;
+    }
+    .liveModal-btn {
+      flex:1; padding:12px; border-radius:9px; font-size:14px; font-weight:700;
+      cursor:pointer; border:1px solid transparent; transition:background .15s;
+      font-family:inherit;
+    }
+    .liveModal-btn--primary {
+      background:linear-gradient(135deg, #d33 0%, #a02 100%); color:#fff;
+    }
+    .liveModal-btn--primary:hover { filter:brightness(1.1); }
+    .liveModal-btn--primary:disabled { opacity:.5; cursor:not-allowed; }
+    .liveModal-btn--ghost {
+      background:rgba(255,255,255,.06); color:rgba(240,232,216,.7);
+      border-color:rgba(255,255,255,.13);
+    }
+    .liveModal-btn--ghost:hover { background:rgba(255,255,255,.1); }
+    .liveModal-status {
+      display:flex; flex-direction:column; align-items:center; gap:8px; padding:24px 0;
+    }
+    .liveModal-status__pulse {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:18px; font-weight:800; color:#ff5252;
+    }
+    .liveModal-status__pulse::before {
+      content:""; width:12px; height:12px; border-radius:50%;
+      background:#ff5252; box-shadow:0 0 12px #ff5252;
+      animation:livePulse 1.4s ease-in-out infinite;
+    }
+    @keyframes livePulse { 0%,100% { opacity:1 } 50% { opacity:.4 } }
+    .liveModal-status__platform { font-size:13px; color:rgba(240,232,216,.65); }
+    .liveModal-status__time { font-size:24px; font-variant-numeric:tabular-nums; color:#f0e8d8; font-weight:700; }
+    .liveBtn.is-live {
+      background:linear-gradient(135deg, #d33 0%, #a02 100%) !important;
+      color:#fff !important; border-color:rgba(255,255,255,.25) !important;
+      animation:liveBtnPulse 2s ease-in-out infinite;
+    }
+    @keyframes liveBtnPulse {
+      0%,100% { box-shadow:0 0 0 0 rgba(211,51,51,.6); }
+      50%     { box-shadow:0 0 0 8px rgba(211,51,51,0); }
+    }
+  </style>
+  <div class="liveOverlay" id="liveOverlay">
+    <div class="liveModal">
+      <h2>🔴 Transmissão ao vivo</h2>
+
+      <div id="liveStep1">
+        <p>Transmita esta sala diretamente pra plataforma escolhida — sem instalar OBS nem outro software.</p>
+
+        <label for="livePlatform">Plataforma</label>
+        <select id="livePlatform">
+          <option value="youtube">YouTube</option>
+          <option value="twitch">Twitch</option>
+          <option value="facebook">Facebook Live</option>
+          <option value="kick">Kick</option>
+          <option value="tiktok">TikTok (requer aprovação prévia)</option>
+          <option value="custom">Outro RTMP</option>
+        </select>
+
+        <label for="liveKey">Stream Key</label>
+        <input type="password" id="liveKey" placeholder="Cole sua Stream Key" autocomplete="off" spellcheck="false">
+        <div class="liveModal-hint" id="liveKeyHint"></div>
+
+        <div class="liveModal-actions">
+          <button class="liveModal-btn liveModal-btn--ghost" id="liveCancelBtn">Cancelar</button>
+          <button class="liveModal-btn liveModal-btn--primary" id="liveStartBtn">🔴 Iniciar Live</button>
+        </div>
+      </div>
+
+      <div id="liveStep2" style="display:none">
+        <div class="liveModal-status">
+          <div class="liveModal-status__pulse" id="liveStatus">Ao vivo</div>
+          <div class="liveModal-status__platform">em <span id="livePlatformActive">—</span></div>
+          <div class="liveModal-status__time" id="liveDuration">0:00</div>
+        </div>
+
+        <p style="text-align:center;font-size:12px">A transmissão está sendo enviada. Você pode fechar este painel — o status continua no botão "🔴 Ao vivo" no topo.</p>
+
+        <div class="liveModal-actions">
+          <button class="liveModal-btn liveModal-btn--ghost" id="liveCloseBtn" onclick="document.getElementById('liveOverlay').classList.remove('open')">Fechar painel</button>
+          <button class="liveModal-btn liveModal-btn--primary" id="liveStopBtn">⏹ Parar Live</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="js/ui/streaming.js"></script>
 
   <!-- ===== MOBILE LAYOUT CONTROLLER ===== -->
   <script src="js/ui/mobile.js"></script>
