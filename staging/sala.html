@@ -85,6 +85,14 @@
   <link rel="preload" href="./img/luis.png" as="image" fetchpriority="high">
   <title>SEXTOLUGAR — Sala</title>
 
+  <!-- Modo Transmissão: aplica antes do paint para evitar flash de credenciais -->
+  <script>
+    if (localStorage.getItem("osl_stream_mode") === "1") {
+      document.documentElement.classList.add("streaming-mode");
+      try { history.replaceState({}, "", "sala.html"); } catch (_) {}
+    }
+  </script>
+
   <!-- Lottie: animated emoji (Noto Animated Emoji by Google) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" defer></script>
 
@@ -6263,6 +6271,16 @@
   }
   .recapCard__btn--share:hover { background:rgba(255,255,255,.13);color:rgba(255,255,255,.85); }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     FEATURE: MODO TRANSMISSÃO — esconde credenciais quando o host está ao vivo
+  ═══════════════════════════════════════════════════════════════════ */
+  html.streaming-mode .stream-hide { display: none !important; }
+  .streamModeBtn--active {
+    background: linear-gradient(135deg, #d33 0%, #a02 100%) !important;
+    color: #fff !important;
+    border-color: rgba(255,255,255,.25) !important;
+  }
+
   </style>
 </head>
 
@@ -6304,9 +6322,10 @@
 
         <div class="topActions" style="align-self:stretch;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;padding:10px 0;">
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:nowrap;">
-            <button class="topActionBtn primary" id="copyCodeBtn">Convidar Amigos</button>
+            <button class="topActionBtn primary stream-hide" id="copyCodeBtn">Convidar Amigos</button>
             <button class="topActionBtn" id="oslShopFab" title="Ver pacotes de cartas">🎴 Loja</button>
             <button class="topActionBtn" id="arenaBtn" title="Alternar Modo Arena">⚔ Arena</button>
+            <button class="topActionBtn streamModeBtn" id="streamModeBtn" hidden title="Ativar Modo Transmissão (Shift+S)">📡 Transmissão</button>
             <button class="topActionBtn" id="myProfileBtn">👤 Perfil<span class="badge" id="desktopProfileBadge"></span></button>
             <button class="topActionBtn iconOnly" id="leaveBtn" aria-label="Sair da sala">⇢</button>
           </div>
@@ -6933,11 +6952,11 @@
 
       <div id="profPaneSessao" class="profPane profPane--selfOnly">
         <div class="profInfoBlock">
-          <div class="profInfoRow">
+          <div class="profInfoRow stream-hide">
             <span class="profInfoLabel">Sala</span>
             <span class="profInfoValue" id="sessSala">—</span>
           </div>
-          <div class="profInfoRow">
+          <div class="profInfoRow stream-hide">
             <span class="profInfoLabel">Nome da Sala</span>
             <span class="profInfoValue" id="sessNomeSala">—</span>
           </div>
@@ -6950,7 +6969,7 @@
             <span class="profInfoValue" id="sessVideo">—</span>
           </div>
         </div>
-        <button class="profileActionBtn" id="copyRoomCodeBtn">Copiar código da sala</button>
+        <button class="profileActionBtn stream-hide" id="copyRoomCodeBtn">Copiar código da sala</button>
       </div>
 
       <div id="profPanePacotes" class="profPane">
@@ -6959,11 +6978,11 @@
 
       <div id="profPaneConta" class="profPane profPane--selfOnly">
         <div class="profInfoBlock">
-          <div class="profInfoRow">
+          <div class="profInfoRow stream-hide">
             <span class="profInfoLabel">Email</span>
             <span class="profInfoValue" id="contaEmail">—</span>
           </div>
-          <div class="profInfoRow">
+          <div class="profInfoRow stream-hide">
             <span class="profInfoLabel">Licença</span>
             <span class="profInfoValue" id="contaLicenca">—</span>
             <button class="profCopyBtn" id="profCopyLicBtn" title="Copiar">⎘</button>
@@ -6972,7 +6991,7 @@
             <span class="profInfoLabel">Acesso</span>
             <span class="profInfoValue" id="contaAcesso">—</span>
           </div>
-          <div class="profInfoRow">
+          <div class="profInfoRow stream-hide">
             <span class="profInfoLabel">UID</span>
             <span class="profInfoValue" id="contaUid">—</span>
           </div>

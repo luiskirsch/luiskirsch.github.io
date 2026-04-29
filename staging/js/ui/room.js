@@ -210,6 +210,8 @@ export function bindRoom() {
     if (startBtn) { startBtn.disabled = !S.isHost || S._isSpectator; startBtn.textContent = S.isHost ? (started ? "Ritual iniciado" : "Iniciar Ritual") : "Aguardando anfitrião"; }
     const arenaBtn = document.getElementById("arenaBtn");
     if (arenaBtn) arenaBtn.hidden = !S.isHost;
+    const streamModeBtn = document.getElementById("streamModeBtn");
+    if (streamModeBtn) streamModeBtn.hidden = !S.isHost;
     if (data.arenaActive) { if (typeof window.activateArenaMode === "function") window.activateArenaMode(); }
     else { if (typeof window.deactivateArenaMode === "function") window.deactivateArenaMode(); if (!started && !S.ritualStarted) setRitualWaitingState(); }
     await setDoc(S.playerRef, { isHost: S.isHost }, { merge: true });
