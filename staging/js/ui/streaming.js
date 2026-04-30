@@ -8,12 +8,71 @@
 
   // Catálogo de plataformas suportadas. Ordem aqui = ordem na UI.
   const PLATFORMS = [
-    { id: "youtube",  name: "YouTube",       icon: "▶️", hint: "YouTube Studio → Transmitir Ao Vivo → Chave de Transmissão" },
-    { id: "twitch",   name: "Twitch",        icon: "🟣", hint: "Twitch Dashboard → Configurações → Transmissão → Chave Principal" },
-    { id: "facebook", name: "Facebook Live", icon: "🔵", hint: "Facebook Live Producer → Stream Key (Persistent recomendado)" },
-    { id: "kick",     name: "Kick",          icon: "🟢", hint: "Kick → Settings → Stream Key" },
-    { id: "tiktok",   name: "TikTok",        icon: "⚫", hint: "⚠️ Requer Live aprovado pela TikTok. Cole a URL completa começando com rtmp://" },
-    { id: "custom",   name: "RTMP Custom",   icon: "⚙️", hint: "Cole a URL RTMP completa (ex: rtmp://servidor.com/app/sua-key)" }
+    {
+      id: "youtube", name: "YouTube", icon: "▶️",
+      hint: "YouTube Studio → Transmitir Ao Vivo → Chave de Transmissão",
+      tutorialUrl: "https://studio.youtube.com",
+      tutorialSteps: [
+        "Clique em \"Abrir YouTube Studio\" abaixo",
+        "Lateral esquerda: \"Criar\" → \"Transmitir Ao Vivo\"",
+        "Em \"Configurações de Transmissão\" → copie a \"Chave de Transmissão\"",
+        "Cole aqui no campo acima"
+      ]
+    },
+    {
+      id: "twitch", name: "Twitch", icon: "🟣",
+      hint: "Twitch Dashboard → Configurações → Transmissão → Chave Principal",
+      tutorialUrl: "https://dashboard.twitch.tv/settings/stream",
+      tutorialSteps: [
+        "Clique em \"Abrir Twitch Dashboard\" abaixo",
+        "Procure por \"Chave de Transmissão Principal\"",
+        "Clique em \"Copiar\" (não precisa apertar \"Mostrar\")",
+        "Cole aqui no campo acima"
+      ]
+    },
+    {
+      id: "facebook", name: "Facebook Live", icon: "🔵",
+      hint: "Facebook Live Producer → Stream Key (Persistent recomendado)",
+      tutorialUrl: "https://www.facebook.com/live/producer",
+      tutorialSteps: [
+        "Clique em \"Abrir Facebook Live Producer\" abaixo",
+        "Em \"Configurações da live\" selecione \"Usar Stream Key\"",
+        "Use \"Persistent Stream Key\" se quiser a mesma chave em várias lives",
+        "Copie a key e cole aqui no campo acima"
+      ]
+    },
+    {
+      id: "kick", name: "Kick", icon: "🟢",
+      hint: "Kick → Settings → Stream Key",
+      tutorialUrl: "https://kick.com/dashboard/settings/stream",
+      tutorialSteps: [
+        "Clique em \"Abrir Kick Dashboard\" abaixo",
+        "Em \"Stream Key\" → copie o código",
+        "Cole aqui no campo acima"
+      ]
+    },
+    {
+      id: "tiktok", name: "TikTok", icon: "⚫",
+      hint: "⚠️ Requer Live aprovado pela TikTok. Cole a URL completa começando com rtmp://",
+      tutorialUrl: "https://livecenter.tiktok.com/",
+      tutorialSteps: [
+        "⚠️ Requer aprovação prévia da TikTok (geralmente conta com 1000+ seguidores)",
+        "Clique em \"Abrir TikTok Live Studio\" abaixo",
+        "Inicie uma Live escolhendo \"RTMP\" como fonte de transmissão",
+        "TikTok gera uma URL completa começando com rtmp://...",
+        "Cole a URL completa aqui (não só a key)"
+      ]
+    },
+    {
+      id: "custom", name: "RTMP Custom", icon: "⚙️",
+      hint: "Cole a URL RTMP completa (ex: rtmp://servidor.com/app/sua-key)",
+      tutorialUrl: "",
+      tutorialSteps: [
+        "Use pra Restream, servidor próprio ou outras plataformas com RTMP",
+        "Cole a URL RTMP completa que a plataforma forneceu",
+        "Formato esperado: rtmp://servidor.com/app/sua-chave"
+      ]
+    }
   ];
 
   let liveActive = false, livePollTimer = null, liveStartedAt = 0, liveActivePlatforms = [];
@@ -42,7 +101,12 @@
 
   function renderPlatformCards() {
     if (!livePlatformList) return;
-    livePlatformList.innerHTML = PLATFORMS.map(p => `
+    livePlatformList.innerHTML = PLATFORMS.map(p => {
+      const stepsHtml = p.tutorialSteps.map(s => `<li>${s}</li>`).join("");
+      const openBtn = p.tutorialUrl
+        ? `<a href="${p.tutorialUrl}" target="_blank" rel="noopener" class="livePlatformCard__open">Abrir ${p.name} ↗</a>`
+        : "";
+      return `
       <div class="livePlatformCard" data-platform="${p.id}">
         <label class="livePlatformCard__head">
           <span class="livePlatformCard__icon">${p.icon}</span>
@@ -53,10 +117,15 @@
           <input type="password" class="livePlatformCard__key" data-platform="${p.id}"
                  placeholder="${p.id === 'tiktok' || p.id === 'custom' ? 'rtmp://...' : 'Cole sua Stream Key'}"
                  autocomplete="off" spellcheck="false">
-          <div class="livePlatformCard__hint">${p.hint}</div>
+          <details class="livePlatformCard__tutorial">
+            <summary>ℹ️ Como pegar a Stream Key?</summary>
+            <ol>${stepsHtml}</ol>
+            ${openBtn}
+          </details>
         </div>
       </div>
-    `).join("");
+    `;
+    }).join("");
 
     // Wire toggles → expand/collapse + style
     livePlatformList.querySelectorAll(".livePlatformCard__toggle").forEach(toggle => {
