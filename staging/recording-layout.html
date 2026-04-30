@@ -437,21 +437,12 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { Room, RoomEvent } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
+    import { db } from "./js/firebase-app.js";
 
     const BACKEND = "https://osl-video-server-production.up.railway.app";
     const LK_URL  = "wss://osextolugar-eqa7q1iz.livekit.cloud";
-
-    const firebaseConfig = {
-      apiKey:"AIzaSyC8sSvA7_1HPYRFGfgdgzstkP_yQHadY-c",
-      authDomain:"osextolugar-game.firebaseapp.com",
-      projectId:"osextolugar-game",
-      storageBucket:"osextolugar-game.firebasestorage.app",
-      messagingSenderId:"947922328721",
-      appId:"1:947922328721:web:989522c99e16ab449f3330"
-    };
 
     const params   = new URLSearchParams(window.location.search);
     const roomCode = params.get("room") || params.get("sala") || "SL-0001";
@@ -558,8 +549,6 @@
     }
 
     // ── Firestore: sincroniza carta em tempo real ────────────────────────
-    const db = getFirestore(initializeApp(firebaseConfig));
-
     onSnapshot(doc(db, "salas", roomCode, "ritual", "state"), (snap) => {
       if (!snap.exists()) return;
       const data = snap.data();

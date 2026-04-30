@@ -158,16 +158,10 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { firebaseConfig } from "./js/firebase-config.js";
 
-    const _fbApp  = initializeApp({
-      apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
-      authDomain: "osextolugar-game.firebaseapp.com",
-      projectId: "osextolugar-game",
-      storageBucket: "osextolugar-game.firebasestorage.app",
-      messagingSenderId: "1042107749185",
-      appId: "1:1042107749185:web:c4a53d6f61f2fe82b0c891"
-    }, "sucesso-app");
-    const _auth = getAuth(_fbApp);
+    const _fbApp = initializeApp(firebaseConfig, "sucesso-app");
+    const _auth  = getAuth(_fbApp);
 
     // Retorna o usuário logado (ou null) resolvendo a Promise
     function getLoggedUser() {

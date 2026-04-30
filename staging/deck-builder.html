@@ -390,25 +390,12 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import {
-    getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc,
+    doc, getDoc, getDocs, setDoc, deleteDoc,
     collection, addDoc, onSnapshot, serverTimestamp, query, orderBy
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
-    authDomain: "osextolugar-game.firebaseapp.com",
-    projectId: "osextolugar-game",
-    storageBucket: "osextolugar-game.firebasestorage.app",
-    messagingSenderId: "592088391155",
-    appId: "1:592088391155:web:c2e4f9fba44fb2c0b3e785"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { app, auth, db } from "./js/firebase-app.js";
 
   // ── Card data (espelhado de sala.html) ─────────────────────────────────
   const BASIC_CARDS = [
