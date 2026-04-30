@@ -19,6 +19,10 @@
   let liveActive = false, livePollTimer = null, liveStartedAt = 0, liveActivePlatforms = [];
   let liveSelectedLayout = "cards";
 
+  function userEmail() {
+    return (localStorage.getItem("osl_license_email") || localStorage.getItem("osl_checkout_email") || "").trim().toLowerCase();
+  }
+
   const liveBtn        = document.getElementById("liveBtn");
   const liveOverlay    = document.getElementById("liveOverlay");
   const liveStep1      = document.getElementById("liveStep1");
@@ -31,6 +35,7 @@
   const liveDuration   = document.getElementById("liveDuration");
   const livePlatformsActive = document.getElementById("livePlatformsActive");
   const liveValidationHint = document.getElementById("liveValidationHint");
+  const liveStatusBanner = document.getElementById("liveStatusBanner");
 
   // --- Render dos cards de plataforma ---
 
@@ -174,6 +179,11 @@
       setValidationHint("Marque pelo menos uma plataforma e cole a Stream Key.");
       return;
     }
+    const email = userEmail();
+    if (!email) {
+      setValidationHint("Faça login com sua licença antes de transmitir.");
+      return;
+    }
 
     liveStartBtn.disabled = true;
     liveStartBtn.textContent = "Iniciando...";
@@ -183,25 +193,87 @@
       const res = await fetch(STREAM_BASE + "/streaming/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId: roomCode, platforms, layoutId: liveSelectedLayout })
+        body: JSON.stringify({ roomId: roomCode, email, platforms, layoutId: liveSelectedLayout })
       });
       const data = await res.json();
       if (data.ok) {
-        // Limpa keys do form pra não ficarem em memória
         livePlatformList?.querySelectorAll(".livePlatformCard__key").forEach(k => k.value = "");
         showLiveActive(platforms, data.startedAt);
       } else {
-        const msg = data.error === "SALA_LIVEKIT_VAZIA"
-          ? "Pra POV ou Grid, ative Câmera ou Mic primeiro. Cards funciona mesmo sem vídeo."
-          : "Erro: " + (data.error || "desconhecido");
+        const msg = errorMessage(data);
         setValidationHint(msg);
         liveStartBtn.disabled = false;
         liveStartBtn.textContent = "🔴 Iniciar Live";
+        if (data.error === "QUOTA_DIARIA_ESGOTADA") {
+          showBuyPassCta();
+        }
       }
     } catch (err) {
       setValidationHint("Erro de conexão: " + err.message);
       liveStartBtn.disabled = false;
       liveStartBtn.textContent = "🔴 Iniciar Live";
+    }
+  }
+
+  function errorMessage(data) {
+    switch (data.error) {
+      case "SALA_LIVEKIT_VAZIA":      return "Pra POV ou Grid, ative Câmera ou Mic primeiro. Cards funciona mesmo sem vídeo.";
+      case "QUOTA_DIARIA_ESGOTADA":   return `Quota gratuita de hoje esgotada (60 min/dia). Compre o Stream Pass mensal pra streamar sem limite.`;
+      case "EMAIL_OBRIGATORIO":       return "Faça login com sua licença antes de transmitir.";
+      case "STREAM_JA_ATIVO":         return "Já existe um stream ativo nesta sala.";
+      default:                        return "Erro: " + (data.error || "desconhecido");
+    }
+  }
+
+  function showBuyPassCta() {
+    if (!liveValidationHint) return;
+    liveValidationHint.innerHTML += ` <a href="#" id="liveBuyPassLink" style="color:#ffaa66;font-weight:700;text-decoration:underline">Comprar Stream Pass (R$ 14,90/mês)</a>`;
+    document.getElementById("liveBuyPassLink")?.addEventListener("click", e => {
+      e.preventDefault();
+      // Phase 3.C: integrar com fluxo de pagamento. Por enquanto, abre uma nova janela com info.
+      alert("Compra do Stream Pass ainda não está disponível na UI — em desenvolvimento. Por enquanto: aguarde 24h pra resetar a quota gratuita.");
+    });
+  }
+
+  // --- Status badge: prestige / pass / free tier ---
+
+  async function refreshStatusBanner() {
+    if (!liveStatusBanner) return;
+    const email = userEmail();
+    if (!email) {
+      liveStatusBanner.textContent = "Faça login pra ver seu plano de transmissão.";
+      liveStatusBanner.className = "liveStatusBanner liveStatusBanner--warn";
+      return;
+    }
+
+    try {
+      const passRes = await fetch(STREAM_BASE + "/streaming/pass/" + encodeURIComponent(email));
+      const pass = await passRes.json();
+      if (pass.active && pass.type === "prestige") {
+        liveStatusBanner.textContent = "✨ Plano Prestige — streaming ilimitado incluído";
+        liveStatusBanner.className = "liveStatusBanner liveStatusBanner--gold";
+        return;
+      }
+      if (pass.active) {
+        const dt = pass.expiresAt ? new Date(pass.expiresAt).toLocaleDateString("pt-BR") : "—";
+        liveStatusBanner.textContent = `✓ Stream Pass ativo até ${dt} — sem limite de tempo`;
+        liveStatusBanner.className = "liveStatusBanner liveStatusBanner--ok";
+        return;
+      }
+      // Sem pass — checa quota free tier
+      const usageRes = await fetch(STREAM_BASE + "/streaming/usage/" + encodeURIComponent(email));
+      const usage = await usageRes.json();
+      const remaining = usage.remainingMin ?? 60;
+      if (remaining > 0) {
+        liveStatusBanner.textContent = `Plano gratuito · Restam ${remaining} min de transmissão hoje`;
+        liveStatusBanner.className = "liveStatusBanner liveStatusBanner--info";
+      } else {
+        liveStatusBanner.textContent = "Quota gratuita de hoje esgotada · Compre o Stream Pass (R$ 14,90/mês)";
+        liveStatusBanner.className = "liveStatusBanner liveStatusBanner--warn";
+      }
+    } catch (_) {
+      liveStatusBanner.textContent = "";
+      liveStatusBanner.className = "liveStatusBanner";
     }
   }
 
@@ -228,7 +300,7 @@
   if (liveBtn) {
     liveBtn.addEventListener("click", () => {
       if (liveActive) stopLive();
-      else openModal();
+      else { openModal(); refreshStatusBanner(); }
     });
   }
 
