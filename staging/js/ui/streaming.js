@@ -310,6 +310,68 @@
     if (liveUpgradeBtn) liveUpgradeBtn.hidden = !visible;
   }
 
+  // --- Phase 4: stats agregados + badge ---
+
+  function fmtTotalMin(min) {
+    if (min < 60) return `${min} min`;
+    const h = Math.floor(min / 60);
+    const rem = min % 60;
+    return rem > 0 ? `${h}h ${rem}min` : `${h}h`;
+  }
+
+  async function fetchStats(email) {
+    try {
+      const r = await fetch(STREAM_BASE + "/streaming/stats/" + encodeURIComponent(email));
+      return await r.json();
+    } catch (_) { return { totalMinutes: 0, totalSessions: 0 }; }
+  }
+
+  async function fetchHistory(email) {
+    try {
+      const r = await fetch(STREAM_BASE + "/streaming/history/" + encodeURIComponent(email) + "?limit=10");
+      const d = await r.json();
+      return d.sessions || [];
+    } catch (_) { return []; }
+  }
+
+  function applyStreamerBadge(totalSessions) {
+    const titleEl = document.querySelector(".liveModal-title span");
+    if (!titleEl) return;
+    const existing = titleEl.querySelector(".liveStreamerBadge");
+    if (totalSessions > 0 && !existing) {
+      const badge = document.createElement("span");
+      badge.className = "liveStreamerBadge";
+      badge.textContent = "🎬";
+      badge.title = "Streamer ativo";
+      badge.style.cssText = "font-size:14px;margin-left:6px;vertical-align:middle";
+      titleEl.appendChild(badge);
+    } else if (totalSessions === 0 && existing) {
+      existing.remove();
+    }
+  }
+
+  async function renderHistorySection(email) {
+    const container = document.getElementById("liveHistorySection");
+    if (!container) return;
+    const sessions = await fetchHistory(email);
+    if (!sessions.length) {
+      container.innerHTML = "";
+      return;
+    }
+    const platformLabel = id => PLATFORMS.find(p => p.id === id)?.name || id;
+    const rows = sessions.slice(0, 5).map(s => {
+      const date = s.endedAt ? new Date(s.endedAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) : "—";
+      const dur  = fmtTotalMin(Math.ceil((s.durationMs || 0) / 60000));
+      const plats = (s.platforms || []).map(platformLabel).join(", ") || "—";
+      return `<li><span class="liveHist__date">${date}</span> · ${dur} · ${plats}</li>`;
+    }).join("");
+    container.innerHTML = `
+      <details class="liveHistory">
+        <summary>📊 Histórico (${sessions.length} ${sessions.length === 1 ? "sessão" : "sessões"})</summary>
+        <ol>${rows}</ol>
+      </details>`;
+  }
+
   async function refreshStatusBanner() {
     if (!liveStatusBanner) return;
     const email = userEmail();
@@ -353,6 +415,16 @@
       liveStatusBanner.className = "liveStatusBanner";
       setUpgradeBtnVisible(false);
     }
+
+    // Phase 4: badge de streamer + histórico
+    try {
+      const stats = await fetchStats(email);
+      applyStreamerBadge(stats.totalSessions || 0);
+      if (stats.totalMinutes > 0 && liveStatusBanner.textContent) {
+        liveStatusBanner.textContent += ` · Total: ${fmtTotalMin(stats.totalMinutes)} (${stats.totalSessions} sessões)`;
+      }
+      renderHistorySection(email);
+    } catch (_) {}
   }
 
   // --- Fluxo de pagamento (Stream Pass mensal) ---
