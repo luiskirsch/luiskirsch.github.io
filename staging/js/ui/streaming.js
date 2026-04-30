@@ -1,55 +1,111 @@
 // Modal de configuração e controle de transmissão ao vivo (RTMP)
-// Phase 1: 1 plataforma por sessão. Backend já suporta múltiplas — UI evolui em Phase 2.
+// Phase 2.A: multi-plataforma simultâneo. Backend manda todas URLs num único egress.
 (function () {
   'use strict';
 
   const STREAM_BASE = window.PANEL_SERVER_BASE || "https://osl-video-server-production.up.railway.app";
   const roomCode = (new URLSearchParams(window.location.search)).get("sala") || localStorage.getItem("osl_sala") || "SL-0001";
 
-  let liveActive = false, livePollTimer = null, liveStartedAt = 0, livePlatformName = "";
+  // Catálogo de plataformas suportadas. Ordem aqui = ordem na UI.
+  const PLATFORMS = [
+    { id: "youtube",  name: "YouTube",       icon: "▶️", hint: "YouTube Studio → Transmitir Ao Vivo → Chave de Transmissão" },
+    { id: "twitch",   name: "Twitch",        icon: "🟣", hint: "Twitch Dashboard → Configurações → Transmissão → Chave Principal" },
+    { id: "facebook", name: "Facebook Live", icon: "🔵", hint: "Facebook Live Producer → Stream Key (Persistent recomendado)" },
+    { id: "kick",     name: "Kick",          icon: "🟢", hint: "Kick → Settings → Stream Key" },
+    { id: "tiktok",   name: "TikTok",        icon: "⚫", hint: "⚠️ Requer Live aprovado pela TikTok. Cole a URL completa começando com rtmp://" },
+    { id: "custom",   name: "RTMP Custom",   icon: "⚙️", hint: "Cole a URL RTMP completa (ex: rtmp://servidor.com/app/sua-key)" }
+  ];
+
+  let liveActive = false, livePollTimer = null, liveStartedAt = 0, liveActivePlatforms = [];
 
   const liveBtn        = document.getElementById("liveBtn");
   const liveOverlay    = document.getElementById("liveOverlay");
   const liveStep1      = document.getElementById("liveStep1");
   const liveStep2      = document.getElementById("liveStep2");
-  const livePlatform   = document.getElementById("livePlatform");
-  const liveKeyHint    = document.getElementById("liveKeyHint");
-  const liveKey        = document.getElementById("liveKey");
+  const livePlatformList = document.getElementById("livePlatformList");
   const liveStartBtn   = document.getElementById("liveStartBtn");
   const liveCancelBtn  = document.getElementById("liveCancelBtn");
   const liveStopBtn    = document.getElementById("liveStopBtn");
-  const liveStatusEl   = document.getElementById("liveStatus");
   const liveDuration   = document.getElementById("liveDuration");
-  const livePlatformActive = document.getElementById("livePlatformActive");
+  const livePlatformsActive = document.getElementById("livePlatformsActive");
+  const liveValidationHint = document.getElementById("liveValidationHint");
 
-  const PLATFORM_HINTS = {
-    youtube:  "YouTube Studio → Transmitir ao Vivo → Stream Key (não compartilhe!)",
-    twitch:   "Twitch → Settings → Stream → Primary Stream key",
-    facebook: "Facebook → Live Producer → Stream Key (Persistent Stream Key recomendado)",
-    kick:     "Kick → Settings → Stream Key",
-    tiktok:   "⚠️ TikTok exige conta com Live aprovado (1000+ seguidores). Cole a URL completa começando com rtmp://",
-    custom:   "Cole a URL RTMP completa (ex: rtmp://servidor.com/app/sua-key)"
-  };
+  // --- Render dos cards de plataforma ---
 
-  const PLATFORM_LABELS = {
-    youtube: "YouTube", twitch: "Twitch", facebook: "Facebook Live",
-    kick: "Kick", tiktok: "TikTok", custom: "RTMP Custom"
-  };
+  function renderPlatformCards() {
+    if (!livePlatformList) return;
+    livePlatformList.innerHTML = PLATFORMS.map(p => `
+      <div class="livePlatformCard" data-platform="${p.id}">
+        <label class="livePlatformCard__head">
+          <span class="livePlatformCard__icon">${p.icon}</span>
+          <span class="livePlatformCard__name">${p.name}</span>
+          <input type="checkbox" class="livePlatformCard__toggle" id="livePlat_${p.id}">
+        </label>
+        <div class="livePlatformCard__body">
+          <input type="password" class="livePlatformCard__key" data-platform="${p.id}"
+                 placeholder="${p.id === 'tiktok' || p.id === 'custom' ? 'rtmp://...' : 'Cole sua Stream Key'}"
+                 autocomplete="off" spellcheck="false">
+          <div class="livePlatformCard__hint">${p.hint}</div>
+        </div>
+      </div>
+    `).join("");
 
-  function openModal()  { if (liveOverlay) liveOverlay.classList.add("open"); }
-  function closeModal() { if (liveOverlay) liveOverlay.classList.remove("open"); }
+    // Wire toggles → expand/collapse + style
+    livePlatformList.querySelectorAll(".livePlatformCard__toggle").forEach(toggle => {
+      toggle.addEventListener("change", e => {
+        const card = e.target.closest(".livePlatformCard");
+        card.classList.toggle("is-on", e.target.checked);
+        if (e.target.checked) {
+          // Foca no input quando abre
+          setTimeout(() => card.querySelector(".livePlatformCard__key")?.focus(), 100);
+        }
+        clearValidationHint();
+      });
+    });
 
-  function setHint() {
-    if (liveKeyHint && livePlatform) liveKeyHint.textContent = PLATFORM_HINTS[livePlatform.value] || "";
-    if (liveKey) {
-      const isCustom = livePlatform?.value === "custom" || livePlatform?.value === "tiktok";
-      liveKey.placeholder = isCustom ? "rtmp://..." : "Cole sua Stream Key";
+    // Limpa hint quando usuário digita
+    livePlatformList.querySelectorAll(".livePlatformCard__key").forEach(k => {
+      k.addEventListener("input", clearValidationHint);
+    });
+  }
+
+  function clearValidationHint() {
+    if (liveValidationHint) liveValidationHint.textContent = "";
+  }
+
+  function setValidationHint(msg) {
+    if (liveValidationHint) {
+      liveValidationHint.textContent = msg;
+      liveValidationHint.style.color = "#ff8a8a";
     }
   }
 
-  function showLiveActive(platformName, startedAt) {
+  // --- Coleta plataformas habilitadas com key preenchida ---
+
+  function getEnabledPlatforms() {
+    const result = [];
+    for (const p of PLATFORMS) {
+      const toggle = document.getElementById(`livePlat_${p.id}`);
+      const keyInput = livePlatformList?.querySelector(`.livePlatformCard__key[data-platform="${p.id}"]`);
+      if (!toggle?.checked) continue;
+      const streamKey = (keyInput?.value || "").trim();
+      if (!streamKey) continue;
+      result.push({ name: p.id, streamKey });
+    }
+    return result;
+  }
+
+  // --- UI estado ativo/inativo ---
+
+  function platformLabels(platforms) {
+    return platforms
+      .map(p => PLATFORMS.find(x => x.id === p.name)?.name || p.name)
+      .join(", ");
+  }
+
+  function showLiveActive(platforms, startedAt) {
     liveActive = true;
-    livePlatformName = platformName;
+    liveActivePlatforms = platforms || [];
     liveStartedAt = startedAt || Date.now();
     if (liveBtn) {
       liveBtn.classList.add("is-live");
@@ -58,13 +114,13 @@
     }
     if (liveStep1) liveStep1.style.display = "none";
     if (liveStep2) liveStep2.style.display = "block";
-    if (livePlatformActive) livePlatformActive.textContent = PLATFORM_LABELS[platformName] || platformName;
+    if (livePlatformsActive) livePlatformsActive.textContent = platformLabels(liveActivePlatforms) || "—";
     startDurationTicker();
   }
 
   function showLiveInactive() {
     liveActive = false;
-    livePlatformName = "";
+    liveActivePlatforms = [];
     liveStartedAt = 0;
     if (liveBtn) {
       liveBtn.classList.remove("is-live");
@@ -96,35 +152,37 @@
     if (livePollTimer) { clearInterval(livePollTimer); livePollTimer = null; }
   }
 
+  // --- Start/Stop ---
+
   async function startLive() {
-    const platform = livePlatform?.value;
-    const streamKey = (liveKey?.value || "").trim();
-    if (!platform)  { alert("Escolha uma plataforma."); return; }
-    if (!streamKey) { alert("Cole sua Stream Key."); return; }
+    const platforms = getEnabledPlatforms();
+    if (!platforms.length) {
+      setValidationHint("Marque pelo menos uma plataforma e cole a Stream Key.");
+      return;
+    }
 
     liveStartBtn.disabled = true;
     liveStartBtn.textContent = "Iniciando...";
+    clearValidationHint();
 
     try {
       const res = await fetch(STREAM_BASE + "/streaming/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roomId: roomCode,
-          platforms: [{ name: platform, streamKey }]
-        })
+        body: JSON.stringify({ roomId: roomCode, platforms })
       });
       const data = await res.json();
       if (data.ok) {
-        if (liveKey) liveKey.value = ""; // limpa key da memória do form
-        showLiveActive(platform, data.startedAt);
+        // Limpa keys do form pra não ficarem em memória
+        livePlatformList?.querySelectorAll(".livePlatformCard__key").forEach(k => k.value = "");
+        showLiveActive(platforms, data.startedAt);
       } else {
-        alert("Erro ao iniciar: " + (data.error || "desconhecido"));
+        setValidationHint("Erro: " + (data.error || "desconhecido"));
         liveStartBtn.disabled = false;
         liveStartBtn.textContent = "🔴 Iniciar Live";
       }
     } catch (err) {
-      alert("Erro de conexão: " + err.message);
+      setValidationHint("Erro de conexão: " + err.message);
       liveStartBtn.disabled = false;
       liveStartBtn.textContent = "🔴 Iniciar Live";
     }
@@ -132,7 +190,7 @@
 
   async function stopLive() {
     if (!liveActive) return;
-    if (!confirm("Parar a transmissão ao vivo?")) return;
+    if (!confirm("Parar a transmissão ao vivo em todas as plataformas?")) return;
     try {
       await fetch(STREAM_BASE + "/streaming/stop", {
         method: "POST",
@@ -142,10 +200,13 @@
     } catch (_) {}
     showLiveInactive();
     if (liveStartBtn) { liveStartBtn.disabled = false; liveStartBtn.textContent = "🔴 Iniciar Live"; }
-    closeModal();
+    if (liveOverlay) liveOverlay.classList.remove("open");
   }
 
   // --- Bindings ---
+
+  function openModal()  { if (liveOverlay) liveOverlay.classList.add("open"); }
+  function closeModal() { if (liveOverlay) liveOverlay.classList.remove("open"); }
 
   if (liveBtn) {
     liveBtn.addEventListener("click", () => {
@@ -154,9 +215,8 @@
     });
   }
 
-  if (livePlatform) livePlatform.addEventListener("change", setHint);
-  if (liveStartBtn) liveStartBtn.addEventListener("click", startLive);
-  if (liveStopBtn)  liveStopBtn.addEventListener("click", stopLive);
+  if (liveStartBtn)  liveStartBtn.addEventListener("click", startLive);
+  if (liveStopBtn)   liveStopBtn.addEventListener("click", stopLive);
   if (liveCancelBtn) liveCancelBtn.addEventListener("click", closeModal);
   if (liveOverlay)   liveOverlay.addEventListener("click", e => { if (e.target === liveOverlay) closeModal(); });
 
@@ -165,12 +225,9 @@
     try {
       const r = await fetch(STREAM_BASE + "/streaming/status/" + encodeURIComponent(roomCode));
       const d = await r.json();
-      if (d.active) {
-        const platformName = d.platforms?.[0]?.name || "youtube";
-        showLiveActive(platformName, d.startedAt);
-      }
+      if (d.active) showLiveActive(d.platforms || [], d.startedAt);
     } catch (_) {}
   })();
 
-  setHint();
+  renderPlatformCards();
 })();

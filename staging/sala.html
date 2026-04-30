@@ -7393,27 +7393,60 @@
       0%,100% { box-shadow:0 0 0 0 rgba(211,51,51,.6); }
       50%     { box-shadow:0 0 0 8px rgba(211,51,51,0); }
     }
+    /* Multi-platform cards */
+    .livePlatformList { display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+    .livePlatformCard {
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1);
+      border-radius:10px; overflow:hidden; transition:border-color .15s, background .15s;
+    }
+    .livePlatformCard.is-on { border-color:rgba(211,51,51,.5); background:rgba(211,51,51,.06); }
+    .livePlatformCard__head {
+      display:flex; align-items:center; gap:10px; padding:11px 14px; cursor:pointer;
+      user-select:none;
+    }
+    .livePlatformCard__icon { font-size:18px; flex-shrink:0; width:24px; text-align:center; }
+    .livePlatformCard__name { flex:1; font-size:14px; font-weight:600; color:#f0e8d8; }
+    .livePlatformCard__toggle {
+      appearance:none; -webkit-appearance:none;
+      width:36px; height:20px; border-radius:10px; background:rgba(255,255,255,.15);
+      position:relative; cursor:pointer; transition:background .15s; flex-shrink:0;
+    }
+    .livePlatformCard__toggle::after {
+      content:""; position:absolute; top:2px; left:2px;
+      width:16px; height:16px; border-radius:50%; background:#f0e8d8;
+      transition:transform .15s;
+    }
+    .livePlatformCard__toggle:checked { background:#d33; }
+    .livePlatformCard__toggle:checked::after { transform:translateX(16px); }
+    .livePlatformCard__body {
+      max-height:0; overflow:hidden; transition:max-height .2s ease;
+      padding:0 14px;
+    }
+    .livePlatformCard.is-on .livePlatformCard__body {
+      max-height:160px; padding:0 14px 12px;
+    }
+    .livePlatformCard__key {
+      width:100%; padding:9px 11px; box-sizing:border-box;
+      background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.13);
+      border-radius:7px; color:#f0e8d8; font-size:13px; font-family:inherit;
+    }
+    .livePlatformCard__key:focus { outline:none; border-color:rgba(211,51,51,.5); }
+    .livePlatformCard__hint {
+      margin-top:6px; font-size:11px; color:rgba(240,232,216,.5); line-height:1.35;
+    }
   </style>
   <div class="liveOverlay" id="liveOverlay">
     <div class="liveModal">
       <h2>🔴 Transmissão ao vivo</h2>
 
       <div id="liveStep1">
-        <p>Transmita esta sala diretamente pra plataforma escolhida — sem instalar OBS nem outro software.</p>
+        <p>Escolha as plataformas onde você quer transmitir <strong>simultaneamente</strong>. Cada uma precisa da sua própria Stream Key.</p>
 
-        <label for="livePlatform">Plataforma</label>
-        <select id="livePlatform">
-          <option value="youtube">YouTube</option>
-          <option value="twitch">Twitch</option>
-          <option value="facebook">Facebook Live</option>
-          <option value="kick">Kick</option>
-          <option value="tiktok">TikTok (requer aprovação prévia)</option>
-          <option value="custom">Outro RTMP</option>
-        </select>
+        <div class="livePlatformList" id="livePlatformList">
+          <!-- preenchido por streaming.js -->
+        </div>
 
-        <label for="liveKey">Stream Key</label>
-        <input type="password" id="liveKey" placeholder="Cole sua Stream Key" autocomplete="off" spellcheck="false">
-        <div class="liveModal-hint" id="liveKeyHint"></div>
+        <div class="liveModal-hint" id="liveValidationHint" style="margin-top:14px"></div>
 
         <div class="liveModal-actions">
           <button class="liveModal-btn liveModal-btn--ghost" id="liveCancelBtn">Cancelar</button>
@@ -7424,11 +7457,11 @@
       <div id="liveStep2" style="display:none">
         <div class="liveModal-status">
           <div class="liveModal-status__pulse" id="liveStatus">Ao vivo</div>
-          <div class="liveModal-status__platform">em <span id="livePlatformActive">—</span></div>
+          <div class="liveModal-status__platform">em <span id="livePlatformsActive">—</span></div>
           <div class="liveModal-status__time" id="liveDuration">0:00</div>
         </div>
 
-        <p style="text-align:center;font-size:12px">A transmissão está sendo enviada. Você pode fechar este painel — o status continua no botão "🔴 Ao vivo" no topo.</p>
+        <p style="text-align:center;font-size:12px">A transmissão está sendo enviada para todas as plataformas marcadas. Você pode fechar este painel — o status continua no botão "🔴 Ao vivo" no topo.</p>
 
         <div class="liveModal-actions">
           <button class="liveModal-btn liveModal-btn--ghost" id="liveCloseBtn" onclick="document.getElementById('liveOverlay').classList.remove('open')">Fechar painel</button>
