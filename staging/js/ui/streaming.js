@@ -191,7 +191,10 @@
         livePlatformList?.querySelectorAll(".livePlatformCard__key").forEach(k => k.value = "");
         showLiveActive(platforms, data.startedAt);
       } else {
-        setValidationHint("Erro: " + (data.error || "desconhecido"));
+        const msg = data.error === "SALA_LIVEKIT_VAZIA"
+          ? "Pra POV ou Grid, ative Câmera ou Mic primeiro. Cards funciona mesmo sem vídeo."
+          : "Erro: " + (data.error || "desconhecido");
+        setValidationHint(msg);
         liveStartBtn.disabled = false;
         liveStartBtn.textContent = "🔴 Iniciar Live";
       }
