@@ -7393,8 +7393,27 @@
       0%,100% { box-shadow:0 0 0 0 rgba(211,51,51,.6); }
       50%     { box-shadow:0 0 0 8px rgba(211,51,51,0); }
     }
+    /* Layout selector */
+    .liveLayoutGrid {
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:6px;
+    }
+    .liveLayoutBtn {
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1);
+      border-radius:10px; padding:14px 8px; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+      color:#f0e8d8; font-family:inherit; transition:all .15s;
+    }
+    .liveLayoutBtn:hover { background:rgba(255,255,255,.08); }
+    .liveLayoutBtn.is-selected {
+      border-color:#d33; background:rgba(211,51,51,.12);
+      box-shadow:0 0 0 1px #d33 inset;
+    }
+    .liveLayoutBtn__preview { font-size:24px; line-height:1; }
+    .liveLayoutBtn__name { font-size:13px; font-weight:700; }
+    .liveLayoutBtn__desc { font-size:10px; color:rgba(240,232,216,.55); text-align:center; line-height:1.2; }
+
     /* Multi-platform cards */
-    .livePlatformList { display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+    .livePlatformList { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
     .livePlatformCard {
       background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1);
       border-radius:10px; overflow:hidden; transition:border-color .15s, background .15s;
@@ -7440,8 +7459,28 @@
       <h2>🔴 Transmissão ao vivo</h2>
 
       <div id="liveStep1">
-        <p>Escolha as plataformas onde você quer transmitir <strong>simultaneamente</strong>. Cada uma precisa da sua própria Stream Key.</p>
+        <p>Escolha o layout visual e as plataformas onde transmitir <strong>simultaneamente</strong>.</p>
 
+        <label style="margin-top:6px">Layout da transmissão</label>
+        <div class="liveLayoutGrid" id="liveLayoutGrid">
+          <button type="button" class="liveLayoutBtn is-selected" data-layout="cards">
+            <div class="liveLayoutBtn__preview">🃏</div>
+            <div class="liveLayoutBtn__name">Cards</div>
+            <div class="liveLayoutBtn__desc">Cartas no centro</div>
+          </button>
+          <button type="button" class="liveLayoutBtn" data-layout="pov-host">
+            <div class="liveLayoutBtn__preview">🎥</div>
+            <div class="liveLayoutBtn__name">POV Host</div>
+            <div class="liveLayoutBtn__desc">Sua câmera</div>
+          </button>
+          <button type="button" class="liveLayoutBtn" data-layout="grid">
+            <div class="liveLayoutBtn__preview">▦</div>
+            <div class="liveLayoutBtn__name">Grid</div>
+            <div class="liveLayoutBtn__desc">Todos jogadores</div>
+          </button>
+        </div>
+
+        <label style="margin-top:14px">Plataformas</label>
         <div class="livePlatformList" id="livePlatformList">
           <!-- preenchido por streaming.js -->
         </div>

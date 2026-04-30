@@ -17,12 +17,14 @@
   ];
 
   let liveActive = false, livePollTimer = null, liveStartedAt = 0, liveActivePlatforms = [];
+  let liveSelectedLayout = "cards";
 
   const liveBtn        = document.getElementById("liveBtn");
   const liveOverlay    = document.getElementById("liveOverlay");
   const liveStep1      = document.getElementById("liveStep1");
   const liveStep2      = document.getElementById("liveStep2");
   const livePlatformList = document.getElementById("livePlatformList");
+  const liveLayoutGrid = document.getElementById("liveLayoutGrid");
   const liveStartBtn   = document.getElementById("liveStartBtn");
   const liveCancelBtn  = document.getElementById("liveCancelBtn");
   const liveStopBtn    = document.getElementById("liveStopBtn");
@@ -66,6 +68,18 @@
     // Limpa hint quando usuário digita
     livePlatformList.querySelectorAll(".livePlatformCard__key").forEach(k => {
       k.addEventListener("input", clearValidationHint);
+    });
+  }
+
+  // Wire seletor de layout
+  function bindLayoutSelector() {
+    if (!liveLayoutGrid) return;
+    liveLayoutGrid.querySelectorAll(".liveLayoutBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        liveLayoutGrid.querySelectorAll(".liveLayoutBtn").forEach(b => b.classList.remove("is-selected"));
+        btn.classList.add("is-selected");
+        liveSelectedLayout = btn.dataset.layout || "cards";
+      });
     });
   }
 
@@ -169,7 +183,7 @@
       const res = await fetch(STREAM_BASE + "/streaming/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId: roomCode, platforms })
+        body: JSON.stringify({ roomId: roomCode, platforms, layoutId: liveSelectedLayout })
       });
       const data = await res.json();
       if (data.ok) {
@@ -230,4 +244,5 @@
   })();
 
   renderPlatformCards();
+  bindLayoutSelector();
 })();
