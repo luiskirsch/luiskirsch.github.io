@@ -7339,6 +7339,17 @@
       box-shadow:0 20px 60px rgba(0,0,0,.6);
     }
     .liveModal h2 { margin:0 0 4px; font-size:17px; color:#ff5252; }
+    .liveModal-title { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .liveUpgradeBtn {
+      background:linear-gradient(135deg, #ffaa3d 0%, #ff7a00 100%);
+      color:#1a1410; border:0; padding:5px 11px; border-radius:6px;
+      font-size:11px; font-weight:800; cursor:pointer; font-family:inherit;
+      white-space:nowrap; flex-shrink:0; letter-spacing:.3px;
+      transition:filter .15s, transform .1s;
+    }
+    .liveUpgradeBtn:hover  { filter:brightness(1.1); }
+    .liveUpgradeBtn:active { transform:scale(0.97); }
+    .liveUpgradeBtn:disabled { opacity:.6; cursor:wait; }
     .liveModal p  { margin:0 0 10px; color:rgba(240,232,216,.65); font-size:12px; line-height:1.35; }
     .liveModal label { display:block; margin:10px 0 4px; font-size:10px; color:rgba(240,232,216,.5); text-transform:uppercase; letter-spacing:.5px; }
     .liveModal select, .liveModal input[type="password"], .liveModal input[type="text"] {
@@ -7468,7 +7479,10 @@
   </style>
   <div class="liveOverlay" id="liveOverlay">
     <div class="liveModal">
-      <h2>🔴 Transmissão ao vivo</h2>
+      <h2 class="liveModal-title">
+        <span>🔴 Transmissão ao vivo</span>
+        <button class="liveUpgradeBtn" id="liveUpgradeBtn" hidden type="button" title="Stream Pass mensal R$ 14,90 — sem limite de tempo">✨ Upgrade</button>
+      </h2>
 
       <div id="liveStep1">
         <div class="liveStatusBanner" id="liveStatusBanner"></div>

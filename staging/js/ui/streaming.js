@@ -36,6 +36,7 @@
   const livePlatformsActive = document.getElementById("livePlatformsActive");
   const liveValidationHint = document.getElementById("liveValidationHint");
   const liveStatusBanner = document.getElementById("liveStatusBanner");
+  const liveUpgradeBtn   = document.getElementById("liveUpgradeBtn");
 
   // --- Render dos cards de plataforma ---
 
@@ -230,12 +231,15 @@
     liveValidationHint.innerHTML += ` <a href="#" id="liveBuyPassLink" style="color:#ffaa66;font-weight:700;text-decoration:underline">Comprar Stream Pass (R$ 14,90/mês)</a>`;
     document.getElementById("liveBuyPassLink")?.addEventListener("click", e => {
       e.preventDefault();
-      // Phase 3.C: integrar com fluxo de pagamento. Por enquanto, abre uma nova janela com info.
-      alert("Compra do Stream Pass ainda não está disponível na UI — em desenvolvimento. Por enquanto: aguarde 24h pra resetar a quota gratuita.");
+      startUpgrade();
     });
   }
 
   // --- Status badge: prestige / pass / free tier ---
+
+  function setUpgradeBtnVisible(visible) {
+    if (liveUpgradeBtn) liveUpgradeBtn.hidden = !visible;
+  }
 
   async function refreshStatusBanner() {
     if (!liveStatusBanner) return;
@@ -243,6 +247,7 @@
     if (!email) {
       liveStatusBanner.textContent = "Faça login pra ver seu plano de transmissão.";
       liveStatusBanner.className = "liveStatusBanner liveStatusBanner--warn";
+      setUpgradeBtnVisible(false);
       return;
     }
 
@@ -252,12 +257,14 @@
       if (pass.active && pass.type === "prestige") {
         liveStatusBanner.textContent = "✨ Plano Prestige — streaming ilimitado incluído";
         liveStatusBanner.className = "liveStatusBanner liveStatusBanner--gold";
+        setUpgradeBtnVisible(false);
         return;
       }
       if (pass.active) {
         const dt = pass.expiresAt ? new Date(pass.expiresAt).toLocaleDateString("pt-BR") : "—";
         liveStatusBanner.textContent = `✓ Stream Pass ativo até ${dt} — sem limite de tempo`;
         liveStatusBanner.className = "liveStatusBanner liveStatusBanner--ok";
+        setUpgradeBtnVisible(false);
         return;
       }
       // Sem pass — checa quota free tier
@@ -271,10 +278,90 @@
         liveStatusBanner.textContent = "Quota gratuita de hoje esgotada · Compre o Stream Pass (R$ 14,90/mês)";
         liveStatusBanner.className = "liveStatusBanner liveStatusBanner--warn";
       }
+      setUpgradeBtnVisible(true);
     } catch (_) {
       liveStatusBanner.textContent = "";
       liveStatusBanner.className = "liveStatusBanner";
+      setUpgradeBtnVisible(false);
     }
+  }
+
+  // --- Fluxo de pagamento (Stream Pass mensal) ---
+
+  let upgradePollTimer = null;
+
+  async function startUpgrade() {
+    const email = userEmail();
+    if (!email) {
+      setValidationHint("Faça login com sua licença antes de comprar.");
+      return;
+    }
+    const nome = (localStorage.getItem("osl_checkout_nome") || localStorage.getItem("osl_nome") || "Jogador").trim();
+
+    if (!liveUpgradeBtn) return;
+    liveUpgradeBtn.disabled = true;
+    liveUpgradeBtn.textContent = "Iniciando...";
+    clearValidationHint();
+
+    try {
+      const res = await fetch(STREAM_BASE + "/criar-pagamento", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome, email,
+          produto: "streaming-mensal",
+          valor: 14.90,
+          roomId: roomCode
+        })
+      });
+      const data = await res.json();
+      if (!data?.ref || !data?.url) {
+        setValidationHint("Erro ao criar pagamento: " + (data?.error || data?.message || "desconhecido"));
+        liveUpgradeBtn.disabled = false;
+        liveUpgradeBtn.textContent = "✨ Upgrade";
+        return;
+      }
+
+      localStorage.setItem("osl_checkout_email", email);
+      if (nome) localStorage.setItem("osl_checkout_nome", nome);
+
+      window.open(data.url, "_blank");
+      liveUpgradeBtn.textContent = "⏳ Aguardando…";
+      setValidationHint("⏳ Concluindo o pagamento na outra aba… Volta aqui quando terminar.");
+      pollUpgrade(data.ref);
+    } catch (err) {
+      setValidationHint("Erro de conexão: " + err.message);
+      liveUpgradeBtn.disabled = false;
+      liveUpgradeBtn.textContent = "✨ Upgrade";
+    }
+  }
+
+  function pollUpgrade(ref) {
+    if (upgradePollTimer) clearInterval(upgradePollTimer);
+    let attempts = 0;
+    upgradePollTimer = setInterval(async () => {
+      if (++attempts > 60) { // ~3 min
+        clearInterval(upgradePollTimer);
+        upgradePollTimer = null;
+        setValidationHint("Tempo esgotado. Se já pagou, recarregue a página em alguns segundos.");
+        if (liveUpgradeBtn) { liveUpgradeBtn.disabled = false; liveUpgradeBtn.textContent = "✨ Upgrade"; }
+        return;
+      }
+      try {
+        const r = await fetch(STREAM_BASE + "/status-pagamento/" + encodeURIComponent(ref));
+        const d = await r.json();
+        if (d.approved) {
+          clearInterval(upgradePollTimer);
+          upgradePollTimer = null;
+          setValidationHint("");
+          if (liveUpgradeBtn) {
+            liveUpgradeBtn.disabled = false;
+            liveUpgradeBtn.textContent = "✓ Ativado";
+          }
+          await refreshStatusBanner(); // mostra novo status com pass ativo
+        }
+      } catch (_) {}
+    }, 3000);
   }
 
   async function stopLive() {
@@ -304,10 +391,11 @@
     });
   }
 
-  if (liveStartBtn)  liveStartBtn.addEventListener("click", startLive);
-  if (liveStopBtn)   liveStopBtn.addEventListener("click", stopLive);
-  if (liveCancelBtn) liveCancelBtn.addEventListener("click", closeModal);
-  if (liveOverlay)   liveOverlay.addEventListener("click", e => { if (e.target === liveOverlay) closeModal(); });
+  if (liveStartBtn)   liveStartBtn.addEventListener("click", startLive);
+  if (liveStopBtn)    liveStopBtn.addEventListener("click", stopLive);
+  if (liveCancelBtn)  liveCancelBtn.addEventListener("click", closeModal);
+  if (liveUpgradeBtn) liveUpgradeBtn.addEventListener("click", startUpgrade);
+  if (liveOverlay)    liveOverlay.addEventListener("click", e => { if (e.target === liveOverlay) closeModal(); });
 
   // Status check ao carregar página (caso já tenha stream rolando)
   (async function () {
