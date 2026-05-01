@@ -1,7 +1,7 @@
 // Entry point principal — inicializa o jogo conectando todos os módulos
 import { S } from "./state.js";
 import { db, auth, initFirebaseRefs, onSnapshot, query, orderBy } from "./firebase.js";
-import { getParticipantId, getUserId } from "./utils.js";
+import { getParticipantId, getUserId, safeParseJSON } from "./utils.js";
 import { applyBgTheme, applyCardStyle, applyVisualEffect, syncAccountPurchases, bindProfileEvents, openProfile, updateDesktopProfileBtn, applyAvatarDisplay } from "./ui/profile.js";
 import { bindUserDoc, bindRoom, bindPlayers, bindTyping, bindMessages, bindRoomEvents, ensureRoom, ensureUserProfile, upsertSelf, startHeartbeat, startMultiPoller, connectHostSse } from "./ui/room.js";
 import { bindMyMission } from "./game/missions.js";
@@ -107,11 +107,13 @@ window.dismissAIDetection = dismissAIDetection;
   // Renderiza do cache local antes de qualquer round-trip Firestore
   const _cachedXp = parseInt(localStorage.getItem("osl_xp_cache") || "0", 10);
   if (_cachedXp > 0) updateXpCard(_cachedXp);
-  try {
-    const _cachedPlayers = JSON.parse(localStorage.getItem("osl_players_cache") || "[]");
-    const { renderPlayers } = await import("./ui/room.js");
-    if (_cachedPlayers.length) renderPlayers(_cachedPlayers);
-  } catch (_) {}
+  const _cachedPlayers = safeParseJSON("osl_players_cache", []);
+  if (_cachedPlayers.length) {
+    try {
+      const { renderPlayers } = await import("./ui/room.js");
+      renderPlayers(_cachedPlayers);
+    } catch (err) { console.warn("renderPlayers from cache failed:", err); }
+  }
 
   // Modo espectador
   if (S._isSpectator) {

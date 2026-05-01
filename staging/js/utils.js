@@ -37,6 +37,18 @@ export function nowTimeFromDate(date) {
   return date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
+// Lê um JSON serializado de localStorage com fallback em caso de corrupção.
+// Loga warning (não silencioso) pra diagnóstico futuro.
+export function safeParseJSON(key, fallback) {
+  const raw = localStorage.getItem(key);
+  if (raw == null) return fallback;
+  try { return JSON.parse(raw); }
+  catch (err) {
+    console.warn(`safeParseJSON: localStorage["${key}"] corrompido —`, err.message);
+    return fallback;
+  }
+}
+
 export function getParticipantId() {
   const navType = performance.getEntriesByType("navigation")[0]?.type;
   const isReload = navType === "reload";

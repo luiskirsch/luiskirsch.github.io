@@ -487,11 +487,14 @@
     }
   }
 
+  const POLL_INTERVAL_MS = 3000;
+  const POLL_MAX_ATTEMPTS = 60; // 60 × 3s = 3 min
+
   function pollUpgrade(ref) {
     if (upgradePollTimer) clearInterval(upgradePollTimer);
     let attempts = 0;
     upgradePollTimer = setInterval(async () => {
-      if (++attempts > 60) { // ~3 min
+      if (++attempts > POLL_MAX_ATTEMPTS) {
         clearInterval(upgradePollTimer);
         upgradePollTimer = null;
         setValidationHint("Tempo esgotado. Se já pagou, recarregue a página em alguns segundos.");
@@ -512,7 +515,7 @@
           await refreshStatusBanner(); // mostra novo status com pass ativo
         }
       } catch (_) {}
-    }, 3000);
+    }, POLL_INTERVAL_MS);
   }
 
   async function stopLive() {
