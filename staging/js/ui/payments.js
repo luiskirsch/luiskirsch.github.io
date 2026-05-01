@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  const OSL_BASE = "https://osl-video-server-production.up.railway.app";
+  const OSL_BASE = "https://osl-video-server-staging.up.railway.app";
   const OSL_LOCK_EVERY = 4;
   const OSL_FINAL_CHANCE = 0.20;
 

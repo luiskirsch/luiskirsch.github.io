@@ -103,7 +103,7 @@
       statusEl.textContent = "Verificando confirmação do pagamento...";
       smallEl.textContent = `Tentativa ${tentativas} de ${maxTentativas}`;
 
-      const res = await fetch(`https://osl-video-server.onrender.com/status-pagamento/${encodeURIComponent(ref)}`);
+      const res = await fetch(`https://osl-video-server-staging.up.railway.app/status-pagamento/${encodeURIComponent(ref)}`);
       const data = await res.json();
 
       if (res.ok && data.approved && data.paymentId) {

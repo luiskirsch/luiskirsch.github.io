@@ -3,7 +3,7 @@
 // ── URL do backend (osl-video-server) ────────────────────────────────────────
 // Usa window.PANEL_SERVER_BASE se setado (sala.html define em prod), senão prod.
 export const BACKEND_BASE_URL = (typeof window !== "undefined" && window.PANEL_SERVER_BASE)
-  || "https://osl-video-server-production.up.railway.app";
+  || "https://osl-video-server-staging.up.railway.app";
 
 
 // ── Efeitos por carta (battlecry / deathrattle) ──────────────────────────────

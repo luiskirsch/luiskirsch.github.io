@@ -306,7 +306,7 @@ export function renderRitualCardFromState(data) {
   // Auto-start recording quando ritual começa
   if (S.isHost && !S.autoRecordingStarted) {
     S.autoRecordingStarted = true;
-    fetch("https://osl-video-server-production.up.railway.app/recording/auto-start", {
+    fetch("https://osl-video-server-staging.up.railway.app/recording/auto-start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ roomId: S.roomCode })

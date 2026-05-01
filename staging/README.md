@@ -134,21 +134,15 @@ Botões:
 - **Aplicar agora (30d)** — preenche `activeFrom = hoje` e `activeUntil = hoje + 30 dias`.
 - **Desativar evento** — zera tudo, volta a `default`.
 
-## Setup Firebase staging (Sprint 5 hand-off)
+## Setup Firebase staging — ✅ CONCLUÍDO (2026-05-01)
 
-Hoje `staging/js/firebase-config.js` ainda aponta pro **projeto de produção** (`osextolugar-game`). Significa que o admin tool e o `active-theme.js` em staging escrevem/lêem na mesma DB que prod. Não usa pra publicar evento sem ter certeza.
+- `staging/js/firebase-config.js` aponta pro projeto `sextolugar-staging` (`__isStagingProject: true`).
+- Authentication (Email/Password) e Firestore Database habilitados no projeto staging.
+- Backend `osl-video-server-staging` rodando no Railway com service account próprio (`firebaseProjectId: sextolugar-staging` no `/health`).
+- Todos os arquivos do `/staging/` apontam pro backend `https://osl-video-server-staging.up.railway.app` (substituiu os hardcodes de `osl-video-server-production` e `osl-video-server.onrender.com`).
+- App RN consome o mesmo backend staging via `app.config.js` quando `APP_ENV=staging`.
 
-Pra isolar:
-
-1. **Cria o projeto** `sextolugar-staging` em https://console.firebase.google.com
-   - Add Web App → copia as 6 credenciais (`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`)
-2. **Habilita Firestore** no projeto staging — modo "Production" com regras default (ajustamos depois).
-3. **Habilita Authentication** → método Email/Password. Cria pelo menos 1 usuário admin no console.
-4. **Edita** `staging/js/firebase-config.js`:
-   - Substitui as credenciais
-   - Muda `__isStagingProject` pra `true`
-5. **Cria o doc inicial** `config/activeTheme` no Firestore staging — pode ser via `admin-theme.html` (clica Salvar com defaults) ou no Console manualmente.
-6. **Commit + push.** A partir daqui, staging escreve/lê só no Firestore staging, isolado de prod.
+Resultado: frente staging completamente isolada de prod (Firestore, backend MP webhook, secrets, bundle ID).
 
 ## Promoção staging → produção
 
@@ -195,6 +189,6 @@ Quando o evento sazonal estiver pronto pra produção:
 
 ## Notas
 
-- **Backend de staging** roda separado em Railway (ver `osl-video-server/`). O front em `/staging/` deve apontar para o endpoint de staging quando configurado.
-- **Firestore separado** (`sextolugar-staging`) — config Firebase trocada por env/flag (Sprint 5).
+- **Backend de staging** roda em Railway (`osl-video-server-staging.up.railway.app`). Todo o `/staging/` aponta pra ele — ver `osl-video-server/STAGING.md`.
+- **Firestore separado** (`sextolugar-staging`) — `staging/js/firebase-config.js` aponta direto pra ele.
 - **Nunca exponha esta URL** em redes sociais, repos públicos ou para usuários reais.
