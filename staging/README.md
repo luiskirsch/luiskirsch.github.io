@@ -1,4 +1,4 @@
-# Staging — O SextoLugar
+# Staging — SEXTOLUGAR
 
 Ambiente de pré-produção do site. Aqui se trabalha mudanças (eventos sazonais, redesigns, novas features) **antes** de publicar no `preludiojogos.com.br`.
 

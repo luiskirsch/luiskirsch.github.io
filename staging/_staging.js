@@ -12,7 +12,7 @@
       '<span class="osl-staging-dot"></span>' +
       '<strong>STAGING</strong>' +
       '<span class="osl-staging-sep">·</span>' +
-      '<span class="osl-staging-text">Ambiente de testes do O SextoLugar. Não compartilhar este link.</span>' +
+      '<span class="osl-staging-text">Ambiente de testes de SEXTOLUGAR. Não compartilhar este link.</span>' +
       '<a class="osl-staging-link" href="https://preludiojogos.com.br/" rel="noopener">ir para produção &rarr;</a>';
 
     var style = document.createElement('style');

@@ -266,7 +266,7 @@ export async function shareSessionCard({ cards, duration, topEmoji, playerCount 
   ctx.fillStyle = "rgba(212,168,75,0.5)"; ctx.font = "400 16px system-ui"; ctx.fillText("sextolugar.com.br", 400, 680);
   canvas.toBlob(async (blob) => {
     const file = new File([blob], "osl-recap.png", { type:"image/png" });
-    if (navigator.canShare?.({ files:[file] })) { try { await navigator.share({ files:[file], title:"O SextoLugar — Ritual Concluído" }); return; } catch (_) {} }
+    if (navigator.canShare?.({ files:[file] })) { try { await navigator.share({ files:[file], title:"SEXTOLUGAR — Ritual Concluído" }); return; } catch (_) {} }
     const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "osl-recap.png"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 5000);
   }, "image/png");
 }
