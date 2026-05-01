@@ -270,10 +270,10 @@
     clearValidationHint();
 
     try {
-      const res = await fetch(STREAM_BASE + "/streaming/start", {
+      const res = await authFetch(STREAM_BASE + "/streaming/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId: roomCode, email, platforms, layoutId: liveSelectedLayout })
+        body: JSON.stringify({ roomId: roomCode, platforms, layoutId: liveSelectedLayout })
       });
       const data = await res.json();
       if (data.ok) {
@@ -519,7 +519,7 @@
     if (!liveActive) return;
     if (!confirm("Parar a transmissão ao vivo em todas as plataformas?")) return;
     try {
-      await fetch(STREAM_BASE + "/streaming/stop", {
+      await authFetch(STREAM_BASE + "/streaming/stop", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId: roomCode })
@@ -549,6 +549,7 @@
   if (liveOverlay)    liveOverlay.addEventListener("click", e => { if (e.target === liveOverlay) closeModal(); });
 
   // Status check ao carregar página (caso já tenha stream rolando)
+  // /streaming/status é público (só retorna info da sala, não cross-user)
   (async function () {
     try {
       const r = await fetch(STREAM_BASE + "/streaming/status/" + encodeURIComponent(roomCode));
