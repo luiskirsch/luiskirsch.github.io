@@ -18,3 +18,11 @@ export const auth = getAuth(app);
 
 export const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
 export const IS_REAL_STAGING_PROJECT = firebaseConfig.__isStagingProject === true;
+
+// Exposto pra scripts não-módulo (recording.js, streaming.js) chamarem endpoints
+// autenticados. Retorna o ID token Firebase do usuário logado, ou null.
+window._oslGetIdToken = async function () {
+  const u = auth.currentUser;
+  if (!u) return null;
+  try { return await u.getIdToken(); } catch { return null; }
+};

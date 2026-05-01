@@ -82,6 +82,16 @@
     return (localStorage.getItem("osl_license_email") || localStorage.getItem("osl_checkout_email") || "").trim().toLowerCase();
   }
 
+  // Security #2: chamadas autenticadas via Firebase ID token. As 4 rotas de
+  // stats/history/pass/usage agora exigem token. Sem usuário Firebase logado,
+  // retorna fetch sem header — o backend devolve 401 e a UI trata.
+  async function authFetch(url, opts = {}) {
+    const token = window._oslGetIdToken ? await window._oslGetIdToken() : null;
+    const headers = Object.assign({}, opts.headers || {});
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    return fetch(url, { ...opts, headers });
+  }
+
   const liveBtn        = document.getElementById("liveBtn");
   const liveOverlay    = document.getElementById("liveOverlay");
   const liveStep1      = document.getElementById("liveStep1");
@@ -321,14 +331,14 @@
 
   async function fetchStats(email) {
     try {
-      const r = await fetch(STREAM_BASE + "/streaming/stats/" + encodeURIComponent(email));
+      const r = await authFetch(STREAM_BASE + "/streaming/stats/" + encodeURIComponent(email));
       return await r.json();
     } catch (_) { return { totalMinutes: 0, totalSessions: 0 }; }
   }
 
   async function fetchHistory(email) {
     try {
-      const r = await fetch(STREAM_BASE + "/streaming/history/" + encodeURIComponent(email) + "?limit=10");
+      const r = await authFetch(STREAM_BASE + "/streaming/history/" + encodeURIComponent(email) + "?limit=10");
       const d = await r.json();
       return d.sessions || [];
     } catch (_) { return []; }
@@ -383,7 +393,7 @@
     }
 
     try {
-      const passRes = await fetch(STREAM_BASE + "/streaming/pass/" + encodeURIComponent(email));
+      const passRes = await authFetch(STREAM_BASE + "/streaming/pass/" + encodeURIComponent(email));
       const pass = await passRes.json();
       if (pass.active && pass.type === "prestige") {
         liveStatusBanner.textContent = "✨ Plano Prestige — streaming ilimitado incluído";
@@ -399,7 +409,7 @@
         return;
       }
       // Sem pass — checa quota free tier
-      const usageRes = await fetch(STREAM_BASE + "/streaming/usage/" + encodeURIComponent(email));
+      const usageRes = await authFetch(STREAM_BASE + "/streaming/usage/" + encodeURIComponent(email));
       const usage = await usageRes.json();
       const remaining = usage.remainingMin ?? 60;
       if (remaining > 0) {
