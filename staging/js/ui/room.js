@@ -7,6 +7,7 @@ import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, set
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
 import { checkDailyReward, showSessionRecap, updateXpCard, showLevelPanel } from "../game/rewards.js";
 import { OSL_ACHIEVEMENTS } from "../game/effects.js";
+import { BACKEND_BASE_URL } from "../constants.js";
 
 // ── Áudio ─────────────────────────────────────────────────────────────────────
 function playIncomingMessageSound() {
@@ -378,7 +379,7 @@ export async function upsertSelf() {
 }
 
 // ── Partidas ao vivo (multiplayer) ────────────────────────────────────────────
-const MULTI_SERVER = window.PANEL_SERVER_BASE || "https://osl-video-server-production.up.railway.app";
+const MULTI_SERVER = BACKEND_BASE_URL;
 
 export async function fetchLiveRooms() {
   try { const r = await fetch(MULTI_SERVER + "/game/rooms"); const d = await r.json(); return Array.isArray(d.rooms) ? d.rooms : []; }

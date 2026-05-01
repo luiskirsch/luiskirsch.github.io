@@ -1,9 +1,7 @@
 import { S } from "./state.js";
+import { BACKEND_BASE_URL } from "./constants.js";
 
-const SERVER_BASE =
-  window.PANEL_SERVER_BASE ||
-  localStorage.getItem("PANEL_SERVER_BASE") ||
-  "https://osl-video-server-production.up.railway.app";
+const SERVER_BASE = localStorage.getItem("PANEL_SERVER_BASE") || BACKEND_BASE_URL;
 
 async function _post(path, data = {}) {
   try {

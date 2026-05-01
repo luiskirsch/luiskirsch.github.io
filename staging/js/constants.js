@@ -1,5 +1,11 @@
 // Constantes de dados puras — sem efeitos colaterais
 
+// ── URL do backend (osl-video-server) ────────────────────────────────────────
+// Usa window.PANEL_SERVER_BASE se setado (sala.html define em prod), senão prod.
+export const BACKEND_BASE_URL = (typeof window !== "undefined" && window.PANEL_SERVER_BASE)
+  || "https://osl-video-server-production.up.railway.app";
+
+
 // ── Efeitos por carta (battlecry / deathrattle) ──────────────────────────────
 export const OSL_CARD_EFFECTS = {
   "Pressão Real":         { battlecry: { type: "force_player", target: "random", label: "deve responder sem fugir" }, deathrattle: { type: "give_xp", amount: 10 } },

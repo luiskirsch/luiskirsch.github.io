@@ -2,9 +2,9 @@
 import { S } from "../state.js";
 import { setDoc, updateDoc, getDoc, getDocs, deleteDoc, doc, query, where, limit, collection, serverTimestamp, onAuthStateChanged } from "../firebase.js";
 import { escapeHtml, initials, normalizeUsername, uniqueArray } from "../utils.js";
-import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, PRESTIGE_PRODUTOS } from "../constants.js";
+import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, PRESTIGE_PRODUTOS, BACKEND_BASE_URL } from "../constants.js";
 
-const BACKEND_BASE_URL_OSL = "https://osl-video-server-production.up.railway.app";
+const BACKEND_BASE_URL_OSL = BACKEND_BASE_URL; // alias mantido pra não trocar 1000 referências
 
 // ── Prestige ──────────────────────────────────────────────────────────────────
 export function applyPrestigeUnlocks() {

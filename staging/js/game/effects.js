@@ -127,12 +127,9 @@ export const OSL_ACHIEVEMENTS = (() => {
       _sessionReactions++;
       if (emoji === "🔥") { _sessionFireReactions++; if (_sessionFireReactions >= 5) grant("fire_streak"); }
     },
-    onCardRevealed(total, type) {
+    onCardRevealed(total /*, type */) {
       if (total >= 10) grant("ten_cards");
-      if (["Segredo","Casais"].includes(type)) {
-        // Conta cartas deep numa sessão — simples: _sessionDeepCards local
-        _sessionReactions; // reuse counter trick — use separate var in closure
-      }
+      // (deep-card achievement removido — contador interno nunca foi implementado)
     },
     onSessionComplete(durationMin) { if (durationMin >= 45) grant("marathon"); },
     onPressureVote()    { _pressureVotes++; if (_pressureVotes >= 5) grant("pressure_5"); },
@@ -146,7 +143,7 @@ export const OSL_ACHIEVEMENTS = (() => {
         if (!S._isPrestige) {
           S._isPrestige = true;
           document.dispatchEvent(new CustomEvent("osl:applyPrestige"));
-          setDoc(document.__oslFirebaseDoc || S.userRef, { prestige: true }, { merge: true }).catch(() => {});
+          setDoc(S.userRef, { prestige: true }, { merge: true }).catch(err => console.warn("Prestige save failed:", err));
         }
       }
     },
