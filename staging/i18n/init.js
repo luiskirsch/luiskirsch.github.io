@@ -64,6 +64,15 @@
       if (typeof value === 'string' && value !== key) el.textContent = value;
     });
 
+    // data-i18n-html: usa innerHTML pra preservar tags inline (br, em, strong, etc).
+    // Translations vêm de JSONs do próprio repo, sem input de usuário — XSS-safe.
+    root.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.getAttribute('data-i18n-html');
+      if (!key) return;
+      const value = t(key);
+      if (typeof value === 'string' && value !== key) el.innerHTML = value;
+    });
+
     const attrs = ['title', 'placeholder', 'alt', 'value', 'aria-label'];
     attrs.forEach(attr => {
       root.querySelectorAll(`[data-i18n-${attr}]`).forEach(el => {

@@ -1,8 +1,9 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR" data-i18n-ns="entrada">
 <head>
 <meta name="robots" content="noindex, nofollow">
 <script src="_staging.js" defer></script>
+<script src="./i18n/init.js" defer></script>
 <script src="js/theme-loader.js"></script>
 <script type="module" src="js/active-theme.js"></script>
 
@@ -11,7 +12,7 @@
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>SEXTOLUGAR — Entrada</title>
+  <title data-i18n="entrada:title">SEXTOLUGAR — Entrada</title>
   <link rel="icon" href="./favicon.png">
 
   <style>
@@ -700,55 +701,58 @@
         <span>✦</span>
         <div class="ornLine"></div>
       </div>
-      <h1 data-theme-key="entrada.title">SEXTOLUGAR</h1>
-      <p class="subtitle" data-theme-key="entrada.subtitle">
+      <h1 data-theme-key="entrada.title" data-i18n="entrada:brand">SEXTOLUGAR</h1>
+      <p class="subtitle" data-theme-key="entrada.subtitle" data-i18n-html="entrada:subtitle">
         Você está prestes a atravessar a linha.<br>
         Respire. Leia. E escolha com cuidado.
       </p>
-      <div class="whisper" id="whisper" data-theme-key="entrada.whisper">O silêncio é parte do jogo.</div>
+      <div class="whisper" id="whisper" data-theme-key="entrada.whisper" data-i18n="entrada:whisper">O silêncio é parte do jogo.</div>
     </header>
 
-    <section class="card" aria-label="Protocolo de entrada">
+    <section class="card" data-i18n-aria-label="entrada:ariaLabels.protocol" aria-label="Protocolo de entrada">
       <div class="tag">
         <span class="dot"></span>
-        <span>Protocolo · Entrada</span>
+        <span data-i18n="entrada:tag">Protocolo · Entrada</span>
         <span class="dot"></span>
       </div>
 
-      <p class="protocol">
+      <p class="protocol" data-i18n-html="entrada:protocol">
         Antes de iniciar, confirme que você entendeu:<br>
         <em>as cartas são físicas</em> — e o site só guia o ritmo.
       </p>
 
       <div class="formWrap">
         <div class="field">
-          <label for="nomeJogador">Seu nome</label>
+          <label for="nomeJogador" data-i18n="entrada:labels.playerName">Seu nome</label>
           <input
             id="nomeJogador"
             type="text"
             maxlength="40"
             placeholder="Ex.: Luis"
+            data-i18n-placeholder="entrada:placeholders.playerName"
             autocomplete="given-name"
           >
         </div>
 
         <div class="row">
           <div class="field">
-            <label for="nomeSala">Nome da sala</label>
+            <label for="nomeSala" data-i18n="entrada:labels.roomName">Nome da sala</label>
             <input
               id="nomeSala"
               type="text"
               maxlength="40"
               placeholder="Ex.: Mesa Principal"
+              data-i18n-placeholder="entrada:placeholders.roomName"
             >
           </div>
           <div class="field">
-            <label for="codigoSala">Código da sala</label>
+            <label for="codigoSala" data-i18n="entrada:labels.roomCode">Código da sala</label>
             <input
               id="codigoSala"
               type="text"
               maxlength="20"
               placeholder="Ex.: SL-0001"
+              data-i18n-placeholder="entrada:placeholders.roomCode"
               autocomplete="off"
               spellcheck="false"
             >
@@ -759,18 +763,18 @@
       <p class="status" id="status" aria-live="polite"></p>
 
       <div class="actions">
-        <button id="btnCriarSala" class="btn btn--primary" type="button">Criar sala</button>
-        <button id="btnEntrarSala" class="btn btn--secondary" type="button">Entrar na sala</button>
+        <button id="btnCriarSala" class="btn btn--primary" type="button" data-i18n="entrada:buttons.createRoom">Criar sala</button>
+        <button id="btnEntrarSala" class="btn btn--secondary" type="button" data-i18n="entrada:buttons.enterRoom">Entrar na sala</button>
       </div>
 
-      <button id="btnRitual" class="ritualLink" type="button">
+      <button id="btnRitual" class="ritualLink" type="button" data-i18n="entrada:buttons.ritualLink">
         Ler o ritual antes de começar →
       </button>
     </section>
 
-    <footer class="footer" aria-label="Direitos autorais">
-      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">SEXTOLUGAR™</span><br>
-      TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+    <footer class="footer" data-i18n-aria-label="entrada:ariaLabels.footer" aria-label="Direitos autorais">
+      <span data-i18n="entrada:footer.line1">© 2026 PRELÚDIO JOGOS™ · SEXTOLUGAR™</span><br>
+      <span data-i18n="entrada:footer.line2">TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM</span>
     </footer>
 
   </main>
@@ -779,18 +783,18 @@
   <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-labelledby="ritualTitle">
     <div class="modal">
       <div class="modalHeader">
-        <h2 id="ritualTitle">O Ritual — Rápido</h2>
-        <button class="close" id="btnClose" aria-label="Fechar">✕</button>
+        <h2 id="ritualTitle" data-i18n="entrada:modal.title">O Ritual — Rápido</h2>
+        <button class="close" id="btnClose" data-i18n-aria-label="entrada:ariaLabels.close" aria-label="Fechar">✕</button>
       </div>
       <div class="modalBody">
-        <p>O site não substitui as cartas. Ele só controla o tempo e o clima.</p>
+        <p data-i18n="entrada:modal.intro">O site não substitui as cartas. Ele só controla o tempo e o clima.</p>
         <ol class="ritualList">
-          <li>Separe o baralho físico e deixe a mesa livre.</li>
-          <li>Escolha um modo: <strong>solo</strong> ou <strong>grupo</strong> (decisão na mesa).</li>
-          <li>Quando o timer rodar, sigam as instruções da carta puxada.</li>
-          <li>Se o timer zerar, a rodada termina — mesmo que alguém queira "só mais um".</li>
+          <li data-i18n="entrada:modal.step1">Separe o baralho físico e deixe a mesa livre.</li>
+          <li data-i18n-html="entrada:modal.step2">Escolha um modo: <strong>solo</strong> ou <strong>grupo</strong> (decisão na mesa).</li>
+          <li data-i18n="entrada:modal.step3">Quando o timer rodar, sigam as instruções da carta puxada.</li>
+          <li data-i18n="entrada:modal.step4">Se o timer zerar, a rodada termina — mesmo que alguém queira "só mais um".</li>
         </ol>
-        <div class="warn">
+        <div class="warn" data-i18n="entrada:modal.warn">
           O jogo pode ser com 3 à 5 pessoas. O "silêncio" é uma regra de clima, não de solidão.
         </div>
       </div>
@@ -885,16 +889,17 @@
     };
 
     window.validarEntradaSala = async function (codigoSala, nomeSalaDigitado) {
+      const _vt = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
       const snap = await getDoc(doc(db, "salas", codigoSala));
-      if (!snap.exists()) return { ok: false, erro: "Sala não encontrada. Verifique o código." };
+      if (!snap.exists()) return { ok: false, erro: _vt('entrada:errors.roomNotFound', "Sala não encontrada. Verifique o código.") };
 
       const data = snap.data();
-      if (data.status === "closed") return { ok: false, erro: "Esta sala foi encerrada." };
+      if (data.status === "closed") return { ok: false, erro: _vt('entrada:errors.roomClosed', "Esta sala foi encerrada.") };
 
       const armazenado = (data.name || "").trim().toLowerCase();
       const informado  = nomeSalaDigitado.trim().toLowerCase();
 
-      if (armazenado !== informado) return { ok: false, erro: "Nome da sala incorreto." };
+      if (armazenado !== informado) return { ok: false, erro: _vt('entrada:errors.roomNameIncorrect', "Nome da sala incorreto.") };
 
       return { ok: true, nomeSala: data.name || nomeSalaDigitado };
     };
@@ -999,7 +1004,7 @@
       url.searchParams.set("sala", codigoSala);
       url.searchParams.set("nomeSala", nomeSala);
 
-      setStatus("Entrando na sala…", "ok");
+      setStatus(_t('entrada:status.entering', "Entrando na sala…"), "ok");
       scene.classList.add("fadeOut");
 
       setTimeout(() => {
@@ -1007,16 +1012,19 @@
       }, 560);
     }
 
+    // Helper i18n com fallback
+    const _t = (key, fallback, vars) => (window.OSL_I18N?.t(key, vars)) || fallback;
+
     btnCriarSala.addEventListener("click", async () => {
       const nomeJogador = obterNomeJogador();
       if (!nomeJogador) {
-        setStatus("Digite seu nome para criar a sala.", "err");
+        setStatus(_t('entrada:status.needNameToCreate', "Digite seu nome para criar a sala."), "err");
         nomeJogadorEl.focus();
         return;
       }
 
       let nomeSala = obterNomeSala();
-      if (!nomeSala) nomeSala = "Sala de Espera";
+      if (!nomeSala) nomeSala = _t('entrada:defaults.waitingRoom', "Sala de Espera");
 
       let codigoSala = normalizarCodigoSala(codigoSalaEl.value);
       if (!codigoSala) {
@@ -1025,19 +1033,20 @@
       }
 
       // Verificar se o código já está em uso
-      setStatus("Verificando código…", "");
+      setStatus(_t('entrada:status.checkingCode', "Verificando código…"), "");
       btnCriarSala.disabled = true;
       try {
         const disponivel = await window.verificarCodigoDisponivel(codigoSala);
         if (!disponivel) {
           const sugestao = gerarCodigoSala();
           codigoSalaEl.value = sugestao;
-          setStatus(`Código já em uso. Sugestão: ${sugestao}`, "err");
+          setStatus(_t('entrada:status.codeInUse', `Código já em uso. Sugestão: ${sugestao}`, { sugestao }), "err");
           btnCriarSala.disabled = false;
           return;
         }
       } catch (err) {
-        setStatus("Erro ao verificar código: " + (err?.message || err), "err");
+        const errMsg = err?.message || String(err);
+        setStatus(_t('entrada:status.codeError', `Erro ao verificar código: ${errMsg}`, { error: errMsg }), "err");
         btnCriarSala.disabled = false;
         return;
       }
@@ -1052,25 +1061,25 @@
       const nomeSala    = obterNomeSala();
 
       if (!nomeJogador) {
-        setStatus("Digite seu nome para entrar na sala.", "err");
+        setStatus(_t('entrada:status.needNameToEnter', "Digite seu nome para entrar na sala."), "err");
         nomeJogadorEl.focus();
         return;
       }
 
       if (!codigoSala) {
-        setStatus("Digite o código da sala.", "err");
+        setStatus(_t('entrada:status.needRoomCode', "Digite o código da sala."), "err");
         codigoSalaEl.focus();
         return;
       }
 
       if (!nomeSala) {
-        setStatus("Digite o nome da sala para entrar.", "err");
+        setStatus(_t('entrada:status.needRoomName', "Digite o nome da sala para entrar."), "err");
         nomeSalaEl.focus();
         return;
       }
 
       codigoSalaEl.value = codigoSala;
-      setStatus("Verificando sala…", "");
+      setStatus(_t('entrada:status.checkingRoom', "Verificando sala…"), "");
       btnEntrarSala.disabled = true;
 
       try {
@@ -1083,7 +1092,7 @@
         await entrarNaSala({ nomeJogador, codigoSala, nomeSala: resultado.nomeSala });
       } catch (err) {
         console.error(err);
-        setStatus("Erro ao verificar a sala. Tente novamente.", "err");
+        setStatus(_t('entrada:status.roomError', "Erro ao verificar a sala. Tente novamente."), "err");
         btnEntrarSala.disabled = false;
       }
     });
