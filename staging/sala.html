@@ -1,8 +1,9 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="sala,cards,achievements,missions,xptitles,effects">
 <head>
 <meta name="robots" content="noindex, nofollow">
 <script src="_staging.js" defer></script>
+<script src="./i18n/init.js" defer></script>
 
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
@@ -83,7 +84,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="icon" href="./favicon.png">
   <link rel="preload" href="./img/luis.png" as="image" fetchpriority="high">
-  <title>SEXTOLUGAR — Sala</title>
+  <title data-i18n="sala:title">SEXTOLUGAR — Sala</title>
 
   <!-- Modo Transmissão: aplica antes do paint para evitar flash de credenciais -->
   <script>
@@ -6296,7 +6297,8 @@
           <div style="display:flex;flex-direction:column;gap:0;padding-left:8px;">
             <div id="topCenterMetaMoved" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
               <span class="topMeta__xp">
-                <span class="topMeta__xpLevel" id="xpCardLevel">Nível 1</span>
+                <span class="topMeta__xpLevel" id="xpCardLevel">Nível 1</span><!-- updated dinamicamente: ver renderXpUi() -->
+
                 <span class="topMeta__xpBarWrap">
                   <span class="topMeta__xpBar"><span class="topMeta__xpFill" id="xpCardFill" style="width:0%"></span></span>
                   <span class="topMeta__xpNums" id="xpCardNums">0 / 100 XP</span>
@@ -6305,7 +6307,7 @@
               </span>
             </div>
             <div style="display:flex;flex-direction:column;gap:4px;">
-              <p class="eyebrow" style="margin-left:2px;">Sala do Ritual · <span id="gameStatus" class="eyebrow__status">Espera</span></p>
+              <p class="eyebrow" style="margin-left:2px;"><span data-i18n="sala:topbar.roomEyebrow">Sala do Ritual</span> · <span id="gameStatus" class="eyebrow__status" data-i18n="sala:topbar.status.waiting">Espera</span></p>
               <h1 class="roomTitle" style="line-height:1;">
                 <canvas id="roomTitleCanvas" style="display:block;max-width:100%;"></canvas>
               </h1>
@@ -6316,27 +6318,27 @@
         <div class="topCenter">
           <div class="recStatusBadge" id="recStatusBadge">
             <span class="recDot"></span>
-            <span id="recStatusText">GRAVANDO</span>
+            <span id="recStatusText" data-i18n="sala:topbar.recording">GRAVANDO</span>
           </div>
         </div>
 
         <div class="topActions" style="align-self:stretch;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;padding:10px 0;">
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:nowrap;">
-            <button class="topActionBtn primary stream-hide" id="copyCodeBtn">Convidar Amigos</button>
-            <button class="topActionBtn" id="oslShopFab" title="Ver pacotes de cartas">🎴 Loja</button>
-            <button class="topActionBtn" id="arenaBtn" title="Alternar Modo Arena">⚔ Arena</button>
-            <button class="topActionBtn streamModeBtn" id="streamModeBtn" hidden title="Ativar Modo Transmissão (Shift+S)">📡 Transmissão</button>
-            <button class="topActionBtn liveBtn" id="liveBtn" hidden title="Iniciar transmissão ao vivo">🔴 Live</button>
-            <button class="topActionBtn" id="myProfileBtn">👤 Perfil<span class="badge" id="desktopProfileBadge"></span></button>
-            <button class="topActionBtn iconOnly" id="leaveBtn" aria-label="Sair da sala">⇢</button>
+            <button class="topActionBtn primary stream-hide" id="copyCodeBtn" data-i18n="sala:topbar.actions.invite">Convidar Amigos</button>
+            <button class="topActionBtn" id="oslShopFab" data-i18n="sala:topbar.actions.shop" data-i18n-title="sala:topbar.actions.shopTitle" title="Ver pacotes de cartas">🎴 Loja</button>
+            <button class="topActionBtn" id="arenaBtn" data-i18n="sala:topbar.actions.arena" data-i18n-title="sala:topbar.actions.arenaTitle" title="Alternar Modo Arena">⚔ Arena</button>
+            <button class="topActionBtn streamModeBtn" id="streamModeBtn" hidden data-i18n="sala:topbar.actions.stream" data-i18n-title="sala:topbar.actions.streamTitle" title="Ativar Modo Transmissão (Shift+S)">📡 Transmissão</button>
+            <button class="topActionBtn liveBtn" id="liveBtn" hidden data-i18n="sala:topbar.actions.live" data-i18n-title="sala:topbar.actions.liveTitle" title="Iniciar transmissão ao vivo">🔴 Live</button>
+            <button class="topActionBtn" id="myProfileBtn"><span data-i18n="sala:topbar.actions.profile">👤 Perfil</span><span class="badge" id="desktopProfileBadge"></span></button>
+            <button class="topActionBtn iconOnly" id="leaveBtn" data-i18n-aria-label="sala:topbar.actions.leaveAria" aria-label="Sair da sala">⇢</button>
           </div>
           <div class="videoControlBar">
-            <span class="videoStatusInline" id="videoStatus">Vídeo desligado.</span>
-            <button class="videoCtrlBtn primary" id="joinVideoBtn">📹 Câmera + Mic</button>
-            <button class="videoCtrlBtn" id="joinAudioBtn">🎤 Só áudio</button>
-            <button class="videoCtrlBtn" id="toggleMicBtn" disabled>🎤 Mutar</button>
-            <button class="videoCtrlBtn" id="toggleCamBtn" disabled>📷 Câmera</button>
-            <button class="videoCtrlBtn danger" id="leaveVideoBtn" disabled>✕ Sair</button>
+            <span class="videoStatusInline" id="videoStatus" data-i18n="sala:topbar.video.off">Vídeo desligado.</span>
+            <button class="videoCtrlBtn primary" id="joinVideoBtn" data-i18n="sala:topbar.video.joinCamMic">📹 Câmera + Mic</button>
+            <button class="videoCtrlBtn" id="joinAudioBtn" data-i18n="sala:topbar.video.joinAudio">🎤 Só áudio</button>
+            <button class="videoCtrlBtn" id="toggleMicBtn" disabled data-i18n="sala:topbar.video.muteToggle">🎤 Mutar</button>
+            <button class="videoCtrlBtn" id="toggleCamBtn" disabled data-i18n="sala:topbar.video.camToggle">📷 Câmera</button>
+            <button class="videoCtrlBtn danger" id="leaveVideoBtn" disabled data-i18n="sala:topbar.video.leave">✕ Sair</button>
           </div>
         </div>
       </header>
@@ -6346,16 +6348,16 @@
         <aside class="sidebar">
           <section class="card playerPanel">
             <div class="cardInner">
-              <h2 class="sectionTitle">Jogadores</h2>
+              <h2 class="sectionTitle" data-i18n="sala:sidebar.playersTitle">Jogadores</h2>
 
               <div class="playerList" id="playerList"></div>
 
-              <div class="emptyState" id="playersEmpty">
+              <div class="emptyState" id="playersEmpty" data-i18n="sala:sidebar.playersEmpty">
                 Nenhum outro jogador entrou ainda. Compartilhe o código da sala para reunir o grupo.
               </div>
 
               <div class="sidebarActions">
-                <button class="btn btnPrimary" id="startBtn">Iniciar Ritual</button>
+                <button class="btn btnPrimary" id="startBtn" data-i18n="sala:sidebar.startRitual">Iniciar Ritual</button>
               </div>
             </div>
           </section>
@@ -6369,14 +6371,14 @@
                   </svg>
                 </div>
                 <div class="chatHeaderInfo">
-                  <h2>Chat</h2>
-                  <p>Conversem antes ou durante.</p>
+                  <h2 data-i18n="sala:sidebar.chatTitle">Chat</h2>
+                  <p data-i18n="sala:sidebar.chatSub">Conversem antes ou durante.</p>
                 </div>
               </div>
             </div>
 
             <div class="messages" id="messages">
-              <div class="chatEmpty" id="chatEmpty">
+              <div class="chatEmpty" id="chatEmpty" data-i18n-html="sala:sidebar.chatConnecting">
                 Conectando a sala...<br>
                 As mensagens e jogadores aparecerão em tempo real.
               </div>
@@ -6392,9 +6394,10 @@
                   type="text"
                   maxlength="240"
                   placeholder="Digite uma mensagem..."
+                  data-i18n-placeholder="sala:sidebar.msgPlaceholder"
                   autocomplete="off"
                 >
-                <button class="sendIconBtn" id="sendBtn" title="Enviar">
+                <button class="sendIconBtn" id="sendBtn" data-i18n-title="sala:sidebar.sendTitle" title="Enviar">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="22" y1="2" x2="11" y2="13"/>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -6409,18 +6412,18 @@
           <section class="card tableCard">
             <div class="tableHead">
               <div class="tableHeadLeft">
-                <h2>Carta Atual</h2>
-                <p>A carta atual domina a sala. O anfitrião conduz a experiência.</p>
+                <h2 data-i18n="sala:table.currentCard">Carta Atual</h2>
+                <p data-i18n="sala:table.currentCardSub">A carta atual domina a sala. O anfitrião conduz a experiência.</p>
               </div>
 
               <div class="tableHeadRight">
-                <button class="videoBtn primary" id="revealCardBtn" disabled>Revelar Primeira Carta</button>
-                <button class="videoBtn primary" id="resetRitualBtn" disabled>Reiniciar ritual</button>
-                <a class="videoBtn" href="deck-builder.html" target="_blank" title="Construtor de Deck" style="text-decoration:none;padding:6px 12px;font-size:12px">🃏 Deck</a>
+                <button class="videoBtn primary" id="revealCardBtn" disabled data-i18n="sala:table.revealFirst">Revelar Primeira Carta</button>
+                <button class="videoBtn primary" id="resetRitualBtn" disabled data-i18n="sala:table.resetRitual">Reiniciar ritual</button>
+                <a class="videoBtn" href="deck-builder.html" target="_blank" data-i18n="sala:table.deckBuilder" data-i18n-title="sala:table.deckBuilderTitle" title="Construtor de Deck" style="text-decoration:none;padding:6px 12px;font-size:12px">🃏 Deck</a>
 
                 <div class="sessionStatus">
                   <span class="dot"></span>
-                  <span id="sessionLabel">Sessão não iniciada</span>
+                  <span id="sessionLabel" data-i18n="sala:table.session.notStarted">Sessão não iniciada</span>
                 </div>
               </div>
             </div>
@@ -6429,7 +6432,7 @@
             <div id="mobilePlayerStripInline" style="display:none">
               <!-- Populated by mobile JS -->
             </div>
-            <span id="mobileCardLabel" style="display:none">Carta Atual</span>
+            <span id="mobileCardLabel" style="display:none" data-i18n="sala:table.currentCard">Carta Atual</span>
 
             <!-- ===== GAME TABLE: 3-column grid (left videos | card + self | right videos) ===== -->
             <div class="gameTableGrid" id="videoGrid">
@@ -6442,7 +6445,7 @@
 
               <!-- Center column: ritual card + self video below -->
               <div class="cardCenter">
-                <div class="deckInfoBar" id="deckInfo">
+                <div class="deckInfoBar" id="deckInfo" data-i18n="sala:table.deckWaiting">
                   Aguardando o anfitrião iniciar.
                 </div>
 
@@ -6455,8 +6458,8 @@
                 <div class="aiDetectToast" id="aiDetectToast">
                   <span class="aiDetectToast__icon">🤖</span>
                   <span class="aiDetectToast__text" id="aiDetectToastMsg"></span>
-                  <button class="aiDetectToast__confirm" onclick="confirmAIDetection()">Confirmar</button>
-                  <button class="aiDetectToast__dismiss" onclick="dismissAIDetection()">Ignorar</button>
+                  <button class="aiDetectToast__confirm" onclick="confirmAIDetection()" data-i18n="sala:table.aiDetect.confirm">Confirmar</button>
+                  <button class="aiDetectToast__dismiss" onclick="dismissAIDetection()" data-i18n="sala:table.aiDetect.dismiss">Ignorar</button>
                 </div>
 
                 <div class="revealPanel">
@@ -6533,7 +6536,7 @@
                   <!-- Temperatura da Sala -->
                   <div class="tensionMeter" id="tensionMeter">
                     <span class="tensionMeter__icon" id="tensionIcon">🧊</span>
-                    <span class="tensionMeter__label">Tensão</span>
+                    <span class="tensionMeter__label" data-i18n="sala:tension.label">Tensão</span>
                     <div class="tensionMeter__bar"><div class="tensionMeter__fill" id="tensionFill"></div></div>
                   </div>
                   <div class="reactionBar" id="reactionBar">
@@ -6564,7 +6567,7 @@
           <section class="card historyCard">
             <div class="historyHead">
               <div class="ornament"></div>
-              <h3>Histórico</h3>
+              <h3 data-i18n="sala:history.title">Histórico</h3>
               <div class="ornament"></div>
             </div>
 
@@ -6574,15 +6577,15 @@
                   <div class="cardBack"></div>
                   <div class="cardBack"></div>
                   <div class="cardBack">
-                    <div class="deckLabel">DECK</div>
+                    <div class="deckLabel" data-i18n="sala:history.deckLabel">DECK</div>
                   </div>
                 </div>
               </aside>
 
               <div class="historyList" id="historyList">
                 <div class="historyItem">
-                  <div class="historyType">Aguardando</div>
-                  <div class="historyText">Nenhuma carta revelada ainda.</div>
+                  <div class="historyType" data-i18n="sala:history.waiting">Aguardando</div>
+                  <div class="historyText" data-i18n="sala:history.none">Nenhuma carta revelada ainda.</div>
                 </div>
               </div>
             </div>
@@ -6590,7 +6593,7 @@
 
           <section class="card multiCard">
             <div class="multiHead">
-              <h3>Partidas Rolando</h3>
+              <h3 data-i18n="sala:matches.title">Partidas Rolando</h3>
               <span class="multiCount" id="multiCount">0</span>
               <button class="multiRefresh" id="multiRefreshBtn" title="Atualizar">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -6600,7 +6603,7 @@
               </button>
             </div>
             <div class="multiBody" id="multiBody">
-              <div class="multiEmpty" id="multiEmpty">Buscando partidas…</div>
+              <div class="multiEmpty" id="multiEmpty" data-i18n="sala:matches.searching">Buscando partidas…</div>
             </div>
           </section>
         </section>
@@ -6608,8 +6611,8 @@
       </section>
 
       <div class="footerBar">
-        <div>Status da sala: <strong id="roomStatus">Conectando</strong></div>
-        <div>Status geral: <strong id="footerStatus">Conectando</strong></div>
+        <div><span data-i18n="sala:footer.roomStatus">Status da sala:</span> <strong id="roomStatus" data-i18n="sala:footer.connecting">Conectando</strong></div>
+        <div><span data-i18n="sala:footer.generalStatus">Status geral:</span> <strong id="footerStatus" data-i18n="sala:footer.connecting">Conectando</strong></div>
       </div>
     </div>
   </main>
@@ -6621,30 +6624,30 @@
   <div class="specOverlay" id="specOverlay" style="display:none">
     <div class="specPanel">
       <div class="specHeader">
-        <span class="specLiveBadge">AO VIVO</span>
-        <span class="specTitle" id="specTitle">Sala</span>
+        <span class="specLiveBadge" data-i18n="sala:spec.live">AO VIVO</span>
+        <span class="specTitle" id="specTitle" data-i18n="sala:spec.title">Sala</span>
         <button class="specClose" id="specClose" aria-label="Fechar">✕</button>
       </div>
       <div class="specBody">
         <div class="specStatus">
           <div class="specStatusDot" id="specStatusDot"></div>
-          <span id="specStatusText">Conectando…</span>
+          <span id="specStatusText" data-i18n="sala:spec.connecting">Conectando…</span>
         </div>
-        <div class="specSectionLabel">Jogadores</div>
+        <div class="specSectionLabel" data-i18n="sala:spec.playersLabel">Jogadores</div>
         <div class="specPlayers" id="specPlayers">
-          <div class="specEmpty">Carregando…</div>
+          <div class="specEmpty" data-i18n="sala:spec.loading">Carregando…</div>
         </div>
         <hr class="specDivider">
-        <div class="specSectionLabel">Carta atual</div>
+        <div class="specSectionLabel" data-i18n="sala:spec.currentCardLabel">Carta atual</div>
         <div id="specCardWrap">
-          <div class="specEmpty" id="specEmpty">Ritual ainda não iniciado</div>
+          <div class="specEmpty" id="specEmpty" data-i18n="sala:spec.ritualNotStarted">Ritual ainda não iniciado</div>
         </div>
       </div>
       <div class="specObservingNotice" id="specObservingNotice" style="display:none">
         <span>👁 Você está observando esta sala — invisível aos jogadores</span>
       </div>
       <div class="specFooter">
-        <span><span class="specFooterDot"></span>Modo espectador</span>
+        <span><span class="specFooterDot"></span><span data-i18n="sala:spec.footerMode">Modo espectador</span></span>
         <span id="specFooterTime">↻ tempo real</span>
       </div>
     </div>
@@ -6653,14 +6656,14 @@
   <!-- MODAL: pedido de entrada -->
   <div class="joinOverlay" id="joinOverlay" style="display:none" aria-modal="true" role="dialog">
     <div class="joinPanel" id="joinPanel">
-      <div class="joinPanel__title">Entrar na partida</div>
+      <div class="joinPanel__title" data-i18n="sala:join.title">Entrar na partida</div>
       <div class="joinPanel__room" id="joinRoomName"></div>
       <div class="joinPanel__meta" id="joinRoomMeta"></div>
-      <div class="joinPanel__label">Seu nome</div>
+      <div class="joinPanel__label" data-i18n="sala:join.nameLabel">Seu nome</div>
       <input class="joinPanel__input" id="joinNameInput" maxlength="40" autocomplete="off">
       <div class="joinPanel__actions">
-        <button class="joinPanel__btn joinPanel__btn--secondary" id="joinCancelBtn">Cancelar</button>
-        <button class="joinPanel__btn joinPanel__btn--primary" id="joinSendBtn">Enviar pedido</button>
+        <button class="joinPanel__btn joinPanel__btn--secondary" id="joinCancelBtn" data-i18n="sala:join.cancel">Cancelar</button>
+        <button class="joinPanel__btn joinPanel__btn--primary" id="joinSendBtn" data-i18n="sala:join.send">Enviar pedido</button>
       </div>
       <div class="joinPanel__status" id="joinStatus"></div>
     </div>
@@ -6668,12 +6671,12 @@
 
   <!-- ALERTA HOST: pedido de entrada recebido -->
   <div class="hostJoinAlert" id="hostJoinAlert" style="display:none">
-    <div class="hostJoinAlert__title">Pedido de entrada</div>
+    <div class="hostJoinAlert__title" data-i18n="sala:hostAlert.title">Pedido de entrada</div>
     <div class="hostJoinAlert__name" id="hostAlertName"></div>
     <div class="hostJoinAlert__msg">quer participar da sua sala.</div>
     <div class="hostJoinAlert__btns">
-      <button class="hostJoinAlert__btn hostJoinAlert__btn--deny"    id="hostDenyBtn">Recusar</button>
-      <button class="hostJoinAlert__btn hostJoinAlert__btn--approve" id="hostApproveBtn">Aprovar</button>
+      <button class="hostJoinAlert__btn hostJoinAlert__btn--deny"    id="hostDenyBtn" data-i18n="sala:hostAlert.deny">Recusar</button>
+      <button class="hostJoinAlert__btn hostJoinAlert__btn--approve" id="hostApproveBtn" data-i18n="sala:hostAlert.approve">Aprovar</button>
     </div>
   </div>
 
@@ -6681,7 +6684,7 @@
   <div class="videoLayer">
 
     <div class="videoFocusBar" id="videoFocusBar" hidden>
-      <button class="videoFocusBtn" id="exitFocusBtn">Voltar</button>
+      <button class="videoFocusBtn" id="exitFocusBtn" data-i18n="sala:video.exitFocus">Voltar</button>
     </div>
   </div>
 
