@@ -1,8 +1,8 @@
 # Staging — SEXTOLUGAR
 
-Ambiente de pré-produção do site. Aqui se trabalha mudanças (eventos sazonais, redesigns, novas features) **antes** de publicar no `preludiojogos.com.br`.
+Ambiente de pré-produção do site. Aqui se trabalha mudanças (eventos sazonais, redesigns, novas features) **antes** de publicar no `preludiojogos.com`.
 
-URL: `https://preludiojogos.com.br/staging/`
+URL: `https://preludiojogos.com/staging/`
 
 ## Proteção
 
@@ -17,7 +17,7 @@ Adicionalmente, todos os HTMLs daqui têm:
 
 1. Edita os arquivos dentro de `/staging/` (NUNCA edita prod direto pra mudanças experimentais).
 2. `git commit && git push` — GitHub Pages publica em ~1min.
-3. Acessa `preludiojogos.com.br/staging/<arquivo>.html`, autentica no Cloudflare, valida.
+3. Acessa `preludiojogos.com/staging/<arquivo>.html`, autentica no Cloudflare, valida.
 4. Quando aprovado, **promover para produção** copiando os arquivos:
    ```bash
    # estando em luiskirsch.github.io/
@@ -26,7 +26,7 @@ Adicionalmente, todos os HTMLs daqui têm:
    # (apenas os arquivos que mudaram)
    git add . && git commit -m "promote staging → prod: <descrição>" && git push
    ```
-5. Validar em produção (`preludiojogos.com.br`).
+5. Validar em produção (`preludiojogos.com`).
 
 ## Estrutura
 
@@ -77,8 +77,8 @@ E aplica três coisas: **CSS variables** em `:root`, **classes** no `<body>` (pr
 ### Como testar um tema (preview)
 
 ```
-https://preludiojogos.com.br/staging/vendas.html?theme=valentines-2026
-https://preludiojogos.com.br/staging/entrada.html?theme=valentines-2026
+https://preludiojogos.com/staging/vendas.html?theme=valentines-2026
+https://preludiojogos.com/staging/entrada.html?theme=valentines-2026
 ```
 
 Ou no DevTools console: `OSL_setTheme('valentines-2026', true)` (persiste em localStorage). Pra limpar: `OSL_clearThemeOverride()`.
@@ -171,21 +171,21 @@ Quando o evento sazonal estiver pronto pra produção:
 
 ## Configuração do Cloudflare Access (one-time setup)
 
-> Pré-requisito: domínio `preludiojogos.com.br` precisa estar no Cloudflare com DNS **proxied** (registro laranja). Se estiver "DNS only" (cinza), Access não funciona.
+> Pré-requisito: domínio `preludiojogos.com` precisa estar no Cloudflare com DNS **proxied** (registro laranja). Se estiver "DNS only" (cinza), Access não funciona.
 
 1. **Cloudflare Dashboard → Zero Trust** (cria conta grátis se não tiver — até 50 usuários sem custo).
 2. **Settings → Authentication → Login methods**: ativa **One-time PIN** (e-mail OTP). Sem necessidade de Google/GitHub SSO pra começar.
 3. **Access → Applications → Add an application → Self-hosted**.
    - Application name: `OSL Staging`
    - Session duration: `24 hours`
-   - Application domain: `preludiojogos.com.br`
+   - Application domain: `preludiojogos.com`
    - Path: `staging` (sem barra inicial; cobre `/staging/*`)
 4. **Identity providers**: marca apenas `One-time PIN`.
 5. **Add a policy**:
    - Policy name: `Staff`
    - Action: `Allow`
    - Configure rules → Include → Selector `Emails` → adiciona os e-mails autorizados (ex: `luishenriquekirsch@hotmail.com`).
-6. **Save** e testa abrindo `https://preludiojogos.com.br/staging/` em uma janela anônima — deve aparecer a tela de login do Cloudflare.
+6. **Save** e testa abrindo `https://preludiojogos.com/staging/` em uma janela anônima — deve aparecer a tela de login do Cloudflare.
 
 ## Notas
 

@@ -13,7 +13,7 @@
       '<strong>STAGING</strong>' +
       '<span class="osl-staging-sep">·</span>' +
       '<span class="osl-staging-text">Ambiente de testes de SEXTOLUGAR. Não compartilhar este link.</span>' +
-      '<a class="osl-staging-link" href="https://preludiojogos.com.br/entrada.html" rel="noopener">ir para produção &rarr;</a>';
+      '<a class="osl-staging-link" href="https://preludiojogos.com/entrada.html" rel="noopener">ir para produção &rarr;</a>';
 
     var style = document.createElement('style');
     style.textContent =
