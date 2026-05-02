@@ -1,8 +1,9 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="sucesso">
 <head>
 <meta name="robots" content="noindex, nofollow">
 <script src="_staging.js" defer></script>
+<script src="./i18n/init.js" defer></script>
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
@@ -12,7 +13,7 @@
     name="viewport"
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   />
-  <title>Pagamento aprovado | SEXTOLUGAR</title>
+  <title data-i18n="sucesso:title">Pagamento aprovado | SEXTOLUGAR</title>
 
   <style>
     *{ box-sizing:border-box; }
@@ -131,26 +132,26 @@
 <body>
 
   <div class="box">
-    <h1>Pagamento aprovado</h1>
-    <p id="subtitleEl">Estamos validando seu pagamento...</p>
+    <h1 data-i18n="sucesso:heading">Pagamento aprovado</h1>
+    <p id="subtitleEl" data-i18n="sucesso:subtitle.initial">Estamos validando seu pagamento...</p>
 
-    <div class="status" id="status">Validando pagamento...</div>
+    <div class="status" id="status" data-i18n="sucesso:status.initial">Validando pagamento...</div>
     <div class="code" id="licenseBox"></div>
 
     <div class="miniActions" id="miniActions">
-      <button class="miniBtn secondary" id="copyCodeBtn" type="button">Copiar código</button>
+      <button class="miniBtn secondary" id="copyCodeBtn" type="button" data-i18n="sucesso:buttons.copyCode">Copiar código</button>
     </div>
 
     <div class="nextInfo" id="nextInfo"></div>
 
     <div class="actions" id="actions">
-      <button id="primaryBtn" type="button">Entrar na sala</button>
-      <button id="createAccountBtn" class="secondary" type="button">Criar conta</button>
-      <button id="loginBtn" class="secondary" type="button">Já tenho conta</button>
-      <button id="panelBtn" class="secondary" type="button">Ir para o painel</button>
+      <button id="primaryBtn" type="button" data-i18n="sucesso:buttons.primary">Entrar na sala</button>
+      <button id="createAccountBtn" class="secondary" type="button" data-i18n="sucesso:buttons.createAccount">Criar conta</button>
+      <button id="loginBtn" class="secondary" type="button" data-i18n="sucesso:buttons.login">Já tenho conta</button>
+      <button id="panelBtn" class="secondary" type="button" data-i18n="sucesso:buttons.panel">Ir para o painel</button>
     </div>
 
-    <div class="small" id="smallNote">
+    <div class="small" id="smallNote" data-i18n="sucesso:smallNote.default">
       Sua compra foi registrada e ficará salva para uso na sessão.
     </div>
   </div>
@@ -171,6 +172,15 @@
     }
 
     (async function () {
+      // Aguarda i18n com timeout de 3s
+      if (!window.OSL_I18N) {
+        await new Promise(resolve => {
+          document.addEventListener('osl:i18n-ready', resolve, { once: true });
+          setTimeout(resolve, 3000);
+        });
+      }
+      const t = (key, fallback, vars) => (window.OSL_I18N?.t(key, vars)) || fallback;
+
       const BACKEND_BASE_URL = "https://osl-video-server-staging.up.railway.app";
       const CREATE_ACCOUNT_URL = "./cadastro.html";
       const LOGIN_URL = "./login.html";
@@ -228,15 +238,15 @@
       async function resolvePaymentId(paymentIdFromUrl, ref) {
         if (paymentIdFromUrl) return paymentIdFromUrl;
         if (!ref) return "";
-        setStatus("Recuperando identificação do pagamento...");
+        setStatus(t('sucesso:status.resolvingPayment', "Recuperando identificação do pagamento..."));
         const data = await verificarCompra(ref);
         return data.approved ? String(data.paymentId || "") : "";
       }
 
       // ── Fluxo para licença (produto principal) ────────────────────────────
       async function handleLicenca(paymentId, fallbackRef) {
-        subtitleEl.textContent = "Estamos validando seu pagamento e preparando sua licença.";
-        setStatus("Emitindo licença...");
+        subtitleEl.textContent = t('sucesso:subtitle.validatingLicense', "Estamos validando seu pagamento e preparando sua licença.");
+        setStatus(t('sucesso:status.issuing', "Emitindo licença..."));
 
         const licRes = await fetch(`${BACKEND_BASE_URL}/emitir-licenca`, {
           method: "POST",
@@ -247,7 +257,7 @@
 
         if (!licRes.ok || !licData.licenseToken || !licData.licenseCode) {
           console.error("Falha em /emitir-licenca:", licData);
-          setStatus("Não foi possível emitir sua licença.", true);
+          setStatus(t('sucesso:status.errors.issueFailed', "Não foi possível emitir sua licença."), true);
           return;
         }
 
@@ -264,20 +274,20 @@
         currentLicenseCode = licData.licenseCode || "";
         licenseBox.style.display = "block";
         licenseBox.innerHTML =
-          "<strong>Licença emitida com sucesso</strong><br><br>" +
-          "Código: " + (licData.licenseCode || "—") + "<br>" +
-          "E-mail: " + (licData.email        || "—") + "<br>" +
-          "Referência: " + (licData.ref || fallbackRef || "—") + "<br>" +
-          "Payment ID: " + paymentId;
+          "<strong>" + t('sucesso:license.successHeading', "Licença emitida com sucesso") + "</strong><br><br>" +
+          t('sucesso:license.code', "Código:") + " " + (licData.licenseCode || "—") + "<br>" +
+          t('sucesso:license.email', "E-mail:") + " " + (licData.email        || "—") + "<br>" +
+          t('sucesso:license.ref', "Referência:") + " " + (licData.ref || fallbackRef || "—") + "<br>" +
+          t('sucesso:license.paymentId', "Payment ID:") + " " + paymentId;
 
-        smallNote.textContent = "Guarde seu código de licença. Ele também fica salvo no servidor e pode ser usado depois no painel.";
-        nextInfoEl.textContent = "Sua licença foi emitida e salva. Agora faça login ou crie sua conta para vinculá-la no painel.";
+        smallNote.textContent = t('sucesso:smallNote.license', "Guarde seu código de licença. Ele também fica salvo no servidor e pode ser usado depois no painel.");
+        nextInfoEl.textContent = t('sucesso:nextInfo.license', "Sua licença foi emitida e salva. Agora faça login ou crie sua conta para vinculá-la no painel.");
         nextInfoEl.style.display = "block";
         miniActEl.style.display = "flex";
 
         primaryBtn.style.display = "none";
         actionsEl.style.display = "flex";
-        setStatus("Tudo pronto. Sua licença foi emitida.");
+        setStatus(t('sucesso:status.ready', "Tudo pronto. Sua licença foi emitida."));
       }
 
       // ── Salva compra no servidor (se logado) ─────────────────────────────
@@ -300,39 +310,39 @@
         saveCompra(ref, produto, titulo);
         localStorage.setItem("osl_checkout_ref", ref);
 
-        subtitleEl.textContent = "Sua compra foi confirmada!";
+        subtitleEl.textContent = t('sucesso:subtitle.purchaseConfirmed', "Sua compra foi confirmada!");
         setStatus("✓ " + titulo);
 
         var msg = "";
         if (tipo === "pack") {
-          msg = "Seu pacote de cartas foi desbloqueado e já está disponível na sala.";
+          msg = t('sucesso:nextInfo.pack', "Seu pacote de cartas foi desbloqueado e já está disponível na sala.");
         } else if (tipo === "consumable") {
-          msg = "Sua compra foi registrada e será aplicada na sessão atual.";
+          msg = t('sucesso:nextInfo.consumable', "Sua compra foi registrada e será aplicada na sessão atual.");
         } else if (tipo === "cosmetic") {
-          msg = "Seu item cosmético foi desbloqueado e já está disponível na sala.";
+          msg = t('sucesso:nextInfo.cosmetic', "Seu item cosmético foi desbloqueado e já está disponível na sala.");
         } else {
-          msg = "Sua compra foi registrada com sucesso.";
+          msg = t('sucesso:nextInfo.default', "Sua compra foi registrada com sucesso.");
         }
 
         // Tenta salvar na conta
         const savedInAccount = await registrarNaConta(ref, titulo);
 
         if (savedInAccount) {
-          msg += " Salvo na sua conta — disponível em qualquer dispositivo.";
+          msg += t('sucesso:nextInfo.savedAccount', " Salvo na sua conta — disponível em qualquer dispositivo.");
           loginBtn.style.display = "none";
           createAccountBtn.style.display = "none";
           panelBtn.style.display = "";
-          panelBtn.textContent = "Ver meu painel";
+          panelBtn.textContent = t('sucesso:buttons.myPanel', "Ver meu painel");
         } else {
-          msg += " Faça login para salvar na sua conta e acessar de qualquer dispositivo.";
+          msg += t('sucesso:nextInfo.loginPrompt', " Faça login para salvar na sua conta e acessar de qualquer dispositivo.");
           panelBtn.style.display = "none";
         }
 
         nextInfoEl.textContent = msg;
         nextInfoEl.style.display = "block";
-        smallNote.textContent = "Referência: " + ref;
+        smallNote.textContent = t('sucesso:smallNote.ref', `Referência: ${ref}`, { ref });
 
-        primaryBtn.textContent = "Entrar na sala";
+        primaryBtn.textContent = t('sucesso:buttons.primary', "Entrar na sala");
         primaryBtn.style.display = "";
         actionsEl.style.display = "flex";
       }
@@ -346,9 +356,9 @@
         if (!currentLicenseCode) return;
         try {
           await navigator.clipboard.writeText(currentLicenseCode);
-          setStatus("Código copiado.");
+          setStatus(t('sucesso:status.copied', "Código copiado."));
         } catch(e) {
-          setStatus("Copie manualmente o código acima.", true);
+          setStatus(t('sucesso:status.copyManually', "Copie manualmente o código acima."), true);
         }
       });
 
@@ -363,22 +373,23 @@
       const fallbackRef = externalReferenceUrl || storedRef;
 
       if (paymentStatus && paymentStatus !== "approved" && paymentStatus !== "success") {
-        setStatus("O pagamento ainda não foi aprovado.", true);
+        setStatus(t('sucesso:status.errors.notApproved', "O pagamento ainda não foi aprovado."), true);
         return;
       }
       if (collectionStatus && collectionStatus !== "approved" && collectionStatus !== "success") {
-        setStatus("O pagamento ainda não foi confirmado.", true);
+        setStatus(t('sucesso:status.errors.notConfirmed', "O pagamento ainda não foi confirmado."), true);
         return;
       }
 
       try {
-        setStatus("Verificando compra...");
+        setStatus(t('sucesso:status.verifying', "Verificando compra..."));
 
         // Aguarda o webhook processar o pagamento (até 20s)
         const compraData = fallbackRef ? await aguardarAprovacao(fallbackRef) : null;
 
         if (!compraData) {
-          setStatus("Não foi possível confirmar o pagamento. Guarde sua referência: " + (fallbackRef || "—"), true);
+          const refStr = fallbackRef || "—";
+          setStatus(t('sucesso:status.errors.noConfirmation', `Não foi possível confirmar o pagamento. Guarde sua referência: ${refStr}`, { ref: refStr }), true);
           return;
         }
 
@@ -389,7 +400,7 @@
         if (tipo === "license") {
           const paymentId = await resolvePaymentId(paymentIdFromUrl, fallbackRef);
           if (!paymentId) {
-            setStatus("Não foi possível identificar o pagamento.", true);
+            setStatus(t('sucesso:status.errors.noPaymentId', "Não foi possível identificar o pagamento."), true);
             return;
           }
           await handleLicenca(paymentId, fallbackRef);
@@ -399,7 +410,7 @@
 
       } catch (error) {
         console.error("Erro ao finalizar compra:", error);
-        setStatus("Erro ao finalizar sua compra.", true);
+        setStatus(t('sucesso:status.errors.finalize', "Erro ao finalizar sua compra."), true);
       }
     })();
   </script>

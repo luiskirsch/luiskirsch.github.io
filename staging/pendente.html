@@ -1,15 +1,16 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="pendente">
 <head>
 <meta name="robots" content="noindex, nofollow">
 <script src="_staging.js" defer></script>
+<script src="./i18n/init.js" defer></script>
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pagamento pendente | SEXTOLUGAR</title>
+  <title data-i18n="pendente:title">Pagamento pendente | SEXTOLUGAR</title>
   <style>
     body{
       margin:0;
@@ -69,18 +70,27 @@
 <body>
 
 <div class="box">
-  <h1>Pagamento pendente</h1>
-  <p>Estamos aguardando a confirmação do seu pagamento.</p>
-  <p>Assim que ele for aprovado, seu acesso será liberado automaticamente.</p>
+  <h1 data-i18n="pendente:heading">Pagamento pendente</h1>
+  <p data-i18n="pendente:intro1">Estamos aguardando a confirmação do seu pagamento.</p>
+  <p data-i18n="pendente:intro2">Assim que ele for aprovado, seu acesso será liberado automaticamente.</p>
 
-  <div class="status" id="status">Verificando pagamento...</div>
+  <div class="status" id="status" data-i18n="pendente:status.initial">Verificando pagamento...</div>
   <div class="small" id="small"></div>
 
-  <a class="btn" href="./vendas.html">Voltar para vendas</a>
+  <a class="btn" href="./vendas.html" data-i18n="pendente:backToSales">Voltar para vendas</a>
 </div>
 
 <script>
 (async function () {
+  // Aguarda i18n (3s timeout) antes de iniciar UI dinâmica
+  if (!window.OSL_I18N) {
+    await new Promise(resolve => {
+      document.addEventListener('osl:i18n-ready', resolve, { once: true });
+      setTimeout(resolve, 3000);
+    });
+  }
+  const t = (key, fallback, vars) => (window.OSL_I18N?.t(key, vars)) || fallback;
+
   const statusEl = document.getElementById("status");
   const smallEl = document.getElementById("small");
 
@@ -90,7 +100,7 @@
     "";
 
   if (!ref) {
-    statusEl.textContent = "Não foi possível localizar a referência do pagamento.";
+    statusEl.textContent = t('pendente:status.noRef', "Não foi possível localizar a referência do pagamento.");
     return;
   }
 
@@ -100,21 +110,21 @@
   async function verificar() {
     try {
       tentativas += 1;
-      statusEl.textContent = "Verificando confirmação do pagamento...";
-      smallEl.textContent = `Tentativa ${tentativas} de ${maxTentativas}`;
+      statusEl.textContent = t('pendente:status.verifying', "Verificando confirmação do pagamento...");
+      smallEl.textContent = t('pendente:small.attempt', `Tentativa ${tentativas} de ${maxTentativas}`, { n: tentativas, max: maxTentativas });
 
       const res = await fetch(`https://osl-video-server-staging.up.railway.app/status-pagamento/${encodeURIComponent(ref)}`);
       const data = await res.json();
 
       if (res.ok && data.approved && data.paymentId) {
-        statusEl.textContent = "Pagamento aprovado. Redirecionando...";
+        statusEl.textContent = t('pendente:status.approved', "Pagamento aprovado. Redirecionando...");
         window.location.href = `./sucesso.html?payment_id=${encodeURIComponent(data.paymentId)}&status=approved`;
         return;
       }
 
       if (tentativas >= maxTentativas) {
-        statusEl.textContent = "Ainda não houve confirmação automática.";
-        smallEl.textContent = "Se você já pagou, aguarde mais alguns instantes e recarregue esta página.";
+        statusEl.textContent = t('pendente:status.noConfirmation', "Ainda não houve confirmação automática.");
+        smallEl.textContent = t('pendente:small.waitAndReload', "Se você já pagou, aguarde mais alguns instantes e recarregue esta página.");
         return;
       }
 
@@ -122,8 +132,8 @@
     } catch (error) {
       console.error(error);
       if (tentativas >= maxTentativas) {
-        statusEl.textContent = "Não foi possível verificar o pagamento agora.";
-        smallEl.textContent = "Recarregue a página em alguns instantes.";
+        statusEl.textContent = t('pendente:status.errorChecking', "Não foi possível verificar o pagamento agora.");
+        smallEl.textContent = t('pendente:small.reload', "Recarregue a página em alguns instantes.");
         return;
       }
       setTimeout(verificar, 5000);
