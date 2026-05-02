@@ -1,11 +1,12 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="index">
 <head>
 <meta name="robots" content="noindex, nofollow">
 <script src="_staging.js" defer></script>
+<script src="./i18n/init.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>SEXTOLUGAR — Em Breve</title>
+<title data-i18n="index:title">SEXTOLUGAR — Em Breve</title>
 <link rel="icon" href="./favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -270,34 +271,34 @@ body::after {
 <body>
 <main class="page">
 
-  <p class="eyebrow">Pronto para</p>
+  <p class="eyebrow" data-i18n="index:eyebrow">Pronto para</p>
 
   <h1 class="title">
-    <span class="line1">O</span>
-    <span class="line2">SEXTOLUGAR?</span>
+    <span class="line1" data-i18n="index:titleLine1">O</span>
+    <span class="line2" data-i18n="index:titleLine2">SEXTOLUGAR?</span>
   </h1>
 
   <div class="countdown">
     <div class="time-box">
       <span class="time-value" id="days">00</span>
-      <span class="time-label">Dias</span>
+      <span class="time-label" data-i18n="index:labelDays">Dias</span>
     </div>
     <div class="time-box">
       <span class="time-value" id="hours">00</span>
-      <span class="time-label">Horas</span>
+      <span class="time-label" data-i18n="index:labelHours">Horas</span>
     </div>
     <div class="time-box">
       <span class="time-value" id="minutes">00</span>
-      <span class="time-label">Minutos</span>
+      <span class="time-label" data-i18n="index:labelMinutes">Minutos</span>
     </div>
     <div class="time-box">
       <span class="time-value" id="seconds">00</span>
-      <span class="time-label">Segundos</span>
+      <span class="time-label" data-i18n="index:labelSeconds">Segundos</span>
     </div>
   </div>
 
-  <p class="soon" id="statusText">Em breve!</p>
-  <p class="launch-line">Lançamento em 30 de junho de 2026 às 20h</p>
+  <p class="soon" id="statusText" data-i18n="index:soon">Em breve!</p>
+  <p class="launch-line" data-i18n="index:launchLine">Lançamento em 30 de junho de 2026 às 20h</p>
 
   <div class="progress-wrap">
     <div class="progress">
@@ -305,7 +306,7 @@ body::after {
     </div>
   </div>
 
-  <p class="footer-note">Prelúdio Jogos &bull; Contagem oficial</p>
+  <p class="footer-note" data-i18n="index:footer">Prelúdio Jogos &bull; Contagem oficial</p>
 
 </main>
 
@@ -365,7 +366,8 @@ body::after {
 
     if (diff <= 0){
       daysEl.textContent = hoursEl.textContent = minutesEl.textContent = secondsEl.textContent = '00';
-      statusText.textContent = 'Chegou a hora.';
+      statusText.setAttribute('data-i18n', 'index:soonItsTime');
+      statusText.textContent = (window.OSL_I18N && window.OSL_I18N.t('index:soonItsTime')) || 'Chegou a hora.';
       progressBar.style.width = '100%';
       return;
     }
