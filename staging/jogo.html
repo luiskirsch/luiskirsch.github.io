@@ -1,11 +1,12 @@
-﻿<!DOCTYPE html>  
-<html lang="pt-br">  
+﻿<!DOCTYPE html>
+<html lang="pt-BR" data-i18n-ns="jogo">
 <head>
 <meta name="robots" content="noindex, nofollow">
-<script src="_staging.js" defer></script>  
-  <meta charset="UTF-8" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />  
-  <title>SEXTOLUGAR — Jogo</title>  
+<script src="_staging.js" defer></script>
+<script src="./i18n/init.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title data-i18n="jogo:title">SEXTOLUGAR — Jogo</title>
 
   <link rel="icon" href="./favicon.png">
   
@@ -239,39 +240,39 @@
   
 <body>  
   <main class="wrap">  
-    <h1>SEXTOLUGAR</h1>  
-    <p class="subtitle">Timer do jogo (cartas físicas). O som só funciona depois do primeiro toque/clique.</p>  
-  
-    <section class="card">  
-      <div class="row">  
-        <p class="timer" id="timerText">05:00</p>  
-  
-        <div class="progressWrap">  
-          <div class="progress" id="progressBar"></div>  
-        </div>  
-  
-        <p class="status" id="status">Status: pronto.</p>  
-  
-        <div class="toggle">  
-          <div class="pill" id="soundToggle">SOM: <strong>ON</strong></div>  
-          <div class="pill" id="modeToggle">MODO: <strong>RODADA</strong></div>  
-        </div>  
-  
-        <div class="actions">  
-          <button id="btnStart">Iniciar</button>  
-          <button id="btnPause">Pausar</button>  
-          <button id="btnReset">Reset</button>  
-          <button id="btnVoltar">Voltar</button>  
-        </div>  
-  
-        <div class="tiny">  
-          Ajuste rápido: clique em “Modo” para alternar (Rodada / Contagem regressiva longa).  
-        </div>  
-      </div>  
-    </section>  
+    <h1>SEXTOLUGAR</h1>
+    <p class="subtitle" data-i18n="jogo:subtitle">Timer do jogo (cartas físicas). O som só funciona depois do primeiro toque/clique.</p>
 
-    <footer class="footer">
-      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+    <section class="card">
+      <div class="row">
+        <p class="timer" id="timerText">05:00</p>
+
+        <div class="progressWrap">
+          <div class="progress" id="progressBar"></div>
+        </div>
+
+        <p class="status" id="status" data-i18n="jogo:status.ready">Status: pronto.</p>
+
+        <div class="toggle">
+          <div class="pill" id="soundToggle" data-i18n-html="jogo:toggles.soundOn">SOM: <strong>ON</strong></div>
+          <div class="pill" id="modeToggle" data-i18n-html="jogo:toggles.modeRodada">MODO: <strong>RODADA</strong></div>
+        </div>
+
+        <div class="actions">
+          <button id="btnStart" data-i18n="jogo:buttons.start">Iniciar</button>
+          <button id="btnPause" data-i18n="jogo:buttons.pause">Pausar</button>
+          <button id="btnReset" data-i18n="jogo:buttons.reset">Reset</button>
+          <button id="btnVoltar" data-i18n="jogo:buttons.back">Voltar</button>
+        </div>
+
+        <div class="tiny" data-i18n="jogo:tiny">
+          Ajuste rápido: clique em “Modo” para alternar (Rodada / Contagem regressiva longa).
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer" data-i18n-html="jogo:footer">
+      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM
     </footer>
   </main>  
   
@@ -429,8 +430,10 @@
       sessionStorage.getItem("osl_player_id") ||
       ("player-" + Math.random().toString(36).slice(2, 10));
 
+    const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
+
     const playerName =
-      sessionStorage.getItem("osl_player_name") || "Jogador";
+      sessionStorage.getItem("osl_player_name") || _t('jogo:defaults.playerName', "Jogador");
 
     sessionStorage.setItem("osl_room_id", roomId);
     sessionStorage.setItem("osl_player_id", playerId);
@@ -440,7 +443,7 @@
       if (gameBooted) return;
       gameBooted = true;
 
-      await PanelBridge.roomCreate(roomId, "Sala do Jogo", playerName);
+      await PanelBridge.roomCreate(roomId, _t('jogo:defaults.roomName', "Sala do Jogo"), playerName);
       await PanelBridge.playerJoin(roomId, playerId, playerName);
       await PanelBridge.video(roomId, false);
       await PanelBridge.recording(roomId, false);
@@ -524,50 +527,50 @@
       await bootPanelConnection();
       await markSessionStart();
 
-      ensureAudio();  
-      if (!paused) return;  
-      paused = false;  
-      statusEl.textContent = "Status: rodando…";  
-      clearInterval(interval);  
-      interval = setInterval(() => {  
-        if (remaining <= 0){  
-          clearInterval(interval);  
-          paused = true;  
-          remaining = 0;  
-          setUI();  
-          statusEl.textContent = "Status: tempo esgotado.";  
+      ensureAudio();
+      if (!paused) return;
+      paused = false;
+      statusEl.textContent = _t('jogo:status.running', "Status: rodando…");
+      clearInterval(interval);
+      interval = setInterval(() => {
+        if (remaining <= 0){
+          clearInterval(interval);
+          paused = true;
+          remaining = 0;
+          setUI();
+          statusEl.textContent = _t('jogo:status.timeUp', "Status: tempo esgotado.");
           PanelBridge.sessionEnd(roomId);
           sessionStartedInPanel = false;
-          return;  
-        }  
+          return;
+        }
         remaining--;  
         tickSound();  
         setUI();  
       }, 1000);  
     }  
   
-    async function pause(){  
-      if (paused) return;  
-      paused = true;  
-      clearInterval(interval);  
-      statusEl.textContent = "Status: pausado.";  
+    async function pause(){
+      if (paused) return;
+      paused = true;
+      clearInterval(interval);
+      statusEl.textContent = _t('jogo:status.paused', "Status: pausado.");
       await markSessionPause();
-    }  
-  
-    async function reset(){  
-      await pause();  
-      remaining = totalSeconds;  
-      setUI();  
-      statusEl.textContent = "Status: pronto.";  
+    }
+
+    async function reset(){
+      await pause();
+      remaining = totalSeconds;
+      setUI();
+      statusEl.textContent = _t('jogo:status.ready', "Status: pronto.");
       await markSessionReset();
-    }  
-  
-    function applyMode(){  
-      if (mode === "rodada") totalSeconds = 5 * 60;  
-      if (mode === "longo")  totalSeconds = 60 * 60;  
-      remaining = totalSeconds;  
-      setUI();  
-      statusEl.textContent = "Status: pronto.";  
+    }
+
+    function applyMode(){
+      if (mode === "rodada") totalSeconds = 5 * 60;
+      if (mode === "longo")  totalSeconds = 60 * 60;
+      remaining = totalSeconds;
+      setUI();
+      statusEl.textContent = _t('jogo:status.ready', "Status: pronto.");
     }  
   
     btnStart.addEventListener("click", start);  
@@ -579,17 +582,21 @@
       window.location.href = "./entrada.html";
     });  
   
-    soundToggle.addEventListener("click", () => {  
-      ensureAudio();  
-      soundEnabled = !soundEnabled;  
-      soundToggle.innerHTML = soundEnabled ? "SOM: <strong>ON</strong>" : "SOM: <strong>OFF</strong>";  
-    });  
-  
-    modeToggle.addEventListener("click", () => {  
-      mode = (mode === "rodada") ? "longo" : "rodada";  
-      modeToggle.innerHTML = (mode === "rodada") ? "MODO: <strong>RODADA</strong>" : "MODO: <strong>LONGO</strong>";  
-      applyMode();  
-    });  
+    soundToggle.addEventListener("click", () => {
+      ensureAudio();
+      soundEnabled = !soundEnabled;
+      soundToggle.innerHTML = soundEnabled
+        ? _t('jogo:toggles.soundOn', "SOM: <strong>ON</strong>")
+        : _t('jogo:toggles.soundOff', "SOM: <strong>OFF</strong>");
+    });
+
+    modeToggle.addEventListener("click", () => {
+      mode = (mode === "rodada") ? "longo" : "rodada";
+      modeToggle.innerHTML = (mode === "rodada")
+        ? _t('jogo:toggles.modeRodada', "MODO: <strong>RODADA</strong>")
+        : _t('jogo:toggles.modeLongo', "MODO: <strong>LONGO</strong>");
+      applyMode();
+    });
 
     window.addEventListener("beforeunload", () => {
       navigator.sendBeacon?.(
