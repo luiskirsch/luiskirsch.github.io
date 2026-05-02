@@ -176,6 +176,94 @@
     applyTranslations();
     createSwitcher();
 
+    function slugify(s) {
+      return String(s || '').toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '');
+    }
+
+    // Mapa estático de pacote-id → slug usado em cards.json
+    const PACK_ID_TO_SLUG = {
+      'pacote-conexao': 'conexao',
+      'pacote-verdades': 'verdades',
+      'pacote-conflito': 'conflito',
+      'pacote-segredos': 'segredos',
+      'pacote-casais': 'casais'
+    };
+
+    // localizeCard(card, packId?) — retorna cópia do card com title/text/rule/phrase/subrule/type
+    // localizados quando há tradução. Preserva _origTitle pra effects lookup.
+    // Se packId não passado, tenta basic primeiro, depois itera por todos os pack slugs.
+    function localizeCard(card, packId) {
+      if (!card) return card;
+      if (!window.i18next || !window.i18next.t) return card;
+
+      const t = window.i18next.t.bind(window.i18next);
+      const slug = slugify(card.title);
+
+      const candidateNs = [];
+      if (packId) {
+        candidateNs.push(`cards:packs.${PACK_ID_TO_SLUG[packId] || packId}.${slug}`);
+      } else {
+        candidateNs.push(`cards:basic.${slug}`);
+        Object.values(PACK_ID_TO_SLUG).forEach(packSlug => {
+          candidateNs.push(`cards:packs.${packSlug}.${slug}`);
+        });
+      }
+
+      // Acha o primeiro NS que tem ao menos title traduzido
+      let chosenNs = null;
+      for (const ns of candidateNs) {
+        const titleKey = `${ns}.title`;
+        const val = t(titleKey);
+        if (typeof val === 'string' && val !== titleKey && val !== '') {
+          chosenNs = ns;
+          break;
+        }
+      }
+      if (!chosenNs) return card; // sem tradução; retorna original
+
+      const out = { ...card, _origTitle: card.title };
+      ['title', 'text', 'rule', 'phrase', 'subrule'].forEach(field => {
+        if (card[field] != null && card[field] !== '') {
+          const key = `${chosenNs}.${field}`;
+          const val = t(key);
+          if (typeof val === 'string' && val !== key && val !== '') out[field] = val;
+        }
+      });
+      if (card.type) {
+        const tk = `cards:types.${card.type}`;
+        const tv = t(tk);
+        if (typeof tv === 'string' && tv !== tk) out.type = tv;
+      }
+      return out;
+    }
+
+    // Encontra packId de uma carta procurando em OSL_PACK_CARDS
+    // (chamado quando contexto não tem o packId)
+    function findPackId(card, packsMap) {
+      if (!packsMap) return null;
+      for (const pid of Object.keys(packsMap)) {
+        if (packsMap[pid].some(c => c.title === card.title || c.title === card._origTitle)) return pid;
+      }
+      return null;
+    }
+
+    // Localiza uma missão da lista (1..20) com vars de interpolação
+    function localizeMission(missionStr, vars) {
+      if (!missionStr || !window.i18next) return missionStr;
+      const t = window.i18next.t.bind(window.i18next);
+      // Tenta achar a missão no PT pra mapear pro número
+      // Por simplicidade: missions.list é referenciado via key direto se disponível
+      // Caller normalmente passa o índice (1..20) via missionStr começando com "@N:"
+      if (typeof missionStr === 'string' && /^@(\d+)$/.test(missionStr)) {
+        const n = missionStr.slice(1);
+        return t(`missions:list.${n}`, vars || {});
+      }
+      return missionStr;
+    }
+
     window.OSL_I18N = {
       t: (key, opts) => window.i18next.t(key, opts),
       apply: applyTranslations,
@@ -183,7 +271,11 @@
       change: async (lng) => {
         await window.i18next.changeLanguage(lng);
         applyTranslations();
-      }
+      },
+      slugify,
+      localizeCard,
+      findPackId,
+      localizeMission
     };
 
     document.dispatchEvent(new Event('osl:i18n-ready'));

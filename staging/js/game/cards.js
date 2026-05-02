@@ -101,7 +101,10 @@ export function updateRitualButtons() {
   const effectBlocking = !!(S.currentActiveEffect && !S.currentActiveEffect.resolved);
   if (revealCardBtn) {
     revealCardBtn.disabled  = !canControl || S.ritualDeck.length === 0 || effectBlocking;
-    revealCardBtn.textContent = (S.ritualStarted && !S.currentCard) ? "Revelar Primeira Carta" : "Revelar Próxima Carta";
+    const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
+    revealCardBtn.textContent = (S.ritualStarted && !S.currentCard)
+      ? _t('cards:ui.revealFirst', "Revelar Primeira Carta")
+      : _t('cards:ui.revealNext', "Revelar Próxima Carta");
   }
   if (resetRitualBtn) resetRitualBtn.disabled = !S.isHost || !S.ritualStarted;
 }
@@ -119,17 +122,22 @@ export function setRitualWaitingState() {
   const ritualCardText  = document.getElementById("ritualCardText");
   const deckInfo        = document.getElementById("deckInfo");
   const historyList     = document.getElementById("historyList");
+  const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
   if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
-  if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
-  if (ritualCardText)  ritualCardText.innerHTML    = "O anfitrião ainda não revelou a próxima carta.";
+  if (ritualCardTitle) ritualCardTitle.textContent = _t('cards:ui.waiting', "Aguardando revelação");
+  if (ritualCardText)  ritualCardText.innerHTML    = _t('cards:ui.noReveal', "O anfitrião ainda não revelou a próxima carta.");
   const _mid = document.getElementById("ritualMidDetails");
   const _div = document.getElementById("ritualCardDivider");
   const _phr = document.getElementById("ritualCardPhrase");
   if (_mid) _mid.style.display = "none";
   if (_div) _div.style.display = "none";
   if (_phr) _phr.style.display = "none";
-  if (deckInfo) deckInfo.innerHTML = "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.";
-  if (historyList) historyList.innerHTML = `<div class="historyItem"><div class="historyType">Aguardando</div><div class="historyText">Nenhuma carta revelada ainda.</div></div>`;
+  if (deckInfo) deckInfo.innerHTML = _t('cards:ui.deckWaitStart', "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.");
+  if (historyList) {
+    const wt = _t('cards:ui.history.waitingType', 'Aguardando');
+    const nr = _t('cards:ui.history.noneRevealed', 'Nenhuma carta revelada ainda.');
+    historyList.innerHTML = `<div class="historyItem"><div class="historyType">${wt}</div><div class="historyText">${nr}</div></div>`;
+  }
   updateRitualButtons();
 }
 
@@ -156,6 +164,14 @@ export async function saveRitualState(card, activeEffect, pendingDeathrattle) {
 
 // ── Aplicar conteúdo de carta no DOM ─────────────────────────────────────────
 export function applyCardContent(card) {
+  // Localiza pra display (PT preservado em _origTitle pra effects lookup em outros lugares).
+  // Card ORIGINAL (com title PT) continua em S.currentCard; só localizamos pra renderizar.
+  const localized = (card && window.OSL_I18N?.localizeCard)
+    ? window.OSL_I18N.localizeCard(card)
+    : card;
+
+  const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
+
   const ritualCardType  = document.getElementById("ritualCardType");
   const ritualCardTitle = document.getElementById("ritualCardTitle");
   const ritualCardText  = document.getElementById("ritualCardText");
@@ -167,30 +183,33 @@ export function applyCardContent(card) {
   const cardDivider   = document.getElementById("ritualCardDivider");
   const cardPhrase    = document.getElementById("ritualCardPhrase");
 
-  if (card) {
-    if (ritualCardType)  ritualCardType.textContent = (card.type || "Ritual").toUpperCase();
-    if (ritualCardTitle) ritualCardTitle.textContent = card.title || "Carta revelada";
+  if (localized) {
+    if (ritualCardType)  ritualCardType.textContent = (localized.type || _t('cards:types.Ritual', 'Ritual')).toUpperCase();
+    if (ritualCardTitle) ritualCardTitle.textContent = localized.title || _t('cards:ui.history.fallbackTitle', "Carta revelada");
     // XSS-safe: escapeHtml ANTES da conversão newline→<br>
-    if (ritualCardText)  ritualCardText.innerHTML = escapeHtml(card.text || "").replace(/\n/g, "<br>");
-    const hasRule = !!card.rule, hasSubrule = !!card.subrule, hasPhrase = !!card.phrase;
+    if (ritualCardText)  ritualCardText.innerHTML = escapeHtml(localized.text || "").replace(/\n/g, "<br>");
+    const hasRule = !!localized.rule, hasSubrule = !!localized.subrule, hasPhrase = !!localized.phrase;
     if (midDetails)    midDetails.style.display    = (hasRule || hasSubrule) ? "" : "none";
-    if (cardRule)      cardRule.innerHTML           = hasRule ? escapeHtml(card.rule).replace(/\n/g, "<br>") : "";
+    if (cardRule)      cardRule.innerHTML           = hasRule ? escapeHtml(localized.rule).replace(/\n/g, "<br>") : "";
     if (subruleDivider)subruleDivider.style.display = hasSubrule ? "" : "none";
-    if (cardSubrule)   { cardSubrule.style.display = hasSubrule ? "" : "none"; if (hasSubrule) cardSubrule.innerHTML = escapeHtml(card.subrule).replace(/\n/g, "<br>"); }
+    if (cardSubrule)   { cardSubrule.style.display = hasSubrule ? "" : "none"; if (hasSubrule) cardSubrule.innerHTML = escapeHtml(localized.subrule).replace(/\n/g, "<br>"); }
     if (cardDivider)   cardDivider.style.display   = hasPhrase ? "" : "none";
-    if (cardPhrase)    { cardPhrase.style.display  = hasPhrase ? "" : "none"; if (hasPhrase) cardPhrase.innerHTML = escapeHtml(card.phrase).replace(/\n/g, "<br>"); }
+    if (cardPhrase)    { cardPhrase.style.display  = hasPhrase ? "" : "none"; if (hasPhrase) cardPhrase.innerHTML = escapeHtml(localized.phrase).replace(/\n/g, "<br>"); }
   } else {
-    if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
-    if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
-    if (ritualCardText)  ritualCardText.innerHTML    = "O anfitrião ainda não revelou a próxima carta.";
+    if (ritualCardType)  ritualCardType.textContent  = _t('cards:types.Ritual', 'RITUAL').toUpperCase();
+    if (ritualCardTitle) ritualCardTitle.textContent = _t('cards:ui.waiting', "Aguardando revelação");
+    if (ritualCardText)  ritualCardText.innerHTML    = _t('cards:ui.noReveal', "O anfitrião ainda não revelou a próxima carta.");
     if (midDetails)  midDetails.style.display  = "none";
     if (cardDivider) cardDivider.style.display = "none";
     if (cardPhrase)  cardPhrase.style.display  = "none";
   }
   if (deckInfo) {
-    deckInfo.innerHTML = S.ritualDeck.length > 0
-      ? `${S.ritualDeck.length} carta(s) restante(s) no deck.<br>O anfitrião pode revelar a próxima.`
-      : `O deck chegou ao fim.<br>Reinicie o ritual para embaralhar novamente.`;
+    if (S.ritualDeck.length > 0) {
+      deckInfo.innerHTML = _t('cards:ui.deckRemaining', `${S.ritualDeck.length} carta(s) restante(s) no deck.<br>O anfitrião pode revelar a próxima.`)
+        .replace('{{count}}', S.ritualDeck.length);
+    } else {
+      deckInfo.innerHTML = _t('cards:ui.deckEmpty', "O deck chegou ao fim.<br>Reinicie o ritual para embaralhar novamente.");
+    }
   }
   updateRitualButtons();
 }
