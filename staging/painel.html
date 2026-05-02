@@ -1,15 +1,16 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="painel">
 <head>
 <meta name="robots" content="noindex, nofollow">
 <script src="_staging.js" defer></script>
+<script src="./i18n/init.js" defer></script>
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel | SEXTOLUGAR</title>
+  <title data-i18n="painel:title">Painel | SEXTOLUGAR</title>
 
   <style>
     *{ box-sizing:border-box; }
@@ -589,16 +590,16 @@
     <section class="hero">
       <div class="heroTop">
         <div>
-          <h1>Seu painel</h1>
-          <div class="muted">
+          <h1 data-i18n="painel:hero.heading">Seu painel</h1>
+          <div class="muted" data-i18n-html="painel:hero.subHtml">
             Gerencie sua conta, sua licença e sua área de afiliado do
             <strong style="color:#e6c07b;">SEXTOLUGAR</strong>.
           </div>
         </div>
 
         <div class="heroBadges">
-          <div class="heroBadge" id="heroUserBadge">Conta conectada</div>
-          <div class="heroBadge inactive" id="heroAccessBadge">Sem acesso</div>
+          <div class="heroBadge" id="heroUserBadge" data-i18n="painel:hero.badges.connected">Conta conectada</div>
+          <div class="heroBadge inactive" id="heroAccessBadge" data-i18n="painel:hero.badges.noAccess">Sem acesso</div>
         </div>
       </div>
     </section>
@@ -608,73 +609,74 @@
         <div class="card premium">
           <div class="sectionHeader">
             <div>
-              <h2 class="sectionTitle">Conta e acesso</h2>
-              <div class="sectionSub">Seu vínculo de licença e a liberação do jogo são gerenciados aqui.</div>
+              <h2 class="sectionTitle" data-i18n="painel:account.title">Conta e acesso</h2>
+              <div class="sectionSub" data-i18n="painel:account.sub">Seu vínculo de licença e a liberação do jogo são gerenciados aqui.</div>
             </div>
 
-            <div class="licenseBadge inactive" id="licenseBadge">Licença inativa</div>
+            <div class="licenseBadge inactive" id="licenseBadge" data-i18n="painel:account.licenseInactive">Licença inativa</div>
           </div>
 
           <div class="box">
-            <div class="label">Nome</div>
-            <div class="value" id="nome">Carregando...</div>
+            <div class="label" data-i18n="painel:account.labels.name">Nome</div>
+            <div class="value" id="nome" data-i18n="painel:account.values.loading">Carregando...</div>
           </div>
 
           <div class="box">
-            <div class="label">Usuário</div>
-            <div class="value" id="username">Carregando...</div>
+            <div class="label" data-i18n="painel:account.labels.username">Usuário</div>
+            <div class="value" id="username" data-i18n="painel:account.values.loading">Carregando...</div>
           </div>
 
           <div class="box">
-            <div class="label">Email</div>
-            <div class="value" id="email">Carregando...</div>
+            <div class="label" data-i18n="painel:account.labels.email">Email</div>
+            <div class="value" id="email" data-i18n="painel:account.values.loading">Carregando...</div>
           </div>
 
           <div class="box">
-            <div class="label">Licença atual</div>
-            <div class="value" id="license">Não vinculada</div>
+            <div class="label" data-i18n="painel:account.labels.currentLicense">Licença atual</div>
+            <div class="value" id="license" data-i18n="painel:account.values.notLinked">Não vinculada</div>
           </div>
 
           <div class="field">
-            <label for="licenseInput">Código da licença</label>
+            <label for="licenseInput" data-i18n="painel:account.labels.licenseCode">Código da licença</label>
             <input
               id="licenseInput"
               type="text"
               placeholder="Ex.: OSL-XXXX-XXXX-XXXX-XXXX-XXXX"
+              data-i18n-placeholder="painel:account.placeholder"
               autocomplete="off"
             />
           </div>
 
-          <button id="linkLicenseBtn">Vincular licença</button>
+          <button id="linkLicenseBtn" data-i18n="painel:account.linkBtn">Vincular licença</button>
 
-          <div class="helper" id="licenseHelper">
+          <div class="helper" id="licenseHelper" data-i18n="painel:account.helper">
             Esta licença ficará vinculada à conta logada e não poderá ser usada por outra conta.
           </div>
 
-          <div class="status" id="status">Carregando painel...</div>
+          <div class="status" id="status" data-i18n="painel:account.loadingPanel">Carregando painel...</div>
 
           <div class="btnRow">
-            <button id="playBtn" disabled>Entrar no jogo</button>
-            <button class="secondary" id="refreshBtn">Atualizar painel</button>
+            <button id="playBtn" disabled data-i18n="painel:account.buttons.play">Entrar no jogo</button>
+            <button class="secondary" id="refreshBtn" data-i18n="painel:account.buttons.refresh">Atualizar painel</button>
           </div>
 
-          <button class="danger" id="logoutBtn" style="margin-top:10px;">Sair</button>
+          <button class="danger" id="logoutBtn" style="margin-top:10px;" data-i18n="painel:account.buttons.logout">Sair</button>
         </div>
 
         <div class="card">
-          <h2 class="sectionTitle">Histórico de ganhos</h2>
+          <h2 class="sectionTitle" data-i18n="painel:history.title">Histórico de ganhos</h2>
           <div class="historyList" id="historyList">
-            <div class="historyEmpty">Carregando histórico...</div>
+            <div class="historyEmpty" data-i18n="painel:history.loading">Carregando histórico...</div>
           </div>
         </div>
 
         <div class="card" id="comprasCard">
-          <h2 class="sectionTitle">Meus pacotes e compras</h2>
-          <div class="sectionSub" style="color:rgba(255,255,255,.55);font-size:13px;margin-bottom:14px;">Conteúdos desbloqueados — disponíveis em qualquer dispositivo.</div>
+          <h2 class="sectionTitle" data-i18n="painel:purchases.title">Meus pacotes e compras</h2>
+          <div class="sectionSub" style="color:rgba(255,255,255,.55);font-size:13px;margin-bottom:14px;" data-i18n="painel:purchases.sub">Conteúdos desbloqueados — disponíveis em qualquer dispositivo.</div>
           <div id="comprasList">
-            <div class="historyEmpty">Carregando...</div>
+            <div class="historyEmpty" data-i18n="painel:purchases.loading">Carregando...</div>
           </div>
-          <a href="./vendas.html" style="display:inline-block;margin-top:14px;font-size:13px;color:#e6c07b;text-decoration:none;">+ Ver pacotes disponíveis</a>
+          <a href="./vendas.html" style="display:inline-block;margin-top:14px;font-size:13px;color:#e6c07b;text-decoration:none;" data-i18n="painel:purchases.morePacks">+ Ver pacotes disponíveis</a>
         </div>
       </div>
 
@@ -682,24 +684,24 @@
         <div class="card premium">
           <div class="sectionHeader">
             <div>
-              <h2 class="sectionTitle">Afiliado</h2>
-              <div class="sectionSub">Compartilhe seu link, acumule moedas e solicite saques.</div>
+              <h2 class="sectionTitle" data-i18n="painel:affiliate.title">Afiliado</h2>
+              <div class="sectionSub" data-i18n="painel:affiliate.sub">Compartilhe seu link, acumule moedas e solicite saques.</div>
             </div>
           </div>
 
           <div class="balanceHero">
             <div class="balanceCard">
-              <div class="balanceLabel">Saldo em moedas</div>
+              <div class="balanceLabel" data-i18n="painel:affiliate.balanceCoins">Saldo em moedas</div>
               <div class="balanceValue" id="coins">0</div>
-              <div class="balanceHint">
+              <div class="balanceHint" data-i18n-html="painel:affiliate.coinsHintHtml">
                 Você recebe <strong style="color:#e6c07b;">10 moedas</strong> por venda aprovada pelo seu link.
               </div>
             </div>
 
             <div class="balanceCard">
-              <div class="balanceLabel">Saldo sacável</div>
+              <div class="balanceLabel" data-i18n="painel:affiliate.balanceWithdrawable">Saldo sacável</div>
               <div class="balanceValue" id="withdrawableCoins">0</div>
-              <div class="balanceHint">
+              <div class="balanceHint" data-i18n-html="painel:affiliate.withdrawHintHtml">
                 Com <strong style="color:#e6c07b;">100 moedas</strong>, você pode solicitar
                 <strong style="color:#e6c07b;">R$ 90,00</strong> via Pix.
               </div>
@@ -708,7 +710,7 @@
 
           <div class="progressWrap">
             <div class="progressTop">
-              <span>Progresso para saque</span>
+              <span data-i18n="painel:affiliate.progressTo">Progresso para saque</span>
               <span id="progressText">0 / 100 moedas</span>
             </div>
             <div class="progressBar">
@@ -718,55 +720,56 @@
 
           <div class="miniStatGrid">
             <div class="miniStat">
-              <div class="label">Indicações aprovadas</div>
+              <div class="label" data-i18n="painel:affiliate.approvedRefs">Indicações aprovadas</div>
               <div class="number" id="referralsApproved">0</div>
             </div>
 
             <div class="miniStat">
-              <div class="label">Indicações pendentes</div>
+              <div class="label" data-i18n="painel:affiliate.pendingRefs">Indicações pendentes</div>
               <div class="number" id="referralsPending">0</div>
             </div>
           </div>
 
           <div class="highlightBox">
             <div class="box" style="margin-bottom:12px;">
-              <div class="label">Seu código</div>
-              <div class="value" id="refCode">Carregando...</div>
+              <div class="label" data-i18n="painel:affiliate.yourCode">Seu código</div>
+              <div class="value" id="refCode" data-i18n="painel:account.values.loading">Carregando...</div>
             </div>
 
-            <div class="label" style="margin-bottom:8px;">Seu link de indicação</div>
+            <div class="label" style="margin-bottom:8px;" data-i18n="painel:affiliate.yourLink">Seu link de indicação</div>
             <div class="linkRow">
-              <div class="linkBox" id="refLink">Carregando...</div>
-              <button class="secondary" id="copyLinkBtn">Copiar link</button>
+              <div class="linkBox" id="refLink" data-i18n="painel:account.values.loading">Carregando...</div>
+              <button class="secondary" id="copyLinkBtn" data-i18n="painel:affiliate.copyLink">Copiar link</button>
             </div>
           </div>
 
           <div class="box">
-            <div class="label">Comissão aprovada</div>
+            <div class="label" data-i18n="painel:affiliate.approvedCommission">Comissão aprovada</div>
             <div class="value" id="commissionApproved">R$ 0,00</div>
           </div>
 
           <div class="box">
-            <div class="label">Total já pago</div>
+            <div class="label" data-i18n="painel:affiliate.totalPaid">Total já pago</div>
             <div class="value" id="totalPaidOut">R$ 0,00</div>
           </div>
 
           <div class="field">
-            <label for="pixKeyInput">Chave Pix</label>
+            <label for="pixKeyInput" data-i18n="painel:affiliate.pixLabel">Chave Pix</label>
             <input
               id="pixKeyInput"
               type="text"
               placeholder="Digite sua chave Pix"
+              data-i18n-placeholder="painel:affiliate.pixPlaceholder"
               autocomplete="off"
             />
           </div>
 
           <div class="btnRow">
-            <button id="savePixBtn">Salvar Pix</button>
-            <button id="withdrawBtn">Solicitar saque de R$ 90,00</button>
+            <button id="savePixBtn" data-i18n="painel:affiliate.savePix">Salvar Pix</button>
+            <button id="withdrawBtn" data-i18n="painel:affiliate.withdraw">Solicitar saque de R$ 90,00</button>
           </div>
 
-          <div class="helper">
+          <div class="helper" data-i18n-html="painel:affiliate.withdrawHelperHtml">
             O saque fica disponível quando você atingir o mínimo de
             <strong style="color:#e6c07b;">100 moedas sacáveis</strong> e tiver uma chave Pix cadastrada.
           </div>
@@ -775,8 +778,8 @@
         </div>
 
         <div class="card">
-          <h2 class="sectionTitle">Resumo</h2>
-          <div class="summaryText">
+          <h2 class="sectionTitle" data-i18n="painel:summary.title">Resumo</h2>
+          <div class="summaryText" data-i18n-html="painel:summary.textHtml">
             Sua conta pode ter uma <strong>licença vinculada</strong> e também participar do
             <strong>sistema de indicação</strong>. O acesso ao jogo é liberado quando a licença é validada
             e o token desta conta está ativo neste navegador.
