@@ -1,15 +1,16 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="login">
 <head>
 <meta name="robots" content="noindex, nofollow">
 <script src="_staging.js" defer></script>
+<script src="./i18n/init.js" defer></script>
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Entrar | SEXTOLUGAR</title>
+  <title data-i18n="login:title">Entrar | SEXTOLUGAR</title>
   <link rel="icon" href="./favicon.png" />
 
   <style>
@@ -136,26 +137,26 @@
 <body>
 
   <div class="card">
-    <h1>Entrar</h1>
-    <p>Acesse sua conta para continuar o ritual.</p>
+    <h1 data-i18n="login:heading">Entrar</h1>
+    <p data-i18n="login:subtitle">Acesse sua conta para continuar o ritual.</p>
 
     <div class="field">
-      <label for="email">Email</label>
-      <input id="email" type="email" placeholder="Seu e-mail" autocomplete="email">
+      <label for="email" data-i18n="login:labels.email">Email</label>
+      <input id="email" type="email" placeholder="Seu e-mail" data-i18n-placeholder="login:placeholders.email" autocomplete="email">
     </div>
 
     <div class="field">
-      <label for="password">Senha</label>
-      <input id="password" type="password" placeholder="Sua senha" autocomplete="current-password">
+      <label for="password" data-i18n="login:labels.password">Senha</label>
+      <input id="password" type="password" placeholder="Sua senha" data-i18n-placeholder="login:placeholders.password" autocomplete="current-password">
     </div>
 
-    <button id="loginBtn">Entrar</button>
+    <button id="loginBtn" data-i18n="login:buttons.login">Entrar</button>
 
     <div class="status" id="status"></div>
 
     <div class="links">
-      Não tem conta? <a href="./cadastro.html">Criar conta</a><br>
-      <a href="#" id="forgot">Esqueci minha senha</a>
+      <span data-i18n="login:links.noAccount">Não tem conta?</span> <a href="./cadastro.html" data-i18n="login:links.createAccount">Criar conta</a><br>
+      <a href="#" id="forgot" data-i18n="login:links.forgot">Esqueci minha senha</a>
     </div>
   </div>
 
@@ -170,6 +171,15 @@
       getDoc
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { app, auth, db } from "./js/firebase-app.js";
+
+    // Aguarda i18n com timeout 3s
+    if (!window.OSL_I18N) {
+      await new Promise(resolve => {
+        document.addEventListener('osl:i18n-ready', resolve, { once: true });
+        setTimeout(resolve, 3000);
+      });
+    }
+    const t = (key, fallback) => (window.OSL_I18N?.t(key)) || fallback;
 
     const emailEl = document.getElementById("email");
     const passwordEl = document.getElementById("password");
@@ -204,27 +214,27 @@
     if (userSnap.exists()) {
       window.location.href = "./painel.html";
     } else {
-      setStatus("Sua conta está logada, mas o perfil ainda não foi criado no banco.", "err");
+      setStatus(t('login:status.profileMissing', "Sua conta está logada, mas o perfil ainda não foi criado no banco."), "err");
     }
   } catch (err) {
     console.error(err);
-    setStatus("Erro ao verificar perfil.", "err");
+    setStatus(t('login:status.verifyProfileError', "Erro ao verificar perfil."), "err");
   }
-});  
+});
 
     loginBtn.addEventListener("click", async () => {
       const email = emailEl.value.trim().toLowerCase();
       const password = passwordEl.value;
 
       if (!email || !password) {
-        setStatus("Preencha todos os campos.", "err");
+        setStatus(t('login:status.fillAllFields', "Preencha todos os campos."), "err");
         return;
       }
 
       try {
         isLoggingIn = true;
         loginBtn.disabled = true;
-        setStatus("Entrando...");
+        setStatus(t('login:status.loggingIn', "Entrando..."));
 
         const cred = await signInWithEmailAndPassword(auth, email, password);
 
@@ -243,7 +253,7 @@
           localStorage.setItem("osl_license_email", data.email || email);
         }
 
-        setStatus("Acesso liberado.", "ok");
+        setStatus(t('login:status.accessGranted', "Acesso liberado."), "ok");
 
         setTimeout(() => {
           window.location.href = "./painel.html";
@@ -252,18 +262,18 @@
       } catch (err) {
         console.error(err);
 
-        let msg = "Erro ao entrar.";
+        let msg = t('login:errors.generic', "Erro ao entrar.");
 
         if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
-          msg = "Conta não encontrada ou credenciais inválidas.";
+          msg = t('login:errors.userNotFound', "Conta não encontrada ou credenciais inválidas.");
         } else if (err.code === "auth/wrong-password") {
-          msg = "Senha incorreta.";
+          msg = t('login:errors.wrongPassword', "Senha incorreta.");
         } else if (err.code === "auth/invalid-email") {
-          msg = "E-mail inválido.";
+          msg = t('login:errors.invalidEmail', "E-mail inválido.");
         } else if (err.code === "auth/too-many-requests") {
-          msg = "Muitas tentativas. Tente novamente mais tarde.";
+          msg = t('login:errors.tooManyRequests', "Muitas tentativas. Tente novamente mais tarde.");
         } else if (err.code === "auth/network-request-failed") {
-          msg = "Erro de conexão. Tente novamente.";
+          msg = t('login:errors.networkFailed', "Erro de conexão. Tente novamente.");
         }
 
         setStatus(msg, "err");
@@ -278,30 +288,30 @@
       const email = emailEl.value.trim().toLowerCase();
 
       if (!email) {
-        setStatus("Digite seu e-mail para recuperar.", "err");
+        setStatus(t('login:status.typeEmailToReset', "Digite seu e-mail para recuperar."), "err");
         return;
       }
 
       try {
         await sendPasswordResetEmail(auth, email);
-        setStatus("E-mail de recuperação enviado.", "ok");
+        setStatus(t('login:status.resetSent', "E-mail de recuperação enviado."), "ok");
       } catch (err) {
         console.error(err);
 
-        let msg = "Erro ao enviar recuperação.";
+        let msg = t('login:errors.resetGeneric', "Erro ao enviar recuperação.");
 
         if (err.code === "auth/invalid-email") {
-          msg = "O e-mail informado é inválido.";
+          msg = t('login:errors.resetInvalidEmail', "O e-mail informado é inválido.");
         } else if (err.code === "auth/user-not-found") {
-          msg = "Não existe conta com esse e-mail.";
+          msg = t('login:errors.resetUserNotFound', "Não existe conta com esse e-mail.");
         } else if (err.code === "auth/missing-email") {
-          msg = "Digite seu e-mail para recuperar.";
+          msg = t('login:status.typeEmailToReset', "Digite seu e-mail para recuperar.");
         } else if (err.code === "auth/too-many-requests") {
-          msg = "Muitas tentativas. Tente novamente mais tarde.";
+          msg = t('login:errors.tooManyRequests', "Muitas tentativas. Tente novamente mais tarde.");
         } else if (err.code === "auth/network-request-failed") {
-          msg = "Erro de conexão. Tente novamente.";
+          msg = t('login:errors.networkFailed', "Erro de conexão. Tente novamente.");
         } else if (err.code === "auth/unauthorized-domain") {
-          msg = "Este domínio não está autorizado no Firebase.";
+          msg = t('login:errors.unauthorizedDomain', "Este domínio não está autorizado no Firebase.");
         }
 
         setStatus(msg, "err");

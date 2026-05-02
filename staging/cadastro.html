@@ -1,15 +1,16 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="cadastro">
 <head>
 <meta name="robots" content="noindex, nofollow">
 <script src="_staging.js" defer></script>
+<script src="./i18n/init.js" defer></script>
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Criar conta | SEXTOLUGAR</title>
+  <title data-i18n="cadastro:title">Criar conta | SEXTOLUGAR</title>
   <link rel="icon" href="./favicon.png" />
 
   <style>
@@ -321,11 +322,11 @@
   <main class="wrap">
     <section class="hero">
       <div class="heroInner">
-        <div class="eyebrow">Acesso oficial</div>
+        <div class="eyebrow" data-i18n="cadastro:hero.eyebrow">Acesso oficial</div>
 
-        <h1>Crie sua conta e entre no ritual.</h1>
+        <h1 data-i18n="cadastro:hero.heading">Crie sua conta e entre no ritual.</h1>
 
-        <p>
+        <p data-i18n="cadastro:hero.intro">
           Seu acesso precisa estar vinculado a uma conta real para que sua licença,
           perfil e progresso permaneçam seguros em qualquer dispositivo.
         </p>
@@ -333,17 +334,17 @@
         <div class="benefits">
           <div class="benefit">
             <div class="benefitIcon">✓</div>
-            <div class="benefitText">Acesso vinculado ao seu e-mail e não apenas ao navegador.</div>
+            <div class="benefitText" data-i18n="cadastro:hero.benefits.1">Acesso vinculado ao seu e-mail e não apenas ao navegador.</div>
           </div>
 
           <div class="benefit">
             <div class="benefitIcon">✓</div>
-            <div class="benefitText">Perfil persistente para entrar no jogo novamente quando quiser.</div>
+            <div class="benefitText" data-i18n="cadastro:hero.benefits.2">Perfil persistente para entrar no jogo novamente quando quiser.</div>
           </div>
 
           <div class="benefit">
             <div class="benefitIcon">✓</div>
-            <div class="benefitText">Base pronta para amigos, histórico, painel e expansão da plataforma.</div>
+            <div class="benefitText" data-i18n="cadastro:hero.benefits.3">Base pronta para amigos, histórico, painel e expansão da plataforma.</div>
           </div>
         </div>
       </div>
@@ -351,42 +352,45 @@
 
     <section class="card">
       <div class="cardInner">
-        <h2 class="cardTitle">Criar conta</h2>
-        <p class="cardSub">
-          Use seus dados para acessar a plataforma dSEXTOLUGAR com segurança.
+        <h2 class="cardTitle" data-i18n="cadastro:card.title">Criar conta</h2>
+        <p class="cardSub" data-i18n="cadastro:card.subtitle">
+          Use seus dados para acessar a plataforma do SEXTOLUGAR com segurança.
         </p>
 
         <form class="form" id="cadastroForm">
           <div class="field">
-            <label for="displayName">Nome de exibição</label>
+            <label for="displayName" data-i18n="cadastro:labels.displayName">Nome de exibição</label>
             <input
               id="displayName"
               type="text"
               maxlength="40"
               placeholder="Ex.: Luis"
+              data-i18n-placeholder="cadastro:placeholders.displayName"
               autocomplete="name"
             />
           </div>
 
           <div class="row">
             <div class="field">
-              <label for="email">Seu e-mail</label>
+              <label for="email" data-i18n="cadastro:labels.email">Seu e-mail</label>
               <input
                 id="email"
                 type="email"
                 maxlength="160"
                 placeholder="Digite seu e-mail"
+                data-i18n-placeholder="cadastro:placeholders.email"
                 autocomplete="email"
               />
             </div>
 
             <div class="field">
-              <label for="username">Usuário</label>
+              <label for="username" data-i18n="cadastro:labels.username">Usuário</label>
               <input
                 id="username"
                 type="text"
                 maxlength="20"
                 placeholder="Ex.: prelude_user"
+                data-i18n-placeholder="cadastro:placeholders.username"
                 autocomplete="username"
               />
             </div>
@@ -394,34 +398,36 @@
 
           <div class="row">
             <div class="field">
-              <label for="password">Senha</label>
+              <label for="password" data-i18n="cadastro:labels.password">Senha</label>
               <input
                 id="password"
                 type="password"
                 minlength="6"
                 placeholder="Mínimo de 6 caracteres"
+                data-i18n-placeholder="cadastro:placeholders.password"
                 autocomplete="new-password"
               />
             </div>
 
             <div class="field">
-              <label for="confirmPassword">Confirmar senha</label>
+              <label for="confirmPassword" data-i18n="cadastro:labels.confirmPassword">Confirmar senha</label>
               <input
                 id="confirmPassword"
                 type="password"
                 minlength="6"
                 placeholder="Repita sua senha"
+                data-i18n-placeholder="cadastro:placeholders.confirmPassword"
                 autocomplete="new-password"
               />
             </div>
           </div>
 
           <div class="actions">
-            <button class="btn btnPrimary" id="submitBtn" type="submit">
+            <button class="btn btnPrimary" id="submitBtn" type="submit" data-i18n="cadastro:buttons.submit">
               Criar conta
             </button>
 
-            <button class="btn btnGhost" id="goLoginBtn" type="button">
+            <button class="btn btnGhost" id="goLoginBtn" type="button" data-i18n="cadastro:buttons.goLogin">
               Já tenho conta
             </button>
           </div>
@@ -430,9 +436,9 @@
         </form>
 
         <div class="bottom">
-          Ao continuar, sua conta será criada no ambiente oficial do jogo.
+          <span data-i18n="cadastro:bottom.1">Ao continuar, sua conta será criada no ambiente oficial do jogo.</span>
           <br />
-          Depois disso, sua licença será vinculada manualmente no painel.
+          <span data-i18n="cadastro:bottom.2">Depois disso, sua licença será vinculada manualmente no painel.</span>
         </div>
       </div>
     </section>
@@ -449,6 +455,15 @@
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
   import { app, auth, db } from "./js/firebase-app.js";
+
+  // Aguarda i18n com timeout 3s
+  if (!window.OSL_I18N) {
+    await new Promise(resolve => {
+      document.addEventListener('osl:i18n-ready', resolve, { once: true });
+      setTimeout(resolve, 3000);
+    });
+  }
+  const t = (key, fallback, vars) => (window.OSL_I18N?.t(key, vars)) || fallback;
 
   const BACKEND_BASE_URL = "https://osl-video-server-staging.up.railway.app";
 
@@ -505,7 +520,7 @@
       displayName,
       username,
       avatarEmoji: "🔮",
-      bio: "Novo participante do ritual.",
+      bio: t('cadastro:profile.defaultBio', "Novo participante do ritual."),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       licenseLinked: false,
@@ -579,25 +594,26 @@
     const code = error?.code || "";
 
     if (code === "auth/email-already-in-use") {
-      return "Este e-mail já está cadastrado.";
+      return t('cadastro:errors.emailInUse', "Este e-mail já está cadastrado.");
     }
     if (code === "auth/invalid-email") {
-      return "O e-mail informado é inválido.";
+      return t('cadastro:errors.invalidEmail', "O e-mail informado é inválido.");
     }
     if (code === "auth/weak-password") {
-      return "Sua senha é fraca demais.";
+      return t('cadastro:errors.weakPassword', "Sua senha é fraca demais.");
     }
     if (code === "auth/network-request-failed") {
-      return "Erro de conexão. Tente novamente.";
+      return t('cadastro:errors.networkFailed', "Erro de conexão. Tente novamente.");
     }
     if (code === "auth/operation-not-allowed") {
-      return "O cadastro por e-mail e senha não está habilitado no Firebase.";
+      return t('cadastro:errors.operationNotAllowed', "O cadastro por e-mail e senha não está habilitado no Firebase.");
     }
     if (code === "permission-denied") {
-      return "O Firestore recusou salvar o perfil.";
+      return t('cadastro:errors.permissionDenied', "O Firestore recusou salvar o perfil.");
     }
 
-    return `Erro ao criar conta: ${code || "desconhecido"}`;
+    const codeOrUnknown = code || t('cadastro:errors.unknown', "desconhecido");
+    return t('cadastro:errors.generic', `Erro ao criar conta: ${codeOrUnknown}`, { code: codeOrUnknown });
   }
 
   cadastroForm.addEventListener("submit", async (e) => {
@@ -611,57 +627,57 @@
     const confirmPassword = confirmPasswordEl.value;
 
     if (!displayName) {
-      setStatus("Digite seu nome de exibição.", "err");
+      setStatus(t('cadastro:validation.needDisplayName', "Digite seu nome de exibição."), "err");
       displayNameEl.focus();
       return;
     }
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setStatus("Digite um e-mail válido.", "err");
+      setStatus(t('cadastro:validation.invalidEmail', "Digite um e-mail válido."), "err");
       emailEl.focus();
       return;
     }
 
     if (!username || username.length < 3) {
-      setStatus("Escolha um usuário com pelo menos 3 caracteres.", "err");
+      setStatus(t('cadastro:validation.shortUsername', "Escolha um usuário com pelo menos 3 caracteres."), "err");
       usernameEl.focus();
       return;
     }
 
     if (password.length < 6) {
-      setStatus("A senha precisa ter pelo menos 6 caracteres.", "err");
+      setStatus(t('cadastro:validation.shortPassword', "A senha precisa ter pelo menos 6 caracteres."), "err");
       passwordEl.focus();
       return;
     }
 
     if (password !== confirmPassword) {
-      setStatus("As senhas não coincidem.", "err");
+      setStatus(t('cadastro:validation.passwordMismatch', "As senhas não coincidem."), "err");
       confirmPasswordEl.focus();
       return;
     }
 
     try {
       setLoading(true);
-      setStatus("Verificando disponibilidade do usuário...");
+      setStatus(t('cadastro:status.checkingUsername', "Verificando disponibilidade do usuário..."));
 
       if (await usernameExists(username)) {
-        setStatus("Esse usuário já está em uso.", "err");
+        setStatus(t('cadastro:status.usernameTaken', "Esse usuário já está em uso."), "err");
         usernameEl.focus();
         setLoading(false);
         return;
       }
 
-      setStatus("Criando sua conta...");
+      setStatus(t('cadastro:status.creating', "Criando sua conta..."));
 
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const createdUser = cred.user;
 
       await updateProfile(createdUser, { displayName });
 
-      setStatus("Salvando seu perfil...");
+      setStatus(t('cadastro:status.savingProfile', "Salvando seu perfil..."));
       await saveUserProfile(createdUser, displayName, username, email);
 
-      setStatus("Vinculando seu acesso...");
+      setStatus(t('cadastro:status.linkingAccess', "Vinculando seu acesso..."));
       await tryLinkLicenseAfterSignup(createdUser.uid);
 
       localStorage.setItem("osl_nome", displayName);
@@ -669,7 +685,7 @@
       localStorage.setItem("osl_auth_uid", createdUser.uid);
       localStorage.setItem("osl_license_email", email);
 
-      setStatus("Conta criada com sucesso. Indo para o login...", "ok");
+      setStatus(t('cadastro:status.createdGoLogin', "Conta criada com sucesso. Indo para o login..."), "ok");
 
       setTimeout(() => {
         window.location.href = "./login.html";
@@ -689,5 +705,5 @@
     window.location.href = "./login.html";
   });
 
-  setStatus("Sistema carregado.");
+  setStatus(t('cadastro:status.loaded', "Sistema carregado."));
 </script>
