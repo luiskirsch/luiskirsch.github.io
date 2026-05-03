@@ -370,7 +370,11 @@ export async function ensureUserProfile() {
     await setDoc(S.userRef, { userId: S.userId, displayName: S.playerName, username: usernameBase, bio: oslTr("sala:newProfile.bio", "Novo participante do ritual."), avatarEmoji:"🔮", avatarColor:"#1f86d9", memberSince: serverTimestamp(), lastSeen: serverTimestamp(), friends:[], incomingRequests:[], outgoingRequests:[], stats:{ gamesPlayed:0, wins:0 } });
     S.selectedAvatarEmoji = "🔮"; S.selectedAvatarColor = "#1f86d9";
     const fab = document.getElementById("mobileProfileBtn"); if (fab) fab.textContent = "🔮";
-    const myBtn = document.getElementById("myProfileBtn"); if (myBtn) myBtn.textContent = "🔮 Perfil";
+    const myBtn = document.getElementById("myProfileBtn"); if (myBtn) {
+      const fullLabel = oslTr("sala:topbar.actions.profile", "👤 Perfil");
+      const labelText = fullLabel.replace(/^[^\s]+\s*/, "");
+      myBtn.textContent = "🔮 " + labelText;
+    }
     localStorage.setItem("osl_avatar", "🔮");
   } else {
     await updateDoc(S.userRef, { lastSeen: serverTimestamp() });

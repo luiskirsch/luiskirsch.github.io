@@ -64,10 +64,14 @@ export function updateDesktopProfileBtn(photoUrl, emoji) {
   const btn   = document.getElementById("myProfileBtn");
   if (!btn) return;
   const badge = btn.querySelector(".badge") || btn.querySelector("#desktopProfileBadge");
+  // O label "Perfil" vem do i18n (sala:topbar.actions.profile = "👤 Perfil"/"👤 Profile");
+  // tira o emoji 👤 do início pra usar emoji/foto do usuário.
+  const fullLabel = oslTr("sala:topbar.actions.profile", "👤 Perfil");
+  const labelText = fullLabel.replace(/^[^\s]+\s*/, "");
   if (photoUrl) {
     btn.innerHTML = ""; const img = document.createElement("img"); img.src = photoUrl; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0";
-    btn.appendChild(img); btn.appendChild(document.createTextNode("Perfil")); if (badge) btn.appendChild(badge);
-  } else { btn.textContent = (emoji || "👤") + " Perfil"; if (badge) btn.appendChild(badge); }
+    btn.appendChild(img); btn.appendChild(document.createTextNode(labelText)); if (badge) btn.appendChild(badge);
+  } else { btn.textContent = (emoji || "👤") + " " + labelText; if (badge) btn.appendChild(badge); }
 }
 
 export function setAvatarSelection(emoji) {

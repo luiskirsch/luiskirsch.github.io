@@ -355,7 +355,10 @@ export function renderActiveEffect(effect) {
       const names = effect.params.targetId2
         ? `${effect.params.targetName} & ${effect.params.targetName2}`
         : effect.params.targetName;
-      if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__highlight">${names}</span><br>${effect.label || oslTr("achievements:vote.defaultFocusLabel", "está em foco")}`;
+      const localizedLabel = effect.label
+        ? oslTr(`achievements:effectLabels.${effect.label}`, effect.label)
+        : oslTr("achievements:vote.defaultFocusLabel", "está em foco");
+      if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__highlight">${names}</span><br>${localizedLabel}`;
       startAIVAD(effect);
       break;
     }
@@ -381,12 +384,18 @@ export function renderActiveEffect(effect) {
       Object.values(votes).forEach(v => { voteCounts[v] = (voteCounts[v] || 0) + 1; });
       const totalVoted   = Object.keys(votes).length;
       const totalPlayers = S.currentPlayers.length || 1;
+      const questionTxt = effect.params.question
+        ? oslTr(`achievements:voteQuestions.${effect.params.question}`, effect.params.question)
+        : oslTr("achievements:vote.defaultQuestion", "Vote:");
       if (bodyEl) bodyEl.innerHTML = `
-        <div class="effectPanel__question">${effect.params.question || oslTr("achievements:vote.defaultQuestion", "Vote:")}</div>
+        <div class="effectPanel__question">${questionTxt}</div>
         <div class="effectPanel__voteOptions">
-          ${opts.map(opt => `<button class="effectPanel__voteBtn${myVote === opt ? " effectPanel__voteBtn--active" : ""}" onclick="castEffectVote('${opt.replace(/'/g,"\\'")}')">
-            ${opt}${voteCounts[opt] ? ` <span class="effectPanel__voteCount">${voteCounts[opt]}</span>` : ""}
-          </button>`).join("")}
+          ${opts.map(opt => {
+            const optLabel = oslTr(`achievements:voteOptions.${opt}`, opt);
+            return `<button class="effectPanel__voteBtn${myVote === opt ? " effectPanel__voteBtn--active" : ""}" onclick="castEffectVote('${opt.replace(/'/g,"\\'")}')">
+              ${optLabel}${voteCounts[opt] ? ` <span class="effectPanel__voteCount">${voteCounts[opt]}</span>` : ""}
+            </button>`;
+          }).join("")}
         </div>
         <div class="effectPanel__voteProgress">${oslTr("achievements:vote.progress", "{{voted}}/{{total}} votaram", { voted: totalVoted, total: totalPlayers })}</div>`;
       if (S.isHost && totalVoted >= totalPlayers) setTimeout(() => resolveActiveEffect(getVoteWinner(votes)), 600);
@@ -399,7 +408,8 @@ export function renderActiveEffect(effect) {
       break;
     }
     case "next_category": {
-      if (bodyEl) bodyEl.innerHTML = oslTr("achievements:effects.nextCategory", "Próxima carta será de <strong>{{category}}</strong>", { category: effect.params.category });
+      const categoryLocalized = oslTr(`achievements:categories.${effect.params.category}`, effect.params.category);
+      if (bodyEl) bodyEl.innerHTML = oslTr("achievements:effects.nextCategory", "Próxima carta será de <strong>{{category}}</strong>", { category: categoryLocalized });
       if (S.isHost) setTimeout(() => resolveActiveEffect(), 3000);
       break;
     }

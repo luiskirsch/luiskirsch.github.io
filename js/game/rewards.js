@@ -219,7 +219,9 @@ export async function showSessionRecap(onNewSession, primaryLabel) {
   let durationStr = "—";
   if (ritualData.sessionStartedAt) {
     const mins = Math.round((Date.now() - ritualData.sessionStartedAt) / 60000);
-    durationStr = mins < 1 ? "< 1 min" : `${mins} min`;
+    durationStr = mins < 1
+      ? oslTr("sala:xpUI.recap.lessThanMin", "< 1 min")
+      : oslTr("sala:xpUI.recap.minutes", "{{n}} min", { n: mins });
     OSL_ACHIEVEMENTS.onSessionComplete(mins);
   }
 
@@ -239,26 +241,26 @@ export async function showSessionRecap(onNewSession, primaryLabel) {
   Object.entries(msgCountByPlayer).forEach(([pid, n]) => { if (n > topMsgCount) { topMsgCount = n; topChatter = pid; } });
   const topChatterName = S.currentPlayers.find(p => p.id === topChatter)?.name || null;
 
-  const statReactor = topReactorName ? `<div class="recapStat"><div class="recapStat__icon">🎭</div><div class="recapStat__value">${escapeHtml(topReactorName)}</div><div class="recapStat__label">Mais expressivo</div></div>` : "";
-  const statChatter = topChatterName ? `<div class="recapStat"><div class="recapStat__icon">💬</div><div class="recapStat__value">${escapeHtml(topChatterName)}</div><div class="recapStat__label">Mais no chat</div></div>` : "";
-  const statEmoji   = topEmoji       ? `<div class="recapStat"><div class="recapStat__icon">${topEmoji}</div><div class="recapStat__value">Favorita</div><div class="recapStat__label">Reação do grupo</div></div>` : "";
+  const statReactor = topReactorName ? `<div class="recapStat"><div class="recapStat__icon">🎭</div><div class="recapStat__value">${escapeHtml(topReactorName)}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.topReactor", "Mais expressivo")}</div></div>` : "";
+  const statChatter = topChatterName ? `<div class="recapStat"><div class="recapStat__icon">💬</div><div class="recapStat__value">${escapeHtml(topChatterName)}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.topChatter", "Mais no chat")}</div></div>` : "";
+  const statEmoji   = topEmoji       ? `<div class="recapStat"><div class="recapStat__icon">${topEmoji}</div><div class="recapStat__value">${oslTr("sala:xpUI.recap.favoriteReaction", "Favorita")}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.groupReaction", "Reação do grupo")}</div></div>` : "";
   const newSessionBtn = onNewSession  ? `<button class="recapCard__btn recapCard__btn--primary" id="recapNewBtn">${primaryLabel}</button>` : "";
 
   const overlay = document.createElement("div");
   overlay.className = "recapOverlay";
   overlay.innerHTML = `
     <div class="recapCard">
-      <div class="recapCard__eyebrow">Fim do Ritual</div>
-      <div class="recapCard__title">Recap da Sessão</div>
+      <div class="recapCard__eyebrow">${oslTr("sala:xpUI.recap.endOfRitual", "Fim do Ritual")}</div>
+      <div class="recapCard__title">${oslTr("sala:xpUI.recap.title", "Recap da Sessão")}</div>
       <div class="recapStats">
-        <div class="recapStat"><div class="recapStat__icon">🃏</div><div class="recapStat__value">${cardsRevealed}</div><div class="recapStat__label">Cartas reveladas</div></div>
-        <div class="recapStat"><div class="recapStat__icon">⏱</div><div class="recapStat__value">${durationStr}</div><div class="recapStat__label">Duração</div></div>
+        <div class="recapStat"><div class="recapStat__icon">🃏</div><div class="recapStat__value">${cardsRevealed}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.cardsRevealed", "Cartas reveladas")}</div></div>
+        <div class="recapStat"><div class="recapStat__icon">⏱</div><div class="recapStat__value">${durationStr}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.duration", "Duração")}</div></div>
         ${statReactor}${statChatter}${statEmoji}
       </div>
       <div class="recapCard__actions">
         ${newSessionBtn}
-        <button class="recapCard__btn recapCard__btn--share" id="recapShareBtn">📤 COMPARTILHAR</button>
-        <button class="recapCard__btn recapCard__btn--ghost" id="recapCloseBtn">FECHAR</button>
+        <button class="recapCard__btn recapCard__btn--share" id="recapShareBtn">${oslTr("sala:xpUI.recap.shareBtn", "📤 COMPARTILHAR")}</button>
+        <button class="recapCard__btn recapCard__btn--ghost" id="recapCloseBtn">${oslTr("sala:xpUI.recap.closeBtn", "FECHAR")}</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -278,14 +280,17 @@ export async function shareSessionCard({ cards, duration, topEmoji, playerCount 
   ctx.fillStyle = bg; ctx.fillRect(0,0,800,800);
   ctx.strokeStyle = "rgba(212,168,75,0.55)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(16,16,768,768,32); ctx.stroke();
   ctx.textAlign = "center"; ctx.fillStyle = "rgba(212,168,75,0.6)"; ctx.font = "700 13px system-ui"; ctx.fillText("O SEXTOLUGAR", 400, 100);
-  ctx.fillStyle = "#f0e8d8"; ctx.font = "900 52px system-ui"; ctx.fillText("Ritual Concluído", 400, 175);
+  ctx.fillStyle = "#f0e8d8"; ctx.font = "900 52px system-ui"; ctx.fillText(oslTr("sala:xpUI.recap.ritualConcluded", "Ritual Concluído"), 400, 175);
   ctx.strokeStyle = "rgba(212,168,75,0.2)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(80,210); ctx.lineTo(720,210); ctx.stroke();
   const drawStat = (icon, value, label, cx, cy) => { ctx.font="48px system-ui"; ctx.fillStyle="#f0e8d8"; ctx.fillText(icon,cx,cy); ctx.font="900 40px system-ui"; ctx.fillText(value,cx,cy+56); ctx.font="400 15px system-ui"; ctx.fillStyle="rgba(255,255,255,0.35)"; ctx.fillText(label.toUpperCase(),cx,cy+80); };
-  drawStat("🃏",String(cards),"cartas",200,310); drawStat("⏱",String(duration),"duração",600,310); drawStat(topEmoji||"🎭","Favorita","reação",200,510); drawStat("👥",String(playerCount),"jogadores",600,510);
-  ctx.fillStyle = "rgba(212,168,75,0.5)"; ctx.font = "400 16px system-ui"; ctx.fillText("sextolugar.com.br", 400, 680);
+  drawStat("🃏",String(cards),oslTr("sala:xpUI.recap.share.cards","cartas"),200,310);
+  drawStat("⏱",String(duration),oslTr("sala:xpUI.recap.share.duration","duração"),600,310);
+  drawStat(topEmoji||"🎭",oslTr("sala:xpUI.recap.share.favorite","Favorita"),oslTr("sala:xpUI.recap.share.reaction","reação"),200,510);
+  drawStat("👥",String(playerCount),oslTr("sala:xpUI.recap.share.players","jogadores"),600,510);
+  ctx.fillStyle = "rgba(212,168,75,0.5)"; ctx.font = "400 16px system-ui"; ctx.fillText("preludiojogos.com", 400, 680);
   canvas.toBlob(async (blob) => {
     const file = new File([blob], "osl-recap.png", { type:"image/png" });
-    if (navigator.canShare?.({ files:[file] })) { try { await navigator.share({ files:[file], title:"SEXTOLUGAR — Ritual Concluído" }); return; } catch (_) {} }
+    if (navigator.canShare?.({ files:[file] })) { try { await navigator.share({ files:[file], title: oslTr("sala:xpUI.recap.shareTitle", "SEXTOLUGAR — Ritual Concluído") }); return; } catch (_) {} }
     const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "osl-recap.png"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 5000);
   }, "image/png");
 }

@@ -240,7 +240,8 @@ export async function startRitualDeck() {
 
   S.ritualCardsRevealedCount = 0;
   S.missionsAssigned = false;
-  await addHistoryItem(oslTr("sala:table.typeRitual", "Ritual"), oslTr("sala:table.ritualStarted", "O ritual foi iniciado."));
+  // Grava em PT para consistência cross-locale; histórico é localizado no render.
+  await addHistoryItem("Ritual", "O ritual foi iniciado.");
   await setDoc(S.ritualRef, { sessionStartedAt: Date.now() }, { merge: true });
 
   await updateDoc(S.roomRef, { arenaActive: true });
@@ -272,7 +273,7 @@ export async function resetRitualDeck() {
 
   S.ritualCardsRevealedCount = 0;
   S.missionsAssigned = false;
-  await addHistoryItem(oslTr("sala:table.typeRitual", "Ritual"), oslTr("sala:table.ritualReset", "O ritual foi reiniciado."));
+  await addHistoryItem("Ritual", "O ritual foi reiniciado.");
   await panelMarkSessionStart();
   updateRitualButtons();
 }
@@ -346,6 +347,37 @@ export function bindRitual(onSnapshotFn, orderByFn, queryFn) {
       historyList.innerHTML = `<div class="historyItem"><div class="historyType">${oslTr("sala:history.waiting", "Aguardando")}</div><div class="historyText">${oslTr("sala:history.none", "Nenhuma carta revelada ainda.")}</div></div>`;
       return;
     }
-    historyList.innerHTML = docs.map(item => `<div class="historyItem"><div class="historyType">${escapeHtml(item.type || oslTr("sala:table.typeRitual", "Ritual"))}</div><div class="historyText">${escapeHtml(item.text || "")}</div></div>`).join("");
+    // Mensagens system gravadas em PT no histórico
+    const HIST_TEXT_PT_TO_KEY = {
+      "O ritual foi iniciado.": "sala:table.ritualStarted",
+      "O ritual foi reiniciado.": "sala:table.ritualReset"
+    };
+    historyList.innerHTML = docs.map(item => {
+      const rawType = item.type || "Ritual";
+      const localizedType = oslTr(`cards:types.${rawType}`, rawType);
+      const rawText = item.text || "";
+      let localizedText = rawText;
+      // Mensagens system conhecidas
+      const sysKey = HIST_TEXT_PT_TO_KEY[rawText];
+      if (sysKey) {
+        localizedText = oslTr(sysKey, rawText);
+      } else {
+        // Tenta localizar title de carta pelo slug (busca em basic + todos os packs)
+        const t = window.OSL_I18N && window.OSL_I18N.t;
+        const slugify = window.OSL_I18N && window.OSL_I18N.slugify;
+        if (rawText && t && slugify) {
+          const slug = slugify(rawText);
+          if (slug) {
+            const packs = ["basic", "packs.conexao", "packs.verdades", "packs.conflito", "packs.segredos", "packs.casais"];
+            for (const ns of packs) {
+              const key = `cards:${ns}.${slug}.title`;
+              const v = t(key);
+              if (typeof v === "string" && v && v !== key) { localizedText = v; break; }
+            }
+          }
+        }
+      }
+      return `<div class="historyItem"><div class="historyType">${escapeHtml(localizedType)}</div><div class="historyText">${escapeHtml(localizedText)}</div></div>`;
+    }).join("");
   });
 }
