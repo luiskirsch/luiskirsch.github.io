@@ -62,25 +62,37 @@ function broadcast(themeId, error) {
   } catch (e) { /* swallow */ }
 }
 
-// Real-time listener. Cada save no admin propaga em <1s para todas as abas/
-// dispositivos conectados — sem precisar recarregar.
-console.info("[osl-active-theme] subscribing to config/activeTheme via onSnapshot");
-let _lastBroadcast = null;
-onSnapshot(
-  doc(db, "config", "activeTheme"),
-  (snap) => {
-    const data = snap.exists() ? snap.data() : null;
-    const themeId = data ? resolveThemeId(data) : "default";
-    console.info("[osl-active-theme] snapshot:", { exists: snap.exists(), data, resolved: themeId, _lastBroadcast });
-    if (themeId === _lastBroadcast) return;
-    _lastBroadcast = themeId;
-    try { localStorage.setItem(CACHE_KEY, themeId); } catch (e) { /* ignore */ }
-    broadcast(themeId);
-  },
-  (err) => {
-    // Firestore unreachable, rules denied, etc. Fail silently — cached/default
-    // is already on screen.
-    console.warn("[osl-active-theme] error:", err.code || err.message, err);
-    if (_lastBroadcast === null) broadcast("default", err);
-  }
-);
+// Em STAGING, o site não lê Firestore por default — staging precisa ser
+// idêntico à prod (default) pra trabalhar atualizações sem ruído. Pra testar
+// um tema use ?theme=X na URL OU ative no admin-theme.html (que escreve no
+// Firestore + também seta osl_theme_override no localStorage do admin pra
+// preview imediato). Em produção continua real-time via onSnapshot.
+const IS_STAGING = ENV === "staging";
+
+if (IS_STAGING) {
+  console.info("[osl-active-theme] STAGING mode — Firestore listener desabilitado. Use ?theme=X ou admin-theme.html pra testar.");
+  // Fallback: garante que default seja aplicado (theme-loader já faz isso, mas
+  // dispatch o evento pra quem escuta).
+  broadcast(localStorage.getItem(CACHE_KEY) || "default");
+} else {
+  // PRODUÇÃO: real-time listener. Cada save no admin propaga em <1s para todas
+  // as abas/dispositivos conectados — sem precisar recarregar.
+  console.info("[osl-active-theme] subscribing to config/activeTheme via onSnapshot");
+  let _lastBroadcast = null;
+  onSnapshot(
+    doc(db, "config", "activeTheme"),
+    (snap) => {
+      const data = snap.exists() ? snap.data() : null;
+      const themeId = data ? resolveThemeId(data) : "default";
+      console.info("[osl-active-theme] snapshot:", { exists: snap.exists(), resolved: themeId });
+      if (themeId === _lastBroadcast) return;
+      _lastBroadcast = themeId;
+      try { localStorage.setItem(CACHE_KEY, themeId); } catch (e) { /* ignore */ }
+      broadcast(themeId);
+    },
+    (err) => {
+      console.warn("[osl-active-theme] error:", err.code || err.message, err);
+      if (_lastBroadcast === null) broadcast("default", err);
+    }
+  );
+}

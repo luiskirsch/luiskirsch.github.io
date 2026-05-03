@@ -79,14 +79,41 @@
     else document.addEventListener('DOMContentLoaded', run);
   }
 
+  // Resolve o subset de copy pra aplicar baseado no locale corrente.
+  // Suporta DUAS formas de copy no JSON do tema:
+  //   1. Plana: copy: { "ns.key": "valor" }                   — aplica em todos os locales
+  //   2. Por locale: copy: { "pt-BR": {...}, "en-US": {...} } — aplica só o locale atual
+  // Se o copy mistura: chaves que parecem locale (\w{2}-\w{2}) vão pra modo locale,
+  // o resto é fallback aplicado sempre.
+  function resolveCopyForLocale(rawCopy) {
+    if (!rawCopy || typeof rawCopy !== 'object') return {};
+    var locale = (window.i18next && window.i18next.language)
+      || (window.OSL_I18N && window.OSL_I18N.locale && window.OSL_I18N.locale())
+      || document.documentElement.getAttribute('lang')
+      || 'pt-BR';
+    var localeRe = /^[a-z]{2}-[A-Z]{2}$/;
+    var hasLocaleBuckets = Object.keys(rawCopy).some(function (k) { return localeRe.test(k); });
+    if (!hasLocaleBuckets) return rawCopy;
+    var result = {};
+    // Fallback: chaves no top level que NÃO são locales aplicam sempre
+    Object.keys(rawCopy).forEach(function (k) {
+      if (!localeRe.test(k) && typeof rawCopy[k] === 'string') result[k] = rawCopy[k];
+    });
+    // Locale específico vence
+    var localeBucket = rawCopy[locale];
+    if (localeBucket && typeof localeBucket === 'object') {
+      Object.keys(localeBucket).forEach(function (k) { result[k] = localeBucket[k]; });
+    }
+    return result;
+  }
+
   function applyCopy(theme) {
-    var copy = theme.copy || {};
+    var rawCopy = theme.copy || {};
     // Suporta DOIS estilos de chave:
     //   - data-theme-key="ns.path"      (sistema antigo, opt-in via marcação)
     //   - data-i18n="ns:path"           (auto-override do i18n; troca os dois pontos por ponto)
-    // Permite que temas sobreponham QUALQUER string i18n existente sem precisar
-    // adicionar data-theme-key em cada elemento.
     var run = function () {
+      var copy = resolveCopyForLocale(rawCopy);
       Object.keys(copy).forEach(function (k) {
         // (a) data-theme-key explícito
         document.querySelectorAll('[data-theme-key="' + k + '"]').forEach(function (el) {
@@ -108,7 +135,7 @@
         });
       });
       // Hook adicional: override do OSL_I18N.t pra que JS dinâmico que usa
-      // oslTr/i18next também respeite a copy do tema.
+      // oslTr/i18next também respeite a copy do tema (locale-aware).
       installCopyTOverride(copy);
     };
     if (document.readyState === 'loading') {
@@ -116,15 +143,26 @@
     } else {
       run();
     }
-    // Re-aplica quando i18n termina de carregar (init.js) ou troca idioma
+    // Re-aplica quando i18n termina de carregar (init.js) ou troca idioma.
+    // languageChanged é o evento do i18next quando OSL_I18N.change() é chamado.
     document.addEventListener('osl:i18n-ready', run);
+    if (window.i18next && typeof window.i18next.on === 'function') {
+      window.i18next.on('languageChanged', run);
+    } else {
+      // Bind tardio quando i18next inicializar
+      document.addEventListener('osl:i18n-ready', function once() {
+        document.removeEventListener('osl:i18n-ready', once);
+        if (window.i18next && typeof window.i18next.on === 'function') {
+          window.i18next.on('languageChanged', run);
+        }
+      }, { once: true });
+    }
   }
 
   // Substitui i18next.t pra que strings dinâmicas (textContent setados via JS)
   // também respeitem o copy do tema. Idempotente: chamado a cada applyCopy.
   function installCopyTOverride(copy) {
     if (!window.i18next || typeof window.i18next.t !== 'function') {
-      // i18next ainda não carregou — instala um listener pra tentar de novo
       document.addEventListener('osl:i18n-ready', function once() {
         document.removeEventListener('osl:i18n-ready', once);
         installCopyTOverride(copy);
@@ -134,7 +172,6 @@
     var orig = window.i18next._origT || window.i18next.t.bind(window.i18next);
     window.i18next._origT = orig;
     window.i18next.t = function (key, opts) {
-      // Aceita "ns:path" ou "ns.path"
       var normalized = String(key || '').replace(':', '.');
       if (Object.prototype.hasOwnProperty.call(copy, normalized)) {
         var v = copy[normalized];

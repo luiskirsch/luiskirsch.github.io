@@ -88,7 +88,7 @@ button.danger    { background: rgba(224,85,85,.18); color: #ff9090; }
 
 <div class="wrap">
   <h1>OSL · Admin Theme</h1>
-  <p class="lede">Controla o documento <code style="background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px">config/activeTheme</code> que site e app lêem em tempo real.</p>
+  <p class="lede">Controla o documento <code style="background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px">config/activeTheme</code>. <strong>Produção</strong> lê em tempo real (real-time onSnapshot — propaga em &lt;1s pra todos os clientes). <strong>Staging</strong> sempre mostra default; pra testar tema use <code>?theme=X</code> na URL ou o botão "Preview neste navegador" abaixo.</p>
 
   <div id="warnFallback" class="warn" style="display:none">
     <strong>ATENÇÃO</strong> · Este painel está conectado ao Firestore de <strong>PRODUÇÃO</strong> (o projeto staging ainda não foi configurado em <code>js/firebase-config.js</code>). Mudanças aqui afetam <strong>usuários reais</strong>. Cancele se isso não é intencional.
@@ -112,7 +112,7 @@ button.danger    { background: rgba(224,85,85,.18); color: #ff9090; }
     <label>Theme ID</label>
     <select id="themeId">
       <option value="default">default</option>
-      <option value="valentines-2026">valentines-2026</option>
+      <option value="valentinesday">valentinesday</option>
       <option value="therapy-pro">therapy-pro</option>
     </select>
 
@@ -148,8 +148,11 @@ button.danger    { background: rgba(224,85,85,.18); color: #ff9090; }
     <h3 style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.85)">Resolvido agora</h3>
     <p class="lede" style="margin:0 0 12px">Tema que clientes verão neste momento (considerando datas).</p>
     <div class="meta">Tema corrente: <code id="resolvedThemeNow">—</code></div>
-    <p class="lede" style="margin:14px 0 6px">Override local: <code id="localOverride">—</code></p>
-    <button id="btnClearLocalOverride" class="secondary" title="Remove osl_theme_override do localStorage deste navegador">Limpar override local</button>
+    <p class="lede" style="margin:14px 0 6px">Override local (este navegador): <code id="localOverride">—</code></p>
+    <div class="actions" style="gap:8px">
+      <button id="btnSetLocalOverride" class="secondary" title="Aplica o themeId selecionado neste navegador (não afeta produção)">Preview neste navegador</button>
+      <button id="btnClearLocalOverride" class="secondary" title="Remove osl_theme_override do localStorage deste navegador">Limpar override local</button>
+    </div>
   </div>
 </div>
 
@@ -275,7 +278,13 @@ refreshLocalState();
 document.getElementById('btnClearLocalOverride').addEventListener('click', () => {
   try { localStorage.removeItem('osl_theme_override'); } catch (e) {}
   refreshLocalState();
-  show($('saveStatus'), 'Override local limpo. Recarregue qualquer página do staging pra ver o tema do servidor.', 'ok');
+  show($('saveStatus'), 'Override local limpo. Recarregue uma página do staging pra ver default.', 'ok');
+});
+document.getElementById('btnSetLocalOverride').addEventListener('click', () => {
+  const id = $('themeId').value;
+  try { localStorage.setItem('osl_theme_override', id); } catch (e) {}
+  refreshLocalState();
+  show($('saveStatus'), `Override local setado para "${id}". Abra/recarregue uma página do staging pra ver.`, 'ok');
 });
 
 $('btnDisable').addEventListener('click', async () => {
