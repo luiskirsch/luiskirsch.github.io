@@ -37,7 +37,7 @@
   async function oslPay(nome, email, produtoId, valor, statusId, btnEl) {
     var statusEl = document.getElementById(statusId);
     if (btnEl) btnEl.disabled = true;
-    if (statusEl) statusEl.textContent = "Criando pagamento...";
+    if (statusEl) statusEl.textContent = oslTr("sala:payments.creating", "Criando pagamento...");
     try {
       var res  = await fetch(OSL_BASE + "/criar-pagamento", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nome, email, produto: produtoId, valor }) });
       var data = await res.json();
@@ -45,15 +45,15 @@
         localStorage.setItem("osl_checkout_nome", nome);
         localStorage.setItem("osl_checkout_email", email);
         window.open(data.url, "_blank");
-        if (statusEl) statusEl.textContent = "Pagamento aberto em nova aba. Retorne após confirmar.";
-        if (btnEl) btnEl.textContent = "✓ Aguardando pagamento";
+        if (statusEl) statusEl.textContent = oslTr("sala:payments.openedInTab", "Pagamento aberto em nova aba. Retorne após confirmar.");
+        if (btnEl) btnEl.textContent = oslTr("sala:payments.waiting", "✓ Aguardando pagamento");
       } else {
-        var msg = (data && (data.message || data.error)) || "Erro ao criar pagamento.";
+        var msg = (data && (data.message || data.error)) || oslTr("sala:payments.errorCreate", "Erro ao criar pagamento.");
         if (statusEl) statusEl.textContent = msg;
         if (btnEl) btnEl.disabled = false;
       }
     } catch (e) {
-      if (statusEl) statusEl.textContent = "Erro de conexão. Tente novamente.";
+      if (statusEl) statusEl.textContent = oslTr("sala:payments.errorConnection", "Erro de conexão. Tente novamente.");
       if (btnEl) btnEl.disabled = false;
     }
   }

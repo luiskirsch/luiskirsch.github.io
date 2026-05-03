@@ -110,13 +110,13 @@ document.addEventListener("DOMContentLoaded", function () {
       isStarted = desktopRevealBtn ? !desktopRevealBtn.disabled : false;
     }
     if (!isHost) {
-      mobileStartBtn.style.display = ""; mobileStartBtn.disabled = true; mobileStartBtn.textContent = "Aguardando anfitrião";
+      mobileStartBtn.style.display = ""; mobileStartBtn.disabled = true; mobileStartBtn.textContent = oslTr("sala:buttons.startRitualBtnWaitHost", "Aguardando anfitrião");
       mobileRevealBtn.style.display = "none"; mobileResetBtn.style.display = "none"; return;
     }
     if (isStarted) {
       mobileStartBtn.style.display = "none"; mobileRevealBtn.style.display = ""; mobileResetBtn.style.display = ""; mobileStartBtn.disabled = false;
     } else {
-      mobileStartBtn.style.display = ""; mobileStartBtn.disabled = false; mobileStartBtn.textContent = "Iniciar Ritual";
+      mobileStartBtn.style.display = ""; mobileStartBtn.disabled = false; mobileStartBtn.textContent = oslTr("sala:mobile.startRitual", "Iniciar Ritual");
       mobileRevealBtn.style.display = "none"; mobileResetBtn.style.display = "none";
     }
   }
@@ -232,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
         var playerEl = others[i] || null;
         if (playerEl) {
           var avatarEl = playerEl.querySelector(".avatar"); var nameEl = playerEl.querySelector(".playerName");
-          var wrap = makeAvatarWrap(avatarEl ? avatarEl.textContent.trim() : "?", nameEl ? nameEl.textContent.trim() : "Jogador", "", !!playerEl.querySelector(".playerHost"), false, (function (el) { return function () { el.click(); }; })(playerEl), playerEl.dataset.pid || "", avatarEl ? (avatarEl.dataset.photoUrl || "") : "");
+          var wrap = makeAvatarWrap(avatarEl ? avatarEl.textContent.trim() : "?", nameEl ? nameEl.textContent.trim() : oslTr("sala:players.fallbackName", "Jogador"), "", !!playerEl.querySelector(".playerHost"), false, (function (el) { return function () { el.click(); }; })(playerEl), playerEl.dataset.pid || "", avatarEl ? (avatarEl.dataset.photoUrl || "") : "");
           mobilePlayerStrip.appendChild(wrap);
         } else {
           var wrap = document.createElement("div"); wrap.className = "mobileAvatarWrap";

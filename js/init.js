@@ -98,6 +98,16 @@ window.dismissAIDetection = dismissAIDetection;
 
 // ── Inicialização principal ───────────────────────────────────────────────────
 (async function init() {
+  // Aguarda i18n carregar antes do primeiro render — evita flash de texto PT em modo EN.
+  // Fallback 2.5s caso i18n falhe; nesse caso renderiza com fallbacks PT.
+  if (!window.OSL_I18N) {
+    await new Promise((resolve) => {
+      const done = () => { document.removeEventListener("osl:i18n-ready", done); resolve(); };
+      document.addEventListener("osl:i18n-ready", done, { once: true });
+      setTimeout(resolve, 2500);
+    });
+  }
+
   // Registra event listeners de sala e perfil
   bindRoomEvents();
   bindProfileEvents();
@@ -117,7 +127,7 @@ window.dismissAIDetection = dismissAIDetection;
     if (badge) badge.style.display = "block";
     ["startBtn","revealCardBtn","resetRitualBtn","sendBtn","messageInput"].forEach(id => {
       const el = document.getElementById(id);
-      if (el) { el.disabled = true; el.title = "Modo observador"; }
+      if (el) { el.disabled = true; el.title = oslTr("sala:spec.observerMode", "Modo observador"); }
     });
   }
 
@@ -151,20 +161,20 @@ window.dismissAIDetection = dismissAIDetection;
     const roomStatusEl   = document.getElementById("roomStatus");
     const chatEmptyEl    = document.getElementById("chatEmpty");
     if (error?.message === "ROOM_FULL") {
-      if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = "A sala atingiu o limite de 5 jogadores.<br>Entre em outra sala ou aguarde alguém sair."; }
-      if (roomStatusEl) roomStatusEl.textContent = "Sala lotada";
-      if (footerStatusEl) footerStatusEl.textContent = "Limite atingido";
+      if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = oslTr("sala:initErrors.roomFullChat", "A sala atingiu o limite de 5 jogadores.<br>Entre em outra sala ou aguarde alguém sair."); }
+      if (roomStatusEl) roomStatusEl.textContent = oslTr("sala:footer.roomFull", "Sala lotada");
+      if (footerStatusEl) footerStatusEl.textContent = oslTr("sala:footer.limitReached", "Limite atingido");
       return;
     }
     const isPermission = error?.code === "permission-denied" || String(error).includes("Missing or insufficient permissions");
     if (isPermission) {
-      if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = "Permissão negada pelo Firestore.<br>As regras de segurança precisam ser atualizadas no Firebase Console."; }
-      if (roomStatusEl) roomStatusEl.textContent = "Permissão negada";
-      if (footerStatusEl) footerStatusEl.textContent = "Sem acesso";
+      if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = oslTr("sala:initErrors.permissionDeniedChat", "Permissão negada pelo Firestore.<br>As regras de segurança precisam ser atualizadas no Firebase Console."); }
+      if (roomStatusEl) roomStatusEl.textContent = oslTr("sala:footer.permissionDenied", "Permissão negada");
+      if (footerStatusEl) footerStatusEl.textContent = oslTr("sala:footer.noAccess", "Sem acesso");
     } else {
-      if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = "Não foi possível conectar à sala.<br>Verifique a configuração do Firebase."; }
-      if (roomStatusEl) roomStatusEl.textContent = "Erro de conexão";
-      if (footerStatusEl) footerStatusEl.textContent = "Erro";
+      if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = oslTr("sala:initErrors.connectionFailedChat", "Não foi possível conectar à sala.<br>Verifique a configuração do Firebase."); }
+      if (roomStatusEl) roomStatusEl.textContent = oslTr("sala:footer.errorConnection", "Erro de conexão");
+      if (footerStatusEl) footerStatusEl.textContent = oslTr("sala:footer.errorShort", "Erro");
     }
   }
 })();

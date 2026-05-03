@@ -56,9 +56,15 @@
     "deckBuilderTitle": "Deck Builder",
     "session": {
       "notStarted": "Session not started",
-      "inProgress": "Session in progress"
+      "inProgress": "Session in progress",
+      "started": "Session started"
     },
     "deckWaiting": "Waiting for the host to start.",
+    "deckWaitingFull": "Waiting for the host to start.<br>After that, the table transforms.",
+    "ritualWaitingTitle": "Awaiting reveal",
+    "typeRitual": "Ritual",
+    "ritualStarted": "The ritual has started.",
+    "ritualReset": "The ritual was reset.",
     "aiDetect": {
       "confirm": "Confirm",
       "dismiss": "Dismiss"
@@ -80,17 +86,123 @@
   },
   "matches": {
     "title": "Matches Live",
-    "searching": "Searching matches…"
+    "searching": "Searching matches…",
+    "empty": "No active matches right now.",
+    "fallbackName": "Room",
+    "playersWord": "players",
+    "fallbackHost": "host",
+    "badge": {
+      "full": "FULL",
+      "live": "🔴 LIVE",
+      "open": "OPEN"
+    },
+    "spectateTitle": "Watch on stand-by"
   },
   "footer": {
     "roomStatus": "Room status:",
     "generalStatus": "General status:",
-    "connecting": "Connecting"
+    "connecting": "Connecting",
+    "ritualActive": "Ritual in progress",
+    "ritualWaiting": "Waiting for players",
+    "ritualStarted": "Ritual started",
+    "ritualWaitingStart": "Awaiting start",
+    "errorConnection": "Connection error",
+    "errorShort": "Error",
+    "roomFull": "Room full",
+    "limitReached": "Limit reached",
+    "permissionDenied": "Permission denied",
+    "noAccess": "No access"
+  },
+  "initErrors": {
+    "roomFullChat": "The room has reached the 5-player limit.<br>Join another room or wait for someone to leave.",
+    "permissionDeniedChat": "Permission denied by Firestore.<br>Security rules must be updated in the Firebase Console.",
+    "connectionFailedChat": "Could not connect to the room.<br>Check the Firebase configuration."
+  },
+  "players": {
+    "you": "(You)",
+    "host": "Host",
+    "participant": "Participant",
+    "fallbackName": "Player",
+    "online": "Online",
+    "hostBadge": "Host"
+  },
+  "chat": {
+    "emptyAfterCreate": "The room was created.<br>System messages and events will appear here.",
+    "systemRoomCreated": "Room created. Waiting for players.",
+    "fallbackAuthor": "Player"
+  },
+  "typing": {
+    "one": "{{name}} is typing",
+    "two": "{{name1}} and {{name2}} are typing",
+    "three": "{{name1}}, {{name2}} and {{name3}} are typing",
+    "many": "{{name1}}, {{name2}}, {{name3}} and {{count}} more are typing"
+  },
+  "buttons": {
+    "startRitualBtnStarted": "Ritual started",
+    "startRitualBtn": "Start Ritual",
+    "startRitualBtnWaitHost": "Waiting for host"
+  },
+  "videoEmpty": {
+    "noOneInCall": "No one in the call.",
+    "onePersonInCall": "1 person in the call · Click to join",
+    "manyPeopleInCall": "{{count}} people in the call · Click to join"
+  },
+  "videoTile": {
+    "cameraOff": "Camera off",
+    "cameraOn": "Camera on",
+    "youSuffix": "(you)",
+    "hostSuffix": " [host]",
+    "youNameTpl": "{{name}} (you)",
+    "videoOff": "Video off.",
+    "activatingCamMic": "Activating camera and microphone...",
+    "errorJoinCall": "Could not join the call.",
+    "errorJoinGeneric": "Error joining the call. Try again.",
+    "errorTokenTimeout": "Server took too long to respond. Click Join again.",
+    "errorTokenFail": "Server unavailable. Wait 10s and click Join again.",
+    "errorTokenInvalid": "Server returned an invalid token. Try again.",
+    "errorMic": "Could not activate the microphone.",
+    "errorCamera": "Could not turn on the camera.",
+    "camLabel": "📷 Camera"
+  },
+  "payments": {
+    "creating": "Creating payment...",
+    "openedInTab": "Payment opened in a new tab. Return after confirming.",
+    "waiting": "✓ Awaiting payment",
+    "errorCreate": "Failed to create payment.",
+    "errorConnection": "Connection error. Try again."
+  },
+  "newProfile": {
+    "bio": "New ritual participant."
+  },
+  "ritual": {
+    "confirmRestart": "The ritual is already in progress. Do you want to restart it with a new shuffled deck?",
+    "starting": "Starting the ritual...",
+    "systemHostStarted": "The host started the ritual. The next step may begin.",
+    "systemRoomCodeCopied": "The room code was copied.",
+    "noNextCardYet": "The host hasn't revealed the next card yet.",
+    "fallbackTitle": "Card revealed",
+    "deckRemaining": "{{count}} card(s) remaining in the deck.<br>The host may reveal the next one.",
+    "deckEnded": "The deck has ended.<br>Restart the ritual to shuffle again."
+  },
+  "joinRoom": {
+    "meta": "{{count}}/5 players · host: {{host}}",
+    "send": "Send request",
+    "sending": "Sending…",
+    "waitingApproval": "Waiting for host approval…",
+    "waitingHost": "Request sent. Waiting for host…",
+    "waiting": "Waiting…",
+    "errorConnection": "Connection error.",
+    "errorGeneric": "Failed to send request.",
+    "errorRoomFull": "Room is full.",
+    "errorNameUsed": "Name already in use. Try: {{suggestion}}",
+    "errorRoomNotFound": "Room not found.",
+    "fallbackSuggestion": "another name"
   },
   "spec": {
     "live": "LIVE",
     "title": "Room",
     "closeAria": "Close",
+    "observerMode": "Observer mode",
     "connecting": "Connecting…",
     "playersLabel": "Players",
     "loading": "Loading…",
@@ -114,6 +226,11 @@
     "exitFocus": "Back"
   },
   "profile": {
+    "videoConnected": "Connected",
+    "videoDisconnected": "Disconnected",
+    "accessExpiredOn": "Expired on {{date}}",
+    "accessActiveUntil": "Active until {{date}}",
+    "accessNotAuthenticated": "Not authenticated",
     "closeAria": "Close profile",
     "namePlaceholder": "Player",
     "usernamePlaceholder": "@player",

@@ -56,9 +56,15 @@
     "deckBuilderTitle": "Construtor de Deck",
     "session": {
       "notStarted": "Sessão não iniciada",
-      "inProgress": "Sessão em andamento"
+      "inProgress": "Sessão em andamento",
+      "started": "Sessão iniciada"
     },
     "deckWaiting": "Aguardando o anfitrião iniciar.",
+    "deckWaitingFull": "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.",
+    "ritualWaitingTitle": "Aguardando revelação",
+    "typeRitual": "Ritual",
+    "ritualStarted": "O ritual foi iniciado.",
+    "ritualReset": "O ritual foi reiniciado.",
     "aiDetect": {
       "confirm": "Confirmar",
       "dismiss": "Ignorar"
@@ -80,17 +86,123 @@
   },
   "matches": {
     "title": "Partidas Rolando",
-    "searching": "Buscando partidas…"
+    "searching": "Buscando partidas…",
+    "empty": "Nenhuma partida ativa no momento.",
+    "fallbackName": "Sala",
+    "playersWord": "jogadores",
+    "fallbackHost": "anfitrião",
+    "badge": {
+      "full": "LOTADA",
+      "live": "🔴 AO VIVO",
+      "open": "ABERTA"
+    },
+    "spectateTitle": "Assistir em stand-by"
   },
   "footer": {
     "roomStatus": "Status da sala:",
     "generalStatus": "Status geral:",
-    "connecting": "Conectando"
+    "connecting": "Conectando",
+    "ritualActive": "Ritual em andamento",
+    "ritualWaiting": "Aguardando jogadores",
+    "ritualStarted": "Ritual iniciado",
+    "ritualWaitingStart": "Aguardando início",
+    "errorConnection": "Erro de conexão",
+    "errorShort": "Erro",
+    "roomFull": "Sala lotada",
+    "limitReached": "Limite atingido",
+    "permissionDenied": "Permissão negada",
+    "noAccess": "Sem acesso"
+  },
+  "initErrors": {
+    "roomFullChat": "A sala atingiu o limite de 5 jogadores.<br>Entre em outra sala ou aguarde alguém sair.",
+    "permissionDeniedChat": "Permissão negada pelo Firestore.<br>As regras de segurança precisam ser atualizadas no Firebase Console.",
+    "connectionFailedChat": "Não foi possível conectar à sala.<br>Verifique a configuração do Firebase."
+  },
+  "players": {
+    "you": "(Você)",
+    "host": "Anfitrião",
+    "participant": "Participante",
+    "fallbackName": "Jogador",
+    "online": "Online",
+    "hostBadge": "Host"
+  },
+  "chat": {
+    "emptyAfterCreate": "A sala foi criada.<br>Quando houver mensagens ou eventos do sistema, eles aparecerão aqui.",
+    "systemRoomCreated": "A sala foi criada. Aguardando jogadores.",
+    "fallbackAuthor": "Jogador"
+  },
+  "typing": {
+    "one": "{{name}} está digitando",
+    "two": "{{name1}} e {{name2}} estão digitando",
+    "three": "{{name1}}, {{name2}} e {{name3}} estão digitando",
+    "many": "{{name1}}, {{name2}}, {{name3}} e mais {{count}} estão digitando"
+  },
+  "buttons": {
+    "startRitualBtnStarted": "Ritual iniciado",
+    "startRitualBtn": "Iniciar Ritual",
+    "startRitualBtnWaitHost": "Aguardando anfitrião"
+  },
+  "videoEmpty": {
+    "noOneInCall": "Ninguém em chamada.",
+    "onePersonInCall": "1 pessoa em chamada · Clique para participar",
+    "manyPeopleInCall": "{{count}} pessoas em chamada · Clique para participar"
+  },
+  "videoTile": {
+    "cameraOff": "Câmera desligada",
+    "cameraOn": "Câmera ligada",
+    "youSuffix": "(você)",
+    "hostSuffix": " [anfitrião]",
+    "youNameTpl": "{{name}} (você)",
+    "videoOff": "Vídeo desligado.",
+    "activatingCamMic": "Ativando câmera e microfone...",
+    "errorJoinCall": "Não foi possível entrar na chamada.",
+    "errorJoinGeneric": "Erro ao entrar na chamada. Tente novamente.",
+    "errorTokenTimeout": "Servidor demorou para responder. Clique em Entrar novamente.",
+    "errorTokenFail": "Servidor indisponível. Aguarde 10s e clique em Entrar novamente.",
+    "errorTokenInvalid": "Servidor retornou token inválido. Tente novamente.",
+    "errorMic": "Não foi possível ativar microfone.",
+    "errorCamera": "Não foi possível ligar a câmera.",
+    "camLabel": "📷 Câmera"
+  },
+  "payments": {
+    "creating": "Criando pagamento...",
+    "openedInTab": "Pagamento aberto em nova aba. Retorne após confirmar.",
+    "waiting": "✓ Aguardando pagamento",
+    "errorCreate": "Erro ao criar pagamento.",
+    "errorConnection": "Erro de conexão. Tente novamente."
+  },
+  "newProfile": {
+    "bio": "Novo participante do ritual."
+  },
+  "ritual": {
+    "confirmRestart": "O ritual já está em andamento. Deseja reiniciá-lo com um novo deck embaralhado?",
+    "starting": "Iniciando o ritual...",
+    "systemHostStarted": "O anfitrião iniciou o ritual. A próxima etapa pode começar.",
+    "systemRoomCodeCopied": "O código da sala foi copiado.",
+    "noNextCardYet": "O anfitrião ainda não revelou a próxima carta.",
+    "fallbackTitle": "Carta revelada",
+    "deckRemaining": "{{count}} carta(s) restante(s) no deck.<br>O anfitrião pode revelar a próxima.",
+    "deckEnded": "O deck chegou ao fim.<br>Reinicie o ritual para embaralhar novamente."
+  },
+  "joinRoom": {
+    "meta": "{{count}}/5 jogadores · anfitrião: {{host}}",
+    "send": "Enviar pedido",
+    "sending": "Enviando…",
+    "waitingApproval": "Aguardando aprovação do anfitrião…",
+    "waitingHost": "Pedido enviado. Aguardando anfitrião…",
+    "waiting": "Aguardando…",
+    "errorConnection": "Erro de conexão.",
+    "errorGeneric": "Erro ao enviar pedido.",
+    "errorRoomFull": "Sala lotada.",
+    "errorNameUsed": "Nome em uso. Tente: {{suggestion}}",
+    "errorRoomNotFound": "Sala não encontrada.",
+    "fallbackSuggestion": "outro nome"
   },
   "spec": {
     "live": "AO VIVO",
     "title": "Sala",
     "closeAria": "Fechar",
+    "observerMode": "Modo observador",
     "connecting": "Conectando…",
     "playersLabel": "Jogadores",
     "loading": "Carregando…",
@@ -114,6 +226,11 @@
     "exitFocus": "Voltar"
   },
   "profile": {
+    "videoConnected": "Conectado",
+    "videoDisconnected": "Desconectado",
+    "accessExpiredOn": "Expirado em {{date}}",
+    "accessActiveUntil": "Ativo até {{date}}",
+    "accessNotAuthenticated": "Não autenticado",
     "closeAria": "Fechar perfil",
     "namePlaceholder": "Jogador",
     "usernamePlaceholder": "@jogador",

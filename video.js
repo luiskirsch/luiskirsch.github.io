@@ -238,7 +238,7 @@ function createCameraOffPlaceholder() {
 
   const text = document.createElement("div");
   text.className = "videoCameraOffText";
-  text.textContent = "Câmera desligada";
+  text.textContent = oslTr("sala:videoTile.cameraOff", "Câmera desligada");
 
   wrap.appendChild(icon);
   wrap.appendChild(text);
@@ -351,7 +351,7 @@ function setTileStatus(identity, { micMuted = false, camMuted = false } = {}) {
   if (camBadge) {
     camBadge.classList.toggle("is-off", camMuted);
     camBadge.textContent = "📷";
-    camBadge.title = camMuted ? "Câmera desligada" : "Câmera ligada";
+    camBadge.title = camMuted ? oslTr("sala:videoTile.cameraOff", "Câmera desligada") : oslTr("sala:videoTile.cameraOn", "Câmera ligada");
   }
 
   tile.classList.toggle("videoTile--hasNoCamera", camMuted);
@@ -464,8 +464,8 @@ function removeTrackFromParticipant(identity, trackSid) {
 
 function buildParticipantLabel(participant, isSelf = false) {
   const baseName = participant?.name || "Jogador";
-  const hostSuffix = participant?.isHost ? " [anfitrião]" : "";
-  return isSelf ? `${baseName} (você)${hostSuffix}` : `${baseName}${hostSuffix}`;
+  const hostSuffix = participant?.isHost ? oslTr("sala:videoTile.hostSuffix", " [anfitrião]") : "";
+  return isSelf ? `${oslTr("sala:videoTile.youNameTpl", "{{name}} (você)", { name: baseName })}${hostSuffix}` : `${baseName}${hostSuffix}`;
 }
 
 function refreshParticipantVisualState(participant) {
@@ -494,11 +494,11 @@ function updatePreviewStatus() {
   if (!isInPreview || !lkRoom || !videoStatusEl) return;
   const count = lkRoom.remoteParticipants.size;
   if (count === 0) {
-    videoStatusEl.textContent = "Ninguém em chamada.";
+    videoStatusEl.textContent = oslTr("sala:videoEmpty.noOneInCall", "Ninguém em chamada.");
   } else if (count === 1) {
-    videoStatusEl.textContent = "1 pessoa em chamada · Clique para participar";
+    videoStatusEl.textContent = oslTr("sala:videoEmpty.onePersonInCall", "1 pessoa em chamada · Clique para participar");
   } else {
-    videoStatusEl.textContent = `${count} pessoas em chamada · Clique para participar`;
+    videoStatusEl.textContent = oslTr("sala:videoEmpty.manyPeopleInCall", "{{count}} pessoas em chamada · Clique para participar", { count });
   }
 }
 
@@ -712,7 +712,7 @@ async function joinVideoCall() {
       }
     } else {
       // Já estava em preview — só ativa câmera/mic
-      videoStatusEl.textContent = "Ativando câmera e microfone...";
+      videoStatusEl.textContent = oslTr("sala:videoTile.activatingCamMic", "Ativando câmera e microfone...");
     }
 
     localAudioTrack = await createLocalAudioTrack();
@@ -728,7 +728,7 @@ async function joinVideoCall() {
 
     const myTile = getOrCreateVideoTile(
       participantId,
-      `${playerName} (você)`
+      oslTr("sala:videoTile.youNameTpl", "{{name}} (você)", { name: playerName })
     );
 
     appendTrackToTile(myTile, localVideoTrack, participantId);
@@ -764,7 +764,7 @@ async function joinVideoCall() {
     if (isInPreview) {
       updatePreviewStatus();
     } else {
-      videoStatusEl.textContent = "Não foi possível entrar na chamada.";
+      videoStatusEl.textContent = oslTr("sala:videoTile.errorJoinCall", "Não foi possível entrar na chamada.");
     }
 
     if (
@@ -773,13 +773,13 @@ async function joinVideoCall() {
       error.message !== "ACCESS_INVALID" &&
       error.message !== "ACCESS_CHECK_FAILED"
     ) {
-      let msg = "Erro ao entrar na chamada. Tente novamente.";
+      let msg = oslTr("sala:videoTile.errorJoinGeneric", "Erro ao entrar na chamada. Tente novamente.");
       if (error.message === "TOKEN_TIMEOUT") {
-        msg = "Servidor demorou para responder. Clique em Entrar novamente.";
+        msg = oslTr("sala:videoTile.errorTokenTimeout", "Servidor demorou para responder. Clique em Entrar novamente.");
       } else if (error.message === "TOKEN_REQUEST_FAILED") {
-        msg = "Servidor indisponível. Aguarde 10s e clique em Entrar novamente.";
+        msg = oslTr("sala:videoTile.errorTokenFail", "Servidor indisponível. Aguarde 10s e clique em Entrar novamente.");
       } else if (error.message === "TOKEN_INVALID") {
-        msg = "Servidor retornou token inválido. Tente novamente.";
+        msg = oslTr("sala:videoTile.errorTokenInvalid", "Servidor retornou token inválido. Tente novamente.");
       }
 
       if (videoStatusEl) videoStatusEl.textContent = msg;
@@ -820,7 +820,7 @@ async function joinAudioOnlyCall() {
     camEnabled = false;
 
     // Cria tile com avatar (sem vídeo)
-    getOrCreateVideoTile(participantId, `${playerName} (você)`);
+    getOrCreateVideoTile(participantId, oslTr("sala:videoTile.youNameTpl", "{{name}} (você)", { name: playerName }));
 
     refreshLocalVisualState();
 
@@ -850,7 +850,7 @@ async function joinAudioOnlyCall() {
     if (isInPreview) {
       updatePreviewStatus();
     } else {
-      videoStatusEl.textContent = "Não foi possível ativar microfone.";
+      videoStatusEl.textContent = oslTr("sala:videoTile.errorMic", "Não foi possível ativar microfone.");
     }
   }
 }
@@ -890,14 +890,14 @@ async function leaveVideoCall() {
   if (joinAudioBtn) joinAudioBtn.disabled = false;
 
   toggleMicBtn.textContent = "🎤 Mutar";
-  toggleCamBtn.textContent = "📷 Câmera";
+  toggleCamBtn.textContent = oslTr("sala:videoTile.camLabel", "📷 Câmera");
 
   // Volta ao modo preview se ainda conectado, ou desconecta se room sumiu
   if (lkRoom) {
     isInPreview = true;
     updatePreviewStatus();
   } else {
-    videoStatusEl.textContent = "Vídeo desligado.";
+    videoStatusEl.textContent = oslTr("sala:videoTile.videoOff", "Vídeo desligado.");
   }
 
   await markPanelVideo(false);
@@ -926,7 +926,7 @@ async function toggleCam() {
       await lkRoom.localParticipant.publishTrack(localVideoTrack);
       window._oslLocalVideoTrack = localVideoTrack;
 
-      const myTile = getOrCreateVideoTile(participantId, `${playerName} (você)`);
+      const myTile = getOrCreateVideoTile(participantId, oslTr("sala:videoTile.youNameTpl", "{{name}} (você)", { name: playerName }));
       appendTrackToTile(myTile, localVideoTrack, participantId);
 
       camEnabled = true;
@@ -936,7 +936,7 @@ async function toggleCam() {
       refreshLocalVisualState();
     } catch (err) {
       console.error("Erro ao ligar câmera:", err);
-      videoStatusEl.textContent = "Não foi possível ligar a câmera.";
+      videoStatusEl.textContent = oslTr("sala:videoTile.errorCamera", "Não foi possível ligar a câmera.");
     } finally {
       toggleCamBtn.disabled = false;
     }

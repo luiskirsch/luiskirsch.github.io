@@ -46,13 +46,13 @@ export function renderPlayers(players) {
       <div class="playerLeft">
         <div class="avatar" ${avatarStyle} ${photoAttr}>${avatarContent}</div>
         <div class="playerMeta">
-          <div class="playerName">${player.id === S.participantId ? "(Você)" : escapeHtml(player.name)}</div>
-          <div class="playerRole">${player.isHost ? "Anfitrião" : "Participante"}</div>
+          <div class="playerName">${player.id === S.participantId ? oslTr("sala:players.you", "(Você)") : escapeHtml(player.name)}</div>
+          <div class="playerRole">${player.isHost ? oslTr("sala:players.host", "Anfitrião") : oslTr("sala:players.participant", "Participante")}</div>
         </div>
       </div>
       <div class="playerRight">
-        <span class="playerStatus">Online</span>
-        ${player.isHost ? '<span class="playerHost">Host</span>' : ""}
+        <span class="playerStatus">${oslTr("sala:players.online", "Online")}</span>
+        ${player.isHost ? `<span class="playerHost">${oslTr("sala:players.hostBadge", "Host")}</span>` : ""}
       </div>`;
     div.addEventListener("click", () => document.dispatchEvent(new CustomEvent("osl:openProfile", { detail: player })));
     playerListEl.appendChild(div);
@@ -100,7 +100,7 @@ function renderMessages(docs) {
   if (!messagesEl) return;
   messagesEl.innerHTML = "";
   if (!docs.length) {
-    if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = "A sala foi criada.<br>Quando houver mensagens ou eventos do sistema, eles aparecerão aqui."; }
+    if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = oslTr("sala:chat.emptyAfterCreate", "A sala foi criada.<br>Quando houver mensagens ou eventos do sistema, eles aparecerão aqui."); }
     return;
   }
   if (chatEmptyEl) chatEmptyEl.style.display = "none";
@@ -115,7 +115,7 @@ function renderMessages(docs) {
       if (item.createdAt && typeof item.createdAt.toDate === "function") timeLabel = nowTimeFromDate(item.createdAt.toDate());
       div.innerHTML = own
         ? `<span class="msgTime">${timeLabel}</span>${escapeHtml(item.text)}`
-        : `<span class="meta">${escapeHtml(item.authorName || "Jogador")}</span><span class="msgTime">${timeLabel}</span>${escapeHtml(item.text)}`;
+        : `<span class="meta">${escapeHtml(item.authorName || oslTr("sala:chat.fallbackAuthor", "Jogador"))}</span><span class="msgTime">${timeLabel}</span>${escapeHtml(item.text)}`;
     }
     messagesEl.appendChild(div);
   });
@@ -129,10 +129,10 @@ function renderTyping(names) {
   const wasEmpty    = !(typingBarEl && typingBarEl.firstChild);
   if (!names.length) { if (typingBarEl) typingBarEl.innerHTML = ""; if (mobileBar) mobileBar.innerHTML = ""; return; }
   let label;
-  if (names.length === 1)      label = `${names[0]} está digitando`;
-  else if (names.length === 2) label = `${names[0]} e ${names[1]} estão digitando`;
-  else if (names.length === 3) label = `${names[0]}, ${names[1]} e ${names[2]} estão digitando`;
-  else                          label = `${names[0]}, ${names[1]}, ${names[2]} e mais ${names.length - 3} estão digitando`;
+  if (names.length === 1)      label = oslTr("sala:typing.one",   "{{name}} está digitando", { name: names[0] });
+  else if (names.length === 2) label = oslTr("sala:typing.two",   "{{name1}} e {{name2}} estão digitando", { name1: names[0], name2: names[1] });
+  else if (names.length === 3) label = oslTr("sala:typing.three", "{{name1}}, {{name2}} e {{name3}} estão digitando", { name1: names[0], name2: names[1], name3: names[2] });
+  else                          label = oslTr("sala:typing.many", "{{name1}}, {{name2}}, {{name3}} e mais {{count}} estão digitando", { name1: names[0], name2: names[1], name3: names[2], count: names.length - 3 });
   const html = label + DOTS_HTML;
   if (typingBarEl) typingBarEl.innerHTML = html;
   if (mobileBar)   mobileBar.innerHTML   = html;
@@ -203,11 +203,16 @@ export function bindRoom() {
     const startBtn       = document.getElementById("startBtn");
     if (roomNameEl) roomNameEl.textContent = data.name || S.roomName;
     const started = data.status === "started";
-    if (roomStatusEl)    roomStatusEl.textContent    = started ? "Ritual em andamento" : "Aguardando jogadores";
-    if (sessionLabelEl)  sessionLabelEl.textContent  = started ? "Sessão iniciada" : "Sessão não iniciada";
-    if (footerStatusEl)  footerStatusEl.textContent  = started ? "Ritual iniciado" : "Aguardando início";
+    if (roomStatusEl)    roomStatusEl.textContent    = started ? oslTr("sala:footer.ritualActive", "Ritual em andamento") : oslTr("sala:footer.ritualWaiting", "Aguardando jogadores");
+    if (sessionLabelEl)  sessionLabelEl.textContent  = started ? oslTr("sala:table.session.started", "Sessão iniciada") : oslTr("sala:table.session.notStarted", "Sessão não iniciada");
+    if (footerStatusEl)  footerStatusEl.textContent  = started ? oslTr("sala:footer.ritualStarted", "Ritual iniciado") : oslTr("sala:footer.ritualWaitingStart", "Aguardando início");
     S.isHost = data.hostId === S.participantId;
-    if (startBtn) { startBtn.disabled = !S.isHost || S._isSpectator; startBtn.textContent = S.isHost ? (started ? "Ritual iniciado" : "Iniciar Ritual") : "Aguardando anfitrião"; }
+    if (startBtn) {
+      startBtn.disabled = !S.isHost || S._isSpectator;
+      startBtn.textContent = S.isHost
+        ? (started ? oslTr("sala:buttons.startRitualBtnStarted", "Ritual iniciado") : oslTr("sala:buttons.startRitualBtn", "Iniciar Ritual"))
+        : oslTr("sala:buttons.startRitualBtnWaitHost", "Aguardando anfitrião");
+    }
     const arenaBtn = document.getElementById("arenaBtn");
     if (arenaBtn) arenaBtn.hidden = !S.isHost;
     if (data.arenaActive) { if (typeof window.activateArenaMode === "function") window.activateArenaMode(); }
@@ -221,7 +226,7 @@ export function bindPlayers() {
   S.playersUnsub = onSnapshot(q, (snapshot) => {
     const players = snapshot.docs.map(docSnap => {
       const data = docSnap.data();
-      return { id: docSnap.id, userId: data.userId || null, name: data.name || "Jogador", isHost: !!data.isHost, activeDeckId: data.activeDeckId || null, avatarEmoji: data.avatarEmoji || null, avatarPhotoUrl: data.avatarPhotoUrl || null, avatarColor: data.avatarColor || null, joinedAt: data.joinedAt || null, lastSeen: data.lastSeen || null };
+      return { id: docSnap.id, userId: data.userId || null, name: data.name || oslTr("sala:players.fallbackName", "Jogador"), isHost: !!data.isHost, activeDeckId: data.activeDeckId || null, avatarEmoji: data.avatarEmoji || null, avatarPhotoUrl: data.avatarPhotoUrl || null, avatarColor: data.avatarColor || null, joinedAt: data.joinedAt || null, lastSeen: data.lastSeen || null };
     }).filter(isPlayerActive);
     S.currentPlayers = players;
     renderPlayers(players);
@@ -273,14 +278,14 @@ export async function startSession() {
   if (!snap.exists()) return;
   const data = snap.data();
   if (data.status === "started") {
-    const ok = confirm("O ritual já está em andamento. Deseja reiniciá-lo com um novo deck embaralhado?");
+    const ok = confirm(oslTr("sala:ritual.confirmRestart", "O ritual já está em andamento. Deseja reiniciá-lo com um novo deck embaralhado?"));
     if (ok) await resetRitualDeck();
     return;
   }
   const deckInfo = document.getElementById("deckInfo");
-  if (deckInfo) deckInfo.textContent = "Iniciando o ritual...";
+  if (deckInfo) deckInfo.textContent = oslTr("sala:ritual.starting", "Iniciando o ritual...");
   await updateDoc(S.roomRef, { status:"started", startedAt: serverTimestamp(), updatedAt: serverTimestamp() });
-  await addDoc(S.messagesRef, { type:"system", text:"O anfitrião iniciou o ritual. A próxima etapa pode começar.", createdAt: serverTimestamp() });
+  await addDoc(S.messagesRef, { type:"system", text: oslTr("sala:ritual.systemHostStarted", "O anfitrião iniciou o ritual. A próxima etapa pode começar."), createdAt: serverTimestamp() });
   await startRitualDeck();
   await panelMarkSessionStart();
 }
@@ -336,7 +341,7 @@ export async function ensureRoom() {
     S.isHost = true;
     if (isClosed) await clearRoomData();
     await setDoc(S.roomRef, { code: S.roomCode, name: S.roomName, status:"waiting", arenaActive: false, hostId: S.participantId, hostName: S.playerName, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-    await addDoc(S.messagesRef, { type:"system", text:"A sala foi criada. Aguardando jogadores.", createdAt: serverTimestamp() });
+    await addDoc(S.messagesRef, { type:"system", text: oslTr("sala:chat.systemRoomCreated", "A sala foi criada. Aguardando jogadores."), createdAt: serverTimestamp() });
   } else {
     S.isHost = snap.data().hostId === S.participantId;
   }
@@ -347,7 +352,7 @@ export async function ensureUserProfile() {
   const snap = await getDoc(S.userRef);
   if (!snap.exists()) {
     const usernameBase = (S.playerName || "jogador").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"").slice(0,20) || "jogador";
-    await setDoc(S.userRef, { userId: S.userId, displayName: S.playerName, username: usernameBase, bio:"Novo participante do ritual.", avatarEmoji:"🔮", avatarColor:"#1f86d9", memberSince: serverTimestamp(), lastSeen: serverTimestamp(), friends:[], incomingRequests:[], outgoingRequests:[], stats:{ gamesPlayed:0, wins:0 } });
+    await setDoc(S.userRef, { userId: S.userId, displayName: S.playerName, username: usernameBase, bio: oslTr("sala:newProfile.bio", "Novo participante do ritual."), avatarEmoji:"🔮", avatarColor:"#1f86d9", memberSince: serverTimestamp(), lastSeen: serverTimestamp(), friends:[], incomingRequests:[], outgoingRequests:[], stats:{ gamesPlayed:0, wins:0 } });
     S.selectedAvatarEmoji = "🔮"; S.selectedAvatarColor = "#1f86d9";
     const fab = document.getElementById("mobileProfileBtn"); if (fab) fab.textContent = "🔮";
     const myBtn = document.getElementById("myProfileBtn"); if (myBtn) myBtn.textContent = "🔮 Perfil";
@@ -387,15 +392,15 @@ export function renderLiveRooms(rooms) {
   if (!body) return;
   const others = rooms.filter(r => r.roomId !== S.roomCode);
   if (countEl) countEl.textContent = others.length;
-  if (!others.length) { body.innerHTML = '<div class="multiEmpty">Nenhuma partida ativa no momento.</div>'; return; }
+  if (!others.length) { body.innerHTML = `<div class="multiEmpty">${oslTr("sala:matches.empty", "Nenhuma partida ativa no momento.")}</div>`; return; }
   body.innerHTML = others.map(r => {
     const full = r.playerCount >= 5, live = r.sessionActive;
-    const badge = full ? '<span class="multiRoomBadge multiRoomBadge--full">LOTADA</span>' : live ? '<span class="multiRoomBadge multiRoomBadge--live">🔴 AO VIVO</span>' : '<span class="multiRoomBadge multiRoomBadge--open">ABERTA</span>';
+    const badge = full ? `<span class="multiRoomBadge multiRoomBadge--full">${oslTr("sala:matches.badge.full", "LOTADA")}</span>` : live ? `<span class="multiRoomBadge multiRoomBadge--live">${oslTr("sala:matches.badge.live", "🔴 AO VIVO")}</span>` : `<span class="multiRoomBadge multiRoomBadge--open">${oslTr("sala:matches.badge.open", "ABERTA")}</span>`;
     const cls   = full ? " multiRoom--full" : "";
-    const safeName = (r.name || "Sala").replace(/"/g,"&quot;");
+    const safeName = (r.name || oslTr("sala:matches.fallbackName", "Sala")).replace(/"/g,"&quot;");
     return `<div class="multiRoom${cls}" data-code="${r.roomId}" data-name="${safeName}" data-host="${(r.host||"").replace(/"/g,"&quot;")}" data-count="${r.playerCount||0}" data-live="${live}">
-      <div class="multiRoomInfo"><div class="multiRoomName">${r.name || r.roomId}</div><div class="multiRoomMeta">${r.playerCount||0}/5 jogadores · ${r.host || "anfitrião"}</div></div>
-      ${badge}<button class="multiSpectateBtn" title="Assistir em stand-by">👁</button></div>`;
+      <div class="multiRoomInfo"><div class="multiRoomName">${r.name || r.roomId}</div><div class="multiRoomMeta">${r.playerCount||0}/5 ${oslTr("sala:matches.playersWord", "jogadores")} · ${r.host || oslTr("sala:matches.fallbackHost", "anfitrião")}</div></div>
+      ${badge}<button class="multiSpectateBtn" title="${oslTr("sala:matches.spectateTitle", "Assistir em stand-by")}">👁</button></div>`;
   }).join("");
 
   body.querySelectorAll(".multiSpectateBtn").forEach(btn => {
@@ -430,11 +435,11 @@ export function openJoinModal(room) {
   const overlay    = document.getElementById("joinOverlay");
   const nameInput  = document.getElementById("joinNameInput");
   document.getElementById("joinRoomName").textContent = room.name;
-  document.getElementById("joinRoomMeta").textContent = `${room.playerCount}/5 jogadores · anfitrião: ${room.host || "—"}`;
+  document.getElementById("joinRoomMeta").textContent = oslTr("sala:joinRoom.meta", "{{count}}/5 jogadores · anfitrião: {{host}}", { count: room.playerCount, host: room.host || "—" });
   document.getElementById("joinStatus").textContent = "";
   document.getElementById("joinStatus").className   = "joinPanel__status";
   document.getElementById("joinSendBtn").disabled   = false;
-  document.getElementById("joinSendBtn").textContent = "Enviar pedido";
+  document.getElementById("joinSendBtn").textContent = oslTr("sala:joinRoom.send", "Enviar pedido");
   nameInput.value = S.playerName;
   overlay.style.display = "flex";
 }
@@ -451,20 +456,25 @@ export async function sendJoinRequest() {
   if (!S._joinTarget) return;
   const name = document.getElementById("joinNameInput").value.trim() || S.playerName;
   const btn  = document.getElementById("joinSendBtn");
-  btn.disabled = true; btn.textContent = "Enviando…";
+  btn.disabled = true; btn.textContent = oslTr("sala:joinRoom.sending", "Enviando…");
   document.getElementById("joinStatus").textContent = "";
   try {
     const res = await fetch(MULTI_SERVER + "/game/room/request-join", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ roomId: S._joinTarget.roomId, roomName: S._joinTarget.name, playerId: S.participantId, playerName: name }) });
     const d   = await res.json();
     if (!d.ok) {
-      const msgs = { SALA_CHEIA:"Sala lotada.", NOME_JA_EM_USO:`Nome em uso. Tente: ${d.suggestion||"outro nome"}`, SALA_NAO_ENCONTRADA:"Sala não encontrada." };
-      document.getElementById("joinStatus").textContent = msgs[d.code] || "Erro ao enviar pedido.";
-      btn.disabled = false; btn.textContent = "Enviar pedido"; return;
+      const suggestion = d.suggestion || oslTr("sala:joinRoom.fallbackSuggestion", "outro nome");
+      const msgs = {
+        SALA_CHEIA: oslTr("sala:joinRoom.errorRoomFull", "Sala lotada."),
+        NOME_JA_EM_USO: oslTr("sala:joinRoom.errorNameUsed", "Nome em uso. Tente: {{suggestion}}", { suggestion }),
+        SALA_NAO_ENCONTRADA: oslTr("sala:joinRoom.errorRoomNotFound", "Sala não encontrada.")
+      };
+      document.getElementById("joinStatus").textContent = msgs[d.code] || oslTr("sala:joinRoom.errorGeneric", "Erro ao enviar pedido.");
+      btn.disabled = false; btn.textContent = oslTr("sala:joinRoom.send", "Enviar pedido"); return;
     }
-    document.getElementById("joinStatus").textContent = d.hostOnline ? "Aguardando aprovação do anfitrião…" : "Pedido enviado. Aguardando anfitrião…";
-    btn.textContent = "Aguardando…";
+    document.getElementById("joinStatus").textContent = d.hostOnline ? oslTr("sala:joinRoom.waitingApproval", "Aguardando aprovação do anfitrião…") : oslTr("sala:joinRoom.waitingHost", "Pedido enviado. Aguardando anfitrião…");
+    btn.textContent = oslTr("sala:joinRoom.waiting", "Aguardando…");
     pollJoinApproval(S._joinTarget.roomId, S._joinTarget.name, name);
-  } catch (_) { document.getElementById("joinStatus").textContent = "Erro de conexão."; btn.disabled = false; btn.textContent = "Enviar pedido"; }
+  } catch (_) { document.getElementById("joinStatus").textContent = oslTr("sala:joinRoom.errorConnection", "Erro de conexão."); btn.disabled = false; btn.textContent = oslTr("sala:joinRoom.send", "Enviar pedido"); }
 }
 
 function pollJoinApproval(targetRoomId, targetRoomName, joinName) {
@@ -529,7 +539,7 @@ export function bindRoomEvents() {
   const leaveBtn      = document.getElementById("leaveBtn");
 
   copyCodeBtn?.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(S.roomCode); await addDoc(S.messagesRef, { type:"system", text:"O código da sala foi copiado.", createdAt: serverTimestamp() }); } catch (_) {}
+    try { await navigator.clipboard.writeText(S.roomCode); await addDoc(S.messagesRef, { type:"system", text: oslTr("sala:ritual.systemRoomCodeCopied", "O código da sala foi copiado."), createdAt: serverTimestamp() }); } catch (_) {}
   });
   sendBtn?.addEventListener("click", () => {
     const text = messageInput?.value.trim();

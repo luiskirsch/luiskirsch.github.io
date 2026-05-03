@@ -19,10 +19,10 @@ const OSL_EFFECTS = {
         const pool = players.length > 1 ? players.filter(p => p.id !== S.participantId) : players;
         if (effect.target === "two_random") {
           const s = [...pool].sort(() => Math.random() - 0.5);
-          base.params = { targetId: s[0]?.id || "", targetName: s[0]?.name || "Jogador", targetId2: s[1]?.id || s[0]?.id || "", targetName2: s[1]?.name || s[0]?.name || "Jogador" };
+          base.params = { targetId: s[0]?.id || "", targetName: s[0]?.name || oslTr("sala:players.fallbackName", "Jogador"), targetId2: s[1]?.id || s[0]?.id || "", targetName2: s[1]?.name || s[0]?.name || oslTr("sala:players.fallbackName", "Jogador") };
         } else {
           const t = pool[Math.floor(Math.random() * pool.length)] || players[0];
-          base.params = { targetId: t?.id || "", targetName: t?.name || "Jogador" };
+          base.params = { targetId: t?.id || "", targetName: t?.name || oslTr("sala:players.fallbackName", "Jogador") };
         }
         break;
       }
@@ -101,7 +101,7 @@ export function updateRitualButtons() {
   const effectBlocking = !!(S.currentActiveEffect && !S.currentActiveEffect.resolved);
   if (revealCardBtn) {
     revealCardBtn.disabled  = !canControl || S.ritualDeck.length === 0 || effectBlocking;
-    revealCardBtn.textContent = (S.ritualStarted && !S.currentCard) ? "Revelar Primeira Carta" : "Revelar Próxima Carta";
+    revealCardBtn.textContent = (S.ritualStarted && !S.currentCard) ? oslTr("sala:table.revealFirst", "Revelar Primeira Carta") : oslTr("sala:table.revealNext", "Revelar Próxima Carta");
   }
   if (resetRitualBtn) resetRitualBtn.disabled = !S.isHost || !S.ritualStarted;
 }
@@ -120,16 +120,16 @@ export function setRitualWaitingState() {
   const deckInfo        = document.getElementById("deckInfo");
   const historyList     = document.getElementById("historyList");
   if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
-  if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
-  if (ritualCardText)  ritualCardText.innerHTML    = "O anfitrião ainda não revelou a próxima carta.";
+  if (ritualCardTitle) ritualCardTitle.textContent = oslTr("sala:table.ritualWaitingTitle", "Aguardando revelação");
+  if (ritualCardText)  ritualCardText.innerHTML    = oslTr("sala:ritual.noNextCardYet", "O anfitrião ainda não revelou a próxima carta.");
   const _mid = document.getElementById("ritualMidDetails");
   const _div = document.getElementById("ritualCardDivider");
   const _phr = document.getElementById("ritualCardPhrase");
   if (_mid) _mid.style.display = "none";
   if (_div) _div.style.display = "none";
   if (_phr) _phr.style.display = "none";
-  if (deckInfo) deckInfo.innerHTML = "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.";
-  if (historyList) historyList.innerHTML = `<div class="historyItem"><div class="historyType">Aguardando</div><div class="historyText">Nenhuma carta revelada ainda.</div></div>`;
+  if (deckInfo) deckInfo.innerHTML = oslTr("sala:table.deckWaitingFull", "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.");
+  if (historyList) historyList.innerHTML = `<div class="historyItem"><div class="historyType">${oslTr("sala:history.waiting", "Aguardando")}</div><div class="historyText">${oslTr("sala:history.none", "Nenhuma carta revelada ainda.")}</div></div>`;
   updateRitualButtons();
 }
 
@@ -168,8 +168,8 @@ export function applyCardContent(card) {
   const cardPhrase    = document.getElementById("ritualCardPhrase");
 
   if (card) {
-    if (ritualCardType)  ritualCardType.textContent = (card.type || "Ritual").toUpperCase();
-    if (ritualCardTitle) ritualCardTitle.textContent = card.title || "Carta revelada";
+    if (ritualCardType)  ritualCardType.textContent = (card.type || oslTr("sala:table.typeRitual", "Ritual")).toUpperCase();
+    if (ritualCardTitle) ritualCardTitle.textContent = card.title || oslTr("sala:ritual.fallbackTitle", "Carta revelada");
     if (ritualCardText)  ritualCardText.innerHTML = (card.text || "").replace(/\n/g, "<br>");
     const hasRule = !!card.rule, hasSubrule = !!card.subrule, hasPhrase = !!card.phrase;
     if (midDetails)    midDetails.style.display    = (hasRule || hasSubrule) ? "" : "none";
@@ -180,16 +180,16 @@ export function applyCardContent(card) {
     if (cardPhrase)    { cardPhrase.style.display  = hasPhrase ? "" : "none"; if (hasPhrase) cardPhrase.innerHTML = card.phrase.replace(/\n/g, "<br>"); }
   } else {
     if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
-    if (ritualCardTitle) ritualCardTitle.textContent = "Aguardando revelação";
-    if (ritualCardText)  ritualCardText.innerHTML    = "O anfitrião ainda não revelou a próxima carta.";
+    if (ritualCardTitle) ritualCardTitle.textContent = oslTr("sala:table.ritualWaitingTitle", "Aguardando revelação");
+    if (ritualCardText)  ritualCardText.innerHTML    = oslTr("sala:ritual.noNextCardYet", "O anfitrião ainda não revelou a próxima carta.");
     if (midDetails)  midDetails.style.display  = "none";
     if (cardDivider) cardDivider.style.display = "none";
     if (cardPhrase)  cardPhrase.style.display  = "none";
   }
   if (deckInfo) {
     deckInfo.innerHTML = S.ritualDeck.length > 0
-      ? `${S.ritualDeck.length} carta(s) restante(s) no deck.<br>O anfitrião pode revelar a próxima.`
-      : `O deck chegou ao fim.<br>Reinicie o ritual para embaralhar novamente.`;
+      ? oslTr("sala:ritual.deckRemaining", "{{count}} carta(s) restante(s) no deck.<br>O anfitrião pode revelar a próxima.", { count: S.ritualDeck.length })
+      : oslTr("sala:ritual.deckEnded", "O deck chegou ao fim.<br>Reinicie o ritual para embaralhar novamente.");
   }
   updateRitualButtons();
 }
@@ -237,7 +237,7 @@ export async function startRitualDeck() {
 
   S.ritualCardsRevealedCount = 0;
   S.missionsAssigned = false;
-  await addHistoryItem("Ritual", "O ritual foi iniciado.");
+  await addHistoryItem(oslTr("sala:table.typeRitual", "Ritual"), oslTr("sala:table.ritualStarted", "O ritual foi iniciado."));
   await setDoc(S.ritualRef, { sessionStartedAt: Date.now() }, { merge: true });
 
   await updateDoc(S.roomRef, { arenaActive: true });
@@ -269,7 +269,7 @@ export async function resetRitualDeck() {
 
   S.ritualCardsRevealedCount = 0;
   S.missionsAssigned = false;
-  await addHistoryItem("Ritual", "O ritual foi reiniciado.");
+  await addHistoryItem(oslTr("sala:table.typeRitual", "Ritual"), oslTr("sala:table.ritualReset", "O ritual foi reiniciado."));
   await panelMarkSessionStart();
   updateRitualButtons();
 }
@@ -286,7 +286,7 @@ export function renderRitualCardFromState(data) {
   if (S.ritualCardsRevealedCount >= 2) S.missionsAssigned = true;
 
   const gameStatusEl = document.getElementById("gameStatus");
-  if (gameStatusEl) gameStatusEl.textContent = started ? "Jogando" : "Espera";
+  if (gameStatusEl) gameStatusEl.textContent = started ? oslTr("sala:topbar.status.playing", "Jogando") : oslTr("sala:topbar.status.waiting", "Espera");
 
   S.currentActiveEffect = data?.activeEffect || null;
   renderActiveEffect(S.currentActiveEffect);
@@ -340,9 +340,9 @@ export function bindRitual(onSnapshotFn, orderByFn, queryFn) {
     if (!historyList) return;
     const docs = snapshot.docs.map(d => d.data());
     if (!docs.length) {
-      historyList.innerHTML = `<div class="historyItem"><div class="historyType">Aguardando</div><div class="historyText">Nenhuma carta revelada ainda.</div></div>`;
+      historyList.innerHTML = `<div class="historyItem"><div class="historyType">${oslTr("sala:history.waiting", "Aguardando")}</div><div class="historyText">${oslTr("sala:history.none", "Nenhuma carta revelada ainda.")}</div></div>`;
       return;
     }
-    historyList.innerHTML = docs.map(item => `<div class="historyItem"><div class="historyType">${escapeHtml(item.type || "Ritual")}</div><div class="historyText">${escapeHtml(item.text || "")}</div></div>`).join("");
+    historyList.innerHTML = docs.map(item => `<div class="historyItem"><div class="historyType">${escapeHtml(item.type || oslTr("sala:table.typeRitual", "Ritual"))}</div><div class="historyText">${escapeHtml(item.text || "")}</div></div>`).join("");
   });
 }

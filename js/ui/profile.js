@@ -208,16 +208,24 @@ function fillContaTab() {
   const uidEl   = document.getElementById("contaUid");     if (uidEl) uidEl.textContent = uid ? uid.slice(0,12) + "…" : "—";
   const acessoEl = document.getElementById("contaAcesso");
   if (acessoEl) {
-    if (!expires) { acessoEl.innerHTML = `<span class="profBadge profBadge--red">Não autenticado</span>`; }
-    else { const expDate = new Date(Number(expires)); const expired = Date.now() > Number(expires); const label = expDate.toLocaleDateString("pt-BR", { day:"2-digit", month:"short", year:"numeric" }); acessoEl.innerHTML = expired ? `<span class="profBadge profBadge--red">Expirado em ${label}</span>` : `<span class="profBadge profBadge--green">Ativo até ${label}</span>`; }
+    if (!expires) { acessoEl.innerHTML = `<span class="profBadge profBadge--red">${oslTr("sala:profile.accessNotAuthenticated", "Não autenticado")}</span>`; }
+    else {
+      const expDate = new Date(Number(expires));
+      const expired = Date.now() > Number(expires);
+      const localeTag = (window.OSL_I18N && window.OSL_I18N.locale && window.OSL_I18N.locale()) || "pt-BR";
+      const label = expDate.toLocaleDateString(localeTag, { day:"2-digit", month:"short", year:"numeric" });
+      acessoEl.innerHTML = expired
+        ? `<span class="profBadge profBadge--red">${oslTr("sala:profile.accessExpiredOn", "Expirado em {{date}}", { date: label })}</span>`
+        : `<span class="profBadge profBadge--green">${oslTr("sala:profile.accessActiveUntil", "Ativo até {{date}}", { date: label })}</span>`;
+    }
   }
 }
 
 function fillSessaoTab() {
   const salaCode = localStorage.getItem("osl_sala") || S.roomCode || "—";
   const salaNome = localStorage.getItem("osl_nome_sala") || "—";
-  const papel    = S.isHost ? "Anfitrião" : "Jogador";
-  const videoConn = (typeof window.lkRoom !== "undefined" && window.lkRoom?.state === "connected") ? "Conectado" : "Desconectado";
+  const papel    = S.isHost ? oslTr("sala:players.host", "Anfitrião") : oslTr("sala:players.fallbackName", "Jogador");
+  const videoConn = (typeof window.lkRoom !== "undefined" && window.lkRoom?.state === "connected") ? oslTr("sala:profile.videoConnected", "Conectado") : oslTr("sala:profile.videoDisconnected", "Desconectado");
   const salaEl = document.getElementById("sessSala");   if (salaEl) salaEl.textContent = salaCode;
   const nomeEl = document.getElementById("sessNomeSala"); if (nomeEl) nomeEl.textContent = salaNome;
   const papelEl = document.getElementById("sessPapel"); if (papelEl) papelEl.textContent = papel;
