@@ -93,6 +93,21 @@ export function applyVideoTileAvatars() {
   new MutationObserver(() => applyVideoTileAvatars()).observe(grid, { childList: true, subtree: true });
 })();
 
+// Mensagens system geradas em PT antes da i18n. Reescreve no render se bater.
+const SYSTEM_MSG_PT_TO_KEY = {
+  "A sala foi criada. Aguardando jogadores.": "sala:chat.systemRoomCreated",
+  "O anfitrião iniciou o ritual. A próxima etapa pode começar.": "sala:ritual.systemHostStarted",
+  "O código da sala foi copiado.": "sala:ritual.systemRoomCodeCopied",
+  "O ritual foi iniciado.": "sala:table.ritualStarted",
+  "O ritual foi reiniciado.": "sala:table.ritualReset"
+};
+function localizeSystemText(text) {
+  if (!text) return text;
+  const key = SYSTEM_MSG_PT_TO_KEY[text];
+  if (!key) return text;
+  return oslTr(key, text);
+}
+
 // ── Renderização de mensagens ─────────────────────────────────────────────────
 function renderMessages(docs) {
   const messagesEl  = document.getElementById("messages");
@@ -107,7 +122,7 @@ function renderMessages(docs) {
   docs.forEach((item) => {
     const div = document.createElement("div");
     if (item.type === "system") {
-      div.className = "message system"; div.textContent = item.text;
+      div.className = "message system"; div.textContent = localizeSystemText(item.text);
     } else {
       const own = item.authorId === S.participantId;
       div.className = "message " + (own ? "me" : "other");

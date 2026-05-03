@@ -256,12 +256,16 @@ function fillPacksTab() {
 
 async function fillProfileUI(user, isSelfView) {
   const profileAvatarLarge = document.getElementById("profileAvatarLarge");
-  applyAvatarDisplay(profileAvatarLarge, user.avatarPhotoUrl, user.avatarEmoji || initials(user.displayName || "Jogador"), user.avatarColor);
+  applyAvatarDisplay(profileAvatarLarge, user.avatarPhotoUrl, user.avatarEmoji || initials(user.displayName || oslTr("sala:players.fallbackName", "Jogador")), user.avatarColor);
   if (isSelfView && user.bgTheme) { S.selectedBgTheme = user.bgTheme; localStorage.setItem("osl_bg", user.bgTheme); applyBgTheme(user.bgTheme); }
   if (isSelfView) { const fab = document.getElementById("mobileProfileBtn"); if (fab) applyAvatarDisplay(fab, user.avatarPhotoUrl, user.avatarEmoji, user.avatarColor); }
-  document.getElementById("profileName").textContent     = user.displayName || "Jogador";
+  document.getElementById("profileName").textContent     = user.displayName || oslTr("sala:players.fallbackName", "Jogador");
   document.getElementById("profileUsername").textContent = `@${user.username || "jogador"}`;
-  document.getElementById("profileBio").textContent      = user.bio || "Sem descrição.";
+  // Auto-traduz bio default em PT que ficou persistida no Firestore antes do i18n
+  const _bio = (user.bio === "Novo participante do ritual.")
+    ? oslTr("sala:newProfile.bio", "Novo participante do ritual.")
+    : (user.bio || oslTr("sala:profile.bioEmpty", "Sem descrição."));
+  document.getElementById("profileBio").textContent      = _bio;
   const gEl = document.getElementById("profileGames"); if (gEl) gEl.textContent = user.stats?.gamesPlayed || 0;
   const wEl = document.getElementById("profileWins");  if (wEl) wEl.textContent = user.stats?.wins || 0;
   const sEl = document.getElementById("profileSince"); if (sEl) sEl.textContent = formatMemberSince(user.memberSince);
@@ -306,7 +310,7 @@ export async function openProfile(player) {
       if (profileAvatarLarge) profileAvatarLarge.textContent = initials(player?.name || S.playerName);
       document.getElementById("profileName").textContent     = player?.name || S.playerName;
       document.getElementById("profileUsername").textContent = "@jogador";
-      document.getElementById("profileBio").textContent      = "Perfil não encontrado.";
+      document.getElementById("profileBio").textContent      = oslTr("sala:newProfile.notFound", "Perfil não encontrado.");
       document.getElementById("editProfileBtn").hidden = true; document.getElementById("addFriendBtn").hidden = true;
       document.getElementById("friendsPanel")?.classList.add("hidden");
       document.getElementById("profileModal").classList.remove("hidden"); return;
@@ -323,7 +327,7 @@ export async function openProfile(player) {
       document.getElementById("profileAvatarLarge").textContent = initials(name);
       document.getElementById("profileName").textContent     = name;
       document.getElementById("profileUsername").textContent = "@jogador";
-      document.getElementById("profileBio").textContent      = "Erro ao carregar perfil: " + (error?.code || error?.message || String(error));
+      document.getElementById("profileBio").textContent      = oslTr("sala:newProfile.loadError", "Erro ao carregar perfil: ") + (error?.code || error?.message || String(error));
       document.getElementById("editProfileBtn").hidden = true; document.getElementById("addFriendBtn").hidden = true;
       document.getElementById("friendsPanel")?.classList.add("hidden");
       document.getElementById("profileModal").classList.remove("hidden");

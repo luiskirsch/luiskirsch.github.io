@@ -5,43 +5,60 @@ import { escapeHtml } from "../utils.js";
 import { OSL_XP_TITLES, OSL_XP_EVENTS, DAILY_STREAK_XP } from "../constants.js";
 import { OSL_XP, OSL_ACHIEVEMENTS } from "./effects.js";
 
+// Localização: pega title/unlock do namespace xptitles (level == índice 1..50)
+function localizedTitleInfo(level, info) {
+  if (!info) return info;
+  const tr = window.oslTr;
+  if (typeof tr !== "function") return info;
+  const titleKey = `xptitles:titles.${level - 1}`;
+  const t = tr(titleKey, info.title);
+  const out = { ...info, title: t };
+  if (info.unlock) {
+    const unlockKey = `xptitles:unlocks.${level - 1}`;
+    const u = tr(unlockKey, info.unlock);
+    if (u) out.unlock = u;
+  }
+  return out;
+}
+
 // ── Atualização do card de XP na topbar ───────────────────────────────────────
 export function updateXpCard(xp) {
   S._currentXp = xp;
   try { localStorage.setItem("osl_xp_cache", String(xp)); } catch (_) {}
 
   const lv   = OSL_XP.levelFromXP(xp);
-  const info = OSL_XP.titleForLevel(lv);
+  const info = localizedTitleInfo(lv, OSL_XP.titleForLevel(lv));
   const curr = OSL_XP.xpForLevel(lv);
   const next = OSL_XP.xpForNextLevel(lv);
   const pct  = next > curr ? Math.round((xp - curr) / (next - curr) * 100) : 100;
   const inLv = xp - curr, needed = next - curr;
 
   const lvEl = document.getElementById("xpCardLevel");
-  if (lvEl) { lvEl.textContent = `${info.icon} Nv.${lv} ${info.title}`; lvEl.dataset.tier = info.tier; }
+  if (lvEl) { lvEl.textContent = `${info.icon} ${oslTr("sala:xpUI.level", "Nv.{{n}}", { n: lv })} ${info.title}`; lvEl.dataset.tier = info.tier; }
   const fillEl = document.getElementById("xpCardFill");
   if (fillEl) fillEl.style.width = `${pct}%`;
   const xpEl = document.getElementById("xpCardXp");
-  if (xpEl) xpEl.textContent = `${xp} XP`;
+  if (xpEl) xpEl.textContent = oslTr("sala:topbar.xpTotal", "{{xp}} XP", { xp });
   const numsEl = document.getElementById("xpCardNums");
-  if (numsEl) numsEl.textContent = next > curr ? `${inLv} / ${needed} XP` : "MAX";
+  if (numsEl) numsEl.textContent = next > curr ? oslTr("sala:topbar.xpNumsTemplate", "{{cur}} / {{max}} XP", { cur: inLv, max: needed }) : oslTr("sala:xpUI.max", "MAX");
 
   if (S._xpPrevLevel > 0 && lv > S._xpPrevLevel) showLevelUpModal(lv, info);
   S._xpPrevLevel = lv;
 }
 
 export function showLevelUpModal(lv, info) {
+  info = localizedTitleInfo(lv, info);
   const overlay = document.createElement("div");
   overlay.className = "levelUpOverlay";
-  const unlockBlock = info.unlock ? `<div class="levelUpCard__unlock"><strong>Desbloqueado</strong>${escapeHtml(info.unlock)}</div>` : "";
+  const unlockBlock = info.unlock ? `<div class="levelUpCard__unlock"><strong>${oslTr("sala:xpUI.levelUp.unlock", "Desbloqueado")}</strong>${escapeHtml(info.unlock)}</div>` : "";
   overlay.innerHTML = `
     <div class="levelUpCard">
       <div class="levelUpCard__badge">${info.icon}</div>
-      <div class="levelUpCard__eyebrow">Subiu de nível</div>
+      <div class="levelUpCard__eyebrow">${oslTr("sala:xpUI.levelUp.eyebrow", "Subiu de nível")}</div>
       <div class="levelUpCard__level">${lv}</div>
       <div class="levelUpCard__title">${escapeHtml(info.title)}</div>
       ${unlockBlock}
-      <button class="levelUpCard__close">Continuar →</button>
+      <button class="levelUpCard__close">${oslTr("sala:xpUI.levelUp.continue", "Continuar →")}</button>
     </div>`;
   document.body.appendChild(overlay);
   overlay.querySelector(".levelUpCard__close").addEventListener("click", () => {
@@ -54,17 +71,17 @@ export function showLevelUpModal(lv, info) {
 // ── Painel de todos os níveis ─────────────────────────────────────────────────
 export function showLevelPanel(currentXp) {
   const lv   = OSL_XP.levelFromXP(currentXp);
-  const info = OSL_XP.titleForLevel(lv);
+  const info = localizedTitleInfo(lv, OSL_XP.titleForLevel(lv));
   const curr = OSL_XP.xpForLevel(lv);
   const next = OSL_XP.xpForNextLevel(lv);
   const pct  = next > curr ? Math.round((currentXp - curr) / (next - curr) * 100) : 100;
   const inLv = currentXp - curr, needed = next - curr;
 
   const TIERS = [
-    { key:"bronze",   label:"Bronze",    range:[1,10]  },
-    { key:"silver",   label:"Prata",     range:[11,20] },
-    { key:"gold",     label:"Ouro",      range:[21,30] },
-    { key:"prestige", label:"Prestígio", range:[31,50] },
+    { key:"bronze",   label: oslTr("sala:xpUI.tier.bronze",   "Bronze"),    range:[1,10]  },
+    { key:"silver",   label: oslTr("sala:xpUI.tier.silver",   "Prata"),     range:[11,20] },
+    { key:"gold",     label: oslTr("sala:xpUI.tier.gold",     "Ouro"),      range:[21,30] },
+    { key:"prestige", label: oslTr("sala:xpUI.tier.prestige", "Prestígio"), range:[31,50] },
   ];
 
   const overlay = document.createElement("div");
@@ -73,7 +90,7 @@ export function showLevelPanel(currentXp) {
   const tierHTML = TIERS.map(tier => {
     const rows = [];
     for (let i = tier.range[0]; i <= tier.range[1]; i++) {
-      const t = OSL_XP.titleForLevel(i);
+      const t = localizedTitleInfo(i, OSL_XP.titleForLevel(i));
       const isNow = i === lv, isDone = i < lv, isLocked = i > lv, hasMile = !!t.unlock;
       let rowClass = "lvlPanel__lvlRow";
       if (isNow)    rowClass += " lvlPanel__lvlRow--current";
@@ -84,28 +101,29 @@ export function showLevelPanel(currentXp) {
       const unlockHTML = hasMile ? `<div class="lvlPanel__lvlUnlock${isDone ? " lvlPanel__lvlUnlock--done" : ""}">${isDone ? "✓" : "🔓"} ${escapeHtml(t.unlock)}</div>` : "";
       rows.push(`<div class="${rowClass}" ${isNow ? 'id="lvlPanel__currentRow"' : ""}><div class="lvlPanel__lvlNum">${i}</div><div class="lvlPanel__lvlIcon">${t.icon}</div><div class="lvlPanel__lvlInfo"><div class="lvlPanel__lvlTitle">${escapeHtml(t.title)}</div>${unlockHTML}</div>${badgeHTML}</div>`);
     }
-    return `<div class="lvlPanel__tierHeader lvlPanel__tierHeader--${tier.key}"><span>${tier.label} · Níveis ${tier.range[0]}–${tier.range[1]}</span></div>${rows.join("")}`;
+    return `<div class="lvlPanel__tierHeader lvlPanel__tierHeader--${tier.key}"><span>${oslTr("sala:xpUI.levelPanel.tierLevels", "{{label}} · Níveis {{from}}–{{to}}", { label: tier.label, from: tier.range[0], to: tier.range[1] })}</span></div>${rows.join("")}`;
   }).join("");
 
-  const xpNextLabel = lv >= 50 ? `<strong>Nível máximo</strong>` : `<strong>${inLv}</strong> / ${needed} XP para o próximo`;
+  const xpNextLabel = lv >= 50 ? `<strong>${oslTr("sala:xpUI.levelPanel.maxLevel", "Nível máximo")}</strong>` : oslTr("sala:xpUI.levelPanel.nextNeeded", "<strong>{{cur}}</strong> / {{needed}} XP para o próximo", { cur: inLv, needed });
+  const tierLocalized = oslTr("sala:xpUI.tier." + info.tier, info.tier.charAt(0).toUpperCase() + info.tier.slice(1));
 
   overlay.innerHTML = `
     <div class="lvlPanel">
-      <div class="lvlPanel__header"><div class="lvlPanel__headerTitle">Sua Jornada</div><button class="lvlPanel__close" id="lvlPanelClose">✕</button></div>
+      <div class="lvlPanel__header"><div class="lvlPanel__headerTitle">${oslTr("sala:xpUI.levelPanel.headerTitle", "Sua Jornada")}</div><button class="lvlPanel__close" id="lvlPanelClose">✕</button></div>
       <div class="lvlPanel__hero">
         <div class="lvlPanel__heroTop">
           <div class="lvlPanel__heroIcon">${info.icon}</div>
           <div class="lvlPanel__heroMeta">
-            <div class="lvlPanel__heroEyebrow">Nível atual</div>
+            <div class="lvlPanel__heroEyebrow">${oslTr("sala:xpUI.levelPanel.current", "Nível atual")}</div>
             <div class="lvlPanel__heroLevelNum">${lv}</div>
             <div class="lvlPanel__heroTitle">${escapeHtml(info.title)}</div>
-            <div class="lvlPanel__heroTier">${escapeHtml(info.tier.charAt(0).toUpperCase() + info.tier.slice(1))} · ${currentXp} XP total</div>
+            <div class="lvlPanel__heroTier">${escapeHtml(oslTr("sala:xpUI.levelPanel.tierTotal", "{{tier}} · {{xp}} XP total", { tier: tierLocalized, xp: currentXp }))}</div>
           </div>
         </div>
         <div class="lvlPanel__xpSection">
-          <div class="lvlPanel__xpLabel"><span>Progresso para o próximo nível</span>${xpNextLabel}</div>
+          <div class="lvlPanel__xpLabel"><span>${oslTr("sala:xpUI.levelPanel.progressTo", "Progresso para o próximo nível")}</span>${xpNextLabel}</div>
           <div class="lvlPanel__xpTrack"><div class="lvlPanel__xpBar" style="width:${pct}%"></div></div>
-          <div class="lvlPanel__xpSub">${pct}% concluído</div>
+          <div class="lvlPanel__xpSub">${oslTr("sala:xpUI.levelPanel.percentDone", "{{pct}}% concluído", { pct })}</div>
         </div>
       </div>
       <div class="lvlPanel__body" id="lvlPanelBody">${tierHTML}</div>
@@ -156,12 +174,12 @@ function showDailyRewardModal(streak, xp, onCollect) {
   overlay.innerHTML = `
     <div class="dailyRewardCard">
       <div class="dailyRewardCard__flame">${icon}</div>
-      <div class="dailyRewardCard__title">Recompensa Diária</div>
-      <div class="dailyRewardCard__streak">DIA ${streak}</div>
+      <div class="dailyRewardCard__title">${oslTr("sala:xpUI.daily.title", "Recompensa Diária")}</div>
+      <div class="dailyRewardCard__streak">${oslTr("sala:xpUI.daily.day", "DIA {{streak}}", { streak })}</div>
       <div class="dailyRewardCard__bar">${dots}</div>
       <div class="dailyRewardCard__xp">+${xp}</div>
       <div class="dailyRewardCard__xplabel">XP</div>
-      <button class="dailyRewardCard__btn" id="dailyRewardBtn">COLETAR</button>
+      <button class="dailyRewardCard__btn" id="dailyRewardBtn">${oslTr("sala:xpUI.daily.collect", "COLETAR")}</button>
     </div>`;
   document.body.appendChild(overlay);
   document.getElementById("dailyRewardBtn").addEventListener("click", async () => {
@@ -186,7 +204,8 @@ export function showVoteResultOverlay(winner, resolvedAt) {
 }
 
 // ── Recap de sessão ───────────────────────────────────────────────────────────
-export async function showSessionRecap(onNewSession, primaryLabel = "NOVA SESSÃO") {
+export async function showSessionRecap(onNewSession, primaryLabel) {
+  primaryLabel = primaryLabel ?? oslTr("sala:xpUI.recap.newSession", "NOVA SESSÃO");
   const [histSnap, msgsSnap, ritualSnap] = await Promise.all([
     getDocs(query(S.ritualHistoryRef, orderBy("createdAt", "asc"))),
     getDocs(query(S.messagesRef, orderBy("createdAt", "asc"))),
