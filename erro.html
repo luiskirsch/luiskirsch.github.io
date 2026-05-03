@@ -1,9 +1,10 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="erro">
 <head>
+<script src="./i18n/init.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pagamento não concluído</title>
+<title data-i18n="erro:title">Pagamento não concluído</title>
 <style>
 body{
   margin:0;
@@ -38,9 +39,9 @@ a{
 </head>
 <body>
   <div class="box">
-    <h1>Pagamento não concluído</h1>
-    <p>Seu acesso ainda não foi liberado.</p>
-    <a href="./vendas.html">Voltar para vendas</a>
+    <h1 data-i18n="erro:heading">Pagamento não concluído</h1>
+    <p data-i18n="erro:subtitle">Seu acesso ainda não foi liberado.</p>
+    <a href="./vendas.html" data-i18n="erro:backToSales">Voltar para vendas</a>
   </div>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </body>
