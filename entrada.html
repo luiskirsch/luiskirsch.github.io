@@ -699,19 +699,29 @@
         if (!el) return;
         if (!window.i18next) { el.textContent = 'no i18next yet'; return; }
         var i = window.i18next;
-        var bundleEN = i.getResourceBundle && i.getResourceBundle('en-US', 'entrada');
-        var bundlePT = i.getResourceBundle && i.getResourceBundle('pt-BR', 'entrada');
-        var subEN = bundleEN && bundleEN.subtitle;
-        var subPT = bundlePT && bundlePT.subtitle;
         var subT = i.t ? i.t('entrada:subtitle') : null;
-        var subTen = i.t ? i.t('entrada:subtitle', { lng: 'en-US' }) : null;
+        var origT = i._origT;
+        var origRes = origT ? origT('entrada:subtitle') : null;
+        var ovr = null, cached = null, fullCachedKeys = '';
+        try { ovr = localStorage.getItem('osl_theme_override'); } catch (e) {}
+        try { cached = localStorage.getItem('osl_active_theme_cached'); } catch (e) {}
+        try {
+          var keys = [];
+          for (var k = 0; k < localStorage.length; k++) {
+            var key = localStorage.key(k);
+            if (key && key.indexOf('osl_theme_full_cached_') === 0) keys.push(key);
+          }
+          fullCachedKeys = keys.join(',');
+        } catch (e) {}
+        var hasOverrideT = i.t !== origT && !!origT;
         el.style.whiteSpace = 'pre-wrap';
         el.textContent =
-          'lang=' + i.language + ' | langs=' + JSON.stringify(i.languages) + '\n' +
-          'EN_bundle.subtitle=' + JSON.stringify(subEN) + '\n' +
-          'PT_bundle.subtitle=' + JSON.stringify(subPT) + '\n' +
-          't()=' + JSON.stringify(subT) + '\n' +
-          't({lng:en-US})=' + JSON.stringify(subTen);
+          'override=' + JSON.stringify(ovr) + ' | cached=' + JSON.stringify(cached) + '\n' +
+          'fullCacheKeys=' + fullCachedKeys + '\n' +
+          'OSL_THEME=' + (window.OSL_THEME && window.OSL_THEME.id) + '\n' +
+          'i18next.t is overriden by theme=' + hasOverrideT + '\n' +
+          't()=' + JSON.stringify(String(subT).slice(0,80)) + '\n' +
+          'origT()=' + JSON.stringify(String(origRes).slice(0,80));
       }
       window.addEventListener('osl:i18n-ready', paint);
       setTimeout(paint, 1500);
