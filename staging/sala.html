@@ -4,8 +4,17 @@
 <meta name="robots" content="noindex, nofollow">
 <script src="_staging.js" defer></script>
 <script src="./i18n/init.js" defer></script>
-<script src="js/theme-loader.js"></script>
-<script type="module" src="js/active-theme.js"></script>
+<script>console.info("[diag] before theme-loader tag");</script>
+<script src="js/theme-loader.js?v=20260503b"></script>
+<script>console.info("[diag] after theme-loader tag, OSL_setTheme=", typeof window.OSL_setTheme);</script>
+<script type="module" src="js/active-theme.js?v=20260503b"></script>
+<script>console.info("[diag] after active-theme tag (module async, won't have run yet)");</script>
+<script type="module">
+  console.info("[diag] inline module executed");
+  setTimeout(() => {
+    console.info("[diag] +2s — OSL_ACTIVE_THEME=", window.OSL_ACTIVE_THEME, " OSL_THEME=", window.OSL_THEME && window.OSL_THEME.id);
+  }, 2000);
+</script>
 
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
