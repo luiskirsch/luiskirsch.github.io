@@ -239,21 +239,28 @@ function fillSessaoTab() {
 function fillPacksTab() {
   const grid = document.getElementById("profPackGrid"); if (!grid) return;
   const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
+  // name/desc/themeName são localizados via sala:profile.packs.items.{id}; price/themeColor mantidos.
   const packs = [
-    { id:"pacote-conexao",  name:"Conexão",  price:"R$ 9,90",  desc:"12 cartas · leve e emocional",   theme:"ambar",   themeName:"Âmbar",   themeColor:"#0e0a02" },
-    { id:"pacote-verdades", name:"Verdades", price:"R$ 12,90", desc:"15 cartas · desconforto leve",    theme:"cristal", themeName:"Cristal", themeColor:"#05070e" },
-    { id:"pacote-conflito", name:"Conflito", price:"R$ 14,90", desc:"15 cartas · provocações",         theme:"chama",   themeName:"Chama",   themeColor:"#120600" },
-    { id:"pacote-segredos", name:"Segredos", price:"R$ 19,90", desc:"18 cartas · psicológico intenso", theme:"veu",     themeName:"Véu",     themeColor:"#07000e" },
-    { id:"pacote-casais",   name:"Casais",   price:"R$ 19,90", desc:"18 cartas · nichado",             theme:"vinho",   themeName:"Vinho",   themeColor:"#0e0007" }
+    { id:"pacote-conexao",  price:"R$ 9,90",  themeColor:"#0e0a02" },
+    { id:"pacote-verdades", price:"R$ 12,90", themeColor:"#05070e" },
+    { id:"pacote-conflito", price:"R$ 14,90", themeColor:"#120600" },
+    { id:"pacote-segredos", price:"R$ 19,90", themeColor:"#07000e" },
+    { id:"pacote-casais",   price:"R$ 19,90", themeColor:"#0e0007" }
   ];
   grid.innerHTML = "";
   const basicCard = document.createElement("div"); basicCard.className = "profPackCard profPackCard--unlocked";
-  basicCard.innerHTML = `<div class="profPackName">Deck Básico</div><div class="profPackDesc">8 cartas · sempre incluído</div><span class="profPackBadge profPackBadge--ok">✓ Incluído</span>`;
+  basicCard.innerHTML = `<div class="profPackName">${oslTr("sala:profile.packs.basicName", "Deck Básico")}</div><div class="profPackDesc">${oslTr("sala:profile.packs.basicDesc", "8 cartas · sempre incluído")}</div><span class="profPackBadge profPackBadge--ok">${oslTr("sala:profile.packs.included", "✓ Incluído")}</span>`;
   grid.appendChild(basicCard);
+  const themeLabel = oslTr("sala:profile.packs.themeLabel", "Tema");
+  const unlockedLabel = oslTr("sala:profile.packs.unlocked", "✓ Desbloqueado");
+  const shopBtnLabel = oslTr("sala:profile.packs.shopBtn", "Ver na loja");
   packs.forEach(pack => {
     const unlocked = compras.some(c => c.produto === pack.id);
+    const name = oslTr(`sala:profile.packs.items.${pack.id}.name`, pack.id);
+    const desc = oslTr(`sala:profile.packs.items.${pack.id}.desc`, "");
+    const themeName = oslTr(`sala:profile.packs.items.${pack.id}.themeName`, "");
     const card = document.createElement("div"); card.className = `profPackCard ${unlocked ? "profPackCard--unlocked" : "profPackCard--locked"}`;
-    card.innerHTML = `<div class="profPackName">${pack.name}</div><div class="profPackDesc">${pack.desc}</div><div class="profPackDesc" style="display:flex;align-items:center;gap:6px;margin-top:4px"><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${pack.themeColor};border:1px solid rgba(255,255,255,.15);flex-shrink:0"></span><span style="color:rgba(243,237,229,.5);font-size:.7rem">Tema <strong style="color:rgba(215,176,107,.75)">${pack.themeName}</strong></span></div>${unlocked ? `<span class="profPackBadge profPackBadge--ok">✓ Desbloqueado</span>` : `<span class="profPackBadge profPackBadge--locked">🔒 ${pack.price}</span><a class="profileActionBtn" href="./vendas.html" style="margin-top:6px;font-size:.75rem;padding:4px 10px">Ver na loja</a>`}`;
+    card.innerHTML = `<div class="profPackName">${name}</div><div class="profPackDesc">${desc}</div><div class="profPackDesc" style="display:flex;align-items:center;gap:6px;margin-top:4px"><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${pack.themeColor};border:1px solid rgba(255,255,255,.15);flex-shrink:0"></span><span style="color:rgba(243,237,229,.5);font-size:.7rem">${themeLabel} <strong style="color:rgba(215,176,107,.75)">${themeName}</strong></span></div>${unlocked ? `<span class="profPackBadge profPackBadge--ok">${unlockedLabel}</span>` : `<span class="profPackBadge profPackBadge--locked">🔒 ${pack.price}</span><a class="profileActionBtn" href="./vendas.html" style="margin-top:6px;font-size:.75rem;padding:4px 10px">${shopBtnLabel}</a>`}`;
     grid.appendChild(card);
   });
 }
@@ -451,9 +458,10 @@ export function bindProfileEvents() {
     const sw = e.target.closest(".bgSwatch"); if (!sw) return;
     const bg = sw.dataset.bg;
     if (BG_PACK_THEMES[bg] && !isThemeUnlocked(bg)) {
-      const packNames = { "pacote-conexao":"Conexão","pacote-verdades":"Verdades","pacote-conflito":"Conflito","pacote-segredos":"Segredos","pacote-casais":"Casais" };
+      const packId = BG_PACK_THEMES[bg];
+      const packName = packId ? oslTr(`sala:profile.packs.items.${packId}.name`, packId) : oslTr("sala:profile.packs.exclusiveOfPackFallback", "um pacote");
       const hint = document.getElementById("bgPackHint");
-      if (hint) { hint.textContent = `Exclusivo do Pacote ${packNames[BG_PACK_THEMES[bg]] || "um pacote"}`; hint.style.opacity = "1"; clearTimeout(_bgHintTimer); _bgHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
+      if (hint) { hint.textContent = oslTr("sala:profile.packs.exclusiveOfPack", "Exclusivo do Pacote {{name}}", { name: packName }); hint.style.opacity = "1"; clearTimeout(_bgHintTimer); _bgHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
       return;
     }
     setBgSelection(bg); localStorage.setItem("osl_bg", bg);
@@ -466,7 +474,7 @@ export function bindProfileEvents() {
     const style = sw.dataset.style;
     if (style !== "padrao" && !isCardStyleUnlocked(style)) {
       const hint = document.getElementById("cardStyleHint");
-      if (hint) { hint.textContent = "Exclusivo do produto Estilo de Carta"; hint.style.opacity = "1"; clearTimeout(_cardHintTimer); _cardHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
+      if (hint) { hint.textContent = oslTr("sala:profile.packs.exclusiveCardStyle", "Exclusivo do produto Estilo de Carta"); hint.style.opacity = "1"; clearTimeout(_cardHintTimer); _cardHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
       return;
     }
     setCardStyleSelection(style); localStorage.setItem("osl_card_style", style);
@@ -479,7 +487,7 @@ export function bindProfileEvents() {
     const fx = sw.dataset.fx;
     if (fx !== "none" && !isFxUnlocked()) {
       const hint = document.getElementById("fxHint");
-      if (hint) { hint.textContent = "Exclusivo do produto Efeitos Visuais"; hint.style.opacity = "1"; clearTimeout(_fxHintTimer); _fxHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
+      if (hint) { hint.textContent = oslTr("sala:profile.packs.exclusiveFx", "Exclusivo do produto Efeitos Visuais"); hint.style.opacity = "1"; clearTimeout(_fxHintTimer); _fxHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
       return;
     }
     setFxSelection(fx); localStorage.setItem("osl_fx", fx);
@@ -489,7 +497,7 @@ export function bindProfileEvents() {
   document.getElementById("copyRoomCodeBtn")?.addEventListener("click", () => {
     const code = localStorage.getItem("osl_sala") || S.roomCode || "";
     if (!code) return;
-    navigator.clipboard.writeText(code).then(() => { const btn = document.getElementById("copyRoomCodeBtn"); btn.textContent = "Copiado!"; setTimeout(() => btn.textContent = "Copiar código da sala", 2000); });
+    navigator.clipboard.writeText(code).then(() => { const btn = document.getElementById("copyRoomCodeBtn"); const orig = oslTr("sala:profile.session.copyCode", "Copiar código da sala"); btn.textContent = oslTr("sala:profile.packs.copied", "Copiado!"); setTimeout(() => btn.textContent = orig, 2000); });
   });
 
   document.getElementById("profCopyLicBtn")?.addEventListener("click", () => {
