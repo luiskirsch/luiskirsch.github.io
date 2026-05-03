@@ -1,6 +1,26 @@
-﻿<!DOCTYPE html>  <html lang="pt-br">    <head>        <meta charset="UTF-8" />      
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />      
-  <title>Prelúdio Jogos — Boas-vindas</title>    <link rel="icon" type="image/png" href="./favicon.png">    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />      
+﻿<!DOCTYPE html>  <html lang="pt-br" data-i18n-ns="pagina">    <head>
+  <script src="./i18n/init.js" defer></script>
+  <script>
+    // Helper de tradução com interpolação manual (i18n é async)
+    window.pTr = function(key, fallback, vars) {
+      try {
+        var t = window.OSL_I18N && window.OSL_I18N.t;
+        if (typeof t === "function") {
+          var v = t(key, vars || {});
+          if (typeof v === "string" && v && v !== key) return v;
+        }
+      } catch (_) {}
+      if (vars && fallback) {
+        return String(fallback).replace(/\{\{(\w+)\}\}/g, function(_, k) {
+          return vars[k] != null ? vars[k] : "";
+        });
+      }
+      return fallback;
+    };
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title data-i18n="pagina:title">Prelúdio Jogos — Boas-vindas</title>    <link rel="icon" type="image/png" href="./favicon.png">    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />      
   <meta http-equiv="Expires" content="0" />      
   <meta name="referrer" content="no-referrer">      
@@ -1289,7 +1309,7 @@ tested: true
   <img loading="lazy" src="./lua_site_transparente.png" alt="" class="moon" referrerpolicy="no-referrer">
 </div>       
   <!-- PAINEL DE CONTA (ESQUERDA) -->
-<div class="accountPanel" id="accountPanel" aria-label="Acesso à conta">
+<div class="accountPanel" id="accountPanel" data-i18n-aria-label="pagina:account.panelAria" aria-label="Acesso à conta">
   <div class="accountBadge" id="accountBadge">
   <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
     <path d="M12 12c2.761 0 5-2.686 5-6s-2.239-6-5-6-5 2.686-5 6 2.239 6 5 6Z" fill="currentColor"/>
@@ -1297,134 +1317,135 @@ tested: true
   </svg>
 </div>
   <div class="accountMeta">
-    <div class="accountLabel" id="accountLabel">Conta</div>
-    <div class="accountName" id="accountName">Entrar ou acessar painel</div>
+    <div class="accountLabel" id="accountLabel" data-i18n="pagina:account.label">Conta</div>
+    <div class="accountName" id="accountName" data-i18n="pagina:account.name">Entrar ou acessar painel</div>
   </div>
 </div>
 
 <!-- PAINEL DE SOM (DIREITA) -->
-<div class="soundPanel" id="soundPanel" aria-label="Controle de som">
+<div class="soundPanel" id="soundPanel" data-i18n-aria-label="pagina:sound.panelAria" aria-label="Controle de som">
   <button class="soundToggle" id="soundBtn" type="button">
-    SOM: <strong id="soundState">OFF</strong>
+    <span data-i18n="pagina:sound.label">SOM:</span> <strong id="soundState" data-i18n="pagina:sound.off">OFF</strong>
   </button>
 
   <div class="soundVolume">
-    <span class="volLabel">VOL</span>
+    <span class="volLabel" data-i18n="pagina:sound.vol">VOL</span>
     <input id="volumeSlider" type="range" min="0" max="100" value="55" />
   </div>
 </div>    <div class="wrap">      
     <section class="grid">      
       <article class="card">      
         <div class="inner">      
-          <div class="kicker">      
-            <span class="dot"></span>      
-            <span>Uma experiência psicológica em cartas físicas</span>      
-          </div>  <div class="titleRow">  <img loading="lazy" class="titleLogo"      
-src="./logo_oficial_fundo_transparente.png"      
-alt="Logo oficial Prelúdio Jogos"      
-referrerpolicy="no-referrer">    <h1 class="title">Prelúdio<br>Jogos</h1>      
-</div>  <p class="subtitle">      
-        O site é a trilha: <strong>tempo</strong>, <strong>clima</strong> e <strong>silêncio</strong>.      
-        As cartas são o corpo — o digital só mantém a tensão viva.      
-      </p>    <div class="whisper">Entre primeiro. Depois, não tem volta.</div>      
-  <div class="rule"></div>        <div class="miniGrid">      
-    <div class="mini">      
-      <h3>Como funciona</h3>      
-      <p>Você puxa a carta física e segue. O site só cronometra e sustenta o ritmo — sem “atalhos”, sem pressa, sem fuga.</p>      
-    </div>      
-    <div class="mini">      
-      <h3>Regra de ouro</h3>      
-      <p>Silêncio é clima. Clima é medo controlado. Quando o tempo zera, termina — mesmo que alguém peça “só mais uma”.</p>      
-    </div>      
+          <div class="kicker">
+            <span class="dot"></span>
+            <span data-i18n="pagina:card1.kicker">Uma experiência psicológica em cartas físicas</span>
+          </div>  <div class="titleRow">  <img loading="lazy" class="titleLogo"
+src="./logo_oficial_fundo_transparente.png"
+data-i18n-alt="pagina:card1.logoAlt"
+alt="Logo oficial Prelúdio Jogos"
+referrerpolicy="no-referrer">    <h1 class="title">Prelúdio<br>Jogos</h1>
+</div>  <p class="subtitle" data-i18n-html="pagina:card1.subtitle">
+        O site é a trilha: <strong>tempo</strong>, <strong>clima</strong> e <strong>silêncio</strong>.
+        As cartas são o corpo — o digital só mantém a tensão viva.
+      </p>    <div class="whisper" data-i18n="pagina:card1.whisper">Entre primeiro. Depois, não tem volta.</div>
+  <div class="rule"></div>        <div class="miniGrid">
+    <div class="mini">
+      <h3 data-i18n="pagina:card1.miniHowTitle">Como funciona</h3>
+      <p data-i18n="pagina:card1.miniHowText">Você puxa a carta física e segue. O site só cronometra e sustenta o ritmo — sem "atalhos", sem pressa, sem fuga.</p>
+    </div>
+    <div class="mini">
+      <h3 data-i18n="pagina:card1.miniRuleTitle">Regra de ouro</h3>
+      <p data-i18n="pagina:card1.miniRuleText">Silêncio é clima. Clima é medo controlado. Quando o tempo zera, termina — mesmo que alguém peça "só mais uma".</p>
+    </div>
   </div>      
 </div>    </article>      <aside class="card">      
-    <div class="inner">      
-      <div class="kicker" style="justify-content:center;">      
-        <span class="dot"></span>      
-        <span>Boas-vindas • Acesso</span>      
-        <span class="dot"></span>      
-      </div>    <p class="leadTitle">      
-    Quer receber novidades e descontos?      
-    <br>Deixe seu contato e entre para a lista.      
-  </p>        <div class="rule" style="margin-left:auto;margin-right:auto;max-width:720px;"></div>        <form class="form" id="leadForm" autocomplete="on" novalidate>      
-    <div class="hpTrap" aria-hidden="true">      
-      <label for="website">Não preencha este campo</label>      
-      <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />      
-    </div>      <div class="row2">      
-  <div>      
-    <label for="nome">Nome</label>      
-    <input id="nome" name="nome" type="text" placeholder="Seu nome" inputmode="text" autocomplete="name" maxlength="80" />      
-  </div>      
-  <div>      
-    <label for="email">E-mail</label>      
-    <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" inputmode="email" autocomplete="email" maxlength="160" />      
-  </div>      
-</div>      
-
-<label class="consent" for="consent">      
-  <input id="consent" type="checkbox" />      
-  <span>Autorizo receber comunicações da <strong style="color:rgba(230,192,123,.95);">Prelúdio Jogos</strong> sobre lançamentos e descontos.</span>      
-</label>      
-
-<div class="status" id="status">Status: aguardando seu e-mail.</div>      
-
-<div class="actions">      
-  <button type="submit" id="btnLead">Entrar na lista</button>      
-  <button type="button" id="btnEntrada">Acessar a entrada</button>      
-</div>      
-
-<div class="chips" aria-label="Destaques">      
-  <div class="chip">Cartas físicas</div>      
-  <div class="chip">Timer + clima</div>      
-  <div class="chip">Ritmo de mesa</div>      
-  <div class="chip">Sem atalhos</div>      
+    <div class="inner">
+      <div class="kicker" style="justify-content:center;">
+        <span class="dot"></span>
+        <span data-i18n="pagina:card2.kicker">Boas-vindas • Acesso</span>
+        <span class="dot"></span>
+      </div>    <p class="leadTitle" data-i18n-html="pagina:card2.leadTitle">
+    Quer receber novidades e descontos?
+    <br>Deixe seu contato e entre para a lista.
+  </p>        <div class="rule" style="margin-left:auto;margin-right:auto;max-width:720px;"></div>        <form class="form" id="leadForm" autocomplete="on" novalidate>
+    <div class="hpTrap" aria-hidden="true">
+      <label for="website" data-i18n="pagina:card2.hpLabel">Não preencha este campo</label>
+      <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>      <div class="row2">
+  <div>
+    <label for="nome" data-i18n="pagina:card2.nameLabel">Nome</label>
+    <input id="nome" name="nome" type="text" data-i18n-placeholder="pagina:card2.namePlaceholder" placeholder="Seu nome" inputmode="text" autocomplete="name" maxlength="80" />
+  </div>
+  <div>
+    <label for="email" data-i18n="pagina:card2.emailLabel">E-mail</label>
+    <input id="email" name="email" type="email" data-i18n-placeholder="pagina:card2.emailPlaceholder" placeholder="seuemail@exemplo.com" inputmode="email" autocomplete="email" maxlength="160" />
+  </div>
 </div>
 
-  </form>      
-</div>    </aside>      
-</section>    <section class="launchCountdown" aria-label="Contagem regressiva de lançamento">      
-  <article class="countdownCard">      
-    <div class="countdownTop">      
-      <h2 class="countdownTitle">Lançamento em contagem regressiva</h2>      
-      <div class="countdownDate" id="launchDateText">Previsão de lançamento</div>      
-    </div>    <p class="countdownLead" id="countdownLeadText">      
-  Faltam poucos ciclos para a primeira tiragem de <strong style="color:rgba(230,192,123,.95);">SextoLugar</strong>.      
-</p>      <div class="countdownGrid" id="countdownGrid" role="timer" aria-live="polite" aria-atomic="true">      
-  <div class="countdownItem">      
-    <p class="countdownValue" id="cdDays">00</p>      
-    <div class="countdownLabel">Dias</div>      
-  </div>      
-  <div class="countdownItem">      
-    <p class="countdownValue" id="cdHours">00</p>      
-    <div class="countdownLabel">Horas</div>      
-  </div>      
-  <div class="countdownItem">      
-    <p class="countdownValue" id="cdMinutes">00</p>      
-    <div class="countdownLabel">Minutos</div>      
-  </div>      
-  <div class="countdownItem">      
-    <p class="countdownValue" id="cdSeconds">00</p>      
-    <div class="countdownLabel">Segundos</div>      
-  </div>      
-</div>      <div class="countdownTrack" aria-hidden="true">      
-  <div class="countdownBar" id="countdownBar"></div>      
-</div>      
-<div class="countdownStatus" id="countdownStatus">Preparando cronômetro de lançamento…</div>    </article>      
-</section>    <section class="below">      
-  <article class="card">      
-    <div class="inner">      
-      <h2 class="aboutTitle">SextoLugar</h2>      
-      <p class="aboutText">      
-        Um jogo físico, psicológico e imersivo. Você não “joga” no celular — você joga na mesa.      
-        O site é a trilha: ele segura o clima, cronometra a tensão e impede “atalhos”.      
-        <br><br>      
-        Recomendado para <strong>3 a 5 pessoas</strong>. Acesse a entrada, leia o ritual e comece a primeira rodada.      
-        Quando o tempo zerar, termina. <strong>Mesmo que alguém peça “só mais uma”.</strong>      
-      </p>      
-    </div>      
-  </article>      
-</section>    <footer class="footer" aria-label="Direitos autorais">      
-  © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">SextoLugar™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR      
+<label class="consent" for="consent">
+  <input id="consent" type="checkbox" />
+  <span data-i18n-html="pagina:card2.consent">Autorizo receber comunicações da <strong style="color:rgba(230,192,123,.95);">Prelúdio Jogos</strong> sobre lançamentos e descontos.</span>
+</label>
+
+<div class="status" id="status" data-i18n="pagina:card2.statusInit">Status: aguardando seu e-mail.</div>
+
+<div class="actions">
+  <button type="submit" id="btnLead" data-i18n="pagina:card2.btnLead">Entrar na lista</button>
+  <button type="button" id="btnEntrada" data-i18n="pagina:card2.btnEntrada">Acessar a entrada</button>
+</div>
+
+<div class="chips" data-i18n-aria-label="pagina:card2.chipsAria" aria-label="Destaques">
+  <div class="chip" data-i18n="pagina:card2.chip1">Cartas físicas</div>
+  <div class="chip" data-i18n="pagina:card2.chip2">Timer + clima</div>
+  <div class="chip" data-i18n="pagina:card2.chip3">Ritmo de mesa</div>
+  <div class="chip" data-i18n="pagina:card2.chip4">Sem atalhos</div>
+</div>
+
+  </form>
+</div>    </aside>
+</section>    <section class="launchCountdown" data-i18n-aria-label="pagina:countdown.aria" aria-label="Contagem regressiva de lançamento">
+  <article class="countdownCard">
+    <div class="countdownTop">
+      <h2 class="countdownTitle" data-i18n="pagina:countdown.title">Lançamento em contagem regressiva</h2>
+      <div class="countdownDate" id="launchDateText" data-i18n="pagina:countdown.date">Previsão de lançamento</div>
+    </div>    <p class="countdownLead" id="countdownLeadText" data-i18n-html="pagina:countdown.lead">
+  Faltam poucos ciclos para a primeira tiragem de <strong style="color:rgba(230,192,123,.95);">SextoLugar</strong>.
+</p>      <div class="countdownGrid" id="countdownGrid" role="timer" aria-live="polite" aria-atomic="true">
+  <div class="countdownItem">
+    <p class="countdownValue" id="cdDays">00</p>
+    <div class="countdownLabel" data-i18n="pagina:countdown.days">Dias</div>
+  </div>
+  <div class="countdownItem">
+    <p class="countdownValue" id="cdHours">00</p>
+    <div class="countdownLabel" data-i18n="pagina:countdown.hours">Horas</div>
+  </div>
+  <div class="countdownItem">
+    <p class="countdownValue" id="cdMinutes">00</p>
+    <div class="countdownLabel" data-i18n="pagina:countdown.minutes">Minutos</div>
+  </div>
+  <div class="countdownItem">
+    <p class="countdownValue" id="cdSeconds">00</p>
+    <div class="countdownLabel" data-i18n="pagina:countdown.seconds">Segundos</div>
+  </div>
+</div>      <div class="countdownTrack" aria-hidden="true">
+  <div class="countdownBar" id="countdownBar"></div>
+</div>
+<div class="countdownStatus" id="countdownStatus" data-i18n="pagina:countdown.statusInit">Preparando cronômetro de lançamento…</div>    </article>
+</section>    <section class="below">
+  <article class="card">
+    <div class="inner">
+      <h2 class="aboutTitle" data-i18n="pagina:about.title">SextoLugar</h2>
+      <p class="aboutText" data-i18n-html="pagina:about.text">
+        Um jogo físico, psicológico e imersivo. Você não "joga" no celular — você joga na mesa.
+        O site é a trilha: ele segura o clima, cronometra a tensão e impede "atalhos".
+        <br><br>
+        Recomendado para <strong>3 a 5 pessoas</strong>. Acesse a entrada, leia o ritual e comece a primeira rodada.
+        Quando o tempo zerar, termina. <strong>Mesmo que alguém peça "só mais uma".</strong>
+      </p>
+    </div>
+  </article>
+</section>    <footer class="footer" data-i18n-aria-label="pagina:footer.aria" aria-label="Direitos autorais" data-i18n-html="pagina:footer.text">
+  © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">SextoLugar™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM
 </footer>    </div>    <script>      
     (function(){      
       var field = document.getElementById("transmissionField");      
@@ -1507,9 +1528,9 @@ syncFocusState();
 
 if (staticStartFn) staticStartFn();      
 
-setTimeout(function(){      
-  titleEl.textContent = title || "UMA TRANSMISSÃO RECEBIDA";      
-}, 140);      
+setTimeout(function(){
+  titleEl.textContent = title || (window.OSL_I18N && window.OSL_I18N.t && window.OSL_I18N.t("pagina:transmission.title")) || "UMA TRANSMISSÃO RECEBIDA";
+}, 140);
 
 openTimer = setTimeout(function(){      
   typeText(text || "", typingSpeed, function(){      
@@ -2402,16 +2423,16 @@ function update(){
   var diff = target.getTime() - now.getTime();      
   if (window.preludioTick) window.preludioTick();      
 
-  if (diff <= 0){      
-    dayEl.textContent = "00";      
-    hourEl.textContent = "00";      
-    minEl.textContent = "00";      
-    secEl.textContent = "00";      
-    barEl.style.width = "100%";      
-    statusEl.textContent = "É hoje. SextoLugar foi lançado.";      
-    leadTextEl.textContent = "O ritual começou. Obrigado por estar desde o prelúdio.";      
-    return;      
-  }      
+  if (diff <= 0){
+    dayEl.textContent = "00";
+    hourEl.textContent = "00";
+    minEl.textContent = "00";
+    secEl.textContent = "00";
+    barEl.style.width = "100%";
+    statusEl.textContent = pTr("pagina:countdown.statusReleased", "É hoje. SextoLugar foi lançado.");
+    leadTextEl.textContent = pTr("pagina:countdown.leadReleased", "O ritual começou. Obrigado por estar desde o prelúdio.");
+    return;
+  }
 
   var days = Math.floor(diff / MS.day); diff -= days * MS.day;      
   var hours = Math.floor(diff / MS.hour); diff -= hours * MS.hour;      
@@ -2428,13 +2449,18 @@ function update(){
   var pct = clamp((elapsed / total) * 100, 0, 100);      
   barEl.style.width = pct.toFixed(2) + "%";      
 
-  statusEl.textContent = "Contagem ativa • " + days + " dia(s) restantes para o lançamento.";      
-}      
+  statusEl.textContent = pTr("pagina:countdown.statusActive", "Contagem ativa • {{days}} dia(s) restantes para o lançamento.", { days: days });
+}
 
-var fmt = new Intl.DateTimeFormat("pt-BR", { dateStyle:"long" });      
-dateTextEl.textContent = "Lançamento previsto: " + fmt.format(target);      
+function applyDate() {
+  var localeTag = (window.OSL_I18N && window.OSL_I18N.locale && window.OSL_I18N.locale()) || "pt-BR";
+  var fmt = new Intl.DateTimeFormat(localeTag, { dateStyle:"long" });
+  dateTextEl.textContent = pTr("pagina:countdown.datePrefix", "Lançamento previsto: {{date}}", { date: fmt.format(target) });
+}
+applyDate();
+document.addEventListener("osl:i18n-ready", applyDate);
 
-update();      
+update();
 setInterval(update, 1000);
 
 }catch(e){}
@@ -2472,31 +2498,31 @@ if (leadForm){
   leadForm.addEventListener("submit", function(e){      
     e.preventDefault();      
 
-    var trap = document.getElementById("website");      
-    if (trap && trap.value) {      
-      statusEl.textContent = "Status: envio ignorado.";      
-      return;      
-    }      
+    var trap = document.getElementById("website");
+    if (trap && trap.value) {
+      statusEl.textContent = pTr("pagina:form.ignored", "Status: envio ignorado.");
+      return;
+    }
 
-    var nome = (document.getElementById("nome").value || "").trim().slice(0, 80);      
-    var email = (document.getElementById("email").value || "").trim().toLowerCase().slice(0, 160);      
-    var consent = document.getElementById("consent").checked;      
+    var nome = (document.getElementById("nome").value || "").trim().slice(0, 80);
+    var email = (document.getElementById("email").value || "").trim().toLowerCase().slice(0, 160);
+    var consent = document.getElementById("consent").checked;
 
-    if (!email){      
-      statusEl.textContent = "Status: preencha seu e-mail.";      
-      statusEl.style.color = "rgba(255,255,255,.70)";      
-      return;      
-    }      
-    if (!validEmail(email)){      
-      statusEl.textContent = "Status: e-mail inválido.";      
-      statusEl.style.color = "rgba(255,77,77,.90)";      
-      return;      
-    }      
-    if (!consent){      
-      statusEl.textContent = "Status: marque a autorização para entrar na lista.";      
-      statusEl.style.color = "rgba(255,77,77,.90)";      
-      return;      
-    }      
+    if (!email){
+      statusEl.textContent = pTr("pagina:form.fillEmail", "Status: preencha seu e-mail.");
+      statusEl.style.color = "rgba(255,255,255,.70)";
+      return;
+    }
+    if (!validEmail(email)){
+      statusEl.textContent = pTr("pagina:form.invalidEmail", "Status: e-mail inválido.");
+      statusEl.style.color = "rgba(255,77,77,.90)";
+      return;
+    }
+    if (!consent){
+      statusEl.textContent = pTr("pagina:form.consentRequired", "Status: marque a autorização para entrar na lista.");
+      statusEl.style.color = "rgba(255,77,77,.90)";
+      return;
+    }
 
     var leads = loadLeads();      
     var now = new Date();      
@@ -2515,19 +2541,17 @@ if (leadForm){
       saveLeads(leads);      
     }      
 
-    statusEl.textContent = jaExiste      
-      ? "Status: você já está na lista. Obrigado."      
-      : "Status: salvo! Abrindo envio…";      
-    statusEl.style.color = "rgba(155,227,122,.92)";      
+    statusEl.textContent = jaExiste
+      ? pTr("pagina:form.alreadyOnList", "Status: você já está na lista. Obrigado.")
+      : pTr("pagina:form.saved", "Status: salvo! Abrindo envio…");
+    statusEl.style.color = "rgba(155,227,122,.92)";
 
-    var subject = encodeURIComponent("Novo lead — Prelúdio Jogos");      
-    var body = encodeURIComponent(      
-      "Novo lead cadastrado:\n\n" +      
-      "Nome: " + (nome || "(não informado)") + "\n" +      
-      "E-mail: " + email + "\n" +      
-      "Consentimento: SIM\n" +      
-      "Data: " + now.toLocaleString() + "\n"      
-    );      
+    var subject = encodeURIComponent(pTr("pagina:form.leadSubject", "Novo lead — Prelúdio Jogos"));
+    var body = encodeURIComponent(
+      pTr("pagina:form.leadBody",
+        "Novo lead cadastrado:\n\nNome: {{name}}\nE-mail: {{email}}\nConsentimento: SIM\nData: {{date}}\n",
+        { name: nome || pTr("pagina:form.noName", "(não informado)"), email: email, date: now.toLocaleString() })
+    );
 
     setTimeout(function(){      
       window.location.href = "mailto:" + LEAD_EMAIL_DESTINO + "?subject=" + subject + "&body=" + body;      
@@ -2535,10 +2559,14 @@ if (leadForm){
   });      
 }      
 
-var leadsNow = loadLeads();      
-if (statusEl && leadsNow.length > 0){      
-  statusEl.textContent = "Status: lista ativa. (" + leadsNow.length + " registrado(s) neste navegador)";      
+var leadsNow = loadLeads();
+function applyListStatus() {
+  if (statusEl && leadsNow.length > 0){
+    statusEl.textContent = pTr("pagina:form.listActive", "Status: lista ativa. ({{count}} registrado(s) neste navegador)", { count: leadsNow.length });
+  }
 }
+applyListStatus();
+document.addEventListener("osl:i18n-ready", applyListStatus);
 
 }catch(e){}
 })();
@@ -2581,7 +2609,9 @@ savedVol = Math.max(0, Math.min(100, savedVol));
 slider.value = String(savedVol);
 
 function setBtn(on){
-stateEl.textContent = on ? "ON" : "OFF";
+stateEl.textContent = on
+  ? pTr("pagina:sound.on", "ON")
+  : pTr("pagina:sound.off", "OFF");
 }
 setBtn(false);
 
@@ -2787,8 +2817,8 @@ function playTransmissionMessageOnly(){
 if (!audioCtx || !master || transmissionPlayedThisLoad) return;
 transmissionPlayedThisLoad = true;
 
-var text = "Olá, visitante. Seja bem-vindo. Você acaba de chegar a um lugar inédito e curioso. Preste muita atenção nas informações e siga em frente. Até logo.";      
-var title = "UMA TRANSMISSÃO RECEBIDA";      
+var text = pTr("pagina:transmission.text", "Olá, visitante. Seja bem-vindo. Você acaba de chegar a um lugar inédito e curioso. Preste muita atenção nas informações e siga em frente. Até logo.");
+var title = pTr("pagina:transmission.title", "UMA TRANSMISSÃO RECEBIDA");
 var openDelayMs = 5000;      
 var typingSpeed = 52;      
 var keepOpenAfterFinishMs = 3000;      
@@ -3079,16 +3109,18 @@ function getPreferredName(user) {
   const email = String(user?.email || "").trim();
   if (email) return email;
 
-  return "Minha conta";
+  return pTr("pagina:account.fallbackName", "Minha conta");
 }
 
+let _lastUser = null;
 function updateAccountUI(user) {
   if (!accountPanel || !accountBadge || !accountLabel || !accountName) return;
+  _lastUser = user;
 
   renderUserIcon();
 
   if (user) {
-    accountLabel.textContent = "Conta conectada";
+    accountLabel.textContent = pTr("pagina:account.labelConnected", "Conta conectada");
     accountName.textContent = getPreferredName(user);
     accountPanel.onclick = function () {
       window.location.href = "./painel.html";
@@ -3096,8 +3128,8 @@ function updateAccountUI(user) {
     return;
   }
 
-  accountLabel.textContent = "Acesso";
-  accountName.textContent = "Entrar ou acessar painel";
+  accountLabel.textContent = pTr("pagina:account.labelAccess", "Acesso");
+  accountName.textContent = pTr("pagina:account.name", "Entrar ou acessar painel");
   accountPanel.onclick = function () {
     window.location.href = "./login.html";
   };
@@ -3106,6 +3138,9 @@ function updateAccountUI(user) {
 onAuthStateChanged(auth, (user) => {
   updateAccountUI(user);
 });
+
+// Re-aplica strings quando i18n termina de carregar
+document.addEventListener("osl:i18n-ready", function() { updateAccountUI(_lastUser); });
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </body>
