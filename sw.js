@@ -1,4 +1,4 @@
-const CACHE = 'osl-v2';
+const CACHE = 'osl-v3';
 
 const PRECACHE = [
   '/favicon.png',
@@ -33,7 +33,23 @@ self.addEventListener('fetch', e => {
 
   // Ignora Firebase, APIs externas e chrome-extension
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
-  if (!url.hostname.includes('luiskirsch.github.io') && !url.hostname.includes('localhost')) return;
+  if (!url.hostname.includes('luiskirsch.github.io') && !url.hostname.includes('localhost') && !url.hostname.includes('preludiojogos')) return;
+
+  // /staging/* SEMPRE network-first (incluindo JS/CSS/JSON) — staging precisa
+  // refletir mudanças instantaneamente sem invalidação de cache. Cache só
+  // serve como fallback offline.
+  if (url.pathname.startsWith('/staging/')) {
+    e.respondWith(
+      fetch(request).then(res => {
+        if (res && res.ok && request.method === 'GET') {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(request, clone)).catch(() => {});
+        }
+        return res;
+      }).catch(() => caches.match(request))
+    );
+    return;
+  }
 
   // HTML — network-first (sempre atualizado)
   if (request.destination === 'document') {
