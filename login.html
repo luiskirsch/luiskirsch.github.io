@@ -1,13 +1,14 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="login">
 <head>
+<script src="./i18n/init.js" defer></script>
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Entrar | SEXTOLUGAR</title>
+  <title data-i18n="login:title">Entrar | SEXTOLUGAR</title>
   <link rel="icon" href="./favicon.png" />
 
   <style>
@@ -134,26 +135,26 @@
 <body>
 
   <div class="card">
-    <h1>Entrar</h1>
-    <p>Acesse sua conta para continuar o ritual.</p>
+    <h1 data-i18n="login:heading">Entrar</h1>
+    <p data-i18n="login:subtitle">Acesse sua conta para continuar o ritual.</p>
 
     <div class="field">
-      <label for="email">Email</label>
-      <input id="email" type="email" placeholder="Seu e-mail" autocomplete="email">
+      <label for="email" data-i18n="login:labels.email">Email</label>
+      <input id="email" type="email" placeholder="Seu e-mail" data-i18n-placeholder="login:placeholders.email" autocomplete="email">
     </div>
 
     <div class="field">
-      <label for="password">Senha</label>
-      <input id="password" type="password" placeholder="Sua senha" autocomplete="current-password">
+      <label for="password" data-i18n="login:labels.password">Senha</label>
+      <input id="password" type="password" placeholder="Sua senha" data-i18n-placeholder="login:placeholders.password" autocomplete="current-password">
     </div>
 
-    <button id="loginBtn">Entrar</button>
+    <button id="loginBtn" data-i18n="login:buttons.login">Entrar</button>
 
     <div class="status" id="status"></div>
 
     <div class="links">
-      Não tem conta? <a href="./cadastro.html">Criar conta</a><br>
-      <a href="#" id="forgot">Esqueci minha senha</a>
+      <span data-i18n="login:links.noAccount">Não tem conta?</span> <a href="./cadastro.html" data-i18n="login:links.createAccount">Criar conta</a><br>
+      <a href="#" id="forgot" data-i18n="login:links.forgot">Esqueci minha senha</a>
     </div>
   </div>
 

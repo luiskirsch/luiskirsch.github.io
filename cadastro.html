@@ -1,13 +1,14 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="cadastro">
 <head>
+<script src="./i18n/init.js" defer></script>
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Criar conta | SEXTOLUGAR</title>
+  <title data-i18n="cadastro:title">Criar conta | SEXTOLUGAR</title>
   <link rel="icon" href="./favicon.png" />
 
   <style>
@@ -319,11 +320,11 @@
   <main class="wrap">
     <section class="hero">
       <div class="heroInner">
-        <div class="eyebrow">Acesso oficial</div>
+        <div class="eyebrow" data-i18n="cadastro:hero.eyebrow">Acesso oficial</div>
 
-        <h1>Crie sua conta e entre no ritual.</h1>
+        <h1 data-i18n="cadastro:hero.heading">Crie sua conta e entre no ritual.</h1>
 
-        <p>
+        <p data-i18n="cadastro:hero.intro">
           Seu acesso precisa estar vinculado a uma conta real para que sua licença,
           perfil e progresso permaneçam seguros em qualquer dispositivo.
         </p>
@@ -331,17 +332,17 @@
         <div class="benefits">
           <div class="benefit">
             <div class="benefitIcon">✓</div>
-            <div class="benefitText">Acesso vinculado ao seu e-mail e não apenas ao navegador.</div>
+            <div class="benefitText" data-i18n="cadastro:hero.benefits.1">Acesso vinculado ao seu e-mail e não apenas ao navegador.</div>
           </div>
 
           <div class="benefit">
             <div class="benefitIcon">✓</div>
-            <div class="benefitText">Perfil persistente para entrar no jogo novamente quando quiser.</div>
+            <div class="benefitText" data-i18n="cadastro:hero.benefits.2">Perfil persistente para entrar no jogo novamente quando quiser.</div>
           </div>
 
           <div class="benefit">
             <div class="benefitIcon">✓</div>
-            <div class="benefitText">Base pronta para amigos, histórico, painel e expansão da plataforma.</div>
+            <div class="benefitText" data-i18n="cadastro:hero.benefits.3">Base pronta para amigos, histórico, painel e expansão da plataforma.</div>
           </div>
         </div>
       </div>
@@ -349,42 +350,45 @@
 
     <section class="card">
       <div class="cardInner">
-        <h2 class="cardTitle">Criar conta</h2>
-        <p class="cardSub">
-          Use seus dados para acessar a plataforma dSEXTOLUGAR com segurança.
+        <h2 class="cardTitle" data-i18n="cadastro:card.title">Criar conta</h2>
+        <p class="cardSub" data-i18n="cadastro:card.subtitle">
+          Use seus dados para acessar a plataforma do SEXTOLUGAR com segurança.
         </p>
 
         <form class="form" id="cadastroForm">
           <div class="field">
-            <label for="displayName">Nome de exibição</label>
+            <label for="displayName" data-i18n="cadastro:labels.displayName">Nome de exibição</label>
             <input
               id="displayName"
               type="text"
               maxlength="40"
               placeholder="Ex.: Luis"
+              data-i18n-placeholder="cadastro:placeholders.displayName"
               autocomplete="name"
             />
           </div>
 
           <div class="row">
             <div class="field">
-              <label for="email">Seu e-mail</label>
+              <label for="email" data-i18n="cadastro:labels.email">Seu e-mail</label>
               <input
                 id="email"
                 type="email"
                 maxlength="160"
                 placeholder="Digite seu e-mail"
+                data-i18n-placeholder="cadastro:placeholders.email"
                 autocomplete="email"
               />
             </div>
 
             <div class="field">
-              <label for="username">Usuário</label>
+              <label for="username" data-i18n="cadastro:labels.username">Usuário</label>
               <input
                 id="username"
                 type="text"
                 maxlength="20"
                 placeholder="Ex.: prelude_user"
+                data-i18n-placeholder="cadastro:placeholders.username"
                 autocomplete="username"
               />
             </div>
@@ -392,34 +396,36 @@
 
           <div class="row">
             <div class="field">
-              <label for="password">Senha</label>
+              <label for="password" data-i18n="cadastro:labels.password">Senha</label>
               <input
                 id="password"
                 type="password"
                 minlength="6"
                 placeholder="Mínimo de 6 caracteres"
+                data-i18n-placeholder="cadastro:placeholders.password"
                 autocomplete="new-password"
               />
             </div>
 
             <div class="field">
-              <label for="confirmPassword">Confirmar senha</label>
+              <label for="confirmPassword" data-i18n="cadastro:labels.confirmPassword">Confirmar senha</label>
               <input
                 id="confirmPassword"
                 type="password"
                 minlength="6"
                 placeholder="Repita sua senha"
+                data-i18n-placeholder="cadastro:placeholders.confirmPassword"
                 autocomplete="new-password"
               />
             </div>
           </div>
 
           <div class="actions">
-            <button class="btn btnPrimary" id="submitBtn" type="submit">
+            <button class="btn btnPrimary" id="submitBtn" type="submit" data-i18n="cadastro:buttons.submit">
               Criar conta
             </button>
 
-            <button class="btn btnGhost" id="goLoginBtn" type="button">
+            <button class="btn btnGhost" id="goLoginBtn" type="button" data-i18n="cadastro:buttons.goLogin">
               Já tenho conta
             </button>
           </div>
@@ -428,9 +434,9 @@
         </form>
 
         <div class="bottom">
-          Ao continuar, sua conta será criada no ambiente oficial do jogo.
+          <span data-i18n="cadastro:bottom.1">Ao continuar, sua conta será criada no ambiente oficial do jogo.</span>
           <br />
-          Depois disso, sua licença será vinculada manualmente no painel.
+          <span data-i18n="cadastro:bottom.2">Depois disso, sua licença será vinculada manualmente no painel.</span>
         </div>
       </div>
     </section>

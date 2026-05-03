@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>  
-<html lang="pt-br">  
-<head>  
-  <meta charset="UTF-8" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />  
-  <title>SEXTOLUGAR — Jogo</title>  
+﻿<!DOCTYPE html>
+<html lang="pt-BR" data-i18n-ns="jogo">
+<head>
+<script src="./i18n/init.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title data-i18n="jogo:title">SEXTOLUGAR — Jogo</title>
 
   <link rel="icon" href="./favicon.png">
   
@@ -237,39 +238,39 @@
   
 <body>  
   <main class="wrap">  
-    <h1>SEXTOLUGAR</h1>  
-    <p class="subtitle">Timer do jogo (cartas físicas). O som só funciona depois do primeiro toque/clique.</p>  
-  
-    <section class="card">  
-      <div class="row">  
-        <p class="timer" id="timerText">05:00</p>  
-  
-        <div class="progressWrap">  
-          <div class="progress" id="progressBar"></div>  
-        </div>  
-  
-        <p class="status" id="status">Status: pronto.</p>  
-  
-        <div class="toggle">  
-          <div class="pill" id="soundToggle">SOM: <strong>ON</strong></div>  
-          <div class="pill" id="modeToggle">MODO: <strong>RODADA</strong></div>  
-        </div>  
-  
-        <div class="actions">  
-          <button id="btnStart">Iniciar</button>  
-          <button id="btnPause">Pausar</button>  
-          <button id="btnReset">Reset</button>  
-          <button id="btnVoltar">Voltar</button>  
-        </div>  
-  
-        <div class="tiny">  
-          Ajuste rápido: clique em “Modo” para alternar (Rodada / Contagem regressiva longa).  
-        </div>  
-      </div>  
-    </section>  
+    <h1>SEXTOLUGAR</h1>
+    <p class="subtitle" data-i18n="jogo:subtitle">Timer do jogo (cartas físicas). O som só funciona depois do primeiro toque/clique.</p>
 
-    <footer class="footer">
-      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM.BR
+    <section class="card">
+      <div class="row">
+        <p class="timer" id="timerText">05:00</p>
+
+        <div class="progressWrap">
+          <div class="progress" id="progressBar"></div>
+        </div>
+
+        <p class="status" id="status" data-i18n="jogo:status.ready">Status: pronto.</p>
+
+        <div class="toggle">
+          <div class="pill" id="soundToggle" data-i18n-html="jogo:toggles.soundOn">SOM: <strong>ON</strong></div>
+          <div class="pill" id="modeToggle" data-i18n-html="jogo:toggles.modeRodada">MODO: <strong>RODADA</strong></div>
+        </div>
+
+        <div class="actions">
+          <button id="btnStart" data-i18n="jogo:buttons.start">Iniciar</button>
+          <button id="btnPause" data-i18n="jogo:buttons.pause">Pausar</button>
+          <button id="btnReset" data-i18n="jogo:buttons.reset">Reset</button>
+          <button id="btnVoltar" data-i18n="jogo:buttons.back">Voltar</button>
+        </div>
+
+        <div class="tiny" data-i18n="jogo:tiny">
+          Ajuste rápido: clique em “Modo” para alternar (Rodada / Contagem regressiva longa).
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer" data-i18n-html="jogo:footer">
+      © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">SEXTOLUGAR™</span> — TODOS OS DIREITOS RESERVADOS · PRELUDIOJOGOS.COM
     </footer>
   </main>  
   
