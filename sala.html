@@ -6603,7 +6603,7 @@
       <div class="specHeader">
         <span class="specLiveBadge">AO VIVO</span>
         <span class="specTitle" id="specTitle">Sala</span>
-        <button class="specClose" id="specClose" aria-label="Fechar">✕</button>
+        <button class="specClose" id="specClose" data-i18n-aria-label="sala:spec.closeAria" aria-label="Fechar">✕</button>
       </div>
       <div class="specBody">
         <div class="specStatus">
@@ -6633,14 +6633,14 @@
   <!-- MODAL: pedido de entrada -->
   <div class="joinOverlay" id="joinOverlay" style="display:none" aria-modal="true" role="dialog">
     <div class="joinPanel" id="joinPanel">
-      <div class="joinPanel__title">Entrar na partida</div>
+      <div class="joinPanel__title" data-i18n="sala:join.title">Entrar na partida</div>
       <div class="joinPanel__room" id="joinRoomName"></div>
       <div class="joinPanel__meta" id="joinRoomMeta"></div>
-      <div class="joinPanel__label">Seu nome</div>
+      <div class="joinPanel__label" data-i18n="sala:join.nameLabel">Seu nome</div>
       <input class="joinPanel__input" id="joinNameInput" maxlength="40" autocomplete="off">
       <div class="joinPanel__actions">
-        <button class="joinPanel__btn joinPanel__btn--secondary" id="joinCancelBtn">Cancelar</button>
-        <button class="joinPanel__btn joinPanel__btn--primary" id="joinSendBtn">Enviar pedido</button>
+        <button class="joinPanel__btn joinPanel__btn--secondary" id="joinCancelBtn" data-i18n="sala:join.cancel">Cancelar</button>
+        <button class="joinPanel__btn joinPanel__btn--primary" id="joinSendBtn" data-i18n="sala:join.send">Enviar pedido</button>
       </div>
       <div class="joinPanel__status" id="joinStatus"></div>
     </div>
@@ -6650,10 +6650,10 @@
   <div class="hostJoinAlert" id="hostJoinAlert" style="display:none">
     <div class="hostJoinAlert__title" data-i18n="sala:hostAlert.title">Pedido de entrada</div>
     <div class="hostJoinAlert__name" id="hostAlertName"></div>
-    <div class="hostJoinAlert__msg">quer participar da sua sala.</div>
+    <div class="hostJoinAlert__msg" data-i18n="sala:hostAlert.msg">quer participar da sua sala.</div>
     <div class="hostJoinAlert__btns">
-      <button class="hostJoinAlert__btn hostJoinAlert__btn--deny"    id="hostDenyBtn">Recusar</button>
-      <button class="hostJoinAlert__btn hostJoinAlert__btn--approve" id="hostApproveBtn">Aprovar</button>
+      <button class="hostJoinAlert__btn hostJoinAlert__btn--deny"    id="hostDenyBtn" data-i18n="sala:hostAlert.deny">Recusar</button>
+      <button class="hostJoinAlert__btn hostJoinAlert__btn--approve" id="hostApproveBtn" data-i18n="sala:hostAlert.approve">Aprovar</button>
     </div>
   </div>
 
@@ -6661,7 +6661,7 @@
   <div class="videoLayer">
 
     <div class="videoFocusBar" id="videoFocusBar" hidden>
-      <button class="videoFocusBtn" id="exitFocusBtn">Voltar</button>
+      <button class="videoFocusBtn" id="exitFocusBtn" data-i18n="sala:video.exitFocus">Voltar</button>
     </div>
   </div>
 
@@ -6670,164 +6670,164 @@
 
   <div id="profileModal" class="profileModal hidden">
     <div class="profileCard profileCard--large">
-      <button class="profileX" id="closeProfileXBtn" aria-label="Fechar perfil">×</button>
+      <button class="profileX" id="closeProfileXBtn" data-i18n-aria-label="sala:profile.closeAria" aria-label="Fechar perfil">×</button>
 
       <div class="profHead">
         <div class="profileAvatarLarge" id="profileAvatarLarge">🔮</div>
         <div class="profIdentity">
-          <div class="profileName" id="profileName">Jogador</div>
-          <div class="profileUsername" id="profileUsername">@jogador</div>
-          <div class="profileBio" id="profileBio">Sem descrição.</div>
+          <div class="profileName" id="profileName" data-i18n="sala:profile.namePlaceholder">Jogador</div>
+          <div class="profileUsername" id="profileUsername" data-i18n="sala:profile.usernamePlaceholder">@jogador</div>
+          <div class="profileBio" id="profileBio" data-i18n="sala:profile.bioEmpty">Sem descrição.</div>
         </div>
       </div>
 
       <nav class="profTabs" id="profTabs">
-        <button class="profTab profTab--active" data-target="profPaneIdentity">Perfil</button>
-        <button class="profTab profTab--selfOnly" data-target="profPaneSessao">Sessão</button>
-        <button class="profTab" data-target="profPanePacotes">Pacotes</button>
-        <button class="profTab profTab--selfOnly" data-target="profPaneConta">Conta</button>
+        <button class="profTab profTab--active" data-target="profPaneIdentity" data-i18n="sala:profile.tabs.identity">Perfil</button>
+        <button class="profTab profTab--selfOnly" data-target="profPaneSessao" data-i18n="sala:profile.tabs.session">Sessão</button>
+        <button class="profTab" data-target="profPanePacotes" data-i18n="sala:profile.tabs.packs">Pacotes</button>
+        <button class="profTab profTab--selfOnly" data-target="profPaneConta" data-i18n="sala:profile.tabs.account">Conta</button>
       </nav>
 
       <div id="profPaneIdentity" class="profPane profPane--active">
         <div class="profStatRow">
           <div class="profStat">
             <div class="profStatValue" id="profileGames">0</div>
-            <div class="profStatLabel">Partidas</div>
+            <div class="profStatLabel" data-i18n="sala:profile.stats.games">Partidas</div>
           </div>
           <div class="profStat">
             <div class="profStatValue" id="profileWins">0</div>
-            <div class="profStatLabel">Vitórias</div>
+            <div class="profStatLabel" data-i18n="sala:profile.stats.wins">Vitórias</div>
           </div>
           <div class="profStat">
             <div class="profStatValue" id="profileSince">—</div>
-            <div class="profStatLabel">Membro desde</div>
+            <div class="profStatLabel" data-i18n="sala:profile.stats.since">Membro desde</div>
           </div>
         </div>
 
         <div class="profileActions" id="profileActions">
-          <button class="profileActionBtn profileActionBtn--primary" id="editProfileBtn">Editar perfil</button>
-          <button class="profileActionBtn" id="addFriendBtn" hidden>Adicionar amigo</button>
+          <button class="profileActionBtn profileActionBtn--primary" id="editProfileBtn" data-i18n="sala:profile.actions.edit">Editar perfil</button>
+          <button class="profileActionBtn" id="addFriendBtn" hidden data-i18n="sala:profile.actions.addFriend">Adicionar amigo</button>
         </div>
 
         <!-- Fundo da Sala — visível direto no perfil, apenas para o próprio usuário -->
         <div class="profBgSection hidden" id="profBgSection">
-          <div class="profBgTitle">Fundo da Sala</div>
+          <div class="profBgTitle" data-i18n="sala:bg.title">Fundo da Sala</div>
           <div class="bgSwatchRow" id="bgSwatchRow">
-            <div class="bgSwatchSection">Grátis</div>
-            <button type="button" class="bgSwatch" data-bg="default" title="Padrão"
+            <div class="bgSwatchSection" data-i18n="sala:bg.free">Grátis</div>
+            <button type="button" class="bgSwatch" data-bg="default" data-i18n-title="sala:bg.swatch.default" title="Padrão"
               style="background:#080604">
-              <span>Padrão</span></button>
-            <button type="button" class="bgSwatch" data-bg="abismo" title="Abismo"
+              <span data-i18n="sala:bg.swatch.default">Padrão</span></button>
+            <button type="button" class="bgSwatch" data-bg="abismo" data-i18n-title="sala:bg.swatch.abismo" title="Abismo"
               style="background:url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=120&q=60&fit=crop') center/cover">
-              <span>Abismo</span></button>
-            <button type="button" class="bgSwatch" data-bg="floresta" title="Floresta"
+              <span data-i18n="sala:bg.swatch.abismo">Abismo</span></button>
+            <button type="button" class="bgSwatch" data-bg="floresta" data-i18n-title="sala:bg.swatch.floresta" title="Floresta"
               style="background:url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=120&q=60&fit=crop') center/cover">
-              <span>Floresta</span></button>
-            <button type="button" class="bgSwatch" data-bg="oceano" title="Oceano"
+              <span data-i18n="sala:bg.swatch.floresta">Floresta</span></button>
+            <button type="button" class="bgSwatch" data-bg="oceano" data-i18n-title="sala:bg.swatch.oceano" title="Oceano"
               style="background:url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=120&q=60&fit=crop') center/cover">
-              <span>Oceano</span></button>
-            <button type="button" class="bgSwatch" data-bg="bruma" title="Bruma"
+              <span data-i18n="sala:bg.swatch.oceano">Oceano</span></button>
+            <button type="button" class="bgSwatch" data-bg="bruma" data-i18n-title="sala:bg.swatch.bruma" title="Bruma"
               style="background:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=120&q=60&fit=crop') center/cover">
-              <span>Bruma</span></button>
-            <button type="button" class="bgSwatch" data-bg="brasa" title="Lua"
+              <span data-i18n="sala:bg.swatch.bruma">Bruma</span></button>
+            <button type="button" class="bgSwatch" data-bg="brasa" data-i18n-title="sala:bg.swatch.lua" title="Lua"
               style="background:url('https://images.unsplash.com/photo-1532693322450-2cb5c511067d?w=120&q=60&fit=crop') center/cover">
-              <span>Lua</span></button>
+              <span data-i18n="sala:bg.swatch.lua">Lua</span></button>
 
-            <div class="bgSwatchSection" id="bgExclusiveLabel">Exclusivos · Pacotes</div>
-            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="ambar" data-pack="pacote-conexao" title="Âmbar — Pacote Conexão"
+            <div class="bgSwatchSection" id="bgExclusiveLabel" data-i18n="sala:bg.exclusive">Exclusivos · Pacotes</div>
+            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="ambar" data-pack="pacote-conexao" data-i18n-title="sala:bg.swatch.ambar" title="Âmbar — Pacote Conexão"
               style="background:url('https://images.unsplash.com/photo-1512908390106-4aeee60e7a27?w=120&q=60&fit=crop') center/cover">
-              <span>Âmbar</span><span class="lockIcon">🔒</span></button>
-            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="cristal" data-pack="pacote-verdades" title="Cristal — Pacote Verdades"
+              <span data-i18n="sala:bg.short.ambar">Âmbar</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="cristal" data-pack="pacote-verdades" data-i18n-title="sala:bg.swatch.cristal" title="Cristal — Pacote Verdades"
               style="background:url('https://images.unsplash.com/photo-1477601263568-180e2c6d046e?w=120&q=60&fit=crop') center/cover">
-              <span>Cristal</span><span class="lockIcon">🔒</span></button>
-            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="chama" data-pack="pacote-conflito" title="Chama — Pacote Conflito"
+              <span data-i18n="sala:bg.short.cristal">Cristal</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="chama" data-pack="pacote-conflito" data-i18n-title="sala:bg.swatch.chama" title="Chama — Pacote Conflito"
               style="background:url('https://images.pexels.com/photos/266896/pexels-photo-266896.jpeg?auto=compress&cs=tinysrgb&w=120') center/cover">
-              <span>Chama</span><span class="lockIcon">🔒</span></button>
-            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="veu" data-pack="pacote-segredos" title="Véu — Pacote Segredos"
+              <span data-i18n="sala:bg.short.chama">Chama</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="veu" data-pack="pacote-segredos" data-i18n-title="sala:bg.swatch.veu" title="Véu — Pacote Segredos"
               style="background:url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=120&q=60&fit=crop') center/cover">
-              <span>Véu</span><span class="lockIcon">🔒</span></button>
-            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="vinho" data-pack="pacote-casais" title="Vinho — Pacote Casais"
+              <span data-i18n="sala:bg.short.veu">Véu</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch bgSwatch--pack" data-bg="vinho" data-pack="pacote-casais" data-i18n-title="sala:bg.swatch.vinho" title="Vinho — Pacote Casais"
               style="background:url('https://images.unsplash.com/photo-1504700610630-ac6aba3536d3?w=120&q=60&fit=crop') center/cover">
-              <span>Vinho</span><span class="lockIcon">🔒</span></button>
+              <span data-i18n="sala:bg.short.vinho">Vinho</span><span class="lockIcon">🔒</span></button>
           </div>
           <div id="bgPackHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
         </div>
 
         <!-- Estilo de Carta -->
         <div class="profBgSection hidden" id="profCardSection">
-          <div class="profBgTitle">Estilo de Carta</div>
+          <div class="profBgTitle" data-i18n="sala:cardStyle.title">Estilo de Carta</div>
           <div class="bgSwatchRow" id="cardStyleRow">
-            <div class="bgSwatchSection">Grátis</div>
-            <button type="button" class="bgSwatch cardStyleSwatch" data-style="padrao" title="Padrão"
+            <div class="bgSwatchSection" data-i18n="sala:cardStyle.free">Grátis</div>
+            <button type="button" class="bgSwatch cardStyleSwatch" data-style="padrao" data-i18n-title="sala:cardStyle.swatch.padrao" title="Padrão"
               style="background:linear-gradient(180deg,#261d18,#110d0a)">
-              <span>Padrão</span></button>
+              <span data-i18n="sala:cardStyle.swatch.padrao">Padrão</span></button>
 
-            <div class="bgSwatchSection">Exclusivos · Estilo de Carta</div>
-            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="dourado" title="Dourado"
+            <div class="bgSwatchSection" data-i18n="sala:cardStyle.exclusive">Exclusivos · Estilo de Carta</div>
+            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="dourado" data-i18n-title="sala:cardStyle.swatch.dourado" title="Dourado"
               style="background:linear-gradient(180deg,#2a200c,#140e04);border-color:rgba(215,176,107,.55)">
-              <span>Dourado</span><span class="lockIcon">🔒</span></button>
-            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="obsidiana" title="Obsidiana"
+              <span data-i18n="sala:cardStyle.swatch.dourado">Dourado</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="obsidiana" data-i18n-title="sala:cardStyle.swatch.obsidiana" title="Obsidiana"
               style="background:linear-gradient(180deg,#08080c,#040408)">
-              <span>Obsidiana</span><span class="lockIcon">🔒</span></button>
-            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="pergaminho" title="Pergaminho"
+              <span data-i18n="sala:cardStyle.swatch.obsidiana">Obsidiana</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="pergaminho" data-i18n-title="sala:cardStyle.swatch.pergaminho" title="Pergaminho"
               style="background:linear-gradient(180deg,#302414,#201810);border-color:rgba(200,165,110,.40)">
-              <span>Pergaminho</span><span class="lockIcon">🔒</span></button>
-            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="neon" title="Neon"
+              <span data-i18n="sala:cardStyle.swatch.pergaminho">Pergaminho</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="neon" data-i18n-title="sala:cardStyle.swatch.neon" title="Neon"
               style="background:linear-gradient(180deg,#0a0614,#04020e);border-color:rgba(120,70,240,.55)">
-              <span>Neon</span><span class="lockIcon">🔒</span></button>
+              <span data-i18n="sala:cardStyle.swatch.neon">Neon</span><span class="lockIcon">🔒</span></button>
           </div>
           <div id="cardStyleHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
         </div>
 
         <!-- Efeitos Visuais -->
         <div class="profBgSection hidden" id="profFxSection">
-          <div class="profBgTitle">Efeitos Visuais</div>
+          <div class="profBgTitle" data-i18n="sala:fx.title">Efeitos Visuais</div>
           <div class="bgSwatchRow" id="fxStyleRow">
-            <div class="bgSwatchSection">Grátis</div>
-            <button type="button" class="bgSwatch fxSwatch" data-fx="none" title="Sem efeito"
+            <div class="bgSwatchSection" data-i18n="sala:fx.free">Grátis</div>
+            <button type="button" class="bgSwatch fxSwatch" data-fx="none" data-i18n-title="sala:fx.swatch.none" title="Sem efeito"
               style="background:#080608">
-              <span>Nenhum</span></button>
+              <span data-i18n="sala:fx.swatch.noneLabel">Nenhum</span></button>
 
-            <div class="bgSwatchSection">Exclusivos · Efeitos Visuais</div>
-            <button type="button" class="bgSwatch fxSwatch fxSwatch--paid" data-fx="particulas" title="Partículas"
+            <div class="bgSwatchSection" data-i18n="sala:fx.exclusive">Exclusivos · Efeitos Visuais</div>
+            <button type="button" class="bgSwatch fxSwatch fxSwatch--paid" data-fx="particulas" data-i18n-title="sala:fx.swatch.particulas" title="Partículas"
               style="background:radial-gradient(circle,rgba(215,176,107,.4) 1.5px,transparent 1.5px),#080606;background-size:10px 10px,auto">
-              <span>Partículas</span><span class="lockIcon">🔒</span></button>
-            <button type="button" class="bgSwatch fxSwatch fxSwatch--paid" data-fx="nevoa" title="Névoa"
+              <span data-i18n="sala:fx.swatch.particulas">Partículas</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch fxSwatch fxSwatch--paid" data-fx="nevoa" data-i18n-title="sala:fx.swatch.nevoa" title="Névoa"
               style="background:radial-gradient(ellipse,rgba(80,100,160,.5),#080a12)">
-              <span>Névoa</span><span class="lockIcon">🔒</span></button>
-            <button type="button" class="bgSwatch fxSwatch fxSwatch--paid" data-fx="pulsos" title="Pulsos"
+              <span data-i18n="sala:fx.swatch.nevoa">Névoa</span><span class="lockIcon">🔒</span></button>
+            <button type="button" class="bgSwatch fxSwatch fxSwatch--paid" data-fx="pulsos" data-i18n-title="sala:fx.swatch.pulsos" title="Pulsos"
               style="background:radial-gradient(circle,rgba(215,176,107,.3),#0a0806)">
-              <span>Pulsos</span><span class="lockIcon">🔒</span></button>
+              <span data-i18n="sala:fx.swatch.pulsos">Pulsos</span><span class="lockIcon">🔒</span></button>
           </div>
           <div id="fxHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
         </div>
 
         <form class="profileEditor hidden" id="profileEditor">
           <label class="profileField">
-            <span>Nome de exibição</span>
+            <span data-i18n="sala:profile.editor.displayName">Nome de exibição</span>
             <input class="profileInput" id="editDisplayName" maxlength="40" type="text" />
           </label>
 
           <label class="profileField">
-            <span>@usuário</span>
+            <span data-i18n="sala:profile.editor.username">@usuário</span>
             <input class="profileInput" id="editUsername" maxlength="20" type="text" />
           </label>
 
           <label class="profileField">
-            <span>Bio</span>
+            <span data-i18n="sala:profile.editor.bio">Bio</span>
             <textarea class="profileTextarea" id="editBio" maxlength="180"></textarea>
           </label>
 
           <div class="profileField">
-            <span>Avatar</span>
+            <span data-i18n="sala:profile.editor.avatar">Avatar</span>
             <input type="file" id="avatarPhotoInput" accept="image/*" style="display:none">
             <div class="avatarPicker" id="avatarPicker">
 
-              <button type="button" class="avatarPhotoBtn" id="avatarPhotoBtn">
+              <button type="button" class="avatarPhotoBtn" id="avatarPhotoBtn" data-i18n="sala:profile.editor.photoBtn">
                 📷 Usar minha foto
               </button>
 
-              <div class="avatarPickerLabel">Místico</div>
+              <div class="avatarPickerLabel" data-i18n="sala:profile.avatar.mistico">Místico</div>
               <button type="button" class="avatarOption" data-avatar="🔮">🔮</button>
               <button type="button" class="avatarOption" data-avatar="🕯️">🕯️</button>
               <button type="button" class="avatarOption" data-avatar="👁️">👁️</button>
@@ -6837,7 +6837,7 @@
               <button type="button" class="avatarOption" data-avatar="🌀">🌀</button>
               <button type="button" class="avatarOption" data-avatar="⚗️">⚗️</button>
 
-              <div class="avatarPickerLabel">Personagem</div>
+              <div class="avatarPickerLabel" data-i18n="sala:profile.avatar.personagem">Personagem</div>
               <button type="button" class="avatarOption" data-avatar="🧙">🧙</button>
               <button type="button" class="avatarOption" data-avatar="🧛">🧛</button>
               <button type="button" class="avatarOption" data-avatar="🥷">🥷</button>
@@ -6847,7 +6847,7 @@
               <button type="button" class="avatarOption" data-avatar="🤖">🤖</button>
               <button type="button" class="avatarOption" data-avatar="👾">👾</button>
 
-              <div class="avatarPickerLabel">Selvagem</div>
+              <div class="avatarPickerLabel" data-i18n="sala:profile.avatar.selvagem">Selvagem</div>
               <button type="button" class="avatarOption" data-avatar="🐺">🐺</button>
               <button type="button" class="avatarOption" data-avatar="🦁">🦁</button>
               <button type="button" class="avatarOption" data-avatar="🐉">🐉</button>
@@ -6857,7 +6857,7 @@
               <button type="button" class="avatarOption" data-avatar="🐙">🐙</button>
               <button type="button" class="avatarOption" data-avatar="🦋">🦋</button>
 
-              <div class="avatarPickerLabel">Poder</div>
+              <div class="avatarPickerLabel" data-i18n="sala:profile.avatar.poder">Poder</div>
               <button type="button" class="avatarOption" data-avatar="🔥">🔥</button>
               <button type="button" class="avatarOption" data-avatar="⚡">⚡</button>
               <button type="button" class="avatarOption" data-avatar="💥">💥</button>
@@ -6867,7 +6867,7 @@
               <button type="button" class="avatarOption" data-avatar="🪄">🪄</button>
               <button type="button" class="avatarOption" data-avatar="💎">💎</button>
 
-              <div class="avatarPickerLabel">Natureza & Arte</div>
+              <div class="avatarPickerLabel" data-i18n="sala:profile.avatar.natureza">Natureza & Arte</div>
               <button type="button" class="avatarOption" data-avatar="🌊">🌊</button>
               <button type="button" class="avatarOption" data-avatar="🌿">🌿</button>
               <button type="button" class="avatarOption" data-avatar="🌺">🌺</button>
@@ -6877,10 +6877,10 @@
               <button type="button" class="avatarOption" data-avatar="🃏">🃏</button>
               <button type="button" class="avatarOption" data-avatar="♟️">♟️</button>
 
-              <div class="avatarPickerLabel">Famosos</div>
-              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/hood.jpg"     title="Encapuzado"   style="background-image:url('img/avatars/hood.jpg')"></button>
-              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/actor1.jpg"   title="Personagem"   style="background-image:url('img/avatars/actor1.jpg')"></button>
-              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/actor2.jpg"   title="Personagem"   style="background-image:url('img/avatars/actor2.jpg')"></button>
+              <div class="avatarPickerLabel" data-i18n="sala:profile.avatar.famosos">Famosos</div>
+              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/hood.jpg"     data-i18n-title="sala:profile.avatar.title.encapuzado" title="Encapuzado"   style="background-image:url('img/avatars/hood.jpg')"></button>
+              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/actor1.jpg"   data-i18n-title="sala:profile.avatar.title.personagem" title="Personagem"   style="background-image:url('img/avatars/actor1.jpg')"></button>
+              <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/actor2.jpg"   data-i18n-title="sala:profile.avatar.title.personagem" title="Personagem"   style="background-image:url('img/avatars/actor2.jpg')"></button>
               <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/mask.jpg"     title="La Casa de Papel" style="background-image:url('img/avatars/mask.jpg')"></button>
               <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/shelby.jpg"   title="Peaky Blinders"   style="background-image:url('img/avatars/shelby.jpg')"></button>
               <button type="button" class="avatarOption avatarOption--img" data-avatar-img="img/avatars/mirror.jpg"   title="Black Mirror"     style="background-image:url('img/avatars/mirror.jpg')"></button>
@@ -6890,42 +6890,42 @@
           </div>
 
           <div class="profileField">
-            <span>Cor do avatar</span>
+            <span data-i18n="sala:profile.editor.color">Cor do avatar</span>
             <div class="colorSwatchRow" id="colorSwatchRow">
-              <button type="button" class="colorSwatch" data-color="#342718" style="background:#342718" title="Âmbar"></button>
-              <button type="button" class="colorSwatch" data-color="#1a2a3a" style="background:#1a2a3a" title="Azul Profundo"></button>
-              <button type="button" class="colorSwatch" data-color="#1f2820" style="background:#1f2820" title="Verde Floresta"></button>
-              <button type="button" class="colorSwatch" data-color="#2a1a2e" style="background:#2a1a2e" title="Roxo Noturno"></button>
-              <button type="button" class="colorSwatch" data-color="#2a1010" style="background:#2a1010" title="Vinho"></button>
-              <button type="button" class="colorSwatch" data-color="#1a1a1a" style="background:#1a1a1a" title="Obsidiana"></button>
+              <button type="button" class="colorSwatch" data-color="#342718" style="background:#342718" data-i18n-title="sala:color.ambar" title="Âmbar"></button>
+              <button type="button" class="colorSwatch" data-color="#1a2a3a" style="background:#1a2a3a" data-i18n-title="sala:color.azulProfundo" title="Azul Profundo"></button>
+              <button type="button" class="colorSwatch" data-color="#1f2820" style="background:#1f2820" data-i18n-title="sala:color.verdeFloresta" title="Verde Floresta"></button>
+              <button type="button" class="colorSwatch" data-color="#2a1a2e" style="background:#2a1a2e" data-i18n-title="sala:color.roxoNoturno" title="Roxo Noturno"></button>
+              <button type="button" class="colorSwatch" data-color="#2a1010" style="background:#2a1010" data-i18n-title="sala:color.vinho" title="Vinho"></button>
+              <button type="button" class="colorSwatch" data-color="#1a1a1a" style="background:#1a1a1a" data-i18n-title="sala:color.obsidiana" title="Obsidiana"></button>
             </div>
           </div>
 
           <div class="profileEditorActions">
-            <button type="button" class="profileActionBtn" id="cancelEditProfileBtn">Cancelar</button>
-            <button type="submit" class="profileActionBtn profileActionBtn--primary" id="saveProfileBtn">Salvar perfil</button>
+            <button type="button" class="profileActionBtn" id="cancelEditProfileBtn" data-i18n="sala:profile.editor.cancel">Cancelar</button>
+            <button type="submit" class="profileActionBtn profileActionBtn--primary" id="saveProfileBtn" data-i18n="sala:profile.editor.save">Salvar perfil</button>
           </div>
         </form>
 
         <div class="friendsPanel hidden" id="friendsPanel">
 
           <div class="friendsBlock" id="friendSearchBlock" hidden>
-            <div class="friendsTitle">Buscar jogadores</div>
+            <div class="friendsTitle" data-i18n="sala:profile.friends.search">Buscar jogadores</div>
             <div class="friendSearchRow">
               <input class="friendSearchInput" id="friendSearchInput" type="text"
-                placeholder="@usuário ou nome" maxlength="40" autocomplete="off">
-              <button class="friendSearchBtn" id="friendSearchBtn">Buscar</button>
+                data-i18n-placeholder="sala:profile.friends.searchPlaceholder" placeholder="@usuário ou nome" maxlength="40" autocomplete="off">
+              <button class="friendSearchBtn" id="friendSearchBtn" data-i18n="sala:profile.friends.searchBtn">Buscar</button>
             </div>
             <div class="friendsList" id="friendSearchResults"></div>
           </div>
 
           <div class="friendsBlock" id="friendsListBlock">
-            <div class="friendsTitle">Amigos</div>
+            <div class="friendsTitle" data-i18n="sala:profile.friends.list">Amigos</div>
             <div class="friendsList" id="friendsList"></div>
           </div>
 
           <div class="friendsBlock" id="incomingRequestsBlock">
-            <div class="friendsTitle">Pedidos recebidos</div>
+            <div class="friendsTitle" data-i18n="sala:profile.friends.incoming">Pedidos recebidos</div>
             <div class="friendsList" id="incomingRequestsList"></div>
           </div>
         </div>
@@ -6934,23 +6934,23 @@
       <div id="profPaneSessao" class="profPane profPane--selfOnly">
         <div class="profInfoBlock">
           <div class="profInfoRow">
-            <span class="profInfoLabel">Sala</span>
+            <span class="profInfoLabel" data-i18n="sala:profile.session.sala">Sala</span>
             <span class="profInfoValue" id="sessSala">—</span>
           </div>
           <div class="profInfoRow">
-            <span class="profInfoLabel">Nome da Sala</span>
+            <span class="profInfoLabel" data-i18n="sala:profile.session.nomeSala">Nome da Sala</span>
             <span class="profInfoValue" id="sessNomeSala">—</span>
           </div>
           <div class="profInfoRow">
-            <span class="profInfoLabel">Papel</span>
+            <span class="profInfoLabel" data-i18n="sala:profile.session.papel">Papel</span>
             <span class="profInfoValue" id="sessPapel">—</span>
           </div>
           <div class="profInfoRow">
-            <span class="profInfoLabel">Vídeo</span>
+            <span class="profInfoLabel" data-i18n="sala:profile.session.video">Vídeo</span>
             <span class="profInfoValue" id="sessVideo">—</span>
           </div>
         </div>
-        <button class="profileActionBtn" id="copyRoomCodeBtn">Copiar código da sala</button>
+        <button class="profileActionBtn" id="copyRoomCodeBtn" data-i18n="sala:profile.session.copyCode">Copiar código da sala</button>
       </div>
 
       <div id="profPanePacotes" class="profPane">
@@ -6960,27 +6960,27 @@
       <div id="profPaneConta" class="profPane profPane--selfOnly">
         <div class="profInfoBlock">
           <div class="profInfoRow">
-            <span class="profInfoLabel">Email</span>
+            <span class="profInfoLabel" data-i18n="sala:profile.account.email">Email</span>
             <span class="profInfoValue" id="contaEmail">—</span>
           </div>
           <div class="profInfoRow">
-            <span class="profInfoLabel">Licença</span>
+            <span class="profInfoLabel" data-i18n="sala:profile.account.license">Licença</span>
             <span class="profInfoValue" id="contaLicenca">—</span>
-            <button class="profCopyBtn" id="profCopyLicBtn" title="Copiar">⎘</button>
+            <button class="profCopyBtn" id="profCopyLicBtn" data-i18n-title="sala:profile.account.copyTitle" title="Copiar">⎘</button>
           </div>
           <div class="profInfoRow">
-            <span class="profInfoLabel">Acesso</span>
+            <span class="profInfoLabel" data-i18n="sala:profile.account.access">Acesso</span>
             <span class="profInfoValue" id="contaAcesso">—</span>
           </div>
           <div class="profInfoRow">
-            <span class="profInfoLabel">UID</span>
+            <span class="profInfoLabel" data-i18n="sala:profile.account.uid">UID</span>
             <span class="profInfoValue" id="contaUid">—</span>
           </div>
         </div>
-        <button class="profileActionBtn profileActionBtn--danger" id="logoutBtn">Sair da conta</button>
+        <button class="profileActionBtn profileActionBtn--danger" id="logoutBtn" data-i18n="sala:profile.account.logout">Sair da conta</button>
       </div>
 
-      <button class="profileClose" id="closeProfileBtn">Fechar perfil</button>
+      <button class="profileClose" id="closeProfileBtn" data-i18n="sala:profile.close">Fechar perfil</button>
     </div>
   </div>
 
@@ -7120,108 +7120,109 @@
     <!-- Modal 1: Carta Bloqueada -->
     <div class="osl-modal" id="oslModalLocked">
       <div class="osl-modal-icon">🔒</div>
-      <div class="osl-modal-eyebrow">Carta Bloqueada</div>
-      <div class="osl-modal-title">Esta carta está além do deck gratuito</div>
-      <div class="osl-modal-desc">O deck básico chegou ao limite. Desbloqueie para continuar o ritual — ou pule para a próxima gratuitamente.</div>
+      <div class="osl-modal-eyebrow" data-i18n="sala:paywall.locked.eyebrow">Carta Bloqueada</div>
+      <div class="osl-modal-title" data-i18n="sala:paywall.locked.title">Esta carta está além do deck gratuito</div>
+      <div class="osl-modal-desc" data-i18n="sala:paywall.locked.desc">O deck básico chegou ao limite. Desbloqueie para continuar o ritual — ou pule para a próxima gratuitamente.</div>
       <div class="osl-modal-price">R$ 2,90</div>
       <div class="osl-checkout-fields" id="oslLockedFields">
         <div class="osl-checkout-field">
-          <label>Seu nome</label>
-          <input type="text" id="oslLockedNome" placeholder="Nome" maxlength="80">
+          <label data-i18n="sala:paywall.locked.nameLabel">Seu nome</label>
+          <input type="text" id="oslLockedNome" data-i18n-placeholder="sala:paywall.locked.namePlaceholder" placeholder="Nome" maxlength="80">
         </div>
         <div class="osl-checkout-field">
-          <label>Seu e-mail</label>
-          <input type="email" id="oslLockedEmail" placeholder="E-mail">
+          <label data-i18n="sala:paywall.locked.emailLabel">Seu e-mail</label>
+          <input type="email" id="oslLockedEmail" data-i18n-placeholder="sala:paywall.locked.emailPlaceholder" placeholder="E-mail">
         </div>
       </div>
-      <button class="osl-btn osl-btn-primary" id="oslLockedDesbloq">Desbloquear agora — R$ 2,90</button>
-      <button class="osl-btn osl-btn-secondary" id="oslLockedPular">Pular esta carta</button>
+      <button class="osl-btn osl-btn-primary" id="oslLockedDesbloq" data-i18n="sala:paywall.locked.unlock">Desbloquear agora — R$ 2,90</button>
+      <button class="osl-btn osl-btn-secondary" id="oslLockedPular" data-i18n="sala:paywall.locked.skip">Pular esta carta</button>
       <div class="osl-status" id="oslLockedStatus"></div>
     </div>
 
     <!-- Modal 2: Carta de Revelação Final -->
     <div class="osl-modal" id="oslModalFinal">
       <div class="osl-modal-icon">✨</div>
-      <div class="osl-modal-eyebrow">Evento Raro</div>
-      <div class="osl-modal-title">Uma carta de revelação final emergiu</div>
-      <div class="osl-modal-desc">Nas profundezas do ritual, esta carta apareceu. Cartas assim chegam poucas vezes por sessão — e mudam tudo.</div>
+      <div class="osl-modal-eyebrow" data-i18n="sala:paywall.final.eyebrow">Evento Raro</div>
+      <div class="osl-modal-title" data-i18n="sala:paywall.final.title">Uma carta de revelação final emergiu</div>
+      <div class="osl-modal-desc" data-i18n="sala:paywall.final.desc">Nas profundezas do ritual, esta carta apareceu. Cartas assim chegam poucas vezes por sessão — e mudam tudo.</div>
       <div class="osl-modal-price">R$ 4,90</div>
       <div class="osl-checkout-fields" id="oslFinalFields">
         <div class="osl-checkout-field">
-          <label>Seu nome</label>
-          <input type="text" id="oslFinalNome" placeholder="Nome" maxlength="80">
+          <label data-i18n="sala:paywall.locked.nameLabel">Seu nome</label>
+          <input type="text" id="oslFinalNome" data-i18n-placeholder="sala:paywall.locked.namePlaceholder" placeholder="Nome" maxlength="80">
         </div>
         <div class="osl-checkout-field">
-          <label>Seu e-mail</label>
-          <input type="email" id="oslFinalEmail" placeholder="E-mail">
+          <label data-i18n="sala:paywall.locked.emailLabel">Seu e-mail</label>
+          <input type="email" id="oslFinalEmail" data-i18n-placeholder="sala:paywall.locked.emailPlaceholder" placeholder="E-mail">
         </div>
       </div>
-      <button class="osl-btn osl-btn-primary" id="oslFinalRevelar">Revelar agora — R$ 4,90</button>
-      <button class="osl-btn osl-btn-secondary" id="oslFinalPular">Ignorar e continuar</button>
+      <button class="osl-btn osl-btn-primary" id="oslFinalRevelar" data-i18n="sala:paywall.final.reveal">Revelar agora — R$ 4,90</button>
+      <button class="osl-btn osl-btn-secondary" id="oslFinalPular" data-i18n="sala:paywall.final.skip">Ignorar e continuar</button>
       <div class="osl-status" id="oslFinalStatus"></div>
     </div>
 
     <!-- Modal 3: Segunda Chance -->
     <div class="osl-modal" id="oslModalSC">
       <div class="osl-modal-icon">🔄</div>
-      <div class="osl-modal-eyebrow">O deck acabou</div>
-      <div class="osl-modal-title">O ritual chegou ao fim</div>
-      <div class="osl-modal-desc">Todas as cartas foram reveladas. O grupo ainda está aqui? Adicione 3 cartas extras para continuar.</div>
+      <div class="osl-modal-eyebrow" data-i18n="sala:paywall.secondChance.eyebrow">O deck acabou</div>
+      <div class="osl-modal-title" data-i18n="sala:paywall.secondChance.title">O ritual chegou ao fim</div>
+      <div class="osl-modal-desc" data-i18n="sala:paywall.secondChance.desc">Todas as cartas foram reveladas. O grupo ainda está aqui? Adicione 3 cartas extras para continuar.</div>
       <div class="osl-modal-price">R$ 1,90</div>
       <div class="osl-checkout-fields" id="oslScFields">
         <div class="osl-checkout-field">
-          <label>Seu nome</label>
-          <input type="text" id="oslScNome" placeholder="Nome" maxlength="80">
+          <label data-i18n="sala:paywall.locked.nameLabel">Seu nome</label>
+          <input type="text" id="oslScNome" data-i18n-placeholder="sala:paywall.locked.namePlaceholder" placeholder="Nome" maxlength="80">
         </div>
         <div class="osl-checkout-field">
-          <label>Seu e-mail</label>
-          <input type="email" id="oslScEmail" placeholder="E-mail">
+          <label data-i18n="sala:paywall.locked.emailLabel">Seu e-mail</label>
+          <input type="email" id="oslScEmail" data-i18n-placeholder="sala:paywall.locked.emailPlaceholder" placeholder="E-mail">
         </div>
       </div>
-      <button class="osl-btn osl-btn-primary" id="oslScAdicionar">Adicionar 3 cartas — R$ 1,90</button>
-      <button class="osl-btn osl-btn-secondary" id="oslScEncerrar">Encerrar o ritual</button>
+      <button class="osl-btn osl-btn-primary" id="oslScAdicionar" data-i18n="sala:paywall.secondChance.add">Adicionar 3 cartas — R$ 1,90</button>
+      <button class="osl-btn osl-btn-secondary" id="oslScEncerrar" data-i18n="sala:paywall.secondChance.end">Encerrar o ritual</button>
       <div class="osl-status" id="oslScStatus"></div>
     </div>
 
     <!-- Modal 4: Salvar Sessão -->
     <div class="osl-modal" id="oslModalSave">
       <div class="osl-modal-icon">🔴</div>
-      <div class="osl-modal-eyebrow">Antes de sair</div>
-      <div class="osl-modal-title">Sua sessão foi gravada!</div>
-      <div class="osl-modal-desc">Este momento foi capturado. Salve agora para acessar o vídeo depois.</div>
+      <div class="osl-modal-eyebrow" data-i18n="sala:paywall.save.eyebrow">Antes de sair</div>
+      <div class="osl-modal-title" data-i18n="sala:paywall.save.title">Sua sessão foi gravada!</div>
+      <div class="osl-modal-desc" data-i18n="sala:paywall.save.desc">Este momento foi capturado. Salve agora para acessar o vídeo depois.</div>
       <div class="osl-rec-grid" id="oslRecGrid">
         <div class="osl-rec-item" id="oslRec1" onclick="oslSelecionarGravacao('gravacao-download','6.90',this)">
           <div class="osl-rec-info">
-            <div class="osl-rec-name">📥 Download MP4</div>
-            <div class="osl-rec-feat">Arquivo completo para guardar</div>
+            <div class="osl-rec-name" data-i18n="sala:paywall.save.downloadName">📥 Download MP4</div>
+            <div class="osl-rec-feat" data-i18n="sala:paywall.save.downloadFeat">Arquivo completo para guardar</div>
           </div>
           <div class="osl-rec-price">R$ 6,90</div>
         </div>
         <div class="osl-rec-item" id="oslRec2" onclick="oslSelecionarGravacao('gravacao-mensal','14.90',this)">
           <div class="osl-rec-info">
-            <div class="osl-rec-name">♾️ Plano Mensal</div>
-            <div class="osl-rec-feat">Gravações ilimitadas por 30 dias</div>
+            <div class="osl-rec-name" data-i18n="sala:paywall.save.monthlyName">♾️ Plano Mensal</div>
+            <div class="osl-rec-feat" data-i18n="sala:paywall.save.monthlyFeat">Gravações ilimitadas por 30 dias</div>
           </div>
           <div class="osl-rec-price">R$ 14,90</div>
         </div>
       </div>
       <div class="osl-checkout-fields" id="oslSaveFields">
         <div class="osl-checkout-field">
-          <label>Seu nome</label>
-          <input type="text" id="oslSaveNome" placeholder="Nome" maxlength="80">
+          <label data-i18n="sala:paywall.locked.nameLabel">Seu nome</label>
+          <input type="text" id="oslSaveNome" data-i18n-placeholder="sala:paywall.locked.namePlaceholder" placeholder="Nome" maxlength="80">
         </div>
         <div class="osl-checkout-field">
-          <label>Seu e-mail</label>
-          <input type="email" id="oslSaveEmail" placeholder="E-mail">
+          <label data-i18n="sala:paywall.locked.emailLabel">Seu e-mail</label>
+          <input type="email" id="oslSaveEmail" data-i18n-placeholder="sala:paywall.locked.emailPlaceholder" placeholder="E-mail">
         </div>
-        <button class="osl-btn osl-btn-primary" id="oslSaveSubmit">Confirmar e pagar</button>
+        <button class="osl-btn osl-btn-primary" id="oslSaveSubmit" data-i18n="sala:paywall.save.submit">Confirmar e pagar</button>
       </div>
       <div class="osl-status" id="oslSaveStatus"></div>
       <div id="oslSaveDownload" style="display:none;margin:8px 0 4px;text-align:center">
         <a id="oslSaveDownloadLink" href="#" target="_blank" rel="noopener"
+           data-i18n="sala:paywall.save.watchLink"
            style="color:#d4af37;font-weight:600;font-size:.95rem;text-decoration:underline">▶ Assistir / Baixar vídeo</a>
       </div>
-      <button class="osl-btn osl-btn-danger" id="oslSaveSair">Sair sem salvar</button>
+      <button class="osl-btn osl-btn-danger" id="oslSaveSair" data-i18n="sala:paywall.save.leave">Sair sem salvar</button>
     </div>
 
   </div>
@@ -7232,63 +7233,63 @@
 
       <!-- Step 1: Plan selection -->
       <div id="recStep1">
-        <div class="recModal-eyebrow">Memória do ritual</div>
-        <div class="recModal-title">Gravar esta sessão</div>
-        <div class="recModal-desc">A gravação captura o vídeo de todos os participantes junto com as cartas reveladas em tempo real. Escolha seu plano:</div>
+        <div class="recModal-eyebrow" data-i18n="sala:rec.step1.eyebrow">Memória do ritual</div>
+        <div class="recModal-title" data-i18n="sala:rec.step1.title">Gravar esta sessão</div>
+        <div class="recModal-desc" data-i18n="sala:rec.step1.desc">A gravação captura o vídeo de todos os participantes junto com as cartas reveladas em tempo real. Escolha seu plano:</div>
 
         <div id="recPassBadge" style="display:none; margin-top:4px; padding:10px 14px; border-radius:10px; background:rgba(120,220,120,.08); border:1px solid rgba(120,220,120,.22); color:rgba(160,240,160,.9); font-size:13px; font-weight:600;"></div>
 
         <div class="recPlanGrid" id="recPlanGrid" style="margin-top:4px">
           <div class="recPlan" id="recPlan1" onclick="recSelectPlan('gravacao-download','6.90',this)">
             <div class="recPlan-info">
-              <div class="recPlan-name">📥 Gravação + Download</div>
-              <div class="recPlan-feat">Arquivo MP4 desta sessão para guardar para sempre</div>
+              <div class="recPlan-name" data-i18n="sala:rec.step1.planDownloadName">📥 Gravação + Download</div>
+              <div class="recPlan-feat" data-i18n="sala:rec.step1.planDownloadFeat">Arquivo MP4 desta sessão para guardar para sempre</div>
             </div>
             <div class="recPlan-price">R$ 6,90</div>
           </div>
           <div class="recPlan" id="recPlan2" onclick="recSelectPlan('gravacao-mensal','14.90',this)">
             <div class="recPlan-info">
-              <div class="recPlan-name">♾️ Gravação Livre Mensal</div>
-              <div class="recPlan-feat">Sessões ilimitadas por 30 dias · Renovação manual</div>
+              <div class="recPlan-name" data-i18n="sala:rec.step1.planMonthlyName">♾️ Gravação Livre Mensal</div>
+              <div class="recPlan-feat" data-i18n="sala:rec.step1.planMonthlyFeat">Sessões ilimitadas por 30 dias · Renovação manual</div>
             </div>
-            <div class="recPlan-price">R$ 14,90<span style="font-size:10px;font-weight:400;color:rgba(215,176,107,.6)">/mês</span></div>
+            <div class="recPlan-price">R$ 14,90<span data-i18n="sala:rec.step1.planMonthlyPriceSuffix" style="font-size:10px;font-weight:400;color:rgba(215,176,107,.6)">/mês</span></div>
           </div>
         </div>
 
         <div class="recFields" id="recFields">
           <div class="recField">
-            <label>Seu nome</label>
-            <input type="text" id="recNome" placeholder="Nome completo" maxlength="80">
+            <label data-i18n="sala:rec.step1.nameLabel">Seu nome</label>
+            <input type="text" id="recNome" data-i18n-placeholder="sala:rec.step1.namePlaceholder" placeholder="Nome completo" maxlength="80">
           </div>
           <div class="recField">
-            <label>E-mail</label>
-            <input type="email" id="recEmail" placeholder="seu@email.com">
+            <label data-i18n="sala:rec.step1.emailLabel">E-mail</label>
+            <input type="email" id="recEmail" data-i18n-placeholder="sala:rec.step1.emailPlaceholder" placeholder="seu@email.com">
           </div>
         </div>
 
         <div id="recStep1Actions" style="display:none; flex-direction:column; gap:10px">
-          <button class="recBtn-primary" id="recPayBtn">Confirmar e pagar</button>
+          <button class="recBtn-primary" id="recPayBtn" data-i18n="sala:rec.step1.pay">Confirmar e pagar</button>
           <div class="recStatus" id="recPayStatus"></div>
         </div>
 
-        <button class="recBtn-secondary" id="recCancelBtn">Cancelar</button>
+        <button class="recBtn-secondary" id="recCancelBtn" data-i18n="sala:rec.step1.cancel">Cancelar</button>
       </div>
 
       <!-- Step 2: Waiting for payment + recording active -->
       <div id="recStep2" style="display:none">
-        <div class="recModal-eyebrow">Aguardando pagamento</div>
-        <div class="recModal-title">Quase lá...</div>
-        <div class="recModal-desc" id="recWaitDesc">Complete o pagamento na aba que abriu. A gravação inicia automaticamente após a confirmação.</div>
+        <div class="recModal-eyebrow" data-i18n="sala:rec.step2.eyebrow">Aguardando pagamento</div>
+        <div class="recModal-title" data-i18n="sala:rec.step2.title">Quase lá...</div>
+        <div class="recModal-desc" id="recWaitDesc" data-i18n="sala:rec.step2.desc">Complete o pagamento na aba que abriu. A gravação inicia automaticamente após a confirmação.</div>
 
         <div style="display:flex; flex-direction:column; gap:12px; margin-top:4px">
-          <div class="recStatus" id="recWaitStatus">Verificando pagamento...</div>
+          <div class="recStatus" id="recWaitStatus" data-i18n="sala:rec.step2.verifying">Verificando pagamento...</div>
           <div class="recDownloadBox" id="recDownloadBox">
-            <p>✅ Gravação concluída! Seu vídeo está pronto.</p>
-            <a class="recDownloadLink" id="recDownloadLink" href="#" target="_blank" rel="noopener">⬇ Baixar gravação</a>
+            <p data-i18n="sala:rec.step2.done">✅ Gravação concluída! Seu vídeo está pronto.</p>
+            <a class="recDownloadLink" id="recDownloadLink" href="#" target="_blank" rel="noopener" data-i18n="sala:rec.step2.download">⬇ Baixar gravação</a>
           </div>
         </div>
 
-        <button class="recBtn-secondary" id="recStep2CancelBtn">Fechar</button>
+        <button class="recBtn-secondary" id="recStep2CancelBtn" data-i18n="sala:rec.step2.close">Fechar</button>
       </div>
 
     </div>
@@ -7311,31 +7312,31 @@
   </div>
 
   <!-- ===== MOBILE BOTTOM NAV BAR ===== -->
-  <nav id="mobileBottomBar" style="display:none" aria-label="Navegação mobile">
+  <nav id="mobileBottomBar" style="display:none" data-i18n-aria-label="sala:mobile.navAria" aria-label="Navegação mobile">
 
     <!-- Left: icon buttons with labels -->
     <div class="mobileNavIcons">
       <div class="mobileNavIconWrap">
-        <button class="mobileNavIcon" id="mobileChatBtn" title="Chat" aria-label="Abrir chat">
+        <button class="mobileNavIcon" id="mobileChatBtn" data-i18n-title="sala:mobile.chatTitle" data-i18n-aria-label="sala:mobile.chatAria" title="Chat" aria-label="Abrir chat">
           💬
           <span class="badge" id="mobileChatBadge"></span>
         </button>
-        <span class="mobileNavIconLabel">Chat</span>
+        <span class="mobileNavIconLabel" data-i18n="sala:mobile.chatLabel">Chat</span>
       </div>
       <div class="mobileNavIconWrap">
-        <button class="mobileNavIcon mobileNavIcon--profile" id="mobileProfileBtn" title="Meu perfil" aria-label="Abrir perfil">
+        <button class="mobileNavIcon mobileNavIcon--profile" id="mobileProfileBtn" data-i18n-title="sala:mobile.profileTitle" data-i18n-aria-label="sala:mobile.profileAria" title="Meu perfil" aria-label="Abrir perfil">
           👤
           <span class="badge" id="mobileProfileBadge"></span>
         </button>
-        <span class="mobileNavIconLabel">Perfil</span>
+        <span class="mobileNavIconLabel" data-i18n="sala:mobile.profileLabel">Perfil</span>
       </div>
     </div>
 
     <!-- Center: action buttons -->
     <div class="mobileNavActions">
-      <button class="mobilePrimaryBtn" id="mobileRevealBtn" disabled>Revelar Próxima Carta</button>
-      <button class="mobileSecondaryBtn" id="mobileResetBtn" disabled>Reiniciar Ritual</button>
-      <button class="mobilePrimaryBtn" id="mobileStartBtn" style="display:none">Iniciar Ritual</button>
+      <button class="mobilePrimaryBtn" id="mobileRevealBtn" disabled data-i18n="sala:mobile.revealNext">Revelar Próxima Carta</button>
+      <button class="mobileSecondaryBtn" id="mobileResetBtn" disabled data-i18n="sala:mobile.resetRitual">Reiniciar Ritual</button>
+      <button class="mobilePrimaryBtn" id="mobileStartBtn" style="display:none" data-i18n="sala:mobile.startRitual">Iniciar Ritual</button>
     </div>
 
     <!-- Right: self video thumbnail -->
@@ -7343,7 +7344,7 @@
       <div id="mobileVideoThumb">
         <span class="mobileVideoOff">🎥</span>
       </div>
-      <span class="mobileNavSelfLabel">Você</span>
+      <span class="mobileNavSelfLabel" data-i18n="sala:mobile.you">Você</span>
     </div>
 
   </nav>
@@ -7354,19 +7355,19 @@
       <img loading="lazy" src="logo_oficial_fundo_transparente.png" alt="SEXTOLUGAR">
       <div id="fullscreenGateName">SEXTOLUGAR</div>
     </div>
-    <div id="fullscreenGateDesc">Para jogar em tela cheia</div>
+    <div id="fullscreenGateDesc" data-i18n="sala:fullscreenGate.desc">Para jogar em tela cheia</div>
     <div id="fullscreenGateIosHint">
       <div id="fullscreenGateIosSteps"><!-- preenchido pelo JS --></div>
     </div>
-    <button id="fullscreenGateCta">Toque para entrar</button>
+    <button id="fullscreenGateCta" data-i18n="sala:fullscreenGate.cta">Toque para entrar</button>
   </div>
 
   <!-- ===== MOBILE CHAT OVERLAY ===== -->
-  <div id="mobileChatOverlay" class="mobileOverlay" role="dialog" aria-modal="true" aria-label="Chat">
+  <div id="mobileChatOverlay" class="mobileOverlay" role="dialog" aria-modal="true" data-i18n-aria-label="sala:mobile.chatOverlayAria" aria-label="Chat">
     <div class="mobileDrawer" id="mobileChatDrawer">
       <div class="chatDrawerHeader">
-        <div class="mobileDrawerTitle">Chat</div>
-        <button class="chatDrawerClose" id="mobileChatCloseBtn" aria-label="Fechar chat">&#x2715;</button>
+        <div class="mobileDrawerTitle" data-i18n="sala:mobile.chatDrawerTitle">Chat</div>
+        <button class="chatDrawerClose" id="mobileChatCloseBtn" data-i18n-aria-label="sala:mobile.chatCloseAria" aria-label="Fechar chat">&#x2715;</button>
       </div>
       <div class="mobileDrawerBody">
         <!-- Messages cloned here by JS -->
@@ -7375,18 +7376,18 @@
       <div class="typingBar" id="mobileTypingBar"></div>
       <div class="chatComposer" style="padding:10px 16px max(14px,env(safe-area-inset-bottom)); border-top:1px solid rgba(255,255,255,.08); flex-shrink:0">
         <div class="composerRow" style="display:grid;grid-template-columns:1fr auto;gap:8px">
-          <input class="input" id="mobileMsgInput" type="text" maxlength="240" placeholder="Digite uma mensagem..." autocomplete="off" style="font-size:16px">
-          <button class="btn btnPrimary" id="mobileSendBtn">Enviar</button>
+          <input class="input" id="mobileMsgInput" type="text" maxlength="240" data-i18n-placeholder="sala:mobile.msgPlaceholder" placeholder="Digite uma mensagem..." autocomplete="off" style="font-size:16px">
+          <button class="btn btnPrimary" id="mobileSendBtn" data-i18n="sala:mobile.send">Enviar</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ===== MOBILE HISTORY OVERLAY ===== -->
-  <div id="mobileHistoryOverlay" class="mobileOverlay" role="dialog" aria-modal="true" aria-label="Histórico">
+  <div id="mobileHistoryOverlay" class="mobileOverlay" role="dialog" aria-modal="true" data-i18n-aria-label="sala:mobile.historyAria" aria-label="Histórico">
     <div class="mobileDrawer" id="mobileHistoryDrawer">
       <div class="mobileDrawerHandle"></div>
-      <div class="mobileDrawerTitle">Histórico de Cartas</div>
+      <div class="mobileDrawerTitle" data-i18n="sala:mobile.historyTitle">Histórico de Cartas</div>
       <div class="mobileDrawerBody" id="mobileHistoryList">
         <!-- Populated by JS -->
       </div>
@@ -7394,10 +7395,10 @@
   </div>
 
   <!-- ===== MOBILE VIDEO OVERLAY ===== -->
-  <div id="mobileVideoOverlay" role="dialog" aria-modal="true" aria-label="Câmera e áudio">
+  <div id="mobileVideoOverlay" role="dialog" aria-modal="true" data-i18n-aria-label="sala:mobile.videoAria" aria-label="Câmera e áudio">
     <div id="mobileVideoDrawer">
       <div class="mobileVideoDrawerHandle"></div>
-      <div class="mobileVideoDrawerTitle">Câmera &amp; Áudio</div>
+      <div class="mobileVideoDrawerTitle" data-i18n="sala:mobile.videoTitle">Câmera &amp; Áudio</div>
       <div class="mobileVideoDrawerBtns" id="mobileVideoDrawerBtns">
         <!-- Buttons injected by JS from desktop videoControlBar -->
       </div>
@@ -7434,34 +7435,48 @@
         return '<div class="iosStep"><span class="iosStepNum">' + n + '</span><span>' + html + '</span></div>';
       }
 
-      if (isIOS && !isStandalone) {
-        var stepsHtml = "";
-
-        if (isInAppIOS) {
-          // App Google, Instagram, etc — não suporta "Adicionar à Tela Inicial"
-          stepsHtml =
-            step(1, 'Toque nos <strong>3 pontos ⋯</strong> ou no ícone de compartilhar do app') +
-            step(2, 'Escolha <strong>"Abrir no Safari"</strong>') +
-            step(3, 'No Safari: toque em ' + SHARE_SVG + ' e depois em <strong>"Adicionar à Tela de Início"</strong>');
-          document.getElementById("fullscreenGateCta").textContent = "Continuar sem tela cheia";
-        } else if (isChromeIOS) {
-          // Chrome iOS
-          stepsHtml =
-            step(1, 'Toque nos <strong>3 pontos ⋯</strong> no canto inferior direito') +
-            step(2, 'Toque em <strong>"Adicionar à Tela de Início"</strong>') +
-            step(3, 'Toque em <strong>"Adicionar"</strong> e abra pelo ícone criado');
-          document.getElementById("fullscreenGateCta").textContent = "Continuar sem tela cheia";
-        } else {
-          // Safari (padrão)
-          stepsHtml =
-            step(1, 'Toque no ícone ' + SHARE_SVG + ' <strong>na barra do Safari</strong> (superior ou inferior)') +
-            step(2, 'Role e toque em <strong>"Adicionar à Tela de Início"</strong>') +
-            step(3, 'Toque em <strong>"Adicionar"</strong> e abra pelo ícone criado');
-          document.getElementById("fullscreenGateCta").textContent = "Continuar sem tela cheia";
+      function trGate(key, fallback, vars) {
+        try {
+          var t = window.OSL_I18N && window.OSL_I18N.t;
+          if (typeof t === 'function') {
+            var v = t(key, vars || {});
+            if (typeof v === 'string' && v && v !== key) return v;
+          }
+        } catch (_) { /* empty */ }
+        if (vars && fallback) {
+          return fallback.replace(/\{\{(\w+)\}\}/g, function(_, k) { return vars[k] || ''; });
         }
+        return fallback;
+      }
 
+      function renderIosSteps() {
+        var stepsHtml = "";
+        if (isInAppIOS) {
+          stepsHtml =
+            step(1, trGate('sala:fullscreenGate.iosInApp.step1', 'Toque nos <strong>3 pontos ⋯</strong> ou no ícone de compartilhar do app')) +
+            step(2, trGate('sala:fullscreenGate.iosInApp.step2', 'Escolha <strong>"Abrir no Safari"</strong>')) +
+            step(3, trGate('sala:fullscreenGate.iosInApp.step3', 'No Safari: toque em {{shareIcon}} e depois em <strong>"Adicionar à Tela de Início"</strong>', { shareIcon: SHARE_SVG }));
+        } else if (isChromeIOS) {
+          stepsHtml =
+            step(1, trGate('sala:fullscreenGate.iosChrome.step1', 'Toque nos <strong>3 pontos ⋯</strong> no canto inferior direito')) +
+            step(2, trGate('sala:fullscreenGate.iosChrome.step2', 'Toque em <strong>"Adicionar à Tela de Início"</strong>')) +
+            step(3, trGate('sala:fullscreenGate.iosChrome.step3', 'Toque em <strong>"Adicionar"</strong> e abra pelo ícone criado'));
+        } else {
+          stepsHtml =
+            step(1, trGate('sala:fullscreenGate.iosSafari.step1', 'Toque no ícone {{shareIcon}} <strong>na barra do Safari</strong> (superior ou inferior)', { shareIcon: SHARE_SVG })) +
+            step(2, trGate('sala:fullscreenGate.iosSafari.step2', 'Role e toque em <strong>"Adicionar à Tela de Início"</strong>')) +
+            step(3, trGate('sala:fullscreenGate.iosSafari.step3', 'Toque em <strong>"Adicionar"</strong> e abra pelo ícone criado'));
+        }
+        document.getElementById("fullscreenGateCta").textContent =
+          trGate('sala:fullscreenGate.ctaSkip', 'Continuar sem tela cheia');
         document.getElementById("fullscreenGateIosSteps").innerHTML = stepsHtml;
+      }
+
+      if (isIOS && !isStandalone) {
+        renderIosSteps();
         document.getElementById("fullscreenGateIosHint").style.display = "block";
+        // Re-render quando i18n carregar
+        document.addEventListener('osl:i18n-ready', renderIosSteps, { once: true });
       }
 
       var cta = document.getElementById("fullscreenGateCta");
@@ -7634,14 +7649,25 @@
         }
       })();
 
+      function trArena(key, fallback) {
+        try {
+          const t = window.OSL_I18N && window.OSL_I18N.t;
+          if (typeof t === 'function') {
+            const v = t(key);
+            if (typeof v === 'string' && v && v !== key) return v;
+          }
+        } catch (_) { /* empty */ }
+        return fallback;
+      }
+
       function activateArenaMode() {
         html.classList.add("arenaMode");
         sessionStorage.setItem("osl_arena", "1");
 
         const btn = document.getElementById("arenaBtn");
         if (btn) {
-          btn.textContent = "✕ Arena";
-          btn.title = "Sair do Modo Arena";
+          btn.textContent = trArena("sala:topbar.actions.arenaActive", "✕ Arena");
+          btn.title = trArena("sala:topbar.actions.arenaActiveTitle", "Sair do Modo Arena");
         }
 
         if (!document.fullscreenElement) {
@@ -7657,8 +7683,8 @@
 
         const btn = document.getElementById("arenaBtn");
         if (btn) {
-          btn.textContent = "⚔ Arena";
-          btn.title = "Alternar Modo Arena";
+          btn.textContent = trArena("sala:topbar.actions.arena", "⚔ Arena");
+          btn.title = trArena("sala:topbar.actions.arenaTitle", "Alternar Modo Arena");
         }
 
         if (document.fullscreenElement) {

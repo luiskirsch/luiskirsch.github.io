@@ -415,10 +415,21 @@
   </script>
   
   <script>  
-    let audioCtx = null;  
-    let soundEnabled = true;  
+    let audioCtx = null;
+    let soundEnabled = true;
     let gameBooted = false;
     let sessionStartedInPanel = false;
+
+    function tr(key, fallback) {
+      try {
+        const t = window.OSL_I18N && window.OSL_I18N.t;
+        if (typeof t === 'function') {
+          const v = t(key);
+          if (typeof v === 'string' && v && v !== key) return v;
+        }
+      } catch (_) { /* empty */ }
+      return fallback;
+    }
 
     const roomId =
       sessionStorage.getItem("osl_room_id") ||
@@ -428,18 +439,22 @@
       sessionStorage.getItem("osl_player_id") ||
       ("player-" + Math.random().toString(36).slice(2, 10));
 
-    const playerName =
-      sessionStorage.getItem("osl_player_name") || "Jogador";
+    function getPlayerName() {
+      return sessionStorage.getItem("osl_player_name") ||
+        tr("jogo:defaults.playerName", "Jogador");
+    }
 
     sessionStorage.setItem("osl_room_id", roomId);
     sessionStorage.setItem("osl_player_id", playerId);
-    sessionStorage.setItem("osl_player_name", playerName);
 
     async function bootPanelConnection() {
       if (gameBooted) return;
       gameBooted = true;
 
-      await PanelBridge.roomCreate(roomId, "Sala do Jogo", playerName);
+      const playerName = getPlayerName();
+      sessionStorage.setItem("osl_player_name", playerName);
+
+      await PanelBridge.roomCreate(roomId, tr("jogo:defaults.roomName", "Sala do Jogo"), playerName);
       await PanelBridge.playerJoin(roomId, playerId, playerName);
       await PanelBridge.video(roomId, false);
       await PanelBridge.recording(roomId, false);
@@ -526,7 +541,7 @@
       ensureAudio();  
       if (!paused) return;  
       paused = false;  
-      statusEl.textContent = "Status: rodando…";  
+      statusEl.textContent = tr("jogo:status.running", "Status: rodando…");
       clearInterval(interval);  
       interval = setInterval(() => {  
         if (remaining <= 0){  
@@ -534,7 +549,7 @@
           paused = true;  
           remaining = 0;  
           setUI();  
-          statusEl.textContent = "Status: tempo esgotado.";  
+          statusEl.textContent = tr("jogo:status.timeUp", "Status: tempo esgotado.");
           PanelBridge.sessionEnd(roomId);
           sessionStartedInPanel = false;
           return;  
@@ -549,25 +564,25 @@
       if (paused) return;  
       paused = true;  
       clearInterval(interval);  
-      statusEl.textContent = "Status: pausado.";  
+      statusEl.textContent = tr("jogo:status.paused", "Status: pausado.");
       await markSessionPause();
     }  
   
-    async function reset(){  
-      await pause();  
-      remaining = totalSeconds;  
-      setUI();  
-      statusEl.textContent = "Status: pronto.";  
+    async function reset(){
+      await pause();
+      remaining = totalSeconds;
+      setUI();
+      statusEl.textContent = tr("jogo:status.ready", "Status: pronto.");
       await markSessionReset();
-    }  
-  
-    function applyMode(){  
-      if (mode === "rodada") totalSeconds = 5 * 60;  
-      if (mode === "longo")  totalSeconds = 60 * 60;  
-      remaining = totalSeconds;  
-      setUI();  
-      statusEl.textContent = "Status: pronto.";  
-    }  
+    }
+
+    function applyMode(){
+      if (mode === "rodada") totalSeconds = 5 * 60;
+      if (mode === "longo")  totalSeconds = 60 * 60;
+      remaining = totalSeconds;
+      setUI();
+      statusEl.textContent = tr("jogo:status.ready", "Status: pronto.");
+    }
   
     btnStart.addEventListener("click", start);  
     btnPause.addEventListener("click", pause);  
@@ -578,17 +593,21 @@
       window.location.href = "./entrada.html";
     });  
   
-    soundToggle.addEventListener("click", () => {  
-      ensureAudio();  
-      soundEnabled = !soundEnabled;  
-      soundToggle.innerHTML = soundEnabled ? "SOM: <strong>ON</strong>" : "SOM: <strong>OFF</strong>";  
-    });  
-  
-    modeToggle.addEventListener("click", () => {  
-      mode = (mode === "rodada") ? "longo" : "rodada";  
-      modeToggle.innerHTML = (mode === "rodada") ? "MODO: <strong>RODADA</strong>" : "MODO: <strong>LONGO</strong>";  
-      applyMode();  
-    });  
+    soundToggle.addEventListener("click", () => {
+      ensureAudio();
+      soundEnabled = !soundEnabled;
+      soundToggle.innerHTML = soundEnabled
+        ? tr("jogo:toggles.soundOn", "SOM: <strong>ON</strong>")
+        : tr("jogo:toggles.soundOff", "SOM: <strong>OFF</strong>");
+    });
+
+    modeToggle.addEventListener("click", () => {
+      mode = (mode === "rodada") ? "longo" : "rodada";
+      modeToggle.innerHTML = (mode === "rodada")
+        ? tr("jogo:toggles.modeRodada", "MODO: <strong>RODADA</strong>")
+        : tr("jogo:toggles.modeLongo", "MODO: <strong>LONGO</strong>");
+      applyMode();
+    });
 
     window.addEventListener("beforeunload", () => {
       navigator.sendBeacon?.(
@@ -601,8 +620,17 @@
     });
   
     setUI();
-    bootPanelConnection();
-  </script>  
+
+    if (window.OSL_I18N) {
+      bootPanelConnection();
+    } else {
+      let booted = false;
+      const onReady = () => { if (!booted) { booted = true; bootPanelConnection(); } };
+      document.addEventListener("osl:i18n-ready", onReady, { once: true });
+      // Fallback: se i18n falhar/demorar, segue com fallbacks PT
+      setTimeout(onReady, 2500);
+    }
+  </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </body>  
 </html>

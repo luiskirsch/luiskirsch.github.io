@@ -1,9 +1,10 @@
 ﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-i18n-ns="mesa">
 <head>
+<script src="./i18n/init.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SEXTOLUGAR — Ritual</title>
+<title data-i18n="mesa:title">SEXTOLUGAR — Ritual</title>
 
 <style>
 
@@ -138,7 +139,7 @@ font-size:13px;
 
 <body>
 
-<div class="top">
+<div class="top" data-i18n="mesa:brand">
 SEXTOLUGAR
 </div>
 
@@ -146,19 +147,19 @@ SEXTOLUGAR
 
 <div class="table">
 
-<div class="deck" id="deck">
+<div class="deck" id="deck" data-i18n="mesa:reveal">
 REVELAR
 </div>
 
 <div class="card back" id="card">
-  <img loading="lazy" src="verso-carta.jpg" alt="verso">
+  <img loading="lazy" src="verso-carta.jpg" data-i18n-alt="mesa:verseAlt" alt="verso">
 </div>
 
 </div>
 
 <div class="history">
 
-<h3>Cartas reveladas</h3>
+<h3 data-i18n="mesa:history.title">Cartas reveladas</h3>
 
 <div class="historyList" id="history"></div>
 
@@ -166,7 +167,7 @@ REVELAR
 
 <script>
 
-const deck = [
+const DECK_FALLBACK_PT = [
 "Uma presença observa alguém da mesa.",
 "Um segredo antigo vem à tona.",
 "Alguém deve revelar algo verdadeiro.",
@@ -176,6 +177,18 @@ const deck = [
 "Uma escolha deve ser feita.",
 "Algo mudou na sala."
 ]
+
+function getDeck() {
+  const t = window.OSL_I18N && window.OSL_I18N.t;
+  if (typeof t !== 'function') return DECK_FALLBACK_PT.slice();
+  const out = [];
+  for (let i = 1; i <= 8; i++) {
+    const key = 'mesa:deck.' + i;
+    const v = t(key);
+    out.push((typeof v === 'string' && v && v !== key) ? v : DECK_FALLBACK_PT[i - 1]);
+  }
+  return out;
+}
 
 const cardEl    = document.getElementById("card")
 const historyEl = document.getElementById("history")
@@ -215,6 +228,7 @@ function reveal() {
   if (flipping) return
   flipping = true
 
+  const deck = getDeck()
   const random = deck[Math.floor(Math.random() * deck.length)]
 
   if (cardEl.classList.contains("back")) {
