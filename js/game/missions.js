@@ -8,19 +8,39 @@ import { OSL_XP, OSL_ACHIEVEMENTS } from "./effects.js";
 // ── Atribuição de missões pelo host ───────────────────────────────────────────
 export async function assignSecretMissions(players) {
   if (!S.isHost || players.length < 1) return;
-  const shuffled = [...SECRET_MISSIONS].sort(() => Math.random() - .5);
+  // Embaralha mantendo o índice original (1-based) pra usar como chave i18n
+  const indexed = SECRET_MISSIONS.map((t, i) => ({ idx: i + 1, text: t }));
+  const shuffled = [...indexed].sort(() => Math.random() - .5);
   for (let i = 0; i < players.length; i++) {
     const player = players[i];
-    let text = shuffled[i % shuffled.length];
+    const pick = shuffled[i % shuffled.length];
+    let text = pick.text;
+    let targetName = "";
     if (text.includes("{nome}")) {
       const others = players.filter(p => p.id !== player.id);
       const target = others.length ? others[Math.floor(Math.random() * others.length)] : players[(i + 1) % players.length];
-      text = text.replace("{nome}", target.name);
+      targetName = target.name;
+      text = text.replace("{nome}", targetName);
     }
     try {
-      await setDoc(doc(S.db, "salas", S.roomCode, "players", player.id), { secretMission: { text, assignedAt: Date.now() } }, { merge: true });
+      // text (PT): retrocompat + detecção por palavras-chave normalizadas (rir/elogie/etc)
+      // idx + targetName: usado no render para localizar via missions:list.{idx}
+      await setDoc(doc(S.db, "salas", S.roomCode, "players", player.id), { secretMission: { text, idx: pick.idx, targetName, assignedAt: Date.now() } }, { merge: true });
     } catch (_) {}
   }
+}
+
+// Localiza missão (idx 1-based) com interpolação de {{nome}}; fallback para text PT
+function getDisplayMissionText(mission) {
+  if (!mission) return "";
+  const idx = mission.idx;
+  const targetName = mission.targetName || "";
+  if (idx) {
+    const key = `missions:list.${idx}`;
+    const v = oslTr(key, mission.text || "", { nome: targetName });
+    if (v) return v;
+  }
+  return mission.text || "";
 }
 
 // ── Listener de missão do próprio jogador ─────────────────────────────────────
@@ -31,12 +51,14 @@ export function bindMyMission(onSnapshotFn) {
     if (!mission?.text || !mission?.assignedAt) return;
     if (mission.assignedAt === S.missionShownTs) return;
     S.missionShownTs   = mission.assignedAt;
+    // currentSecretMission permanece em PT — detecção (rir/elogie/keyword) usa normalize()
     S.currentSecretMission = mission.text;
+    S.currentSecretMissionDisplay = getDisplayMissionText(mission);
     S.missionCompleted = false;
     S.missionNameMentionCount = 0;
     stopMissionVoiceDetection();
-    showSecretMissionModal(mission.text);
-    updateMissionBadge(mission.text);
+    showSecretMissionModal(S.currentSecretMissionDisplay);
+    updateMissionBadge(S.currentSecretMissionDisplay);
     startMissionVoiceDetection();
   });
 }
@@ -111,7 +133,8 @@ export function startMissionVoiceDetection() {
   if (!SR) return;
   stopMissionVoiceDetection();
   const rec = new SR();
-  rec.lang = "pt-BR"; rec.continuous = true; rec.interimResults = true;
+  rec.lang = (window.OSL_I18N && window.OSL_I18N.locale && window.OSL_I18N.locale()) || "pt-BR";
+  rec.continuous = true; rec.interimResults = true;
   rec.onresult = (e) => {
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const t = e.results[i][0].transcript;
@@ -143,12 +166,12 @@ export function completeMission() {
     const icon = badge.querySelector(".topMeta__mission__icon");
     if (icon) icon.textContent = "✅";
     const txt = document.getElementById("missionBadgeText");
-    if (txt) txt.textContent = "Missão cumprida!";
+    if (txt) txt.textContent = oslTr("missions:ui.completed", "Missão cumprida!");
   }
 
   const toast = document.createElement("div");
   toast.style.cssText = "position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);z-index:9999;background:rgba(20,50,20,.95);border:1px solid rgba(80,200,80,.45);border-radius:10px;padding:10px 18px;color:#80d080;font-size:13px;font-weight:700;letter-spacing:.04em;white-space:nowrap;opacity:0;transition:opacity .25s ease,transform .25s ease;";
-  toast.textContent = "✅ Missão secreta cumprida!";
+  toast.textContent = oslTr("missions:ui.toastDone", "✅ Missão secreta cumprida!");
   document.body.appendChild(toast);
   requestAnimationFrame(() => requestAnimationFrame(() => { toast.style.opacity = "1"; toast.style.transform = "translateX(-50%) translateY(0)"; }));
   setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 3500);
@@ -164,11 +187,11 @@ export function showSecretMissionModal(text) {
   modal.className = "missionModal";
   modal.innerHTML = `
     <div class="missionCard">
-      <div class="missionCard__label">Missão Secreta</div>
+      <div class="missionCard__label">${oslTr("missions:ui.modalLabel", "Missão Secreta")}</div>
       <div class="missionCard__icon">🎯</div>
       <div class="missionCard__text">${escapeHtml(text)}</div>
-      <div class="missionCard__sub">Apenas você pode ver isso</div>
-      <button class="missionCard__btn" id="missionCloseBtn">ENTENDIDO</button>
+      <div class="missionCard__sub">${oslTr("missions:ui.modalSub", "Apenas você pode ver isso")}</div>
+      <button class="missionCard__btn" id="missionCloseBtn">${oslTr("missions:ui.modalConfirm", "ENTENDIDO")}</button>
     </div>`;
   document.body.appendChild(modal);
   document.getElementById("missionCloseBtn").addEventListener("click", () => {
@@ -190,7 +213,7 @@ export function updateMissionBadge(text) {
 
   badge.onclick = (e) => {
     if (e.target.closest(".topMeta__mission__btn")) return;
-    if (S.currentSecretMission) showSecretMissionModal(S.currentSecretMission);
+    if (S.currentSecretMission) showSecretMissionModal(S.currentSecretMissionDisplay || S.currentSecretMission);
   };
 
   const existing = badge.querySelector(".topMeta__mission__btn");
@@ -198,7 +221,7 @@ export function updateMissionBadge(text) {
   if (getMissionDetectionType() === "self_report") {
     const btn = document.createElement("button");
     btn.className = "topMeta__mission__btn";
-    btn.textContent = "✓ Cumpri";
+    btn.textContent = oslTr("missions:ui.selfReportBtn", "✓ Cumpri");
     btn.onclick = (e) => { e.stopPropagation(); completeMission(); };
     badge.appendChild(btn);
   }

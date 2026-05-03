@@ -48,7 +48,7 @@ export const OSL_TENSION = (() => {
   function fireMomentoCritico() {
     const n = document.createElement("div");
     n.className = "momentoCriticoNotif";
-    n.innerHTML = `<div class="momentoCriticoNotif__label">⚡ Momento Crítico</div><div class="momentoCriticoNotif__title">A sala está em chamas</div><div class="momentoCriticoNotif__sub">Tensão máxima atingida pelo grupo</div>`;
+    n.innerHTML = `<div class="momentoCriticoNotif__label">${oslTr("achievements:toast.criticalLabel", "⚡ Momento Crítico")}</div><div class="momentoCriticoNotif__title">${oslTr("achievements:toast.criticalTitle", "A sala está em chamas")}</div><div class="momentoCriticoNotif__sub">${oslTr("achievements:toast.criticalSubtitle", "Tensão máxima atingida pelo grupo")}</div>`;
     document.body.appendChild(n);
     if (S.userRef) OSL_XP.award(S.userRef, null, 15);
     OSL_ACHIEVEMENTS.onTensionCritical();
@@ -95,9 +95,10 @@ export const OSL_ACHIEVEMENTS = (() => {
     if (!_toastQueue.length) { _toastShowing = false; return; }
     _toastShowing = true;
     const b = _toastQueue.shift();
+    const localizedName = oslTr(`achievements:badges.${b.id}`, b.name);
     const t = document.createElement("div");
     t.className = "achievementToast";
-    t.innerHTML = `<div class="achievementToast__icon">${b.icon}</div><div class="achievementToast__body"><div class="achievementToast__name">${escapeHtml(b.name)}</div><div class="achievementToast__sub">Conquista desbloqueada!</div></div>`;
+    t.innerHTML = `<div class="achievementToast__icon">${b.icon}</div><div class="achievementToast__body"><div class="achievementToast__name">${escapeHtml(localizedName)}</div><div class="achievementToast__sub">${oslTr("achievements:toast.unlocked", "Conquista desbloqueada!")}</div></div>`;
     document.body.appendChild(t);
     requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add("achievementToast--visible")));
     setTimeout(() => { t.classList.remove("achievementToast--visible"); setTimeout(() => { t.remove(); drainQueue(); }, 400); }, 4000);
@@ -164,7 +165,7 @@ export function initPressureBtn() {
     if (_pressureVotedThisCard) return;
     _pressureVotedThisCard = true;
     btn.classList.add("pressureBtn--voted");
-    btn.textContent = "✓ Votado";
+    btn.textContent = oslTr("achievements:effects.votedButton", "✓ Votado");
     if (S.userRef) OSL_XP.award(S.userRef, "PRESSURE_VOTE");
     OSL_ACHIEVEMENTS.onPressureVote();
     try {
@@ -177,7 +178,7 @@ export function initPressureBtn() {
 export function resetPressureBtn() {
   _pressureVotedThisCard = false;
   const btn = document.getElementById("pressureBtn");
-  if (btn) { btn.classList.remove("pressureBtn--voted"); btn.textContent = "🔥 Quer mais"; }
+  if (btn) { btn.classList.remove("pressureBtn--voted"); btn.textContent = oslTr("achievements:effects.wantMoreButton", "🔥 Quer mais"); }
 }
 
 export function bindSocialPressure() {
@@ -191,7 +192,7 @@ export function bindSocialPressure() {
       if (sp.votedBy !== S.playerName) {
         const n = document.createElement("div");
         n.className = "pressureNotif";
-        n.innerHTML = `A sala quer mais<div class="pressureNotif__sub">${escapeHtml(sp.votedBy)} votou para continuar</div>`;
+        n.innerHTML = `${oslTr("achievements:toast.socialPressureMain", "A sala quer mais")}<div class="pressureNotif__sub">${oslTr("achievements:toast.socialPressureSub", "{{name}} votou para continuar", { name: escapeHtml(sp.votedBy) })}</div>`;
         document.body.appendChild(n);
         OSL_TENSION.heat(18);
         setTimeout(() => { n.classList.add("pressureNotif--out"); setTimeout(() => n.remove(), 380); }, 3500);
@@ -259,8 +260,8 @@ export function checkAIDetection(aiDetection) {
   if (!toast || !msg) return;
   if (!aiDetection?.detectedAt || Date.now() - aiDetection.detectedAt > 30000) { toast.classList.remove("aiDetectToast--visible"); return; }
   msg.textContent = aiDetection.source === "voice"
-    ? `${aiDetection.playerName} terminou de falar`
-    : `${aiDetection.playerName} respondeu no chat`;
+    ? oslTr("achievements:ai.spokeFinished", "{{playerName}} terminou de falar", { playerName: aiDetection.playerName })
+    : oslTr("achievements:ai.chatReply", "{{playerName}} respondeu no chat", { playerName: aiDetection.playerName });
   toast.classList.add("aiDetectToast--visible");
 }
 
@@ -339,7 +340,9 @@ export function renderActiveEffect(effect) {
 
   const titleEl   = panel.querySelector(".effectPanel__title");
   const bodyEl    = panel.querySelector(".effectPanel__body");
-  const phaseLabel = effect.phase === "deathrattle" ? "⚰ DEATHRATTLE" : "⚡ BATTLECRY";
+  const phaseLabel = effect.phase === "deathrattle"
+    ? oslTr("achievements:effects.deathrattleLabel", "⚰ DEATHRATTLE")
+    : oslTr("achievements:effects.battlecryLabel", "⚡ BATTLECRY");
   if (titleEl) titleEl.textContent = phaseLabel;
 
   const old = panel.querySelector(".effectPanel__confirm");
@@ -352,7 +355,7 @@ export function renderActiveEffect(effect) {
       const names = effect.params.targetId2
         ? `${effect.params.targetName} & ${effect.params.targetName2}`
         : effect.params.targetName;
-      if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__highlight">${names}</span><br>${effect.label || "está em foco"}`;
+      if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__highlight">${names}</span><br>${effect.label || oslTr("achievements:vote.defaultFocusLabel", "está em foco")}`;
       startAIVAD(effect);
       break;
     }
@@ -379,24 +382,24 @@ export function renderActiveEffect(effect) {
       const totalVoted   = Object.keys(votes).length;
       const totalPlayers = S.currentPlayers.length || 1;
       if (bodyEl) bodyEl.innerHTML = `
-        <div class="effectPanel__question">${effect.params.question || "Vote:"}</div>
+        <div class="effectPanel__question">${effect.params.question || oslTr("achievements:vote.defaultQuestion", "Vote:")}</div>
         <div class="effectPanel__voteOptions">
           ${opts.map(opt => `<button class="effectPanel__voteBtn${myVote === opt ? " effectPanel__voteBtn--active" : ""}" onclick="castEffectVote('${opt.replace(/'/g,"\\'")}')">
             ${opt}${voteCounts[opt] ? ` <span class="effectPanel__voteCount">${voteCounts[opt]}</span>` : ""}
           </button>`).join("")}
         </div>
-        <div class="effectPanel__voteProgress">${totalVoted}/${totalPlayers} votaram</div>`;
+        <div class="effectPanel__voteProgress">${oslTr("achievements:vote.progress", "{{voted}}/{{total}} votaram", { voted: totalVoted, total: totalPlayers })}</div>`;
       if (S.isHost && totalVoted >= totalPlayers) setTimeout(() => resolveActiveEffect(getVoteWinner(votes)), 600);
       break;
     }
     case "give_xp": {
-      if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__xp">+${effect.params.amount || 10} XP</span><br>para todos na sala!`;
+      if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__xp">${oslTr("achievements:effects.xpAmount", "+{{amount}} XP", { amount: effect.params.amount || 10 })}</span><br>${oslTr("achievements:effects.xpForAll", "para todos na sala!")}`;
       if (!S.isHost) OSL_XP.award(S.userRef, null, effect.params.amount).catch(() => {});
       if (S.isHost) setTimeout(() => resolveActiveEffect(), 3000);
       break;
     }
     case "next_category": {
-      if (bodyEl) bodyEl.innerHTML = `Próxima carta será de <strong>${effect.params.category}</strong>`;
+      if (bodyEl) bodyEl.innerHTML = oslTr("achievements:effects.nextCategory", "Próxima carta será de <strong>{{category}}</strong>", { category: effect.params.category });
       if (S.isHost) setTimeout(() => resolveActiveEffect(), 3000);
       break;
     }
@@ -408,7 +411,7 @@ export function renderActiveEffect(effect) {
   if (needsConfirm && S.isHost) {
     const btn = document.createElement("button");
     btn.className = "effectPanel__confirm";
-    btn.textContent = "Concluído ✓";
+    btn.textContent = oslTr("achievements:effects.doneButton", "Concluído ✓");
     btn.onclick = resolveActiveEffect;
     panel.appendChild(btn);
   }

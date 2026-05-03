@@ -36,7 +36,10 @@ const OSL_EFFECTS = {
   },
   prepareCard(card, players) {
     if (!card) return { battlecry: null, deathrattle: null };
-    const effects = OSL_CARD_EFFECTS[card.title] || {};
+    // OSL_CARD_EFFECTS usa títulos PT como chave; quando a carta foi localizada,
+    // _origTitle guarda o título original PT pra lookup correto em qualquer locale.
+    const lookupKey = card._origTitle || card.title;
+    const effects = OSL_CARD_EFFECTS[lookupKey] || {};
     return {
       battlecry:   effects.battlecry   ? this.prepare(effects.battlecry,   players, "battlecry")   : null,
       deathrattle: effects.deathrattle ? this.prepare(effects.deathrattle, players, "deathrattle") : null
