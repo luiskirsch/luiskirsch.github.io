@@ -1,0 +1,498 @@
+/* ============================================================
+   THEME: valentines-2026 · Dia dos Namorados (jun/2026)
+   Mood: íntimo, romântico maduro (sem clichê de novela).
+   Paleta:
+     bg base       #1a060e   (bordô profundo, quase preto)
+     bg deep       #0f0408
+     accent rosa   #ff7a96   (rosa quente, não candy)
+     accent gold   #d4a574   (dourado quente)
+     text          #f7e8ec   (off-white quente)
+     muted         rgba(247,232,236,0.65)
+   ============================================================ */
+
+body.theme-valentines {
+  background:
+    radial-gradient(60% 80% at 50% 0%, rgba(255,122,150,0.12), transparent 60%),
+    radial-gradient(80% 60% at 100% 100%, rgba(212,165,116,0.08), transparent 70%),
+    #1a060e !important;
+  color: #f7e8ec !important;
+}
+
+body.theme-valentines::before,
+body.theme-valentines::after { display: none !important; }
+
+/* ──────────────────────────────────────────────────────────
+   TOPBAR — bordô translúcido com brilho rosa sutil
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines .topBar,
+body.theme-valentines .topbar,
+body.theme-valentines #topBar {
+  background: linear-gradient(180deg, rgba(26,6,14,0.92), rgba(15,4,8,0.92)) !important;
+  border-bottom: 1px solid rgba(255,122,150,0.18) !important;
+  box-shadow: 0 1px 0 rgba(255,122,150,0.08), 0 12px 32px -16px rgba(0,0,0,0.50) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+body.theme-valentines .topActionBtn {
+  background: rgba(255,122,150,0.06) !important;
+  border: 1px solid rgba(255,122,150,0.20) !important;
+  color: #f7e8ec !important;
+  letter-spacing: 0.04em !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+}
+body.theme-valentines .topActionBtn:hover {
+  background: rgba(255,122,150,0.12) !important;
+  border-color: rgba(255,122,150,0.32) !important;
+}
+body.theme-valentines .topActionBtn.primary {
+  background: linear-gradient(135deg, #ff7a96, #d4506a) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px -4px rgba(255,122,150,0.50), inset 0 1px 0 rgba(255,255,255,0.20) !important;
+}
+body.theme-valentines .topActionBtn.primary:hover {
+  background: linear-gradient(135deg, #ff8aa3, #e05a78) !important;
+}
+
+body.theme-valentines .videoCtrlBtn {
+  background: rgba(255,122,150,0.06) !important;
+  border: 1px solid rgba(255,122,150,0.20) !important;
+  color: #f7e8ec !important;
+  border-radius: 10px !important;
+}
+body.theme-valentines .videoCtrlBtn.primary {
+  background: linear-gradient(135deg, #ff7a96, #d4506a) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px -4px rgba(255,122,150,0.50) !important;
+}
+body.theme-valentines .videoCtrlBtn.danger {
+  background: rgba(180,40,60,0.16) !important;
+  border-color: rgba(255,90,110,0.45) !important;
+  color: #ffb0bd !important;
+}
+
+body.theme-valentines .eyebrow,
+body.theme-valentines .eyebrow__status {
+  color: rgba(255,122,150,0.85) !important;
+  letter-spacing: 0.10em !important;
+  font-weight: 500 !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   XP card mantém estilo de jogo, mas com cores valentines
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines #xpCardLevel { color: #f7e8ec !important; }
+body.theme-valentines #xpCardFill {
+  background: linear-gradient(90deg, #ff7a96, #d4a574) !important;
+}
+body.theme-valentines #xpCardXp,
+body.theme-valentines #xpCardNums { color: rgba(247,232,236,0.65) !important; }
+
+/* ──────────────────────────────────────────────────────────
+   SIDEBAR — bordô cards translúcidos
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines .sidebar,
+body.theme-valentines #sidebar {
+  background: rgba(26,6,14,0.78) !important;
+  border-right: 1px solid rgba(255,122,150,0.14) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+body.theme-valentines .sectionTitle,
+body.theme-valentines h2.sectionTitle,
+body.theme-valentines h2 {
+  color: #f7e8ec !important;
+  font-weight: 600 !important;
+}
+
+body.theme-valentines .player {
+  background: rgba(255,122,150,0.04) !important;
+  border: 1px solid rgba(255,122,150,0.12) !important;
+  border-radius: 12px !important;
+  margin-bottom: 6px !important;
+}
+body.theme-valentines .player:hover {
+  background: rgba(255,122,150,0.08) !important;
+  border-color: rgba(255,122,150,0.22) !important;
+}
+body.theme-valentines .playerName { color: #f7e8ec !important; font-weight: 500 !important; }
+body.theme-valentines .playerRole { color: rgba(247,232,236,0.65) !important; }
+body.theme-valentines .playerStatus,
+body.theme-valentines .playerHost {
+  background: rgba(255,122,150,0.18) !important;
+  color: #ffb0bd !important;
+  border: 1px solid rgba(255,122,150,0.30) !important;
+  font-weight: 500 !important;
+  border-radius: 999px !important;
+}
+body.theme-valentines .avatar {
+  background: linear-gradient(135deg, rgba(255,122,150,0.20), rgba(212,165,116,0.18)) !important;
+  color: #ffb0bd !important;
+}
+
+body.theme-valentines .emptyState,
+body.theme-valentines #playersEmpty,
+body.theme-valentines .chatEmpty {
+  color: rgba(247,232,236,0.70) !important;
+  background: rgba(255,122,150,0.04) !important;
+  border: 1px dashed rgba(255,122,150,0.18) !important;
+  border-radius: 12px !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   CHAT — íntimo, mensagens próprias rosa
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines .chatBox,
+body.theme-valentines #chat,
+body.theme-valentines #messages {
+  background: rgba(15,4,8,0.50) !important;
+}
+body.theme-valentines .message {
+  background: rgba(255,122,150,0.06) !important;
+  border: 1px solid rgba(255,122,150,0.14) !important;
+  color: #f7e8ec !important;
+  border-radius: 14px !important;
+}
+body.theme-valentines .message.me {
+  background: linear-gradient(135deg, #ff7a96, #d4506a) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px -4px rgba(255,122,150,0.40) !important;
+}
+body.theme-valentines .message.me .msgTime { color: rgba(255,255,255,0.75) !important; }
+body.theme-valentines .message.system {
+  background: transparent !important;
+  border: none !important;
+  border-left: 2px solid rgba(255,122,150,0.40) !important;
+  color: rgba(247,232,236,0.65) !important;
+  font-style: italic !important;
+  padding-left: 12px !important;
+  border-radius: 0 !important;
+}
+body.theme-valentines .message .meta { color: rgba(255,122,150,0.85) !important; font-weight: 500 !important; }
+body.theme-valentines .message .msgTime { color: rgba(247,232,236,0.50) !important; }
+
+body.theme-valentines #messageInput,
+body.theme-valentines .composer input,
+body.theme-valentines .input {
+  background: rgba(15,4,8,0.60) !important;
+  border: 1px solid rgba(255,122,150,0.22) !important;
+  color: #f7e8ec !important;
+  border-radius: 10px !important;
+}
+body.theme-valentines #messageInput::placeholder,
+body.theme-valentines .composer input::placeholder,
+body.theme-valentines .input::placeholder { color: rgba(247,232,236,0.42) !important; }
+body.theme-valentines #messageInput:focus,
+body.theme-valentines .composer input:focus,
+body.theme-valentines .input:focus {
+  outline: none !important;
+  border-color: #ff7a96 !important;
+  box-shadow: 0 0 0 3px rgba(255,122,150,0.18) !important;
+}
+body.theme-valentines .sendIconBtn { color: #ff7a96 !important; }
+
+body.theme-valentines .typingBar { color: rgba(255,122,150,0.85) !important; font-style: italic !important; }
+
+/* Botões primários */
+body.theme-valentines .btn,
+body.theme-valentines .btnPrimary,
+body.theme-valentines #startBtn {
+  background: linear-gradient(135deg, #ff7a96, #d4506a) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  letter-spacing: 0.04em !important;
+  font-weight: 600 !important;
+  box-shadow: 0 6px 20px -6px rgba(255,122,150,0.50), inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+body.theme-valentines .btn:hover,
+body.theme-valentines .btnPrimary:hover,
+body.theme-valentines #startBtn:hover {
+  background: linear-gradient(135deg, #ff8aa3, #e05a78) !important;
+  box-shadow: 0 8px 24px -6px rgba(255,122,150,0.60) !important;
+}
+body.theme-valentines .btn:disabled,
+body.theme-valentines .btnPrimary:disabled,
+body.theme-valentines #startBtn:disabled {
+  background: rgba(255,122,150,0.20) !important;
+  color: rgba(247,232,236,0.40) !important;
+  box-shadow: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   MESA / CARTA — pergaminho rosa
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines .table,
+body.theme-valentines #table,
+body.theme-valentines .cardCenter {
+  background: transparent !important;
+}
+
+body.theme-valentines .ritualCard,
+body.theme-valentines .currentCardCard,
+body.theme-valentines #ritualCardWrap,
+body.theme-valentines .cardWrap {
+  background:
+    radial-gradient(80% 60% at 50% 0%, rgba(255,122,150,0.12), transparent 70%),
+    linear-gradient(180deg, rgba(255,122,150,0.06), rgba(15,4,8,0.50)) !important;
+  border: 1px solid rgba(255,122,150,0.22) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    0 1px 0 rgba(255,122,150,0.10),
+    0 32px 64px -24px rgba(0,0,0,0.65),
+    0 12px 24px -16px rgba(255,122,150,0.20) !important;
+  color: #f7e8ec !important;
+}
+
+body.theme-valentines #ritualCardType {
+  color: #ff7a96 !important;
+  letter-spacing: 0.18em !important;
+  font-weight: 600 !important;
+}
+body.theme-valentines #ritualCardTitle {
+  color: #f7e8ec !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.005em !important;
+  text-shadow: 0 2px 16px rgba(255,122,150,0.20) !important;
+}
+body.theme-valentines #ritualCardText,
+body.theme-valentines #ritualCardRule,
+body.theme-valentines #ritualCardSubrule { color: #f7e8ec !important; line-height: 1.6 !important; }
+body.theme-valentines #ritualCardPhrase {
+  color: #d4a574 !important;
+  font-style: italic !important;
+}
+body.theme-valentines #ritualCardDivider,
+body.theme-valentines #ritualSubruleDivider {
+  background: linear-gradient(90deg, transparent, rgba(255,122,150,0.45), transparent) !important;
+  height: 1px !important;
+}
+body.theme-valentines #deckInfo {
+  color: rgba(247,232,236,0.65) !important;
+  letter-spacing: 0.04em !important;
+}
+
+body.theme-valentines .videoBtn {
+  background: rgba(255,122,150,0.06) !important;
+  border: 1px solid rgba(255,122,150,0.22) !important;
+  color: #f7e8ec !important;
+  border-radius: 10px !important;
+}
+body.theme-valentines .videoBtn:hover { background: rgba(255,122,150,0.12) !important; }
+body.theme-valentines .videoBtn.primary {
+  background: linear-gradient(135deg, #ff7a96, #d4506a) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px -6px rgba(255,122,150,0.50) !important;
+}
+
+/* Histórico */
+body.theme-valentines .historyItem {
+  background: rgba(255,122,150,0.05) !important;
+  border: 1px solid rgba(255,122,150,0.14) !important;
+  color: #f7e8ec !important;
+  border-radius: 12px !important;
+}
+body.theme-valentines .historyType {
+  color: #ff7a96 !important;
+  letter-spacing: 0.10em !important;
+  font-weight: 600 !important;
+}
+body.theme-valentines .historyText { color: #f7e8ec !important; }
+
+/* ──────────────────────────────────────────────────────────
+   VÍDEO — moldura rosa sutil
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines .videoTile {
+  border: 1px solid rgba(255,122,150,0.22) !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 1px 0 rgba(255,122,150,0.10),
+    0 24px 48px -24px rgba(0,0,0,0.65),
+    0 8px 16px -12px rgba(255,122,150,0.18) !important;
+  background: #0a0405 !important;
+  overflow: hidden !important;
+}
+body.theme-valentines .videoTile .videoCameraOff {
+  background: linear-gradient(135deg, #1a060e 0%, #2a0c18 100%) !important;
+  color: rgba(247,232,236,0.78) !important;
+}
+body.theme-valentines .videoTile .videoTileName {
+  background: rgba(15,4,8,0.85) !important;
+  color: #f7e8ec !important;
+  font-weight: 500 !important;
+  border: 1px solid rgba(255,122,150,0.18) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   FOOTER · Tensão · pequenos detalhes
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines .footerBar {
+  background: rgba(15,4,8,0.78) !important;
+  border-top: 1px solid rgba(255,122,150,0.14) !important;
+  color: rgba(247,232,236,0.65) !important;
+}
+body.theme-valentines .footerBar strong { color: #ff7a96 !important; }
+
+body.theme-valentines .tensionMeter__label { color: rgba(255,122,150,0.85) !important; }
+body.theme-valentines .tensionMeter__fill { background: linear-gradient(90deg, #ff7a96, #d4a574, #ff5f7e) !important; }
+
+body.theme-valentines .reactionBar__btn {
+  background: rgba(255,122,150,0.06) !important;
+  border: 1px solid rgba(255,122,150,0.18) !important;
+}
+body.theme-valentines .reactionBar__btn:hover {
+  background: rgba(255,122,150,0.14) !important;
+  border-color: rgba(255,122,150,0.32) !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   PROFILE MODAL
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines .profileModal { background: rgba(15,4,8,0.65) !important; backdrop-filter: blur(8px) !important; }
+body.theme-valentines .profileCard {
+  background: linear-gradient(180deg, #1a060e, #0f0408) !important;
+  color: #f7e8ec !important;
+  border: 1px solid rgba(255,122,150,0.18) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 32px 64px -16px rgba(0,0,0,0.65) !important;
+}
+body.theme-valentines .profileName { color: #f7e8ec !important; font-weight: 600 !important; }
+body.theme-valentines .profileUsername { color: #ff7a96 !important; }
+body.theme-valentines .profileBio,
+body.theme-valentines .profStatLabel,
+body.theme-valentines .profStatValue,
+body.theme-valentines .profInfoLabel,
+body.theme-valentines .profInfoValue { color: #f7e8ec !important; }
+body.theme-valentines .profInfoLabel { color: rgba(247,232,236,0.65) !important; }
+
+body.theme-valentines .profTab {
+  color: rgba(247,232,236,0.65) !important;
+  background: transparent !important;
+  border-bottom: 2px solid transparent !important;
+}
+body.theme-valentines .profTab--active {
+  color: #ff7a96 !important;
+  border-bottom-color: #ff7a96 !important;
+}
+
+body.theme-valentines .profileActionBtn {
+  background: rgba(255,122,150,0.06) !important;
+  border: 1px solid rgba(255,122,150,0.20) !important;
+  color: #f7e8ec !important;
+  border-radius: 10px !important;
+}
+body.theme-valentines .profileActionBtn--primary {
+  background: linear-gradient(135deg, #ff7a96, #d4506a) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px -6px rgba(255,122,150,0.50) !important;
+}
+
+body.theme-valentines .profileEditor input,
+body.theme-valentines .profileEditor textarea,
+body.theme-valentines .profileInput,
+body.theme-valentines .profileTextarea {
+  background: rgba(15,4,8,0.60) !important;
+  border: 1px solid rgba(255,122,150,0.22) !important;
+  color: #f7e8ec !important;
+  border-radius: 10px !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   JOIN MODAL
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines .joinPanel {
+  background: linear-gradient(180deg, #1a060e, #0f0408) !important;
+  border: 1px solid rgba(255,122,150,0.22) !important;
+  border-radius: 18px !important;
+  color: #f7e8ec !important;
+  box-shadow: 0 32px 64px -16px rgba(0,0,0,0.65) !important;
+}
+body.theme-valentines .joinPanel__title { color: #f7e8ec !important; font-weight: 600 !important; }
+body.theme-valentines .joinPanel__room { color: #ff7a96 !important; }
+body.theme-valentines .joinPanel__label { color: rgba(247,232,236,0.65) !important; }
+body.theme-valentines .joinPanel__input {
+  background: rgba(15,4,8,0.60) !important;
+  border: 1px solid rgba(255,122,150,0.22) !important;
+  color: #f7e8ec !important;
+}
+body.theme-valentines .joinPanel__btn--primary {
+  background: linear-gradient(135deg, #ff7a96, #d4506a) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+body.theme-valentines .hostJoinAlert {
+  background: linear-gradient(180deg, #1a060e, #0f0408) !important;
+  border: 1px solid rgba(255,122,150,0.22) !important;
+  border-radius: 16px !important;
+  color: #f7e8ec !important;
+  box-shadow: 0 24px 48px -16px rgba(0,0,0,0.65) !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   MOBILE
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines #mobileBottomBar {
+  background: rgba(15,4,8,0.92) !important;
+  border-top: 1px solid rgba(255,122,150,0.18) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+body.theme-valentines .mobileNavIconLabel,
+body.theme-valentines .mobileNavSelfLabel { color: rgba(247,232,236,0.65) !important; }
+body.theme-valentines .mobilePrimaryBtn {
+  background: linear-gradient(135deg, #ff7a96, #d4506a) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 6px 20px -6px rgba(255,122,150,0.50) !important;
+}
+body.theme-valentines .mobileSecondaryBtn {
+  background: transparent !important;
+  color: #ff7a96 !important;
+  border: 1px solid rgba(255,122,150,0.40) !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Selection + scrollbar (detalhes premium)
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines ::selection { background: rgba(255,122,150,0.30); color: #ffffff; }
+body.theme-valentines ::-webkit-scrollbar { width: 10px; height: 10px; }
+body.theme-valentines ::-webkit-scrollbar-track { background: transparent; }
+body.theme-valentines ::-webkit-scrollbar-thumb {
+  background: rgba(255,122,150,0.22);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+body.theme-valentines ::-webkit-scrollbar-thumb:hover { background: rgba(255,122,150,0.40); background-clip: content-box; border: 2px solid transparent; }
+
+/* ──────────────────────────────────────────────────────────
+   Decorações sutis (corações nos cantos da mesa, opcional)
+   ────────────────────────────────────────────────────────── */
+body.theme-valentines .cardCenter::before {
+  content: "♥";
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  font-size: 14px;
+  color: rgba(255,122,150,0.18);
+  pointer-events: none;
+  z-index: 0;
+}
+body.theme-valentines .cardCenter::after {
+  content: "♥";
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  font-size: 14px;
+  color: rgba(255,122,150,0.18);
+  pointer-events: none;
+  z-index: 0;
+}
