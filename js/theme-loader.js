@@ -113,6 +113,14 @@
     //   - data-theme-key="ns.path"      (sistema antigo, opt-in via marcação)
     //   - data-i18n="ns:path"           (auto-override do i18n; troca os dois pontos por ponto)
     var run = function () {
+      // Antes de aplicar copy do tema, restaura i18n base. Sem isso, ao
+      // trocar de tema (ou pra default), os textos do tema anterior ficam
+      // grudados nos elementos que o tema novo não tem copy específico.
+      try {
+        if (window.OSL_I18N && typeof window.OSL_I18N.apply === 'function') {
+          window.OSL_I18N.apply();
+        }
+      } catch (_) { /* empty */ }
       var copy = resolveCopyForLocale(rawCopy);
       Object.keys(copy).forEach(function (k) {
         // (a) data-theme-key explícito
