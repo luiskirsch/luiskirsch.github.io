@@ -35,6 +35,10 @@ self.addEventListener('fetch', e => {
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
   if (!url.hostname.includes('luiskirsch.github.io') && !url.hostname.includes('localhost') && !url.hostname.includes('preludiojogos')) return;
 
+  // Cache só aceita GETs — não interceptamos POST/PUT/DELETE (sendBeacon, forms,
+  // etc). Deixa o navegador resolver direto pela rede.
+  if (request.method !== 'GET') return;
+
   // /staging/* SEMPRE network-first (incluindo JS/CSS/JSON) — staging precisa
   // refletir mudanças instantaneamente sem invalidação de cache. Cache só
   // serve como fallback offline.
