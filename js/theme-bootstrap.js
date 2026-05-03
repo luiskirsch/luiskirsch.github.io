@@ -51,6 +51,24 @@
     }
   }
 
+  // 3.1) <style> EARLY: aplica bg/color base IMEDIATO em <html> (que existe
+  //      desde o início do parse). Garante que o primeiro paint use as
+  //      cores do tema mesmo antes do <body> aparecer e do CSS principal
+  //      do tema (body.theme-X) entrar em vigor. Este style é prepended
+  //      no head pra preceder qualquer outro CSS render-blocking; usa
+  //      especificidade :root.theme-X que vence regras de tag puras.
+  var earlyId = 'osl-theme-early';
+  if (!document.getElementById(earlyId)) {
+    var earlyCSS = ':root.osl-theme-' + themeId + '{background:var(--bg)!important;color:var(--text)!important}'
+      + 'html.osl-theme-' + themeId + ' body{background:var(--bg)!important;color:var(--text)!important}';
+    var earlyStyle = document.createElement('style');
+    earlyStyle.id = earlyId;
+    earlyStyle.appendChild(document.createTextNode(earlyCSS));
+    var head = document.head || document.documentElement;
+    if (head.firstChild) head.insertBefore(earlyStyle, head.firstChild);
+    else head.appendChild(earlyStyle);
+  }
+
   // 4) Classes em <html> (já existe agora) e em <body> (assim que aparecer)
   var classesToAdd = ['osl-theme', 'osl-theme-' + themeId];
   if (theme.bodyClass) {
