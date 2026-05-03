@@ -1018,7 +1018,10 @@ body{
     try {
       const res = await fetch(OSL_BASE + "/criar-pagamento", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Locale": (window.OSL_I18N?.locale && window.OSL_I18N.locale()) || "pt-BR"
+        },
         body: JSON.stringify({
           nome,
           email,
@@ -1031,8 +1034,9 @@ body{
 
       if (!res.ok || !data.url) {
         let erro = _t('vendas:checkout.errors.createFailed', "Não foi possível criar o pagamento.");
-        if (data?.message) erro = data.message;
-        else if (data?.error) erro = data.error;
+        // Tenta traduzir error code do backend via backend.json
+        const localized = window.OSL_I18N?.localizeBackendError?.(data);
+        if (localized) erro = localized;
         statusEl.textContent = erro;
         btn.disabled = false;
         btn.textContent = _t('vendas:checkout.buttons.submit', "Ir para o pagamento");

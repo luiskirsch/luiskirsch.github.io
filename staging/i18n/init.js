@@ -264,6 +264,30 @@
       return missionStr;
     }
 
+    // localizeBackendError(data) — recebe response.json() de erro do backend
+    // e retorna mensagem amigável traduzida. Prioridade:
+    //   1. backend.errors.{ERROR_CODE}
+    //   2. data.message (vem do backend localizado via Accept-Language)
+    //   3. data.hint
+    //   4. fallback: prefixo + código
+    function localizeBackendError(data) {
+      if (!data) return '';
+      const t = window.i18next?.t?.bind(window.i18next);
+      const code = data.error || data.code;
+      if (code && t) {
+        const key = `backend:errors.${code}`;
+        const v = t(key);
+        if (v && v !== key) return v;
+      }
+      if (data.message) return data.message;
+      if (data.hint) return data.hint;
+      if (code) {
+        const prefix = (t && t('backend:errors._genericPrefix')) || 'Erro: ';
+        return `${prefix}${code}`;
+      }
+      return '';
+    }
+
     window.OSL_I18N = {
       t: (key, opts) => window.i18next.t(key, opts),
       apply: applyTranslations,
@@ -275,7 +299,8 @@
       slugify,
       localizeCard,
       findPackId,
-      localizeMission
+      localizeMission,
+      localizeBackendError
     };
 
     document.dispatchEvent(new Event('osl:i18n-ready'));
