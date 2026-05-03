@@ -133,7 +133,7 @@ button.danger    { background: rgba(224,85,85,.18); color: #ff9090; }
     </select>
 
     <div class="actions">
-      <button id="btnSave">Salvar</button>
+      <button id="btnSave">Salvar e aplicar</button>
       <button id="btnApplyNow" class="secondary" title="Define activeFrom = agora, activeUntil = +30 dias">Aplicar agora (30d)</button>
       <button id="btnDisable" class="danger" title="Limpa o evento — volta a default sem janela">Desativar evento</button>
       <button id="btnLogout" class="secondary" style="margin-left:auto">Sair</button>
@@ -142,6 +142,14 @@ button.danger    { background: rgba(224,85,85,.18); color: #ff9090; }
     <div id="saveStatus" class="status"></div>
 
     <div class="meta" id="metaInfo"></div>
+
+    <hr style="margin:24px 0;border:none;border-top:1px solid rgba(255,255,255,.10)">
+
+    <h3 style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,.85)">Resolvido agora</h3>
+    <p class="lede" style="margin:0 0 12px">Tema que clientes verão neste momento (considerando datas).</p>
+    <div class="meta">Tema corrente: <code id="resolvedThemeNow">—</code></div>
+    <p class="lede" style="margin:14px 0 6px">Override local: <code id="localOverride">—</code></p>
+    <button id="btnClearLocalOverride" class="secondary" title="Remove osl_theme_override do localStorage deste navegador">Limpar override local</button>
   </div>
 </div>
 
@@ -250,6 +258,24 @@ $('btnApplyNow').addEventListener('click', async () => {
   $('activeFrom').value  = today.toISOString().slice(0, 10);
   $('activeUntil').value = plus30.toISOString().slice(0, 10);
   show($('saveStatus'), 'Datas preenchidas — clica em Salvar pra aplicar.', 'ok');
+});
+
+// ---------- override local + tema resolvido ----------
+function refreshLocalState() {
+  let override = '—';
+  let resolved = '—';
+  try { override = localStorage.getItem('osl_theme_override') || '— (sem override)'; } catch (e) {}
+  try { resolved = localStorage.getItem('osl_active_theme_cached') || '— (não resolvido)'; } catch (e) {}
+  const ovEl = document.getElementById('localOverride');
+  const rsEl = document.getElementById('resolvedThemeNow');
+  if (ovEl) ovEl.textContent = override;
+  if (rsEl) rsEl.textContent = resolved;
+}
+refreshLocalState();
+document.getElementById('btnClearLocalOverride').addEventListener('click', () => {
+  try { localStorage.removeItem('osl_theme_override'); } catch (e) {}
+  refreshLocalState();
+  show($('saveStatus'), 'Override local limpo. Recarregue qualquer página do staging pra ver o tema do servidor.', 'ok');
 });
 
 $('btnDisable').addEventListener('click', async () => {

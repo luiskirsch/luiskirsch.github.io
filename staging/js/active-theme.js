@@ -1,11 +1,12 @@
-// Reads `config/activeTheme` from Firestore and pushes the resolved theme id
-// to the theme-loader. Runs after theme-loader.js so the cached/default theme
-// is already painted; this only swaps in the *fresh* server-side decision.
+// Reads `config/activeTheme` from Firestore in REAL-TIME via onSnapshot and
+// pushes the resolved theme id to the theme-loader. Runs after theme-loader.js
+// so the cached/default theme is already painted; subsequent updates from the
+// admin propagate within <1s to every connected client.
 
 import { db } from "./firebase-app.js";
 import {
   doc,
-  getDoc,
+  onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const CACHE_KEY = "osl_active_theme_cached";
@@ -61,20 +62,22 @@ function broadcast(themeId, error) {
   } catch (e) { /* swallow */ }
 }
 
-(async function () {
-  try {
-    const snap = await getDoc(doc(db, "config", "activeTheme"));
-    if (!snap.exists()) {
-      broadcast("default");
-      return;
-    }
-    const themeId = resolveThemeId(snap.data());
+// Real-time listener. Cada save no admin propaga em <1s para todas as abas/
+// dispositivos conectados — sem precisar recarregar.
+let _lastBroadcast = null;
+onSnapshot(
+  doc(db, "config", "activeTheme"),
+  (snap) => {
+    const themeId = snap.exists() ? resolveThemeId(snap.data()) : "default";
+    if (themeId === _lastBroadcast) return;
+    _lastBroadcast = themeId;
     try { localStorage.setItem(CACHE_KEY, themeId); } catch (e) { /* ignore */ }
     broadcast(themeId);
-  } catch (err) {
+  },
+  (err) => {
     // Firestore unreachable, rules denied, etc. Fail silently — cached/default
     // is already on screen.
     console.warn("[osl-active-theme]", err);
-    broadcast("default", err);
+    if (_lastBroadcast === null) broadcast("default", err);
   }
-})();
+);
