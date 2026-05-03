@@ -64,11 +64,14 @@ function broadcast(themeId, error) {
 
 // Real-time listener. Cada save no admin propaga em <1s para todas as abas/
 // dispositivos conectados — sem precisar recarregar.
+console.info("[osl-active-theme] subscribing to config/activeTheme via onSnapshot");
 let _lastBroadcast = null;
 onSnapshot(
   doc(db, "config", "activeTheme"),
   (snap) => {
-    const themeId = snap.exists() ? resolveThemeId(snap.data()) : "default";
+    const data = snap.exists() ? snap.data() : null;
+    const themeId = data ? resolveThemeId(data) : "default";
+    console.info("[osl-active-theme] snapshot:", { exists: snap.exists(), data, resolved: themeId, _lastBroadcast });
     if (themeId === _lastBroadcast) return;
     _lastBroadcast = themeId;
     try { localStorage.setItem(CACHE_KEY, themeId); } catch (e) { /* ignore */ }
@@ -77,7 +80,7 @@ onSnapshot(
   (err) => {
     // Firestore unreachable, rules denied, etc. Fail silently — cached/default
     // is already on screen.
-    console.warn("[osl-active-theme]", err);
+    console.warn("[osl-active-theme] error:", err.code || err.message, err);
     if (_lastBroadcast === null) broadcast("default", err);
   }
 );

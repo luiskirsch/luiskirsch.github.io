@@ -1,4 +1,4 @@
-const CACHE = 'osl-v3';
+const CACHE = 'osl-v4';
 
 const PRECACHE = [
   '/favicon.png',
@@ -39,15 +39,27 @@ self.addEventListener('fetch', e => {
   // etc). Deixa o navegador resolver direto pela rede.
   if (request.method !== 'GET') return;
 
-  // /staging/* SEMPRE network-first (incluindo JS/CSS/JSON) — staging precisa
-  // refletir mudanças instantaneamente sem invalidação de cache. Cache só
-  // serve como fallback offline.
+  // /staging/* SEMPRE network-first; cache só fallback offline.
+  // IMPORTANTE: Cloudflare Access pode retornar HTML de "Sign in" no lugar
+  // de JS/JSON quando a sessão expira — NUNCA cachear esses interceptos.
   if (url.pathname.startsWith('/staging/')) {
     e.respondWith(
       fetch(request).then(res => {
-        if (res && res.ok && request.method === 'GET') {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(request, clone)).catch(() => {});
+        if (res && res.ok) {
+          const ct = res.headers.get('content-type') || '';
+          const expectedJs = /\.(js|mjs)$/.test(url.pathname);
+          const expectedJson = /\.json$/.test(url.pathname);
+          const expectedCss = /\.css$/.test(url.pathname);
+          const isHtmlResponse = ct.indexOf('text/html') === 0;
+          // Se esperava JS/JSON/CSS mas veio HTML, é Cloudflare Access intercept.
+          // Não cacheia e não retorna pra app (bloqueia execução de HTML como JS).
+          if ((expectedJs || expectedJson || expectedCss) && isHtmlResponse) {
+            return new Response('// blocked by SW: Cloudflare Access intercept', {
+              status: 401,
+              headers: { 'Content-Type': expectedJson ? 'application/json' : 'application/javascript' }
+            });
+          }
+          caches.open(CACHE).then(c => c.put(request, res.clone())).catch(() => {});
         }
         return res;
       }).catch(() => caches.match(request))
