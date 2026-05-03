@@ -1,4 +1,4 @@
-const CACHE = 'osl-v4';
+const CACHE = 'osl-v5';
 
 const PRECACHE = [
   '/favicon.png',
