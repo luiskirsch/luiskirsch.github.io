@@ -248,12 +248,29 @@
     } catch (e) {}
   }
 
-  // Cache do JSON completo no localStorage pra theme-bootstrap.js aplicar
-  // síncrono no próximo carregamento (zero flash em reload / primeiro acesso).
+  // Cache do JSON completo + conteúdo do CSS no localStorage pra
+  // theme-bootstrap.js aplicar síncrono no próximo carregamento (zero flash).
   var FULL_CACHE_PREFIX = 'osl_theme_full_cached_';
+  var CSS_CACHE_PREFIX  = 'osl_theme_css_cached_';
+
   function cacheFullTheme(theme) {
     if (!theme || !theme.id) return;
     try { localStorage.setItem(FULL_CACHE_PREFIX + theme.id, JSON.stringify(theme)); } catch (e) { /* quota etc */ }
+  }
+
+  function cacheStylesheetText(theme) {
+    if (!theme || !theme.id || !theme.stylesheet) return Promise.resolve();
+    var href = theme.stylesheet;
+    if (!/^https?:|^\//.test(href)) {
+      href = themesBaseUrl().replace(/themes\/$/, '') + href.replace(/^\.\//, '');
+    }
+    return fetch(href, { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (cssText) {
+        if (!cssText) return;
+        try { localStorage.setItem(CSS_CACHE_PREFIX + theme.id, cssText); } catch (e) { /* quota: tema pesado, aceita flash */ }
+      })
+      .catch(function () { /* silently */ });
   }
 
   function loadTheme(name) {
@@ -264,6 +281,8 @@
       })
       .then(function (theme) {
         cacheFullTheme(theme);
+        // Fetch e cacheia o CSS em paralelo (não bloqueia a aplicação do tema)
+        cacheStylesheetText(theme);
         return theme;
       });
   }

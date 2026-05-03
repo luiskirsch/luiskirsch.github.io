@@ -4,24 +4,22 @@
    Roda BLOCKING no <head> ANTES de qualquer outro script ou render.
    Lê o tema corrente do localStorage (sem fetch) e aplica:
      - cssVars no <html>
-     - bodyClass no <body> (assim que body existir)
-     - <link rel="stylesheet"> do tema
-   Resultado: o primeiro paint já tem o tema aplicado, sem flash do
-   layout default em reload, primeira visita ou troca de idioma.
-
-   Não substitui theme-loader.js — só dá o frame inicial. theme-loader
-   continua sendo fonte de verdade: faz fetch fresh, aplica copy, hooks
-   etc. Quando theme-loader terminar, refresca o cache cheio (key
-   'osl_theme_full_cached_<id>') pra próxima visita estar atualizada.
+     - classes no <html> (osl-theme, osl-theme-<id>, bodyClass)
+     - classes no <body> via MutationObserver (assim que <body> aparece,
+       AINDA durante o parse — antes do primeiro paint)
+     - <style> INLINE com o CSS do tema (cacheado como string)
+       em vez de <link> (que seria async/render-blocking-network)
+   Resultado: o primeiro paint já tem o tema aplicado em qualquer
+   carga subsequente (após o cache populado pela primeira visita).
    ============================================================ */
 (function () {
   'use strict';
   var OVERRIDE_KEY = 'osl_theme_override';
   var CACHE_KEY    = 'osl_active_theme_cached';
   var FULL_PREFIX  = 'osl_theme_full_cached_';
+  var CSS_PREFIX   = 'osl_theme_css_cached_';
 
-  // 1) Resolve qual tema aplicar (mesma ordem de resolveInitialThemeName em
-  //    theme-loader: URL > localStorage override > localStorage cache > default)
+  // 1) Resolve qual tema aplicar (URL > localStorage override > localStorage cache)
   var themeId = null;
   try {
     var u = new URL(window.location.href);
@@ -35,15 +33,15 @@
   }
   if (!themeId || themeId === 'default') return;
 
-  // 2) Lê JSON do tema do cache (gravado por theme-loader em loads anteriores)
+  // 2) Lê JSON do tema do cache (gravado por theme-loader)
   var theme = null;
   try {
     var raw = localStorage.getItem(FULL_PREFIX + themeId);
     if (raw) theme = JSON.parse(raw);
   } catch (e) { /* empty */ }
-  if (!theme || theme.id !== themeId) return; // sem cache → theme-loader resolve
+  if (!theme || theme.id !== themeId) return;
 
-  // 3) Aplica cssVars imediatamente no <html>
+  // 3) Aplica cssVars em <html>
   var root = document.documentElement;
   if (theme.cssVars && typeof theme.cssVars === 'object') {
     for (var k in theme.cssVars) {
@@ -53,41 +51,60 @@
     }
   }
 
-  // 4) bodyClass — agora se body já existir, ou via DOMContentLoaded
-  function applyBody() {
-    if (!document.body) return;
-    document.body.classList.add('osl-theme', 'osl-theme-' + themeId);
-    if (theme.bodyClass) {
-      String(theme.bodyClass).split(/\s+/).forEach(function (c) {
-        if (c) document.body.classList.add(c);
-      });
-    }
+  // 4) Classes em <html> (já existe agora) e em <body> (assim que aparecer)
+  var classesToAdd = ['osl-theme', 'osl-theme-' + themeId];
+  if (theme.bodyClass) {
+    String(theme.bodyClass).split(/\s+/).forEach(function (c) {
+      if (c) classesToAdd.push(c);
+    });
   }
-  if (document.body) applyBody();
-  else document.addEventListener('DOMContentLoaded', applyBody, { once: true });
+  classesToAdd.forEach(function (c) { root.classList.add(c); });
 
-  // 5) Stylesheet do tema — injeta <link> no head ASAP. theme-loader vai
-  //    detectar o id 'osl-theme-stylesheet' e reutilizar (não duplica).
-  if (theme.stylesheet) {
-    var href = theme.stylesheet;
-    if (!/^https?:|^\//.test(href)) {
-      var pathname = window.location.pathname;
-      var base = pathname.indexOf('/staging/') === 0 ? '/staging/' : '/';
-      href = base + href.replace(/^\.\//, '');
-    }
-    var existing = document.getElementById('osl-theme-stylesheet');
-    if (existing) {
-      if (existing.getAttribute('href') !== href) existing.setAttribute('href', href);
-    } else {
+  function applyBody(body) {
+    classesToAdd.forEach(function (c) { body.classList.add(c); });
+  }
+  if (document.body) {
+    applyBody(document.body);
+  } else {
+    // MutationObserver pega <body> assim que aparece, AINDA durante o parse,
+    // antes do primeiro paint — não espera DOMContentLoaded.
+    var mo = new MutationObserver(function () {
+      if (document.body) {
+        applyBody(document.body);
+        mo.disconnect();
+      }
+    });
+    mo.observe(document.documentElement, { childList: true });
+  }
+
+  // 5) CSS do tema INLINE como <style> (sync, sem network).
+  //    theme-loader cacheia o conteúdo do .css em osl_theme_css_cached_<id>.
+  //    Fallback: <link rel=stylesheet> se cssText não estiver em cache (1ª visita).
+  var STYLE_ID = 'osl-theme-stylesheet';
+  if (!document.getElementById(STYLE_ID)) {
+    var cssText = null;
+    try { cssText = localStorage.getItem(CSS_PREFIX + themeId); } catch (e) { /* empty */ }
+    if (cssText && typeof cssText === 'string' && cssText.length > 0) {
+      var styleEl = document.createElement('style');
+      styleEl.id = STYLE_ID;
+      styleEl.setAttribute('data-osl-inline', '1');
+      styleEl.appendChild(document.createTextNode(cssText));
+      (document.head || document.documentElement).appendChild(styleEl);
+    } else if (theme.stylesheet) {
+      // Fallback async — só na primeira visita absoluta
+      var href = theme.stylesheet;
+      if (!/^https?:|^\//.test(href)) {
+        var pathname = window.location.pathname;
+        var base = pathname.indexOf('/staging/') === 0 ? '/staging/' : '/';
+        href = base + href.replace(/^\.\//, '');
+      }
       var link = document.createElement('link');
-      link.id = 'osl-theme-stylesheet';
+      link.id = STYLE_ID;
       link.rel = 'stylesheet';
       link.href = href;
       (document.head || document.documentElement).appendChild(link);
     }
   }
 
-  // 6) Marca window.OSL_THEME_BOOTSTRAPPED pra theme-loader saber que já
-  //    rodou (e poder optar por não duplicar trabalho síncrono).
   window.OSL_THEME_BOOTSTRAPPED = themeId;
 })();
