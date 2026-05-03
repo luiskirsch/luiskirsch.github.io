@@ -42,18 +42,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Aplica avatar do cache antes do Firestore responder — evita flash
   (function () {
-    var selfAvatarPhoto = localStorage.getItem("osl_avatar_photo") || "";
-    var selfAvatar      = localStorage.getItem("osl_avatar") || "";
     var mBtn  = document.getElementById("mobileProfileBtn");
     var dBtn  = document.getElementById("myProfileBtn");
-    var profileLabel = oslTr("sala:topbar.actions.profile", "👤 Perfil").replace(/^[^\s]+\s*/, "");
-    if (selfAvatarPhoto) {
-      if (mBtn) { mBtn.style.backgroundImage = "url('" + selfAvatarPhoto + "')"; mBtn.style.backgroundSize = "cover"; mBtn.style.backgroundPosition = "center"; mBtn.style.fontSize = "0"; mBtn.textContent = ""; }
-      if (dBtn) { var badge = dBtn.querySelector(".badge"); dBtn.innerHTML = ""; var img = document.createElement("img"); img.src = selfAvatarPhoto; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0"; dBtn.appendChild(img); dBtn.appendChild(document.createTextNode(profileLabel)); if (badge) dBtn.appendChild(badge); }
-    } else if (selfAvatar) {
-      if (mBtn) mBtn.textContent = selfAvatar;
-      if (dBtn) dBtn.textContent = selfAvatar + " " + profileLabel;
+
+    // Re-renderiza botão desktop com label i18n. Chamado no cache pre-Firestore
+    // (fallback PT) e re-chamado em osl:i18n-ready (EN garantido).
+    function applyDesktopBtn() {
+      if (!dBtn) return;
+      var label = oslTr("sala:topbar.actions.profile", "👤 Perfil").replace(/^[^\s]+\s*/, "");
+      var photo = localStorage.getItem("osl_avatar_photo") || "";
+      var emoji = localStorage.getItem("osl_avatar") || "";
+      if (photo) {
+        var badge = dBtn.querySelector(".badge"); dBtn.innerHTML = "";
+        var img = document.createElement("img"); img.src = photo; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0";
+        dBtn.appendChild(img); dBtn.appendChild(document.createTextNode(label));
+        if (badge) dBtn.appendChild(badge);
+      } else if (emoji) {
+        dBtn.textContent = emoji + " " + label;
+      }
     }
+
+    var selfAvatarPhoto = localStorage.getItem("osl_avatar_photo") || "";
+    var selfAvatar      = localStorage.getItem("osl_avatar") || "";
+    if (selfAvatarPhoto && mBtn) { mBtn.style.backgroundImage = "url('" + selfAvatarPhoto + "')"; mBtn.style.backgroundSize = "cover"; mBtn.style.backgroundPosition = "center"; mBtn.style.fontSize = "0"; mBtn.textContent = ""; }
+    else if (selfAvatar && mBtn) mBtn.textContent = selfAvatar;
+    applyDesktopBtn();
+    document.addEventListener("osl:i18n-ready", applyDesktopBtn);
   })();
 
   var chatIsOpen = false, histIsOpen = false, unreadCount = 0;
