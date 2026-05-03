@@ -45,6 +45,6 @@ a{
     <p data-i18n="erro:subtitle">Seu acesso ainda não foi liberado.</p>
     <a href="./vendas.html" data-i18n="erro:backToSales">Voltar para vendas</a>
   </div>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));</script>
 </body>
 </html>

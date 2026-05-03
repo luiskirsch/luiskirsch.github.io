@@ -1056,7 +1056,7 @@ body{
     }
   }
 </script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));</script>
 <script type="module">
   (function() {
     const canvas = document.getElementById('binaryScatter');
