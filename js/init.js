@@ -51,12 +51,14 @@ window.addEventListener("keydown",     enableAudio, { once: true });
   const savedEmoji  = localStorage.getItem("osl_avatar") || "🔮";
   const mobileBtn   = document.getElementById("mobileProfileBtn");
   const desktopBtn  = document.getElementById("myProfileBtn");
+  // Pega o label "Perfil"/"Profile" do i18n e remove o emoji prefixo
+  const profileLabel = oslTr("sala:topbar.actions.profile", "👤 Perfil").replace(/^[^\s]+\s*/, "");
   if (savedPhoto) {
     if (mobileBtn)  applyAvatarDisplay(mobileBtn,  savedPhoto, null, null);
-    if (desktopBtn) { const badge = desktopBtn.querySelector(".badge"); desktopBtn.innerHTML = ""; const img = document.createElement("img"); img.src = savedPhoto; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0"; desktopBtn.appendChild(img); desktopBtn.appendChild(document.createTextNode("Perfil")); if (badge) desktopBtn.appendChild(badge); }
+    if (desktopBtn) { const badge = desktopBtn.querySelector(".badge"); desktopBtn.innerHTML = ""; const img = document.createElement("img"); img.src = savedPhoto; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0"; desktopBtn.appendChild(img); desktopBtn.appendChild(document.createTextNode(profileLabel)); if (badge) desktopBtn.appendChild(badge); }
   } else if (savedEmoji) {
     if (mobileBtn)  mobileBtn.textContent  = savedEmoji;
-    if (desktopBtn) desktopBtn.textContent = savedEmoji + " Perfil";
+    if (desktopBtn) desktopBtn.textContent = savedEmoji + " " + profileLabel;
   }
 })();
 

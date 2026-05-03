@@ -46,12 +46,13 @@ document.addEventListener("DOMContentLoaded", function () {
     var selfAvatar      = localStorage.getItem("osl_avatar") || "";
     var mBtn  = document.getElementById("mobileProfileBtn");
     var dBtn  = document.getElementById("myProfileBtn");
+    var profileLabel = oslTr("sala:topbar.actions.profile", "👤 Perfil").replace(/^[^\s]+\s*/, "");
     if (selfAvatarPhoto) {
       if (mBtn) { mBtn.style.backgroundImage = "url('" + selfAvatarPhoto + "')"; mBtn.style.backgroundSize = "cover"; mBtn.style.backgroundPosition = "center"; mBtn.style.fontSize = "0"; mBtn.textContent = ""; }
-      if (dBtn) { var badge = dBtn.querySelector(".badge"); dBtn.innerHTML = ""; var img = document.createElement("img"); img.src = selfAvatarPhoto; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0"; dBtn.appendChild(img); dBtn.appendChild(document.createTextNode("Perfil")); if (badge) dBtn.appendChild(badge); }
+      if (dBtn) { var badge = dBtn.querySelector(".badge"); dBtn.innerHTML = ""; var img = document.createElement("img"); img.src = selfAvatarPhoto; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0"; dBtn.appendChild(img); dBtn.appendChild(document.createTextNode(profileLabel)); if (badge) dBtn.appendChild(badge); }
     } else if (selfAvatar) {
       if (mBtn) mBtn.textContent = selfAvatar;
-      if (dBtn) dBtn.textContent = selfAvatar + " Perfil";
+      if (dBtn) dBtn.textContent = selfAvatar + " " + profileLabel;
     }
   })();
 

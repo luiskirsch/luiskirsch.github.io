@@ -73,12 +73,12 @@
   function oslShowLocked() {
     oslLockedPhase = 0; oslHideFields("oslLockedFields");
     document.getElementById("oslLockedStatus").textContent = "";
-    var btn = document.getElementById("oslLockedDesbloq"); btn.disabled = false; btn.textContent = "Desbloquear agora — R$ 2,90";
+    var btn = document.getElementById("oslLockedDesbloq"); btn.disabled = false; btn.textContent = oslTr("sala:paywall.locked.unlock", "Desbloquear agora — R$ 2,90");
     oslOpenModal("oslModalLocked");
   }
 
   document.getElementById("oslLockedDesbloq").addEventListener("click", async function () {
-    if (oslLockedPhase === 0) { oslLockedPhase = 1; oslShowFields("oslLockedFields"); oslPrefill("oslLockedNome", "oslLockedEmail"); this.textContent = "Confirmar pagamento"; return; }
+    if (oslLockedPhase === 0) { oslLockedPhase = 1; oslShowFields("oslLockedFields"); oslPrefill("oslLockedNome", "oslLockedEmail"); this.textContent = oslTr("sala:payments.confirmPayment", "Confirmar pagamento"); return; }
     var v = oslValidate("oslLockedNome", "oslLockedEmail", "oslLockedStatus"); if (!v) return;
     await oslPay(v.nome, v.email, "carta-bloqueada", "2.90", "oslLockedStatus", this);
   });
@@ -95,12 +95,12 @@
   function oslShowFinal() {
     oslFinalPhase = 0; oslHideFields("oslFinalFields");
     document.getElementById("oslFinalStatus").textContent = "";
-    var btn = document.getElementById("oslFinalRevelar"); btn.disabled = false; btn.textContent = "Revelar agora — R$ 4,90";
+    var btn = document.getElementById("oslFinalRevelar"); btn.disabled = false; btn.textContent = oslTr("sala:paywall.final.reveal", "Revelar agora — R$ 4,90");
     oslOpenModal("oslModalFinal");
   }
 
   document.getElementById("oslFinalRevelar").addEventListener("click", async function () {
-    if (oslFinalPhase === 0) { oslFinalPhase = 1; oslShowFields("oslFinalFields"); oslPrefill("oslFinalNome", "oslFinalEmail"); this.textContent = "Confirmar pagamento"; return; }
+    if (oslFinalPhase === 0) { oslFinalPhase = 1; oslShowFields("oslFinalFields"); oslPrefill("oslFinalNome", "oslFinalEmail"); this.textContent = oslTr("sala:payments.confirmPayment", "Confirmar pagamento"); return; }
     var v = oslValidate("oslFinalNome", "oslFinalEmail", "oslFinalStatus"); if (!v) return;
     await oslPay(v.nome, v.email, "carta-final", "4.90", "oslFinalStatus", this);
   });
@@ -118,12 +118,12 @@
   function oslShowSC() {
     if (oslScShown) return; oslScShown = true; oslScPhase = 0; oslHideFields("oslScFields");
     document.getElementById("oslScStatus").textContent = "";
-    var btn = document.getElementById("oslScAdicionar"); btn.disabled = false; btn.textContent = "Adicionar 3 cartas — R$ 1,90";
+    var btn = document.getElementById("oslScAdicionar"); btn.disabled = false; btn.textContent = oslTr("sala:paywall.secondChance.add", "Adicionar 3 cartas — R$ 1,90");
     oslOpenModal("oslModalSC");
   }
 
   document.getElementById("oslScAdicionar").addEventListener("click", async function () {
-    if (oslScPhase === 0) { oslScPhase = 1; oslShowFields("oslScFields"); oslPrefill("oslScNome", "oslScEmail"); this.textContent = "Confirmar pagamento"; return; }
+    if (oslScPhase === 0) { oslScPhase = 1; oslShowFields("oslScFields"); oslPrefill("oslScNome", "oslScEmail"); this.textContent = oslTr("sala:payments.confirmPayment", "Confirmar pagamento"); return; }
     var v = oslValidate("oslScNome", "oslScEmail", "oslScStatus"); if (!v) return;
     await oslPay(v.nome, v.email, "segunda-chance", "1.90", "oslScStatus", this);
   });
@@ -146,7 +146,7 @@
     oslShowFields("oslSaveFields"); oslPrefill("oslSaveNome", "oslSaveEmail");
     document.getElementById("oslSaveStatus").textContent = "";
     document.getElementById("oslSaveDownload").style.display = "none";
-    var btn = document.getElementById("oslSaveSubmit"); btn.disabled = false; btn.textContent = "Confirmar e pagar";
+    var btn = document.getElementById("oslSaveSubmit"); btn.disabled = false; btn.textContent = oslTr("sala:paywall.save.submit", "Confirmar e pagar");
   };
 
   document.getElementById("oslSaveSubmit").addEventListener("click", async function () {

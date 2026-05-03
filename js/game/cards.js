@@ -159,6 +159,11 @@ export async function saveRitualState(card, activeEffect, pendingDeathrattle) {
 
 // ── Aplicar conteúdo de carta no DOM ─────────────────────────────────────────
 export function applyCardContent(card) {
+  // Localiza title/text/rule/subrule/phrase pelo idioma corrente.
+  // Cards são gravados em PT no Firestore (consistência cross-locale).
+  if (card && window.OSL_I18N && typeof window.OSL_I18N.localizeCard === "function") {
+    card = window.OSL_I18N.localizeCard(card);
+  }
   const ritualCardType  = document.getElementById("ritualCardType");
   const ritualCardTitle = document.getElementById("ritualCardTitle");
   const ritualCardText  = document.getElementById("ritualCardText");
