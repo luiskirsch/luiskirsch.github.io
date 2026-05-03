@@ -81,19 +81,73 @@
 
   function applyCopy(theme) {
     var copy = theme.copy || {};
+    // Suporta DOIS estilos de chave:
+    //   - data-theme-key="ns.path"      (sistema antigo, opt-in via marcação)
+    //   - data-i18n="ns:path"           (auto-override do i18n; troca os dois pontos por ponto)
+    // Permite que temas sobreponham QUALQUER string i18n existente sem precisar
+    // adicionar data-theme-key em cada elemento.
     var run = function () {
       Object.keys(copy).forEach(function (k) {
-        var nodes = document.querySelectorAll('[data-theme-key="' + k + '"]');
-        nodes.forEach(function (el) {
+        // (a) data-theme-key explícito
+        document.querySelectorAll('[data-theme-key="' + k + '"]').forEach(function (el) {
           el.innerHTML = copy[k];
         });
+        // (b) data-i18n e variantes (placeholder/title/aria-label/alt) — converte
+        //     "ns.path" → "ns:path" pra casar com o formato i18next
+        var i18nKey = k.replace('.', ':');
+        document.querySelectorAll('[data-i18n="' + i18nKey + '"]').forEach(function (el) {
+          el.textContent = copy[k];
+        });
+        document.querySelectorAll('[data-i18n-html="' + i18nKey + '"]').forEach(function (el) {
+          el.innerHTML = copy[k];
+        });
+        ['placeholder','title','aria-label','alt'].forEach(function (attr) {
+          document.querySelectorAll('[data-i18n-' + attr + '="' + i18nKey + '"]').forEach(function (el) {
+            el.setAttribute(attr, copy[k]);
+          });
+        });
       });
+      // Hook adicional: override do OSL_I18N.t pra que JS dinâmico que usa
+      // oslTr/i18next também respeite a copy do tema.
+      installCopyTOverride(copy);
     };
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', run);
     } else {
       run();
     }
+    // Re-aplica quando i18n termina de carregar (init.js) ou troca idioma
+    document.addEventListener('osl:i18n-ready', run);
+  }
+
+  // Substitui i18next.t pra que strings dinâmicas (textContent setados via JS)
+  // também respeitem o copy do tema. Idempotente: chamado a cada applyCopy.
+  function installCopyTOverride(copy) {
+    if (!window.i18next || typeof window.i18next.t !== 'function') {
+      // i18next ainda não carregou — instala um listener pra tentar de novo
+      document.addEventListener('osl:i18n-ready', function once() {
+        document.removeEventListener('osl:i18n-ready', once);
+        installCopyTOverride(copy);
+      }, { once: true });
+      return;
+    }
+    var orig = window.i18next._origT || window.i18next.t.bind(window.i18next);
+    window.i18next._origT = orig;
+    window.i18next.t = function (key, opts) {
+      // Aceita "ns:path" ou "ns.path"
+      var normalized = String(key || '').replace(':', '.');
+      if (Object.prototype.hasOwnProperty.call(copy, normalized)) {
+        var v = copy[normalized];
+        if (opts && typeof v === 'string') {
+          return v.replace(/\{\{(\w+)\}\}/g, function (_, k) {
+            return opts[k] != null ? opts[k] : '';
+          });
+        }
+        return v;
+      }
+      return orig(key, opts);
+    };
+    if (window.OSL_I18N) window.OSL_I18N.t = window.i18next.t;
   }
 
   function applyImages(theme) {

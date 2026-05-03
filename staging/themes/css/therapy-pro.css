@@ -1,28 +1,37 @@
 /* ============================================================
-   THEME: therapy-pro
-   Layout sóbrio para vídeo-consulta (psicólogos, terapeutas, psiquiatras).
-   - Esconde gamificação (XP, missões, conquistas, reações, tensão, modos
-     Arena/Live/Stream/Loja, paywall in-session, recap de sessão).
-   - Paleta clínica: off-white de fundo, azul corporativo, texto escuro.
-   - Tipografia Inter / system-ui (sem serifa).
-   - Vídeo proeminente, chat sóbrio, "tópicos" no lugar de "cartas".
-   Aplicado quando body.theme-therapy-pro está presente (ver theme-loader).
+   THEME: therapy-pro · v2 · Clínico-editorial premium
+   Paleta:
+     bg       #f6f5f1   (off-white quente, papel)
+     text     #1c1f1d   (carvão profundo, AA contra bg = 14.7:1)
+     muted    #4f5552   (cinza médio, AA contra bg = 6.8:1)
+     accent   #2d4a3e   (verde-pinheiro, AA contra branco = 8.7:1)
+     card     #ffffff
+     border   rgba(28,31,29,0.10)  (bordas finíssimas)
+   Tipografia:
+     UI         Inter, system-ui (peso 400/500/600)
+     Títulos    Inter (peso 600, tracking -0.01em)
+   Sombras camadeadas (blur baixo + spread negativo).
    ============================================================ */
 
 body.theme-therapy-pro {
-  background: var(--bg) !important;
-  color: var(--text) !important;
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
+  background: #f6f5f1 !important;
+  color: #1c1f1d !important;
+  font-family: "Inter", "Helvetica Neue", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-
-/* Garante que ::before/::after globais com gradientes dourados sumam */
 body.theme-therapy-pro::before,
-body.theme-therapy-pro::after {
-  display: none !important;
-}
+body.theme-therapy-pro::after { display: none !important; }
+
+/* Aceita parágrafos longos com leitura fluida */
+body.theme-therapy-pro p,
+body.theme-therapy-pro li,
+body.theme-therapy-pro span,
+body.theme-therapy-pro div { color: #1c1f1d; }
 
 /* ──────────────────────────────────────────────────────────
-   ESCONDE elementos de gamificação e produto-jogo
+   ESCONDE gamificação e produto-jogo (entregue inalterado)
    ────────────────────────────────────────────────────────── */
 body.theme-therapy-pro #xpCard,
 body.theme-therapy-pro #xpCardLevel,
@@ -55,394 +64,670 @@ body.theme-therapy-pro .multiCard,
 body.theme-therapy-pro .recapOverlay,
 body.theme-therapy-pro .osl-overlay,
 body.theme-therapy-pro #oslShopOverlay,
-body.theme-therapy-pro #profPaneSessao .profileActionBtn--danger,
-body.theme-therapy-pro .profPane .profPackGrid,
-body.theme-therapy-pro #profPanePacotes {
-  display: none !important;
-}
-
-/* Esconde abas de gamificação dentro do perfil (Sessão/Pacotes), mantém Identity + Account */
-body.theme-therapy-pro .profTab[data-target="profPanePacotes"] {
-  display: none !important;
-}
+body.theme-therapy-pro #profPanePacotes,
+body.theme-therapy-pro .profTab[data-target="profPanePacotes"],
 body.theme-therapy-pro .profStatRow,
-body.theme-therapy-pro .profBgSection[id="profBgSection"],
+body.theme-therapy-pro #profBgSection,
 body.theme-therapy-pro #profCardSection,
-body.theme-therapy-pro #profFxSection {
-  display: none !important;
-}
-
-/* Footer simplificado */
-body.theme-therapy-pro .footerBar > div:last-child {
-  display: none !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   TOPBAR sóbria
-   ────────────────────────────────────────────────────────── */
-body.theme-therapy-pro .topBar,
-body.theme-therapy-pro .topbar,
-body.theme-therapy-pro #topBar {
-  background: var(--card-bg) !important;
-  border-bottom: 1px solid var(--card-border) !important;
-  box-shadow: 0 1px 0 var(--shadow) !important;
-  backdrop-filter: none !important;
-}
-
-body.theme-therapy-pro .topActionBtn {
-  background: transparent !important;
-  border: 1px solid var(--card-border) !important;
-  color: var(--text) !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-weight: 500 !important;
-  border-radius: 8px !important;
-}
-body.theme-therapy-pro .topActionBtn:hover {
-  background: rgba(61, 90, 128, 0.06) !important;
-}
-body.theme-therapy-pro .topActionBtn.primary {
-  background: var(--gold) !important;
-  color: #fff !important;
-  border-color: var(--gold) !important;
-}
-body.theme-therapy-pro .topActionBtn.primary:hover {
-  background: #34507a !important;
-}
-
-body.theme-therapy-pro .videoCtrlBtn {
-  background: transparent !important;
-  border: 1px solid var(--card-border) !important;
-  color: var(--text) !important;
-  border-radius: 8px !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-weight: 500 !important;
-}
-body.theme-therapy-pro .videoCtrlBtn.primary {
-  background: var(--gold) !important;
-  color: #fff !important;
-  border-color: var(--gold) !important;
-}
-body.theme-therapy-pro .videoCtrlBtn.danger {
-  background: var(--danger) !important;
-  color: #fff !important;
-  border-color: var(--danger) !important;
-}
-
-body.theme-therapy-pro .eyebrow,
-body.theme-therapy-pro .eyebrow__status {
-  color: var(--muted) !important;
-  letter-spacing: 0.04em !important;
-  text-transform: none !important;
-  font-weight: 500 !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   SIDEBAR (participantes + chat) sóbria
-   ────────────────────────────────────────────────────────── */
-body.theme-therapy-pro .sidebar,
-body.theme-therapy-pro #sidebar {
-  background: var(--card-bg) !important;
-  border-right: 1px solid var(--card-border) !important;
-}
-
-body.theme-therapy-pro .sectionTitle,
-body.theme-therapy-pro h2.sectionTitle {
-  color: var(--text) !important;
-  font-weight: 600 !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-
-body.theme-therapy-pro .player {
-  background: transparent !important;
-  border-bottom: 1px solid var(--card-border) !important;
-  border-radius: 0 !important;
-}
-body.theme-therapy-pro .player:hover {
-  background: rgba(61, 90, 128, 0.04) !important;
-}
-body.theme-therapy-pro .playerName { color: var(--text) !important; font-weight: 500 !important; }
-body.theme-therapy-pro .playerRole { color: var(--muted) !important; }
-body.theme-therapy-pro .playerStatus,
-body.theme-therapy-pro .playerHost {
-  background: var(--gold-dim) !important;
-  color: var(--gold) !important;
-  font-weight: 500 !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-
-body.theme-therapy-pro .chatBox,
-body.theme-therapy-pro #chat,
-body.theme-therapy-pro #messages {
-  background: var(--bg) !important;
-}
-body.theme-therapy-pro .message {
-  background: var(--card-bg) !important;
-  border: 1px solid var(--card-border) !important;
-  color: var(--text) !important;
-  border-radius: 10px !important;
-  box-shadow: none !important;
-}
-body.theme-therapy-pro .message.me {
-  background: var(--gold) !important;
-  color: #fff !important;
-  border-color: var(--gold) !important;
-}
-body.theme-therapy-pro .message.system {
-  background: rgba(61, 90, 128, 0.06) !important;
-  border-color: var(--card-border) !important;
-  color: var(--muted) !important;
-  font-style: normal !important;
-}
-body.theme-therapy-pro #messageInput,
-body.theme-therapy-pro .composer input {
-  background: var(--card-bg) !important;
-  border: 1px solid var(--card-border) !important;
-  color: var(--text) !important;
-  border-radius: 8px !important;
-}
-body.theme-therapy-pro .sendIconBtn {
-  color: var(--gold) !important;
-}
-
-body.theme-therapy-pro .btn,
-body.theme-therapy-pro .btnPrimary,
-body.theme-therapy-pro #startBtn {
-  background: var(--gold) !important;
-  color: #fff !important;
-  border: 1px solid var(--gold) !important;
-  border-radius: 8px !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-weight: 500 !important;
-  box-shadow: none !important;
-}
-body.theme-therapy-pro .btn:hover,
-body.theme-therapy-pro .btnPrimary:hover,
-body.theme-therapy-pro #startBtn:hover {
-  background: #34507a !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   MESA / TÓPICOS (mantém estrutura mas sóbria)
-   ────────────────────────────────────────────────────────── */
-body.theme-therapy-pro .table,
-body.theme-therapy-pro #table,
-body.theme-therapy-pro .cardCenter {
-  background: var(--bg) !important;
-}
-
-body.theme-therapy-pro .ritualCard,
-body.theme-therapy-pro .currentCardCard,
-body.theme-therapy-pro #ritualCardWrap {
-  background: var(--card-bg) !important;
-  border: 1px solid var(--card-border) !important;
-  border-radius: 14px !important;
-  box-shadow: 0 8px 24px var(--shadow) !important;
-  color: var(--text) !important;
-}
-
-body.theme-therapy-pro #ritualCardType {
-  color: var(--gold) !important;
-  letter-spacing: 0.10em !important;
-  font-size: 11px !important;
-  font-weight: 600 !important;
-}
-body.theme-therapy-pro #ritualCardTitle {
-  color: var(--text) !important;
-  font-weight: 600 !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-body.theme-therapy-pro #ritualCardText,
-body.theme-therapy-pro #ritualCardRule,
-body.theme-therapy-pro #ritualCardSubrule,
-body.theme-therapy-pro #ritualCardPhrase {
-  color: var(--text) !important;
-  font-style: normal !important;
-}
-body.theme-therapy-pro #deckInfo {
-  color: var(--muted) !important;
-}
-
-body.theme-therapy-pro .videoBtn {
-  background: transparent !important;
-  border: 1px solid var(--card-border) !important;
-  color: var(--text) !important;
-  border-radius: 8px !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-weight: 500 !important;
-}
-body.theme-therapy-pro .videoBtn.primary {
-  background: var(--gold) !important;
-  color: #fff !important;
-  border-color: var(--gold) !important;
-}
-body.theme-therapy-pro .videoBtn.primary:hover {
-  background: #34507a !important;
-}
-body.theme-therapy-pro .videoBtn.primary:disabled {
-  background: rgba(61,90,128,0.35) !important;
-  border-color: rgba(61,90,128,0.35) !important;
-  cursor: not-allowed !important;
-}
-
-/* Histórico sóbrio */
-body.theme-therapy-pro .historyItem {
-  background: var(--card-bg) !important;
-  border: 1px solid var(--card-border) !important;
-  color: var(--text) !important;
-  border-radius: 8px !important;
-}
-body.theme-therapy-pro .historyType {
-  color: var(--gold) !important;
-  text-transform: none !important;
-  letter-spacing: 0.04em !important;
-  font-weight: 600 !important;
-}
-body.theme-therapy-pro .historyText { color: var(--text) !important; }
-
-/* ──────────────────────────────────────────────────────────
-   VÍDEO em destaque
-   ────────────────────────────────────────────────────────── */
-body.theme-therapy-pro #videoGrid,
-body.theme-therapy-pro .videoLayer {
-  z-index: 5;
-}
-body.theme-therapy-pro .videoTile {
-  border: 1px solid var(--card-border) !important;
-  border-radius: 14px !important;
-  box-shadow: 0 8px 24px var(--shadow) !important;
-  background: #0d141f !important;
-}
-body.theme-therapy-pro .videoTile .videoCameraOff {
-  background: #0d141f !important;
-  color: rgba(255,255,255,0.65) !important;
-}
-body.theme-therapy-pro .videoTile .videoTileName {
-  background: rgba(13,20,31,0.78) !important;
-  color: #fff !important;
-  font-weight: 500 !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   FOOTER + status
-   ────────────────────────────────────────────────────────── */
-body.theme-therapy-pro .footerBar {
-  background: var(--card-bg) !important;
-  border-top: 1px solid var(--card-border) !important;
-  color: var(--muted) !important;
-  font-weight: 500 !important;
-}
-body.theme-therapy-pro .footerBar strong {
-  color: var(--text) !important;
-  font-weight: 600 !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   PROFILE MODAL sóbrio
-   ────────────────────────────────────────────────────────── */
-body.theme-therapy-pro .profileModal { background: rgba(15, 23, 42, 0.45) !important; }
-body.theme-therapy-pro .profileCard {
-  background: var(--card-bg) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--card-border) !important;
-  border-radius: 14px !important;
-  box-shadow: 0 18px 48px var(--shadow) !important;
-}
-body.theme-therapy-pro .profileName,
-body.theme-therapy-pro .profileUsername,
-body.theme-therapy-pro .profileBio,
-body.theme-therapy-pro .profStatLabel,
-body.theme-therapy-pro .profStatValue,
-body.theme-therapy-pro .profInfoLabel,
-body.theme-therapy-pro .profInfoValue {
-  color: var(--text) !important;
-}
-body.theme-therapy-pro .profInfoLabel { color: var(--muted) !important; font-weight: 500 !important; }
-body.theme-therapy-pro .profileActionBtn {
-  background: transparent !important;
-  border: 1px solid var(--card-border) !important;
-  color: var(--text) !important;
-  border-radius: 8px !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-weight: 500 !important;
-}
-body.theme-therapy-pro .profileActionBtn--primary {
-  background: var(--gold) !important;
-  color: #fff !important;
-  border-color: var(--gold) !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   JOIN MODAL (paciente entrando)
-   ────────────────────────────────────────────────────────── */
-body.theme-therapy-pro .joinPanel {
-  background: var(--card-bg) !important;
-  border: 1px solid var(--card-border) !important;
-  border-radius: 14px !important;
-  color: var(--text) !important;
-  box-shadow: 0 18px 48px var(--shadow) !important;
-}
-body.theme-therapy-pro .joinPanel__title { color: var(--text) !important; font-weight: 600 !important; }
-body.theme-therapy-pro .joinPanel__label { color: var(--muted) !important; }
-body.theme-therapy-pro .joinPanel__input {
-  background: var(--bg) !important;
-  border: 1px solid var(--card-border) !important;
-  color: var(--text) !important;
-  border-radius: 8px !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   MOBILE BOTTOM BAR sóbrio
-   ────────────────────────────────────────────────────────── */
-body.theme-therapy-pro #mobileBottomBar {
-  background: var(--card-bg) !important;
-  border-top: 1px solid var(--card-border) !important;
-  box-shadow: 0 -1px 0 var(--shadow) !important;
-}
-body.theme-therapy-pro .mobileNavIconLabel,
-body.theme-therapy-pro .mobileNavSelfLabel { color: var(--muted) !important; }
-body.theme-therapy-pro .mobilePrimaryBtn {
-  background: var(--gold) !important;
-  color: #fff !important;
-  border: none !important;
-  border-radius: 8px !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-weight: 500 !important;
-}
-body.theme-therapy-pro .mobileSecondaryBtn {
-  background: transparent !important;
-  color: var(--gold) !important;
-  border: 1px solid var(--gold) !important;
-  border-radius: 8px !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-weight: 500 !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   Espera/Recording status
-   ────────────────────────────────────────────────────────── */
-body.theme-therapy-pro .recOverlay { background: rgba(15, 23, 42, 0.55) !important; }
-body.theme-therapy-pro .recModal {
-  background: var(--card-bg) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--card-border) !important;
-  border-radius: 14px !important;
-}
-
-/* Esconde Tensão wrapper (caso o seletor #tensionMeter acima não pegue todos os estados) */
+body.theme-therapy-pro #profFxSection,
 body.theme-therapy-pro .tensionMeter,
 body.theme-therapy-pro .tensionMeter__bar,
 body.theme-therapy-pro .tensionMeter__fill,
 body.theme-therapy-pro .tensionMeter__icon,
 body.theme-therapy-pro .tensionMeter__label {
   display: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   TOPBAR · sóbria, densa, premium
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .topBar,
+body.theme-therapy-pro .topbar,
+body.theme-therapy-pro #topBar {
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(28,31,29,0.08) !important;
+  box-shadow: 0 1px 0 rgba(28,31,29,0.04), 0 8px 24px -16px rgba(28,31,29,0.06) !important;
+  backdrop-filter: none !important;
+  color: #1c1f1d !important;
+}
+
+body.theme-therapy-pro .topActionBtn {
+  background: transparent !important;
+  border: 1px solid rgba(28,31,29,0.12) !important;
+  color: #1c1f1d !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
+  padding: 8px 14px !important;
+  box-shadow: 0 1px 0 rgba(28,31,29,0.04) !important;
+  transition: background 120ms ease, border-color 120ms ease !important;
+}
+body.theme-therapy-pro .topActionBtn:hover {
+  background: rgba(45,74,62,0.04) !important;
+  border-color: rgba(28,31,29,0.18) !important;
+}
+body.theme-therapy-pro .topActionBtn.primary {
+  background: #2d4a3e !important;
+  color: #ffffff !important;
+  border-color: #2d4a3e !important;
+  box-shadow: 0 1px 0 rgba(28,31,29,0.08), 0 4px 12px -4px rgba(45,74,62,0.35) !important;
+}
+body.theme-therapy-pro .topActionBtn.primary:hover {
+  background: #25402f !important;
+  border-color: #25402f !important;
+}
+body.theme-therapy-pro .topActionBtn.iconOnly { padding: 8px 10px !important; }
+
+body.theme-therapy-pro .videoCtrlBtn {
+  background: transparent !important;
+  border: 1px solid rgba(28,31,29,0.12) !important;
+  color: #1c1f1d !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  padding: 8px 14px !important;
+}
+body.theme-therapy-pro .videoCtrlBtn:hover { background: rgba(45,74,62,0.04) !important; }
+body.theme-therapy-pro .videoCtrlBtn.primary {
+  background: #2d4a3e !important; color: #ffffff !important; border-color: #2d4a3e !important;
+}
+body.theme-therapy-pro .videoCtrlBtn.danger {
+  background: #ffffff !important; color: #a02b1f !important; border-color: rgba(160,43,31,0.35) !important;
+}
+body.theme-therapy-pro .videoCtrlBtn.danger:hover { background: rgba(160,43,31,0.06) !important; }
+body.theme-therapy-pro .videoCtrlBtn:disabled {
+  opacity: 0.5 !important; cursor: not-allowed !important;
+}
+
+body.theme-therapy-pro .videoStatusInline { color: #4f5552 !important; font-size: 12.5px !important; }
+
+body.theme-therapy-pro .eyebrow,
+body.theme-therapy-pro .eyebrow__status {
+  color: #4f5552 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  font-size: 12.5px !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   SIDEBAR · participantes + anotações
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .sidebar,
+body.theme-therapy-pro #sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid rgba(28,31,29,0.08) !important;
+}
+
+body.theme-therapy-pro .sectionTitle,
+body.theme-therapy-pro h2.sectionTitle,
+body.theme-therapy-pro h2 {
+  color: #1c1f1d !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.005em !important;
+  text-transform: none !important;
+  font-size: 15px !important;
+}
+
+body.theme-therapy-pro .player {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(28,31,29,0.06) !important;
+  border-radius: 0 !important;
+  padding: 12px 14px !important;
+}
+body.theme-therapy-pro .player:hover { background: rgba(45,74,62,0.03) !important; }
+body.theme-therapy-pro .playerName { color: #1c1f1d !important; font-weight: 500 !important; font-size: 14px !important; }
+body.theme-therapy-pro .playerRole { color: #4f5552 !important; font-size: 12px !important; }
+body.theme-therapy-pro .playerStatus,
+body.theme-therapy-pro .playerHost {
+  background: rgba(45,74,62,0.10) !important;
+  color: #2d4a3e !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  font-size: 11px !important;
+  padding: 3px 8px !important;
+  border-radius: 999px !important;
+  border: none !important;
+}
+body.theme-therapy-pro .avatar {
+  background: rgba(45,74,62,0.08) !important;
+  color: #2d4a3e !important;
+}
+
+body.theme-therapy-pro .emptyState,
+body.theme-therapy-pro #playersEmpty,
+body.theme-therapy-pro .chatEmpty {
+  color: #4f5552 !important;
+  font-size: 13.5px !important;
+  line-height: 1.6 !important;
+  background: rgba(45,74,62,0.03) !important;
+  border: 1px dashed rgba(28,31,29,0.10) !important;
+  border-radius: 10px !important;
+  padding: 16px !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   CHAT · sóbrio, alta legibilidade
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .chatBox,
+body.theme-therapy-pro #chat,
+body.theme-therapy-pro #messages {
+  background: #fafaf7 !important;
+}
+body.theme-therapy-pro .message {
+  background: #ffffff !important;
+  border: 1px solid rgba(28,31,29,0.08) !important;
+  color: #1c1f1d !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  padding: 10px 12px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+body.theme-therapy-pro .message.me {
+  background: #2d4a3e !important;
+  color: #ffffff !important;
+  border-color: #2d4a3e !important;
+}
+body.theme-therapy-pro .message.me .msgTime { color: rgba(255,255,255,0.65) !important; }
+body.theme-therapy-pro .message.system {
+  background: transparent !important;
+  border: none !important;
+  border-left: 2px solid rgba(45,74,62,0.30) !important;
+  color: #4f5552 !important;
+  font-style: normal !important;
+  border-radius: 0 !important;
+  padding-left: 12px !important;
+  font-size: 13px !important;
+}
+body.theme-therapy-pro .message .meta { color: #4f5552 !important; font-weight: 500 !important; font-size: 12px !important; }
+body.theme-therapy-pro .message .msgTime { color: #4f5552 !important; opacity: 0.7 !important; font-size: 11px !important; }
+
+body.theme-therapy-pro #messageInput,
+body.theme-therapy-pro .composer input,
+body.theme-therapy-pro .input {
+  background: #ffffff !important;
+  border: 1px solid rgba(28,31,29,0.14) !important;
+  color: #1c1f1d !important;
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  box-shadow: 0 1px 0 rgba(28,31,29,0.03) !important;
+}
+body.theme-therapy-pro #messageInput::placeholder,
+body.theme-therapy-pro .composer input::placeholder,
+body.theme-therapy-pro .input::placeholder { color: #8a8f8c !important; }
+body.theme-therapy-pro #messageInput:focus,
+body.theme-therapy-pro .composer input:focus,
+body.theme-therapy-pro .input:focus {
+  outline: none !important;
+  border-color: #2d4a3e !important;
+  box-shadow: 0 0 0 3px rgba(45,74,62,0.12) !important;
+}
+
+body.theme-therapy-pro .sendIconBtn { color: #2d4a3e !important; }
+body.theme-therapy-pro .sendIconBtn:hover { color: #25402f !important; }
+
+body.theme-therapy-pro .typingBar { color: #4f5552 !important; font-size: 12px !important; }
+
+/* Botões primários */
+body.theme-therapy-pro .btn,
+body.theme-therapy-pro .btnPrimary,
+body.theme-therapy-pro #startBtn {
+  background: #2d4a3e !important;
+  color: #ffffff !important;
+  border: 1px solid #2d4a3e !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  padding: 10px 18px !important;
+  box-shadow: 0 1px 0 rgba(28,31,29,0.08), 0 4px 12px -4px rgba(45,74,62,0.30) !important;
+  transition: background 120ms ease !important;
+}
+body.theme-therapy-pro .btn:hover,
+body.theme-therapy-pro .btnPrimary:hover,
+body.theme-therapy-pro #startBtn:hover { background: #25402f !important; border-color: #25402f !important; }
+body.theme-therapy-pro .btn:disabled,
+body.theme-therapy-pro .btnPrimary:disabled,
+body.theme-therapy-pro #startBtn:disabled {
+  background: rgba(45,74,62,0.30) !important;
+  border-color: transparent !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   MESA / TÓPICO atual · tipografia editorial
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .table,
+body.theme-therapy-pro #table,
+body.theme-therapy-pro .cardCenter {
+  background: #f6f5f1 !important;
+}
+
+body.theme-therapy-pro .ritualCard,
+body.theme-therapy-pro .currentCardCard,
+body.theme-therapy-pro #ritualCardWrap,
+body.theme-therapy-pro .cardWrap {
+  background: #ffffff !important;
+  border: 1px solid rgba(28,31,29,0.08) !important;
+  border-radius: 14px !important;
+  box-shadow:
+    0 1px 0 rgba(28,31,29,0.04),
+    0 24px 48px -24px rgba(28,31,29,0.16),
+    0 8px 16px -12px rgba(28,31,29,0.10) !important;
+  color: #1c1f1d !important;
+}
+
+body.theme-therapy-pro #ritualCardType {
+  color: #2d4a3e !important;
+  letter-spacing: 0.12em !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+}
+body.theme-therapy-pro #ritualCardTitle {
+  color: #1c1f1d !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  font-size: 24px !important;
+  line-height: 1.25 !important;
+}
+body.theme-therapy-pro #ritualCardText,
+body.theme-therapy-pro #ritualCardRule,
+body.theme-therapy-pro #ritualCardSubrule {
+  color: #1c1f1d !important;
+  font-style: normal !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  font-weight: 400 !important;
+}
+body.theme-therapy-pro #ritualCardPhrase {
+  color: #4f5552 !important;
+  font-style: italic !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+body.theme-therapy-pro #ritualCardDivider,
+body.theme-therapy-pro #ritualSubruleDivider {
+  background: rgba(28,31,29,0.10) !important;
+}
+body.theme-therapy-pro #deckInfo {
+  color: #4f5552 !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+}
+
+body.theme-therapy-pro .videoBtn {
+  background: transparent !important;
+  border: 1px solid rgba(28,31,29,0.14) !important;
+  color: #1c1f1d !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  font-size: 13.5px !important;
+  padding: 9px 16px !important;
+}
+body.theme-therapy-pro .videoBtn:hover { background: rgba(45,74,62,0.04) !important; }
+body.theme-therapy-pro .videoBtn.primary {
+  background: #2d4a3e !important; color: #ffffff !important; border-color: #2d4a3e !important;
+  box-shadow: 0 1px 0 rgba(28,31,29,0.08), 0 4px 12px -4px rgba(45,74,62,0.30) !important;
+}
+body.theme-therapy-pro .videoBtn.primary:hover { background: #25402f !important; }
+body.theme-therapy-pro .videoBtn.primary:disabled {
+  background: rgba(45,74,62,0.30) !important; border-color: transparent !important; box-shadow: none !important;
+}
+
+/* Histórico · lista cuidadosa */
+body.theme-therapy-pro .historyItem {
+  background: #ffffff !important;
+  border: 1px solid rgba(28,31,29,0.08) !important;
+  color: #1c1f1d !important;
+  border-radius: 10px !important;
+  padding: 12px 14px !important;
+  box-shadow: none !important;
+}
+body.theme-therapy-pro .historyType {
+  color: #2d4a3e !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  font-weight: 600 !important;
+  font-size: 10.5px !important;
+  margin-bottom: 4px !important;
+}
+body.theme-therapy-pro .historyText { color: #1c1f1d !important; font-size: 14px !important; line-height: 1.4 !important; }
+
+/* ──────────────────────────────────────────────────────────
+   VÍDEO · proeminente, sombras camadeadas
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .videoTile {
+  border: 1px solid rgba(28,31,29,0.10) !important;
+  border-radius: 14px !important;
+  box-shadow:
+    0 1px 0 rgba(28,31,29,0.04),
+    0 24px 48px -24px rgba(28,31,29,0.20),
+    0 8px 16px -12px rgba(28,31,29,0.10) !important;
+  background: #0d141f !important;
+  overflow: hidden !important;
+}
+body.theme-therapy-pro .videoTile .videoCameraOff {
+  background: linear-gradient(135deg, #1c1f1d 0%, #2d3530 100%) !important;
+  color: rgba(255,255,255,0.78) !important;
+}
+body.theme-therapy-pro .videoTile .videoTileName {
+  background: rgba(13,20,31,0.82) !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  font-size: 12.5px !important;
+  letter-spacing: 0 !important;
+  padding: 6px 12px !important;
+  border-radius: 999px !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   FOOTER · status sutil
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .footerBar {
+  background: #ffffff !important;
+  border-top: 1px solid rgba(28,31,29,0.08) !important;
+  color: #4f5552 !important;
+  font-weight: 400 !important;
+  font-size: 12.5px !important;
+  padding: 10px 16px !important;
+}
+body.theme-therapy-pro .footerBar strong {
+  color: #1c1f1d !important;
+  font-weight: 600 !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   PROFILE MODAL
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .profileModal { background: rgba(28,31,29,0.45) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
+body.theme-therapy-pro .profileCard {
+  background: #ffffff !important;
+  color: #1c1f1d !important;
+  border: 1px solid rgba(28,31,29,0.08) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 32px 64px -16px rgba(28,31,29,0.30), 0 12px 24px -12px rgba(28,31,29,0.15) !important;
+}
+body.theme-therapy-pro .profileName { color: #1c1f1d !important; font-weight: 600 !important; font-size: 18px !important; letter-spacing: -0.01em !important; }
+body.theme-therapy-pro .profileUsername { color: #4f5552 !important; font-size: 13.5px !important; }
+body.theme-therapy-pro .profileBio { color: #1c1f1d !important; font-size: 14px !important; line-height: 1.5 !important; }
+body.theme-therapy-pro .profStatLabel,
+body.theme-therapy-pro .profStatValue,
+body.theme-therapy-pro .profInfoLabel,
+body.theme-therapy-pro .profInfoValue { color: #1c1f1d !important; }
+body.theme-therapy-pro .profInfoLabel { color: #4f5552 !important; font-weight: 500 !important; font-size: 12.5px !important; }
+body.theme-therapy-pro .profInfoValue { font-size: 13.5px !important; }
+body.theme-therapy-pro .profileX { color: #1c1f1d !important; }
+
+body.theme-therapy-pro .profTab {
+  color: #4f5552 !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  padding: 10px 14px !important;
+}
+body.theme-therapy-pro .profTab:hover { color: #1c1f1d !important; }
+body.theme-therapy-pro .profTab--active {
+  color: #2d4a3e !important;
+  border-bottom-color: #2d4a3e !important;
+}
+
+body.theme-therapy-pro .profileActionBtn {
+  background: transparent !important;
+  border: 1px solid rgba(28,31,29,0.14) !important;
+  color: #1c1f1d !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  font-size: 13.5px !important;
+  padding: 9px 16px !important;
+}
+body.theme-therapy-pro .profileActionBtn--primary {
+  background: #2d4a3e !important; color: #ffffff !important; border-color: #2d4a3e !important;
+}
+body.theme-therapy-pro .profileActionBtn--primary:hover { background: #25402f !important; border-color: #25402f !important; }
+body.theme-therapy-pro .profileActionBtn--danger {
+  color: #a02b1f !important; border-color: rgba(160,43,31,0.30) !important;
+}
+
+body.theme-therapy-pro .profileClose {
+  color: #4f5552 !important;
+  background: transparent !important;
+  border: none !important;
+}
+body.theme-therapy-pro .profileClose:hover { color: #1c1f1d !important; }
+
+body.theme-therapy-pro .profileEditor input,
+body.theme-therapy-pro .profileEditor textarea,
+body.theme-therapy-pro .profileInput,
+body.theme-therapy-pro .profileTextarea {
+  background: #ffffff !important;
+  border: 1px solid rgba(28,31,29,0.14) !important;
+  color: #1c1f1d !important;
+  border-radius: 8px !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+}
+body.theme-therapy-pro .profileEditor input:focus,
+body.theme-therapy-pro .profileInput:focus,
+body.theme-therapy-pro .profileTextarea:focus {
+  outline: none !important;
+  border-color: #2d4a3e !important;
+  box-shadow: 0 0 0 3px rgba(45,74,62,0.12) !important;
+}
+body.theme-therapy-pro .profileField span,
+body.theme-therapy-pro .profileEditor label span { color: #4f5552 !important; font-weight: 500 !important; font-size: 12.5px !important; }
+
+body.theme-therapy-pro .profBadge--green {
+  background: rgba(45,106,79,0.12) !important;
+  color: #2d6a4f !important;
+  border: 1px solid rgba(45,106,79,0.20) !important;
+}
+body.theme-therapy-pro .profBadge--red {
+  background: rgba(160,43,31,0.10) !important;
+  color: #a02b1f !important;
+  border: 1px solid rgba(160,43,31,0.20) !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   JOIN MODAL · paciente entrando
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .joinOverlay { background: rgba(28,31,29,0.45) !important; backdrop-filter: blur(6px) !important; }
+body.theme-therapy-pro .joinPanel {
+  background: #ffffff !important;
+  border: 1px solid rgba(28,31,29,0.08) !important;
+  border-radius: 14px !important;
+  color: #1c1f1d !important;
+  box-shadow: 0 32px 64px -16px rgba(28,31,29,0.30) !important;
+}
+body.theme-therapy-pro .joinPanel__title { color: #1c1f1d !important; font-weight: 600 !important; font-size: 18px !important; letter-spacing: -0.01em !important; }
+body.theme-therapy-pro .joinPanel__room { color: #2d4a3e !important; font-weight: 500 !important; }
+body.theme-therapy-pro .joinPanel__meta { color: #4f5552 !important; font-size: 13px !important; }
+body.theme-therapy-pro .joinPanel__label { color: #4f5552 !important; font-size: 12.5px !important; font-weight: 500 !important; }
+body.theme-therapy-pro .joinPanel__input {
+  background: #ffffff !important;
+  border: 1px solid rgba(28,31,29,0.14) !important;
+  color: #1c1f1d !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  padding: 10px 12px !important;
+}
+body.theme-therapy-pro .joinPanel__input:focus { outline: none !important; border-color: #2d4a3e !important; box-shadow: 0 0 0 3px rgba(45,74,62,0.12) !important; }
+body.theme-therapy-pro .joinPanel__btn {
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  padding: 10px 18px !important;
+}
+body.theme-therapy-pro .joinPanel__btn--primary {
+  background: #2d4a3e !important; color: #ffffff !important; border-color: #2d4a3e !important;
+}
+body.theme-therapy-pro .joinPanel__btn--secondary {
+  background: transparent !important; color: #1c1f1d !important; border: 1px solid rgba(28,31,29,0.14) !important;
+}
+body.theme-therapy-pro .joinPanel__status { color: #4f5552 !important; font-size: 13px !important; }
+
+body.theme-therapy-pro .hostJoinAlert {
+  background: #ffffff !important;
+  border: 1px solid rgba(28,31,29,0.10) !important;
+  border-radius: 12px !important;
+  color: #1c1f1d !important;
+  box-shadow: 0 24px 48px -16px rgba(28,31,29,0.20) !important;
+}
+body.theme-therapy-pro .hostJoinAlert__title { color: #2d4a3e !important; font-weight: 600 !important; }
+body.theme-therapy-pro .hostJoinAlert__name { color: #1c1f1d !important; font-weight: 500 !important; }
+body.theme-therapy-pro .hostJoinAlert__msg { color: #4f5552 !important; }
+
+/* ──────────────────────────────────────────────────────────
+   MOBILE BOTTOM BAR
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro #mobileBottomBar {
+  background: #ffffff !important;
+  border-top: 1px solid rgba(28,31,29,0.08) !important;
+  box-shadow: 0 -1px 0 rgba(28,31,29,0.04), 0 -8px 24px -16px rgba(28,31,29,0.10) !important;
+}
+body.theme-therapy-pro .mobileNavIconLabel,
+body.theme-therapy-pro .mobileNavSelfLabel { color: #4f5552 !important; font-size: 11px !important; font-weight: 500 !important; }
+body.theme-therapy-pro .mobileNavIcon { color: #1c1f1d !important; }
+body.theme-therapy-pro .mobilePrimaryBtn {
+  background: #2d4a3e !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  font-size: 13.5px !important;
+  box-shadow: 0 1px 0 rgba(28,31,29,0.08), 0 4px 12px -4px rgba(45,74,62,0.30) !important;
+}
+body.theme-therapy-pro .mobileSecondaryBtn {
+  background: transparent !important;
+  color: #2d4a3e !important;
+  border: 1px solid rgba(45,74,62,0.30) !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  font-size: 13.5px !important;
+}
+
+body.theme-therapy-pro .mobileDrawer,
+body.theme-therapy-pro .mobileOverlay > .mobileDrawer,
+body.theme-therapy-pro #mobileVideoDrawer {
+  background: #ffffff !important;
+  color: #1c1f1d !important;
+}
+body.theme-therapy-pro .mobileDrawerTitle,
+body.theme-therapy-pro .mobileVideoDrawerTitle { color: #1c1f1d !important; font-weight: 600 !important; font-size: 15px !important; }
+body.theme-therapy-pro .chatDrawerHeader { border-bottom: 1px solid rgba(28,31,29,0.08) !important; }
+
+/* ──────────────────────────────────────────────────────────
+   RECORDING / Save modais (mantidos sóbrios caso apareçam)
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .recOverlay { background: rgba(28,31,29,0.55) !important; backdrop-filter: blur(6px) !important; }
+body.theme-therapy-pro .recModal {
+  background: #ffffff !important;
+  color: #1c1f1d !important;
+  border: 1px solid rgba(28,31,29,0.08) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 32px 64px -16px rgba(28,31,29,0.30) !important;
+}
+body.theme-therapy-pro .recModal-eyebrow { color: #2d4a3e !important; letter-spacing: 0.04em !important; font-size: 11px !important; font-weight: 600 !important; }
+body.theme-therapy-pro .recModal-title { color: #1c1f1d !important; font-weight: 600 !important; font-size: 18px !important; letter-spacing: -0.01em !important; }
+body.theme-therapy-pro .recModal-desc { color: #4f5552 !important; font-size: 14px !important; line-height: 1.5 !important; }
+body.theme-therapy-pro .recBtn-primary {
+  background: #2d4a3e !important; color: #ffffff !important; border: 1px solid #2d4a3e !important;
+  border-radius: 8px !important; font-weight: 500 !important; font-size: 14px !important; padding: 10px 18px !important;
+  letter-spacing: 0 !important; text-transform: none !important;
+}
+body.theme-therapy-pro .recBtn-secondary {
+  background: transparent !important; color: #1c1f1d !important; border: 1px solid rgba(28,31,29,0.14) !important;
+  border-radius: 8px !important; font-weight: 500 !important; font-size: 14px !important; padding: 10px 18px !important;
+  letter-spacing: 0 !important; text-transform: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Fullscreen Gate (iOS)
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro #fullscreenGate {
+  background: #f6f5f1 !important;
+  color: #1c1f1d !important;
+}
+body.theme-therapy-pro #fullscreenGateName,
+body.theme-therapy-pro #fullscreenGateDesc { color: #1c1f1d !important; }
+body.theme-therapy-pro #fullscreenGateCta {
+  background: #2d4a3e !important; color: #ffffff !important; border: 1px solid #2d4a3e !important;
+  border-radius: 8px !important; font-weight: 500 !important; text-transform: none !important; letter-spacing: 0 !important;
+}
+body.theme-therapy-pro .iosStep,
+body.theme-therapy-pro .iosStepNum { color: #1c1f1d !important; }
+body.theme-therapy-pro .iosStepNum {
+  background: rgba(45,74,62,0.10) !important;
+  color: #2d4a3e !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Spec panel (observador)
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .specOverlay { background: rgba(28,31,29,0.45) !important; }
+body.theme-therapy-pro .specPanel {
+  background: #ffffff !important; color: #1c1f1d !important;
+  border: 1px solid rgba(28,31,29,0.08) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 32px 64px -16px rgba(28,31,29,0.30) !important;
+}
+body.theme-therapy-pro .specLiveBadge {
+  background: rgba(45,74,62,0.10) !important; color: #2d4a3e !important;
+  border: 1px solid rgba(45,74,62,0.20) !important; font-weight: 500 !important;
+}
+body.theme-therapy-pro .specTitle { color: #1c1f1d !important; font-weight: 600 !important; }
+body.theme-therapy-pro .specClose { color: #1c1f1d !important; }
+
+/* ──────────────────────────────────────────────────────────
+   Selection styling (detalhe premium)
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro ::selection {
+  background: rgba(45,74,62,0.18);
+  color: #1c1f1d;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Scrollbar fina (WebKit)
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro ::-webkit-scrollbar { width: 10px; height: 10px; }
+body.theme-therapy-pro ::-webkit-scrollbar-track { background: transparent; }
+body.theme-therapy-pro ::-webkit-scrollbar-thumb {
+  background: rgba(28,31,29,0.18);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+body.theme-therapy-pro ::-webkit-scrollbar-thumb:hover {
+  background: rgba(28,31,29,0.32);
+  background-clip: content-box;
+  border: 2px solid transparent;
 }
