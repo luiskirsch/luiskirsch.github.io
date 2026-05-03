@@ -248,11 +248,23 @@
     } catch (e) {}
   }
 
+  // Cache do JSON completo no localStorage pra theme-bootstrap.js aplicar
+  // síncrono no próximo carregamento (zero flash em reload / primeiro acesso).
+  var FULL_CACHE_PREFIX = 'osl_theme_full_cached_';
+  function cacheFullTheme(theme) {
+    if (!theme || !theme.id) return;
+    try { localStorage.setItem(FULL_CACHE_PREFIX + theme.id, JSON.stringify(theme)); } catch (e) { /* quota etc */ }
+  }
+
   function loadTheme(name) {
     return fetch(themesBaseUrl() + name + '.json', { cache: 'no-cache' })
       .then(function (r) {
         if (!r.ok) throw new Error('theme not found: ' + name);
         return r.json();
+      })
+      .then(function (theme) {
+        cacheFullTheme(theme);
+        return theme;
       });
   }
 
