@@ -120,10 +120,34 @@
     }
   }
 
+  // Carrega/troca <link rel="stylesheet"> exclusivo do tema. Permite overrides
+  // profundos de layout (não só cssVars/copy). Removido ao trocar de tema.
+  function applyStylesheet(theme) {
+    var EL_ID = 'osl-theme-stylesheet';
+    var existing = document.getElementById(EL_ID);
+    if (!theme.stylesheet) {
+      if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+      return;
+    }
+    var href = theme.stylesheet;
+    if (!/^https?:|^\//.test(href)) {
+      // resolve relativo a themes/
+      href = themesBaseUrl().replace(/themes\/$/, '') + (href.replace(/^\.\//, ''));
+    }
+    if (existing) {
+      if (existing.getAttribute('href') !== href) existing.setAttribute('href', href);
+      return;
+    }
+    var link = document.createElement('link');
+    link.id = EL_ID; link.rel = 'stylesheet'; link.href = href;
+    (document.head || document.documentElement).appendChild(link);
+  }
+
   function applyTheme(theme) {
     if (!theme || typeof theme !== 'object') return;
     applyCssVars(theme);
     applyBodyClasses(theme);
+    applyStylesheet(theme);
     applyCopy(theme);
     applyImages(theme);
     window.OSL_THEME = theme;

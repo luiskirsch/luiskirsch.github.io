@@ -1,0 +1,448 @@
+/* ============================================================
+   THEME: therapy-pro
+   Layout sóbrio para vídeo-consulta (psicólogos, terapeutas, psiquiatras).
+   - Esconde gamificação (XP, missões, conquistas, reações, tensão, modos
+     Arena/Live/Stream/Loja, paywall in-session, recap de sessão).
+   - Paleta clínica: off-white de fundo, azul corporativo, texto escuro.
+   - Tipografia Inter / system-ui (sem serifa).
+   - Vídeo proeminente, chat sóbrio, "tópicos" no lugar de "cartas".
+   Aplicado quando body.theme-therapy-pro está presente (ver theme-loader).
+   ============================================================ */
+
+body.theme-therapy-pro {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Garante que ::before/::after globais com gradientes dourados sumam */
+body.theme-therapy-pro::before,
+body.theme-therapy-pro::after {
+  display: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   ESCONDE elementos de gamificação e produto-jogo
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro #xpCard,
+body.theme-therapy-pro #xpCardLevel,
+body.theme-therapy-pro #xpCardFill,
+body.theme-therapy-pro #xpCardXp,
+body.theme-therapy-pro #xpCardNums,
+body.theme-therapy-pro #recStatus,
+body.theme-therapy-pro #recStatusText,
+body.theme-therapy-pro #oslShopFab,
+body.theme-therapy-pro #arenaBtn,
+body.theme-therapy-pro #streamBtn,
+body.theme-therapy-pro #liveBtn,
+body.theme-therapy-pro #exitArenaBtn,
+body.theme-therapy-pro #pressureBtn,
+body.theme-therapy-pro #tensionMeter,
+body.theme-therapy-pro #reactionBar,
+body.theme-therapy-pro #effectPanel,
+body.theme-therapy-pro #achievementToast,
+body.theme-therapy-pro .achievementToast,
+body.theme-therapy-pro #missionBadge,
+body.theme-therapy-pro #missionSep,
+body.theme-therapy-pro .missionModal,
+body.theme-therapy-pro .levelUpOverlay,
+body.theme-therapy-pro .lvlPanelOverlay,
+body.theme-therapy-pro .dailyRewardModal,
+body.theme-therapy-pro .voteResultOverlay,
+body.theme-therapy-pro .pressureNotif,
+body.theme-therapy-pro .momentoCriticoNotif,
+body.theme-therapy-pro .multiCard,
+body.theme-therapy-pro .recapOverlay,
+body.theme-therapy-pro .osl-overlay,
+body.theme-therapy-pro #oslShopOverlay,
+body.theme-therapy-pro #profPaneSessao .profileActionBtn--danger,
+body.theme-therapy-pro .profPane .profPackGrid,
+body.theme-therapy-pro #profPanePacotes {
+  display: none !important;
+}
+
+/* Esconde abas de gamificação dentro do perfil (Sessão/Pacotes), mantém Identity + Account */
+body.theme-therapy-pro .profTab[data-target="profPanePacotes"] {
+  display: none !important;
+}
+body.theme-therapy-pro .profStatRow,
+body.theme-therapy-pro .profBgSection[id="profBgSection"],
+body.theme-therapy-pro #profCardSection,
+body.theme-therapy-pro #profFxSection {
+  display: none !important;
+}
+
+/* Footer simplificado */
+body.theme-therapy-pro .footerBar > div:last-child {
+  display: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   TOPBAR sóbria
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .topBar,
+body.theme-therapy-pro .topbar,
+body.theme-therapy-pro #topBar {
+  background: var(--card-bg) !important;
+  border-bottom: 1px solid var(--card-border) !important;
+  box-shadow: 0 1px 0 var(--shadow) !important;
+  backdrop-filter: none !important;
+}
+
+body.theme-therapy-pro .topActionBtn {
+  background: transparent !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+}
+body.theme-therapy-pro .topActionBtn:hover {
+  background: rgba(61, 90, 128, 0.06) !important;
+}
+body.theme-therapy-pro .topActionBtn.primary {
+  background: var(--gold) !important;
+  color: #fff !important;
+  border-color: var(--gold) !important;
+}
+body.theme-therapy-pro .topActionBtn.primary:hover {
+  background: #34507a !important;
+}
+
+body.theme-therapy-pro .videoCtrlBtn {
+  background: transparent !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+}
+body.theme-therapy-pro .videoCtrlBtn.primary {
+  background: var(--gold) !important;
+  color: #fff !important;
+  border-color: var(--gold) !important;
+}
+body.theme-therapy-pro .videoCtrlBtn.danger {
+  background: var(--danger) !important;
+  color: #fff !important;
+  border-color: var(--danger) !important;
+}
+
+body.theme-therapy-pro .eyebrow,
+body.theme-therapy-pro .eyebrow__status {
+  color: var(--muted) !important;
+  letter-spacing: 0.04em !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   SIDEBAR (participantes + chat) sóbria
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .sidebar,
+body.theme-therapy-pro #sidebar {
+  background: var(--card-bg) !important;
+  border-right: 1px solid var(--card-border) !important;
+}
+
+body.theme-therapy-pro .sectionTitle,
+body.theme-therapy-pro h2.sectionTitle {
+  color: var(--text) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+body.theme-therapy-pro .player {
+  background: transparent !important;
+  border-bottom: 1px solid var(--card-border) !important;
+  border-radius: 0 !important;
+}
+body.theme-therapy-pro .player:hover {
+  background: rgba(61, 90, 128, 0.04) !important;
+}
+body.theme-therapy-pro .playerName { color: var(--text) !important; font-weight: 500 !important; }
+body.theme-therapy-pro .playerRole { color: var(--muted) !important; }
+body.theme-therapy-pro .playerStatus,
+body.theme-therapy-pro .playerHost {
+  background: var(--gold-dim) !important;
+  color: var(--gold) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+body.theme-therapy-pro .chatBox,
+body.theme-therapy-pro #chat,
+body.theme-therapy-pro #messages {
+  background: var(--bg) !important;
+}
+body.theme-therapy-pro .message {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+body.theme-therapy-pro .message.me {
+  background: var(--gold) !important;
+  color: #fff !important;
+  border-color: var(--gold) !important;
+}
+body.theme-therapy-pro .message.system {
+  background: rgba(61, 90, 128, 0.06) !important;
+  border-color: var(--card-border) !important;
+  color: var(--muted) !important;
+  font-style: normal !important;
+}
+body.theme-therapy-pro #messageInput,
+body.theme-therapy-pro .composer input {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+}
+body.theme-therapy-pro .sendIconBtn {
+  color: var(--gold) !important;
+}
+
+body.theme-therapy-pro .btn,
+body.theme-therapy-pro .btnPrimary,
+body.theme-therapy-pro #startBtn {
+  background: var(--gold) !important;
+  color: #fff !important;
+  border: 1px solid var(--gold) !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+body.theme-therapy-pro .btn:hover,
+body.theme-therapy-pro .btnPrimary:hover,
+body.theme-therapy-pro #startBtn:hover {
+  background: #34507a !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   MESA / TÓPICOS (mantém estrutura mas sóbria)
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .table,
+body.theme-therapy-pro #table,
+body.theme-therapy-pro .cardCenter {
+  background: var(--bg) !important;
+}
+
+body.theme-therapy-pro .ritualCard,
+body.theme-therapy-pro .currentCardCard,
+body.theme-therapy-pro #ritualCardWrap {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 24px var(--shadow) !important;
+  color: var(--text) !important;
+}
+
+body.theme-therapy-pro #ritualCardType {
+  color: var(--gold) !important;
+  letter-spacing: 0.10em !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+body.theme-therapy-pro #ritualCardTitle {
+  color: var(--text) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+body.theme-therapy-pro #ritualCardText,
+body.theme-therapy-pro #ritualCardRule,
+body.theme-therapy-pro #ritualCardSubrule,
+body.theme-therapy-pro #ritualCardPhrase {
+  color: var(--text) !important;
+  font-style: normal !important;
+}
+body.theme-therapy-pro #deckInfo {
+  color: var(--muted) !important;
+}
+
+body.theme-therapy-pro .videoBtn {
+  background: transparent !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+}
+body.theme-therapy-pro .videoBtn.primary {
+  background: var(--gold) !important;
+  color: #fff !important;
+  border-color: var(--gold) !important;
+}
+body.theme-therapy-pro .videoBtn.primary:hover {
+  background: #34507a !important;
+}
+body.theme-therapy-pro .videoBtn.primary:disabled {
+  background: rgba(61,90,128,0.35) !important;
+  border-color: rgba(61,90,128,0.35) !important;
+  cursor: not-allowed !important;
+}
+
+/* Histórico sóbrio */
+body.theme-therapy-pro .historyItem {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+}
+body.theme-therapy-pro .historyType {
+  color: var(--gold) !important;
+  text-transform: none !important;
+  letter-spacing: 0.04em !important;
+  font-weight: 600 !important;
+}
+body.theme-therapy-pro .historyText { color: var(--text) !important; }
+
+/* ──────────────────────────────────────────────────────────
+   VÍDEO em destaque
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro #videoGrid,
+body.theme-therapy-pro .videoLayer {
+  z-index: 5;
+}
+body.theme-therapy-pro .videoTile {
+  border: 1px solid var(--card-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 24px var(--shadow) !important;
+  background: #0d141f !important;
+}
+body.theme-therapy-pro .videoTile .videoCameraOff {
+  background: #0d141f !important;
+  color: rgba(255,255,255,0.65) !important;
+}
+body.theme-therapy-pro .videoTile .videoTileName {
+  background: rgba(13,20,31,0.78) !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   FOOTER + status
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .footerBar {
+  background: var(--card-bg) !important;
+  border-top: 1px solid var(--card-border) !important;
+  color: var(--muted) !important;
+  font-weight: 500 !important;
+}
+body.theme-therapy-pro .footerBar strong {
+  color: var(--text) !important;
+  font-weight: 600 !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   PROFILE MODAL sóbrio
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .profileModal { background: rgba(15, 23, 42, 0.45) !important; }
+body.theme-therapy-pro .profileCard {
+  background: var(--card-bg) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 18px 48px var(--shadow) !important;
+}
+body.theme-therapy-pro .profileName,
+body.theme-therapy-pro .profileUsername,
+body.theme-therapy-pro .profileBio,
+body.theme-therapy-pro .profStatLabel,
+body.theme-therapy-pro .profStatValue,
+body.theme-therapy-pro .profInfoLabel,
+body.theme-therapy-pro .profInfoValue {
+  color: var(--text) !important;
+}
+body.theme-therapy-pro .profInfoLabel { color: var(--muted) !important; font-weight: 500 !important; }
+body.theme-therapy-pro .profileActionBtn {
+  background: transparent !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+}
+body.theme-therapy-pro .profileActionBtn--primary {
+  background: var(--gold) !important;
+  color: #fff !important;
+  border-color: var(--gold) !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   JOIN MODAL (paciente entrando)
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .joinPanel {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 14px !important;
+  color: var(--text) !important;
+  box-shadow: 0 18px 48px var(--shadow) !important;
+}
+body.theme-therapy-pro .joinPanel__title { color: var(--text) !important; font-weight: 600 !important; }
+body.theme-therapy-pro .joinPanel__label { color: var(--muted) !important; }
+body.theme-therapy-pro .joinPanel__input {
+  background: var(--bg) !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   MOBILE BOTTOM BAR sóbrio
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro #mobileBottomBar {
+  background: var(--card-bg) !important;
+  border-top: 1px solid var(--card-border) !important;
+  box-shadow: 0 -1px 0 var(--shadow) !important;
+}
+body.theme-therapy-pro .mobileNavIconLabel,
+body.theme-therapy-pro .mobileNavSelfLabel { color: var(--muted) !important; }
+body.theme-therapy-pro .mobilePrimaryBtn {
+  background: var(--gold) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+}
+body.theme-therapy-pro .mobileSecondaryBtn {
+  background: transparent !important;
+  color: var(--gold) !important;
+  border: 1px solid var(--gold) !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Espera/Recording status
+   ────────────────────────────────────────────────────────── */
+body.theme-therapy-pro .recOverlay { background: rgba(15, 23, 42, 0.55) !important; }
+body.theme-therapy-pro .recModal {
+  background: var(--card-bg) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 14px !important;
+}
+
+/* Esconde Tensão wrapper (caso o seletor #tensionMeter acima não pegue todos os estados) */
+body.theme-therapy-pro .tensionMeter,
+body.theme-therapy-pro .tensionMeter__bar,
+body.theme-therapy-pro .tensionMeter__fill,
+body.theme-therapy-pro .tensionMeter__icon,
+body.theme-therapy-pro .tensionMeter__label {
+  display: none !important;
+}
