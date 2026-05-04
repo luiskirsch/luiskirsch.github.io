@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta · Espaço Prelúdio</title>
+  <link rel="icon" href="../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/espaco-preludio.css">
+  <script src="../_staging.js" defer></script>
+</head>
+<body class="ep-consult">
+
+<!-- Tela 1: pré-entrada com nome + consentimento -->
+<div id="prejoin" style="min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--ep-bg); color: var(--ep-ink);">
+  <div class="ep-auth__panel" style="max-width: 480px;">
+    <a href="./index.html" class="ep-brand" aria-label="Espaço Prelúdio">
+      <span class="ep-brand__mark">EP</span>
+      <span class="ep-brand__name">
+        <span class="ep-brand__lead">Espaço</span>
+        <span>Prelúdio</span>
+      </span>
+    </a>
+
+    <h1 class="ep-auth__title ep-mt-32">Sua consulta começou.</h1>
+    <p class="ep-auth__sub" id="prejoinHello">
+      Você foi convidado(a) por <strong id="therapistNameLbl">um profissional</strong>.
+      Confirme seu nome e leia rapidamente como protegemos seus dados.
+    </p>
+
+    <div class="ep-stack">
+      <div class="ep-field">
+        <label class="ep-label" for="patientName">Como o profissional deve te chamar?</label>
+        <input id="patientName" class="ep-input" type="text" maxlength="80" placeholder="Seu nome ou apelido">
+      </div>
+
+      <div class="ep-alert ep-alert--info">
+        <strong>O que protegemos:</strong>
+        <ul style="margin: 8px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.55;">
+          <li>O áudio e vídeo são <strong>cifrados ponta a ponta</strong> — só você e o(a) profissional veem/ouvem.</li>
+          <li>Não gravamos nada. Não há cookie de rastreio. Sem cadastro.</li>
+          <li>Suas informações dadas em consulta ficam sob responsabilidade ética e legal do(a) profissional, conforme a Resolução CFP nº 11/2018.</li>
+        </ul>
+      </div>
+
+      <label class="ep-checkbox">
+        <input type="checkbox" id="consentLgpd">
+        <span>Confirmo que aceito iniciar a sessão de teleconsulta. Reconheço que os dados de saúde compartilhados são protegidos pela LGPD (Art. 11) e seguem o sigilo profissional.</span>
+      </label>
+
+      <div class="ep-status" id="prejoinStatus"></div>
+
+      <button class="ep-btn ep-btn--primary ep-btn--lg ep-btn--block" type="button" id="startBtn" disabled>Entrar na consulta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tela 2: sala em andamento -->
+<div id="inSession" class="ep-shell ep-hide">
+  <header class="ep-consult__topbar">
+    <div class="ep-brand">
+      <span class="ep-brand__mark">EP</span>
+      <span class="ep-brand__name">
+        <span class="ep-brand__lead">Em consulta com</span>
+        <span id="topTherapistName">—</span>
+      </span>
+    </div>
+    <div style="flex: 1; display: flex; align-items: center; gap: 14px; justify-content: center;">
+      <span id="connectionStatus" class="ep-consult__status">conectando…</span>
+      <span id="e2eeBadge" class="ep-badge ep-badge--ok ep-hide">E2EE ativo</span>
+    </div>
+  </header>
+
+  <main class="ep-consult__main" style="grid-template-columns: 1fr;">
+    <section class="ep-consult__video" id="videoArea" style="grid-template-columns: 1fr 1fr;">
+      <div class="ep-tile" id="tileLocal">
+        <video id="videoLocal" autoplay muted playsinline></video>
+        <div class="ep-tile__name">Você</div>
+      </div>
+      <div class="ep-tile" id="tileRemote">
+        <div class="ep-tile__placeholder" id="remotePlaceholder">Aguardando o(a) profissional…</div>
+        <video id="videoRemote" autoplay playsinline class="ep-hide"></video>
+        <div class="ep-tile__name ep-hide" id="remoteName"></div>
+      </div>
+
+      <div class="ep-controls-bar">
+        <button class="ep-ctrl" id="ctrlMic" type="button" title="Silenciar microfone" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
+        <button class="ep-ctrl" id="ctrlCam" type="button" title="Desligar câmera" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="m17 10 4-2v8l-4-2z"/></svg>
+        </button>
+        <button class="ep-ctrl ep-ctrl--leave" id="ctrlLeave" type="button" title="Sair da consulta">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" transform="rotate(135 12 12)"/></svg>
+        </button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Tela 3: erro / link inválido -->
+<div id="errorScreen" class="ep-hide" style="min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--ep-bg); color: var(--ep-ink);">
+  <div class="ep-auth__panel" style="max-width: 460px; text-align: center;">
+    <a href="./index.html" class="ep-brand" style="justify-content: center;" aria-label="Espaço Prelúdio">
+      <span class="ep-brand__mark">EP</span>
+      <span class="ep-brand__name">
+        <span class="ep-brand__lead">Espaço</span>
+        <span>Prelúdio</span>
+      </span>
+    </a>
+    <h1 class="ep-auth__title ep-mt-32">Link inválido ou expirado.</h1>
+    <p class="ep-auth__sub" id="errorMsg">Peça um novo link ao(à) profissional.</p>
+  </div>
+</div>
+
+<script type="module">
+  import { BACKEND_BASE_URL } from "./js/firebase-config.js";
+
+  const LIVEKIT_VERSION = "2.5.6";
+
+  const params = new URLSearchParams(location.search);
+  const joinToken = params.get("t");
+
+  const prejoin     = document.getElementById("prejoin");
+  const inSession   = document.getElementById("inSession");
+  const errorScreen = document.getElementById("errorScreen");
+  const errorMsg    = document.getElementById("errorMsg");
+
+  function showError(text) {
+    prejoin.classList.add("ep-hide");
+    inSession.classList.add("ep-hide");
+    errorScreen.classList.remove("ep-hide");
+    if (text) errorMsg.textContent = text;
+  }
+
+  if (!joinToken) {
+    showError("O link da consulta está faltando. Peça um novo ao(à) profissional.");
+    throw new Error("NO_TOKEN");
+  }
+
+  const consentEl = document.getElementById("consentLgpd");
+  const startBtn  = document.getElementById("startBtn");
+  const nameEl    = document.getElementById("patientName");
+  const statusEl  = document.getElementById("prejoinStatus");
+
+  consentEl.addEventListener("change", () => {
+    startBtn.disabled = !consentEl.checked;
+  });
+
+  startBtn.addEventListener("click", async () => {
+    if (!consentEl.checked) return;
+    startBtn.disabled = true;
+    statusEl.textContent = "conectando…";
+    statusEl.className = "ep-status";
+
+    let joinRes;
+    try {
+      joinRes = await fetch(`${BACKEND_BASE_URL}/therapy/sessao/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          joinToken,
+          patientName: nameEl.value.trim().slice(0, 80) || "Paciente",
+          consentLgpd: true
+        })
+      });
+    } catch {
+      statusEl.textContent = "Erro de rede.";
+      statusEl.className = "ep-status is-err";
+      startBtn.disabled = false;
+      return;
+    }
+    const data = await joinRes.json().catch(() => ({}));
+    if (!joinRes.ok || !data.ok) {
+      const code = data?.error || joinRes.status;
+      if (code === "SESSAO_ENCERRADA" || code === "TOKEN_EXPIRADO" || code === 401 || code === 410) {
+        showError("A consulta já foi encerrada ou o link expirou.");
+      } else {
+        statusEl.textContent = "Erro: " + code;
+        statusEl.className = "ep-status is-err";
+        startBtn.disabled = false;
+      }
+      return;
+    }
+
+    document.getElementById("topTherapistName").textContent = data.therapistDisplayName || "Profissional";
+    prejoin.classList.add("ep-hide");
+    inSession.classList.remove("ep-hide");
+
+    await joinRoom(data);
+  });
+
+  async function joinRoom(data) {
+    const livekitMod = await import(`https://esm.sh/livekit-client@${LIVEKIT_VERSION}`);
+    const { Room, RoomEvent, Track, ExternalE2EEKeyProvider } = livekitMod;
+
+    const connStatus = document.getElementById("connectionStatus");
+    const e2eeBadge  = document.getElementById("e2eeBadge");
+    const videoLocal = document.getElementById("videoLocal");
+    const videoRemote= document.getElementById("videoRemote");
+    const remotePlaceholder = document.getElementById("remotePlaceholder");
+    const remoteName = document.getElementById("remoteName");
+    const ctrlMic    = document.getElementById("ctrlMic");
+    const ctrlCam    = document.getElementById("ctrlCam");
+    const ctrlLeave  = document.getElementById("ctrlLeave");
+
+    function setStatus(text) { connStatus.textContent = text; }
+    function b64ToBytes(b64) {
+      const bin = atob(b64);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+
+    let e2eeWorker = null;
+    try {
+      e2eeWorker = new Worker(
+        `https://esm.sh/livekit-client@${LIVEKIT_VERSION}/dist/livekit-client.e2ee.worker.js`,
+        { type: "module" }
+      );
+    } catch {}
+    const e2eeKeyBytes = data.e2eeKey ? b64ToBytes(data.e2eeKey) : null;
+    const useE2EE = !!(e2eeWorker && e2eeKeyBytes);
+    const keyProvider = useE2EE ? new ExternalE2EEKeyProvider() : null;
+
+    const room = new Room({
+      adaptiveStream: true,
+      dynacast: true,
+      e2ee: useE2EE ? { keyProvider, worker: e2eeWorker } : undefined
+    });
+
+    room
+      .on(RoomEvent.ParticipantConnected, (p) => {
+        remotePlaceholder.classList.add("ep-hide");
+        videoRemote.classList.remove("ep-hide");
+        remoteName.classList.remove("ep-hide");
+        remoteName.textContent = p.name || "Profissional";
+      })
+      .on(RoomEvent.ParticipantDisconnected, () => {
+        remotePlaceholder.classList.remove("ep-hide");
+        videoRemote.classList.add("ep-hide");
+        remoteName.classList.add("ep-hide");
+      })
+      .on(RoomEvent.TrackSubscribed, (track) => {
+        if (track.kind === Track.Kind.Video) {
+          track.attach(videoRemote);
+        } else if (track.kind === Track.Kind.Audio) {
+          const a = track.attach();
+          a.style.display = "none";
+          document.body.appendChild(a);
+        }
+      })
+      .on(RoomEvent.TrackUnsubscribed, (track) => track.detach().forEach(el => el.remove()))
+      .on(RoomEvent.Disconnected, () => setStatus("desconectado"));
+
+    try {
+      if (useE2EE) await keyProvider.setKey(e2eeKeyBytes);
+      await room.connect(data.livekitUrl, data.livekitToken);
+      if (useE2EE) {
+        await room.setE2EEEnabled(true);
+        e2eeBadge.classList.remove("ep-hide");
+      }
+      setStatus("ligando câmera…");
+      await room.localParticipant.enableCameraAndMicrophone();
+      const camTrack = Array.from(room.localParticipant.videoTrackPublications.values())[0]?.videoTrack;
+      if (camTrack) camTrack.attach(videoLocal);
+      setStatus("em sessão");
+    } catch (err) {
+      console.error("join_error", err);
+      setStatus("erro");
+      alert("Não foi possível entrar na consulta:\n" + (err?.message || err));
+      return;
+    }
+
+    ctrlMic.addEventListener("click", async () => {
+      const enabled = !ctrlMic.classList.contains("is-off");
+      await room.localParticipant.setMicrophoneEnabled(!enabled);
+      ctrlMic.classList.toggle("is-off", enabled);
+    });
+    ctrlCam.addEventListener("click", async () => {
+      const enabled = !ctrlCam.classList.contains("is-off");
+      await room.localParticipant.setCameraEnabled(!enabled);
+      ctrlCam.classList.toggle("is-off", enabled);
+    });
+    ctrlLeave.addEventListener("click", async () => {
+      if (!confirm("Sair da consulta?")) return;
+      try { await room.disconnect(); } catch {}
+      window.location.href = "./index.html";
+    });
+
+    window.addEventListener("beforeunload", () => { try { room.disconnect(); } catch {} });
+  }
+</script>
+
+</body>
+</html>

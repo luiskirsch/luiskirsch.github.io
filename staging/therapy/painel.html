@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel · Espaço Prelúdio</title>
+  <link rel="icon" href="../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/espaco-preludio.css">
+  <script src="../_staging.js" defer></script>
+</head>
+<body>
+
+<div class="ep-staging-banner">Ambiente de teste · Espaço Prelúdio · staging</div>
+
+<header class="ep-topbar">
+  <div class="ep-container ep-topbar__inner">
+    <a href="./painel.html" class="ep-brand" aria-label="Espaço Prelúdio">
+      <span class="ep-brand__mark">EP</span>
+      <span class="ep-brand__name">
+        <span class="ep-brand__lead">Espaço</span>
+        <span>Prelúdio</span>
+      </span>
+    </a>
+    <nav class="ep-nav" aria-label="Painel">
+      <a href="./painel.html" class="is-active">Consultas</a>
+      <a href="./perfil.html">Perfil</a>
+      <span id="topUserName" class="ep-text-sm ep-text-muted" style="margin: 0 8px;"></span>
+      <button id="logoutBtn" type="button" class="ep-btn ep-btn--ghost ep-btn--sm">Sair</button>
+    </nav>
+  </div>
+</header>
+
+<main class="ep-container ep-mt-32" style="padding-bottom: 80px;">
+
+  <section class="ep-stack">
+    <div style="display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <div class="ep-eyebrow">Painel do profissional</div>
+        <h1 class="ep-h1 ep-mt-12" style="font-size: clamp(28px, 3vw, 36px);">Suas consultas</h1>
+        <p class="ep-text-muted ep-mt-8" style="margin: 0;">
+          Crie um link único para cada paciente. Cifragem ponta-a-ponta ativa em todas as sessões.
+        </p>
+      </div>
+      <button id="newSessionBtn" type="button" class="ep-btn ep-btn--primary ep-btn--lg">+ Nova consulta</button>
+    </div>
+
+    <div id="loadingBanner" class="ep-alert ep-mt-16">Carregando suas consultas…</div>
+
+    <div id="sessionList" class="ep-session-list ep-mt-16 ep-hide"></div>
+
+    <div id="emptyState" class="ep-empty ep-mt-16 ep-hide">
+      <h3 class="ep-h3">Nenhuma consulta ainda.</h3>
+      <p class="ep-text-muted ep-mt-8" style="margin: 0;">
+        Crie sua primeira consulta para gerar um link e enviar ao paciente.
+      </p>
+      <button class="ep-btn ep-btn--primary ep-mt-16" type="button" id="emptyCta">Criar primeira consulta</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- Modal: Nova consulta -->
+<div class="ep-modal" id="newSessionModal" role="dialog" aria-modal="true">
+  <div class="ep-modal__panel">
+    <h3 class="ep-modal__title">Nova consulta</h3>
+    <p class="ep-modal__sub">
+      Defina o nome do paciente (apelido se preferir) e gere um link único.
+      O link expira em 2 horas — perfeito para enviar pouco antes da sessão.
+    </p>
+
+    <form id="newSessionForm" class="ep-stack">
+      <div class="ep-field">
+        <label class="ep-label" for="patientName">Nome do paciente</label>
+        <input id="patientName" class="ep-input" type="text" maxlength="80" required placeholder="Ex.: João S.">
+      </div>
+      <div class="ep-field">
+        <label class="ep-label" for="scheduledAt">Horário (opcional)</label>
+        <input id="scheduledAt" class="ep-input" type="datetime-local">
+        <span class="ep-text-xs ep-text-muted">Use para agendar futura — você pode entrar antes.</span>
+      </div>
+      <div class="ep-status" id="newSessionStatus"></div>
+    </form>
+
+    <div class="ep-modal__actions">
+      <button type="button" class="ep-btn ep-btn--ghost" id="cancelNewSession">Cancelar</button>
+      <button type="button" class="ep-btn ep-btn--primary" id="createNewSession">Criar consulta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Link gerado -->
+<div class="ep-modal" id="linkModal" role="dialog" aria-modal="true">
+  <div class="ep-modal__panel">
+    <h3 class="ep-modal__title">Link da consulta gerado</h3>
+    <p class="ep-modal__sub">
+      Envie este link diretamente ao paciente. Ele expira em 2 horas e só pode ser usado uma vez.
+    </p>
+
+    <div class="ep-recovery" id="linkValue" style="font-size: 12px; word-break: break-all;"></div>
+
+    <div class="ep-modal__actions">
+      <button type="button" class="ep-btn ep-btn--ghost" id="copyLinkBtn">Copiar link</button>
+      <button type="button" class="ep-btn ep-btn--primary" id="closeLinkModal">Pronto</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { auth, BACKEND_BASE_URL } from "./js/firebase-config.js";
+  import { requireTherapist } from "./js/auth-guard.js";
+  import { clearDek, recallUser } from "./js/crypto.js";
+
+  // ─── Boot ───────────────────────────────────────────────────
+  const session = await requireTherapist({ requireDek: true });
+  const { idToken, therapist } = session;
+
+  document.getElementById("topUserName").textContent = therapist.displayName || "";
+
+  // ─── Logout ─────────────────────────────────────────────────
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    clearDek();
+    await signOut(auth);
+    window.location.href = "./login.html";
+  });
+
+  // ─── Helpers ────────────────────────────────────────────────
+  function fmtDate(ms) {
+    if (!ms) return "—";
+    return new Date(ms).toLocaleString("pt-BR", {
+      day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
+    });
+  }
+  function statusBadge(status) {
+    if (status === "completed")   return '<span class="ep-badge ep-badge--muted">Encerrada</span>';
+    if (status === "in_progress") return '<span class="ep-badge ep-badge--ok">Em sessão</span>';
+    return '<span class="ep-badge">Agendada</span>';
+  }
+  function buildPatientLink(joinToken) {
+    return `${location.origin}/staging/therapy/paciente.html?t=${encodeURIComponent(joinToken)}`;
+  }
+
+  // ─── Listar sessões ─────────────────────────────────────────
+  const loadingBanner = document.getElementById("loadingBanner");
+  const sessionList   = document.getElementById("sessionList");
+  const emptyState    = document.getElementById("emptyState");
+
+  async function loadSessions() {
+    loadingBanner.classList.remove("ep-hide");
+    sessionList.classList.add("ep-hide");
+    emptyState.classList.add("ep-hide");
+
+    try {
+      const res = await fetch(`${BACKEND_BASE_URL}/therapy/sessoes`, {
+        headers: { "Authorization": `Bearer ${idToken}` }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data?.error || "ERRO");
+
+      loadingBanner.classList.add("ep-hide");
+
+      if (!data.sessions || data.sessions.length === 0) {
+        emptyState.classList.remove("ep-hide");
+        return;
+      }
+
+      sessionList.innerHTML = "";
+      data.sessions.forEach(s => sessionList.appendChild(renderSession(s)));
+      sessionList.classList.remove("ep-hide");
+    } catch (error) {
+      loadingBanner.textContent = "Erro ao carregar consultas.";
+      loadingBanner.className = "ep-alert ep-alert--danger";
+    }
+  }
+
+  function renderSession(s) {
+    const div = document.createElement("article");
+    div.className = "ep-session";
+    div.innerHTML = `
+      <div>
+        <div class="ep-session__name">${escapeHtml(s.patientName)}</div>
+        <div class="ep-session__meta">
+          ${statusBadge(s.status)}
+          <span>Criada ${fmtDate(s.createdAt)}</span>
+          ${s.scheduledAt ? `<span>· Agendada ${fmtDate(s.scheduledAt)}</span>` : ""}
+          ${s.completedAt ? `<span>· Encerrada ${fmtDate(s.completedAt)}</span>` : ""}
+        </div>
+      </div>
+      <div class="ep-session__actions">
+        ${s.status !== "completed" ? `
+          <button class="ep-btn ep-btn--primary ep-btn--sm" data-action="enter" data-id="${s.sessionId}">Entrar</button>
+        ` : ""}
+        ${s.status !== "completed" ? `
+          <button class="ep-btn ep-btn--ghost ep-btn--sm" data-action="encerrar" data-id="${s.sessionId}">Encerrar</button>
+        ` : ""}
+      </div>
+    `;
+    return div;
+  }
+
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  sessionList.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+
+    if (action === "enter") {
+      window.location.href = `./consultorio.html?session=${encodeURIComponent(id)}`;
+    } else if (action === "encerrar") {
+      if (!confirm("Encerrar esta consulta? Ela ficará marcada como concluída.")) return;
+      btn.disabled = true;
+      try {
+        await fetch(`${BACKEND_BASE_URL}/therapy/sessao/${encodeURIComponent(id)}/encerrar`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${idToken}` }
+        });
+        await loadSessions();
+      } catch {
+        btn.disabled = false;
+        alert("Erro ao encerrar.");
+      }
+    }
+  });
+
+  // ─── Nova consulta ──────────────────────────────────────────
+  const newSessionModal = document.getElementById("newSessionModal");
+  const linkModal = document.getElementById("linkModal");
+
+  document.getElementById("newSessionBtn").addEventListener("click", () => openModal());
+  document.getElementById("emptyCta").addEventListener("click", () => openModal());
+  document.getElementById("cancelNewSession").addEventListener("click", () => closeModal(newSessionModal));
+
+  function openModal() {
+    document.getElementById("patientName").value = "";
+    document.getElementById("scheduledAt").value = "";
+    document.getElementById("newSessionStatus").textContent = "";
+    newSessionModal.classList.add("is-open");
+    setTimeout(() => document.getElementById("patientName").focus(), 50);
+  }
+  function closeModal(el) { el.classList.remove("is-open"); }
+
+  document.getElementById("createNewSession").addEventListener("click", async () => {
+    const patientName = document.getElementById("patientName").value.trim();
+    const scheduledAtRaw = document.getElementById("scheduledAt").value;
+    const statusEl = document.getElementById("newSessionStatus");
+    if (!patientName) {
+      statusEl.textContent = "Informe o nome do paciente.";
+      statusEl.className = "ep-status is-err";
+      return;
+    }
+    statusEl.textContent = "Criando…";
+    statusEl.className = "ep-status";
+
+    const scheduledAt = scheduledAtRaw ? new Date(scheduledAtRaw).getTime() : null;
+
+    try {
+      const res = await fetch(`${BACKEND_BASE_URL}/therapy/sessao/criar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ patientName, scheduledAt })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        statusEl.textContent = "Erro: " + (data?.error || res.status);
+        statusEl.className = "ep-status is-err";
+        return;
+      }
+      closeModal(newSessionModal);
+
+      const link = buildPatientLink(data.session.joinToken);
+      document.getElementById("linkValue").textContent = link;
+      linkModal.classList.add("is-open");
+
+      await loadSessions();
+    } catch (error) {
+      statusEl.textContent = "Erro de rede.";
+      statusEl.className = "ep-status is-err";
+    }
+  });
+
+  document.getElementById("closeLinkModal").addEventListener("click", () => closeModal(linkModal));
+  document.getElementById("copyLinkBtn").addEventListener("click", async () => {
+    const text = document.getElementById("linkValue").textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      const btn = document.getElementById("copyLinkBtn");
+      const orig = btn.textContent;
+      btn.textContent = "Copiado!";
+      setTimeout(() => { btn.textContent = orig; }, 1200);
+    } catch { /* noop */ }
+  });
+
+  // Esc fecha modais
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      newSessionModal.classList.remove("is-open");
+      linkModal.classList.remove("is-open");
+    }
+  });
+
+  await loadSessions();
+</script>
+
+</body>
+</html>
