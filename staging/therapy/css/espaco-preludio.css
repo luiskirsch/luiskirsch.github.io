@@ -1250,6 +1250,285 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
 }
 
 /* ============================================================
+   PRONTUÁRIO — header card + stats + timeline expandível
+   ============================================================ */
+
+.ep-prontuario__header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+  background: var(--ep-surface);
+  border: 1px solid var(--ep-line);
+  border-radius: var(--ep-radius-lg);
+  padding: 24px 28px;
+  box-shadow: var(--ep-shadow-card);
+}
+@media (max-width: 760px) {
+  .ep-prontuario__header {
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "avatar title" "actions actions";
+    gap: 16px;
+  }
+  .ep-prontuario__header > .ep-prontuario__avatar  { grid-area: avatar; }
+  .ep-prontuario__header > .ep-prontuario__title   { grid-area: title; }
+  .ep-prontuario__header > .ep-prontuario__actions { grid-area: actions; justify-self: stretch; }
+}
+
+.ep-prontuario__avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,251,240,0.4), transparent 60%),
+    linear-gradient(135deg, var(--ep-gold), var(--ep-gold-deep));
+  color: #14110d;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 12px 24px -10px var(--ep-gold-glow), 0 1px 0 rgba(255,251,240,0.4) inset;
+  flex: 0 0 auto;
+  text-transform: uppercase;
+}
+
+.ep-prontuario__title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.ep-prontuario__title h1 {
+  margin: 0;
+  font-size: clamp(24px, 3.2vw, 36px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ep-ink);
+  line-height: 1.1;
+}
+
+.ep-prontuario__pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.ep-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ep-bg-2);
+  border: 1px solid var(--ep-line);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12.5px;
+  color: var(--ep-ink-2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ep-pill svg { width: 13px; height: 13px; flex: 0 0 auto; }
+.ep-pill--accent {
+  background: var(--ep-accent-soft);
+  color: var(--ep-accent);
+  border-color: rgba(45,74,62,0.20);
+}
+
+.ep-prontuario__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Stats strip */
+.ep-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .ep-stats-strip { grid-template-columns: 1fr 1fr; }
+}
+
+.ep-stat {
+  background: var(--ep-surface);
+  border: 1px solid var(--ep-line);
+  border-radius: var(--ep-radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ep-stat__label {
+  color: var(--ep-ink-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+.ep-stat__value {
+  color: var(--ep-ink);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.ep-stat__hint {
+  color: var(--ep-ink-2);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* Observações expandidas */
+.ep-observations {
+  background: var(--ep-bg-2);
+  border-left: 3px solid var(--ep-accent);
+  padding: 14px 18px;
+  border-radius: 4px;
+  color: var(--ep-ink);
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.ep-observations:empty { display: none; }
+
+/* Timeline de sessões agrupada por mês */
+.ep-timeline { display: flex; flex-direction: column; gap: 24px; }
+
+.ep-timeline-month {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ep-timeline-month__label {
+  color: var(--ep-accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--ep-line);
+  margin-bottom: 4px;
+}
+
+.ep-session-card {
+  background: var(--ep-surface);
+  border: 1px solid var(--ep-line);
+  border-radius: var(--ep-radius);
+  overflow: hidden;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.ep-session-card:hover { border-color: var(--ep-line-strong); }
+.ep-session-card.is-open { box-shadow: var(--ep-shadow-soft); border-color: var(--ep-line-strong); }
+
+.ep-session-card__head {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 18px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  border-radius: var(--ep-radius);
+}
+.ep-session-card__head:hover { background: var(--ep-bg-2); }
+@media (max-width: 640px) {
+  .ep-session-card__head {
+    grid-template-columns: 1fr auto;
+    gap: 8px 14px;
+  }
+  .ep-session-card__head .ep-session-card__time { grid-column: 1 / -1; }
+}
+
+.ep-session-card__date {
+  color: var(--ep-ink);
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+.ep-session-card__time {
+  color: var(--ep-ink-2);
+  font-size: 13px;
+}
+.ep-session-card__count {
+  color: var(--ep-ink-2);
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ep-session-card__chevron {
+  width: 24px; height: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--ep-ink-2);
+  transition: transform 180ms ease, color 120ms ease;
+}
+.ep-session-card.is-open .ep-session-card__chevron {
+  transform: rotate(180deg);
+  color: var(--ep-accent);
+}
+
+.ep-session-card__body {
+  padding: 0 18px 16px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--ep-line);
+  padding-top: 14px;
+  margin-top: -1px;
+}
+.ep-session-card.is-open .ep-session-card__body { display: flex; }
+
+/* Loading skeletons */
+.ep-skeleton {
+  background: linear-gradient(90deg,
+    rgba(28,31,29,0.04) 0%,
+    rgba(28,31,29,0.08) 50%,
+    rgba(28,31,29,0.04) 100%);
+  background-size: 200% 100%;
+  animation: epSkeletonPulse 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+.ep-skeleton--title { height: 38px; width: 60%; }
+.ep-skeleton--pill { height: 22px; width: 90px; border-radius: 999px; display: inline-block; margin-right: 6px; }
+.ep-skeleton--card { height: 64px; width: 100%; }
+.ep-skeleton--avatar { width: 32px; height: 32px; border-radius: 50%; }
+@keyframes epSkeletonPulse {
+  0%, 100% { background-position: 200% 0; }
+  50%      { background-position: 0 0; }
+}
+
+/* Estado de erro com retry */
+.ep-error-state {
+  background: rgba(160,43,31,0.04);
+  border: 1px solid rgba(160,43,31,0.24);
+  border-radius: var(--ep-radius);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+.ep-error-state__title {
+  color: var(--ep-danger);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.ep-error-state__detail {
+  color: var(--ep-ink-2);
+  font-size: 13px;
+  font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+
+/* ============================================================
    ASSINATURA PRELÚDIO — paleta dourada do ritual + modos de clima
    ============================================================ */
 
