@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-21">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-22">
 </head>
 <body>
 
@@ -44,6 +44,18 @@
       Esses dados aparecem no cabeçalho das suas receitas digitais. Mantenha
       atualizado — o paciente e a farmácia veem essas informações.
     </p>
+
+    <!-- Card de plano -->
+    <section id="planoCard" class="ep-issuer-block ep-mt-24" style="display: none;">
+      <div class="ep-issuer-block__main">
+        <div class="ep-eyebrow" id="planoEyebrow">Plano</div>
+        <div class="ep-issuer-block__name" id="planoTitle">—</div>
+        <div class="ep-issuer-block__ids" id="planoSub">—</div>
+      </div>
+      <div class="ep-issuer-block__actions">
+        <a href="./planos.html" class="ep-btn ep-btn--ghost ep-btn--sm">Gerenciar plano</a>
+      </div>
+    </section>
 
     <form id="perfilForm" class="ep-stack ep-mt-24" novalidate>
 
@@ -218,6 +230,41 @@
       reader.readAsDataURL(file);
     });
   }
+
+  // ─── Card de plano ───────────────────────────────────────────────────
+  function renderPlanoCard(t) {
+    const card = $("planoCard");
+    if (!card) return;
+    const trialUntil = t.trialUntil?.toMillis ? t.trialUntil.toMillis() : Number(t.trialUntil) || null;
+    const plano = t.plano || "trial";
+
+    let title = "Plano Trial", sub = "—", eyebrow = "Plano";
+    if (plano === "pro") {
+      eyebrow = "Plano · Ativo";
+      title = "Espaço Prelúdio Pro";
+      sub = t.nextChargeAt
+        ? "Próxima cobrança em " + new Date(Number(t.nextChargeAt)).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+        : "Assinatura ativa.";
+    } else if (plano === "trial") {
+      const days = trialUntil ? Math.max(0, Math.ceil((trialUntil - Date.now()) / 86_400_000)) : null;
+      eyebrow = "Plano · Trial";
+      title = days != null ? `Trial gratuito — ${days} ${days === 1 ? "dia restante" : "dias restantes"}` : "Trial gratuito";
+      sub = trialUntil ? "Expira em " + new Date(trialUntil).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : "";
+    } else if (plano === "expired") {
+      eyebrow = "Plano · Expirado";
+      title = "Trial encerrado";
+      sub = "Assine para continuar usando todas as funcionalidades.";
+    } else if (plano === "canceled") {
+      eyebrow = "Plano · Cancelado";
+      title = "Assinatura cancelada";
+      sub = "Você pode reativar quando quiser.";
+    }
+    $("planoEyebrow").textContent = eyebrow;
+    $("planoTitle").textContent   = title;
+    $("planoSub").textContent     = sub;
+    card.style.display = "flex";
+  }
+  renderPlanoCard(therapist);
 
   // ─── Carrega dados existentes ────────────────────────────────────────
   function applyTherapist(t) {
