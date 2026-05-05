@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-17">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-18">
 </head>
 <body>
 
@@ -31,7 +31,7 @@
   </header>
 
   <main class="ep-main">
-    <div class="ep-flex ep-flex--end-wrap" style="justify-content: space-between; align-items: end; margin-bottom: 24px;">
+    <div class="ep-flex ep-flex--end-wrap" style="justify-content: space-between; align-items: end; margin-bottom: 16px;">
       <div>
         <div class="ep-eyebrow">Receita digital</div>
         <h1 class="ep-h1 ep-mt-12" id="pageTitle">Nova receita</h1>
@@ -43,7 +43,25 @@
       </span>
     </div>
 
-    <div class="ep-receita-grid">
+    <!-- Emitido por: dados do médico que aparecem no PDF -->
+    <section class="ep-issuer-block" id="issuerBlock">
+      <div class="ep-issuer-block__logo" id="issuerLogo">
+        <span class="ep-issuer-block__logo-fallback" id="issuerLogoFallback">EP</span>
+      </div>
+      <div class="ep-issuer-block__main">
+        <div class="ep-eyebrow">Emitido por</div>
+        <div class="ep-issuer-block__name" id="issuerName">—</div>
+        <div class="ep-issuer-block__ids" id="issuerIds">—</div>
+        <div class="ep-issuer-block__addr" id="issuerAddr"></div>
+        <div class="ep-issuer-block__phone" id="issuerPhone"></div>
+      </div>
+      <div class="ep-issuer-block__actions">
+        <a href="./perfil.html" class="ep-btn ep-btn--ghost ep-btn--sm">Editar perfil</a>
+      </div>
+    </section>
+    <div id="issuerWarning" class="ep-alert ep-alert--info ep-mt-12 ep-hide" style="background: rgba(184,69,61,0.06); border-color: rgba(184,69,61,0.25); color: #8a3a33;"></div>
+
+    <div class="ep-receita-grid ep-mt-16">
       <!-- Form -->
       <section class="ep-receita-form">
         <h2 class="ep-h3 ep-mt-0">Dados da receita</h2>
@@ -209,6 +227,56 @@
   const editId = params.get("id");
   const presetPatientId = params.get("patientId");
   const presetSessionId = params.get("sessionId");
+
+  // ─── Issuer block: renderiza dados do médico que vão pro PDF ────────
+  function renderIssuer() {
+    const t = therapist;
+    const c = t.consultorio || {};
+    const initials = (t.displayName || "")
+      .split(/\s+/).filter(Boolean).slice(0, 2)
+      .map(s => s[0]).join("").toUpperCase() || "—";
+
+    const logoEl = document.getElementById("issuerLogo");
+    if (t.logoBase64 && t.logoMime) {
+      logoEl.innerHTML = `<img src="data:${t.logoMime};base64,${t.logoBase64}" alt="Logo">`;
+    } else {
+      document.getElementById("issuerLogoFallback").textContent = initials;
+    }
+
+    document.getElementById("issuerName").textContent = t.displayName || "(sem nome)";
+
+    const idParts = [];
+    if (t.crm) idParts.push("CRM " + t.crm);
+    if (t.crp) idParts.push("CRP " + t.crp);
+    if (t.rqe) idParts.push("RQE " + t.rqe.replace(/^RQE\s*/i, ""));
+    if (t.especialidade) idParts.push(t.especialidade);
+    document.getElementById("issuerIds").textContent = idParts.join("  ·  ") || "(sem identificação profissional)";
+
+    const addrParts = [];
+    if (c.endereco) {
+      let line = c.endereco;
+      if (c.numero) line += ", " + c.numero;
+      if (c.complemento) line += " — " + c.complemento;
+      addrParts.push(line);
+    }
+    const cityLine = [c.bairro, c.cidade, c.uf, c.cep].filter(Boolean).join(" · ");
+    if (cityLine) addrParts.push(cityLine);
+    document.getElementById("issuerAddr").textContent = addrParts.join(" / ");
+    document.getElementById("issuerPhone").textContent = c.telefone || "";
+
+    // Warning de campos faltando
+    const missing = [];
+    if (!c.endereco || !c.cidade) missing.push("endereço do consultório");
+    if (!c.telefone)              missing.push("telefone");
+    if (!t.crm && !t.crp)         missing.push("CRM/CRP");
+    if (missing.length > 0) {
+      const w = document.getElementById("issuerWarning");
+      w.classList.remove("ep-hide");
+      w.innerHTML = `<strong>Atenção:</strong> faltam dados no perfil para emitir uma receita completa: ${missing.join(", ")}.
+        <a href="./perfil.html" style="color: inherit; text-decoration: underline;">Editar perfil →</a>`;
+    }
+  }
+  renderIssuer();
 
   // DOM
   const patientSelect    = document.getElementById("patientSelect");
@@ -454,6 +522,9 @@
   saveDraftBtn.addEventListener("click", persistDraft);
 
   // ─── Geração de PDF (pdf-lib) ────────────────────────────────────────
+  // Layout: cabeçalho do consultório do médico (logo + identidade) →
+  // corpo flowing (título, paciente, prescrição, observações, validade) →
+  // bloco de assinatura logo após corpo → rodapé sutil do Prelúdio.
   async function buildPdf(form) {
     const { PDFDocument, StandardFonts, rgb } = await import("https://esm.sh/pdf-lib@1.17.1");
     const pdfDoc = await PDFDocument.create();
@@ -462,10 +533,14 @@
     const fontReg  = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    let y = 800;
     const left = 50;
     const right = 545;
+    let y = 800;
 
+    function drawAt(text, x, opts = {}) {
+      const { font = fontReg, size = 11, color = rgb(0.1, 0.1, 0.1) } = opts;
+      page.drawText(String(text || ""), { x, y, font, size, color });
+    }
     function drawText(text, opts = {}) {
       const { x = left, font = fontReg, size = 11, color = rgb(0.1, 0.1, 0.1), maxWidth = right - left } = opts;
       const lines = wrapText(String(text || ""), font, size, maxWidth);
@@ -491,37 +566,121 @@
       if (current) lines.push(current);
       return lines.length ? lines : [""];
     }
-    function hr() {
-      page.drawLine({ start: { x: left, y: y + 4 }, end: { x: right, y: y + 4 }, thickness: 0.5, color: rgb(0.7,0.7,0.7) });
-      y -= 12;
+    function hr(yPos = null) {
+      const yy = yPos !== null ? yPos : y + 4;
+      page.drawLine({ start: { x: left, y: yy }, end: { x: right, y: yy }, thickness: 0.5, color: rgb(0.78,0.78,0.78) });
+      if (yPos === null) y -= 12;
     }
 
-    // Cabeçalho profissional
-    drawText(therapist.displayName || "", { font: fontBold, size: 14 });
-    const ids = [];
-    if (therapist.crm) ids.push("CRM " + therapist.crm);
-    if (therapist.crp) ids.push("CRP " + therapist.crp);
-    if (therapist.especialidade) ids.push(therapist.especialidade);
-    drawText(ids.join("  ·  "), { size: 10, color: rgb(0.35,0.35,0.35) });
-    y -= 6;
+    const t = therapist;
+    const c = t.consultorio || {};
+
+    // ── Embed logo (PNG/JPEG direto; WebP via canvas → PNG) ───────────
+    let logoImg = null;
+    if (t.logoBase64 && t.logoMime) {
+      try {
+        let bytes;
+        const mime = t.logoMime;
+        if (mime === "image/png") {
+          bytes = base64ToBytes(t.logoBase64);
+          logoImg = await pdfDoc.embedPng(bytes);
+        } else if (mime === "image/jpeg" || mime === "image/jpg") {
+          bytes = base64ToBytes(t.logoBase64);
+          logoImg = await pdfDoc.embedJpg(bytes);
+        } else if (mime === "image/webp") {
+          // Converte WebP → PNG via canvas (pdf-lib não suporta WebP nativo)
+          const dataUrl = `data:${mime};base64,${t.logoBase64}`;
+          const img = new Image();
+          await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          canvas.getContext("2d").drawImage(img, 0, 0);
+          const png = canvas.toDataURL("image/png").split(",")[1];
+          logoImg = await pdfDoc.embedPng(base64ToBytes(png));
+        }
+      } catch (e) { console.warn("logo_embed_failed", e); logoImg = null; }
+    }
+
+    // ── HEADER (consultório do médico) ────────────────────────────────
+    const headerTopY = y;
+    let textX = left;
+    if (logoImg) {
+      const maxSide = 56;
+      const ratio = logoImg.width / logoImg.height;
+      let w = maxSide, h = maxSide;
+      if (ratio > 1) h = maxSide / ratio; else w = maxSide * ratio;
+      page.drawImage(logoImg, { x: left, y: y - maxSide, width: w, height: h });
+      textX = left + maxSide + 16;
+    }
+
+    // Nome em destaque
+    drawAt(t.displayName || "", textX, { font: fontBold, size: 16 });
+    y -= 22;
+
+    // Identificadores
+    const idParts = [];
+    if (t.crm) idParts.push("CRM " + t.crm);
+    if (t.crp) idParts.push("CRP " + t.crp);
+    if (t.rqe) idParts.push("RQE " + t.rqe.replace(/^RQE\s*/i, ""));
+    if (t.especialidade) idParts.push(t.especialidade);
+    if (idParts.length) {
+      drawAt(idParts.join("  ·  "), textX, { size: 9.5, color: rgb(0.32,0.32,0.32) });
+      y -= 13;
+    }
+
+    // Endereço
+    const addrLines = [];
+    if (c.endereco) {
+      let line = c.endereco;
+      if (c.numero) line += ", " + c.numero;
+      if (c.complemento) line += " — " + c.complemento;
+      addrLines.push(line);
+    }
+    const cityBits = [];
+    if (c.bairro) cityBits.push(c.bairro);
+    if (c.cidade && c.uf) cityBits.push(`${c.cidade}/${c.uf}`);
+    else if (c.cidade) cityBits.push(c.cidade);
+    else if (c.uf) cityBits.push(c.uf);
+    if (c.cep) cityBits.push("CEP " + c.cep);
+    if (cityBits.length) addrLines.push(cityBits.join(" · "));
+    for (const line of addrLines) {
+      drawAt(line, textX, { size: 9, color: rgb(0.42,0.42,0.42) });
+      y -= 11;
+    }
+
+    const contactBits = [];
+    if (c.telefone) contactBits.push("Tel.: " + c.telefone);
+    if (t.cnpj)     contactBits.push("CNPJ: " + t.cnpj);
+    if (contactBits.length) {
+      drawAt(contactBits.join("  ·  "), textX, { size: 9, color: rgb(0.42,0.42,0.42) });
+      y -= 11;
+    }
+
+    // Garante que o bloco header tem espaço pro logo
+    if (logoImg) {
+      const logoBottom = headerTopY - 56;
+      if (y > logoBottom) y = logoBottom;
+    }
+    y -= 14;
     hr();
 
-    // Título
-    const tituloMap = {
+    // ── Título do receituário ─────────────────────────────────────────
+    const titulos = {
       "simples": "RECEITUÁRIO",
       "controle-especial": "RECEITUÁRIO DE CONTROLE ESPECIAL"
     };
-    drawText(tituloMap[form.tipoReceita] || "RECEITUÁRIO", { font: fontBold, size: 13 });
+    drawText(titulos[form.tipoReceita] || "RECEITUÁRIO", { font: fontBold, size: 13 });
     y -= 4;
 
-    // Paciente
+    // ── Paciente ──────────────────────────────────────────────────────
     drawText("Paciente: " + form.patientName, { font: fontBold });
     if (form.patientCpf) drawText("CPF: " + form.patientCpf);
     drawText("Data: " + new Date(form.dataEmissao + "T00:00:00").toLocaleDateString("pt-BR"));
     y -= 6;
     hr();
 
-    // Medicamentos
+    // ── Prescrição ────────────────────────────────────────────────────
     drawText("PRESCRIÇÃO", { font: fontBold, size: 12 });
     y -= 2;
     form.meds.forEach((m, i) => {
@@ -531,6 +690,7 @@
       y -= 4;
     });
 
+    // ── Observações ───────────────────────────────────────────────────
     if (form.observacoes) {
       y -= 4;
       hr();
@@ -538,24 +698,24 @@
       drawText(form.observacoes);
     }
 
+    // ── Validade ──────────────────────────────────────────────────────
     y -= 6;
     hr();
     drawText("Validade: " + form.validade + " dias a partir da emissão.", { size: 10, color: rgb(0.35,0.35,0.35) });
 
-    // Bloco de assinatura
-    y = 160;
+    // ── Bloco de assinatura — logo após o conteúdo, com espaçamento ──
+    y -= 36;
+    // Garante que sobra espaço pro rodapé (mínimo y = 90)
+    if (y < 130) y = 130;
     page.drawLine({ start: { x: left, y }, end: { x: left + 280, y }, thickness: 0.5, color: rgb(0.3,0.3,0.3) });
     y -= 14;
     drawText("Assinatura digital do(a) profissional", { size: 9, color: rgb(0.45,0.45,0.45) });
-    drawText(therapist.displayName || "", { size: 10, font: fontBold });
-    drawText(ids.join("  ·  "), { size: 9, color: rgb(0.35,0.35,0.35) });
+    drawText(t.displayName || "", { size: 10, font: fontBold });
+    if (idParts.length) drawText(idParts.join("  ·  "), { size: 9, color: rgb(0.35,0.35,0.35) });
 
-    // Rodapé
-    page.drawText("Receita emitida pela plataforma Espaço Prelúdio · espaço-preludio.com.br", {
-      x: left, y: 40, font: fontReg, size: 8, color: rgb(0.55,0.55,0.55)
-    });
-    page.drawText("Para validar a assinatura ICP-Brasil, abra em validar.iti.gov.br ou Adobe Reader.", {
-      x: left, y: 28, font: fontReg, size: 8, color: rgb(0.55,0.55,0.55)
+    // ── Rodapé sutil (Prelúdio) ───────────────────────────────────────
+    page.drawText("Documento emitido via Espaço Prelúdio · espacopreludio.com.br · Validar a assinatura ICP-Brasil em verificador.iti.gov.br", {
+      x: left, y: 32, font: fontReg, size: 7.5, color: rgb(0.60,0.60,0.60)
     });
 
     return pdfDoc.save();
