@@ -26,14 +26,38 @@
     <div class="ep-flex ep-flex--center ep-gap-14 ep-w-full">
       <span id="connectionStatus" class="ep-consult__status">conectando…</span>
       <span id="e2eeBadge" class="ep-badge ep-badge--ok ep-hide" title="End-to-end encrypted">E2EE ativo</span>
-      <div class="ep-mode-switch" role="group" aria-label="Modo de clima">
-        <button type="button" data-mode="foco"       class="is-active">Foco</button>
-        <button type="button" data-mode="entardecer">Entardecer</button>
-        <button type="button" data-mode="calmo">Calmo</button>
-      </div>
     </div>
     <div class="ep-flex ep-gap-8">
-      <button id="ambientToggle" type="button" class="ep-ambient-toggle" title="Áudio ambiente">♪ Ambiente</button>
+      <div class="ep-ambient">
+        <button id="ambientBtn" class="ep-ambient__btn" type="button" aria-expanded="false" aria-haspopup="dialog" aria-controls="ambientPanel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <line x1="4" y1="9" x2="20" y2="9"/>
+            <line x1="4" y1="15" x2="20" y2="15"/>
+            <circle cx="9" cy="9" r="2.2"/>
+            <circle cx="15" cy="15" r="2.2"/>
+          </svg>
+          Ajustar ambiente
+        </button>
+        <div class="ep-ambient__panel" id="ambientPanel" aria-label="Ajustes de ambiente">
+          <div class="ep-ambient__section">
+            <div class="ep-ambient__label">Clima da sala</div>
+            <div class="ep-ambient__pills" role="group" aria-label="Modo de clima">
+              <button class="ep-ambient__pill" type="button" data-mode="foco">Foco</button>
+              <button class="ep-ambient__pill" type="button" data-mode="entardecer">Entardecer</button>
+              <button class="ep-ambient__pill" type="button" data-mode="calmo">Calmo</button>
+            </div>
+          </div>
+          <div class="ep-ambient__section">
+            <div class="ep-ambient__label">Som ambiente</div>
+            <div class="ep-ambient__pills" role="group" aria-label="Som ambiente">
+              <button class="ep-ambient__pill" type="button" data-sound="off">Silêncio</button>
+              <button class="ep-ambient__pill" type="button" data-sound="brown">Acolhedor</button>
+            </div>
+            <input type="range" data-ambient-volume class="ep-ambient__slider" min="0" max="100" value="40" aria-label="Volume do som ambiente">
+          </div>
+          <p class="ep-ambient__hint">Suas preferências ficam só neste dispositivo.</p>
+        </div>
+      </div>
       <a href="./painel.html" class="ep-btn ep-btn--ghost ep-btn--sm">Painel</a>
     </div>
   </header>
@@ -137,24 +161,11 @@
   import { requireTherapist } from "./js/auth-guard.js";
   import { encryptNote, decryptNote, clearDek } from "./js/crypto.js";
   import { TOPIC_LIBRARY, ABORDAGEM_LABEL, shuffle } from "./js/topics.js";
+  import { initAtmosphere } from "./js/atmosphere.js";
 
-  // ─── Modo de clima (foco / entardecer / calmo) ──────────────
-  // Aplicado via classe no body. Persiste em localStorage.
-  const MODE_KEY = "ep_consult_mode";
-  const validModes = new Set(["foco", "entardecer", "calmo"]);
-  function applyMode(mode) {
-    if (!validModes.has(mode)) mode = "foco";
-    document.body.classList.remove("ep-mode-foco", "ep-mode-entardecer", "ep-mode-calmo");
-    document.body.classList.add("ep-mode-" + mode);
-    document.querySelectorAll(".ep-mode-switch button").forEach(b => {
-      b.classList.toggle("is-active", b.dataset.mode === mode);
-    });
-    try { localStorage.setItem(MODE_KEY, mode); } catch {}
-  }
-  applyMode(localStorage.getItem(MODE_KEY) || "foco");
-  document.querySelectorAll(".ep-mode-switch button").forEach(b => {
-    b.addEventListener("click", () => applyMode(b.dataset.mode));
-  });
+  // Inicializa clima + som ambiente + painel "Ajustar ambiente".
+  // Todo o estado fica em localStorage; nada disso vai pro servidor.
+  await initAtmosphere({ buttonId: "ambientBtn", panelId: "ambientPanel" });
 
   // LiveKit via esm.sh — pin de versão para reprodutibilidade.
   const LIVEKIT_VERSION = "2.5.6";
@@ -545,53 +556,7 @@
   renderFilters();
   renderList();
 
-  // ─── Áudio ambiente (brown noise suave gerado on-the-fly) ───
-  // Toggle 2 estados: off / silêncio acolhedor (brown noise -36 dB).
-  // Sem chuva real (precisaria de asset). Som gerado via AudioContext.
-  const ambientToggle = document.getElementById("ambientToggle");
-  let ambientCtx = null;
-  let ambientNode = null;
-  let ambientGain = null;
-
-  function startAmbient() {
-    try {
-      ambientCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const bufferSize = 2 * ambientCtx.sampleRate;
-      const buffer = ambientCtx.createBuffer(1, bufferSize, ambientCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-      let lastOut = 0;
-      for (let i = 0; i < bufferSize; i++) {
-        const white = Math.random() * 2 - 1;
-        // Brown noise: integrador leve com ganho compensatório
-        lastOut = (lastOut + (0.02 * white)) / 1.02;
-        data[i] = lastOut * 3.5;
-      }
-      ambientNode = ambientCtx.createBufferSource();
-      ambientNode.buffer = buffer;
-      ambientNode.loop = true;
-      ambientGain = ambientCtx.createGain();
-      ambientGain.gain.value = 0;
-      ambientGain.gain.linearRampToValueAtTime(0.04, ambientCtx.currentTime + 1.5);
-      ambientNode.connect(ambientGain).connect(ambientCtx.destination);
-      ambientNode.start(0);
-      ambientToggle.classList.add("is-on");
-    } catch (e) { console.warn("ambient_start_error", e); }
-  }
-  function stopAmbient() {
-    try {
-      if (ambientGain && ambientCtx) {
-        ambientGain.gain.linearRampToValueAtTime(0, ambientCtx.currentTime + 0.6);
-        setTimeout(() => {
-          try { ambientNode.stop(); ambientCtx.close(); } catch {}
-          ambientCtx = null; ambientNode = null; ambientGain = null;
-        }, 700);
-      }
-      ambientToggle.classList.remove("is-on");
-    } catch {}
-  }
-  ambientToggle.addEventListener("click", () => {
-    if (ambientCtx) stopAmbient(); else startAmbient();
-  });
+  // Som ambiente e clima já foram inicializados por initAtmosphere() acima.
 
   await loadNotes();
 

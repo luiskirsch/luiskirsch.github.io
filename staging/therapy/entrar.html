@@ -71,6 +71,38 @@
       <span id="connectionStatus" class="ep-consult__status">conectando…</span>
       <span id="e2eeBadge" class="ep-badge ep-badge--ok ep-hide">E2EE ativo</span>
     </div>
+    <div class="ep-flex ep-gap-8">
+      <div class="ep-ambient">
+        <button id="ambientBtn" class="ep-ambient__btn" type="button" aria-expanded="false" aria-haspopup="dialog" aria-controls="ambientPanel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <line x1="4" y1="9" x2="20" y2="9"/>
+            <line x1="4" y1="15" x2="20" y2="15"/>
+            <circle cx="9" cy="9" r="2.2"/>
+            <circle cx="15" cy="15" r="2.2"/>
+          </svg>
+          Ajustar ambiente
+        </button>
+        <div class="ep-ambient__panel" id="ambientPanel" aria-label="Ajustes de ambiente">
+          <div class="ep-ambient__section">
+            <div class="ep-ambient__label">Clima da sala</div>
+            <div class="ep-ambient__pills" role="group" aria-label="Modo de clima">
+              <button class="ep-ambient__pill" type="button" data-mode="foco">Foco</button>
+              <button class="ep-ambient__pill" type="button" data-mode="entardecer">Entardecer</button>
+              <button class="ep-ambient__pill" type="button" data-mode="calmo">Calmo</button>
+            </div>
+          </div>
+          <div class="ep-ambient__section">
+            <div class="ep-ambient__label">Som ambiente</div>
+            <div class="ep-ambient__pills" role="group" aria-label="Som ambiente">
+              <button class="ep-ambient__pill" type="button" data-sound="off">Silêncio</button>
+              <button class="ep-ambient__pill" type="button" data-sound="brown">Acolhedor</button>
+            </div>
+            <input type="range" data-ambient-volume class="ep-ambient__slider" min="0" max="100" value="40" aria-label="Volume do som ambiente">
+          </div>
+          <p class="ep-ambient__hint">Suas preferências ficam só neste dispositivo.</p>
+        </div>
+      </div>
+    </div>
   </header>
 
   <main class="ep-consult__main ep-consult__main--solo">
@@ -123,6 +155,10 @@
 
 <script type="module">
   import { BACKEND_BASE_URL } from "./js/firebase-config.js";
+  import { initAtmosphere } from "./js/atmosphere.js";
+
+  // Inicializa clima + som ambiente do paciente. Local-only.
+  await initAtmosphere({ buttonId: "ambientBtn", panelId: "ambientPanel" });
 
   const LIVEKIT_VERSION = "2.5.6";
 
