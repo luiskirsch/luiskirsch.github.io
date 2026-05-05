@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-2">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-3">
 </head>
 <body class="ep-consult">
 
@@ -71,8 +71,28 @@
       <span id="connectionStatus" class="ep-consult__status">conectando…</span>
       <span id="e2eeBadge" class="ep-badge ep-badge--ok ep-hide">E2EE ativo</span>
     </div>
-    <div class="ep-flex ep-gap-8">
-      <div class="ep-ambient">
+  </header>
+
+  <main class="ep-consult__main ep-consult__main--solo">
+    <section class="ep-consult__video" id="videoArea">
+      <div class="ep-tile ep-tile--gilded" id="tileLocal">
+        <video id="videoLocal" autoplay muted playsinline></video>
+        <div class="ep-tile__name">Você</div>
+      </div>
+      <div class="ep-tile ep-tile--gilded" id="tileRemote">
+        <div class="ep-tile__placeholder" id="remotePlaceholder">
+          <div class="ep-waiting">
+            <div class="ep-waiting__pulse" aria-hidden="true"></div>
+            <div class="ep-waiting__text">Seu terapeuta está se preparando.</div>
+            <div class="ep-waiting__sub">A consulta começará em instantes.</div>
+          </div>
+        </div>
+        <video id="videoRemote" autoplay playsinline class="ep-hide"></video>
+        <div class="ep-tile__name ep-hide" id="remoteName"></div>
+      </div>
+
+      <!-- Ajustar ambiente (canto inferior esquerdo, painel abre pra cima) -->
+      <div class="ep-ambient ep-ambient--bottom">
         <button id="ambientBtn" class="ep-ambient__btn" type="button" aria-expanded="false" aria-haspopup="dialog" aria-controls="ambientPanel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
             <line x1="4" y1="9" x2="20" y2="9"/>
@@ -101,26 +121,6 @@
           </div>
           <p class="ep-ambient__hint">Suas preferências ficam só neste dispositivo.</p>
         </div>
-      </div>
-    </div>
-  </header>
-
-  <main class="ep-consult__main ep-consult__main--solo">
-    <section class="ep-consult__video" id="videoArea">
-      <div class="ep-tile ep-tile--gilded" id="tileLocal">
-        <video id="videoLocal" autoplay muted playsinline></video>
-        <div class="ep-tile__name">Você</div>
-      </div>
-      <div class="ep-tile ep-tile--gilded" id="tileRemote">
-        <div class="ep-tile__placeholder" id="remotePlaceholder">
-          <div class="ep-waiting">
-            <div class="ep-waiting__pulse" aria-hidden="true"></div>
-            <div class="ep-waiting__text">Seu terapeuta está se preparando.</div>
-            <div class="ep-waiting__sub">A consulta começará em instantes.</div>
-          </div>
-        </div>
-        <video id="videoRemote" autoplay playsinline class="ep-hide"></video>
-        <div class="ep-tile__name ep-hide" id="remoteName"></div>
       </div>
 
       <div class="ep-controls-bar">

@@ -662,6 +662,152 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   gap: 0;
 }
 .ep-consult__main--solo { grid-template-columns: 1fr; }
+
+/* Layout do consultório com anotações inline (sem sidebar direita) ──── */
+
+.ep-consult__video--inline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(220px, 1.1fr) minmax(220px, 0.9fr);
+  grid-template-areas:
+    "local patient"
+    "notes notes";
+  padding: 16px 16px 96px;     /* espaço pros controles flutuantes embaixo */
+  gap: 14px;
+  position: relative;
+}
+.ep-consult__video--inline #tileLocal,
+.ep-consult__video--inline #tileRemote {
+  aspect-ratio: auto;          /* tiles preenchem a célula em vez de impor 16/11 */
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.ep-consult__video--inline #tileLocal   { grid-area: local; }
+.ep-consult__video--inline #tileRemote  { grid-area: patient; }
+.ep-consult__video--inline .ep-inline-notes { grid-area: notes; }
+
+@media (max-width: 860px) {
+  .ep-consult__video--inline {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "local"
+      "patient"
+      "notes";
+  }
+}
+
+/* Painel de anotações inline (substitui a sidebar direita) ─────────── */
+
+.ep-inline-notes {
+  background: rgba(20,17,13,0.92);
+  border: 1px solid rgba(215,176,107,0.18);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.ep-inline-notes__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.ep-inline-notes__head .ep-lock {
+  color: var(--ep-gold-soft);
+}
+.ep-inline-notes__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+.ep-inline-notes .ep-note {
+  background: rgba(255,251,240,0.04);
+  border: 1px solid rgba(215,176,107,0.12);
+  color: var(--ep-paper);
+}
+.ep-inline-notes .ep-note__meta {
+  color: rgba(255,251,240,0.50);
+}
+.ep-inline-notes__empty {
+  background: transparent;
+  border: 1px dashed rgba(215,176,107,0.16);
+  color: rgba(255,251,240,0.50);
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+  font-size: 13px;
+}
+.ep-inline-notes__composer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid rgba(215,176,107,0.10);
+  padding-top: 12px;
+}
+.ep-inline-notes__composer textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 56px;
+  max-height: 200px;
+  background: rgba(255,251,240,0.04);
+  border: 1px solid rgba(215,176,107,0.18);
+  color: var(--ep-paper);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+  font-family: inherit;
+}
+.ep-inline-notes__composer textarea:focus {
+  outline: none;
+  border-color: var(--ep-gold);
+  box-shadow: 0 0 0 3px rgba(215,176,107,0.15);
+}
+.ep-inline-notes__composer textarea::placeholder {
+  color: rgba(255,251,240,0.35);
+}
+.ep-inline-notes__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Variantes "bottom" do Ambient e Topics — flutuam no fundo da sala ── */
+
+.ep-ambient--bottom {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  z-index: 11;
+}
+.ep-ambient--bottom .ep-ambient__panel {
+  bottom: calc(100% + 10px);
+  top: auto;
+  left: 0;
+  right: auto;
+}
+
+.ep-topics-toggle--bottom {
+  top: auto;
+  bottom: 24px;
+  right: 24px;
+}
+.ep-topics-deck--bottom {
+  top: auto;
+  bottom: 70px;
+  right: 24px;
+  max-height: calc(100% - 120px);
+}
 @media (max-width: 980px) {
   .ep-consult__main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
 }
