@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-9">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-10">
 </head>
 <body>
 
@@ -73,11 +73,13 @@
 
     <form id="newSessionForm" class="ep-stack">
       <div class="ep-field">
-        <label class="ep-label" for="patientSelect">Paciente cadastrado</label>
+        <label class="ep-label" for="patientSelect">Paciente</label>
         <select id="patientSelect" class="ep-select">
-          <option value="">— Avulso (digitar nome) —</option>
+          <option value="">— Selecione ou digite o nome —</option>
         </select>
-        <span class="ep-text-xs ep-text-muted">Selecione um paciente já cadastrado ou crie uma consulta avulsa.</span>
+        <span class="ep-text-xs ep-text-muted">
+          <a href="./pacientes.html" target="_blank" rel="noopener">Gerenciar pacientes →</a>
+        </span>
       </div>
       <div class="ep-field" id="freeNameField">
         <label class="ep-label" for="patientName">Nome do paciente</label>
@@ -155,6 +157,10 @@
   const sessionList   = document.getElementById("sessionList");
   const emptyState    = document.getElementById("emptyState");
 
+  // Cache global das sessões — usado tanto pra render quanto pra extrair
+  // pacientes "atendidos antes" (avulsos sem patientId) no select de nova consulta.
+  let allSessions = [];
+
   async function loadSessions() {
     loadingBanner.classList.remove("ep-hide");
     sessionList.classList.add("ep-hide");
@@ -171,14 +177,15 @@
       }
 
       loadingBanner.classList.add("ep-hide");
+      allSessions = data.sessions || [];
 
-      if (!data.sessions || data.sessions.length === 0) {
+      if (allSessions.length === 0) {
         emptyState.classList.remove("ep-hide");
         return;
       }
 
       sessionList.innerHTML = "";
-      data.sessions.forEach(s => sessionList.appendChild(renderSession(s)));
+      allSessions.forEach(s => sessionList.appendChild(renderSession(s)));
       sessionList.classList.remove("ep-hide");
     } catch (error) {
       console.error("load_sessions_error", error);
@@ -249,41 +256,109 @@
   const freeNameField   = document.getElementById("freeNameField");
 
   // Carrega pacientes do profissional (decifra nomes localmente) para o select.
-  let patientsCache = [];
+  // O select tem 3 grupos:
+  //   • Pacientes cadastrados — value="id:<patientId>"
+  //   • Atendidos antes (avulso) — value="name:<nome>" (extraído de allSessions)
+  //   • + Cadastrar novo paciente — value="__new__"  → pacientes.html
+  // Vazio (default) → liberado para digitar nome avulso.
+  let patientsCache = [];   // cadastrados
+  let avulsoCache   = [];   // nomes únicos sem patientId em sessões anteriores
+
   async function loadPatientsForSelect() {
     try {
       const res = await fetch(`${BACKEND_BASE_URL}/therapy/pacientes`, {
         headers: { "Authorization": `Bearer ${idToken}` }
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) return;
-      patientsCache = await Promise.all((data.patients || []).map(async p => {
-        try {
-          const json = await decryptNote({ ciphertext: p.ciphertext, iv: p.iv }, dek);
-          const obj = JSON.parse(json);
-          return { patientId: p.patientId, name: obj.name || "—" };
-        } catch {
-          return { patientId: p.patientId, name: "[corrompido]" };
-        }
-      }));
-      patientSelect.innerHTML = `<option value="">— Avulso (digitar nome) —</option>`;
-      patientsCache
+      if (res.ok && data.ok) {
+        patientsCache = await Promise.all((data.patients || []).map(async p => {
+          try {
+            const json = await decryptNote({ ciphertext: p.ciphertext, iv: p.iv }, dek);
+            const obj = JSON.parse(json);
+            return { patientId: p.patientId, name: obj.name || "—" };
+          } catch {
+            return { patientId: p.patientId, name: "[corrompido]" };
+          }
+        }));
+      }
+    } catch (err) {
+      console.warn("load_patients_for_select_error", err);
+    }
+
+    // Extrai nomes avulsos únicos do histórico de sessões já carregado.
+    // Considera apenas sessões SEM patientId (não vinculadas a cadastro)
+    // e que têm nome significativo (≠ "Paciente" default).
+    const seen = new Set();
+    avulsoCache = [];
+    const cadastradosLower = new Set(patientsCache.map(p => p.name.toLowerCase()));
+    for (const s of allSessions) {
+      if (s.patientId) continue;
+      const name = (s.patientName || "").trim();
+      if (!name || name.toLowerCase() === "paciente") continue;
+      const key = name.toLowerCase();
+      if (seen.has(key)) continue;
+      // não duplicar: se já está cadastrado com mesmo nome, pula
+      if (cadastradosLower.has(key)) continue;
+      seen.add(key);
+      avulsoCache.push({ name, lastSession: s.createdAt || 0 });
+    }
+    avulsoCache.sort((a, b) => (b.lastSession || 0) - (a.lastSession || 0));
+
+    // Reconstrói o select.
+    patientSelect.innerHTML = "";
+    const optDefault = document.createElement("option");
+    optDefault.value = "";
+    optDefault.textContent = "— Selecione ou digite o nome —";
+    patientSelect.appendChild(optDefault);
+
+    const optNew = document.createElement("option");
+    optNew.value = "__new__";
+    optNew.textContent = "+ Cadastrar novo paciente";
+    patientSelect.appendChild(optNew);
+
+    if (patientsCache.length) {
+      const grp = document.createElement("optgroup");
+      grp.label = "Pacientes cadastrados";
+      [...patientsCache]
         .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
         .forEach(p => {
           const opt = document.createElement("option");
-          opt.value = p.patientId;
+          opt.value = "id:" + p.patientId;
           opt.textContent = p.name;
-          patientSelect.appendChild(opt);
+          grp.appendChild(opt);
         });
-    } catch (err) {
-      console.warn("load_patients_for_select_error", err);
+      patientSelect.appendChild(grp);
+    }
+
+    if (avulsoCache.length) {
+      const grp = document.createElement("optgroup");
+      grp.label = "Atendidos antes (sem cadastro)";
+      avulsoCache.forEach(a => {
+        const opt = document.createElement("option");
+        opt.value = "name:" + a.name;
+        opt.textContent = a.name;
+        grp.appendChild(opt);
+      });
+      patientSelect.appendChild(grp);
     }
   }
 
   patientSelect.addEventListener("change", () => {
-    if (patientSelect.value) {
-      const p = patientsCache.find(x => x.patientId === patientSelect.value);
+    const v = patientSelect.value;
+    if (v === "__new__") {
+      // Reset visual e redireciona pro CRUD de pacientes.
+      patientSelect.value = "";
+      window.location.href = "./pacientes.html";
+      return;
+    }
+    if (v.startsWith("id:")) {
+      const patientId = v.slice(3);
+      const p = patientsCache.find(x => x.patientId === patientId);
       document.getElementById("patientName").value = p?.name || "";
+      freeNameField.classList.add("ep-hide");
+    } else if (v.startsWith("name:")) {
+      const name = v.slice(5);
+      document.getElementById("patientName").value = name;
       freeNameField.classList.add("ep-hide");
     } else {
       freeNameField.classList.remove("ep-hide");
@@ -296,11 +371,20 @@
   document.getElementById("cancelNewSession").addEventListener("click", () => closeModal(newSessionModal));
 
   function openModal(prefill = {}) {
-    patientSelect.value = prefill.patientId || "";
+    // prefill: { patientId?: string, patientName?: string }
+    if (prefill.patientId) {
+      patientSelect.value = "id:" + prefill.patientId;
+    } else if (prefill.patientName) {
+      // Tenta achar nos avulsos primeiro
+      const found = avulsoCache.find(a => a.name.toLowerCase() === prefill.patientName.toLowerCase());
+      patientSelect.value = found ? "name:" + found.name : "";
+    } else {
+      patientSelect.value = "";
+    }
     document.getElementById("patientName").value = prefill.patientName || "";
     document.getElementById("scheduledAt").value = "";
     document.getElementById("newSessionStatus").textContent = "";
-    if (prefill.patientId) {
+    if (prefill.patientId || (prefill.patientName && patientSelect.value)) {
       freeNameField.classList.add("ep-hide");
     } else {
       freeNameField.classList.remove("ep-hide");
@@ -313,11 +397,18 @@
   function closeModal(el) { el.classList.remove("is-open"); }
 
   document.getElementById("createNewSession").addEventListener("click", async () => {
-    const selectedId = patientSelect.value;
-    const selectedPatient = selectedId ? patientsCache.find(x => x.patientId === selectedId) : null;
-    const patientName = selectedPatient
-      ? selectedPatient.name
-      : document.getElementById("patientName").value.trim();
+    const v = patientSelect.value;
+    let patientName = "";
+    let patientId = "";
+    if (v.startsWith("id:")) {
+      patientId = v.slice(3);
+      const p = patientsCache.find(x => x.patientId === patientId);
+      patientName = p?.name || "";
+    } else if (v.startsWith("name:")) {
+      patientName = v.slice(5);
+    } else {
+      patientName = document.getElementById("patientName").value.trim();
+    }
     const scheduledAtRaw = document.getElementById("scheduledAt").value;
     const statusEl = document.getElementById("newSessionStatus");
     if (!patientName) {
@@ -339,7 +430,7 @@
         },
         body: JSON.stringify({
           patientName,
-          patientId: selectedId || undefined,
+          patientId: patientId || undefined,
           scheduledAt
         })
       });
