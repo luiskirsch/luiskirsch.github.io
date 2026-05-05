@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-24">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-25">
 </head>
 <body>
 
@@ -704,17 +704,15 @@
     hr();
     drawText("Validade: " + form.validade + " dias a partir da emissão.", { size: 10, color: rgb(0.35,0.35,0.35) });
 
-    // ── Bloco de assinatura — logo após o conteúdo, com espaçamento ──
-    y -= 36;
-    // Garante que sobra espaço pro rodapé (mínimo y = 90)
-    if (y < 130) y = 130;
-    page.drawLine({ start: { x: left, y }, end: { x: left + 280, y }, thickness: 0.5, color: rgb(0.3,0.3,0.3) });
-    y -= 14;
-    drawText("Assinatura digital do(a) profissional", { size: 9, color: rgb(0.45,0.45,0.45) });
-    drawText(t.displayName || "", { size: 10, font: fontBold });
-    if (idParts.length) drawText(idParts.join("  ·  "), { size: 9, color: rgb(0.35,0.35,0.35) });
+    // ── BLOCO INFERIOR (assinatura + QR ancorados na base, mesmo nível) ──
+    // Geramos QR primeiro pra saber tamanho/posição. Em seguida desenhamos
+    // o bloco de assinatura à esquerda no MESMO nível vertical do QR.
+    let qrImg = null;
+    const qrSize = 78;
+    const qrX    = right - qrSize;
+    const qrY    = 50;                      // y do canto inferior do QR (acima do rodapé y=32)
+    const blockTopY = qrY + qrSize;         // ~128 — topo do bloco inferior
 
-    // ── QR de verificação no canto inferior direito ───────────────────
     if (verifyUrl) {
       try {
         const QRLib = await import("https://esm.sh/qrcode@1.5.3");
@@ -722,32 +720,54 @@
           width: 240, margin: 1, errorCorrectionLevel: "M"
         });
         const qrBytes = base64ToBytes(qrDataUrl.split(",")[1]);
-        const qrImg = await pdfDoc.embedPng(qrBytes);
-        const qrSize = 78;
-        const qrX = right - qrSize;
-        const qrY = 56;
+        qrImg = await pdfDoc.embedPng(qrBytes);
         page.drawImage(qrImg, { x: qrX, y: qrY, width: qrSize, height: qrSize });
 
-        // Caixinha de instrução à esquerda do QR
-        const labelX = qrX - 220;
-        const labelTop = qrY + qrSize - 8;
+        // Label "VERIFICAÇÃO DE AUTENTICIDADE" próxima do QR (à esquerda dele)
+        const labelX = qrX - 200;
+        let labelY = blockTopY - 4;
         page.drawText("VERIFICAÇÃO DE AUTENTICIDADE", {
-          x: labelX, y: labelTop,
+          x: labelX, y: labelY,
           font: fontBold, size: 7.5, color: rgb(0.30, 0.30, 0.30)
         });
-        page.drawText("Escaneie o QR ao lado para conferir a", {
-          x: labelX, y: labelTop - 14,
+        labelY -= 14;
+        page.drawText("Escaneie o QR ao lado para", {
+          x: labelX, y: labelY,
           font: fontReg, size: 8, color: rgb(0.40, 0.40, 0.40)
         });
-        page.drawText("autenticidade desta receita e a", {
-          x: labelX, y: labelTop - 24,
+        labelY -= 11;
+        page.drawText("conferir a autenticidade desta", {
+          x: labelX, y: labelY,
           font: fontReg, size: 8, color: rgb(0.40, 0.40, 0.40)
         });
-        page.drawText("validade da assinatura ICP-Brasil.", {
-          x: labelX, y: labelTop - 34,
+        labelY -= 11;
+        page.drawText("receita e a assinatura ICP-Brasil.", {
+          x: labelX, y: labelY,
           font: fontReg, size: 8, color: rgb(0.40, 0.40, 0.40)
         });
       } catch (e) { console.warn("qr_embed_failed", e); }
+    }
+
+    // Assinatura à esquerda, ancorada no MESMO topo do bloco do QR
+    const sigLineY = blockTopY;
+    page.drawLine({
+      start: { x: left, y: sigLineY },
+      end:   { x: left + 260, y: sigLineY },
+      thickness: 0.5, color: rgb(0.3, 0.3, 0.3)
+    });
+    let sigY = sigLineY - 12;
+    page.drawText("Assinatura digital do(a) profissional", {
+      x: left, y: sigY, font: fontReg, size: 9, color: rgb(0.45, 0.45, 0.45)
+    });
+    sigY -= 14;
+    page.drawText(t.displayName || "", {
+      x: left, y: sigY, font: fontBold, size: 10, color: rgb(0.10, 0.10, 0.10)
+    });
+    sigY -= 13;
+    if (idParts.length) {
+      page.drawText(idParts.join("  ·  "), {
+        x: left, y: sigY, font: fontReg, size: 9, color: rgb(0.35, 0.35, 0.35)
+      });
     }
 
     // ── Rodapé sutil (Prelúdio) ───────────────────────────────────────
