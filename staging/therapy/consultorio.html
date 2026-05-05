@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-8">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-9">
 </head>
 <body class="ep-consult">
 
@@ -20,7 +20,7 @@
       <span class="ep-brand__mark">EP</span>
       <span class="ep-brand__name">
         <span class="ep-brand__lead">Consultório</span>
-        <span id="topPatientName">—</span>
+        <span id="topPatientName" class="ep-brand__waiting">Aguardando paciente</span>
       </span>
     </a>
     <div class="ep-flex ep-flex--center ep-gap-14 ep-w-full">
@@ -257,7 +257,8 @@
     videoRemote.classList.remove("ep-hide");
     remoteName.classList.remove("ep-hide");
     remoteName.textContent = p.name || p.identity || "Paciente";
-    topPatientName.textContent = p.name || "paciente";
+    topPatientName.textContent = p.name || "Paciente";
+    topPatientName.classList.remove("ep-brand__waiting");
     if (!ritualPlayedThisSession) {
       ritualPlayedThisSession = true;
       playOpeningRitual();
