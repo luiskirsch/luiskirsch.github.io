@@ -2518,3 +2518,81 @@ body.ep-consult.ep-mode-calmo .ep-consult__topbar {
   border: 1px solid rgba(28,31,29,0.10);
   background: #fff;
 }
+
+/* PÁGINA DE VERIFICAÇÃO (receita-publica.html) ──────────────── */
+
+.ep-verify-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 24px;
+  border-radius: 16px;
+  border: 1px solid;
+  margin-top: 24px;
+}
+.ep-verify-hero__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.ep-verify-hero__body { flex: 1; min-width: 0; }
+.ep-verify-hero--ok {
+  background: linear-gradient(135deg, rgba(45,138,82,0.08), rgba(45,138,82,0.03));
+  border-color: rgba(45,138,82,0.30);
+}
+.ep-verify-hero--ok .ep-verify-hero__icon {
+  background: rgba(45,138,82,0.18);
+  color: #1f6b3e;
+}
+.ep-verify-hero--ok .ep-h1 {
+  color: #1f6b3e;
+  letter-spacing: -0.01em;
+}
+.ep-verify-hero--err {
+  background: rgba(184,69,61,0.06);
+  border-color: rgba(184,69,61,0.25);
+}
+.ep-verify-hero--err .ep-verify-hero__icon {
+  background: rgba(184,69,61,0.16);
+  color: #8a3a33;
+}
+
+.ep-verify-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+@media (max-width: 760px) {
+  .ep-verify-grid { grid-template-columns: 1fr; }
+}
+.ep-verify-card {
+  background: #fff;
+  border: 1px solid rgba(28,31,29,0.10);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ep-verify-card__label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(28,31,29,0.50);
+  font-weight: 600;
+}
+.ep-verify-card__value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ep-ink);
+  line-height: 1.3;
+}
+.ep-verify-card__sub {
+  font-size: 12px;
+  color: rgba(28,31,29,0.55);
+  line-height: 1.4;
+}

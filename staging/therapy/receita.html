@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-18">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-19">
 </head>
 <body>
 
@@ -524,8 +524,9 @@
   // ─── Geração de PDF (pdf-lib) ────────────────────────────────────────
   // Layout: cabeçalho do consultório do médico (logo + identidade) →
   // corpo flowing (título, paciente, prescrição, observações, validade) →
-  // bloco de assinatura logo após corpo → rodapé sutil do Prelúdio.
-  async function buildPdf(form) {
+  // bloco de assinatura logo após corpo → QR de verificação no canto direito →
+  // rodapé sutil do Prelúdio.
+  async function buildPdf(form, verifyUrl = null) {
     const { PDFDocument, StandardFonts, rgb } = await import("https://esm.sh/pdf-lib@1.17.1");
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([595, 842]); // A4
@@ -713,6 +714,42 @@
     drawText(t.displayName || "", { size: 10, font: fontBold });
     if (idParts.length) drawText(idParts.join("  ·  "), { size: 9, color: rgb(0.35,0.35,0.35) });
 
+    // ── QR de verificação no canto inferior direito ───────────────────
+    if (verifyUrl) {
+      try {
+        const QRLib = await import("https://esm.sh/qrcode@1.5.3");
+        const qrDataUrl = await QRLib.toDataURL(verifyUrl, {
+          width: 240, margin: 1, errorCorrectionLevel: "M"
+        });
+        const qrBytes = base64ToBytes(qrDataUrl.split(",")[1]);
+        const qrImg = await pdfDoc.embedPng(qrBytes);
+        const qrSize = 78;
+        const qrX = right - qrSize;
+        const qrY = 56;
+        page.drawImage(qrImg, { x: qrX, y: qrY, width: qrSize, height: qrSize });
+
+        // Caixinha de instrução à esquerda do QR
+        const labelX = qrX - 220;
+        const labelTop = qrY + qrSize - 8;
+        page.drawText("VERIFICAÇÃO DE AUTENTICIDADE", {
+          x: labelX, y: labelTop,
+          font: fontBold, size: 7.5, color: rgb(0.30, 0.30, 0.30)
+        });
+        page.drawText("Escaneie o QR ao lado para conferir a", {
+          x: labelX, y: labelTop - 14,
+          font: fontReg, size: 8, color: rgb(0.40, 0.40, 0.40)
+        });
+        page.drawText("autenticidade desta receita e a", {
+          x: labelX, y: labelTop - 24,
+          font: fontReg, size: 8, color: rgb(0.40, 0.40, 0.40)
+        });
+        page.drawText("validade da assinatura ICP-Brasil.", {
+          x: labelX, y: labelTop - 34,
+          font: fontReg, size: 8, color: rgb(0.40, 0.40, 0.40)
+        });
+      } catch (e) { console.warn("qr_embed_failed", e); }
+    }
+
     // ── Rodapé sutil (Prelúdio) ───────────────────────────────────────
     page.drawText("Documento emitido via Espaço Prelúdio · espacopreludio.com.br · Validar a assinatura ICP-Brasil em verificador.iti.gov.br", {
       x: left, y: 32, font: fontReg, size: 7.5, color: rgb(0.60,0.60,0.60)
@@ -725,9 +762,28 @@
   previewBtn.addEventListener("click", async () => {
     const form = await persistDraft();
     if (!form) return;
+    setStatus(formStatus, "Reservando link de verificação…");
+
+    // Pede o deliveryToken pré-assinatura pra que o QR já saia embutido no PDF.
+    let verifyUrl = null;
+    try {
+      const linkRes = await fetch(`${BACKEND_BASE_URL}/therapy/receitas/${receitaId}/preparar-link`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${idToken}` }
+      });
+      const linkData = await linkRes.json().catch(() => ({}));
+      if (linkRes.ok && linkData.ok && linkData.deliveryToken) {
+        verifyUrl = `${location.origin}/staging/therapy/receita-publica.html?t=${encodeURIComponent(linkData.deliveryToken)}`;
+      } else {
+        console.warn("preparar_link_failed", linkData);
+      }
+    } catch (e) {
+      console.warn("preparar_link_network_error", e);
+    }
+
     setStatus(formStatus, "Gerando PDF…");
     try {
-      const bytes = await buildPdf(form);
+      const bytes = await buildPdf(form, verifyUrl);
       pendingPdfBytes = new Uint8Array(bytes);
       const blob = new Blob([pendingPdfBytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
