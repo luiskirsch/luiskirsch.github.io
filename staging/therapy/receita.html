@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receita digital · Espaço Prelúdio</title>
+  <link rel="icon" href="../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-17">
+</head>
+<body>
+
+<div class="ep-staging-banner">Ambiente de teste · Espaço Prelúdio · staging</div>
+
+<div class="ep-shell">
+  <header class="ep-topbar">
+    <a href="./painel.html" class="ep-brand" aria-label="Espaço Prelúdio">
+      <span class="ep-brand__mark">EP</span>
+      <span class="ep-brand__name">
+        <span class="ep-brand__lead">Espaço</span>
+        <span>Prelúdio</span>
+      </span>
+    </a>
+    <nav class="ep-nav">
+      <a href="./painel.html" class="ep-text-sm">Painel</a>
+      <a href="./painel.html" class="ep-btn ep-btn--ghost ep-btn--sm">Voltar</a>
+    </nav>
+  </header>
+
+  <main class="ep-main">
+    <div class="ep-flex ep-flex--end-wrap" style="justify-content: space-between; align-items: end; margin-bottom: 24px;">
+      <div>
+        <div class="ep-eyebrow">Receita digital</div>
+        <h1 class="ep-h1 ep-mt-12" id="pageTitle">Nova receita</h1>
+        <p class="ep-text-muted ep-mt-0" id="pageSub">Layout padrão CFM. Assinatura ICP-Brasil dentro da plataforma ou externa.</p>
+      </div>
+      <span id="statusBadge" class="ep-verif-pill is-pending ep-hide">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        Rascunho
+      </span>
+    </div>
+
+    <div class="ep-receita-grid">
+      <!-- Form -->
+      <section class="ep-receita-form">
+        <h2 class="ep-h3 ep-mt-0">Dados da receita</h2>
+
+        <form id="receitaForm" class="ep-stack" novalidate>
+          <div class="ep-field">
+            <label class="ep-label" for="patientSelect">Paciente</label>
+            <select id="patientSelect" class="ep-select">
+              <option value="">— Selecione ou digite o nome —</option>
+            </select>
+          </div>
+          <div class="ep-field" id="freePatientField">
+            <label class="ep-label" for="patientName">Nome do paciente *</label>
+            <input id="patientName" class="ep-input" type="text" maxlength="120" required>
+          </div>
+          <div class="ep-row">
+            <div class="ep-field">
+              <label class="ep-label" for="patientCpf">CPF (opcional)</label>
+              <input id="patientCpf" class="ep-input" type="text" maxlength="14" placeholder="000.000.000-00">
+            </div>
+            <div class="ep-field">
+              <label class="ep-label" for="dataEmissao">Data de emissão</label>
+              <input id="dataEmissao" class="ep-input" type="date" required>
+            </div>
+          </div>
+
+          <div class="ep-field">
+            <label class="ep-label" for="tipoReceita">Tipo</label>
+            <select id="tipoReceita" class="ep-select">
+              <option value="simples">Receita comum (medicamentos sem tarja)</option>
+              <option value="controle-especial">Receita de Controle Especial (tarja vermelha — C1/C5)</option>
+            </select>
+            <p class="ep-text-xs ep-text-muted ep-mt-0">
+              <strong>Atenção:</strong> psicotrópicos B1/B2 (azuis) e A1/A2/A3 (amarelas) ainda exigem talonário físico
+              da Vigilância Sanitária — não emita por aqui.
+            </p>
+          </div>
+
+          <h3 class="ep-h3 ep-mt-16">Medicação</h3>
+          <div id="medList" class="ep-stack" style="gap: 10px;"></div>
+          <button type="button" class="ep-btn ep-btn--ghost ep-btn--sm" id="addMedBtn">+ Adicionar medicamento</button>
+
+          <div class="ep-field ep-mt-16">
+            <label class="ep-label" for="observacoes">Observações ao paciente</label>
+            <textarea id="observacoes" class="ep-input" rows="3" maxlength="600" placeholder="Ex.: tomar sempre após as refeições; evitar dirigir nos primeiros dias."></textarea>
+          </div>
+
+          <div class="ep-field">
+            <label class="ep-label" for="validade">Validade da receita</label>
+            <select id="validade" class="ep-select">
+              <option value="30">30 dias</option>
+              <option value="60">60 dias</option>
+              <option value="90" selected>90 dias (controle especial)</option>
+              <option value="180">180 dias</option>
+            </select>
+          </div>
+
+          <div class="ep-status" id="formStatus"></div>
+
+          <div class="ep-flex" style="gap: 8px;">
+            <button type="button" class="ep-btn ep-btn--ghost" id="saveDraftBtn">Salvar rascunho</button>
+            <button type="button" class="ep-btn ep-btn--primary" id="previewBtn">Gerar PDF</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Preview + sign -->
+      <aside class="ep-receita-side">
+        <div id="previewBlock" class="ep-receita-preview">
+          <div class="ep-receita-preview__empty">
+            Preencha os dados e clique <strong>Gerar PDF</strong> para pré-visualizar.
+          </div>
+        </div>
+
+        <div id="signBlock" class="ep-stack ep-mt-16 ep-hide" style="gap: 10px;">
+          <h3 class="ep-h3 ep-mt-0">Assinar a receita</h3>
+
+          <div class="ep-receita-sign-tabs">
+            <button type="button" class="ep-receita-sign-tab is-active" data-tab="a1">Certificado A1 (.pfx)</button>
+            <button type="button" class="ep-receita-sign-tab" data-tab="external">Assinar fora</button>
+          </div>
+
+          <!-- Tab A1 -->
+          <div class="ep-receita-sign-pane is-active" data-pane="a1">
+            <p class="ep-text-sm ep-text-muted ep-mt-0">
+              Sobe o seu arquivo <strong>.pfx</strong> (certificado A1) e a senha. A assinatura
+              acontece no seu navegador — o arquivo nunca sai do seu dispositivo.
+            </p>
+            <div class="ep-field">
+              <label class="ep-label" for="pfxFile">Arquivo .pfx</label>
+              <input id="pfxFile" class="ep-input" type="file" accept=".pfx,.p12,application/x-pkcs12">
+            </div>
+            <div class="ep-field">
+              <label class="ep-label" for="pfxPass">Senha do certificado</label>
+              <input id="pfxPass" class="ep-input" type="password" autocomplete="off">
+            </div>
+            <div class="ep-status" id="signA1Status"></div>
+            <button type="button" class="ep-btn ep-btn--primary ep-btn--block" id="signA1Btn">Assinar com A1</button>
+          </div>
+
+          <!-- Tab external -->
+          <div class="ep-receita-sign-pane" data-pane="external">
+            <p class="ep-text-sm ep-text-muted ep-mt-0">
+              Baixe o PDF, assine onde preferir (gov.br, BirdID, Adobe + A1, etc.) e re-faça o upload.
+              Sugestões:
+              <a href="https://assinador.iti.br/" target="_blank" rel="noopener">gov.br/assina</a> (gratuito) ·
+              <a href="https://www.birdid.com.br/" target="_blank" rel="noopener">BirdID</a> ·
+              <a href="https://receitadigital.cfm.org.br/" target="_blank" rel="noopener">Receita Digital CFM</a>.
+            </p>
+            <button type="button" class="ep-btn ep-btn--ghost ep-btn--block" id="downloadUnsignedBtn">Baixar PDF não assinado</button>
+            <div class="ep-field ep-mt-12">
+              <label class="ep-label" for="signedFile">Re-upload do PDF assinado</label>
+              <input id="signedFile" class="ep-input" type="file" accept="application/pdf">
+            </div>
+            <div class="ep-status" id="signExtStatus"></div>
+            <button type="button" class="ep-btn ep-btn--primary ep-btn--block" id="uploadSignedBtn">Anexar receita assinada</button>
+          </div>
+        </div>
+
+        <!-- After signed: delivery -->
+        <div id="deliveryBlock" class="ep-stack ep-mt-16 ep-hide" style="gap: 10px;">
+          <div class="ep-status-card ep-status-card--ok">
+            <div class="ep-status-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+            </div>
+            <div>
+              <div class="ep-status-card__title">Receita assinada</div>
+              <div class="ep-status-card__sub" id="signedSub">—</div>
+            </div>
+          </div>
+
+          <div class="ep-field">
+            <label class="ep-label">Link para o paciente</label>
+            <div class="ep-flex" style="gap: 6px;">
+              <input id="deliveryLink" class="ep-input" type="text" readonly style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">
+              <button type="button" class="ep-btn ep-btn--ghost ep-btn--sm" id="copyLinkBtn">Copiar</button>
+            </div>
+            <p class="ep-text-xs ep-text-muted ep-mt-0">
+              Envie por WhatsApp/e-mail. Validade: <span id="deliveryExp">—</span>.
+              A farmácia abre o link para validar a assinatura.
+            </p>
+          </div>
+
+          <div class="ep-receita-qr" id="qrCanvas"></div>
+
+          <button type="button" class="ep-btn ep-btn--ghost ep-btn--block" id="downloadSignedBtn">Baixar receita assinada</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { auth, BACKEND_BASE_URL } from "./js/firebase-config.js";
+  import { requireTherapist } from "./js/auth-guard.js";
+  import { encryptNote, decryptNote } from "./js/crypto.js";
+
+  // ─── Boot ────────────────────────────────────────────────────────────
+  const ctx = await requireTherapist({ requireDek: true });
+  const { idToken, therapist, dek } = ctx;
+
+  const params = new URLSearchParams(location.search);
+  const editId = params.get("id");
+  const presetPatientId = params.get("patientId");
+  const presetSessionId = params.get("sessionId");
+
+  // DOM
+  const patientSelect    = document.getElementById("patientSelect");
+  const freePatientField = document.getElementById("freePatientField");
+  const patientNameEl    = document.getElementById("patientName");
+  const patientCpfEl     = document.getElementById("patientCpf");
+  const dataEmissaoEl    = document.getElementById("dataEmissao");
+  const tipoReceitaEl    = document.getElementById("tipoReceita");
+  const observacoesEl    = document.getElementById("observacoes");
+  const validadeEl       = document.getElementById("validade");
+  const medListEl        = document.getElementById("medList");
+  const addMedBtn        = document.getElementById("addMedBtn");
+  const formStatus       = document.getElementById("formStatus");
+  const saveDraftBtn     = document.getElementById("saveDraftBtn");
+  const previewBtn       = document.getElementById("previewBtn");
+  const previewBlock     = document.getElementById("previewBlock");
+  const signBlock        = document.getElementById("signBlock");
+  const deliveryBlock    = document.getElementById("deliveryBlock");
+  const statusBadge      = document.getElementById("statusBadge");
+  const pageTitle        = document.getElementById("pageTitle");
+  const pageSub          = document.getElementById("pageSub");
+  const signA1Btn        = document.getElementById("signA1Btn");
+  const signA1Status     = document.getElementById("signA1Status");
+  const signExtStatus    = document.getElementById("signExtStatus");
+  const downloadUnsignedBtn = document.getElementById("downloadUnsignedBtn");
+  const uploadSignedBtn  = document.getElementById("uploadSignedBtn");
+
+  let receitaId = editId || null;
+  let receitaState = "draft"; // "draft" | "signed"
+  let pendingPdfBytes = null; // Uint8Array do PDF não assinado (após preview)
+  let signedDeliveryToken = null;
+
+  // ─── Helpers ─────────────────────────────────────────────────────────
+  function setStatus(el, text, type = "") {
+    el.textContent = text;
+    el.className = "ep-status";
+    if (type) el.classList.add("is-" + type);
+  }
+
+  function todayISO() {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
+  }
+
+  dataEmissaoEl.value = todayISO();
+
+  function bytesToBase64(bytes) {
+    let bin = "";
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(bin);
+  }
+  function base64ToBytes(b64) {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  // ─── Medicação dinâmica ──────────────────────────────────────────────
+  function addMedRow(prefill = {}) {
+    const row = document.createElement("div");
+    row.className = "ep-receita-med";
+    row.innerHTML = `
+      <div class="ep-row">
+        <div class="ep-field">
+          <label class="ep-label">Medicamento (DCB)</label>
+          <input class="ep-input" data-field="nome" type="text" maxlength="120" placeholder="Ex.: Sertralina 50mg" required>
+        </div>
+        <div class="ep-field">
+          <label class="ep-label">Quantidade</label>
+          <input class="ep-input" data-field="qtd" type="text" maxlength="40" placeholder="Ex.: 60 comprimidos">
+        </div>
+      </div>
+      <div class="ep-field">
+        <label class="ep-label">Posologia</label>
+        <input class="ep-input" data-field="posologia" type="text" maxlength="200" placeholder="Ex.: 1 comprimido pela manhã, por 30 dias">
+      </div>
+      <button type="button" class="ep-btn ep-btn--ghost ep-btn--xs" data-remove>Remover</button>
+    `;
+    if (prefill.nome)      row.querySelector('[data-field="nome"]').value = prefill.nome;
+    if (prefill.qtd)       row.querySelector('[data-field="qtd"]').value = prefill.qtd;
+    if (prefill.posologia) row.querySelector('[data-field="posologia"]').value = prefill.posologia;
+    row.querySelector("[data-remove]").addEventListener("click", () => row.remove());
+    medListEl.appendChild(row);
+  }
+  addMedBtn.addEventListener("click", () => addMedRow());
+  addMedRow(); // inicial
+
+  function collectMeds() {
+    return Array.from(medListEl.querySelectorAll(".ep-receita-med")).map(row => ({
+      nome:      row.querySelector('[data-field="nome"]').value.trim(),
+      qtd:       row.querySelector('[data-field="qtd"]').value.trim(),
+      posologia: row.querySelector('[data-field="posologia"]').value.trim()
+    })).filter(m => m.nome);
+  }
+
+  function collectForm() {
+    return {
+      patientId: patientSelect.value || null,
+      patientName: patientNameEl.value.trim(),
+      patientCpf:  patientCpfEl.value.trim(),
+      dataEmissao: dataEmissaoEl.value,
+      tipoReceita: tipoReceitaEl.value,
+      observacoes: observacoesEl.value.trim(),
+      validade:    Number(validadeEl.value),
+      meds:        collectMeds()
+    };
+  }
+
+  function applyForm(f) {
+    if (f.patientId) patientSelect.value = f.patientId;
+    patientNameEl.value = f.patientName || "";
+    patientCpfEl.value  = f.patientCpf  || "";
+    dataEmissaoEl.value = f.dataEmissao || todayISO();
+    tipoReceitaEl.value = f.tipoReceita || "simples";
+    observacoesEl.value = f.observacoes || "";
+    validadeEl.value    = String(f.validade || 90);
+    medListEl.innerHTML = "";
+    (f.meds || []).forEach(m => addMedRow(m));
+    if ((f.meds || []).length === 0) addMedRow();
+  }
+
+  // ─── Pacientes (para select) ─────────────────────────────────────────
+  async function loadPatientsIntoSelect() {
+    try {
+      const res = await fetch(`${BACKEND_BASE_URL}/therapy/pacientes`, {
+        headers: { "Authorization": `Bearer ${idToken}` }
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || !j.ok) return;
+
+      for (const p of (j.patients || [])) {
+        try {
+          const json = await decryptNote({ ciphertext: p.ciphertext, iv: p.iv }, dek);
+          const data = JSON.parse(json);
+          const opt = document.createElement("option");
+          opt.value = p.patientId;
+          opt.textContent = data.name || "(sem nome)";
+          opt.dataset.name = data.name || "";
+          patientSelect.appendChild(opt);
+        } catch {}
+      }
+      if (presetPatientId) patientSelect.value = presetPatientId;
+    } catch {}
+
+    patientSelect.addEventListener("change", () => {
+      const opt = patientSelect.selectedOptions[0];
+      if (opt && opt.dataset.name) {
+        patientNameEl.value = opt.dataset.name;
+        freePatientField.classList.add("ep-hide");
+      } else {
+        freePatientField.classList.remove("ep-hide");
+      }
+    });
+    patientSelect.dispatchEvent(new Event("change"));
+  }
+  await loadPatientsIntoSelect();
+
+  // ─── Carrega rascunho existente, se houver id ────────────────────────
+  if (editId) {
+    try {
+      const res = await fetch(`${BACKEND_BASE_URL}/therapy/receitas/${editId}`, {
+        headers: { "Authorization": `Bearer ${idToken}` }
+      });
+      const j = await res.json().catch(() => ({}));
+      if (res.ok && j.ok) {
+        const r = j.receita;
+        receitaState = r.status;
+        if (r.formCiphertext) {
+          const txt = await decryptNote({ ciphertext: r.formCiphertext, iv: r.formIv }, dek);
+          applyForm(JSON.parse(txt));
+        }
+        if (r.status === "signed") {
+          pageTitle.textContent = "Receita assinada";
+          pageSub.textContent   = "Esta receita já foi assinada e pode ser entregue ao paciente.";
+          statusBadge.classList.remove("ep-hide", "is-pending");
+          statusBadge.classList.add("is-verified");
+          statusBadge.innerHTML = `
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+            Assinada
+          `;
+          // Mostra delivery
+          showDelivery(r.deliveryToken, r.deliveryTokenExp);
+          previewBtn.disabled = saveDraftBtn.disabled = true;
+        }
+      }
+    } catch (e) { console.warn("load_receita_failed", e); }
+  }
+
+  // ─── Salvar rascunho ─────────────────────────────────────────────────
+  async function persistDraft() {
+    const form = collectForm();
+    if (!form.patientName) {
+      setStatus(formStatus, "Informe o nome do paciente.", "err");
+      return null;
+    }
+    if (form.meds.length === 0) {
+      setStatus(formStatus, "Adicione ao menos um medicamento.", "err");
+      return null;
+    }
+    setStatus(formStatus, "Salvando…");
+    const payload = JSON.stringify(form);
+    const { ciphertext, iv } = await encryptNote(payload, dek);
+
+    try {
+      let res;
+      if (receitaId) {
+        res = await fetch(`${BACKEND_BASE_URL}/therapy/receitas/${receitaId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${idToken}` },
+          body: JSON.stringify({ formCiphertext: ciphertext, formIv: iv })
+        });
+      } else {
+        res = await fetch(`${BACKEND_BASE_URL}/therapy/receitas`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${idToken}` },
+          body: JSON.stringify({
+            formCiphertext: ciphertext,
+            formIv: iv,
+            patientId: form.patientId,
+            patientNameSnapshot: form.patientName,
+            sessionId: presetSessionId || null
+          })
+        });
+      }
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || !j.ok) {
+        setStatus(formStatus, "Erro ao salvar: " + (j?.error || res.status), "err");
+        return null;
+      }
+      if (j.receitaId) receitaId = j.receitaId;
+      setStatus(formStatus, "Rascunho salvo.", "ok");
+      setTimeout(() => setStatus(formStatus, ""), 2000);
+      return form;
+    } catch (e) {
+      setStatus(formStatus, "Erro de rede.", "err");
+      return null;
+    }
+  }
+  saveDraftBtn.addEventListener("click", persistDraft);
+
+  // ─── Geração de PDF (pdf-lib) ────────────────────────────────────────
+  async function buildPdf(form) {
+    const { PDFDocument, StandardFonts, rgb } = await import("https://esm.sh/pdf-lib@1.17.1");
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595, 842]); // A4
+
+    const fontReg  = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    let y = 800;
+    const left = 50;
+    const right = 545;
+
+    function drawText(text, opts = {}) {
+      const { x = left, font = fontReg, size = 11, color = rgb(0.1, 0.1, 0.1), maxWidth = right - left } = opts;
+      const lines = wrapText(String(text || ""), font, size, maxWidth);
+      for (const line of lines) {
+        page.drawText(line, { x, y, font, size, color });
+        y -= size * 1.35;
+      }
+    }
+    function wrapText(text, font, size, maxWidth) {
+      const words = text.split(/\s+/);
+      const lines = [];
+      let current = "";
+      for (const w of words) {
+        const test = current ? current + " " + w : w;
+        const width = font.widthOfTextAtSize(test, size);
+        if (width > maxWidth && current) {
+          lines.push(current);
+          current = w;
+        } else {
+          current = test;
+        }
+      }
+      if (current) lines.push(current);
+      return lines.length ? lines : [""];
+    }
+    function hr() {
+      page.drawLine({ start: { x: left, y: y + 4 }, end: { x: right, y: y + 4 }, thickness: 0.5, color: rgb(0.7,0.7,0.7) });
+      y -= 12;
+    }
+
+    // Cabeçalho profissional
+    drawText(therapist.displayName || "", { font: fontBold, size: 14 });
+    const ids = [];
+    if (therapist.crm) ids.push("CRM " + therapist.crm);
+    if (therapist.crp) ids.push("CRP " + therapist.crp);
+    if (therapist.especialidade) ids.push(therapist.especialidade);
+    drawText(ids.join("  ·  "), { size: 10, color: rgb(0.35,0.35,0.35) });
+    y -= 6;
+    hr();
+
+    // Título
+    const tituloMap = {
+      "simples": "RECEITUÁRIO",
+      "controle-especial": "RECEITUÁRIO DE CONTROLE ESPECIAL"
+    };
+    drawText(tituloMap[form.tipoReceita] || "RECEITUÁRIO", { font: fontBold, size: 13 });
+    y -= 4;
+
+    // Paciente
+    drawText("Paciente: " + form.patientName, { font: fontBold });
+    if (form.patientCpf) drawText("CPF: " + form.patientCpf);
+    drawText("Data: " + new Date(form.dataEmissao + "T00:00:00").toLocaleDateString("pt-BR"));
+    y -= 6;
+    hr();
+
+    // Medicamentos
+    drawText("PRESCRIÇÃO", { font: fontBold, size: 12 });
+    y -= 2;
+    form.meds.forEach((m, i) => {
+      drawText(`${i + 1}. ${m.nome}`, { font: fontBold });
+      if (m.qtd)       drawText("Quantidade: " + m.qtd);
+      if (m.posologia) drawText("Posologia: " + m.posologia);
+      y -= 4;
+    });
+
+    if (form.observacoes) {
+      y -= 4;
+      hr();
+      drawText("OBSERVAÇÕES", { font: fontBold, size: 12 });
+      drawText(form.observacoes);
+    }
+
+    y -= 6;
+    hr();
+    drawText("Validade: " + form.validade + " dias a partir da emissão.", { size: 10, color: rgb(0.35,0.35,0.35) });
+
+    // Bloco de assinatura
+    y = 160;
+    page.drawLine({ start: { x: left, y }, end: { x: left + 280, y }, thickness: 0.5, color: rgb(0.3,0.3,0.3) });
+    y -= 14;
+    drawText("Assinatura digital do(a) profissional", { size: 9, color: rgb(0.45,0.45,0.45) });
+    drawText(therapist.displayName || "", { size: 10, font: fontBold });
+    drawText(ids.join("  ·  "), { size: 9, color: rgb(0.35,0.35,0.35) });
+
+    // Rodapé
+    page.drawText("Receita emitida pela plataforma Espaço Prelúdio · espaço-preludio.com.br", {
+      x: left, y: 40, font: fontReg, size: 8, color: rgb(0.55,0.55,0.55)
+    });
+    page.drawText("Para validar a assinatura ICP-Brasil, abra em validar.iti.gov.br ou Adobe Reader.", {
+      x: left, y: 28, font: fontReg, size: 8, color: rgb(0.55,0.55,0.55)
+    });
+
+    return pdfDoc.save();
+  }
+
+  // ─── Preview ─────────────────────────────────────────────────────────
+  previewBtn.addEventListener("click", async () => {
+    const form = await persistDraft();
+    if (!form) return;
+    setStatus(formStatus, "Gerando PDF…");
+    try {
+      const bytes = await buildPdf(form);
+      pendingPdfBytes = new Uint8Array(bytes);
+      const blob = new Blob([pendingPdfBytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      previewBlock.innerHTML = `<iframe src="${url}" class="ep-receita-preview__iframe"></iframe>`;
+      signBlock.classList.remove("ep-hide");
+      setStatus(formStatus, "PDF gerado. Reveja antes de assinar.", "ok");
+      setTimeout(() => setStatus(formStatus, ""), 2500);
+    } catch (e) {
+      console.error("pdf_build_error", e);
+      setStatus(formStatus, "Erro ao gerar PDF: " + e.message, "err");
+    }
+  });
+
+  // ─── Tabs de assinatura ──────────────────────────────────────────────
+  document.querySelectorAll(".ep-receita-sign-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".ep-receita-sign-tab").forEach(t => t.classList.remove("is-active"));
+      document.querySelectorAll(".ep-receita-sign-pane").forEach(p => p.classList.remove("is-active"));
+      tab.classList.add("is-active");
+      document.querySelector(`.ep-receita-sign-pane[data-pane="${tab.dataset.tab}"]`).classList.add("is-active");
+    });
+  });
+
+  // ─── Assinatura A1 inline ────────────────────────────────────────────
+  signA1Btn.addEventListener("click", async () => {
+    if (!pendingPdfBytes) {
+      setStatus(signA1Status, "Gere o PDF primeiro.", "err"); return;
+    }
+    if (!receitaId) {
+      setStatus(signA1Status, "Salve o rascunho antes.", "err"); return;
+    }
+    const file = document.getElementById("pfxFile").files?.[0];
+    const pass = document.getElementById("pfxPass").value;
+    if (!file) { setStatus(signA1Status, "Selecione o arquivo .pfx.", "err"); return; }
+    if (!pass) { setStatus(signA1Status, "Informe a senha do certificado.", "err"); return; }
+
+    signA1Btn.disabled = true;
+    setStatus(signA1Status, "Carregando bibliotecas de assinatura…");
+
+    try {
+      const [{ default: signpdfLib }, { P12Signer }, placeholderMod, pdfLib] = await Promise.all([
+        import("https://esm.sh/@signpdf/signpdf@3.2.4?bundle"),
+        import("https://esm.sh/@signpdf/signer-p12@3.2.4?bundle"),
+        import("https://esm.sh/@signpdf/placeholder-pdf-lib@3.2.4?bundle"),
+        import("https://esm.sh/pdf-lib@1.17.1")
+      ]);
+      const SignPdf = signpdfLib?.SignPdf || signpdfLib?.default || signpdfLib;
+      const pdflibAddPlaceholder = placeholderMod?.pdflibAddPlaceholder || placeholderMod?.default;
+
+      setStatus(signA1Status, "Adicionando placeholder de assinatura…");
+      const pdfDoc = await pdfLib.PDFDocument.load(pendingPdfBytes);
+      pdflibAddPlaceholder({
+        pdfDoc,
+        reason: "Receita médica eletrônica",
+        contactInfo: "espaco.preludio@preludiojogos.com",
+        name: therapist.displayName || "Profissional",
+        location: "Brasil",
+        signatureLength: 16384
+      });
+      const placeholderBytes = await pdfDoc.save({ useObjectStreams: false });
+
+      setStatus(signA1Status, "Assinando com seu certificado…");
+      const pfxBytes = new Uint8Array(await file.arrayBuffer());
+      const signer = new P12Signer(pfxBytes, { passphrase: pass });
+      const signer_instance = (typeof SignPdf === "function") ? new SignPdf() : SignPdf;
+      const signedBytes = await signer_instance.sign(placeholderBytes, signer);
+
+      const signedB64 = bytesToBase64(new Uint8Array(signedBytes));
+      await uploadSigned(signedB64, "a1_inline");
+    } catch (e) {
+      console.error("sign_a1_error", e);
+      const msg = (e?.message || "").includes("password") || (e?.message || "").includes("MAC")
+        ? "Senha incorreta ou .pfx inválido."
+        : "Erro ao assinar: " + (e?.message || "desconhecido") + ". Tente o caminho 'Assinar fora'.";
+      setStatus(signA1Status, msg, "err");
+      signA1Btn.disabled = false;
+    }
+  });
+
+  // ─── Assinatura externa: download + re-upload ────────────────────────
+  downloadUnsignedBtn.addEventListener("click", () => {
+    if (!pendingPdfBytes) {
+      setStatus(signExtStatus, "Gere o PDF primeiro.", "err"); return;
+    }
+    const blob = new Blob([pendingPdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `receita-${receitaId || Date.now()}-nao-assinada.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  uploadSignedBtn.addEventListener("click", async () => {
+    if (!receitaId) {
+      setStatus(signExtStatus, "Salve o rascunho antes.", "err"); return;
+    }
+    const file = document.getElementById("signedFile").files?.[0];
+    if (!file) { setStatus(signExtStatus, "Selecione o PDF assinado.", "err"); return; }
+    if (file.size > 1024 * 1024) {
+      setStatus(signExtStatus, "PDF muito grande (limite 1 MB).", "err"); return;
+    }
+    uploadSignedBtn.disabled = true;
+    setStatus(signExtStatus, "Anexando…");
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const b64 = bytesToBase64(bytes);
+      await uploadSigned(b64, "external_upload");
+    } catch (e) {
+      setStatus(signExtStatus, "Erro: " + e.message, "err");
+      uploadSignedBtn.disabled = false;
+    }
+  });
+
+  async function uploadSigned(pdfBase64, signatureMethod) {
+    const res = await fetch(`${BACKEND_BASE_URL}/therapy/receitas/${receitaId}/assinar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${idToken}` },
+      body: JSON.stringify({ pdfBase64, pdfMime: "application/pdf", signatureMethod })
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok || !j.ok) throw new Error(j?.error || ("HTTP_" + res.status));
+    receitaState = "signed";
+    showDelivery(j.deliveryToken, j.deliveryTokenExp);
+  }
+
+  // ─── Delivery (após assinada) ────────────────────────────────────────
+  function showDelivery(token, exp) {
+    signedDeliveryToken = token;
+    signBlock.classList.add("ep-hide");
+    deliveryBlock.classList.remove("ep-hide");
+    statusBadge.classList.remove("ep-hide", "is-pending");
+    statusBadge.classList.add("is-verified");
+    statusBadge.innerHTML = `
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+      Assinada
+    `;
+
+    const url = `${location.origin}/staging/therapy/receita-publica.html?t=${encodeURIComponent(token)}`;
+    document.getElementById("deliveryLink").value = url;
+    document.getElementById("deliveryExp").textContent = exp
+      ? new Date(exp).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+      : "—";
+    document.getElementById("signedSub").textContent =
+      "Compartilhe o link abaixo com o paciente. A farmácia abre o mesmo link para validar.";
+
+    // QR code
+    import("https://esm.sh/qrcode@1.5.3").then(QR => {
+      QR.toCanvas(url, { width: 180, margin: 1 }).then(canvas => {
+        const wrap = document.getElementById("qrCanvas");
+        wrap.innerHTML = "";
+        wrap.appendChild(canvas);
+      }).catch(e => console.warn("qr_error", e));
+    });
+
+    document.getElementById("copyLinkBtn").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        const btn = document.getElementById("copyLinkBtn");
+        const orig = btn.textContent;
+        btn.textContent = "Copiado!";
+        setTimeout(() => btn.textContent = orig, 1500);
+      } catch {}
+    });
+
+    document.getElementById("downloadSignedBtn").addEventListener("click", async () => {
+      // Re-download direto do servidor pra pegar o PDF que ficou armazenado
+      const res = await fetch(`${BACKEND_BASE_URL}/therapy/receitas/${receitaId}`, {
+        headers: { "Authorization": `Bearer ${idToken}` }
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || !j.ok || !j.receita.pdfSignedBase64) return;
+      const bytes = base64ToBytes(j.receita.pdfSignedBase64);
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const burl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = burl;
+      a.download = `receita-${receitaId}-assinada.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(burl);
+    });
+  }
+</script>
+
+</body>
+</html>

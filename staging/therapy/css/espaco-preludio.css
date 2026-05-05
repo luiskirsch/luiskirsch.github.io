@@ -2316,3 +2316,131 @@ body.ep-consult.ep-mode-calmo .ep-consult__topbar {
   background: var(--ep-ink);
   color: #fff;
 }
+
+/* RECEITA DIGITAL (receita.html, receita-publica.html, prontuario) */
+
+.ep-receita-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+@media (max-width: 920px) {
+  .ep-receita-grid { grid-template-columns: 1fr; }
+}
+
+.ep-receita-form {
+  background: #fff;
+  border: 1px solid rgba(28,31,29,0.10);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.ep-receita-side { min-width: 0; }
+
+.ep-receita-preview {
+  background: #fff;
+  border: 1px solid rgba(28,31,29,0.10);
+  border-radius: 14px;
+  height: 600px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.ep-receita-preview__empty {
+  padding: 32px;
+  color: rgba(28,31,29,0.45);
+  text-align: center;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.ep-receita-preview__iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.ep-receita-med {
+  background: rgba(28,31,29,0.02);
+  border: 1px solid rgba(28,31,29,0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Tabs de assinatura ─────────────────────────────────────────── */
+
+.ep-receita-sign-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid rgba(28,31,29,0.10);
+  margin-bottom: 12px;
+}
+.ep-receita-sign-tab {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  font: inherit;
+  font-size: 13px;
+  color: rgba(28,31,29,0.55);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.ep-receita-sign-tab:hover { color: var(--ep-ink); }
+.ep-receita-sign-tab.is-active {
+  color: var(--ep-ink);
+  border-bottom-color: var(--ep-gold);
+  font-weight: 500;
+}
+.ep-receita-sign-pane { display: none; }
+.ep-receita-sign-pane.is-active { display: block; }
+
+/* QR code wrapper ────────────────────────────────────────────── */
+
+.ep-receita-qr {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid rgba(28,31,29,0.10);
+  border-radius: 12px;
+}
+.ep-receita-qr canvas { display: block; }
+
+/* Linha de receita no prontuário ─────────────────────────────── */
+
+.ep-receita-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid rgba(28,31,29,0.08);
+  border-radius: 10px;
+}
+.ep-receita-row__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ep-receita-row__resumo {
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: var(--ep-ink);
+}
+
+/* Página pública (paciente/farmácia) ─────────────────────────── */
+
+.ep-receita-public-frame {
+  width: 100%;
+  height: 720px;
+  border: 1px solid rgba(28,31,29,0.10);
+  border-radius: 12px;
+  background: #fff;
+  display: block;
+}

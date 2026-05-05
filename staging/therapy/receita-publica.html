@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receita digital · Espaço Prelúdio</title>
+  <link rel="icon" href="../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-17">
+</head>
+<body>
+
+<div class="ep-shell">
+  <header class="ep-topbar">
+    <a href="./index.html" class="ep-brand" aria-label="Espaço Prelúdio">
+      <span class="ep-brand__mark">EP</span>
+      <span class="ep-brand__name">
+        <span class="ep-brand__lead">Espaço</span>
+        <span>Prelúdio</span>
+      </span>
+    </a>
+    <nav class="ep-nav">
+      <span class="ep-text-sm ep-text-muted">Receita digital</span>
+    </nav>
+  </header>
+
+  <main class="ep-main" style="max-width: 880px; margin: 0 auto;">
+
+    <div id="loading" class="ep-skeleton ep-mt-32">Carregando receita…</div>
+
+    <div id="errorBox" class="ep-error-state ep-hide ep-mt-32">
+      <h2 class="ep-h2 ep-mt-0" id="errorTitle">Receita indisponível.</h2>
+      <p class="ep-text-muted" id="errorMsg">O link está inválido, expirou ou a receita ainda não foi assinada.</p>
+    </div>
+
+    <div id="content" class="ep-hide">
+      <div class="ep-flex ep-flex--end-wrap" style="justify-content: space-between; align-items: end; margin-bottom: 16px; gap: 12px;">
+        <div>
+          <div class="ep-eyebrow">Sua receita</div>
+          <h1 class="ep-h1 ep-mt-12" id="patientNameLbl">—</h1>
+          <p class="ep-text-muted ep-mt-0">
+            Emitida por <strong id="therapistLbl">—</strong> em <span id="signedAtLbl">—</span>.
+          </p>
+        </div>
+        <div class="ep-flex" style="gap: 8px;">
+          <button class="ep-btn ep-btn--primary" type="button" id="downloadBtn">Baixar PDF</button>
+        </div>
+      </div>
+
+      <div class="ep-alert ep-alert--info">
+        <strong>Para a farmácia:</strong> abra o PDF e verifique a assinatura digital no
+        <a href="https://verificador.iti.gov.br/" target="_blank" rel="noopener">Verificador ITI gov.br</a>
+        ou no Adobe Reader (validade ICP-Brasil) antes de dispensar.
+      </div>
+
+      <iframe id="pdfFrame" class="ep-receita-public-frame"></iframe>
+
+      <p class="ep-text-xs ep-text-muted ep-mt-16" style="text-align: center;">
+        Receita gerada e entregue pelo Espaço Prelúdio. Em caso de dúvida, contate o(a) profissional emissor(a).
+      </p>
+    </div>
+
+  </main>
+</div>
+
+<script type="module">
+  import { BACKEND_BASE_URL } from "./js/firebase-config.js";
+
+  const params = new URLSearchParams(location.search);
+  const token = params.get("t");
+
+  const loading   = document.getElementById("loading");
+  const errorBox  = document.getElementById("errorBox");
+  const content   = document.getElementById("content");
+
+  function showError(title, msg) {
+    loading.classList.add("ep-hide");
+    errorBox.classList.remove("ep-hide");
+    if (title) document.getElementById("errorTitle").textContent = title;
+    if (msg)   document.getElementById("errorMsg").textContent   = msg;
+  }
+
+  if (!token) { showError("Link inválido.", "Faltam dados do link."); throw new Error("NO_TOKEN"); }
+
+  function base64ToBytes(b64) {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  (async () => {
+    try {
+      const res = await fetch(`${BACKEND_BASE_URL}/therapy/receita/publica?t=${encodeURIComponent(token)}`);
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || !j.ok) {
+        const code = j?.error || res.status;
+        if (code === "TOKEN_EXPIRADO" || res.status === 401 || res.status === 410) {
+          showError("Link expirado.", "Esta receita expirou. Peça uma nova ao(à) profissional.");
+        } else if (res.status === 404) {
+          showError("Receita não encontrada.", "Verifique se o link está correto.");
+        } else {
+          showError("Não foi possível abrir.", "Tente novamente em alguns minutos.");
+        }
+        return;
+      }
+
+      const r = j.receita;
+      document.getElementById("patientNameLbl").textContent = r.patientNameSnapshot || "Paciente";
+      document.getElementById("therapistLbl").textContent   = r.therapistDisplayName || "Profissional";
+      document.getElementById("signedAtLbl").textContent    = r.signedAt
+        ? new Date(r.signedAt).toLocaleString("pt-BR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })
+        : "—";
+
+      const bytes = base64ToBytes(r.pdfBase64);
+      const blob  = new Blob([bytes], { type: r.pdfMime || "application/pdf" });
+      const url   = URL.createObjectURL(blob);
+
+      document.getElementById("pdfFrame").src = url;
+      document.getElementById("downloadBtn").addEventListener("click", () => {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `receita-${r.receitaId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+
+      loading.classList.add("ep-hide");
+      content.classList.remove("ep-hide");
+    } catch (e) {
+      console.error("receita_publica_error", e);
+      showError("Erro de conexão.", "Tente novamente mais tarde.");
+    }
+  })();
+</script>
+
+</body>
+</html>

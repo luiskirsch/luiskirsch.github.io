@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-16">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-17">
 </head>
 <body>
 
@@ -53,6 +53,7 @@
     </div>
     <div class="ep-prontuario__actions">
       <a href="./pacientes.html" class="ep-btn ep-btn--ghost ep-btn--sm" id="editPatientBtn" title="Gerenciar paciente">Editar</a>
+      <a id="newReceitaLink" href="#" class="ep-btn ep-btn--ghost ep-btn--sm" title="Emitir nova receita">+ Receita</a>
       <a id="newSessionLink" href="#" class="ep-btn ep-btn--primary">+ Nova consulta</a>
     </div>
   </section>
@@ -115,6 +116,21 @@
         <div class="ep-error-state__detail" id="errorStateDetail"></div>
       </div>
       <button class="ep-btn ep-btn--ghost ep-btn--sm" type="button" id="retryBtn">Tentar novamente</button>
+    </div>
+  </section>
+
+  <!-- Receitas digitais -->
+  <section class="ep-mt-32">
+    <div class="ep-eyebrow">Receitas</div>
+    <div class="ep-flex" style="justify-content: space-between; align-items: end; gap: 12px;">
+      <h2 class="ep-h2 ep-mt-12">Receitas emitidas</h2>
+      <a id="newReceitaInline" href="#" class="ep-btn ep-btn--ghost ep-btn--sm">+ Nova receita</a>
+    </div>
+
+    <div id="receitasLoading" class="ep-skeleton ep-mt-16">Carregando…</div>
+    <div id="receitasList" class="ep-stack ep-mt-16 ep-hide" style="gap: 8px;"></div>
+    <div id="receitasEmpty" class="ep-empty ep-mt-16 ep-hide">
+      <p class="ep-text-muted ep-mt-0">Nenhuma receita emitida para este paciente.</p>
     </div>
   </section>
 
@@ -274,6 +290,7 @@
     const newSessionHref = `./painel.html?newWith=${encodeURIComponent(patientId)}&name=${encodeURIComponent(patient.name || "")}`;
     document.getElementById("newSessionLink").href = newSessionHref;
     document.getElementById("newSessionEmptyCta").href = newSessionHref;
+    document.getElementById("newReceitaLink").href = `./receita.html?patientId=${encodeURIComponent(patientId)}`;
   }
 
   function renderHeaderError(name) {
@@ -283,6 +300,7 @@
     document.getElementById("patientObs").style.display = "none";
     document.getElementById("editPatientBtn").classList.add("ep-hide");
     document.getElementById("newSessionLink").classList.add("ep-hide");
+    document.getElementById("newReceitaLink").classList.add("ep-hide");
   }
 
   function renderStats(sessions) {
@@ -463,9 +481,78 @@
     renderTimeline(sessions, notesBySession);
   }
 
+  // ─── Receitas digitais — listagem por paciente ─────────────────────
+  async function loadReceitas() {
+    const url = `${BACKEND_BASE_URL}/therapy/receitas?patientId=${encodeURIComponent(patientId)}`;
+    const res = await fetch(url, { headers: { "Authorization": `Bearer ${idToken}` } });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data?.error || ("HTTP_" + res.status));
+    return data.receitas || [];
+  }
+
+  function fmtReceitaDate(ms) {
+    if (!ms) return "—";
+    return new Date(ms).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  }
+
+  async function renderReceitas() {
+    const loading = document.getElementById("receitasLoading");
+    const list    = document.getElementById("receitasList");
+    const empty   = document.getElementById("receitasEmpty");
+    document.getElementById("newReceitaInline").href = `./receita.html?patientId=${encodeURIComponent(patientId)}`;
+    try {
+      const receitas = await loadReceitas();
+      loading.classList.add("ep-hide");
+      if (!receitas.length) { empty.classList.remove("ep-hide"); return; }
+
+      list.innerHTML = "";
+      for (const r of receitas) {
+        // Decifra resumo do form pra mostrar 1ª linha de medicação
+        let resumo = "(rascunho)";
+        try {
+          const txt = await decryptNote({ ciphertext: r.formCiphertext, iv: r.formIv }, dek);
+          const f = JSON.parse(txt);
+          const first = (f.meds && f.meds[0]) || null;
+          resumo = first ? `${first.nome}${first.posologia ? " · " + first.posologia : ""}` : "(sem medicamentos)";
+        } catch {}
+
+        const card = document.createElement("article");
+        card.className = "ep-receita-row";
+        const isSigned = r.status === "signed";
+        const statusPill = isSigned
+          ? `<span class="ep-verif-pill is-verified" style="font-size: 11px;">Assinada</span>`
+          : `<span class="ep-verif-pill is-pending" style="font-size: 11px;">Rascunho</span>`;
+        const linkBtn = isSigned && r.deliveryToken
+          ? `<a class="ep-btn ep-btn--ghost ep-btn--xs" href="./receita-publica.html?t=${encodeURIComponent(r.deliveryToken)}" target="_blank">Ver link</a>`
+          : "";
+        card.innerHTML = `
+          <div>
+            <div class="ep-receita-row__top">
+              ${statusPill}
+              <span class="ep-text-xs ep-text-muted">${fmtReceitaDate(r.signedAt || r.createdAt)}</span>
+            </div>
+            <div class="ep-receita-row__resumo">${escapeHtml(resumo)}</div>
+          </div>
+          <div class="ep-flex" style="gap: 6px;">
+            ${linkBtn}
+            <a class="ep-btn ep-btn--ghost ep-btn--xs" href="./receita.html?id=${encodeURIComponent(r.receitaId)}">Abrir</a>
+          </div>
+        `;
+        list.appendChild(card);
+      }
+      list.classList.remove("ep-hide");
+    } catch (e) {
+      console.error("load_receitas_error", e);
+      loading.textContent = "Não foi possível carregar receitas.";
+      loading.classList.add("ep-error-state");
+    }
+  }
+
   document.getElementById("retryBtn").addEventListener("click", boot);
 
   await boot();
+  // Receitas carregam após o resto (não-bloqueante)
+  renderReceitas();
 </script>
 
 </body>
