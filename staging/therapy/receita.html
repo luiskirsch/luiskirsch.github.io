@@ -9,14 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-26">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-27">
 </head>
 <body>
 
 <div class="ep-staging-banner">Ambiente de teste · Espaço Prelúdio · staging</div>
 
-<div class="ep-shell">
-  <header class="ep-topbar">
+<header class="ep-topbar">
+  <div class="ep-container ep-topbar__inner">
     <a href="./painel.html" class="ep-brand" aria-label="Espaço Prelúdio">
       <span class="ep-brand__mark">EP</span>
       <span class="ep-brand__name">
@@ -24,13 +24,19 @@
         <span>Prelúdio</span>
       </span>
     </a>
-    <nav class="ep-nav">
-      <a href="./painel.html" class="ep-text-sm">Painel</a>
-      <a href="./painel.html" class="ep-btn ep-btn--ghost ep-btn--sm">Voltar</a>
+    <nav class="ep-nav" aria-label="Painel">
+      <a href="./painel.html">Consultas</a>
+      <a href="./agenda.html">Agenda</a>
+      <a href="./pacientes.html">Pacientes</a>
+      <a href="./receita.html" class="is-active">Receitas</a>
+      <a href="./perfil.html">Perfil</a>
+      <span id="topUserName" class="ep-text-sm ep-text-muted">&nbsp;</span>
+      <button id="logoutBtn" type="button" class="ep-btn ep-btn--ghost ep-btn--sm">Sair</button>
     </nav>
-  </header>
+  </div>
+</header>
 
-  <main class="ep-main">
+<main class="ep-container ep-mt-32 ep-mb-16">
     <div class="ep-flex ep-flex--end-wrap" style="justify-content: space-between; align-items: end; margin-bottom: 16px;">
       <div>
         <div class="ep-eyebrow">Receita digital</div>
@@ -212,16 +218,23 @@
       </aside>
     </div>
   </main>
-</div>
 
 <script type="module">
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import { auth, BACKEND_BASE_URL } from "./js/firebase-config.js";
   import { requireTherapist } from "./js/auth-guard.js";
-  import { encryptNote, decryptNote } from "./js/crypto.js";
+  import { encryptNote, decryptNote, clearDek } from "./js/crypto.js";
 
   // ─── Boot ────────────────────────────────────────────────────────────
   const ctx = await requireTherapist({ requireDek: true });
   const { idToken, therapist, dek } = ctx;
+
+  document.getElementById("topUserName").textContent = therapist.displayName || "";
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    clearDek();
+    await signOut(auth);
+    window.location.href = "./login.html";
+  });
 
   const params = new URLSearchParams(location.search);
   const editId = params.get("id");
