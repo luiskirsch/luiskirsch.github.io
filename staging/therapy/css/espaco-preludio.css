@@ -1993,3 +1993,102 @@ body.ep-consult.ep-mode-calmo .ep-consult__topbar {
   padding-top: 10px;
   margin: 0;
 }
+
+/* PAINEL DO PACIENTE — variant claro de .ep-note + ações + xs button ── */
+
+.ep-btn--xs {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.ep-note--patient {
+  background: rgba(28,31,29,0.04);
+  border: 1px solid rgba(28,31,29,0.10);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.ep-note--patient .ep-note__meta {
+  color: rgba(28,31,29,0.55);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+.ep-note--patient .ep-note__text {
+  color: var(--ep-ink);
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.ep-note__actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+.ep-note--patient:hover .ep-note__actions,
+.ep-note--patient:focus-within .ep-note__actions { opacity: 1; }
+
+/* CTA "Quer guardar essas anotações?" no entrar.html ────────────── */
+
+.ep-account-cta {
+  background: rgba(215,176,107,0.10);
+  border: 1px solid rgba(215,176,107,0.25);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ep-account-cta__text {
+  color: rgba(255,251,240,0.85);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.ep-account-cta__text strong { color: var(--ep-gold-soft); }
+.ep-account-cta__actions { display: flex; gap: 8px; flex-shrink: 0; }
+.ep-account-cta a {
+  color: var(--ep-gold-soft);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid rgba(215,176,107,0.30);
+  border-radius: 999px;
+  padding: 6px 14px;
+  transition: background 120ms ease;
+  white-space: nowrap;
+}
+.ep-account-cta a:hover { background: rgba(215,176,107,0.16); }
+.ep-account-cta a.is-secondary { border-color: rgba(255,251,240,0.20); color: rgba(255,251,240,0.65); }
+
+/* Badge "Logado(a) como X" no pré-join e topbar do paciente ────── */
+
+.ep-account-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(45,74,62,0.10);
+  border: 1px solid rgba(45,74,62,0.25);
+  border-radius: 999px;
+  padding: 5px 12px;
+  color: var(--ep-accent);
+  font-size: 12px;
+  font-weight: 500;
+}
+.ep-account-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2d8a52;
+  box-shadow: 0 0 6px rgba(45,138,82,0.5);
+}

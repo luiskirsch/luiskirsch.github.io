@@ -27,17 +27,18 @@
         </span>
       </a>
 
-      <h1 class="ep-auth__title ep-mt-32">Crie seu consultório.</h1>
+      <h1 class="ep-auth__title ep-mt-32">Sua conta de paciente.</h1>
       <p class="ep-auth__sub">
-        Em menos de dois minutos você terá um ambiente clínico cifrado de ponta a ponta,
-        com link único para enviar ao paciente.
+        Crie um espaço seguro para guardar suas próprias anotações entre as
+        sessões. Só você lê o que escreve — nem o profissional, nem nós.
       </p>
 
       <div class="ep-stack ep-mt-24">
         <div class="ep-alert ep-alert--info">
-          <strong>Por que pedimos seu CRP/CRM?</strong><br>
-          Para garantir que apenas profissionais habilitados atendam pelo Espaço Prelúdio.
-          O número fica visível na sua página pública para que o paciente confirme sua atuação.
+          <strong>Por que é opcional?</strong><br>
+          Você pode entrar em qualquer consulta apenas pelo link enviado pelo profissional.
+          A conta serve só para que <em>suas próprias notas</em> fiquem salvas
+          e disponíveis depois — sem ela, somem ao fechar a aba.
         </div>
         <div class="ep-lock">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
@@ -47,48 +48,21 @@
     </aside>
 
     <section class="ep-auth__form">
-      <!-- Etapa 1: dados profissionais -->
+      <!-- Etapa 1: dados -->
       <div id="stepData">
-        <h2 class="ep-auth__title ep-mt-0">Dados do profissional</h2>
-        <p class="ep-auth__sub">Use seu nome real e seus dados de conselho. Tudo é editável depois.</p>
+        <h2 class="ep-auth__title ep-mt-0">Seus dados</h2>
+        <p class="ep-auth__sub">Use o nome pelo qual quer ser chamado(a). Tudo é editável depois.</p>
 
         <form id="formData" class="ep-stack" novalidate>
           <div class="ep-field">
-            <label class="ep-label" for="displayName">Nome completo</label>
-            <input id="displayName" class="ep-input" type="text" maxlength="80" autocomplete="name" placeholder="Ex.: Dra. Ana Souza" required>
+            <label class="ep-label" for="displayName">Como quer ser chamado(a)?</label>
+            <input id="displayName" class="ep-input" type="text" maxlength="80" autocomplete="name" placeholder="Seu nome ou apelido" required>
           </div>
 
-          <div class="ep-row">
-            <div class="ep-field">
-              <label class="ep-label" for="email">E-mail profissional</label>
-              <input id="email" class="ep-input" type="email" maxlength="160" autocomplete="email" placeholder="voce@exemplo.com" required>
-            </div>
-            <div class="ep-field">
-              <label class="ep-label" for="especialidade">Especialidade</label>
-              <select id="especialidade" class="ep-select">
-                <option value="">Selecione…</option>
-                <option value="psicologia-clinica">Psicologia clínica</option>
-                <option value="psicanalise">Psicanálise</option>
-                <option value="terapia-cognitivo-comportamental">TCC</option>
-                <option value="terapia-de-casal">Terapia de casal</option>
-                <option value="psiquiatria">Psiquiatria</option>
-                <option value="terapia-ocupacional">Terapia ocupacional</option>
-                <option value="outra">Outra</option>
-              </select>
-            </div>
+          <div class="ep-field">
+            <label class="ep-label" for="email">E-mail</label>
+            <input id="email" class="ep-input" type="email" maxlength="160" autocomplete="email" placeholder="voce@exemplo.com" required>
           </div>
-
-          <div class="ep-row">
-            <div class="ep-field">
-              <label class="ep-label" for="crp">Nº CRP</label>
-              <input id="crp" class="ep-input" type="text" maxlength="20" placeholder="Ex.: 12/12345" autocomplete="off">
-            </div>
-            <div class="ep-field">
-              <label class="ep-label" for="crm">Nº CRM (psiquiatras)</label>
-              <input id="crm" class="ep-input" type="text" maxlength="20" placeholder="Ex.: 123456-SC" autocomplete="off">
-            </div>
-          </div>
-          <p class="ep-text-xs ep-text-muted ep-mt-0">Preencha pelo menos um dos dois.</p>
 
           <div class="ep-row">
             <div class="ep-field">
@@ -101,15 +75,16 @@
             </div>
           </div>
           <p class="ep-text-xs ep-text-muted ep-mt-0">
-            Sua senha deriva a chave que cifra suas anotações. <strong>Não há recuperação automática</strong> — guarde a chave-semente que mostraremos no próximo passo.
+            Sua senha deriva a chave que cifra suas anotações. <strong>Não há recuperação automática</strong> —
+            no próximo passo mostraremos uma chave-semente para você guardar.
           </p>
 
           <label class="ep-checkbox ep-mt-12">
             <input type="checkbox" id="consentLgpd" required>
             <span>
-              Declaro ser profissional habilitado(a), aceito a <a href="./termos.html" target="_blank">Política de Uso</a>
-              e o <a href="./politica.html" target="_blank">Tratamento de Dados (LGPD)</a> e me responsabilizo pelo
-              prontuário dos meus pacientes conforme a Resolução CFP nº 11/2018.
+              Aceito a <a href="./termos.html" target="_blank">Política de Uso</a> e o
+              <a href="./politica.html" target="_blank">Tratamento de Dados (LGPD, Art. 11)</a>.
+              Entendo que minhas anotações são pessoais e ficam cifradas com chave que só eu controlo.
             </span>
           </label>
 
@@ -117,12 +92,12 @@
 
           <div class="ep-stack ep-mt-12" style="gap: 8px;">
             <button class="ep-btn ep-btn--primary ep-btn--lg ep-btn--block" type="submit" id="submitData">Continuar</button>
-            <a href="./login.html" class="ep-btn ep-btn--ghost ep-btn--block">Já tenho conta</a>
+            <a href="./paciente-login.html" class="ep-btn ep-btn--ghost ep-btn--block">Já tenho conta</a>
           </div>
         </form>
       </div>
 
-      <!-- Etapa 2: recovery phrase (única vez) -->
+      <!-- Etapa 2: recovery phrase -->
       <div id="stepRecovery" class="ep-hide">
         <h2 class="ep-auth__title ep-mt-0">Sua chave-semente</h2>
         <p class="ep-auth__sub">
@@ -150,9 +125,9 @@
       <!-- Etapa 3: sucesso -->
       <div id="stepDone" class="ep-hide ep-text-center">
         <div class="ep-eyebrow" style="justify-content: center; display: inline-flex;">Tudo pronto</div>
-        <h2 class="ep-auth__title ep-mt-12">Seu consultório está aberto.</h2>
-        <p class="ep-auth__sub">
-          Você está sendo levado(a) ao painel. Lá você cria seu primeiro link de consulta.
+        <h2 class="ep-auth__title ep-mt-12">Conta criada.</h2>
+        <p class="ep-auth__sub" id="doneText">
+          Levando você ao seu painel pessoal…
         </p>
       </div>
     </section>
@@ -167,21 +142,21 @@
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import { auth, BACKEND_BASE_URL } from "./js/firebase-config.js";
   import {
-    generateSalt, generateDEK, wrapDek, dekToRecoveryPhrase,
-    rememberDek, rememberUser
+    generateSalt, generateDEK, wrapDek, dekToRecoveryPhrase
   } from "./js/crypto.js";
+  import { rememberPatientDek, rememberPatientUser } from "./js/patient-session.js";
 
-  // ─── DOM ────────────────────────────────────────────────────
+  const params = new URLSearchParams(location.search);
+  const next = params.get("next"); // ex.: redirecionar de volta a entrar.html?t=...
+
   const stepData     = document.getElementById("stepData");
   const stepRecovery = document.getElementById("stepRecovery");
   const stepDone     = document.getElementById("stepDone");
+  const doneText     = document.getElementById("doneText");
 
   const formData         = document.getElementById("formData");
   const displayNameEl    = document.getElementById("displayName");
   const emailEl          = document.getElementById("email");
-  const especialidadeEl  = document.getElementById("especialidade");
-  const crpEl            = document.getElementById("crp");
-  const crmEl            = document.getElementById("crm");
   const passwordEl       = document.getElementById("password");
   const passwordConfirmEl= document.getElementById("passwordConfirm");
   const consentLgpdEl    = document.getElementById("consentLgpd");
@@ -195,53 +170,43 @@
   const finishRegister   = document.getElementById("finishRegister");
   const statusRecovery   = document.getElementById("statusRecovery");
 
-  // ─── State ──────────────────────────────────────────────────
-  let pending = null; // { user, idToken, password, dekBytes, salt, wrappedDEK, wrappedDEKIv, recoveryPhrase, formData }
+  let pending = null;
   let busy = false;
 
-  // ─── Helpers ────────────────────────────────────────────────
   function setStatus(el, text, type = "") {
     el.textContent = text;
     el.className = "ep-status";
     if (type) el.classList.add("is-" + type);
   }
-  function setBusy(state) {
-    busy = state;
-    submitData.disabled = state;
-  }
+  function setBusy(state) { busy = state; submitData.disabled = state; }
   function show(stepEl) {
     [stepData, stepRecovery, stepDone].forEach(s => s.classList.add("ep-hide"));
     stepEl.classList.remove("ep-hide");
   }
   function humanizeAuthError(error) {
     const code = error?.code || "";
-    if (code === "auth/email-already-in-use") return "Este e-mail já está cadastrado. Use o login.";
+    if (code === "auth/email-already-in-use") return "Este e-mail já tem cadastro. Tente entrar.";
     if (code === "auth/invalid-email")        return "E-mail inválido.";
     if (code === "auth/weak-password")        return "Senha fraca demais. Use ao menos 10 caracteres.";
     if (code === "auth/network-request-failed")return "Erro de conexão. Tente novamente.";
     return error?.message || "Erro ao criar conta.";
   }
 
-  // ─── Etapa 1 → Etapa 2 ──────────────────────────────────────
   formData.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (busy) return;
 
-    const displayName  = displayNameEl.value.trim().slice(0, 80);
-    const email        = emailEl.value.trim().toLowerCase().slice(0, 160);
-    const especialidade= especialidadeEl.value;
-    const crp          = crpEl.value.trim().toUpperCase();
-    const crm          = crmEl.value.trim().toUpperCase();
-    const password     = passwordEl.value;
+    const displayName = displayNameEl.value.trim().slice(0, 80);
+    const email       = emailEl.value.trim().toLowerCase().slice(0, 160);
+    const password    = passwordEl.value;
     const passwordConfirm = passwordConfirmEl.value;
-    const consentLgpd  = consentLgpdEl.checked;
+    const consentLgpd = consentLgpdEl.checked;
 
-    if (!displayName)  return setStatus(statusData, "Informe seu nome completo.", "err");
+    if (!displayName) return setStatus(statusData, "Informe como deseja ser chamado(a).", "err");
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setStatus(statusData, "E-mail inválido.", "err");
-    if (!crp && !crm)  return setStatus(statusData, "Informe ao menos um número de conselho (CRP ou CRM).", "err");
-    if (password.length < 10) return setStatus(statusData, "Sua senha precisa de pelo menos 10 caracteres.", "err");
+    if (password.length < 10) return setStatus(statusData, "Senha precisa de pelo menos 10 caracteres.", "err");
     if (password !== passwordConfirm) return setStatus(statusData, "As senhas não conferem.", "err");
-    if (!consentLgpd) return setStatus(statusData, "Você precisa aceitar os termos e a política LGPD.", "err");
+    if (!consentLgpd) return setStatus(statusData, "Você precisa aceitar os termos.", "err");
 
     setBusy(true);
     setStatus(statusData, "Criando sua conta…");
@@ -266,7 +231,7 @@
         wrappedDEK,
         wrappedDEKIv,
         recoveryPhrase: recovery,
-        form: { displayName, email, especialidade, crp, crm }
+        form: { displayName, email }
       };
 
       recoveryEl.textContent = recovery;
@@ -274,13 +239,12 @@
       setStatus(statusData, "");
       setBusy(false);
     } catch (error) {
-      console.error("cadastro_error", error);
+      console.error("paciente_cadastro_error", error);
       setStatus(statusData, humanizeAuthError(error), "err");
       setBusy(false);
     }
   });
 
-  // ─── Recovery: copy/download ────────────────────────────────
   copyRecoveryBtn.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(pending?.recoveryPhrase || "");
@@ -291,10 +255,10 @@
   });
   downloadRecoveryBtn.addEventListener("click", () => {
     const blob = new Blob([
-      "ESPAÇO PRELÚDIO — CHAVE-SEMENTE\n\n",
+      "ESPAÇO PRELÚDIO — CHAVE-SEMENTE (PACIENTE)\n\n",
       "Esta é a única forma de recuperar suas anotações se você esquecer a senha.\n",
       "Guarde em local seguro. Nunca compartilhe.\n\n",
-      "Profissional: " + (pending?.form?.displayName || "") + "\n",
+      "Nome: " + (pending?.form?.displayName || "") + "\n",
       "E-mail: " + (pending?.form?.email || "") + "\n",
       "Gerada em: " + new Date().toISOString() + "\n\n",
       "CHAVE:\n",
@@ -304,7 +268,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `espaco-preludio-chave-semente-${Date.now()}.txt`;
+    a.download = `espaco-preludio-paciente-chave-${Date.now()}.txt`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -315,29 +279,24 @@
     finishRegister.disabled = !confirmRecovery.checked;
   });
 
-  // ─── Etapa 2 → Backend register ─────────────────────────────
   finishRegister.addEventListener("click", async () => {
     if (!pending || finishRegister.disabled) return;
     finishRegister.disabled = true;
-    setStatus(statusRecovery, "Registrando profissional…");
+    setStatus(statusRecovery, "Registrando sua conta…");
 
     try {
-      const res = await fetch(`${BACKEND_BASE_URL}/therapy/profissional/registrar`, {
+      const res = await fetch(`${BACKEND_BASE_URL}/therapy/paciente/registrar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${pending.idToken}`
         },
         body: JSON.stringify({
-          displayName:   pending.form.displayName,
-          crp:           pending.form.crp,
-          crm:           pending.form.crm,
-          especialidade: pending.form.especialidade,
-          bio:           "",
-          e2eeSalt:      pending.salt,
-          wrappedDEK:    pending.wrappedDEK,
-          wrappedDEKIv:  pending.wrappedDEKIv,
-          consentLgpd:   true
+          displayName:  pending.form.displayName,
+          e2eeSalt:     pending.salt,
+          wrappedDEK:   pending.wrappedDEK,
+          wrappedDEKIv: pending.wrappedDEKIv,
+          consentLgpd:  true
         })
       });
 
@@ -348,35 +307,23 @@
         return;
       }
 
-      rememberDek(pending.dekBytes);
-      rememberUser({
+      rememberPatientDek(pending.dekBytes);
+      rememberPatientUser({
         uid: pending.user.uid,
         email: pending.form.email,
         displayName: pending.form.displayName
       });
 
       show(stepDone);
-      setTimeout(() => { window.location.href = "./painel.html"; }, 1200);
+      const dest = next ? decodeURIComponent(next) : "./paciente-painel.html";
+      doneText.textContent = next ? "Voltando à sua consulta…" : "Levando você ao seu painel pessoal…";
+      setTimeout(() => { window.location.href = dest; }, 1200);
     } catch (error) {
-      console.error("registrar_profissional_error", error);
+      console.error("registrar_paciente_error", error);
       setStatus(statusRecovery, "Erro de rede. Tente novamente.", "err");
       finishRegister.disabled = false;
     }
   });
-
-  // Pre-fill plano se vindo da landing
-  try {
-    const params = new URLSearchParams(location.search);
-    const plano = params.get("plano");
-    if (plano) {
-      // marcador visual sutil — não precisa armazenar agora
-      const banner = document.createElement("div");
-      banner.className = "ep-alert ep-alert--info";
-      banner.style.marginBottom = "16px";
-      banner.textContent = "Plano selecionado: " + plano + ". Você poderá confirmar depois.";
-      stepData.insertBefore(banner, stepData.firstChild.nextSibling);
-    }
-  } catch {}
 </script>
 
 </body>

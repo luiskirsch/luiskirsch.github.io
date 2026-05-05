@@ -25,9 +25,9 @@
       </span>
     </a>
 
-    <h2 class="ep-auth__title ep-mt-32">Entrar no consultório</h2>
+    <h2 class="ep-auth__title ep-mt-32">Entrar na sua conta</h2>
     <p class="ep-auth__sub">
-      Use seu e-mail profissional. Sua senha desbloqueia também a chave que cifra suas anotações.
+      Sua senha desbloqueia também a chave que decifra suas anotações.
     </p>
 
     <div id="reauthAlert" class="ep-alert ep-alert--info ep-mt-12 ep-hide">
@@ -48,12 +48,12 @@
 
       <div class="ep-stack" style="gap: 8px;">
         <button class="ep-btn ep-btn--primary ep-btn--lg ep-btn--block" type="submit" id="submitBtn">Entrar</button>
-        <a href="./cadastro.html" class="ep-btn ep-btn--ghost ep-btn--block">Criar consultório</a>
+        <a href="./paciente-cadastro.html" class="ep-btn ep-btn--ghost ep-btn--block">Criar conta de paciente</a>
       </div>
     </form>
 
     <div class="ep-auth__bottom">
-      <a href="./recuperar.html">Esqueci minha senha · usar chave-semente</a>
+      <a href="./paciente-recuperar.html">Esqueci minha senha · usar chave-semente</a>
     </div>
   </div>
 </main>
@@ -63,11 +63,12 @@
     signInWithEmailAndPassword
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import { auth, BACKEND_BASE_URL } from "./js/firebase-config.js";
-  import { unwrapDek, rememberDek, rememberUser } from "./js/crypto.js";
+  import { unwrapDek } from "./js/crypto.js";
+  import { rememberPatientDek, rememberPatientUser } from "./js/patient-session.js";
 
   const params = new URLSearchParams(location.search);
   const reauth = params.get("reauth") === "1";
-  const redirect = params.get("redirect") || "./painel.html";
+  const redirect = params.get("redirect") || "./paciente-painel.html";
   const errorParam = params.get("error");
 
   if (reauth) document.getElementById("reauthAlert").classList.remove("ep-hide");
@@ -80,17 +81,17 @@
   }
 
   if (errorParam === "NAO_REGISTRADO") {
-    setStatus("Você ainda não tem cadastro de profissional. Crie sua conta primeiro.", "err");
+    setStatus("Sua conta existe, mas o cadastro de paciente não foi finalizado.", "err");
   }
 
   async function fetchProfile(idToken) {
-    const res = await fetch(`${BACKEND_BASE_URL}/therapy/profissional/me`, {
+    const res = await fetch(`${BACKEND_BASE_URL}/therapy/paciente/me`, {
       headers: { "Authorization": `Bearer ${idToken}` }
     });
     if (res.status === 404) return { ok: false, code: "NAO_REGISTRADO" };
     const data = await res.json().catch(() => ({}));
     if (!res.ok) return { ok: false, code: data?.error || "ERRO_PERFIL" };
-    return { ok: true, therapist: data.therapist };
+    return { ok: true, account: data.account };
   }
 
   function humanize(err) {
@@ -126,8 +127,8 @@
       const profile = await fetchProfile(idToken);
       if (!profile.ok) {
         if (profile.code === "NAO_REGISTRADO") {
-          setStatus("Sua conta existe mas o cadastro de profissional não foi finalizado. Indo para o cadastro…", "err");
-          setTimeout(() => { window.location.href = "./cadastro.html?step=profissional"; }, 1500);
+          setStatus("Sua conta existe mas falta finalizar o cadastro de paciente. Indo…", "err");
+          setTimeout(() => { window.location.href = "./paciente-cadastro.html"; }, 1500);
           return;
         }
         setStatus("Erro: " + profile.code, "err");
@@ -135,9 +136,9 @@
         return;
       }
 
-      const t = profile.therapist;
-      if (!t.e2eeSalt || !t.wrappedDEK || !t.wrappedDEKIv) {
-        setStatus("Sua conta está sem chave de cifragem. Recadastre-se ou entre em contato.", "err");
+      const a = profile.account;
+      if (!a.e2eeSalt || !a.wrappedDEK || !a.wrappedDEKIv) {
+        setStatus("Sua conta está sem chave de cifragem. Recadastre-se.", "err");
         submitBtn.disabled = false;
         return;
       }
@@ -146,23 +147,23 @@
       let dek;
       try {
         dek = await unwrapDek({
-          wrappedDEK:   t.wrappedDEK,
-          wrappedDEKIv: t.wrappedDEKIv,
-          e2eeSalt:     t.e2eeSalt
+          wrappedDEK:   a.wrappedDEK,
+          wrappedDEKIv: a.wrappedDEKIv,
+          e2eeSalt:     a.e2eeSalt
         }, password);
       } catch {
-        setStatus("Senha aceita mas a chave não pôde ser desbloqueada — possivelmente o cadastro está corrompido.", "err");
+        setStatus("Senha aceita mas a chave não pôde ser desbloqueada.", "err");
         submitBtn.disabled = false;
         return;
       }
 
-      rememberDek(dek);
-      rememberUser({ uid: cred.user.uid, email, displayName: t.displayName });
+      rememberPatientDek(dek);
+      rememberPatientUser({ uid: cred.user.uid, email, displayName: a.displayName });
 
       setStatus("Entrando…", "ok");
       window.location.href = redirect;
     } catch (error) {
-      console.error("login_error", error);
+      console.error("paciente_login_error", error);
       setStatus(humanize(error), "err");
       submitBtn.disabled = false;
     }

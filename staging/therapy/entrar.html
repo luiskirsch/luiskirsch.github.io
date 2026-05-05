@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-12">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-13">
 </head>
 <body class="ep-consult">
 
@@ -30,7 +30,10 @@
       Confirme seu nome e leia rapidamente como protegemos seus dados.
     </p>
 
-    <div class="ep-stack">
+    <!-- Status da conta: badge (logado) ou CTA (anônimo) -->
+    <div id="accountSlot" class="ep-mt-12"></div>
+
+    <div class="ep-stack ep-mt-12">
       <div class="ep-field">
         <label class="ep-label" for="patientName">Como o profissional deve te chamar?</label>
         <input id="patientName" class="ep-input" type="text" maxlength="80" placeholder="Seu nome ou apelido">
@@ -40,7 +43,7 @@
         <strong>O que protegemos:</strong>
         <ul style="margin: 8px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.55;">
           <li>O áudio e vídeo são <strong>cifrados ponta a ponta</strong> — só você e o(a) profissional veem/ouvem.</li>
-          <li>Não gravamos nada. Não há cookie de rastreio. Sem cadastro.</li>
+          <li>Não gravamos nada. Não há cookie de rastreio.</li>
           <li>Suas informações dadas em consulta ficam sob responsabilidade ética e legal do(a) profissional, conforme a Resolução CFP nº 11/2018.</li>
         </ul>
       </div>
@@ -108,7 +111,7 @@
           <div class="ep-patient-notes__head">
             <span class="ep-lock">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-              Suas anotações · só você vê
+              <span id="notesScopeLabel">Suas anotações · só você vê</span>
             </span>
             <span class="ep-text-xs ep-text-muted" id="patientNotesStatus">&nbsp;</span>
           </div>
@@ -151,7 +154,10 @@
 </div>
 
 <script type="module">
-  import { BACKEND_BASE_URL } from "./js/firebase-config.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { auth, BACKEND_BASE_URL } from "./js/firebase-config.js";
+  import { encryptNote, decryptNote } from "./js/crypto.js";
+  import { recallPatientDek, recallPatientUser } from "./js/patient-session.js";
 
   const LIVEKIT_VERSION = "2.5.6";
 
@@ -162,6 +168,7 @@
   const inSession   = document.getElementById("inSession");
   const errorScreen = document.getElementById("errorScreen");
   const errorMsg    = document.getElementById("errorMsg");
+  const accountSlot = document.getElementById("accountSlot");
 
   function showError(text) {
     prejoin.classList.add("ep-hide");
@@ -175,10 +182,94 @@
     throw new Error("NO_TOKEN");
   }
 
+  // ─── Detecta modo de auth ANTES de mostrar o pré-join ─────────────────
+  // - "logged"   : Firebase user + perfil paciente carregado + DEK em sessionStorage
+  // - "anon"     : sem login, ou login mas sem DEK (vai como visitante)
+  // Anotações: server-side cifradas (logged) ou sessionStorage (anon).
+
   const consentEl = document.getElementById("consentLgpd");
   const startBtn  = document.getElementById("startBtn");
   const nameEl    = document.getElementById("patientName");
   const statusEl  = document.getElementById("prejoinStatus");
+
+  let authMode = "anon";
+  let patientUser = null;
+  let patientDek  = null;
+  let patientIdToken = null;
+
+  function authReady() {
+    return new Promise((resolve) => {
+      const unsub = onAuthStateChanged(auth, (user) => {
+        unsub();
+        resolve(user || null);
+      });
+    });
+  }
+
+  async function detectAuthMode() {
+    const fbUser = await authReady();
+    if (!fbUser) return;
+
+    const cachedUser = recallPatientUser();
+    if (!cachedUser || cachedUser.uid !== fbUser.uid) return;
+
+    const dek = recallPatientDek();
+    if (!dek) return;
+
+    try {
+      patientIdToken = await fbUser.getIdToken();
+    } catch {
+      return;
+    }
+    patientUser = cachedUser;
+    patientDek  = dek;
+    authMode = "logged";
+
+    if (cachedUser.displayName) nameEl.value = cachedUser.displayName;
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  function renderAccountSlot() {
+    accountSlot.innerHTML = "";
+    if (authMode === "logged") {
+      const wrap = document.createElement("div");
+      wrap.className = "ep-account-badge";
+      wrap.innerHTML = `
+        <span class="ep-account-badge__dot" aria-hidden="true"></span>
+        Logado(a) como <strong style="margin-left:4px;">${escapeHtml(patientUser.displayName || patientUser.email || "")}</strong>
+      `;
+      accountSlot.appendChild(wrap);
+
+      const sub = document.createElement("p");
+      sub.className = "ep-text-xs ep-text-muted ep-mt-8";
+      sub.style.marginBottom = "0";
+      sub.innerHTML = `Suas anotações desta sessão ficarão salvas na sua conta. <a href="./paciente-painel.html" target="_blank" style="color: var(--ep-accent); text-decoration: underline;">Ver minhas anotações</a>`;
+      accountSlot.appendChild(sub);
+    } else {
+      const cta = document.createElement("div");
+      cta.className = "ep-alert ep-alert--info";
+      cta.style.background = "rgba(215,176,107,0.12)";
+      cta.style.borderColor = "rgba(215,176,107,0.30)";
+      cta.style.color = "var(--ep-ink)";
+      const back = encodeURIComponent(location.pathname + location.search);
+      cta.innerHTML = `
+        <strong>Quer guardar suas anotações?</strong>
+        Você pode entrar como visitante (anotações somem ao fechar a aba) ou
+        <a href="./paciente-cadastro.html?next=${back}" style="color: var(--ep-accent); font-weight: 600;">criar uma conta gratuita</a>.
+        Já tem conta?
+        <a href="./paciente-login.html?redirect=${back}" style="color: var(--ep-accent); font-weight: 600;">Entrar</a>.
+      `;
+      accountSlot.appendChild(cta);
+    }
+  }
+
+  await detectAuthMode();
+  renderAccountSlot();
 
   consentEl.addEventListener("change", () => {
     startBtn.disabled = !consentEl.checked;
@@ -192,14 +283,18 @@
 
     let joinRes;
     try {
+      const body = {
+        joinToken,
+        patientName: nameEl.value.trim().slice(0, 80) || "Paciente",
+        consentLgpd: true
+      };
+      if (authMode === "logged" && patientIdToken) {
+        body.patientIdToken = patientIdToken;
+      }
       joinRes = await fetch(`${BACKEND_BASE_URL}/therapy/sessao/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          joinToken,
-          patientName: nameEl.value.trim().slice(0, 80) || "Paciente",
-          consentLgpd: true
-        })
+        body: JSON.stringify(body)
       });
     } catch {
       statusEl.textContent = "Erro de rede.";
@@ -266,35 +361,64 @@
       e2ee: useE2EE ? { keyProvider, worker: e2eeWorker } : undefined
     });
 
-    // ─── State machine waiting → session (banner some, notas aparecem) ──
     const bottomStack = document.getElementById("bottomStack");
     function setBottomState(state) { bottomStack.dataset.state = state; }
 
-    // ─── Anotações pessoais do paciente (sessionStorage, local-only) ────
-    // Nada disso vai pro servidor. Fecha aba → some.
-    const NOTES_KEY = "ep_patient_notes_" + (data.sessionId || "anon");
-    const notesList   = document.getElementById("patientNotesList");
-    const noteInput   = document.getElementById("patientNoteInput");
-    const noteSaveBtn = document.getElementById("patientNoteSave");
-    const noteStatus  = document.getElementById("patientNotesStatus");
+    // ─── Anotações pessoais — duas formas de armazenar ──────────────────
+    // mode "logged" → POST /paciente/notas (cifrado E2EE com DEK do paciente)
+    // mode "anon"   → sessionStorage (some ao fechar aba)
+    const sessionId = data.sessionId || "anon";
+    const NOTES_KEY = "ep_patient_notes_" + sessionId;
 
-    function loadPatientNotes() {
-      try { return JSON.parse(sessionStorage.getItem(NOTES_KEY) || "[]"); } catch { return []; }
+    const notesList     = document.getElementById("patientNotesList");
+    const noteInput     = document.getElementById("patientNoteInput");
+    const noteSaveBtn   = document.getElementById("patientNoteSave");
+    const noteStatus    = document.getElementById("patientNotesStatus");
+    const notesScopeLbl = document.getElementById("notesScopeLabel");
+
+    notesScopeLbl.textContent = (authMode === "logged")
+      ? "Suas anotações · só você vê · salvas na sua conta"
+      : "Suas anotações · só você vê · somem ao fechar";
+
+    let notes = []; // [{ noteId?, text, createdAt }]
+
+    async function loadNotesInitial() {
+      if (authMode === "logged") {
+        try {
+          const res = await fetch(`${BACKEND_BASE_URL}/therapy/paciente/notas?sessionId=${encodeURIComponent(sessionId)}`, {
+            headers: { "Authorization": `Bearer ${patientIdToken}` }
+          });
+          const j = await res.json().catch(() => ({}));
+          if (res.ok && j.ok) {
+            notes = [];
+            for (const n of (j.notes || [])) {
+              const text = await decryptNote({ ciphertext: n.ciphertext, iv: n.iv }, patientDek);
+              notes.push({ noteId: n.noteId, text, createdAt: n.createdAt || Date.now() });
+            }
+          }
+        } catch (e) {
+          console.warn("load_notes_failed", e);
+        }
+      } else {
+        try { notes = JSON.parse(sessionStorage.getItem(NOTES_KEY) || "[]"); } catch { notes = []; }
+      }
+      renderNotes();
     }
-    function savePatientNotes(arr) {
-      try { sessionStorage.setItem(NOTES_KEY, JSON.stringify(arr)); } catch {}
+
+    function persistAnonNotes() {
+      try { sessionStorage.setItem(NOTES_KEY, JSON.stringify(notes)); } catch {}
     }
-    function renderPatientNotes() {
-      const arr = loadPatientNotes();
+
+    function renderNotes() {
       notesList.innerHTML = "";
-      if (arr.length === 0) {
+      if (notes.length === 0) {
         const empty = document.createElement("div");
         empty.className = "ep-patient-notes__empty";
         empty.textContent = "Você ainda não escreveu nada. Use este espaço pra registrar o que quiser lembrar.";
         notesList.appendChild(empty);
         return;
       }
-      arr.forEach(n => {
+      notes.forEach(n => {
         const el = document.createElement("article");
         el.className = "ep-note";
         const meta = document.createElement("div");
@@ -308,20 +432,43 @@
       });
       notesList.scrollTop = notesList.scrollHeight;
     }
-    function addPatientNote(text) {
-      const arr = loadPatientNotes();
-      arr.push({ text, createdAt: Date.now() });
-      savePatientNotes(arr);
-      renderPatientNotes();
+
+    async function saveNote(text) {
+      const createdAt = Date.now();
+      if (authMode === "logged") {
+        const { ciphertext, iv } = await encryptNote(text, patientDek);
+        const res = await fetch(`${BACKEND_BASE_URL}/therapy/paciente/notas`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${patientIdToken}`
+          },
+          body: JSON.stringify({ sessionId, ciphertext, iv })
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok || !j.ok) throw new Error(j?.error || ("HTTP_" + res.status));
+        notes.push({ noteId: j.noteId, text, createdAt });
+      } else {
+        notes.push({ text, createdAt });
+        persistAnonNotes();
+      }
+      renderNotes();
     }
 
-    noteSaveBtn.addEventListener("click", () => {
+    noteSaveBtn.addEventListener("click", async () => {
       const t = noteInput.value.trim();
       if (!t) return;
-      addPatientNote(t);
-      noteInput.value = "";
-      noteStatus.textContent = "salva";
-      setTimeout(() => { noteStatus.textContent = " "; }, 1500);
+      noteSaveBtn.disabled = true;
+      try {
+        await saveNote(t);
+        noteInput.value = "";
+        noteStatus.textContent = (authMode === "logged") ? "salva na sua conta" : "salva (sessão atual)";
+        setTimeout(() => { noteStatus.textContent = " "; }, 1800);
+      } catch (e) {
+        noteStatus.textContent = "Erro ao salvar — tente novamente.";
+        setTimeout(() => { noteStatus.textContent = " "; }, 2500);
+      }
+      noteSaveBtn.disabled = false;
     });
     noteInput.addEventListener("keydown", (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
@@ -329,7 +476,8 @@
         noteSaveBtn.click();
       }
     });
-    renderPatientNotes();
+
+    loadNotesInitial();
 
     room
       .on(RoomEvent.ParticipantConnected, (p) => {
@@ -389,7 +537,7 @@
     ctrlLeave.addEventListener("click", async () => {
       if (!confirm("Sair da consulta?")) return;
       try { await room.disconnect(); } catch {}
-      window.location.href = "./index.html";
+      window.location.href = (authMode === "logged") ? "./paciente-painel.html" : "./index.html";
     });
 
     window.addEventListener("beforeunload", () => { try { room.disconnect(); } catch {} });
