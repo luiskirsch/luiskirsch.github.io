@@ -2178,3 +2178,141 @@ body.ep-consult.ep-mode-calmo .ep-consult__topbar {
   .ep-doc .ep-h1 { font-size: 26px; }
   .ep-doc .ep-h2 { font-size: 18px; }
 }
+
+/* VERIFICAÇÃO CRP/CRM ─────────────────────────────────────────── */
+
+.ep-verif-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid;
+  letter-spacing: 0.005em;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.ep-verif-pill.is-verified {
+  background: rgba(45,138,82,0.10);
+  border-color: rgba(45,138,82,0.32);
+  color: #1f6b3e;
+}
+.ep-verif-pill.is-verified:hover { background: rgba(45,138,82,0.16); }
+.ep-verif-pill.is-pending {
+  background: rgba(215,176,107,0.12);
+  border-color: rgba(215,176,107,0.35);
+  color: #8a6a30;
+}
+.ep-verif-pill.is-pending:hover { background: rgba(215,176,107,0.18); }
+.ep-verif-pill.is-rejected,
+.ep-verif-pill.is-none {
+  background: rgba(184,69,61,0.06);
+  border-color: rgba(184,69,61,0.24);
+  color: #8a3a33;
+}
+.ep-verif-pill.is-rejected:hover,
+.ep-verif-pill.is-none:hover { background: rgba(184,69,61,0.12); }
+
+/* Cards de status (verificacao.html) ───────────────────────────── */
+
+.ep-status-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid;
+}
+.ep-status-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.ep-status-card__title { font-weight: 600; font-size: 15px; }
+.ep-status-card__sub { font-size: 13px; line-height: 1.5; margin-top: 2px; }
+.ep-status-card--ok {
+  background: rgba(45,138,82,0.06);
+  border-color: rgba(45,138,82,0.25);
+  color: #1f6b3e;
+}
+.ep-status-card--ok .ep-status-card__icon {
+  background: rgba(45,138,82,0.15);
+  color: #1f6b3e;
+}
+.ep-status-card--pending {
+  background: rgba(215,176,107,0.08);
+  border-color: rgba(215,176,107,0.32);
+  color: #8a6a30;
+}
+.ep-status-card--pending .ep-status-card__icon {
+  background: rgba(215,176,107,0.18);
+  color: #8a6a30;
+}
+.ep-status-card--err {
+  background: rgba(184,69,61,0.06);
+  border-color: rgba(184,69,61,0.24);
+  color: #8a3a33;
+}
+.ep-status-card--err .ep-status-card__icon {
+  background: rgba(184,69,61,0.14);
+  color: #8a3a33;
+}
+
+/* Pré-visualização de documento ─────────────────────────────────── */
+
+.ep-doc__preview {
+  border: 1px solid rgba(28,31,29,0.10);
+  border-radius: 10px;
+  padding: 8px;
+  background: rgba(28,31,29,0.02);
+}
+.ep-doc__preview-pdf {
+  padding: 16px;
+  font-size: 13px;
+  color: rgba(28,31,29,0.65);
+  font-family: ui-monospace, monospace;
+}
+
+/* Admin: cards de submissão ─────────────────────────────────────── */
+
+.ep-admin-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid rgba(28,31,29,0.10);
+  border-radius: 12px;
+}
+.ep-admin-card__name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ep-ink);
+}
+.ep-admin-card__meta {
+  font-size: 12.5px;
+  color: rgba(28,31,29,0.60);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.ep-admin-card__reject {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: #8a3a33;
+  background: rgba(184,69,61,0.06);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border-left: 2px solid #8a3a33;
+}
+
+/* Botão de filtro ativo no painel admin ────────────────────────── */
+[data-filter].is-active {
+  background: var(--ep-ink);
+  color: #fff;
+}

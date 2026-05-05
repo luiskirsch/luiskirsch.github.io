@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-15">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-16">
 </head>
 <body>
 
@@ -43,6 +43,7 @@
         <p class="ep-text-muted ep-mt-8 ep-mt-0">
           Crie um link único para cada paciente. Cifragem ponta-a-ponta ativa em todas as sessões.
         </p>
+        <a href="./verificacao.html" id="verifPill" class="ep-verif-pill ep-hide ep-mt-12" aria-label="Status de verificação"></a>
       </div>
       <button id="newSessionBtn" type="button" class="ep-btn ep-btn--primary ep-btn--lg">+ Nova consulta</button>
     </div>
@@ -128,6 +129,44 @@
   const { idToken, therapist, dek } = session;
 
   document.getElementById("topUserName").textContent = therapist.displayName || "";
+
+  // ─── Verificação CRP/CRM (e-Psi) — pill dinâmica ────────────
+  (async () => {
+    const pill = document.getElementById("verifPill");
+    try {
+      const res = await fetch(`${BACKEND_BASE_URL}/therapy/profissional/verificacao/status`, {
+        headers: { "Authorization": `Bearer ${idToken}` }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) return;
+      pill.classList.remove("ep-hide");
+      if (data.status === "verified") {
+        pill.classList.add("is-verified");
+        pill.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+          Profissional verificado
+        `;
+      } else if (data.status === "pending") {
+        pill.classList.add("is-pending");
+        pill.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          Verificação em análise
+        `;
+      } else if (data.status === "rejected") {
+        pill.classList.add("is-rejected");
+        pill.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          Verificação recusada — reenviar
+        `;
+      } else {
+        pill.classList.add("is-none");
+        pill.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          Verificar perfil profissional →
+        `;
+      }
+    } catch (e) { /* silencioso — pill fica oculta */ }
+  })();
 
   // ─── Logout ─────────────────────────────────────────────────
   document.getElementById("logoutBtn").addEventListener("click", async () => {
