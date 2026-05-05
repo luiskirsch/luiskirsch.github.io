@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prontuário · Espaço Prelúdio</title>
+  <link rel="icon" href="../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/espaco-preludio.css">
+</head>
+<body>
+
+<div class="ep-staging-banner">Ambiente de teste · Espaço Prelúdio · staging</div>
+
+<header class="ep-topbar">
+  <div class="ep-container ep-topbar__inner">
+    <a href="./painel.html" class="ep-brand" aria-label="Espaço Prelúdio">
+      <span class="ep-brand__mark">EP</span>
+      <span class="ep-brand__name">
+        <span class="ep-brand__lead">Espaço</span>
+        <span>Prelúdio</span>
+      </span>
+    </a>
+    <nav class="ep-nav" aria-label="Painel">
+      <a href="./painel.html">Consultas</a>
+      <a href="./pacientes.html" class="is-active">Pacientes</a>
+      <span id="topUserName" class="ep-text-sm ep-text-muted">&nbsp;</span>
+      <button id="logoutBtn" type="button" class="ep-btn ep-btn--ghost ep-btn--sm">Sair</button>
+    </nav>
+  </div>
+</header>
+
+<main class="ep-container ep-mt-32 ep-mb-16">
+
+  <a href="./pacientes.html" class="ep-text-sm ep-text-muted">← Pacientes</a>
+
+  <section class="ep-card ep-card--strong ep-mt-12">
+    <div class="ep-eyebrow">Prontuário</div>
+    <h1 class="ep-h1 ep-mt-12" id="patientName">Carregando…</h1>
+    <dl class="ep-grid ep-grid--3 ep-mt-16" id="patientMeta"></dl>
+    <p id="patientObs" class="ep-text-muted ep-mt-16"></p>
+    <div class="ep-flex ep-gap-8 ep-mt-16">
+      <a id="newSessionLink" href="#" class="ep-btn ep-btn--primary">Nova consulta com este paciente</a>
+    </div>
+  </section>
+
+  <section class="ep-mt-32">
+    <div class="ep-eyebrow">Histórico clínico</div>
+    <h2 class="ep-h2 ep-mt-12">Sessões anteriores</h2>
+    <p class="ep-text-muted ep-mt-8 ep-mt-0">
+      <span class="ep-lock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      </span>
+      Tudo aqui é decifrado no seu navegador. Sair da aba apaga as anotações da memória.
+    </p>
+
+    <div id="sessionsLoading" class="ep-alert ep-mt-16">Carregando histórico…</div>
+    <div id="sessions" class="ep-stack ep-mt-16 ep-hide" style="gap: 28px;"></div>
+    <div id="sessionsEmpty" class="ep-empty ep-mt-16 ep-hide">
+      Nenhuma sessão registrada com este paciente ainda.
+    </div>
+  </section>
+
+</main>
+
+<script type="module">
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { auth, BACKEND_BASE_URL } from "./js/firebase-config.js";
+  import { requireTherapist } from "./js/auth-guard.js";
+  import { decryptNote, clearDek } from "./js/crypto.js";
+
+  const params = new URLSearchParams(location.search);
+  const patientId = params.get("p");
+  if (!patientId) {
+    window.location.href = "./pacientes.html";
+    throw new Error("NO_PATIENT");
+  }
+
+  const sess = await requireTherapist({ requireDek: true });
+  const { idToken, therapist, dek } = sess;
+  document.getElementById("topUserName").textContent = therapist.displayName || "";
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    clearDek();
+    await signOut(auth);
+    window.location.href = "./login.html";
+  });
+
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+    }[c]));
+  }
+  function fmtDateTime(ms) {
+    if (!ms) return "—";
+    return new Date(ms).toLocaleString("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+  function fmtTime(ms) {
+    if (!ms) return "";
+    return new Date(ms).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  // ─── Carrega paciente (single GET — list e filtra; backend não tem GET por id puro) ──
+  async function loadPatient() {
+    const res = await fetch(`${BACKEND_BASE_URL}/therapy/pacientes`, {
+      headers: { "Authorization": `Bearer ${idToken}` }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data?.error || "ERRO_PACIENTES");
+    const p = (data.patients || []).find(x => x.patientId === patientId);
+    if (!p) return null;
+    const json = await decryptNote({ ciphertext: p.ciphertext, iv: p.iv }, dek);
+    return { ...JSON.parse(json), patientId, createdAt: p.createdAt, updatedAt: p.updatedAt };
+  }
+
+  async function loadSessions() {
+    const res = await fetch(`${BACKEND_BASE_URL}/therapy/pacientes/${encodeURIComponent(patientId)}/sessoes`, {
+      headers: { "Authorization": `Bearer ${idToken}` }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data?.error || "ERRO_SESSOES");
+    return data.sessions || [];
+  }
+
+  async function loadNotes(sessionId) {
+    const res = await fetch(`${BACKEND_BASE_URL}/therapy/sessao/${encodeURIComponent(sessionId)}/notas`, {
+      headers: { "Authorization": `Bearer ${idToken}` }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) return [];
+    const decrypted = await Promise.all((data.notes || []).map(async n => ({
+      ...n,
+      text: await decryptNote(n, dek)
+    })));
+    return decrypted;
+  }
+
+  // ─── Render ────────────────────────────────────────────────
+  try {
+    const patient = await loadPatient();
+    if (!patient) {
+      document.getElementById("patientName").textContent = "Paciente não encontrado";
+      document.getElementById("sessionsLoading").classList.add("ep-hide");
+      return;
+    }
+
+    document.getElementById("patientName").textContent = patient.name || "—";
+    const meta = document.getElementById("patientMeta");
+    meta.innerHTML = "";
+    if (patient.contact) {
+      meta.insertAdjacentHTML("beforeend", `<div><dt class="ep-text-muted ep-text-xs">Contato</dt><dd class="ep-mt-0">${escapeHtml(patient.contact)}</dd></div>`);
+    }
+    if (patient.birthdate) {
+      meta.insertAdjacentHTML("beforeend", `<div><dt class="ep-text-muted ep-text-xs">Nascimento</dt><dd class="ep-mt-0">${escapeHtml(patient.birthdate)}</dd></div>`);
+    }
+    meta.insertAdjacentHTML("beforeend", `<div><dt class="ep-text-muted ep-text-xs">Cadastro</dt><dd class="ep-mt-0">${fmtDateTime(patient.createdAt)}</dd></div>`);
+
+    if (patient.observations) {
+      document.getElementById("patientObs").textContent = patient.observations;
+    }
+
+    document.getElementById("newSessionLink").href = `./painel.html?newWith=${encodeURIComponent(patientId)}&name=${encodeURIComponent(patient.name || "")}`;
+
+    const sessions = await loadSessions();
+    const loadingBanner = document.getElementById("sessionsLoading");
+    const sessionsEl = document.getElementById("sessions");
+    const emptyEl = document.getElementById("sessionsEmpty");
+
+    loadingBanner.classList.add("ep-hide");
+    if (sessions.length === 0) {
+      emptyEl.classList.remove("ep-hide");
+      return;
+    }
+
+    sessionsEl.classList.remove("ep-hide");
+
+    for (const s of sessions) {
+      const block = document.createElement("article");
+      block.className = "ep-card";
+      block.innerHTML = `
+        <div class="ep-flex ep-flex--between">
+          <div>
+            <h3 class="ep-h3">${fmtDateTime(s.createdAt)}</h3>
+            <div class="ep-text-xs ep-text-muted ep-mt-0">
+              ${s.status === "completed" ? "Encerrada · " + fmtDateTime(s.completedAt) :
+                s.status === "in_progress" ? "Em sessão" : "Agendada"}
+            </div>
+          </div>
+          <span class="ep-badge ${s.status === "completed" ? "ep-badge--muted" : ""}">${s.status}</span>
+        </div>
+        <div class="ep-notes-list ep-mt-12" data-notes-list></div>
+      `;
+      sessionsEl.appendChild(block);
+
+      const notesList = block.querySelector("[data-notes-list]");
+      const notes = await loadNotes(s.sessionId);
+      if (notes.length === 0) {
+        notesList.innerHTML = `<div class="ep-text-xs ep-text-muted">Nenhuma anotação nesta sessão.</div>`;
+      } else {
+        for (const n of notes) {
+          const noteEl = document.createElement("div");
+          noteEl.className = "ep-note";
+          noteEl.innerHTML = `
+            <div class="ep-note__meta"><span>${fmtTime(n.createdAt)}</span></div>
+            <div></div>
+          `;
+          noteEl.lastElementChild.textContent = n.text;
+          notesList.appendChild(noteEl);
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error("prontuario_error", error);
+    document.getElementById("sessionsLoading").textContent = "Erro ao carregar prontuário.";
+    document.getElementById("sessionsLoading").className = "ep-alert ep-alert--danger";
+  }
+</script>
+
+</body>
+</html>

@@ -10,7 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/espaco-preludio.css">
-  <script src="../_staging.js" defer></script>
 </head>
 <body class="ep-consult">
 
@@ -24,22 +23,39 @@
         <span id="topPatientName">—</span>
       </span>
     </a>
-    <div style="flex: 1; display: flex; align-items: center; gap: 14px; justify-content: center;">
+    <div class="ep-flex ep-flex--center ep-gap-14 ep-w-full">
       <span id="connectionStatus" class="ep-consult__status">conectando…</span>
       <span id="e2eeBadge" class="ep-badge ep-badge--ok ep-hide" title="End-to-end encrypted">E2EE ativo</span>
+      <div class="ep-mode-switch" role="group" aria-label="Modo de clima">
+        <button type="button" data-mode="foco"       class="is-active">Foco</button>
+        <button type="button" data-mode="entardecer">Entardecer</button>
+        <button type="button" data-mode="calmo">Calmo</button>
+      </div>
     </div>
-    <div style="display: flex; gap: 8px;">
+    <div class="ep-flex ep-gap-8">
+      <button id="ambientToggle" type="button" class="ep-ambient-toggle" title="Áudio ambiente">♪ Ambiente</button>
       <a href="./painel.html" class="ep-btn ep-btn--ghost ep-btn--sm">Painel</a>
     </div>
   </header>
 
   <main class="ep-consult__main">
     <section class="ep-consult__video" id="videoArea">
-      <div class="ep-tile" id="tileLocal">
+      <button class="ep-topics-toggle" id="topicsToggle" type="button" aria-expanded="false">＋ Tópicos</button>
+      <aside class="ep-topics-deck" id="topicsDeck" aria-hidden="true">
+        <div class="ep-topics-deck__head">
+          <span class="ep-topics-deck__title">Cards de Tópicos</span>
+          <button class="ep-topics-deck__close" id="topicsClose" type="button" aria-label="Fechar">×</button>
+        </div>
+        <div class="ep-topics-deck__filters" id="topicsFilters"></div>
+        <div class="ep-topics-deck__list" id="topicsList"></div>
+        <button class="ep-topics-deck__draw" id="topicsDraw" type="button">Puxar tópico aleatório</button>
+      </aside>
+
+      <div class="ep-tile ep-tile--gilded" id="tileLocal">
         <video id="videoLocal" autoplay muted playsinline></video>
         <div class="ep-tile__name">Você (profissional)</div>
       </div>
-      <div class="ep-tile" id="tileRemote">
+      <div class="ep-tile ep-tile--gilded" id="tileRemote">
         <div class="ep-tile__placeholder" id="remotePlaceholder">Aguardando o paciente entrar…</div>
         <video id="videoRemote" autoplay playsinline class="ep-hide"></video>
         <div class="ep-tile__name ep-hide" id="remoteName"></div>
@@ -98,6 +114,15 @@
     </aside>
   </main>
 
+  <div class="ep-session-timeline" aria-hidden="true">
+    <div class="ep-session-timeline__fill" id="timelineFill"></div>
+  </div>
+
+  <div class="ep-ritual-open ep-hide" id="ritualOpen" aria-hidden="true">
+    <div class="ep-ritual-open__circle"></div>
+    <div class="ep-ritual-open__text">a sessão começou</div>
+  </div>
+
 </div>
 
 <script type="module">
@@ -105,6 +130,25 @@
   import { auth, BACKEND_BASE_URL } from "./js/firebase-config.js";
   import { requireTherapist } from "./js/auth-guard.js";
   import { encryptNote, decryptNote, clearDek } from "./js/crypto.js";
+  import { TOPIC_LIBRARY, ABORDAGEM_LABEL, shuffle } from "./js/topics.js";
+
+  // ─── Modo de clima (foco / entardecer / calmo) ──────────────
+  // Aplicado via classe no body. Persiste em localStorage.
+  const MODE_KEY = "ep_consult_mode";
+  const validModes = new Set(["foco", "entardecer", "calmo"]);
+  function applyMode(mode) {
+    if (!validModes.has(mode)) mode = "foco";
+    document.body.classList.remove("ep-mode-foco", "ep-mode-entardecer", "ep-mode-calmo");
+    document.body.classList.add("ep-mode-" + mode);
+    document.querySelectorAll(".ep-mode-switch button").forEach(b => {
+      b.classList.toggle("is-active", b.dataset.mode === mode);
+    });
+    try { localStorage.setItem(MODE_KEY, mode); } catch {}
+  }
+  applyMode(localStorage.getItem(MODE_KEY) || "foco");
+  document.querySelectorAll(".ep-mode-switch button").forEach(b => {
+    b.addEventListener("click", () => applyMode(b.dataset.mode));
+  });
 
   // LiveKit via esm.sh — pin de versão para reprodutibilidade.
   const LIVEKIT_VERSION = "2.5.6";
@@ -211,12 +255,17 @@
     .on(RoomEvent.Disconnected, () => setStatus("desconectado"))
     .on(RoomEvent.ConnectionStateChanged, (s) => setStatus(String(s).toLowerCase()));
 
+  let ritualPlayedThisSession = false;
   function onRemoteConnected(p) {
     remotePlaceholder.classList.add("ep-hide");
     videoRemote.classList.remove("ep-hide");
     remoteName.classList.remove("ep-hide");
     remoteName.textContent = p.name || p.identity || "Paciente";
     topPatientName.textContent = p.name || "paciente";
+    if (!ritualPlayedThisSession) {
+      ritualPlayedThisSession = true;
+      playOpeningRitual();
+    }
   }
   function onRemoteDisconnected() {
     remotePlaceholder.classList.remove("ep-hide");
@@ -373,7 +422,11 @@
     }
   });
 
-  // ─── Info & Duração ─────────────────────────────────────────
+  // ─── Info & Duração + Linha do tempo dourada ────────────────
+  // Sessão típica: 50 min. A linha enche linearmente. Sem alarme — pista visual.
+  const SESSION_TARGET_MS = 50 * 60 * 1000;
+  const timelineFill = document.getElementById("timelineFill");
+
   document.getElementById("infoPatient").textContent = topPatientName.textContent || "—";
   document.getElementById("infoCreated").textContent = new Date(sessionStartTs).toLocaleString("pt-BR");
   setInterval(() => {
@@ -381,7 +434,158 @@
     const m = Math.floor(ms / 60000);
     const s = Math.floor((ms % 60000) / 1000);
     document.getElementById("infoDuration").textContent = `${m}min ${String(s).padStart(2,"0")}s`;
+    const pct = Math.min(100, (ms / SESSION_TARGET_MS) * 100);
+    timelineFill.style.width = pct + "%";
   }, 1000);
+
+  // ─── Ritual de abertura (overlay + chime) ───────────────────
+  // Toca uma vez quando o paciente entra. Som suave gerado por Web Audio
+  // (sem assets) — duas oitavas em fade triangular, cabeçalho de sessão.
+  function playOpeningRitual() {
+    const overlay = document.getElementById("ritualOpen");
+    overlay.classList.remove("ep-hide");
+    setTimeout(() => overlay.classList.add("ep-hide"), 3200);
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const now = ctx.currentTime;
+      [392.0, 587.33].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + i * 0.4);
+        gain.gain.linearRampToValueAtTime(0.06, now + i * 0.4 + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.4 + 1.6);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.4);
+        osc.stop(now + i * 0.4 + 1.7);
+      });
+      setTimeout(() => ctx.close().catch(() => {}), 2400);
+    } catch (e) { /* navegador sem WebAudio: ignora */ }
+  }
+
+  // ─── Cards de Tópicos Clínicos ──────────────────────────────
+  const topicsToggle  = document.getElementById("topicsToggle");
+  const topicsDeck    = document.getElementById("topicsDeck");
+  const topicsClose   = document.getElementById("topicsClose");
+  const topicsFilters = document.getElementById("topicsFilters");
+  const topicsList    = document.getElementById("topicsList");
+  const topicsDraw    = document.getElementById("topicsDraw");
+
+  let activeAbord = "all";
+
+  function renderFilters() {
+    const abords = ["all", ...Object.keys(ABORDAGEM_LABEL)];
+    topicsFilters.innerHTML = "";
+    abords.forEach(a => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "ep-topics-deck__filter" + (a === activeAbord ? " is-active" : "");
+      btn.textContent = a === "all" ? "Todas" : ABORDAGEM_LABEL[a];
+      btn.addEventListener("click", () => {
+        activeAbord = a;
+        renderFilters();
+        renderList();
+      });
+      topicsFilters.appendChild(btn);
+    });
+  }
+  function renderList() {
+    const filtered = activeAbord === "all"
+      ? TOPIC_LIBRARY
+      : TOPIC_LIBRARY.filter(t => t.abord === activeAbord);
+    topicsList.innerHTML = "";
+    filtered.forEach(t => topicsList.appendChild(buildTopicCard(t)));
+  }
+  function buildTopicCard(t) {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "ep-topic-card";
+    const abord = document.createElement("span");
+    abord.className = "ep-topic-card__abord";
+    abord.textContent = ABORDAGEM_LABEL[t.abord] || t.abord;
+    const text = document.createElement("span");
+    text.textContent = t.text;
+    card.appendChild(abord);
+    card.appendChild(text);
+    card.addEventListener("click", () => {
+      // Insere o tópico como prefixo na anotação atual.
+      const prefix = noteInput.value.trim();
+      noteInput.value = (prefix ? prefix + "\n\n" : "") + "› " + t.text + "\n";
+      noteInput.focus();
+    });
+    return card;
+  }
+
+  topicsToggle.addEventListener("click", () => {
+    const open = topicsDeck.classList.toggle("is-open");
+    topicsToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    topicsDeck.setAttribute("aria-hidden", open ? "false" : "true");
+  });
+  topicsClose.addEventListener("click", () => {
+    topicsDeck.classList.remove("is-open");
+    topicsToggle.setAttribute("aria-expanded", "false");
+    topicsDeck.setAttribute("aria-hidden", "true");
+  });
+  topicsDraw.addEventListener("click", () => {
+    const pool = activeAbord === "all" ? TOPIC_LIBRARY : TOPIC_LIBRARY.filter(t => t.abord === activeAbord);
+    if (pool.length === 0) return;
+    const t = pool[Math.floor(Math.random() * pool.length)];
+    const prefix = noteInput.value.trim();
+    noteInput.value = (prefix ? prefix + "\n\n" : "") + "› " + t.text + "\n";
+    noteInput.focus();
+  });
+
+  renderFilters();
+  renderList();
+
+  // ─── Áudio ambiente (brown noise suave gerado on-the-fly) ───
+  // Toggle 2 estados: off / silêncio acolhedor (brown noise -36 dB).
+  // Sem chuva real (precisaria de asset). Som gerado via AudioContext.
+  const ambientToggle = document.getElementById("ambientToggle");
+  let ambientCtx = null;
+  let ambientNode = null;
+  let ambientGain = null;
+
+  function startAmbient() {
+    try {
+      ambientCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const bufferSize = 2 * ambientCtx.sampleRate;
+      const buffer = ambientCtx.createBuffer(1, bufferSize, ambientCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let lastOut = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        // Brown noise: integrador leve com ganho compensatório
+        lastOut = (lastOut + (0.02 * white)) / 1.02;
+        data[i] = lastOut * 3.5;
+      }
+      ambientNode = ambientCtx.createBufferSource();
+      ambientNode.buffer = buffer;
+      ambientNode.loop = true;
+      ambientGain = ambientCtx.createGain();
+      ambientGain.gain.value = 0;
+      ambientGain.gain.linearRampToValueAtTime(0.04, ambientCtx.currentTime + 1.5);
+      ambientNode.connect(ambientGain).connect(ambientCtx.destination);
+      ambientNode.start(0);
+      ambientToggle.classList.add("is-on");
+    } catch (e) { console.warn("ambient_start_error", e); }
+  }
+  function stopAmbient() {
+    try {
+      if (ambientGain && ambientCtx) {
+        ambientGain.gain.linearRampToValueAtTime(0, ambientCtx.currentTime + 0.6);
+        setTimeout(() => {
+          try { ambientNode.stop(); ambientCtx.close(); } catch {}
+          ambientCtx = null; ambientNode = null; ambientGain = null;
+        }, 700);
+      }
+      ambientToggle.classList.remove("is-on");
+    } catch {}
+  }
+  ambientToggle.addEventListener("click", () => {
+    if (ambientCtx) stopAmbient(); else startAmbient();
+  });
 
   await loadNotes();
 

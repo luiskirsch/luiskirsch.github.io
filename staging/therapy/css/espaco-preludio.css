@@ -112,8 +112,8 @@ a:hover { color: var(--ep-accent-hover); }
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: saturate(1.2) blur(8px);
   -webkit-backdrop-filter: saturate(1.2) blur(8px);
+  backdrop-filter: saturate(1.2) blur(8px);
 }
 
 .ep-topbar__inner {
@@ -156,7 +156,7 @@ a:hover { color: var(--ep-accent-hover); }
   align-items: center;
 }
 
-.ep-nav a {
+.ep-nav a:not(.ep-btn) {
   color: var(--ep-ink-2);
   font-size: 13.5px;
   font-weight: 500;
@@ -164,8 +164,8 @@ a:hover { color: var(--ep-accent-hover); }
   border-radius: var(--ep-radius-sm);
   transition: color 120ms ease, background 120ms ease;
 }
-.ep-nav a:hover { color: var(--ep-ink); background: var(--ep-accent-soft); }
-.ep-nav a.is-active { color: var(--ep-accent); }
+.ep-nav a:not(.ep-btn):hover { color: var(--ep-ink); background: var(--ep-accent-soft); }
+.ep-nav a.is-active:not(.ep-btn) { color: var(--ep-accent); }
 
 /* ─── Hero / Sections ───────────────────────────────────── */
 
@@ -581,8 +581,8 @@ h3.ep-h3 {
   position: fixed;
   inset: 0;
   background: rgba(28,31,29,0.45);
-  backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   display: none;
   place-items: center;
   z-index: 200;
@@ -611,8 +611,8 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
 .ep-consult__topbar {
   background: rgba(13,20,31,0.85);
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   padding: 12px 20px;
   display: flex;
   align-items: center;
@@ -683,8 +683,8 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   border-radius: 999px;
   font-size: 12.5px;
   font-weight: 500;
-  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   display: inline-flex; align-items: center; gap: 6px;
 }
 .ep-tile__placeholder {
@@ -784,8 +784,8 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 999px;
   padding: 8px 12px;
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   z-index: 10;
 }
 .ep-ctrl {
@@ -835,4 +835,365 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   letter-spacing: 0.06em;
   padding: 6px 16px;
   text-transform: uppercase;
+}
+
+/* ============================================================
+   ASSINATURA PRELÚDIO — paleta dourada do ritual + modos de clima
+   ============================================================ */
+
+:root {
+  --ep-gold:        #d7b06b;   /* RITUAL_GOLD — herança do verso de carta */
+  --ep-gold-soft:   #e3c489;
+  --ep-gold-deep:   #b8924d;
+  --ep-paper:       #fff8ee;   /* RITUAL_PAPER */
+  --ep-ritual-ink:  #0f0c09;   /* RITUAL_INK */
+  --ep-gold-glow:   rgba(215,176,107,0.32);
+}
+
+/* Utility classes para reduzir inline styles ────────────────── */
+.ep-flex            { display: flex; }
+.ep-flex--center    { align-items: center; justify-content: center; }
+.ep-flex--between   { align-items: center; justify-content: space-between; }
+.ep-flex--end-wrap  { align-items: flex-end; flex-wrap: wrap; gap: 16px; justify-content: space-between; }
+.ep-flex--wrap      { flex-wrap: wrap; }
+.ep-flex--col       { flex-direction: column; }
+.ep-gap-4   { gap: 4px; }
+.ep-gap-6   { gap: 6px; }
+.ep-gap-8   { gap: 8px; }
+.ep-gap-10  { gap: 10px; }
+.ep-gap-12  { gap: 12px; }
+.ep-gap-14  { gap: 14px; }
+.ep-gap-16  { gap: 16px; }
+.ep-grid--center { display: grid; place-items: center; }
+.ep-w-full       { width: 100%; }
+.ep-card--accent { border-color: var(--ep-accent) !important; }
+.ep-stack--inline { display: inline-flex; gap: 12px; }
+.ep-text-break    { word-break: break-all; font-size: 12px; }
+.ep-mb-12 { margin-bottom: 12px; }
+.ep-mb-16 { margin-bottom: 16px; }
+.ep-card--max-480 { max-width: 480px; }
+
+/* MODOS DE CLIMA na sala — body switches ─────────────────────── */
+
+body.ep-consult.ep-mode-foco {
+  /* Padrão: dark profissional, foco máximo */
+  background: #0d141f;
+}
+body.ep-consult.ep-mode-foco .ep-consult__video {
+  background: #0a0e15;
+}
+
+body.ep-consult.ep-mode-entardecer {
+  background:
+    radial-gradient(1200px 700px at 70% 0%, rgba(215,176,107,0.12), transparent 55%),
+    radial-gradient(900px 500px at 30% 100%, rgba(160,80,50,0.10), transparent 60%),
+    linear-gradient(180deg, #1a1410 0%, #0d0a08 100%);
+}
+body.ep-consult.ep-mode-entardecer .ep-consult__video {
+  background:
+    radial-gradient(800px 400px at 50% 100%, rgba(215,176,107,0.06), transparent 70%),
+    #110d0a;
+}
+body.ep-consult.ep-mode-entardecer .ep-consult__topbar {
+  background: rgba(26,20,16,0.85);
+  border-bottom-color: rgba(215,176,107,0.12);
+}
+
+body.ep-consult.ep-mode-calmo {
+  background:
+    radial-gradient(1000px 600px at 50% 0%, rgba(180,200,210,0.10), transparent 55%),
+    linear-gradient(180deg, #0d1418 0%, #08101a 100%);
+}
+body.ep-consult.ep-mode-calmo .ep-consult__video {
+  background: #060c12;
+}
+body.ep-consult.ep-mode-calmo .ep-consult__topbar {
+  background: rgba(8,16,26,0.85);
+  border-bottom-color: rgba(180,200,210,0.10);
+}
+
+/* MOLDURA DOURADA nos tiles ──────────────────────────────────── */
+
+.ep-tile--gilded {
+  border: 2px solid rgba(215,176,107,0.28) !important;
+  box-shadow:
+    0 0 0 1px rgba(215,176,107,0.08),
+    0 24px 48px -24px rgba(0,0,0,0.7),
+    0 0 32px -12px var(--ep-gold-glow) !important;
+  border-radius: 16px !important;
+}
+.ep-tile--gilded::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid rgba(255,251,240,0.06);
+  box-shadow: inset 0 0 24px rgba(215,176,107,0.06);
+}
+
+/* LINHA DO TEMPO DOURADA da sessão ──────────────────────────── */
+
+.ep-session-timeline {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgba(215,176,107,0.10);
+  z-index: 5;
+  pointer-events: none;
+}
+.ep-session-timeline__fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--ep-gold-deep), var(--ep-gold), var(--ep-gold-soft));
+  box-shadow: 0 0 12px var(--ep-gold-glow);
+  transition: width 1s linear;
+}
+.ep-session-timeline__mark {
+  position: absolute;
+  top: -3px;
+  width: 1px;
+  height: 8px;
+  background: rgba(215,176,107,0.4);
+}
+
+/* RITUAL DE ABERTURA — overlay 3s ────────────────────────────── */
+
+.ep-ritual-open {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, #1a1410 0%, #060403 70%);
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  animation: epRitualFadeOut 3s ease forwards;
+}
+.ep-ritual-open__circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--ep-gold-soft) 0%, var(--ep-gold) 60%, transparent 100%);
+  box-shadow: 0 0 60px var(--ep-gold-glow), 0 0 120px rgba(215,176,107,0.2);
+  animation: epRitualPulse 2.5s ease-out forwards;
+}
+.ep-ritual-open__text {
+  position: absolute;
+  bottom: 32%;
+  color: var(--ep-paper);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: epRitualText 3s ease forwards;
+}
+@keyframes epRitualPulse {
+  0%   { transform: scale(0.5); opacity: 0; }
+  20%  { transform: scale(1);   opacity: 1; }
+  60%  { transform: scale(8);   opacity: 0.6; }
+  100% { transform: scale(28);  opacity: 0; }
+}
+@keyframes epRitualText {
+  0%, 20%  { opacity: 0; transform: translateY(8px); }
+  35%, 70% { opacity: 0.85; transform: translateY(0); }
+  100%     { opacity: 0; transform: translateY(-4px); }
+}
+@keyframes epRitualFadeOut {
+  0%, 75% { opacity: 1; }
+  100%    { opacity: 0; visibility: hidden; }
+}
+
+/* DROPDOWN DE MODO DE CLIMA ──────────────────────────────────── */
+
+.ep-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 999px;
+  padding: 4px 6px;
+}
+.ep-mode-switch button {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.ep-mode-switch button:hover { color: #fff; }
+.ep-mode-switch button.is-active {
+  background: rgba(215,176,107,0.18);
+  color: var(--ep-gold-soft);
+}
+
+/* CARDS DE TÓPICOS CLÍNICOS ──────────────────────────────────── */
+
+.ep-topics-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 8;
+  background: rgba(13,20,31,0.78);
+  border: 1px solid rgba(215,176,107,0.20);
+  color: var(--ep-gold-soft);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.ep-topics-toggle:hover {
+  background: rgba(13,20,31,0.92);
+  border-color: rgba(215,176,107,0.4);
+}
+
+.ep-topics-deck {
+  position: absolute;
+  top: 60px;
+  right: 16px;
+  width: 320px;
+  max-height: calc(100% - 80px);
+  z-index: 9;
+  background: rgba(15,12,9,0.92);
+  border: 1px solid rgba(215,176,107,0.24);
+  border-radius: 14px;
+  padding: 14px;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 24px 48px -16px rgba(0,0,0,0.8);
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+.ep-topics-deck.is-open { display: flex; }
+
+.ep-topics-deck__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(215,176,107,0.14);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+.ep-topics-deck__title {
+  color: var(--ep-gold-soft);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ep-topics-deck__close {
+  background: transparent;
+  border: none;
+  color: rgba(255,251,240,0.5);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+.ep-topics-deck__close:hover { color: var(--ep-paper); }
+
+.ep-topics-deck__filters {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.ep-topics-deck__filter {
+  background: transparent;
+  border: 1px solid rgba(215,176,107,0.18);
+  color: rgba(255,251,240,0.65);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.ep-topics-deck__filter.is-active {
+  background: rgba(215,176,107,0.16);
+  color: var(--ep-gold-soft);
+  border-color: rgba(215,176,107,0.4);
+}
+
+.ep-topics-deck__list {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+.ep-topic-card {
+  background: linear-gradient(180deg, rgba(255,248,238,0.03) 0%, rgba(215,176,107,0.04) 100%);
+  border: 1px solid rgba(215,176,107,0.14);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--ep-paper);
+  font-size: 13.5px;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: border-color 120ms ease, transform 120ms ease;
+  text-align: left;
+  font-family: inherit;
+}
+.ep-topic-card:hover {
+  border-color: rgba(215,176,107,0.40);
+  transform: translateY(-1px);
+}
+.ep-topic-card__abord {
+  color: var(--ep-gold);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* Botão "puxar próxima" no rodapé do deck */
+.ep-topics-deck__draw {
+  background: rgba(215,176,107,0.12);
+  border: 1px solid rgba(215,176,107,0.30);
+  color: var(--ep-gold-soft);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.ep-topics-deck__draw:hover { background: rgba(215,176,107,0.22); }
+
+/* Áudio ambiente — chip discreto na topbar */
+.ep-ambient-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.7);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.ep-ambient-toggle:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.ep-ambient-toggle.is-on {
+  color: var(--ep-gold-soft);
+  border-color: rgba(215,176,107,0.30);
+  background: rgba(215,176,107,0.10);
 }

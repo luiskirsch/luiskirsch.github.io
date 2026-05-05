@@ -10,7 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/espaco-preludio.css">
-  <script src="../_staging.js" defer></script>
 </head>
 <body>
 
@@ -27,21 +26,21 @@
     </a>
     <nav class="ep-nav" aria-label="Painel">
       <a href="./painel.html" class="is-active">Consultas</a>
-      <a href="./perfil.html">Perfil</a>
-      <span id="topUserName" class="ep-text-sm ep-text-muted" style="margin: 0 8px;"></span>
+      <a href="./pacientes.html">Pacientes</a>
+      <span id="topUserName" class="ep-text-sm ep-text-muted">&nbsp;</span>
       <button id="logoutBtn" type="button" class="ep-btn ep-btn--ghost ep-btn--sm">Sair</button>
     </nav>
   </div>
 </header>
 
-<main class="ep-container ep-mt-32" style="padding-bottom: 80px;">
+<main class="ep-container ep-mt-32 ep-mb-16">
 
   <section class="ep-stack">
-    <div style="display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap;">
+    <div class="ep-flex--end-wrap ep-flex">
       <div>
         <div class="ep-eyebrow">Painel do profissional</div>
-        <h1 class="ep-h1 ep-mt-12" style="font-size: clamp(28px, 3vw, 36px);">Suas consultas</h1>
-        <p class="ep-text-muted ep-mt-8" style="margin: 0;">
+        <h1 class="ep-h1 ep-mt-12">Suas consultas</h1>
+        <p class="ep-text-muted ep-mt-8 ep-mt-0">
           Crie um link único para cada paciente. Cifragem ponta-a-ponta ativa em todas as sessões.
         </p>
       </div>
@@ -74,8 +73,15 @@
 
     <form id="newSessionForm" class="ep-stack">
       <div class="ep-field">
+        <label class="ep-label" for="patientSelect">Paciente cadastrado</label>
+        <select id="patientSelect" class="ep-select">
+          <option value="">— Avulso (digitar nome) —</option>
+        </select>
+        <span class="ep-text-xs ep-text-muted">Selecione um paciente já cadastrado ou crie uma consulta avulsa.</span>
+      </div>
+      <div class="ep-field" id="freeNameField">
         <label class="ep-label" for="patientName">Nome do paciente</label>
-        <input id="patientName" class="ep-input" type="text" maxlength="80" required placeholder="Ex.: João S.">
+        <input id="patientName" class="ep-input" type="text" maxlength="80" placeholder="Ex.: João S.">
       </div>
       <div class="ep-field">
         <label class="ep-label" for="scheduledAt">Horário (opcional)</label>
@@ -113,11 +119,11 @@
   import { signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import { auth, BACKEND_BASE_URL } from "./js/firebase-config.js";
   import { requireTherapist } from "./js/auth-guard.js";
-  import { clearDek, recallUser } from "./js/crypto.js";
+  import { clearDek, recallUser, decryptNote } from "./js/crypto.js";
 
   // ─── Boot ───────────────────────────────────────────────────
   const session = await requireTherapist({ requireDek: true });
-  const { idToken, therapist } = session;
+  const { idToken, therapist, dek } = session;
 
   document.getElementById("topUserName").textContent = therapist.displayName || "";
 
@@ -141,7 +147,7 @@
     return '<span class="ep-badge">Agendada</span>';
   }
   function buildPatientLink(joinToken) {
-    return `${location.origin}/staging/therapy/paciente.html?t=${encodeURIComponent(joinToken)}`;
+    return `${location.origin}/staging/therapy/entrar.html?t=${encodeURIComponent(joinToken)}`;
   }
 
   // ─── Listar sessões ─────────────────────────────────────────
@@ -234,27 +240,84 @@
 
   // ─── Nova consulta ──────────────────────────────────────────
   const newSessionModal = document.getElementById("newSessionModal");
-  const linkModal = document.getElementById("linkModal");
+  const linkModal       = document.getElementById("linkModal");
+  const patientSelect   = document.getElementById("patientSelect");
+  const freeNameField   = document.getElementById("freeNameField");
+
+  // Carrega pacientes do profissional (decifra nomes localmente) para o select.
+  let patientsCache = [];
+  async function loadPatientsForSelect() {
+    try {
+      const res = await fetch(`${BACKEND_BASE_URL}/therapy/pacientes`, {
+        headers: { "Authorization": `Bearer ${idToken}` }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) return;
+      patientsCache = await Promise.all((data.patients || []).map(async p => {
+        try {
+          const json = await decryptNote({ ciphertext: p.ciphertext, iv: p.iv }, dek);
+          const obj = JSON.parse(json);
+          return { patientId: p.patientId, name: obj.name || "—" };
+        } catch {
+          return { patientId: p.patientId, name: "[corrompido]" };
+        }
+      }));
+      patientSelect.innerHTML = `<option value="">— Avulso (digitar nome) —</option>`;
+      patientsCache
+        .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
+        .forEach(p => {
+          const opt = document.createElement("option");
+          opt.value = p.patientId;
+          opt.textContent = p.name;
+          patientSelect.appendChild(opt);
+        });
+    } catch (err) {
+      console.warn("load_patients_for_select_error", err);
+    }
+  }
+
+  patientSelect.addEventListener("change", () => {
+    if (patientSelect.value) {
+      const p = patientsCache.find(x => x.patientId === patientSelect.value);
+      document.getElementById("patientName").value = p?.name || "";
+      freeNameField.classList.add("ep-hide");
+    } else {
+      freeNameField.classList.remove("ep-hide");
+      document.getElementById("patientName").value = "";
+    }
+  });
 
   document.getElementById("newSessionBtn").addEventListener("click", () => openModal());
   document.getElementById("emptyCta").addEventListener("click", () => openModal());
   document.getElementById("cancelNewSession").addEventListener("click", () => closeModal(newSessionModal));
 
-  function openModal() {
-    document.getElementById("patientName").value = "";
+  function openModal(prefill = {}) {
+    patientSelect.value = prefill.patientId || "";
+    document.getElementById("patientName").value = prefill.patientName || "";
     document.getElementById("scheduledAt").value = "";
     document.getElementById("newSessionStatus").textContent = "";
+    if (prefill.patientId) {
+      freeNameField.classList.add("ep-hide");
+    } else {
+      freeNameField.classList.remove("ep-hide");
+    }
     newSessionModal.classList.add("is-open");
-    setTimeout(() => document.getElementById("patientName").focus(), 50);
+    setTimeout(() => {
+      (prefill.patientId ? patientSelect : document.getElementById("patientName")).focus();
+    }, 50);
   }
   function closeModal(el) { el.classList.remove("is-open"); }
 
   document.getElementById("createNewSession").addEventListener("click", async () => {
-    const patientName = document.getElementById("patientName").value.trim();
+    const selectedId = patientSelect.value;
+    const selectedPatient = selectedId ? patientsCache.find(x => x.patientId === selectedId) : null;
+    const patientName = selectedPatient
+      ? selectedPatient.name
+      : document.getElementById("patientName").value.trim();
     const scheduledAtRaw = document.getElementById("scheduledAt").value;
     const statusEl = document.getElementById("newSessionStatus");
     if (!patientName) {
-      statusEl.textContent = "Informe o nome do paciente.";
+      statusEl.textContent = "Selecione um paciente ou informe um nome.";
       statusEl.className = "ep-status is-err";
       return;
     }
@@ -270,7 +333,11 @@
           "Content-Type": "application/json",
           "Authorization": `Bearer ${idToken}`
         },
-        body: JSON.stringify({ patientName, scheduledAt })
+        body: JSON.stringify({
+          patientName,
+          patientId: selectedId || undefined,
+          scheduledAt
+        })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) {
@@ -312,6 +379,16 @@
   });
 
   await loadSessions();
+  await loadPatientsForSelect();
+
+  // Auto-abrir modal se vier de prontuario.html?newWith=ID&name=...
+  (function maybeAutoOpen() {
+    const params = new URLSearchParams(location.search);
+    const newWith = params.get("newWith");
+    if (newWith) {
+      openModal({ patientId: newWith, patientName: params.get("name") || "" });
+    }
+  })();
 </script>
 
 </body>
