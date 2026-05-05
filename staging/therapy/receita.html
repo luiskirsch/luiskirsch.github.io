@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-25">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-26">
 </head>
 <body>
 
@@ -704,55 +704,21 @@
     hr();
     drawText("Validade: " + form.validade + " dias a partir da emissão.", { size: 10, color: rgb(0.35,0.35,0.35) });
 
-    // ── BLOCO INFERIOR (assinatura + QR ancorados na base, mesmo nível) ──
-    // Geramos QR primeiro pra saber tamanho/posição. Em seguida desenhamos
-    // o bloco de assinatura à esquerda no MESMO nível vertical do QR.
-    let qrImg = null;
-    const qrSize = 78;
-    const qrX    = right - qrSize;
-    const qrY    = 50;                      // y do canto inferior do QR (acima do rodapé y=32)
-    const blockTopY = qrY + qrSize;         // ~128 — topo do bloco inferior
+    // ── BLOCO INFERIOR (assinatura à esquerda, QR à direita, mesmo nível) ──
+    // Duas colunas claramente separadas pra evitar colisão entre IDs longos
+    // do médico e a label de verificação.
+    const SIG_COL_W   = 230;                 // largura da coluna da assinatura
+    const VERIF_COL_X = 320;                 // x onde começa a coluna de verificação
+    const qrSize    = 78;
+    const qrX       = right - qrSize;        // 467
+    const qrY       = 50;                    // base do QR (acima do rodapé y=32)
+    const blockTopY = qrY + qrSize;          // 128 — topo do bloco inferior
 
-    if (verifyUrl) {
-      try {
-        const QRLib = await import("https://esm.sh/qrcode@1.5.3");
-        const qrDataUrl = await QRLib.toDataURL(verifyUrl, {
-          width: 240, margin: 1, errorCorrectionLevel: "M"
-        });
-        const qrBytes = base64ToBytes(qrDataUrl.split(",")[1]);
-        qrImg = await pdfDoc.embedPng(qrBytes);
-        page.drawImage(qrImg, { x: qrX, y: qrY, width: qrSize, height: qrSize });
-
-        // Label "VERIFICAÇÃO DE AUTENTICIDADE" próxima do QR (à esquerda dele)
-        const labelX = qrX - 200;
-        let labelY = blockTopY - 4;
-        page.drawText("VERIFICAÇÃO DE AUTENTICIDADE", {
-          x: labelX, y: labelY,
-          font: fontBold, size: 7.5, color: rgb(0.30, 0.30, 0.30)
-        });
-        labelY -= 14;
-        page.drawText("Escaneie o QR ao lado para", {
-          x: labelX, y: labelY,
-          font: fontReg, size: 8, color: rgb(0.40, 0.40, 0.40)
-        });
-        labelY -= 11;
-        page.drawText("conferir a autenticidade desta", {
-          x: labelX, y: labelY,
-          font: fontReg, size: 8, color: rgb(0.40, 0.40, 0.40)
-        });
-        labelY -= 11;
-        page.drawText("receita e a assinatura ICP-Brasil.", {
-          x: labelX, y: labelY,
-          font: fontReg, size: 8, color: rgb(0.40, 0.40, 0.40)
-        });
-      } catch (e) { console.warn("qr_embed_failed", e); }
-    }
-
-    // Assinatura à esquerda, ancorada no MESMO topo do bloco do QR
+    // LEFT — assinatura, com IDs em multi-linha quando longos
     const sigLineY = blockTopY;
     page.drawLine({
       start: { x: left, y: sigLineY },
-      end:   { x: left + 260, y: sigLineY },
+      end:   { x: left + SIG_COL_W, y: sigLineY },
       thickness: 0.5, color: rgb(0.3, 0.3, 0.3)
     });
     let sigY = sigLineY - 12;
@@ -765,9 +731,48 @@
     });
     sigY -= 13;
     if (idParts.length) {
-      page.drawText(idParts.join("  ·  "), {
-        x: left, y: sigY, font: fontReg, size: 9, color: rgb(0.35, 0.35, 0.35)
-      });
+      const idLines = wrapText(idParts.join("  ·  "), fontReg, 9, SIG_COL_W);
+      for (const ln of idLines) {
+        page.drawText(ln, {
+          x: left, y: sigY, font: fontReg, size: 9, color: rgb(0.35, 0.35, 0.35)
+        });
+        sigY -= 12;
+      }
+    }
+
+    // RIGHT — QR + label/helper, isolado da coluna da esquerda
+    if (verifyUrl) {
+      try {
+        const QRLib = await import("https://esm.sh/qrcode@1.5.3");
+        const qrDataUrl = await QRLib.toDataURL(verifyUrl, {
+          width: 240, margin: 1, errorCorrectionLevel: "M"
+        });
+        const qrBytes = base64ToBytes(qrDataUrl.split(",")[1]);
+        const qrImg = await pdfDoc.embedPng(qrBytes);
+        page.drawImage(qrImg, { x: qrX, y: qrY, width: qrSize, height: qrSize });
+
+        // Texto de verificação à esquerda do QR, dentro da coluna
+        const labelX     = VERIF_COL_X;
+        const labelMaxW  = qrX - labelX - 8; // ~139px
+        let labelY = blockTopY - 4;
+
+        page.drawText("VERIFICAÇÃO DE AUTENTICIDADE", {
+          x: labelX, y: labelY,
+          font: fontBold, size: 7, color: rgb(0.30, 0.30, 0.30)
+        });
+        labelY -= 13;
+
+        const helperLines = wrapText(
+          "Escaneie o QR ao lado para verificar a autenticidade desta receita.",
+          fontReg, 8, labelMaxW
+        );
+        for (const ln of helperLines) {
+          page.drawText(ln, {
+            x: labelX, y: labelY, font: fontReg, size: 8, color: rgb(0.40, 0.40, 0.40)
+          });
+          labelY -= 11;
+        }
+      } catch (e) { console.warn("qr_embed_failed", e); }
     }
 
     // ── Rodapé sutil (Prelúdio) ───────────────────────────────────────
