@@ -135,16 +135,20 @@ a:hover { color: var(--ep-accent-hover); }
 }
 
 .ep-brand__mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--ep-accent);
-  display: grid;
-  place-items: center;
-  color: #fff;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.04em;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(215,176,107,0.10);
+  border: 1px solid rgba(215,176,107,0.40);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M20 14a8 8 0 1 1-9.4-7.9A6 6 0 0 0 14 14a6 6 0 0 0 6-6 8 8 0 0 1 0 6z' fill='%23d7b06b'/%3E%3Ccircle cx='17.5' cy='5.5' r='0.9' fill='%23e3c489'/%3E%3C/svg%3E");
+  background-size: 60%;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: inline-block;
+  font-size: 0; /* esconde o texto "EP" se ainda estiver no HTML */
+  color: transparent;
+  flex: 0 0 auto;
+  box-shadow: 0 0 12px rgba(215,176,107,0.18);
 }
 
 .ep-brand__name { display: flex; flex-direction: column; line-height: 1.1; }
@@ -605,12 +609,17 @@ h3.ep-h3 {
 
 /* ─── Consultório (sala de vídeo) ───────────────────────── */
 
-body.ep-consult { background: #0d141f; color: #f3f3f0; }
+body.ep-consult {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(215,176,107,0.04), transparent 55%),
+    linear-gradient(180deg, #14110d 0%, #0a0805 100%);
+  color: #f3f3f0;
+}
 body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
 
 .ep-consult__topbar {
-  background: rgba(13,20,31,0.85);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(20,17,13,0.88);
+  border-bottom: 1px solid rgba(215,176,107,0.10);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   padding: 12px 20px;
@@ -619,8 +628,18 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   gap: 14px;
   color: #f3f3f0;
 }
-.ep-consult__topbar .ep-brand { color: #f3f3f0; }
-.ep-consult__topbar .ep-brand__lead { color: rgba(255,255,255,0.55); }
+.ep-consult__topbar .ep-brand { color: var(--ep-paper); }
+.ep-consult__topbar .ep-brand__lead {
+  color: var(--ep-gold-soft);
+  letter-spacing: 0.10em;
+  font-weight: 500;
+  font-size: 10.5px;
+}
+.ep-consult__topbar .ep-brand__name > span:not(.ep-brand__lead) {
+  color: var(--ep-paper);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
 
 .ep-consult__status {
   display: inline-flex;
@@ -642,13 +661,16 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   grid-template-columns: minmax(0, 1fr) 380px;
   gap: 0;
 }
+.ep-consult__main--solo { grid-template-columns: 1fr; }
 @media (max-width: 980px) {
   .ep-consult__main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
 }
 
 .ep-consult__video {
   position: relative;
-  background: #0a0e15;
+  background:
+    radial-gradient(1000px 500px at 50% 100%, rgba(215,176,107,0.03), transparent 65%),
+    #0a0805;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
@@ -660,14 +682,33 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
 
 .ep-tile {
   position: relative;
-  background: linear-gradient(135deg, #1c1f1d 0%, #2d3530 100%);
+  background:
+    radial-gradient(ellipse at 50% 60%, rgba(215,176,107,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 30% 80%, rgba(160,80,40,0.04) 0%, transparent 60%),
+    linear-gradient(135deg, #1c1814 0%, #110d09 100%);
   border-radius: 14px;
   overflow: hidden;
   aspect-ratio: 16 / 11;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 24px 48px -24px rgba(0,0,0,0.6);
+  border: 1px solid rgba(215,176,107,0.10);
+  box-shadow: 0 24px 48px -24px rgba(0,0,0,0.7);
+}
+/* Respiração ambiental — só fica visível quando o tile está sem vídeo. */
+.ep-tile::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  background: radial-gradient(circle at center, var(--ep-gold-glow) 0%, transparent 38%);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: epTileBreathe 7s ease-in-out infinite;
+  z-index: 0;
+}
+.ep-tile > * { position: relative; z-index: 1; }
+@keyframes epTileBreathe {
+  0%, 100% { transform: scale(0.85); opacity: 0.35; }
+  50%      { transform: scale(1.08); opacity: 0.65; }
 }
 .ep-tile video {
   width: 100%; height: 100%;
@@ -688,10 +729,44 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   display: inline-flex; align-items: center; gap: 6px;
 }
 .ep-tile__placeholder {
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,251,240,0.78);
   font-size: 14px;
   text-align: center;
-  padding: 0 20px;
+  padding: 0 28px;
+}
+
+/* Estado de espera com pulso respiratório dourado */
+.ep-waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+.ep-waiting__pulse {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--ep-gold-soft) 0%, var(--ep-gold) 60%, transparent 100%);
+  box-shadow: 0 0 24px var(--ep-gold-glow), 0 0 48px rgba(215,176,107,0.28);
+  animation: epWaitingPulse 3.4s ease-in-out infinite;
+}
+.ep-waiting__text {
+  color: var(--ep-paper);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  line-height: 1.45;
+}
+.ep-waiting__sub {
+  color: rgba(255,251,240,0.55);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+@keyframes epWaitingPulse {
+  0%, 100% { transform: scale(0.75); opacity: 0.45; }
+  50%      { transform: scale(1.25); opacity: 1; }
 }
 
 .ep-consult__sidebar {
@@ -780,26 +855,27 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   transform: translateX(-50%);
   display: flex;
   gap: 10px;
-  background: rgba(13,20,31,0.78);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(20,17,13,0.88);
+  border: 1px solid rgba(215,176,107,0.22);
   border-radius: 999px;
   padding: 8px 12px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
+  box-shadow: 0 0 32px rgba(215,176,107,0.08), 0 12px 32px -12px rgba(0,0,0,0.6);
   z-index: 10;
 }
 .ep-ctrl {
   appearance: none;
   border: none;
-  background: rgba(255,255,255,0.10);
-  color: #fff;
+  background: rgba(255,251,240,0.06);
+  color: var(--ep-paper);
   width: 44px; height: 44px;
   border-radius: 999px;
   display: grid; place-items: center;
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background 120ms ease, color 120ms ease;
 }
-.ep-ctrl:hover { background: rgba(255,255,255,0.18); }
+.ep-ctrl:hover { background: rgba(215,176,107,0.18); color: var(--ep-gold-soft); }
 .ep-ctrl.is-off { background: rgba(160,43,31,0.85); }
 .ep-ctrl.is-off:hover { background: rgba(160,43,31,1); }
 .ep-ctrl--leave { background: rgba(160,43,31,0.85); }

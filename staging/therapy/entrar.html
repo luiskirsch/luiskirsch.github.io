@@ -67,20 +67,26 @@
         <span id="topTherapistName">—</span>
       </span>
     </div>
-    <div style="flex: 1; display: flex; align-items: center; gap: 14px; justify-content: center;">
+    <div class="ep-flex ep-flex--center ep-gap-14 ep-w-full">
       <span id="connectionStatus" class="ep-consult__status">conectando…</span>
       <span id="e2eeBadge" class="ep-badge ep-badge--ok ep-hide">E2EE ativo</span>
     </div>
   </header>
 
-  <main class="ep-consult__main" style="grid-template-columns: 1fr;">
-    <section class="ep-consult__video" id="videoArea" style="grid-template-columns: 1fr 1fr;">
-      <div class="ep-tile" id="tileLocal">
+  <main class="ep-consult__main ep-consult__main--solo">
+    <section class="ep-consult__video" id="videoArea">
+      <div class="ep-tile ep-tile--gilded" id="tileLocal">
         <video id="videoLocal" autoplay muted playsinline></video>
         <div class="ep-tile__name">Você</div>
       </div>
-      <div class="ep-tile" id="tileRemote">
-        <div class="ep-tile__placeholder" id="remotePlaceholder">Aguardando o(a) profissional…</div>
+      <div class="ep-tile ep-tile--gilded" id="tileRemote">
+        <div class="ep-tile__placeholder" id="remotePlaceholder">
+          <div class="ep-waiting">
+            <div class="ep-waiting__pulse" aria-hidden="true"></div>
+            <div class="ep-waiting__text">Seu terapeuta está se preparando.</div>
+            <div class="ep-waiting__sub">A consulta começará em instantes.</div>
+          </div>
+        </div>
         <video id="videoRemote" autoplay playsinline class="ep-hide"></video>
         <div class="ep-tile__name ep-hide" id="remoteName"></div>
       </div>

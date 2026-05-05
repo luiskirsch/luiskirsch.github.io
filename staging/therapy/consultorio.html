@@ -56,7 +56,13 @@
         <div class="ep-tile__name">Você (profissional)</div>
       </div>
       <div class="ep-tile ep-tile--gilded" id="tileRemote">
-        <div class="ep-tile__placeholder" id="remotePlaceholder">Aguardando o paciente entrar…</div>
+        <div class="ep-tile__placeholder" id="remotePlaceholder">
+          <div class="ep-waiting">
+            <div class="ep-waiting__pulse" aria-hidden="true"></div>
+            <div class="ep-waiting__text">A sala está aberta.</div>
+            <div class="ep-waiting__sub">O paciente entrará pelo link enviado.</div>
+          </div>
+        </div>
         <video id="videoRemote" autoplay playsinline class="ep-hide"></video>
         <div class="ep-tile__name ep-hide" id="remoteName"></div>
       </div>
