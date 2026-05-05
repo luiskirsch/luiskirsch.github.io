@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-6">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-7">
 </head>
 <body>
 
@@ -165,7 +165,10 @@
         headers: { "Authorization": `Bearer ${idToken}` }
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) throw new Error(data?.error || "ERRO");
+      if (!res.ok || !data.ok) {
+        const code = data?.error || ("HTTP_" + res.status);
+        throw new Error(code);
+      }
 
       loadingBanner.classList.add("ep-hide");
 
@@ -178,7 +181,8 @@
       data.sessions.forEach(s => sessionList.appendChild(renderSession(s)));
       sessionList.classList.remove("ep-hide");
     } catch (error) {
-      loadingBanner.textContent = "Erro ao carregar consultas.";
+      console.error("load_sessions_error", error);
+      loadingBanner.textContent = "Erro ao carregar consultas: " + (error?.message || "desconhecido");
       loadingBanner.className = "ep-alert ep-alert--danger";
     }
   }
