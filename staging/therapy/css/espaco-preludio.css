@@ -319,24 +319,39 @@ h3.ep-h3 {
 .ep-btn:active { transform: translateY(0); }
 .ep-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+.ep-btn--primary,
+.ep-btn--primary:hover,
+.ep-btn--primary:focus,
+.ep-btn--primary:visited {
+  color: #fff;
+}
 .ep-btn--primary {
   background: var(--ep-accent);
-  color: #fff;
   border-color: var(--ep-accent);
   box-shadow: 0 1px 0 rgba(28,31,29,0.08), 0 4px 12px -4px rgba(45,74,62,0.30);
 }
 .ep-btn--primary:hover { background: var(--ep-accent-hover); border-color: var(--ep-accent-hover); }
 
+.ep-btn--ghost,
+.ep-btn--ghost:hover,
+.ep-btn--ghost:focus,
+.ep-btn--ghost:visited {
+  color: var(--ep-ink);
+}
 .ep-btn--ghost {
   background: transparent;
-  color: var(--ep-ink);
   border-color: var(--ep-line-strong);
 }
 .ep-btn--ghost:hover { background: var(--ep-accent-soft); border-color: var(--ep-line-strong); }
 
+.ep-btn--danger,
+.ep-btn--danger:hover,
+.ep-btn--danger:focus,
+.ep-btn--danger:visited {
+  color: var(--ep-danger);
+}
 .ep-btn--danger {
   background: var(--ep-surface);
-  color: var(--ep-danger);
   border-color: rgba(160,43,31,0.30);
 }
 .ep-btn--danger:hover { background: rgba(160,43,31,0.06); }
