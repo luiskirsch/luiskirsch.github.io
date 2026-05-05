@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-23">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-24">
 </head>
 <body>
 
@@ -94,6 +94,7 @@
     <div id="modalBody"></div>
     <div class="ep-modal__actions">
       <button type="button" class="ep-btn ep-btn--ghost" id="closeModal">Fechar</button>
+      <button type="button" class="ep-btn ep-btn--ghost" id="autoValidateBtn" title="Roda validação automatizada via API paga">🔍 API</button>
       <button type="button" class="ep-btn ep-btn--ghost" id="rejectBtn" style="color: #b8453d; border-color: rgba(184,69,61,0.3);">Rejeitar</button>
       <button type="button" class="ep-btn ep-btn--primary" id="approveBtn">Aprovar</button>
     </div>
@@ -239,8 +240,9 @@
   const modal       = document.getElementById("detailModal");
   const modalTitle  = document.getElementById("modalTitle");
   const modalBody   = document.getElementById("modalBody");
-  const approveBtn  = document.getElementById("approveBtn");
-  const rejectBtn   = document.getElementById("rejectBtn");
+  const approveBtn      = document.getElementById("approveBtn");
+  const rejectBtn       = document.getElementById("rejectBtn");
+  const autoValidateBtn = document.getElementById("autoValidateBtn");
   document.getElementById("closeModal").addEventListener("click", () => modal.classList.remove("is-open"));
 
   let activeId = null;
@@ -303,6 +305,32 @@
     } catch (err) {
       alert("Erro ao aprovar: " + err.message);
       approveBtn.disabled = false;
+    }
+  });
+
+  autoValidateBtn.addEventListener("click", async () => {
+    if (!activeId) return;
+    autoValidateBtn.disabled = true;
+    const original = autoValidateBtn.textContent;
+    autoValidateBtn.textContent = "Validando…";
+    try {
+      const { result } = await api(`/therapy/admin/verificacoes/${encodeURIComponent(activeId)}/auto-validar`, { method: "POST" });
+      const verified = !!result.verified;
+      const provider = result.provider || "—";
+      const conf     = result.confidence != null ? Math.round(result.confidence * 100) + "%" : "—";
+      const errMsg   = result.error ? `\n\nErro: ${result.error}` : "";
+      const rawNote  = result.raw?.message ? `\n\n${result.raw.message}` : "";
+      alert(
+        `Validação automatizada (provider: ${provider})\n\n` +
+        `Verificado: ${verified ? "SIM" : "NÃO"}\n` +
+        `Confiança: ${conf}` +
+        errMsg + rawNote
+      );
+    } catch (err) {
+      alert("Falha ao chamar validador: " + err.message);
+    } finally {
+      autoValidateBtn.disabled = false;
+      autoValidateBtn.textContent = original;
     }
   });
 
