@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-5">
+  <link rel="stylesheet" href="./css/espaco-preludio.css?v=2-6">
 </head>
 <body class="ep-consult">
 
@@ -91,55 +91,32 @@
         <div class="ep-tile__name ep-hide" id="remoteName"></div>
       </div>
 
-      <!-- Faixa de tranquilização para o paciente (largura total) -->
-      <div class="ep-patient-info" aria-label="Informações da sessão">
-        <div class="ep-patient-info__cell">
+      <!-- Bloco inferior: cápsula de tranquilização (waiting) ou anotações pessoais (session) -->
+      <div class="ep-bottom-stack" id="bottomStack" data-state="waiting">
+        <div class="ep-patient-info" data-show-on="waiting" aria-label="Informações da sessão">
           <span class="ep-lock">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+            Vídeo cifrado
           </span>
-          <div>
-            <div class="ep-patient-info__label">Privacidade</div>
-            <div class="ep-patient-info__value">Vídeo cifrado ponta a ponta · ninguém além do(a) profissional ouve esta sessão.</div>
-          </div>
+          <span class="ep-patient-info__sep" aria-hidden="true">·</span>
+          <span>Sua privacidade é garantida durante toda a sessão.</span>
+          <span class="ep-patient-info__sep" aria-hidden="true">·</span>
+          <span>Respire. Você está em um espaço cuidado.</span>
         </div>
-        <span class="ep-patient-info__sep" aria-hidden="true">·</span>
-        <div class="ep-patient-info__cell">
-          <div>
-            <div class="ep-patient-info__label">Antes de começar</div>
-            <div class="ep-patient-info__value">Procure um lugar tranquilo. Respire fundo. Você está em um espaço cuidado.</div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Ajustar ambiente (canto inferior esquerdo, painel abre pra cima) -->
-      <div class="ep-ambient ep-ambient--bottom">
-        <button id="ambientBtn" class="ep-ambient__btn" type="button" aria-expanded="false" aria-haspopup="dialog" aria-controls="ambientPanel">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-            <line x1="4" y1="9" x2="20" y2="9"/>
-            <line x1="4" y1="15" x2="20" y2="15"/>
-            <circle cx="9" cy="9" r="2.2"/>
-            <circle cx="15" cy="15" r="2.2"/>
-          </svg>
-          Ajustar ambiente
-        </button>
-        <div class="ep-ambient__panel" id="ambientPanel" aria-label="Ajustes de ambiente">
-          <div class="ep-ambient__section">
-            <div class="ep-ambient__label">Clima da sala</div>
-            <div class="ep-ambient__pills" role="group" aria-label="Modo de clima">
-              <button class="ep-ambient__pill" type="button" data-mode="foco">Foco</button>
-              <button class="ep-ambient__pill" type="button" data-mode="entardecer">Entardecer</button>
-              <button class="ep-ambient__pill" type="button" data-mode="calmo">Calmo</button>
-            </div>
+        <div class="ep-patient-notes" data-show-on="session" aria-label="Suas anotações pessoais">
+          <div class="ep-patient-notes__head">
+            <span class="ep-lock">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              Suas anotações · só você vê
+            </span>
+            <span class="ep-text-xs ep-text-muted" id="patientNotesStatus">&nbsp;</span>
           </div>
-          <div class="ep-ambient__section">
-            <div class="ep-ambient__label">Som ambiente</div>
-            <div class="ep-ambient__pills" role="group" aria-label="Som ambiente">
-              <button class="ep-ambient__pill" type="button" data-sound="off">Silêncio</button>
-              <button class="ep-ambient__pill" type="button" data-sound="brown">Acolhedor</button>
-            </div>
-            <input type="range" data-ambient-volume class="ep-ambient__slider" min="0" max="100" value="40" aria-label="Volume do som ambiente">
+          <div class="ep-patient-notes__list" id="patientNotesList"></div>
+          <div class="ep-patient-notes__composer">
+            <textarea id="patientNoteInput" placeholder="Anote o que quiser lembrar dessa sessão…" maxlength="2000"></textarea>
+            <button id="patientNoteSave" type="button" class="ep-btn ep-btn--primary ep-btn--sm">Salvar</button>
           </div>
-          <p class="ep-ambient__hint">Suas preferências ficam só neste dispositivo.</p>
         </div>
       </div>
 
@@ -175,10 +152,6 @@
 
 <script type="module">
   import { BACKEND_BASE_URL } from "./js/firebase-config.js";
-  import { initAtmosphere } from "./js/atmosphere.js";
-
-  // Inicializa clima + som ambiente do paciente. Local-only.
-  await initAtmosphere({ buttonId: "ambientBtn", panelId: "ambientPanel" });
 
   const LIVEKIT_VERSION = "2.5.6";
 
@@ -293,17 +266,84 @@
       e2ee: useE2EE ? { keyProvider, worker: e2eeWorker } : undefined
     });
 
+    // ─── State machine waiting → session (banner some, notas aparecem) ──
+    const bottomStack = document.getElementById("bottomStack");
+    function setBottomState(state) { bottomStack.dataset.state = state; }
+
+    // ─── Anotações pessoais do paciente (sessionStorage, local-only) ────
+    // Nada disso vai pro servidor. Fecha aba → some.
+    const NOTES_KEY = "ep_patient_notes_" + (data.sessionId || "anon");
+    const notesList   = document.getElementById("patientNotesList");
+    const noteInput   = document.getElementById("patientNoteInput");
+    const noteSaveBtn = document.getElementById("patientNoteSave");
+    const noteStatus  = document.getElementById("patientNotesStatus");
+
+    function loadPatientNotes() {
+      try { return JSON.parse(sessionStorage.getItem(NOTES_KEY) || "[]"); } catch { return []; }
+    }
+    function savePatientNotes(arr) {
+      try { sessionStorage.setItem(NOTES_KEY, JSON.stringify(arr)); } catch {}
+    }
+    function renderPatientNotes() {
+      const arr = loadPatientNotes();
+      notesList.innerHTML = "";
+      if (arr.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "ep-patient-notes__empty";
+        empty.textContent = "Você ainda não escreveu nada. Use este espaço pra registrar o que quiser lembrar.";
+        notesList.appendChild(empty);
+        return;
+      }
+      arr.forEach(n => {
+        const el = document.createElement("article");
+        el.className = "ep-note";
+        const meta = document.createElement("div");
+        meta.className = "ep-note__meta";
+        meta.textContent = new Date(n.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+        const body = document.createElement("div");
+        body.textContent = n.text;
+        el.appendChild(meta);
+        el.appendChild(body);
+        notesList.appendChild(el);
+      });
+      notesList.scrollTop = notesList.scrollHeight;
+    }
+    function addPatientNote(text) {
+      const arr = loadPatientNotes();
+      arr.push({ text, createdAt: Date.now() });
+      savePatientNotes(arr);
+      renderPatientNotes();
+    }
+
+    noteSaveBtn.addEventListener("click", () => {
+      const t = noteInput.value.trim();
+      if (!t) return;
+      addPatientNote(t);
+      noteInput.value = "";
+      noteStatus.textContent = "salva";
+      setTimeout(() => { noteStatus.textContent = " "; }, 1500);
+    });
+    noteInput.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        noteSaveBtn.click();
+      }
+    });
+    renderPatientNotes();
+
     room
       .on(RoomEvent.ParticipantConnected, (p) => {
         remotePlaceholder.classList.add("ep-hide");
         videoRemote.classList.remove("ep-hide");
         remoteName.classList.remove("ep-hide");
         remoteName.textContent = p.name || "Profissional";
+        setBottomState("session");
       })
       .on(RoomEvent.ParticipantDisconnected, () => {
         remotePlaceholder.classList.remove("ep-hide");
         videoRemote.classList.add("ep-hide");
         remoteName.classList.add("ep-hide");
+        setBottomState("waiting");
       })
       .on(RoomEvent.TrackSubscribed, (track) => {
         if (track.kind === Track.Kind.Video) {
