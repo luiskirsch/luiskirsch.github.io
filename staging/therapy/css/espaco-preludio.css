@@ -641,6 +641,19 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   letter-spacing: -0.005em;
 }
 
+/* Override dos botões ghost dentro da topbar dark do consultório/sala —
+   o ghost padrão usa var(--ep-ink) que é preto e some no fundo carvão. */
+.ep-consult__topbar .ep-btn--ghost {
+  background: transparent;
+  color: rgba(255,251,240,0.85);
+  border: 1px solid rgba(215,176,107,0.30);
+}
+.ep-consult__topbar .ep-btn--ghost:hover {
+  background: rgba(215,176,107,0.10);
+  border-color: rgba(215,176,107,0.50);
+  color: var(--ep-paper);
+}
+
 .ep-consult__status {
   display: inline-flex;
   align-items: center;
@@ -806,13 +819,14 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
 .ep-consult__video--inline {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: minmax(220px, 1.1fr) minmax(220px, 0.9fr);
+  grid-template-rows: minmax(0, 1fr) 260px;     /* tiles preenchem o resto, notas fixas */
   grid-template-areas:
     "local patient"
     "notes notes";
   padding: 16px 16px 96px;     /* espaço pros controles flutuantes embaixo */
   gap: 14px;
   position: relative;
+  min-height: 0;
 }
 .ep-consult__video--inline #tileLocal,
 .ep-consult__video--inline #tileRemote {
@@ -841,10 +855,10 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   background: rgba(20,17,13,0.92);
   border: 1px solid rgba(215,176,107,0.18);
   border-radius: 14px;
-  padding: 16px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   min-height: 0;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
@@ -891,18 +905,24 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
   border-top: 1px solid rgba(215,176,107,0.10);
   padding-top: 12px;
 }
+.ep-inline-notes__composer {
+  border-top: 1px solid rgba(215,176,107,0.10);
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .ep-inline-notes__composer textarea {
   width: 100%;
-  resize: vertical;
-  min-height: 56px;
-  max-height: 200px;
+  resize: none;
+  height: 48px;
   background: rgba(255,251,240,0.04);
   border: 1px solid rgba(215,176,107,0.18);
   color: var(--ep-paper);
   border-radius: 10px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   font: inherit;
-  font-size: 14px;
+  font-size: 13.5px;
   font-family: inherit;
 }
 .ep-inline-notes__composer textarea:focus {
@@ -937,14 +957,16 @@ body.ep-consult .ep-shell { min-height: 100vh; display: grid; grid-template-rows
 
 .ep-topics-toggle--bottom {
   top: auto;
-  bottom: 24px;
+  bottom: 28px;
   right: 24px;
+  z-index: 12;
 }
 .ep-topics-deck--bottom {
   top: auto;
-  bottom: 70px;
+  bottom: 78px;
   right: 24px;
-  max-height: calc(100% - 120px);
+  max-height: 60vh;
+  z-index: 11;
 }
 @media (max-width: 980px) {
   .ep-consult__main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
