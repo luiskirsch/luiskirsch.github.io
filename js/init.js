@@ -10,6 +10,7 @@ import { checkDailyReward, updateXpCard } from "./game/rewards.js";
 import { sendReaction, castEffectVote, confirmAIDetection, dismissAIDetection } from "./game/effects.js";
 import { startSession, leaveRoom } from "./ui/room.js";
 import { revealNextRitualCard, resetRitualDeck } from "./game/cards.js";
+import { initStreamMode } from "./ui/stream-mode.js";
 
 // ── Identidade ────────────────────────────────────────────────────────────────
 S.participantId = getParticipantId();
@@ -126,6 +127,7 @@ window.dismissAIDetection = dismissAIDetection;
   // Registra event listeners de sala e perfil
   bindRoomEvents();
   bindProfileEvents();
+  initStreamMode();
 
   // Renderiza do cache local antes de qualquer round-trip Firestore
   const _cachedXp = parseInt(localStorage.getItem("osl_xp_cache") || "0", 10);

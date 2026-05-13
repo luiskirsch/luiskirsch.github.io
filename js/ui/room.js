@@ -230,6 +230,10 @@ export function bindRoom() {
     }
     const arenaBtn = document.getElementById("arenaBtn");
     if (arenaBtn) arenaBtn.hidden = !S.isHost;
+    const streamModeBtn = document.getElementById("streamModeBtn");
+    if (streamModeBtn) streamModeBtn.hidden = !S.isHost;
+    const liveBtn = document.getElementById("liveBtn");
+    if (liveBtn) liveBtn.hidden = !S.isHost;
     if (data.arenaActive) { if (typeof window.activateArenaMode === "function") window.activateArenaMode(); }
     else { if (typeof window.deactivateArenaMode === "function") window.deactivateArenaMode(); if (!started && !S.ritualStarted) setRitualWaitingState(); }
     await setDoc(S.playerRef, { isHost: S.isHost }, { merge: true });

@@ -87,6 +87,14 @@
   <link rel="preload" href="./img/luis.png" as="image" fetchpriority="high">
   <title data-i18n="sala:title">SEXTOLUGAR — Sala</title>
 
+  <!-- Modo Transmissão: aplica antes do paint para evitar flash de credenciais -->
+  <script>
+    if (localStorage.getItem("osl_stream_mode") === "1") {
+      document.documentElement.classList.add("streaming-mode");
+      try { history.replaceState({}, "", "sala.html"); } catch (_) {}
+    }
+  </script>
+
   <!-- Lottie: animated emoji (Noto Animated Emoji by Google) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" defer></script>
 
@@ -6265,6 +6273,16 @@
   }
   .recapCard__btn--share:hover { background:rgba(255,255,255,.13);color:rgba(255,255,255,.85); }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     FEATURE: MODO TRANSMISSÃO — esconde credenciais quando o host está ao vivo
+  ═══════════════════════════════════════════════════════════════════ */
+  html.streaming-mode .stream-hide { display: none !important; }
+  .streamModeBtn--active {
+    background: linear-gradient(135deg, #d33 0%, #a02 100%) !important;
+    color: #fff !important;
+    border-color: rgba(255,255,255,.25) !important;
+  }
+
   </style>
 </head>
 
@@ -6306,9 +6324,11 @@
 
         <div class="topActions" style="align-self:stretch;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;padding:10px 0;">
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:nowrap;">
-            <button class="topActionBtn primary" id="copyCodeBtn" data-i18n="sala:topbar.actions.invite">Convidar Amigos</button>
+            <button class="topActionBtn primary stream-hide" id="copyCodeBtn" data-i18n="sala:topbar.actions.invite">Convidar Amigos</button>
             <button class="topActionBtn" id="oslShopFab" data-i18n="sala:topbar.actions.shop" data-i18n-title="sala:topbar.actions.shopTitle" title="Ver pacotes de cartas">🎴 Loja</button>
             <button class="topActionBtn" id="arenaBtn" data-i18n="sala:topbar.actions.arena" data-i18n-title="sala:topbar.actions.arenaTitle" title="Alternar Modo Arena">⚔ Arena</button>
+            <button class="topActionBtn streamModeBtn" id="streamModeBtn" hidden data-i18n="sala:topbar.actions.stream" data-i18n-title="sala:topbar.actions.streamTitle" title="Ativar Modo Transmissão (Shift+S)">📡 Transmissão</button>
+            <button class="topActionBtn liveBtn" id="liveBtn" hidden data-i18n="sala:topbar.actions.live" data-i18n-title="sala:topbar.actions.liveTitle" title="Iniciar transmissão ao vivo">🔴 Live</button>
             <button class="topActionBtn" id="myProfileBtn"><span data-i18n="sala:topbar.actions.profile">👤 Perfil</span><span class="badge" id="desktopProfileBadge"></span></button>
             <button class="topActionBtn iconOnly" id="leaveBtn" data-i18n-aria-label="sala:topbar.actions.leaveAria" aria-label="Sair da sala">⇢</button>
           </div>
@@ -6936,11 +6956,11 @@
 
       <div id="profPaneSessao" class="profPane profPane--selfOnly">
         <div class="profInfoBlock">
-          <div class="profInfoRow">
+          <div class="profInfoRow stream-hide">
             <span class="profInfoLabel" data-i18n="sala:profile.session.sala">Sala</span>
             <span class="profInfoValue" id="sessSala">—</span>
           </div>
-          <div class="profInfoRow">
+          <div class="profInfoRow stream-hide">
             <span class="profInfoLabel" data-i18n="sala:profile.session.nomeSala">Nome da Sala</span>
             <span class="profInfoValue" id="sessNomeSala">—</span>
           </div>
@@ -6953,7 +6973,7 @@
             <span class="profInfoValue" id="sessVideo">—</span>
           </div>
         </div>
-        <button class="profileActionBtn" id="copyRoomCodeBtn" data-i18n="sala:profile.session.copyCode">Copiar código da sala</button>
+        <button class="profileActionBtn stream-hide" id="copyRoomCodeBtn" data-i18n="sala:profile.session.copyCode">Copiar código da sala</button>
       </div>
 
       <div id="profPanePacotes" class="profPane">
@@ -6962,11 +6982,11 @@
 
       <div id="profPaneConta" class="profPane profPane--selfOnly">
         <div class="profInfoBlock">
-          <div class="profInfoRow">
+          <div class="profInfoRow stream-hide">
             <span class="profInfoLabel" data-i18n="sala:profile.account.email">Email</span>
             <span class="profInfoValue" id="contaEmail">—</span>
           </div>
-          <div class="profInfoRow">
+          <div class="profInfoRow stream-hide">
             <span class="profInfoLabel" data-i18n="sala:profile.account.license">Licença</span>
             <span class="profInfoValue" id="contaLicenca">—</span>
             <button class="profCopyBtn" id="profCopyLicBtn" data-i18n-title="sala:profile.account.copyTitle" title="Copiar">⎘</button>
@@ -6975,7 +6995,7 @@
             <span class="profInfoLabel" data-i18n="sala:profile.account.access">Acesso</span>
             <span class="profInfoValue" id="contaAcesso">—</span>
           </div>
-          <div class="profInfoRow">
+          <div class="profInfoRow stream-hide">
             <span class="profInfoLabel" data-i18n="sala:profile.account.uid">UID</span>
             <span class="profInfoValue" id="contaUid">—</span>
           </div>
@@ -7324,6 +7344,270 @@
   <!-- ===== RECORDING CONTROL ===== -->
   <!-- ===== RECORDING CONTROL =====-->
   <script src="js/ui/recording.js"></script>
+
+  <!-- ===== LIVE STREAMING MODAL ===== -->
+  <style>
+    .liveOverlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,.78); z-index:2100;
+      align-items:center; justify-content:center; padding:20px;
+    }
+    .liveOverlay.open { display:flex; }
+    .liveModal {
+      background:linear-gradient(180deg, #1a1410 0%, #0f0a08 100%);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px; padding:18px;
+      max-width:440px; width:100%; max-height:90vh; overflow-y:auto;
+      color:#f0e8d8;
+      box-shadow:0 20px 60px rgba(0,0,0,.6);
+    }
+    .liveModal h2 { margin:0 0 4px; font-size:17px; color:#ff5252; }
+    .liveModal-title { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .liveUpgradeBtn {
+      background:linear-gradient(135deg, #ffaa3d 0%, #ff7a00 100%);
+      color:#1a1410; border:0; padding:5px 11px; border-radius:6px;
+      font-size:11px; font-weight:800; cursor:pointer; font-family:inherit;
+      white-space:nowrap; flex-shrink:0; letter-spacing:.3px;
+      transition:filter .15s, transform .1s;
+    }
+    .liveUpgradeBtn:hover  { filter:brightness(1.1); }
+    .liveUpgradeBtn:active { transform:scale(0.97); }
+    .liveUpgradeBtn:disabled { opacity:.6; cursor:wait; }
+    .liveModal p  { margin:0 0 10px; color:rgba(240,232,216,.65); font-size:12px; line-height:1.35; }
+    .liveModal label { display:block; margin:10px 0 4px; font-size:10px; color:rgba(240,232,216,.5); text-transform:uppercase; letter-spacing:.5px; }
+    .liveModal select, .liveModal input[type="password"], .liveModal input[type="text"] {
+      width:100%; padding:9px 11px; box-sizing:border-box;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.13);
+      border-radius:8px; color:#f0e8d8; font-size:13px; font-family:inherit;
+    }
+    .liveModal select:focus, .liveModal input:focus {
+      outline:none; border-color:rgba(255,82,82,.5);
+    }
+    .liveModal-hint {
+      margin-top:5px; font-size:11px; color:rgba(240,232,216,.45); line-height:1.35;
+    }
+    .liveModal-actions {
+      display:flex; gap:8px; margin-top:14px;
+    }
+    .liveModal-btn {
+      flex:1; padding:10px; border-radius:8px; font-size:13px; font-weight:700;
+      cursor:pointer; border:1px solid transparent; transition:background .15s;
+      font-family:inherit;
+    }
+    .liveModal-btn--primary {
+      background:linear-gradient(135deg, #d33 0%, #a02 100%); color:#fff;
+    }
+    .liveModal-btn--primary:hover { filter:brightness(1.1); }
+    .liveModal-btn--primary:disabled { opacity:.5; cursor:not-allowed; }
+    .liveModal-btn--ghost {
+      background:rgba(255,255,255,.06); color:rgba(240,232,216,.7);
+      border-color:rgba(255,255,255,.13);
+    }
+    .liveModal-btn--ghost:hover { background:rgba(255,255,255,.1); }
+    .liveModal-status {
+      display:flex; flex-direction:column; align-items:center; gap:8px; padding:24px 0;
+    }
+    .liveModal-status__pulse {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:18px; font-weight:800; color:#ff5252;
+    }
+    .liveModal-status__pulse::before {
+      content:""; width:12px; height:12px; border-radius:50%;
+      background:#ff5252; box-shadow:0 0 12px #ff5252;
+      animation:livePulse 1.4s ease-in-out infinite;
+    }
+    @keyframes livePulse { 0%,100% { opacity:1 } 50% { opacity:.4 } }
+    .liveModal-status__platform { font-size:13px; color:rgba(240,232,216,.65); }
+    .liveModal-status__time { font-size:24px; font-variant-numeric:tabular-nums; color:#f0e8d8; font-weight:700; }
+    .liveBtn.is-live {
+      background:linear-gradient(135deg, #d33 0%, #a02 100%) !important;
+      color:#fff !important; border-color:rgba(255,255,255,.25) !important;
+      animation:liveBtnPulse 2s ease-in-out infinite;
+    }
+    @keyframes liveBtnPulse {
+      0%,100% { box-shadow:0 0 0 0 rgba(211,51,51,.6); }
+      50%     { box-shadow:0 0 0 8px rgba(211,51,51,0); }
+    }
+    /* Status banner (plano/quota) */
+    .liveStatusBanner {
+      display:none; padding:8px 11px; border-radius:7px; margin-bottom:10px;
+      font-size:11px; font-weight:600; line-height:1.3;
+    }
+    .liveStatusBanner:not(:empty) { display:block; }
+    .liveStatusBanner--gold { background:rgba(255,200,80,.1); border:1px solid rgba(255,200,80,.3); color:#ffd478; }
+    .liveStatusBanner--ok   { background:rgba(120,220,120,.08); border:1px solid rgba(120,220,120,.22); color:#b8f0b8; }
+    .liveStatusBanner--info { background:rgba(120,180,255,.08); border:1px solid rgba(120,180,255,.22); color:#b8d4ff; }
+    .liveStatusBanner--warn { background:rgba(255,140,80,.1); border:1px solid rgba(255,140,80,.3); color:#ffb88a; }
+
+    /* Layout selector */
+    .liveLayoutGrid {
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-top:4px;
+    }
+    .liveLayoutBtn {
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1);
+      border-radius:8px; padding:8px 4px; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; gap:2px;
+      color:#f0e8d8; font-family:inherit; transition:all .15s;
+    }
+    .liveLayoutBtn:hover { background:rgba(255,255,255,.08); }
+    .liveLayoutBtn.is-selected {
+      border-color:#d33; background:rgba(211,51,51,.12);
+      box-shadow:0 0 0 1px #d33 inset;
+    }
+    .liveLayoutBtn__preview { font-size:18px; line-height:1; }
+    .liveLayoutBtn__name { font-size:11px; font-weight:700; }
+    .liveLayoutBtn__desc { display:none; }
+
+    /* Multi-platform cards */
+    .livePlatformList { display:flex; flex-direction:column; gap:5px; margin-top:4px; }
+    .livePlatformCard {
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1);
+      border-radius:8px; overflow:hidden; transition:border-color .15s, background .15s;
+    }
+    .livePlatformCard.is-on { border-color:rgba(211,51,51,.5); background:rgba(211,51,51,.06); }
+    .livePlatformCard__head {
+      display:flex; align-items:center; gap:8px; padding:8px 11px; cursor:pointer;
+      user-select:none;
+    }
+    .livePlatformCard__icon { font-size:15px; flex-shrink:0; width:18px; text-align:center; }
+    .livePlatformCard__name { flex:1; font-size:13px; font-weight:600; color:#f0e8d8; }
+    .livePlatformCard__toggle {
+      appearance:none; -webkit-appearance:none;
+      width:32px; height:18px; border-radius:9px; background:rgba(255,255,255,.15);
+      position:relative; cursor:pointer; transition:background .15s; flex-shrink:0;
+    }
+    .livePlatformCard__toggle::after {
+      content:""; position:absolute; top:2px; left:2px;
+      width:14px; height:14px; border-radius:50%; background:#f0e8d8;
+      transition:transform .15s;
+    }
+    .livePlatformCard__toggle:checked { background:#d33; }
+    .livePlatformCard__toggle:checked::after { transform:translateX(14px); }
+    .livePlatformCard__body {
+      max-height:0; overflow:hidden; transition:max-height .2s ease;
+      padding:0 11px;
+    }
+    .livePlatformCard.is-on .livePlatformCard__body {
+      max-height:380px; padding:0 11px 9px;
+    }
+    .livePlatformCard__key {
+      width:100%; padding:7px 9px; box-sizing:border-box;
+      background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.13);
+      border-radius:6px; color:#f0e8d8; font-size:12px; font-family:inherit;
+    }
+    .livePlatformCard__key:focus { outline:none; border-color:rgba(211,51,51,.5); }
+    .livePlatformCard__hint {
+      margin-top:4px; font-size:10px; color:rgba(240,232,216,.5); line-height:1.3;
+    }
+    /* Tutorial colapsável (Phase 3.D) */
+    .livePlatformCard__tutorial {
+      margin-top:6px;
+    }
+    .livePlatformCard__tutorial summary {
+      cursor:pointer; user-select:none; list-style:none;
+      color:#ffaa66; font-weight:600; font-size:11px; padding:3px 0;
+    }
+    .livePlatformCard__tutorial summary::-webkit-details-marker { display:none; }
+    .livePlatformCard__tutorial summary::before {
+      content:"▶"; font-size:8px; margin-right:6px;
+      display:inline-block; transition:transform .15s;
+    }
+    .livePlatformCard__tutorial[open] summary::before { transform:rotate(90deg); }
+    .livePlatformCard__tutorial ol {
+      margin:6px 0 8px; padding-left:22px;
+      font-size:11px; color:rgba(240,232,216,.7); line-height:1.45;
+    }
+    .livePlatformCard__tutorial li { margin-bottom:3px; }
+    .livePlatformCard__open {
+      display:inline-block;
+      background:rgba(255,170,102,.15); color:#ffaa66;
+      padding:5px 10px; border-radius:6px;
+      text-decoration:none; font-weight:700; font-size:11px;
+    }
+    .livePlatformCard__open:hover { background:rgba(255,170,102,.25); }
+    /* Phase 4: histórico de sessões */
+    .liveHistory {
+      margin-top:10px; padding:8px 10px; border-radius:7px;
+      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
+    }
+    .liveHistory summary {
+      cursor:pointer; user-select:none; list-style:none;
+      color:rgba(240,232,216,.65); font-size:11px; font-weight:600; padding:2px 0;
+    }
+    .liveHistory summary::-webkit-details-marker { display:none; }
+    .liveHistory summary::before {
+      content:"▶"; font-size:8px; margin-right:6px;
+      display:inline-block; transition:transform .15s;
+    }
+    .liveHistory[open] summary::before { transform:rotate(90deg); }
+    .liveHistory ol {
+      margin:6px 0 0; padding-left:18px;
+      font-size:10px; color:rgba(240,232,216,.6); line-height:1.5;
+    }
+    .liveHistory li { margin-bottom:2px; }
+    .liveHist__date { color:rgba(255,170,102,.85); font-weight:700; }
+  </style>
+  <div class="liveOverlay" id="liveOverlay">
+    <div class="liveModal">
+      <h2 class="liveModal-title">
+        <span>🔴 Transmissão ao vivo</span>
+        <button class="liveUpgradeBtn" id="liveUpgradeBtn" hidden type="button" title="Stream Pass mensal R$ 14,90 — sem limite de tempo">✨ Upgrade</button>
+      </h2>
+
+      <div id="liveStep1">
+        <div class="liveStatusBanner" id="liveStatusBanner"></div>
+
+        <label style="margin-top:0">Layout</label>
+        <div class="liveLayoutGrid" id="liveLayoutGrid">
+          <button type="button" class="liveLayoutBtn is-selected" data-layout="cards">
+            <div class="liveLayoutBtn__preview">🃏</div>
+            <div class="liveLayoutBtn__name">Cards</div>
+            <div class="liveLayoutBtn__desc">Cartas no centro</div>
+          </button>
+          <button type="button" class="liveLayoutBtn" data-layout="pov-host">
+            <div class="liveLayoutBtn__preview">🎥</div>
+            <div class="liveLayoutBtn__name">POV Host</div>
+            <div class="liveLayoutBtn__desc">Sua câmera</div>
+          </button>
+          <button type="button" class="liveLayoutBtn" data-layout="grid">
+            <div class="liveLayoutBtn__preview">▦</div>
+            <div class="liveLayoutBtn__name">Grid</div>
+            <div class="liveLayoutBtn__desc">Todos jogadores</div>
+          </button>
+        </div>
+
+        <label style="margin-top:14px">Plataformas</label>
+        <div class="livePlatformList" id="livePlatformList">
+          <!-- preenchido por streaming.js -->
+        </div>
+
+        <div class="liveModal-hint" id="liveValidationHint" style="margin-top:14px"></div>
+
+        <div id="liveHistorySection"></div>
+
+        <div class="liveModal-actions">
+          <button class="liveModal-btn liveModal-btn--ghost" id="liveCancelBtn">Cancelar</button>
+          <button class="liveModal-btn liveModal-btn--primary" id="liveStartBtn">🔴 Iniciar Live</button>
+        </div>
+      </div>
+
+      <div id="liveStep2" style="display:none">
+        <div class="liveModal-status">
+          <div class="liveModal-status__pulse" id="liveStatus">Ao vivo</div>
+          <div class="liveModal-status__platform">em <span id="livePlatformsActive">—</span></div>
+          <div class="liveModal-status__time" id="liveDuration">0:00</div>
+        </div>
+
+        <p style="text-align:center;font-size:12px">A transmissão está sendo enviada para todas as plataformas marcadas. Você pode fechar este painel — o status continua no botão "🔴 Ao vivo" no topo.</p>
+
+        <div class="liveModal-actions">
+          <button class="liveModal-btn liveModal-btn--ghost" id="liveCloseBtn" onclick="document.getElementById('liveOverlay').classList.remove('open')">Fechar painel</button>
+          <button class="liveModal-btn liveModal-btn--primary" id="liveStopBtn">⏹ Parar Live</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="js/ui/streaming.js"></script>
 
   <!-- ===== MOBILE LAYOUT CONTROLLER ===== -->
   <script src="js/ui/mobile.js"></script>
