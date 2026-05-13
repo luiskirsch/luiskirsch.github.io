@@ -521,13 +521,22 @@
   async function stopLive() {
     if (!liveActive) return;
     if (!confirm("Parar a transmissão ao vivo em todas as plataformas?")) return;
+    let stopOk = false;
     try {
-      await authFetch(STREAM_BASE + "/streaming/stop", {
+      const res = await authFetch(STREAM_BASE + "/streaming/stop", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId: roomCode })
       });
-    } catch (_) {}
+      stopOk = res.ok;
+      if (!stopOk) {
+        const data = await res.json().catch(() => ({}));
+        alert("Erro ao parar a transmissão (" + (data.error || res.status) + "). Tente novamente.");
+      }
+    } catch (err) {
+      alert("Erro de conexão ao parar: " + err.message + ". Tente novamente.");
+    }
+    if (!stopOk) return;
     showLiveInactive();
     if (liveStartBtn) { liveStartBtn.disabled = false; liveStartBtn.textContent = "🔴 Iniciar Live"; }
     if (liveOverlay) liveOverlay.classList.remove("open");
