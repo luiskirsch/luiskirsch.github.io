@@ -7771,5 +7771,45 @@
     })();
   </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+
+  <!-- ── Partidas Rolando: refresh + painel espectador ─────────────────────── -->
+  <script>
+    (function() {
+      // Refresh btn — gira seta ao clicar
+      document.getElementById("multiRefreshBtn")?.addEventListener("click", async function() {
+        var btn = this;
+        btn.classList.add("spinning");
+        setTimeout(function() { btn.classList.remove("spinning"); }, 650);
+        var rooms = await (window._osl?.fetchLiveRooms?.() || Promise.resolve([]));
+        window._osl?.renderLiveRooms?.(rooms);
+      });
+
+      // Painel espectador — fechar
+      function closeSpecOverlay() {
+        var overlay = document.getElementById("specOverlay");
+        if (!overlay) return;
+        overlay.classList.add("closing");
+        setTimeout(function() {
+          overlay.classList.remove("closing");
+          overlay.style.display = "none";
+        }, 220);
+      }
+
+      document.getElementById("specClose")?.addEventListener("click", closeSpecOverlay);
+      document.getElementById("specOverlay")?.addEventListener("click", function(e) {
+        if (e.target === this) closeSpecOverlay();
+      });
+      document.addEventListener("keydown", function(e) {
+        var o = document.getElementById("specOverlay");
+        if (e.key === "Escape" && o && o.style.display !== "none") closeSpecOverlay();
+      });
+
+      // Painel espectador — abrir ao clicar no olho (evento disparado por renderLiveRooms)
+      document.addEventListener("osl:openSpectator", function(e) {
+        var detail = e.detail || {};
+        window._osl?.spectateRoom?.(detail.roomId, detail.name);
+      });
+    })();
+  </script>
 </body>
 </html>
