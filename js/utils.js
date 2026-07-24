@@ -56,3 +56,27 @@ export function getUserId() {
   }
   return id;
 }
+
+let _toastTimer = null;
+export function showOslToast(msg, type = "info") {
+  let el = document.getElementById("oslGlobalToast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "oslGlobalToast";
+    el.style.cssText = [
+      "position:fixed","bottom:80px","left:50%","transform:translateX(-50%)",
+      "z-index:99000","background:rgba(20,15,5,.96)","color:#f8f5ef",
+      "border:1px solid rgba(215,176,107,.4)","border-radius:10px",
+      "padding:10px 18px","font-size:13px","font-weight:600","letter-spacing:.02em",
+      "pointer-events:none","opacity:0","transition:opacity .2s ease",
+      "white-space:nowrap","max-width:88vw","text-align:center"
+    ].join(";");
+    document.body.appendChild(el);
+  }
+  if (type === "warn") el.style.borderColor = "rgba(255,180,50,.5)";
+  else el.style.borderColor = "rgba(215,176,107,.4)";
+  el.textContent = msg;
+  el.style.opacity = "1";
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.style.opacity = "0"; }, 2800);
+}

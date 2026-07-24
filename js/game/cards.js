@@ -195,9 +195,14 @@ export function applyCardContent(card) {
     if (cardPhrase)  cardPhrase.style.display  = "none";
   }
   if (deckInfo) {
-    deckInfo.innerHTML = S.ritualDeck.length > 0
-      ? oslTr("sala:ritual.deckRemaining", "{{count}} carta(s) restante(s) no deck.<br>O anfitrião pode revelar a próxima.", { count: S.ritualDeck.length })
-      : oslTr("sala:ritual.deckEnded", "O deck chegou ao fim.<br>Reinicie o ritual para embaralhar novamente.");
+    if (S.ritualDeck.length > 0) {
+      const hint = S.isHost
+        ? oslTr("sala:ritual.deckRemainingHost", "{{count}} carta(s) restante(s) · Quando o grupo responder, revele a próxima.", { count: S.ritualDeck.length })
+        : oslTr("sala:ritual.deckRemainingPlayer", "{{count}} carta(s) restante(s) · Responda via vídeo ou no chat — o anfitrião revela a próxima.", { count: S.ritualDeck.length });
+      deckInfo.innerHTML = hint;
+    } else {
+      deckInfo.innerHTML = oslTr("sala:ritual.deckEnded", "O deck chegou ao fim.<br>Reinicie o ritual para embaralhar novamente.");
+    }
   }
   updateRitualButtons();
 }

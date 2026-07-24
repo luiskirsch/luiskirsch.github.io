@@ -1,7 +1,7 @@
 // Entry point principal — inicializa o jogo conectando todos os módulos
 import { S } from "./state.js";
 import { db, auth, initFirebaseRefs, onSnapshot, query, orderBy } from "./firebase.js";
-import { getParticipantId, getUserId } from "./utils.js";
+import { getParticipantId, getUserId, showOslToast } from "./utils.js";
 import { applyBgTheme, applyCardStyle, applyVisualEffect, syncAccountPurchases, bindProfileEvents, openProfile, updateDesktopProfileBtn, applyAvatarDisplay } from "./ui/profile.js";
 import { bindUserDoc, bindRoom, bindPlayers, bindTyping, bindMessages, bindRoomEvents, ensureRoom, ensureUserProfile, upsertSelf, startHeartbeat, startMultiPoller, connectHostSse } from "./ui/room.js";
 import { bindMyMission } from "./game/missions.js";
@@ -95,7 +95,10 @@ window._osl.toggleArena = async () => {
   const { getDoc, updateDoc } = await import("./firebase.js");
   const snap = await getDoc(S.roomRef); if (!snap.exists()) return;
   const currentlyActive = snap.data().arenaActive;
-  if (!currentlyActive && !S.ritualStarted) return;
+  if (!currentlyActive && !S.ritualStarted) {
+    showOslToast(oslTr("sala:topbar.actions.arenaRequiresStarted", "⚔️ Inicie o ritual primeiro para ativar o Modo Arena."), "warn");
+    return;
+  }
   await updateDoc(S.roomRef, { arenaActive: !currentlyActive });
 };
 
@@ -106,6 +109,7 @@ window._osl.deactivateArenaForAll = async () => {
 };
 
 // Expõe para uso inline no HTML (onclick="sendReaction(...)", etc.)
+window.showOslToast       = showOslToast;
 window.sendReaction       = sendReaction;
 window.castEffectVote     = castEffectVote;
 window.confirmAIDetection = confirmAIDetection;
