@@ -422,9 +422,7 @@ export function renderLiveRooms(rooms) {
       ${badge}<button class="multiSpectateBtn" title="${oslTr("sala:matches.spectateTitle", "Assistir em stand-by")}">👁</button></div>`;
   }).join("");
 
-  body.querySelectorAll(".multiSpectateBtn").forEach(btn => {
-    btn.addEventListener("click", e => { e.stopPropagation(); const row = btn.closest(".multiRoom"); document.dispatchEvent(new CustomEvent("osl:openSpectator", { detail:{ roomId: row.dataset.code, name: row.dataset.name, host: row.dataset.host } })); });
-  });
+  // Clique no join: delegado via #multiBody em sala.html (não registrado aqui para sobreviver re-renders)
   body.querySelectorAll(".multiRoom:not(.multiRoom--full)").forEach(el => {
     el.addEventListener("click", e => {
       if (e.target.classList.contains("multiSpectateBtn")) return;
@@ -548,7 +546,19 @@ export async function respondJoin(approved) {
 }
 
 // ── Painel espectador (exposto via window._osl) ───────────────────────────────
+let _specLkRoom = null; // LiveKit room do espectador (subscriber-only)
+
+export async function closeSpectatorRoom() {
+  if (_specLkRoom) {
+    try { await _specLkRoom.disconnect(); } catch (_) {}
+    _specLkRoom = null;
+  }
+}
+
 export async function spectateRoom(roomId, name) {
+  // Desconecta sessão de espectador anterior se existir
+  await closeSpectatorRoom();
+
   const specOverlay = document.getElementById("specOverlay");
   if (!specOverlay || !roomId) return;
 
@@ -560,13 +570,13 @@ export async function spectateRoom(roomId, name) {
   const noticeEl   = document.getElementById("specObservingNotice");
   const liveBadge  = document.getElementById("specLiveBadge");
 
-  if (titleEl)   titleEl.textContent      = name || roomId;
-  if (statusEl)  statusEl.textContent     = "Carregando…";
-  if (dotEl)     dotEl.className          = "specStatusDot";
-  if (liveBadge) liveBadge.style.display  = "none";
-  if (playersEl) playersEl.innerHTML      = `<div class="specEmpty" style="padding:32px 0">⏳</div>`;
-  if (cardWrap)  cardWrap.innerHTML       = "";
-  if (noticeEl)  noticeEl.style.display   = "flex";
+  if (titleEl)    titleEl.textContent     = name || roomId;
+  if (statusEl)   statusEl.textContent    = "Carregando…";
+  if (dotEl)      dotEl.className         = "specStatusDot";
+  if (liveBadge)  liveBadge.style.display = "none";
+  if (playersEl)  playersEl.innerHTML     = `<div class="specEmpty" style="padding:32px 0">⏳</div>`;
+  if (cardWrap)   cardWrap.innerHTML      = "";
+  if (noticeEl)   noticeEl.style.display  = "flex";
   specOverlay.style.display = "flex";
 
   try {
@@ -578,64 +588,63 @@ export async function spectateRoom(roomId, name) {
 
     const room   = panelRes?.room;
     const isLive = !!room?.sessionActive;
+    const hasVideo = isLive && !!room?.videoActive;
 
-    if (dotEl)    dotEl.className         = "specStatusDot" + (isLive ? " specStatusDot--live" : "");
-    if (statusEl) statusEl.textContent    = isLive ? "Ritual em andamento" : "Aguardando início";
+    if (dotEl)    dotEl.className          = "specStatusDot" + (isLive ? " specStatusDot--live" : "");
+    if (statusEl) statusEl.textContent     = isLive ? "Ritual em andamento" : "Aguardando início";
     if (liveBadge) liveBadge.style.display = isLive ? "" : "none";
 
-    // Jogadores — Firestore é a fonte principal (tem foto/emoji); backend é fallback
+    // Jogadores — Firestore é fonte principal (foto/emoji); backend é fallback
     let players = [];
     if (playersSnap && !playersSnap.empty) {
       playersSnap.forEach(d => {
         const p = d.data();
-        if (p.name) players.push(p);
+        if (p.name) players.push({ ...p, _fsId: d.id });
       });
       players.sort((a, b) => {
         if (a.isHost && !b.isHost) return -1;
         if (!a.isHost && b.isHost) return 1;
-        const t1 = a.joinedAt?.toMillis?.() || 0;
-        const t2 = b.joinedAt?.toMillis?.() || 0;
-        return t1 - t2;
+        return (a.joinedAt?.toMillis?.() || 0) - (b.joinedAt?.toMillis?.() || 0);
       });
     } else if (room?.players?.length) {
-      players = room.players.map(p => ({ name: p.playerName, isHost: p.playerName === room.host }));
+      players = room.players.map(p => ({ name: p.playerName, isHost: p.playerName === room.host, _fsId: p.playerId || "" }));
+    }
+
+    function buildTileHtml(p) {
+      const hostCls  = p.isHost ? " specPlayerTile--host" : "";
+      const nameCls  = p.isHost ? "specPlayerTileName--host" : "specPlayerTileName";
+      const nameText = (p.isHost ? "👑 " : "") + escapeHtml(p.name || "Jogador");
+      const livePip  = hasVideo ? `<div class="specPlayerTileLive">📹 AO VIVO</div>` : (isLive ? `<div class="specPlayerTileLive">AO VIVO</div>` : "");
+      const pid      = escapeHtml(p._fsId || p.id || "");
+
+      let avatarContent;
+      if (p.avatarPhotoUrl) {
+        avatarContent = `<img class="specPlayerTileAvatarImg" src="${p.avatarPhotoUrl}" alt="">`;
+        return `<div class="specPlayerTile${hostCls}" data-participant-id="${pid}">
+          <div class="specPlayerTileAvatar">${avatarContent}</div>
+          ${livePip}<div class="${nameCls}">${nameText}</div>
+        </div>`;
+      }
+      const bg  = p.avatarColor ? `background:${p.avatarColor}22` : "background:rgba(212,168,75,.08)";
+      const col = p.isHost ? "#d4a84b" : "rgba(255,255,255,.75)";
+      avatarContent = p.avatarEmoji
+        ? `<span style="font-size:2.2em">${p.avatarEmoji}</span>`
+        : `<span style="font-size:1.6em;font-weight:800;color:${col}">${escapeHtml((p.name||"?").charAt(0).toUpperCase())}</span>`;
+      return `<div class="specPlayerTile${hostCls}" data-participant-id="${pid}">
+        <div class="specPlayerTileAvatar" style="${bg}">${avatarContent}</div>
+        ${livePip}<div class="${nameCls}">${nameText}</div>
+      </div>`;
     }
 
     if (playersEl) {
-      if (players.length) {
-        playersEl.innerHTML = players.map(p => {
-          const hostCls = p.isHost ? " specPlayerTile--host" : "";
-          const nameCls = p.isHost ? "specPlayerTileName--host" : "specPlayerTileName";
-          const nameText = (p.isHost ? "👑 " : "") + escapeHtml(p.name || "Jogador");
-          const livePip  = isLive ? `<div class="specPlayerTileLive">AO VIVO</div>` : "";
-          let avatarHtml;
-          if (p.avatarPhotoUrl) {
-            avatarHtml = `<img class="specPlayerTileAvatarImg" src="${p.avatarPhotoUrl}" alt="">`;
-          } else if (p.avatarEmoji) {
-            avatarHtml = `<span style="font-size:2.2em">${p.avatarEmoji}</span>`;
-          } else {
-            const bg  = p.avatarColor ? `background:${p.avatarColor}22` : "background:rgba(212,168,75,.08)";
-            const col = p.isHost ? "#d4a84b" : "rgba(255,255,255,.75)";
-            avatarHtml = `<span style="font-size:1.6em;font-weight:800;color:${col}">${escapeHtml((p.name||"?").charAt(0).toUpperCase())}</span>`;
-            return `<div class="specPlayerTile${hostCls}">
-              <div class="specPlayerTileAvatar" style="${bg}">${avatarHtml}</div>
-              ${livePip}
-              <div class="${nameCls}">${nameText}</div>
-            </div>`;
-          }
-          return `<div class="specPlayerTile${hostCls}">
-            <div class="specPlayerTileAvatar">${avatarHtml}</div>
-            ${livePip}
-            <div class="${nameCls}">${nameText}</div>
-          </div>`;
-        }).join("");
-      } else {
-        playersEl.innerHTML = `<div class="specEmpty">Nenhum jogador ativo</div>`;
-      }
+      playersEl.innerHTML = players.length
+        ? players.map(buildTileHtml).join("")
+        : `<div class="specEmpty">Nenhum jogador ativo</div>`;
     }
 
     // Carta atual
-    if (ritualSnap?.exists?.()) {
+    const updateCard = () => {
+      if (!ritualSnap?.exists?.()) { if (cardWrap) cardWrap.innerHTML = `<div class="specEmpty">Ritual ainda não iniciado</div>`; return; }
       const ritual = ritualSnap.data();
       const card   = ritual?.currentCard;
       if (card && ritual?.started && cardWrap) {
@@ -647,8 +656,38 @@ export async function spectateRoom(roomId, name) {
       } else if (cardWrap) {
         cardWrap.innerHTML = `<div class="specEmpty">Ritual ainda não iniciado</div>`;
       }
-    } else if (cardWrap) {
-      cardWrap.innerHTML = `<div class="specEmpty">Ritual ainda não iniciado</div>`;
+    };
+    updateCard();
+
+    // Vídeo ao vivo — conecta como subscriber LiveKit se sala tem vídeo ativo
+    if (hasVideo) {
+      try {
+        const [tokenRes, { Room, RoomEvent }] = await Promise.all([
+          fetch(`${MULTI_SERVER}/spectate-token?room=${encodeURIComponent(roomId)}&user=${encodeURIComponent(S.participantId)}`).then(r => r.json()),
+          import("https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs")
+        ]);
+        if (tokenRes?.ok && tokenRes?.token && specOverlay.style.display !== "none") {
+          const lkRoom = new Room({ adaptiveStream: false, dynacast: false });
+          _specLkRoom = lkRoom;
+
+          lkRoom.on(RoomEvent.TrackSubscribed, (track, _pub, participant) => {
+            if (track.kind !== "video") return;
+            const tileEl = playersEl?.querySelector(`[data-participant-id="${participant.identity}"]`);
+            if (!tileEl) return;
+            const avatarEl = tileEl.querySelector(".specPlayerTileAvatar");
+            if (!avatarEl) return;
+            const videoEl = track.attach();
+            videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;border-radius:0";
+            avatarEl.innerHTML = "";
+            avatarEl.style.cssText = "position:absolute;inset:0;overflow:hidden;background:#000";
+            avatarEl.appendChild(videoEl);
+          });
+
+          lkRoom.on(RoomEvent.TrackUnsubscribed, (track) => { track.detach(); });
+
+          await lkRoom.connect(tokenRes.url || "wss://osextolugar-eqa7q1iz.livekit.cloud", tokenRes.token, { autoSubscribe: true });
+        }
+      } catch (_) { /* vídeo falhou mas modal continua visível */ }
     }
 
   } catch (_) {

@@ -3,7 +3,7 @@ import { S } from "./state.js";
 import { db, auth, initFirebaseRefs, onSnapshot, query, orderBy } from "./firebase.js";
 import { getParticipantId, getUserId, showOslToast } from "./utils.js";
 import { applyBgTheme, applyCardStyle, applyVisualEffect, syncAccountPurchases, bindProfileEvents, openProfile, updateDesktopProfileBtn, applyAvatarDisplay } from "./ui/profile.js";
-import { bindUserDoc, bindRoom, bindPlayers, bindTyping, bindMessages, bindRoomEvents, ensureRoom, ensureUserProfile, upsertSelf, startHeartbeat, startMultiPoller, connectHostSse, fetchLiveRooms, renderLiveRooms, spectateRoom } from "./ui/room.js";
+import { bindUserDoc, bindRoom, bindPlayers, bindTyping, bindMessages, bindRoomEvents, ensureRoom, ensureUserProfile, upsertSelf, startHeartbeat, startMultiPoller, connectHostSse, fetchLiveRooms, renderLiveRooms, spectateRoom, closeSpectatorRoom } from "./ui/room.js";
 import { bindMyMission } from "./game/missions.js";
 import { bindRitual } from "./game/cards.js";
 import { checkDailyReward, updateXpCard } from "./game/rewards.js";
@@ -87,9 +87,10 @@ window._osl.getRoomCode      = () => S.roomCode;
 window._osl.setTyping          = (v) => import("./ui/room.js").then(m => m.setTyping(v));
 window._osl.scheduleTypingStop = () => import("./ui/room.js").then(m => m.scheduleTypingStop());
 window._osl.openSelfProfile  = () => openProfile({ userId: S.userId, name: S.playerName, isHost: S.isHost }).catch(console.error);
-window._osl.fetchLiveRooms  = fetchLiveRooms;
-window._osl.renderLiveRooms = renderLiveRooms;
-window._osl.spectateRoom    = spectateRoom;
+window._osl.fetchLiveRooms       = fetchLiveRooms;
+window._osl.renderLiveRooms      = renderLiveRooms;
+window._osl.spectateRoom         = spectateRoom;
+window._osl.closeSpectatorRoom   = closeSpectatorRoom;
 window.oslOpenProfile        = window._osl.openSelfProfile; // atalho para scripts não-módulo
 document.addEventListener("osl:openSelfProfile", () => window._osl.openSelfProfile());
 

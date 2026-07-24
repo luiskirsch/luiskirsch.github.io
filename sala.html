@@ -7797,10 +7797,11 @@
         window._osl?.renderLiveRooms?.(rooms);
       });
 
-      // Painel espectador — fechar
+      // Painel espectador — fechar (+ desconectar LiveKit subscriber)
       function closeSpecOverlay() {
         var overlay = document.getElementById("specOverlay");
         if (!overlay) return;
+        window._osl?.closeSpectatorRoom?.();
         overlay.classList.add("closing");
         setTimeout(function() {
           overlay.classList.remove("closing");
@@ -7817,10 +7818,14 @@
         if (e.key === "Escape" && o && o.style.display !== "none") closeSpecOverlay();
       });
 
-      // Painel espectador — abrir ao clicar no olho (evento disparado por renderLiveRooms)
-      document.addEventListener("osl:openSpectator", function(e) {
-        var detail = e.detail || {};
-        window._osl?.spectateRoom?.(detail.roomId, detail.name);
+      // Event delegation em #multiBody — capta cliques no botão 👁 mesmo após re-renders
+      document.getElementById("multiBody")?.addEventListener("click", function(e) {
+        var btn = e.target.closest(".multiSpectateBtn");
+        if (!btn) return;
+        e.stopPropagation();
+        var row = btn.closest(".multiRoom");
+        if (!row) return;
+        window._osl?.spectateRoom?.(row.dataset.code, row.dataset.name);
       });
     })();
   </script>
