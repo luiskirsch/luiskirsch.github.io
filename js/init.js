@@ -8,7 +8,7 @@ import { bindMyMission } from "./game/missions.js";
 import { bindRitual } from "./game/cards.js";
 import { checkDailyReward, updateXpCard } from "./game/rewards.js";
 import { sendReaction, castEffectVote, confirmAIDetection, dismissAIDetection } from "./game/effects.js";
-import { startSession, leaveRoom } from "./ui/room.js";
+import { startSession, leaveRoom, sendLeaveBeacon } from "./ui/room.js";
 import { revealNextRitualCard, resetRitualDeck } from "./game/cards.js";
 
 // ── Identidade ────────────────────────────────────────────────────────────────
@@ -107,6 +107,10 @@ window._osl.deactivateArenaForAll = async () => {
   const { updateDoc } = await import("./firebase.js");
   await updateDoc(S.roomRef, { arenaActive: false });
 };
+
+// Beacon de saída — dispara quando a aba é fechada, navegada ou colocada em background
+// sendBeacon garante entrega mesmo durante o unload (fetch seria cancelado)
+window.addEventListener("pagehide", sendLeaveBeacon);
 
 // Expõe para uso inline no HTML (onclick="sendReaction(...)", etc.)
 window.showOslToast       = showOslToast;
