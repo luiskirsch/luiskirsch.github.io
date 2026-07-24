@@ -552,47 +552,89 @@ export async function spectateRoom(roomId, name) {
   const specOverlay = document.getElementById("specOverlay");
   if (!specOverlay || !roomId) return;
 
-  const titleEl   = document.getElementById("specTitle");
-  const statusEl  = document.getElementById("specStatusText");
-  const dotEl     = document.getElementById("specStatusDot");
-  const playersEl = document.getElementById("specPlayers");
-  const cardWrap  = document.getElementById("specCardWrap");
-  const noticeEl  = document.getElementById("specObservingNotice");
+  const titleEl    = document.getElementById("specTitle");
+  const statusEl   = document.getElementById("specStatusText");
+  const dotEl      = document.getElementById("specStatusDot");
+  const playersEl  = document.getElementById("specPlayers");
+  const cardWrap   = document.getElementById("specCardWrap");
+  const noticeEl   = document.getElementById("specObservingNotice");
+  const liveBadge  = document.getElementById("specLiveBadge");
 
-  if (titleEl)   titleEl.textContent  = name || roomId;
-  if (statusEl)  statusEl.textContent = oslTr("sala:spec.loading", "Carregando…");
-  if (dotEl)     dotEl.className      = "specStatusDot";
-  if (playersEl) playersEl.innerHTML  = `<div class="specEmpty">Carregando…</div>`;
-  if (cardWrap)  cardWrap.innerHTML   = `<div class="specEmpty">${oslTr("sala:spec.ritualNotStarted", "Ritual ainda não iniciado")}</div>`;
-  if (noticeEl)  noticeEl.style.display = "flex";
+  if (titleEl)   titleEl.textContent      = name || roomId;
+  if (statusEl)  statusEl.textContent     = "Carregando…";
+  if (dotEl)     dotEl.className          = "specStatusDot";
+  if (liveBadge) liveBadge.style.display  = "none";
+  if (playersEl) playersEl.innerHTML      = `<div class="specEmpty" style="padding:32px 0">⏳</div>`;
+  if (cardWrap)  cardWrap.innerHTML       = "";
+  if (noticeEl)  noticeEl.style.display   = "flex";
   specOverlay.style.display = "flex";
 
   try {
-    const [panelRes, ritualSnap] = await Promise.all([
+    const [panelRes, playersSnap, ritualSnap] = await Promise.all([
       fetch(MULTI_SERVER + "/game/room/" + encodeURIComponent(roomId)).then(r => r.json()).catch(() => null),
+      getDocs(collection(S.db, "salas", roomId, "players")).catch(() => null),
       getDoc(doc(S.db, "salas", roomId, "ritual", "state")).catch(() => null)
     ]);
 
-    const room = panelRes?.room;
+    const room   = panelRes?.room;
     const isLive = !!room?.sessionActive;
-    if (dotEl)    dotEl.className      = "specStatusDot" + (isLive ? " specStatusDot--live" : "");
-    if (statusEl) statusEl.textContent = isLive
-      ? oslTr("sala:spec.live", "Ritual em andamento")
-      : oslTr("sala:spec.waiting", "Aguardando início");
 
-    const players = room?.players || [];
-    if (playersEl) {
-      playersEl.innerHTML = players.length
-        ? players.map(p => {
-            const isHost = p.playerName === room?.host;
-            return `<div class="specPlayer">
-              <div class="specPlayerAvatar">${escapeHtml((p.playerName || "?").charAt(0).toUpperCase())}</div>
-              <div class="specPlayerName${isHost ? " specPlayerName--host" : ""}">${escapeHtml(p.playerName || "Jogador")}</div>
-            </div>`;
-          }).join("")
-        : `<div class="specEmpty">${oslTr("sala:spec.noPlayers", "Nenhum jogador ativo")}</div>`;
+    if (dotEl)    dotEl.className         = "specStatusDot" + (isLive ? " specStatusDot--live" : "");
+    if (statusEl) statusEl.textContent    = isLive ? "Ritual em andamento" : "Aguardando início";
+    if (liveBadge) liveBadge.style.display = isLive ? "" : "none";
+
+    // Jogadores — Firestore é a fonte principal (tem foto/emoji); backend é fallback
+    let players = [];
+    if (playersSnap && !playersSnap.empty) {
+      playersSnap.forEach(d => {
+        const p = d.data();
+        if (p.name) players.push(p);
+      });
+      players.sort((a, b) => {
+        if (a.isHost && !b.isHost) return -1;
+        if (!a.isHost && b.isHost) return 1;
+        const t1 = a.joinedAt?.toMillis?.() || 0;
+        const t2 = b.joinedAt?.toMillis?.() || 0;
+        return t1 - t2;
+      });
+    } else if (room?.players?.length) {
+      players = room.players.map(p => ({ name: p.playerName, isHost: p.playerName === room.host }));
     }
 
+    if (playersEl) {
+      if (players.length) {
+        playersEl.innerHTML = players.map(p => {
+          const hostCls = p.isHost ? " specPlayerTile--host" : "";
+          const nameCls = p.isHost ? "specPlayerTileName--host" : "specPlayerTileName";
+          const nameText = (p.isHost ? "👑 " : "") + escapeHtml(p.name || "Jogador");
+          const livePip  = isLive ? `<div class="specPlayerTileLive">AO VIVO</div>` : "";
+          let avatarHtml;
+          if (p.avatarPhotoUrl) {
+            avatarHtml = `<img class="specPlayerTileAvatarImg" src="${p.avatarPhotoUrl}" alt="">`;
+          } else if (p.avatarEmoji) {
+            avatarHtml = `<span style="font-size:2.2em">${p.avatarEmoji}</span>`;
+          } else {
+            const bg  = p.avatarColor ? `background:${p.avatarColor}22` : "background:rgba(212,168,75,.08)";
+            const col = p.isHost ? "#d4a84b" : "rgba(255,255,255,.75)";
+            avatarHtml = `<span style="font-size:1.6em;font-weight:800;color:${col}">${escapeHtml((p.name||"?").charAt(0).toUpperCase())}</span>`;
+            return `<div class="specPlayerTile${hostCls}">
+              <div class="specPlayerTileAvatar" style="${bg}">${avatarHtml}</div>
+              ${livePip}
+              <div class="${nameCls}">${nameText}</div>
+            </div>`;
+          }
+          return `<div class="specPlayerTile${hostCls}">
+            <div class="specPlayerTileAvatar">${avatarHtml}</div>
+            ${livePip}
+            <div class="${nameCls}">${nameText}</div>
+          </div>`;
+        }).join("");
+      } else {
+        playersEl.innerHTML = `<div class="specEmpty">Nenhum jogador ativo</div>`;
+      }
+    }
+
+    // Carta atual
     if (ritualSnap?.exists?.()) {
       const ritual = ritualSnap.data();
       const card   = ritual?.currentCard;
@@ -602,10 +644,15 @@ export async function spectateRoom(roomId, name) {
           <div class="specCardTitle">${escapeHtml(card.title || "")}</div>
           <div class="specCardText">${(card.text || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</div>
         </div>`;
+      } else if (cardWrap) {
+        cardWrap.innerHTML = `<div class="specEmpty">Ritual ainda não iniciado</div>`;
       }
+    } else if (cardWrap) {
+      cardWrap.innerHTML = `<div class="specEmpty">Ritual ainda não iniciado</div>`;
     }
+
   } catch (_) {
-    if (statusEl) statusEl.textContent = oslTr("sala:spec.error", "Erro ao carregar dados");
+    if (statusEl) statusEl.textContent = "Erro ao carregar dados da sala";
   }
 }
 

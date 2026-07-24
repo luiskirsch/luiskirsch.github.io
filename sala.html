@@ -1333,24 +1333,37 @@
       color:rgba(212,168,75,.45);margin-bottom:8px;
     }
     .specPlayers{
-      display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
       gap:8px;margin-bottom:18px;
     }
-    .specPlayer{
-      background:rgba(255,255,255,.03);border:1px solid rgba(215,176,107,.1);
-      border-radius:12px;overflow:hidden;text-align:center;
+    .specPlayerTile{
+      aspect-ratio:4/3;
+      background:#0c0a10;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:10px;overflow:hidden;position:relative;
     }
-    .specPlayerAvatar{
-      font-size:26px;line-height:1;
-      height:80px;display:flex;align-items:center;justify-content:center;
-      background:rgba(255,255,255,.04);position:relative;overflow:hidden;
+    .specPlayerTile--host{ border-color:rgba(212,168,75,.45); }
+    .specPlayerTileAvatar{
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
     }
-    .specPlayerName{
-      font-size:10px;font-weight:600;color:rgba(255,255,255,.6);
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-      padding:6px 6px 7px;
+    .specPlayerTileAvatarImg{
+      width:100%;height:100%;object-fit:cover;
     }
-    .specPlayerName--host{ color:#d4a84b; }
+    .specPlayerTileLive{
+      position:absolute;top:5px;left:5px;
+      background:#c03030;border-radius:3px;
+      font-size:7px;font-weight:800;letter-spacing:.09em;
+      color:#fff;padding:2px 5px;text-transform:uppercase;
+    }
+    .specPlayerTileName{
+      position:absolute;bottom:0;left:0;right:0;
+      padding:16px 6px 5px;
+      background:linear-gradient(transparent,rgba(0,0,0,.82));
+      font-size:10px;font-weight:600;color:rgba(255,255,255,.85);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;
+    }
+    .specPlayerTileName--host{ color:#d4a84b; }
 
     .specDivider{
       border:none;border-top:1px solid rgba(255,255,255,.06);margin:0 0 16px;
@@ -6604,7 +6617,7 @@
   <div class="specOverlay" id="specOverlay" style="display:none">
     <div class="specPanel">
       <div class="specHeader">
-        <span class="specLiveBadge">AO VIVO</span>
+        <span class="specLiveBadge" id="specLiveBadge" style="display:none">AO VIVO</span>
         <span class="specTitle" id="specTitle">Sala</span>
         <button class="specClose" id="specClose" data-i18n-aria-label="sala:spec.closeAria" aria-label="Fechar">✕</button>
       </div>
