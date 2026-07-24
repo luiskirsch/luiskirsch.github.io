@@ -590,6 +590,94 @@ export function bindRoomEvents() {
   window.addEventListener("pagehide",     sendLeaveBeacon);
   window.addEventListener("beforeunload", sendLeaveBeacon);
 
+  // ── Refresh "Partidas Rolando" ──────────────────────────────────────────────
+  const multiRefreshBtn = document.getElementById("multiRefreshBtn");
+  multiRefreshBtn?.addEventListener("click", async () => {
+    multiRefreshBtn.classList.add("spinning");
+    setTimeout(() => multiRefreshBtn.classList.remove("spinning"), 650);
+    const rooms = await fetchLiveRooms();
+    renderLiveRooms(rooms);
+  });
+
+  // ── Painel espectador ───────────────────────────────────────────────────────
+  const specOverlay  = document.getElementById("specOverlay");
+  const specCloseBtn = document.getElementById("specClose");
+
+  function closeSpecOverlay() {
+    if (!specOverlay) return;
+    specOverlay.classList.add("closing");
+    setTimeout(() => { specOverlay.classList.remove("closing"); specOverlay.style.display = "none"; }, 220);
+  }
+
+  specCloseBtn?.addEventListener("click", closeSpecOverlay);
+  specOverlay?.addEventListener("click", e => { if (e.target === specOverlay) closeSpecOverlay(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && specOverlay?.style.display !== "none") closeSpecOverlay(); });
+
+  document.addEventListener("osl:openSpectator", async (e) => {
+    const { roomId, name } = e.detail || {};
+    if (!specOverlay || !roomId) return;
+
+    const titleEl   = document.getElementById("specTitle");
+    const statusEl  = document.getElementById("specStatusText");
+    const dotEl     = document.getElementById("specStatusDot");
+    const playersEl = document.getElementById("specPlayers");
+    const cardWrap  = document.getElementById("specCardWrap");
+    const noticeEl  = document.getElementById("specObservingNotice");
+
+    if (titleEl)   titleEl.textContent  = name || roomId;
+    if (statusEl)  statusEl.textContent = oslTr("sala:spec.loading", "Carregando…");
+    if (dotEl)     dotEl.className      = "specStatusDot";
+    if (playersEl) playersEl.innerHTML  = `<div class="specEmpty">Carregando…</div>`;
+    if (cardWrap)  cardWrap.innerHTML   = `<div class="specEmpty">${oslTr("sala:spec.ritualNotStarted", "Ritual ainda não iniciado")}</div>`;
+    if (noticeEl)  noticeEl.style.display = "flex";
+    specOverlay.style.display = "flex";
+
+    try {
+      const [panelRes, ritualSnap] = await Promise.all([
+        fetch(MULTI_SERVER + "/game/room/" + encodeURIComponent(roomId)).then(r => r.json()).catch(() => null),
+        getDoc(doc(S.db, "salas", roomId, "ritual", "state")).catch(() => null)
+      ]);
+
+      const room = panelRes?.room;
+
+      // Status dot
+      const isLive = !!room?.sessionActive;
+      if (dotEl)    dotEl.className      = "specStatusDot" + (isLive ? " specStatusDot--live" : "");
+      if (statusEl) statusEl.textContent = isLive
+        ? oslTr("sala:spec.live", "Ritual em andamento")
+        : oslTr("sala:spec.waiting", "Aguardando início");
+
+      // Jogadores
+      const players = room?.players || [];
+      if (playersEl) {
+        playersEl.innerHTML = players.length
+          ? players.map(p => {
+              const isHost = p.playerName === room?.host;
+              return `<div class="specPlayer">
+                <div class="specPlayerAvatar">${escapeHtml((p.playerName || "?").charAt(0).toUpperCase())}</div>
+                <div class="specPlayerName${isHost ? " specPlayerName--host" : ""}">${escapeHtml(p.playerName || "Jogador")}</div>
+              </div>`;
+            }).join("")
+          : `<div class="specEmpty">${oslTr("sala:spec.noPlayers", "Nenhum jogador ativo")}</div>`;
+      }
+
+      // Carta atual (Firestore)
+      if (ritualSnap?.exists?.()) {
+        const ritual = ritualSnap.data();
+        const card   = ritual?.currentCard;
+        if (card && ritual?.started && cardWrap) {
+          cardWrap.innerHTML = `<div class="specCard">
+            <div class="specCardType">${escapeHtml((card.type || "Ritual").toUpperCase())}</div>
+            <div class="specCardTitle">${escapeHtml(card.title || "")}</div>
+            <div class="specCardText">${(card.text || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</div>
+          </div>`;
+        }
+      }
+    } catch (_) {
+      if (statusEl) statusEl.textContent = oslTr("sala:spec.error", "Erro ao carregar dados");
+    }
+  });
+
   // Evento customizado de osl:openProfile (disparado por renderPlayers)
   document.addEventListener("osl:openProfile", e => document.dispatchEvent(new CustomEvent("osl:openProfileModal", { detail: e.detail })));
 }
