@@ -9,6 +9,8 @@ import { OSL_XP, OSL_ACHIEVEMENTS } from "./effects.js";
 export function updateReactionBar(level) {
   const bar = document.getElementById("reactionBar");
   if (!bar) return;
+  if (bar.dataset.level === String(level)) return; // sem mudança de nível, não reconstrói
+  bar.dataset.level = String(level);
   const emojis = OSL_REACTION_UNLOCKS
     .filter(r => r.minLevel <= level)
     .flatMap(r => r.emojis);

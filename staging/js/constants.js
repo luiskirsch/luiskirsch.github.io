@@ -274,3 +274,26 @@ export const OSL_XP_TITLES = [
 
 // ── Daily streak XP ───────────────────────────────────────────────────────────
 export const DAILY_STREAK_XP = [20, 30, 40, 50, 75, 100, 150];
+
+// ── Reações desbloqueadas por nível mínimo ────────────────────────────────────
+export const OSL_REACTION_UNLOCKS = [
+  { minLevel: 1,  emojis: ["😂","❤️","😮","👏","🔥","💀"] },
+  { minLevel: 5,  emojis: ["😤","🤩","🥺","👀"] },
+  { minLevel: 10, emojis: ["🫠","🤯","😈","💔"] },
+  { minLevel: 20, emojis: ["🥶","🫣","😭","🤑"] },
+  { minLevel: 30, emojis: ["🦋","⚡","🌊","🎯"] },
+];
+
+// ── Moedas ganhas por nível (índice 0 = nível 1) ─────────────────────────────
+export const OSL_COINS_PER_LEVEL = [
+  25, 25, 25, 25,100,
+  25, 25, 25, 25,100,
+  30, 30, 30, 30,150,
+  30, 30, 30, 30,150,
+  50, 50, 50, 50,200,
+  50, 50, 50, 50,200,
+  75, 75, 75, 75,300,
+  75, 75, 75, 75,300,
+ 100,100,100,100,400,
+ 100,100,100,100,500,
+];
