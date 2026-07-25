@@ -5292,6 +5292,16 @@
     }
     .ritualVisualCard { width: 100% !important; height: 100% !important; }
 
+    /*
+      Battlecry/timer aberto: a carta mantém a altura máxima (88vw × 7/5) e
+      extende para dentro da mesa de madeira abaixo, em vez de encolher.
+      Os containers pais já têm overflow:visible, então o card sobressai visualmente.
+    */
+    .cardCenter--effect-open .ritualCardWrap,
+    html.arenaMode .cardCenter--effect-open .ritualCardWrap {
+      height: calc(88vw * 7 / 5) !important;
+    }
+
     /* Sem hover 3D no touch — mantém !important aqui para bloquear a regra hover do desktop */
     .ritualCardWrap:hover { transform: rotateX(0deg) !important; }
 
