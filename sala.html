@@ -148,6 +148,7 @@
       color:var(--text);
       font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
       overflow-x:clip; /* clip não quebra o compositor thread como hidden faz */
+      scrollbar-gutter:stable; /* reserva o espaço da scrollbar — evita layout shift quando conteúdo cresce */
       background:var(--bg-1); /* cor sólida no body — sem repaint no scroll */
     }
 
