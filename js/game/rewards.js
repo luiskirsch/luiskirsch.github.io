@@ -395,12 +395,18 @@ export async function shareSessionCard({ cards, duration, topEmoji, playerCount 
   const watermarkY = cardY + cardH - 54;
   const logoAreaTop = phraseY + 56;
   const logoAreaBot = watermarkY - 50;
-  const logoSize = Math.min(logoAreaBot - logoAreaTop, 240);
-  const logoX = cx - logoSize / 2;
-  const logoY = logoAreaTop + (logoAreaBot - logoAreaTop - logoSize) / 2;
-  if (logoImg && logoSize > 80) {
+  const logoAreaH = logoAreaBot - logoAreaTop;
+  if (logoImg && logoAreaH > 80) {
+    // A imagem PNG tem espaço transparente abaixo do círculo.
+    // Usa apenas a porção quadrada do topo onde o círculo realmente está
+    // (o círculo ocupa a largura total e ~72% da altura da imagem).
+    const srcW = logoImg.naturalWidth;
+    const srcH = logoImg.naturalWidth; // corta o espaço vazio embaixo
+    const drawSize = Math.min(logoAreaH, 240);
+    const drawX = cx - drawSize / 2;
+    const drawY = logoAreaTop + (logoAreaH - drawSize) / 2;
     ctx.globalAlpha = 0.90;
-    ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+    ctx.drawImage(logoImg, 0, 0, srcW, srcH, drawX, drawY, drawSize, drawSize);
     ctx.globalAlpha = 1;
   }
 
