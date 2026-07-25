@@ -287,38 +287,33 @@ export async function shareSessionCard({ cards, duration, topEmoji, playerCount 
   const ctx = canvas.getContext("2d");
   const cx = W / 2;
 
+  // Carrega logo antes de desenhar
+  const logoImg = await new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = "/logo_oficial_fundo_transparente.png";
+  });
+
   // ── Fundo ─────────────────────────────────────────────────────────────────
   const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
   bgGrad.addColorStop(0, "#05040E"); bgGrad.addColorStop(0.5, "#0E0B1F"); bgGrad.addColorStop(1, "#05040E");
   ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, W, H);
 
-  // Glow radial central
-  const glowCY = H * 0.44;
-  const glow = ctx.createRadialGradient(cx, glowCY, 0, cx, glowCY, 480);
-  glow.addColorStop(0, "rgba(191,155,84,0.14)"); glow.addColorStop(1, "transparent");
-  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
-
-  // ── Anéis decorativos ────────────────────────────────────────────────────
-  const drawRing = (r, alpha) => {
-    ctx.beginPath(); ctx.arc(cx, glowCY, r, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(191,155,84,${alpha})`; ctx.lineWidth = 1; ctx.stroke();
-  };
-  drawRing(400, 0.07); drawRing(310, 0.10); drawRing(210, 0.13);
-
   // ── Borda do card ─────────────────────────────────────────────────────────
   const pad = 48, cardX = pad, cardY = 78, cardW = W - pad * 2, cardH = H - 78 * 2;
-  ctx.strokeStyle = "rgba(191,155,84,0.35)"; ctx.lineWidth = 1.5;
+  ctx.strokeStyle = "rgba(191,155,84,0.40)"; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.roundRect(cardX, cardY, cardW, cardH, 36); ctx.stroke();
-  ctx.strokeStyle = "rgba(191,155,84,0.07)"; ctx.lineWidth = 6;
+  ctx.strokeStyle = "rgba(191,155,84,0.08)"; ctx.lineWidth = 6;
   ctx.beginPath(); ctx.roundRect(cardX + 3, cardY + 3, cardW - 6, cardH - 6, 34); ctx.stroke();
 
   // Linha gradiente reutilizável
   const lineGrad = ctx.createLinearGradient(cardX + 60, 0, cardX + cardW - 60, 0);
-  lineGrad.addColorStop(0, "transparent"); lineGrad.addColorStop(0.5, "rgba(191,155,84,0.4)"); lineGrad.addColorStop(1, "transparent");
+  lineGrad.addColorStop(0, "transparent"); lineGrad.addColorStop(0.5, "rgba(191,155,84,0.5)"); lineGrad.addColorStop(1, "transparent");
 
   // ── Brand topo ────────────────────────────────────────────────────────────
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = "rgba(191,155,84,0.45)";
+  ctx.fillStyle = "rgba(191,155,84,0.80)";
   ctx.font = "700 26px system-ui,-apple-system,sans-serif";
   ctx.letterSpacing = "11px";
   ctx.fillText("O SEXTOLUGAR", cx, cardY + 80);
@@ -328,7 +323,7 @@ export async function shareSessionCard({ cards, duration, topEmoji, playerCount 
   ctx.beginPath(); ctx.moveTo(cardX + 60, cardY + 106); ctx.lineTo(cardX + cardW - 60, cardY + 106); ctx.stroke();
 
   // ── Eyebrow ──────────────────────────────────────────────────────────────
-  ctx.fillStyle = "rgba(191,155,84,0.55)";
+  ctx.fillStyle = "rgba(191,155,84,0.85)";
   ctx.font = "600 21px system-ui,-apple-system,sans-serif";
   ctx.letterSpacing = "7px";
   ctx.fillText("FIM DO RITUAL", cx, cardY + 158);
@@ -340,19 +335,18 @@ export async function shareSessionCard({ cards, duration, topEmoji, playerCount 
   ctx.fillText("Ritual Concluído", cx, cardY + 270);
 
   // ── Ornamento ─────────────────────────────────────────────────────────────
-  ctx.fillStyle = "rgba(191,155,84,0.5)";
+  ctx.fillStyle = "rgba(191,155,84,0.75)";
   ctx.font = "400 22px system-ui";
   ctx.fillText("◆  ◆  ◆", cx, cardY + 332);
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const statsTop = cardY + 400;
-  // topEmoji presente → 4 stats 2×2; ausente → 3 stats 2+1 centrado
   const hasEmoji = !!topEmoji;
   const statColW = hasEmoji ? cardW / 2 : cardW / 3;
 
   const drawStatBlock = (value, label, colX, colW, by) => {
     const accentGrad = ctx.createLinearGradient(colX + 60, 0, colX + colW - 60, 0);
-    accentGrad.addColorStop(0, "transparent"); accentGrad.addColorStop(0.5, "rgba(191,155,84,0.5)"); accentGrad.addColorStop(1, "transparent");
+    accentGrad.addColorStop(0, "transparent"); accentGrad.addColorStop(0.5, "rgba(191,155,84,0.6)"); accentGrad.addColorStop(1, "transparent");
     ctx.strokeStyle = accentGrad; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(colX + 60, by); ctx.lineTo(colX + colW - 60, by); ctx.stroke();
 
@@ -361,7 +355,7 @@ export async function shareSessionCard({ cards, duration, topEmoji, playerCount 
     ctx.textAlign = "center";
     ctx.fillText(String(value), colX + colW / 2, by + 88);
 
-    ctx.fillStyle = "rgba(191,155,84,0.5)";
+    ctx.fillStyle = "rgba(191,155,84,0.80)";
     ctx.font = "600 19px system-ui,-apple-system,sans-serif";
     ctx.letterSpacing = "4px";
     ctx.fillText(label.toUpperCase(), colX + colW / 2, by + 118);
@@ -370,18 +364,16 @@ export async function shareSessionCard({ cards, duration, topEmoji, playerCount 
 
   let statsBottomY;
   if (hasEmoji) {
-    // Grid 2×2
-    ctx.strokeStyle = "rgba(191,155,84,0.15)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(191,155,84,0.20)"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(cx, statsTop - 10); ctx.lineTo(cx, statsTop + 300); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cardX + 60, statsTop + 148); ctx.lineTo(cardX + cardW - 60, statsTop + 148); ctx.stroke();
-    drawStatBlock(cards,       oslTr("sala:xpUI.recap.share.cards",    "Cartas"),    cardX,           statColW, statsTop);
+    drawStatBlock(cards,       oslTr("sala:xpUI.recap.share.cards",    "Cartas"),    cardX,            statColW, statsTop);
     drawStatBlock(duration,    oslTr("sala:xpUI.recap.share.duration", "Duração"),   cardX + statColW, statColW, statsTop);
-    drawStatBlock(topEmoji,    oslTr("sala:xpUI.recap.share.reaction", "Reação"),    cardX,           statColW, statsTop + 158);
+    drawStatBlock(topEmoji,    oslTr("sala:xpUI.recap.share.reaction", "Reação"),    cardX,            statColW, statsTop + 158);
     drawStatBlock(playerCount, oslTr("sala:xpUI.recap.share.players",  "Jogadores"), cardX + statColW, statColW, statsTop + 158);
     statsBottomY = statsTop + 158 + 130;
   } else {
-    // 3 stats em linha única
-    ctx.strokeStyle = "rgba(191,155,84,0.15)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(191,155,84,0.20)"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(cardX + statColW,     statsTop - 10); ctx.lineTo(cardX + statColW,     statsTop + 135); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cardX + statColW * 2, statsTop - 10); ctx.lineTo(cardX + statColW * 2, statsTop + 135); ctx.stroke();
     drawStatBlock(cards,       oslTr("sala:xpUI.recap.share.cards",    "Cartas"),    cardX,                statColW, statsTop);
@@ -391,30 +383,41 @@ export async function shareSessionCard({ cards, duration, topEmoji, playerCount 
   }
 
   // ── Frase de encerramento ─────────────────────────────────────────────────
-  const phraseY = statsBottomY + 72;
-  ctx.fillStyle = "rgba(191,155,84,0.3)";
+  const phraseY = statsBottomY + 66;
+  ctx.fillStyle = "rgba(191,155,84,0.60)";
   ctx.font = "italic 30px Georgia,'Times New Roman',serif";
   ctx.fillText("Cada sessão deixa uma marca.", cx, phraseY);
 
   ctx.strokeStyle = lineGrad; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(cardX + 60, phraseY + 44); ctx.lineTo(cardX + cardW - 60, phraseY + 44); ctx.stroke();
 
+  // ── Logo ──────────────────────────────────────────────────────────────────
+  const watermarkY = cardY + cardH - 54;
+  const logoAreaTop = phraseY + 56;
+  const logoAreaBot = watermarkY - 50;
+  const logoSize = Math.min(logoAreaBot - logoAreaTop, 240);
+  const logoX = cx - logoSize / 2;
+  const logoY = logoAreaTop + (logoAreaBot - logoAreaTop - logoSize) / 2;
+  if (logoImg && logoSize > 80) {
+    ctx.globalAlpha = 0.90;
+    ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+    ctx.globalAlpha = 1;
+  }
+
   // ── URL / watermark ───────────────────────────────────────────────────────
-  ctx.fillStyle = "rgba(191,155,84,0.35)";
+  ctx.fillStyle = "rgba(191,155,84,0.65)";
   ctx.font = "500 26px system-ui,-apple-system,sans-serif";
   ctx.letterSpacing = "3px";
-  ctx.fillText("preludiojogos.com", cx, cardY + cardH - 54);
+  ctx.fillText("preludiojogos.com", cx, watermarkY);
   ctx.letterSpacing = "0px";
 
   // ── Exportar ──────────────────────────────────────────────────────────────
   canvas.toBlob(async (blob) => {
     const file = new File([blob], "osl-recap.png", { type: "image/png" });
-    // Share nativo só no mobile — no desktop a share sheet do SO não tem "salvar"
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isMobile && navigator.canShare?.({ files: [file] })) {
       try { await navigator.share({ files: [file], title: oslTr("sala:xpUI.recap.shareTitle", "SEXTOLUGAR — Ritual Concluído") }); return; } catch (_) {}
     }
-    // Desktop ou fallback: download direto
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = "osl-recap.png"; a.click();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
