@@ -157,6 +157,52 @@ export async function saveRitualState(card, activeEffect, pendingDeathrattle) {
   } catch (error) { console.error("Erro ao salvar estado do ritual:", error); }
 }
 
+// ── Auto-fit do título da carta ───────────────────────────────────────────────
+// Reduz font-size até nenhuma palavra do título precisar quebrar no meio.
+// Usa canvas offscreen para medir sem causar reflow.
+let _fitObserver = null;
+
+function autoFitCardTitle() {
+  const el = document.getElementById("ritualCardTitle");
+  if (!el) return;
+  const frame = el.closest(".ritualCardFrame");
+  if (!frame) return;
+  const maxW = frame.clientWidth - 24; // 12px padding em cada lado
+  if (maxW <= 0) return; // card ainda não visível
+
+  // Reset para valor CSS base antes de medir
+  el.style.fontSize = "";
+  let size = parseFloat(getComputedStyle(el).fontSize) || 17;
+
+  const words = (el.textContent || "").split(/\s+/).filter(Boolean);
+  if (!words.length) return;
+
+  // Canvas estático reutilizado — zero DOM extra
+  if (!autoFitCardTitle._canvas) autoFitCardTitle._canvas = document.createElement("canvas");
+  const ctx = autoFitCardTitle._canvas.getContext("2d");
+  const lsRatio = 0.05; // letter-spacing: 0.05em do CSS
+
+  for (let i = 0; i < 24; i++) {
+    ctx.font = `700 ${size}px Georgia,"Times New Roman",serif`;
+    const lsPx = size * lsRatio;
+    const longest = words.reduce((max, w) => {
+      const pw = ctx.measureText(w).width + (w.length - 1) * lsPx;
+      return pw > max ? pw : max;
+    }, 0);
+    if (longest <= maxW) break;
+    size = Math.max(10, size - 0.5);
+    el.style.fontSize = `${size}px`;
+  }
+}
+
+function ensureCardTitleObserver() {
+  if (_fitObserver) return;
+  const wrap = document.getElementById("ritualCardWrap");
+  if (!wrap || typeof ResizeObserver === "undefined") return;
+  _fitObserver = new ResizeObserver(autoFitCardTitle);
+  _fitObserver.observe(wrap);
+}
+
 // ── Aplicar conteúdo de carta no DOM ─────────────────────────────────────────
 export function applyCardContent(card) {
   // Localiza title/text/rule/subrule/phrase pelo idioma corrente.
@@ -177,7 +223,15 @@ export function applyCardContent(card) {
 
   if (card) {
     if (ritualCardType)  ritualCardType.textContent = (card.type || oslTr("sala:table.typeRitual", "Ritual")).toUpperCase();
-    if (ritualCardTitle) ritualCardTitle.textContent = card.title || oslTr("sala:ritual.fallbackTitle", "Carta revelada");
+    if (ritualCardTitle) {
+      ritualCardTitle.style.fontSize = ""; // reset antes de setar novo conteúdo
+      ritualCardTitle.textContent = card.title || oslTr("sala:ritual.fallbackTitle", "Carta revelada");
+      // Ajusta font-size após dois frames (card precisa ter layout calculado)
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        autoFitCardTitle();
+        ensureCardTitleObserver();
+      }));
+    }
     if (ritualCardText)  ritualCardText.innerHTML = (card.text || "").replace(/\n/g, "<br>");
     const hasRule = !!card.rule, hasSubrule = !!card.subrule, hasPhrase = !!card.phrase;
     if (midDetails)    midDetails.style.display    = (hasRule || hasSubrule) ? "" : "none";
