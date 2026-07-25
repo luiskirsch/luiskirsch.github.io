@@ -382,7 +382,8 @@ export function bindRitual(onSnapshotFn, orderByFn, queryFn) {
             for (const ns of packs) {
               const key = `cards:${ns}.${slug}.title`;
               const v = t(key);
-              if (typeof v === "string" && v && v !== key) { localizedText = v; break; }
+              const stub = key.includes(':') ? key.split(':')[1] : key;
+              if (typeof v === "string" && v && v !== key && v !== stub) { localizedText = v; break; }
             }
           }
         }

@@ -212,12 +212,19 @@
         });
       }
 
+      // i18next retorna a chave SEM namespace quando não encontra.
+      // Ex: t("cards:basic.foo.title") → "basic.foo.title" (não "cards:basic.foo.title")
+      // A comparação simples val !== key não detecta isso; precisa checar o stub também.
+      const nsStub = (k) => k.includes(':') ? k.split(':')[1] : k;
+      const isRealValue = (val, key) =>
+        typeof val === 'string' && val !== '' && val !== key && val !== nsStub(key);
+
       // Acha o primeiro NS que tem ao menos title traduzido
       let chosenNs = null;
       for (const ns of candidateNs) {
         const titleKey = `${ns}.title`;
         const val = t(titleKey);
-        if (typeof val === 'string' && val !== titleKey && val !== '') {
+        if (isRealValue(val, titleKey)) {
           chosenNs = ns;
           break;
         }
@@ -229,13 +236,13 @@
         if (card[field] != null && card[field] !== '') {
           const key = `${chosenNs}.${field}`;
           const val = t(key);
-          if (typeof val === 'string' && val !== key && val !== '') out[field] = val;
+          if (isRealValue(val, key)) out[field] = val;
         }
       });
       if (card.type) {
         const tk = `cards:types.${card.type}`;
         const tv = t(tk);
-        if (typeof tv === 'string' && tv !== tk) out.type = tv;
+        if (isRealValue(tv, tk)) out.type = tv;
       }
       return out;
     }
