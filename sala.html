@@ -5003,7 +5003,7 @@
        • Fixed bottom nav: icons | action buttons | self-video thumb
   ================================================================ */
 
-  @media (max-width: 640px), (max-width: 960px) and (pointer: coarse) {
+  @media (max-width: 960px) {
 
     /* ═══════════════════════════════════════════════════════
        ESCONDER TUDO DO DESKTOP
@@ -7512,7 +7512,7 @@
       var gate = document.getElementById("fullscreenGate");
       if (!gate) return;
 
-      var isMobile = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
+      var isMobile = window.matchMedia("(max-width: 960px)").matches;
       if (!isMobile) { gate.remove(); return; }
 
       var ua           = navigator.userAgent;
@@ -7830,9 +7830,7 @@
         }
       });
 
-      const isMobileDevice = window.matchMedia("(max-width: 640px)").matches ||
-        (window.matchMedia("(pointer: coarse)").matches &&
-         window.matchMedia("(max-width: 960px)").matches);
+      const isMobileDevice = window.matchMedia("(max-width: 960px)").matches;
 
       if (isMobileDevice) {
         // No mobile: sempre começa sem arenaMode.

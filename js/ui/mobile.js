@@ -9,7 +9,7 @@
 
 document.addEventListener("DOMContentLoaded", function () {
 (function () {
-  var IS_MOBILE = window.matchMedia("(max-width: 640px), (max-width: 960px) and (pointer: coarse)");
+  var IS_MOBILE = window.matchMedia("(max-width: 960px)");
 
   // ── Element refs ──────────────────────────────────────────────────────────
   var mobileBar         = document.getElementById("mobileBottomBar");
@@ -210,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   var lastStripKey = null;
-  var _mobileUiQuery = window.matchMedia("(max-width: 640px),(max-width:960px) and (orientation:landscape) and (pointer:coarse)");
+  var _mobileUiQuery = window.matchMedia("(max-width: 960px)");
 
   function syncAvatarVideos() {
     if (!mobilePlayerStrip || !_mobileUiQuery.matches) return;
