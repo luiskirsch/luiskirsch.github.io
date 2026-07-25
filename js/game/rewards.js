@@ -400,9 +400,12 @@ export async function shareSessionCard({ cards, duration, topEmoji, playerCount 
   // ── Exportar ──────────────────────────────────────────────────────────────
   canvas.toBlob(async (blob) => {
     const file = new File([blob], "osl-recap.png", { type: "image/png" });
-    if (navigator.canShare?.({ files: [file] })) {
+    // Share nativo só no mobile — no desktop a share sheet do SO não tem "salvar"
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile && navigator.canShare?.({ files: [file] })) {
       try { await navigator.share({ files: [file], title: oslTr("sala:xpUI.recap.shareTitle", "SEXTOLUGAR — Ritual Concluído") }); return; } catch (_) {}
     }
+    // Desktop ou fallback: download direto
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = "osl-recap.png"; a.click();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
