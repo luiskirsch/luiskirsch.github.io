@@ -268,3 +268,28 @@ export const OSL_XP_TITLES = [
 
 // ── Daily streak XP ───────────────────────────────────────────────────────────
 export const DAILY_STREAK_XP = [20, 30, 40, 50, 75, 100, 150];
+
+// ── Reações desbloqueadas por nível mínimo ────────────────────────────────────
+// O nível 1 tem as 6 reações base. Cada milestone adiciona mais.
+export const OSL_REACTION_UNLOCKS = [
+  { minLevel: 1,  emojis: ["😂","❤️","😮","👏","🔥","💀"] },
+  { minLevel: 5,  emojis: ["😤","🤩","🥺","👀"] },
+  { minLevel: 10, emojis: ["🫠","🤯","😈","💔"] },
+  { minLevel: 20, emojis: ["🥶","🫣","😭","🤑"] },
+  { minLevel: 30, emojis: ["🦋","⚡","🌊","🎯"] },
+];
+
+// ── Moedas ganhas por nível (índice 0 = nível 1) ─────────────────────────────
+// Milestones (níveis com unlock) dão 3× a mais.
+export const OSL_COINS_PER_LEVEL = [
+  25, 25, 25, 25,100,  //  1– 5  (nível 5 milestone)
+  25, 25, 25, 25,100,  //  6–10
+  30, 30, 30, 30,150,  // 11–15
+  30, 30, 30, 30,150,  // 16–20
+  50, 50, 50, 50,200,  // 21–25
+  50, 50, 50, 50,200,  // 26–30
+  75, 75, 75, 75,300,  // 31–35
+  75, 75, 75, 75,300,  // 36–40
+ 100,100,100,100,400,  // 41–45
+ 100,100,100,100,500,  // 46–50
+];

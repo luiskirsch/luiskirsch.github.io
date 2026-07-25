@@ -2,8 +2,43 @@
 import { S } from "../state.js";
 import { setDoc, getDoc, getDocs, query, orderBy } from "../firebase.js";
 import { escapeHtml } from "../utils.js";
-import { OSL_XP_TITLES, OSL_XP_EVENTS, DAILY_STREAK_XP } from "../constants.js";
+import { OSL_XP_TITLES, OSL_XP_EVENTS, DAILY_STREAK_XP, OSL_REACTION_UNLOCKS, OSL_COINS_PER_LEVEL } from "../constants.js";
 import { OSL_XP, OSL_ACHIEVEMENTS } from "./effects.js";
+
+// ── Barra de reações ──────────────────────────────────────────────────────────
+export function updateReactionBar(level) {
+  const bar = document.getElementById("reactionBar");
+  if (!bar) return;
+  const emojis = OSL_REACTION_UNLOCKS
+    .filter(r => r.minLevel <= level)
+    .flatMap(r => r.emojis);
+  bar.innerHTML = emojis.map(e =>
+    `<button class="reactionBar__btn" onclick="sendReaction('${e}',this)" title="${e}">${e}</button>`
+  ).join("");
+}
+
+// ── Moedas ────────────────────────────────────────────────────────────────────
+export function getCoinDisplay() {
+  try { return parseInt(localStorage.getItem("osl_coins") || "0", 10); } catch(_) { return 0; }
+}
+
+async function awardCoins(level) {
+  const amount = OSL_COINS_PER_LEVEL[level - 1] ?? 25;
+  try { localStorage.setItem("osl_coins", String(getCoinDisplay() + amount)); } catch(_) {}
+  if (S.userRef) {
+    try {
+      const { updateDoc, increment } = await import("../firebase.js");
+      await updateDoc(S.userRef, { coins: increment(amount) });
+    } catch(_) {}
+  }
+  updateCoinDisplay();
+  return amount;
+}
+
+export function updateCoinDisplay() {
+  const el = document.getElementById("coinBalance");
+  if (el) el.textContent = getCoinDisplay().toLocaleString("pt-BR");
+}
 
 // Localização: pega title/unlock do namespace xptitles (level == índice 1..50)
 function localizedTitleInfo(level, info) {
@@ -42,21 +77,35 @@ export function updateXpCard(xp) {
   const numsEl = document.getElementById("xpCardNums");
   if (numsEl) numsEl.textContent = next > curr ? oslTr("sala:topbar.xpNumsTemplate", "{{cur}} / {{max}} XP", { cur: inLv, max: needed }) : oslTr("sala:xpUI.max", "MAX");
 
-  if (S._xpPrevLevel > 0 && lv > S._xpPrevLevel) showLevelUpModal(lv, info);
+  updateReactionBar(lv);
+  if (S._xpPrevLevel > 0 && lv > S._xpPrevLevel) {
+    awardCoins(lv).then(amount => showLevelUpModal(lv, info, amount));
+  } else if (S._xpPrevLevel === 0) {
+    updateCoinDisplay(); // mostra saldo do localStorage imediatamente
+    if (S.userRef) {
+      getDoc(S.userRef).then(snap => {
+        const coins = snap.data()?.coins ?? 0;
+        try { localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
+        updateCoinDisplay();
+      }).catch(() => {});
+    }
+  }
   S._xpPrevLevel = lv;
 }
 
-export function showLevelUpModal(lv, info) {
+export function showLevelUpModal(lv, info, coinsEarned) {
   info = localizedTitleInfo(lv, info);
   const overlay = document.createElement("div");
   overlay.className = "levelUpOverlay";
   const unlockBlock = info.unlock ? `<div class="levelUpCard__unlock"><strong>${oslTr("sala:xpUI.levelUp.unlock", "Desbloqueado")}</strong>${escapeHtml(info.unlock)}</div>` : "";
+  const coinsBlock = coinsEarned ? `<div class="levelUpCard__coins">+${coinsEarned} <span class="levelUpCard__coinIcon">🪙</span></div>` : "";
   overlay.innerHTML = `
     <div class="levelUpCard">
       <div class="levelUpCard__badge">${info.icon}</div>
       <div class="levelUpCard__eyebrow">${oslTr("sala:xpUI.levelUp.eyebrow", "Subiu de nível")}</div>
       <div class="levelUpCard__level">${lv}</div>
       <div class="levelUpCard__title">${escapeHtml(info.title)}</div>
+      ${coinsBlock}
       ${unlockBlock}
       <button class="levelUpCard__close">${oslTr("sala:xpUI.levelUp.continue", "Continuar →")}</button>
     </div>`;

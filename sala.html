@@ -2288,6 +2288,10 @@
     .topMeta__sep{
       color:rgba(255,255,255,.18);
     }
+    .topMeta__coins{
+      font-size:13px;color:rgba(240,192,64,.85);font-weight:600;
+      display:inline-flex;align-items:center;gap:2px;white-space:nowrap;
+    }
     .topMeta__xp{
       display:inline-flex;
       align-items:center;
@@ -5293,13 +5297,27 @@
     .ritualVisualCard { width: 100% !important; height: 100% !important; }
 
     /*
-      Battlecry/timer aberto: a carta mantém a altura máxima (88vw × 7/5) e
-      extende para dentro da mesa de madeira abaixo, em vez de encolher.
-      Os containers pais já têm overflow:visible, então o card sobressai visualmente.
+      effectPanel como overlay flutuante acima da carta.
+      Não participa do flex flow → o card mantém sua altura total mesmo
+      quando battlecry/timer está visível.
     */
-    .cardCenter--effect-open .ritualCardWrap,
-    html.arenaMode .cardCenter--effect-open .ritualCardWrap {
-      height: calc(88vw * 7 / 5) !important;
+    .cardCenter { position: relative; }
+    .effectPanel {
+      position: absolute !important;
+      top: 8px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      z-index: 25 !important;
+      width: min(88%, 380px) !important;
+      margin: 0 !important;
+    }
+    /* Animação de saída precisa preservar o translateX do absolute */
+    .effectPanel--closing {
+      animation: effectPanelOutMobile .22s ease forwards !important;
+    }
+    @keyframes effectPanelOutMobile {
+      from { opacity:1; transform: translateX(-50%) translateY(0) scale(1); }
+      to   { opacity:0; transform: translateX(-50%) translateY(-6px) scale(.97); }
     }
 
     /* Sem hover 3D no touch — mantém !important aqui para bloquear a regra hover do desktop */
@@ -5983,6 +6001,12 @@
     color:#f0e8d8;font-size:22px;font-weight:900;
     letter-spacing:.07em;text-transform:uppercase;margin-bottom:22px;
   }
+  .levelUpCard__coins {
+    font-size:28px;font-weight:700;color:#f0c040;
+    margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px;
+    text-shadow:0 0 18px rgba(240,192,64,.45);
+  }
+  .levelUpCard__coinIcon { font-size:26px; }
   .levelUpCard__unlock {
     background:rgba(212,168,75,.08);border:1px solid rgba(212,168,75,.22);
     border-radius:12px;padding:14px 16px;margin-bottom:24px;
@@ -6345,6 +6369,8 @@
                 </span>
                 <strong class="topMeta__xpTotal" id="xpCardXp">0 XP</strong>
               </span>
+              <span class="topMeta__sep">·</span>
+              <span class="topMeta__coins" id="coinBalanceWrap" title="Moedas acumuladas">🪙 <span id="coinBalance">0</span></span>
             </div>
             <div style="display:flex;flex-direction:column;gap:4px;">
               <p class="eyebrow" style="margin-left:2px;"><span data-i18n="sala:topbar.roomEyebrow">Sala do Ritual</span> · <span id="gameStatus" class="eyebrow__status" data-i18n="sala:topbar.status.waiting">Espera</span></p>
@@ -6577,14 +6603,7 @@
                     <span class="tensionMeter__label" data-i18n="sala:tension.label">Tensão</span>
                     <div class="tensionMeter__bar"><div class="tensionMeter__fill" id="tensionFill"></div></div>
                   </div>
-                  <div class="reactionBar" id="reactionBar">
-                    <button class="reactionBar__btn" onclick="sendReaction('😂',this)" title="Haha">😂</button>
-                    <button class="reactionBar__btn" onclick="sendReaction('❤️',this)" title="Amor">❤️</button>
-                    <button class="reactionBar__btn" onclick="sendReaction('😮',this)" title="Uau">😮</button>
-                    <button class="reactionBar__btn" onclick="sendReaction('👏',this)" title="Palmas">👏</button>
-                    <button class="reactionBar__btn" onclick="sendReaction('🔥',this)" title="Fogo">🔥</button>
-                    <button class="reactionBar__btn" onclick="sendReaction('💀',this)" title="Morto">💀</button>
-                  </div>
+                  <div class="reactionBar" id="reactionBar"></div>
                   <!-- Pressão Social -->
                   <button class="pressureBtn" id="pressureBtn" title="Votar para continuar">🔥 Quer mais</button>
                 </div>
