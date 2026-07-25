@@ -241,26 +241,33 @@ export async function showSessionRecap(onNewSession, primaryLabel) {
   Object.entries(msgCountByPlayer).forEach(([pid, n]) => { if (n > topMsgCount) { topMsgCount = n; topChatter = pid; } });
   const topChatterName = S.currentPlayers.find(p => p.id === topChatter)?.name || null;
 
-  const statReactor = topReactorName ? `<div class="recapStat"><div class="recapStat__icon">🎭</div><div class="recapStat__value">${escapeHtml(topReactorName)}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.topReactor", "Mais expressivo")}</div></div>` : "";
-  const statChatter = topChatterName ? `<div class="recapStat"><div class="recapStat__icon">💬</div><div class="recapStat__value">${escapeHtml(topChatterName)}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.topChatter", "Mais no chat")}</div></div>` : "";
-  const statEmoji   = topEmoji       ? `<div class="recapStat"><div class="recapStat__icon">${topEmoji}</div><div class="recapStat__value">${oslTr("sala:xpUI.recap.favoriteReaction", "Favorita")}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.groupReaction", "Reação do grupo")}</div></div>` : "";
+  const statReactor = topReactorName ? `<div class="recapStat recapStat--wide"><div class="recapStat__icon">🎭</div><div class="recapStat__value">${escapeHtml(topReactorName)}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.topReactor", "Mais expressivo")}</div></div>` : "";
+  const statChatter = topChatterName ? `<div class="recapStat recapStat--wide"><div class="recapStat__icon">💬</div><div class="recapStat__value">${escapeHtml(topChatterName)}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.topChatter", "Mais no chat")}</div></div>` : "";
+  const statEmoji   = topEmoji       ? `<div class="recapStat recapStat--wide"><div class="recapStat__icon">${topEmoji}</div><div class="recapStat__value">${oslTr("sala:xpUI.recap.favoriteReaction", "Favorita")}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.groupReaction", "Reação do grupo")}</div></div>` : "";
   const newSessionBtn = onNewSession  ? `<button class="recapCard__btn recapCard__btn--primary" id="recapNewBtn">${primaryLabel}</button>` : "";
 
   const overlay = document.createElement("div");
   overlay.className = "recapOverlay";
   overlay.innerHTML = `
     <div class="recapCard">
+      <div class="recapCard__brand">O SextoLugar</div>
+      <div class="recapCard__ornament">
+        <span class="recapCard__ornamentLine"></span>
+        <span class="recapCard__ornamentGem">◆ ◆ ◆</span>
+        <span class="recapCard__ornamentLine"></span>
+      </div>
       <div class="recapCard__eyebrow">${oslTr("sala:xpUI.recap.endOfRitual", "Fim do Ritual")}</div>
       <div class="recapCard__title">${oslTr("sala:xpUI.recap.title", "Recap da Sessão")}</div>
       <div class="recapStats">
-        <div class="recapStat"><div class="recapStat__icon">🃏</div><div class="recapStat__value">${cardsRevealed}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.cardsRevealed", "Cartas reveladas")}</div></div>
-        <div class="recapStat"><div class="recapStat__icon">⏱</div><div class="recapStat__value">${durationStr}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.duration", "Duração")}</div></div>
+        <div class="recapStat"><div class="recapStat__value">${cardsRevealed}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.cardsRevealed", "Cartas reveladas")}</div></div>
+        <div class="recapStat"><div class="recapStat__value">${durationStr}</div><div class="recapStat__label">${oslTr("sala:xpUI.recap.duration", "Duração")}</div></div>
         ${statReactor}${statChatter}${statEmoji}
       </div>
+      <div class="recapCard__sep">● ● ●</div>
       <div class="recapCard__actions">
+        <button class="recapCard__btn recapCard__btn--share" id="recapShareBtn">✦ ${oslTr("sala:xpUI.recap.shareBtn2", "Compartilhar sessão")}</button>
         ${newSessionBtn}
-        <button class="recapCard__btn recapCard__btn--share" id="recapShareBtn">${oslTr("sala:xpUI.recap.shareBtn", "📤 COMPARTILHAR")}</button>
-        <button class="recapCard__btn recapCard__btn--ghost" id="recapCloseBtn">${oslTr("sala:xpUI.recap.closeBtn", "FECHAR")}</button>
+        <button class="recapCard__btn recapCard__btn--ghost" id="recapCloseBtn">${oslTr("sala:xpUI.recap.closeBtn", "Fechar")}</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -273,24 +280,131 @@ export async function showSessionRecap(onNewSession, primaryLabel) {
 
 // ── Compartilhamento de card ──────────────────────────────────────────────────
 export async function shareSessionCard({ cards, duration, topEmoji, playerCount }) {
+  const W = 1080, H = 1920;
   const canvas = document.createElement("canvas");
-  canvas.width = 800; canvas.height = 800;
+  canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext("2d");
-  const bg = ctx.createLinearGradient(0,0,0,800); bg.addColorStop(0,"#0c0804"); bg.addColorStop(0.5,"#1a1006"); bg.addColorStop(1,"#0c0804");
-  ctx.fillStyle = bg; ctx.fillRect(0,0,800,800);
-  ctx.strokeStyle = "rgba(212,168,75,0.55)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(16,16,768,768,32); ctx.stroke();
-  ctx.textAlign = "center"; ctx.fillStyle = "rgba(212,168,75,0.6)"; ctx.font = "700 13px system-ui"; ctx.fillText("O SEXTOLUGAR", 400, 100);
-  ctx.fillStyle = "#f0e8d8"; ctx.font = "900 52px system-ui"; ctx.fillText(oslTr("sala:xpUI.recap.ritualConcluded", "Ritual Concluído"), 400, 175);
-  ctx.strokeStyle = "rgba(212,168,75,0.2)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(80,210); ctx.lineTo(720,210); ctx.stroke();
-  const drawStat = (icon, value, label, cx, cy) => { ctx.font="48px system-ui"; ctx.fillStyle="#f0e8d8"; ctx.fillText(icon,cx,cy); ctx.font="900 40px system-ui"; ctx.fillText(value,cx,cy+56); ctx.font="400 15px system-ui"; ctx.fillStyle="rgba(255,255,255,0.35)"; ctx.fillText(label.toUpperCase(),cx,cy+80); };
-  drawStat("🃏",String(cards),oslTr("sala:xpUI.recap.share.cards","cartas"),200,310);
-  drawStat("⏱",String(duration),oslTr("sala:xpUI.recap.share.duration","duração"),600,310);
-  drawStat(topEmoji||"🎭",oslTr("sala:xpUI.recap.share.favorite","Favorita"),oslTr("sala:xpUI.recap.share.reaction","reação"),200,510);
-  drawStat("👥",String(playerCount),oslTr("sala:xpUI.recap.share.players","jogadores"),600,510);
-  ctx.fillStyle = "rgba(212,168,75,0.5)"; ctx.font = "400 16px system-ui"; ctx.fillText("preludiojogos.com", 400, 680);
+  const cx = W / 2;
+
+  // ── Fundo ─────────────────────────────────────────────────────────────────
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, "#05040E"); bgGrad.addColorStop(0.5, "#0E0B1F"); bgGrad.addColorStop(1, "#05040E");
+  ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, W, H);
+
+  // Glow radial central
+  const glow = ctx.createRadialGradient(cx, H * 0.42, 0, cx, H * 0.42, 560);
+  glow.addColorStop(0, "rgba(191,155,84,0.13)"); glow.addColorStop(1, "transparent");
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+
+  // ── Anéis decorativos ────────────────────────────────────────────────────
+  const drawRing = (r, alpha) => {
+    ctx.beginPath(); ctx.arc(cx, H * 0.42, r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(191,155,84,${alpha})`; ctx.lineWidth = 1; ctx.stroke();
+  };
+  drawRing(480, 0.07); drawRing(380, 0.1); drawRing(260, 0.12);
+
+  // ── Borda do card ─────────────────────────────────────────────────────────
+  const pad = 48, cardX = pad, cardY = H * 0.08, cardW = W - pad * 2, cardH = H * 0.84;
+  ctx.strokeStyle = "rgba(191,155,84,0.35)"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(cardX, cardY, cardW, cardH, 40); ctx.stroke();
+  // inner glow border
+  ctx.strokeStyle = "rgba(191,155,84,0.08)"; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.roundRect(cardX + 3, cardY + 3, cardW - 6, cardH - 6, 38); ctx.stroke();
+
+  // ── Brand topo ────────────────────────────────────────────────────────────
+  ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "rgba(191,155,84,0.45)";
+  ctx.font = "700 28px system-ui,-apple-system,sans-serif";
+  ctx.letterSpacing = "12px";
+  ctx.fillText("O SEXTOLUGAR", cx, cardY + 90);
+  ctx.letterSpacing = "0px";
+
+  // Linha ornamental
+  const lineY = cardY + 118;
+  const lineGrad = ctx.createLinearGradient(cardX + 60, 0, cardX + cardW - 60, 0);
+  lineGrad.addColorStop(0, "transparent"); lineGrad.addColorStop(0.5, "rgba(191,155,84,0.4)"); lineGrad.addColorStop(1, "transparent");
+  ctx.strokeStyle = lineGrad; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(cardX + 60, lineY); ctx.lineTo(cardX + cardW - 60, lineY); ctx.stroke();
+
+  // ── Eyebrow ──────────────────────────────────────────────────────────────
+  ctx.fillStyle = "rgba(191,155,84,0.55)";
+  ctx.font = "600 22px system-ui,-apple-system,sans-serif";
+  ctx.letterSpacing = "8px";
+  ctx.fillText("FIM DO RITUAL", cx, cardY + 175);
+  ctx.letterSpacing = "0px";
+
+  // ── Título principal (serif italic via measureText trick) ─────────────────
+  ctx.fillStyle = "#EDE0C4";
+  ctx.font = "italic 900 96px Georgia,'Times New Roman',serif";
+  ctx.fillText("Ritual Concluído", cx, cardY + 300);
+
+  // ── Divisor ornamental ────────────────────────────────────────────────────
+  ctx.fillStyle = "rgba(191,155,84,0.5)";
+  ctx.font = "400 24px system-ui";
+  ctx.fillText("◆  ◆  ◆", cx, cardY + 360);
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  const statsTop = cardY + 420;
+  const statColW = cardW / 2;
+
+  const drawStatBlock = (value, label, bx, by) => {
+    // Top gold accent
+    const accentGrad = ctx.createLinearGradient(bx + 80, 0, bx + statColW - 80, 0);
+    accentGrad.addColorStop(0, "transparent"); accentGrad.addColorStop(0.5, "rgba(191,155,84,0.5)"); accentGrad.addColorStop(1, "transparent");
+    ctx.strokeStyle = accentGrad; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(bx + 80, by); ctx.lineTo(bx + statColW - 80, by); ctx.stroke();
+
+    // Value
+    ctx.fillStyle = "#EDE0C4";
+    ctx.font = "900 80px system-ui,-apple-system,sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(value, bx + statColW / 2, by + 90);
+
+    // Label
+    ctx.fillStyle = "rgba(191,155,84,0.5)";
+    ctx.font = "600 20px system-ui,-apple-system,sans-serif";
+    ctx.letterSpacing = "4px";
+    ctx.fillText(label.toUpperCase(), bx + statColW / 2, by + 122);
+    ctx.letterSpacing = "0px";
+  };
+
+  // Vertical divider between stats
+  ctx.strokeStyle = "rgba(191,155,84,0.15)"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(cx, statsTop - 20); ctx.lineTo(cx, statsTop + 250); ctx.stroke();
+  // Horizontal divider
+  ctx.beginPath(); ctx.moveTo(cardX + 60, statsTop + 160); ctx.lineTo(cardX + cardW - 60, statsTop + 160); ctx.stroke();
+
+  drawStatBlock(String(cards), oslTr("sala:xpUI.recap.share.cards", "Cartas"), cardX, statsTop);
+  drawStatBlock(String(duration), oslTr("sala:xpUI.recap.share.duration", "Duração"), cardX + statColW, statsTop);
+  drawStatBlock(topEmoji || "🎭", oslTr("sala:xpUI.recap.share.reaction", "Reação"), cardX, statsTop + 170);
+  drawStatBlock(String(playerCount), oslTr("sala:xpUI.recap.share.players", "Jogadores"), cardX + statColW, statsTop + 170);
+
+  // ── Frase de encerramento ─────────────────────────────────────────────────
+  const phraseY = statsTop + 430;
+  ctx.fillStyle = "rgba(191,155,84,0.3)";
+  ctx.font = "italic 32px Georgia,'Times New Roman',serif";
+  ctx.fillText("Cada sessão deixa uma marca.", cx, phraseY);
+
+  // Linha separadora inferior
+  const sep2 = phraseY + 50;
+  ctx.strokeStyle = lineGrad; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(cardX + 60, sep2); ctx.lineTo(cardX + cardW - 60, sep2); ctx.stroke();
+
+  // ── URL / watermark ───────────────────────────────────────────────────────
+  ctx.fillStyle = "rgba(191,155,84,0.35)";
+  ctx.font = "500 28px system-ui,-apple-system,sans-serif";
+  ctx.letterSpacing = "3px";
+  ctx.fillText("preludiojogos.com", cx, cardY + cardH - 60);
+  ctx.letterSpacing = "0px";
+
+  // ── Exportar ──────────────────────────────────────────────────────────────
   canvas.toBlob(async (blob) => {
-    const file = new File([blob], "osl-recap.png", { type:"image/png" });
-    if (navigator.canShare?.({ files:[file] })) { try { await navigator.share({ files:[file], title: oslTr("sala:xpUI.recap.shareTitle", "SEXTOLUGAR — Ritual Concluído") }); return; } catch (_) {} }
-    const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "osl-recap.png"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+    const file = new File([blob], "osl-recap.png", { type: "image/png" });
+    if (navigator.canShare?.({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: oslTr("sala:xpUI.recap.shareTitle", "SEXTOLUGAR — Ritual Concluído") }); return; } catch (_) {}
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "osl-recap.png"; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
   }, "image/png");
 }
