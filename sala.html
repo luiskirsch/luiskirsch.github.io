@@ -6580,11 +6580,24 @@
   }
 
   /* ── LOBBY MODE — AAA full-bleed (ativo via body.lobby-mode) ──────── */
+  /* Cadeia de altura: layout → mainArea → tableCard → gameTableGrid */
+  body.lobby-mode .layout{
+    height:calc(100svh - 116px);
+    align-items:stretch;
+  }
+  body.lobby-mode .mainArea{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+  }
   body.lobby-mode .tableCard{
     background:transparent!important;
     border:none!important;
     box-shadow:none!important;
-    overflow:visible!important;
+    overflow:hidden!important;
+    flex:1;
+    min-height:0;
+    border-radius:20px!important;
   }
   body.lobby-mode .tableCard::before{ display:none!important; }
   body.lobby-mode .tableHead{
@@ -8263,6 +8276,9 @@
   </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 
+<!-- ── Lobby Mode: adicionado imediatamente, sem depender do Three.js CDN ── -->
+<script>document.body.classList.add("lobby-mode");</script>
+
 <!-- ── Lobby 3D Viewer ────────────────────────────────────────────────────── -->
 <script type="module">
   import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
@@ -8351,10 +8367,10 @@
   const pPos = new Float32Array(N * 3);
   const pVel = [];
   for (let i = 0; i < N; i++) {
-    const r = Math.random() * 3.4, θ = Math.random() * Math.PI * 2;
-    pPos[i*3]   = Math.cos(θ) * r;
+    const r = Math.random() * 3.4, th = Math.random() * Math.PI * 2;
+    pPos[i*3]   = Math.cos(th) * r;
     pPos[i*3+1] = Math.random() * 5;
-    pPos[i*3+2] = Math.sin(θ) * r;
+    pPos[i*3+2] = Math.sin(th) * r;
     pVel.push({ x: (Math.random()-.5)*.003, y: .004+Math.random()*.008, z: (Math.random()-.5)*.003 });
   }
   const pGeo = new THREE.BufferGeometry();
@@ -8435,8 +8451,8 @@
       v.x += (Math.random()-.5)*.00018;
       v.z += (Math.random()-.5)*.00018;
       if (pPos[i*3+1] > 5.2) {
-        const r2=Math.random()*2.6, θ2=Math.random()*Math.PI*2;
-        pPos[i*3]=Math.cos(θ2)*r2; pPos[i*3+1]=-0.1; pPos[i*3+2]=Math.sin(θ2)*r2;
+        const r2=Math.random()*2.6, th2=Math.random()*Math.PI*2;
+        pPos[i*3]=Math.cos(th2)*r2; pPos[i*3+1]=-0.1; pPos[i*3+2]=Math.sin(th2)*r2;
         v.x=(Math.random()-.5)*.003; v.y=.004+Math.random()*.008; v.z=(Math.random()-.5)*.003;
       }
     }
