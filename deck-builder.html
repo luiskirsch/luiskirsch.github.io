@@ -204,12 +204,12 @@
 
     .cardChip {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       background: rgba(255,255,255,.04);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 8px 12px;
+      padding: 10px 12px;
       cursor: pointer;
       transition: background .2s, border-color .2s;
       gap: 8px;
@@ -220,9 +220,11 @@
       border-color: rgba(80,180,80,.4);
     }
     .cardChip__info { flex: 1; min-width: 0; }
-    .cardChip__title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cardChip__type { font-size: 11px; color: var(--muted); }
-    .cardChip__effect { font-size: 10px; color: var(--gold); margin-top: 2px; }
+    .cardChip__title { font-size: 13px; font-weight: 700; color: var(--fg); margin-bottom: 2px; }
+    .cardChip__type { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+    .cardChip__text { font-size: 12px; color: rgba(240,232,216,.72); line-height: 1.5; margin-bottom: 3px; }
+    .cardChip__rule { font-size: 11px; color: var(--gold); font-style: italic; margin-top: 3px; line-height: 1.4; }
+    .cardChip__effect { font-size: 10px; color: var(--gold); margin-top: 3px; }
     .cardChip__action {
       background: none;
       border: none;
@@ -232,6 +234,7 @@
       line-height: 1;
       padding: 2px;
       flex-shrink: 0;
+      margin-top: 1px;
     }
     .cardChip--inDeck .cardChip__action { color: var(--red); }
 
@@ -670,6 +673,8 @@
                   <div class="cardChip__info">
                     <div class="cardChip__title">${card.title}</div>
                     <div class="cardChip__type">${card.type}</div>
+                    ${card.text ? `<div class="cardChip__text">${card.text}</div>` : ""}
+                    ${card.rule ? `<div class="cardChip__rule">⚠ ${card.rule}</div>` : ""}
                     ${CARD_EFFECT_LABELS[card.title] ? `<div class="cardChip__effect">${CARD_EFFECT_LABELS[card.title]}</div>` : ""}
                   </div>
                   <button class="cardChip__action" title="${deckTitles.has(card.title) ? "Remover" : "Adicionar"}">
@@ -689,6 +694,8 @@
                     <div class="cardChip__info">
                       <div class="cardChip__title">${card.title}</div>
                       <div class="cardChip__type">${card.type}</div>
+                      ${card.text ? `<div class="cardChip__text">${card.text}</div>` : ""}
+                      ${card.rule ? `<div class="cardChip__rule">⚠ ${card.rule}</div>` : ""}
                       ${CARD_EFFECT_LABELS[card.title] ? `<div class="cardChip__effect">${CARD_EFFECT_LABELS[card.title]}</div>` : ""}
                     </div>
                     <button class="cardChip__action" title="Remover">−</button>
