@@ -19,10 +19,10 @@ const OSL_EFFECTS = {
         const pool = players.length > 1 ? players.filter(p => p.id !== S.participantId) : players;
         if (effect.target === "two_random") {
           const s = [...pool].sort(() => Math.random() - 0.5);
-          base.params = { targetId: s[0]?.id || "", targetName: s[0]?.name || "Jogador", targetId2: s[1]?.id || s[0]?.id || "", targetName2: s[1]?.name || s[0]?.name || "Jogador" };
+          base.params = { targetId: s[0]?.id || "", targetName: s[0]?.name || oslTr("sala:players.fallbackName", "Jogador"), targetId2: s[1]?.id || s[0]?.id || "", targetName2: s[1]?.name || s[0]?.name || oslTr("sala:players.fallbackName", "Jogador") };
         } else {
           const t = pool[Math.floor(Math.random() * pool.length)] || players[0];
-          base.params = { targetId: t?.id || "", targetName: t?.name || "Jogador" };
+          base.params = { targetId: t?.id || "", targetName: t?.name || oslTr("sala:players.fallbackName", "Jogador") };
         }
         break;
       }
@@ -36,7 +36,10 @@ const OSL_EFFECTS = {
   },
   prepareCard(card, players) {
     if (!card) return { battlecry: null, deathrattle: null };
-    const effects = OSL_CARD_EFFECTS[card.title] || {};
+    // OSL_CARD_EFFECTS usa títulos PT como chave; quando a carta foi localizada,
+    // _origTitle guarda o título original PT pra lookup correto em qualquer locale.
+    const lookupKey = card._origTitle || card.title;
+    const effects = OSL_CARD_EFFECTS[lookupKey] || {};
     return {
       battlecry:   effects.battlecry   ? this.prepare(effects.battlecry,   players, "battlecry")   : null,
       deathrattle: effects.deathrattle ? this.prepare(effects.deathrattle, players, "deathrattle") : null
@@ -101,10 +104,7 @@ export function updateRitualButtons() {
   const effectBlocking = !!(S.currentActiveEffect && !S.currentActiveEffect.resolved);
   if (revealCardBtn) {
     revealCardBtn.disabled  = !canControl || S.ritualDeck.length === 0 || effectBlocking;
-    const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
-    revealCardBtn.textContent = (S.ritualStarted && !S.currentCard)
-      ? _t('cards:ui.revealFirst', "Revelar Primeira Carta")
-      : _t('cards:ui.revealNext', "Revelar Próxima Carta");
+    revealCardBtn.textContent = (S.ritualStarted && !S.currentCard) ? oslTr("sala:table.revealFirst", "Revelar Primeira Carta") : oslTr("sala:table.revealNext", "Revelar Próxima Carta");
   }
   if (resetRitualBtn) resetRitualBtn.disabled = !S.isHost || !S.ritualStarted;
 }
@@ -117,27 +117,24 @@ export function setRitualWaitingState() {
   S.ritualStarted = false;
   S.ritualDeck    = [];
   OSL_TENSION.stop();
+  document.getElementById("revealPanel")?.style.setProperty("display","none");
+  window._lobby3d?.show();
   const ritualCardType  = document.getElementById("ritualCardType");
   const ritualCardTitle = document.getElementById("ritualCardTitle");
   const ritualCardText  = document.getElementById("ritualCardText");
   const deckInfo        = document.getElementById("deckInfo");
   const historyList     = document.getElementById("historyList");
-  const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
   if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
-  if (ritualCardTitle) ritualCardTitle.textContent = _t('cards:ui.waiting', "Aguardando revelação");
-  if (ritualCardText)  ritualCardText.innerHTML    = _t('cards:ui.noReveal', "O anfitrião ainda não revelou a próxima carta.");
+  if (ritualCardTitle) ritualCardTitle.textContent = oslTr("sala:table.ritualWaitingTitle", "Aguardando revelação");
+  if (ritualCardText)  ritualCardText.innerHTML    = oslTr("sala:ritual.noNextCardYet", "O anfitrião ainda não revelou a próxima carta.");
   const _mid = document.getElementById("ritualMidDetails");
   const _div = document.getElementById("ritualCardDivider");
   const _phr = document.getElementById("ritualCardPhrase");
   if (_mid) _mid.style.display = "none";
   if (_div) _div.style.display = "none";
   if (_phr) _phr.style.display = "none";
-  if (deckInfo) deckInfo.innerHTML = _t('cards:ui.deckWaitStart', "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.");
-  if (historyList) {
-    const wt = _t('cards:ui.history.waitingType', 'Aguardando');
-    const nr = _t('cards:ui.history.noneRevealed', 'Nenhuma carta revelada ainda.');
-    historyList.innerHTML = `<div class="historyItem"><div class="historyType">${wt}</div><div class="historyText">${nr}</div></div>`;
-  }
+  if (deckInfo) deckInfo.innerHTML = oslTr("sala:table.deckWaitingFull", "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.");
+  if (historyList) historyList.innerHTML = `<div class="historyItem"><div class="historyType">${oslTr("sala:history.waiting", "Aguardando")}</div><div class="historyText">${oslTr("sala:history.none", "Nenhuma carta revelada ainda.")}</div></div>`;
   updateRitualButtons();
 }
 
@@ -162,16 +159,59 @@ export async function saveRitualState(card, activeEffect, pendingDeathrattle) {
   } catch (error) { console.error("Erro ao salvar estado do ritual:", error); }
 }
 
+// ── Auto-fit do título da carta ───────────────────────────────────────────────
+// Reduz font-size até nenhuma palavra do título precisar quebrar no meio.
+// Usa canvas offscreen para medir sem causar reflow.
+let _fitObserver = null;
+
+function autoFitCardTitle() {
+  const el = document.getElementById("ritualCardTitle");
+  if (!el) return;
+  const frame = el.closest(".ritualCardFrame");
+  if (!frame) return;
+  const maxW = frame.clientWidth - 24; // 12px padding em cada lado
+  if (maxW <= 0) return; // card ainda não visível
+
+  // Reset para valor CSS base antes de medir
+  el.style.fontSize = "";
+  let size = parseFloat(getComputedStyle(el).fontSize) || 17;
+
+  const words = (el.textContent || "").split(/\s+/).filter(Boolean);
+  if (!words.length) return;
+
+  // Canvas estático reutilizado — zero DOM extra
+  if (!autoFitCardTitle._canvas) autoFitCardTitle._canvas = document.createElement("canvas");
+  const ctx = autoFitCardTitle._canvas.getContext("2d");
+  const lsRatio = 0.05; // letter-spacing: 0.05em do CSS
+
+  for (let i = 0; i < 24; i++) {
+    ctx.font = `700 ${size}px Georgia,"Times New Roman",serif`;
+    const lsPx = size * lsRatio;
+    const longest = words.reduce((max, w) => {
+      const pw = ctx.measureText(w).width + (w.length - 1) * lsPx;
+      return pw > max ? pw : max;
+    }, 0);
+    if (longest <= maxW) break;
+    size = Math.max(10, size - 0.5);
+    el.style.fontSize = `${size}px`;
+  }
+}
+
+function ensureCardTitleObserver() {
+  if (_fitObserver) return;
+  const wrap = document.getElementById("ritualCardWrap");
+  if (!wrap || typeof ResizeObserver === "undefined") return;
+  _fitObserver = new ResizeObserver(autoFitCardTitle);
+  _fitObserver.observe(wrap);
+}
+
 // ── Aplicar conteúdo de carta no DOM ─────────────────────────────────────────
 export function applyCardContent(card) {
-  // Localiza pra display (PT preservado em _origTitle pra effects lookup em outros lugares).
-  // Card ORIGINAL (com title PT) continua em S.currentCard; só localizamos pra renderizar.
-  const localized = (card && window.OSL_I18N?.localizeCard)
-    ? window.OSL_I18N.localizeCard(card)
-    : card;
-
-  const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
-
+  // Localiza title/text/rule/subrule/phrase pelo idioma corrente.
+  // Cards são gravados em PT no Firestore (consistência cross-locale).
+  if (card && window.OSL_I18N && typeof window.OSL_I18N.localizeCard === "function") {
+    card = window.OSL_I18N.localizeCard(card);
+  }
   const ritualCardType  = document.getElementById("ritualCardType");
   const ritualCardTitle = document.getElementById("ritualCardTitle");
   const ritualCardText  = document.getElementById("ritualCardText");
@@ -183,32 +223,41 @@ export function applyCardContent(card) {
   const cardDivider   = document.getElementById("ritualCardDivider");
   const cardPhrase    = document.getElementById("ritualCardPhrase");
 
-  if (localized) {
-    if (ritualCardType)  ritualCardType.textContent = (localized.type || _t('cards:types.Ritual', 'Ritual')).toUpperCase();
-    if (ritualCardTitle) ritualCardTitle.textContent = localized.title || _t('cards:ui.history.fallbackTitle', "Carta revelada");
-    // XSS-safe: escapeHtml ANTES da conversão newline→<br>
-    if (ritualCardText)  ritualCardText.innerHTML = escapeHtml(localized.text || "").replace(/\n/g, "<br>");
-    const hasRule = !!localized.rule, hasSubrule = !!localized.subrule, hasPhrase = !!localized.phrase;
+  if (card) {
+    if (ritualCardType)  ritualCardType.textContent = (card.type || oslTr("sala:table.typeRitual", "Ritual")).toUpperCase();
+    if (ritualCardTitle) {
+      ritualCardTitle.style.fontSize = ""; // reset antes de setar novo conteúdo
+      ritualCardTitle.textContent = card.title || oslTr("sala:ritual.fallbackTitle", "Carta revelada");
+      // Ajusta font-size após dois frames (card precisa ter layout calculado)
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        autoFitCardTitle();
+        ensureCardTitleObserver();
+      }));
+    }
+    if (ritualCardText)  ritualCardText.innerHTML = (card.text || "").replace(/\n/g, "<br>");
+    const hasRule = !!card.rule, hasSubrule = !!card.subrule, hasPhrase = !!card.phrase;
     if (midDetails)    midDetails.style.display    = (hasRule || hasSubrule) ? "" : "none";
-    if (cardRule)      cardRule.innerHTML           = hasRule ? escapeHtml(localized.rule).replace(/\n/g, "<br>") : "";
+    if (cardRule)      cardRule.innerHTML           = hasRule ? card.rule.replace(/\n/g, "<br>") : "";
     if (subruleDivider)subruleDivider.style.display = hasSubrule ? "" : "none";
-    if (cardSubrule)   { cardSubrule.style.display = hasSubrule ? "" : "none"; if (hasSubrule) cardSubrule.innerHTML = escapeHtml(localized.subrule).replace(/\n/g, "<br>"); }
+    if (cardSubrule)   { cardSubrule.style.display = hasSubrule ? "" : "none"; if (hasSubrule) cardSubrule.innerHTML = card.subrule.replace(/\n/g, "<br>"); }
     if (cardDivider)   cardDivider.style.display   = hasPhrase ? "" : "none";
-    if (cardPhrase)    { cardPhrase.style.display  = hasPhrase ? "" : "none"; if (hasPhrase) cardPhrase.innerHTML = escapeHtml(localized.phrase).replace(/\n/g, "<br>"); }
+    if (cardPhrase)    { cardPhrase.style.display  = hasPhrase ? "" : "none"; if (hasPhrase) cardPhrase.innerHTML = card.phrase.replace(/\n/g, "<br>"); }
   } else {
-    if (ritualCardType)  ritualCardType.textContent  = _t('cards:types.Ritual', 'RITUAL').toUpperCase();
-    if (ritualCardTitle) ritualCardTitle.textContent = _t('cards:ui.waiting', "Aguardando revelação");
-    if (ritualCardText)  ritualCardText.innerHTML    = _t('cards:ui.noReveal', "O anfitrião ainda não revelou a próxima carta.");
+    if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
+    if (ritualCardTitle) ritualCardTitle.textContent = oslTr("sala:table.ritualWaitingTitle", "Aguardando revelação");
+    if (ritualCardText)  ritualCardText.innerHTML    = oslTr("sala:ritual.noNextCardYet", "O anfitrião ainda não revelou a próxima carta.");
     if (midDetails)  midDetails.style.display  = "none";
     if (cardDivider) cardDivider.style.display = "none";
     if (cardPhrase)  cardPhrase.style.display  = "none";
   }
   if (deckInfo) {
     if (S.ritualDeck.length > 0) {
-      deckInfo.innerHTML = _t('cards:ui.deckRemaining', `${S.ritualDeck.length} carta(s) restante(s) no deck.<br>O anfitrião pode revelar a próxima.`)
-        .replace('{{count}}', S.ritualDeck.length);
+      const hint = S.isHost
+        ? oslTr("sala:ritual.deckRemainingHost", "{{count}} carta(s) restante(s) · Quando o grupo responder, revele a próxima.", { count: S.ritualDeck.length })
+        : oslTr("sala:ritual.deckRemainingPlayer", "{{count}} carta(s) restante(s) · Responda via vídeo ou no chat — o anfitrião revela a próxima.", { count: S.ritualDeck.length });
+      deckInfo.innerHTML = hint;
     } else {
-      deckInfo.innerHTML = _t('cards:ui.deckEmpty', "O deck chegou ao fim.<br>Reinicie o ritual para embaralhar novamente.");
+      deckInfo.innerHTML = oslTr("sala:ritual.deckEnded", "O deck chegou ao fim.<br>Reinicie o ritual para embaralhar novamente.");
     }
   }
   updateRitualButtons();
@@ -242,6 +291,8 @@ export async function revealNextRitualCard() {
 // ── Iniciar deck ──────────────────────────────────────────────────────────────
 export async function startRitualDeck() {
   S.ritualStarted = true;
+  window._lobby3d?.hide();
+  document.getElementById("revealPanel")?.style.setProperty("display","");
   S.ritualDeck    = await buildRitualDeck();
 
   await setDoc(S.ritualRef, {
@@ -257,6 +308,7 @@ export async function startRitualDeck() {
 
   S.ritualCardsRevealedCount = 0;
   S.missionsAssigned = false;
+  // Grava em PT para consistência cross-locale; histórico é localizado no render.
   await addHistoryItem("Ritual", "O ritual foi iniciado.");
   await setDoc(S.ritualRef, { sessionStartedAt: Date.now() }, { merge: true });
 
@@ -274,6 +326,8 @@ export async function startRitualDeck() {
 export async function resetRitualDeck() {
   if (!S.isHost) return;
   S.ritualStarted = true;
+  window._lobby3d?.hide();
+  document.getElementById("revealPanel")?.style.setProperty("display","");
   S.ritualDeck    = await buildRitualDeck();
 
   await setDoc(S.ritualRef, {
@@ -306,7 +360,7 @@ export function renderRitualCardFromState(data) {
   if (S.ritualCardsRevealedCount >= 2) S.missionsAssigned = true;
 
   const gameStatusEl = document.getElementById("gameStatus");
-  if (gameStatusEl) gameStatusEl.textContent = started ? "Jogando" : "Espera";
+  if (gameStatusEl) gameStatusEl.textContent = started ? oslTr("sala:topbar.status.playing", "Jogando") : oslTr("sala:topbar.status.waiting", "Espera");
 
   S.currentActiveEffect = data?.activeEffect || null;
   renderActiveEffect(S.currentActiveEffect);
@@ -322,10 +376,13 @@ export function renderRitualCardFromState(data) {
 
   if (!started) { S.lastRevealedCardKey = null; setRitualWaitingState(); return; }
 
+  window._lobby3d?.hide();
+  document.getElementById("revealPanel")?.style.setProperty("display","");
+
   // Auto-start recording quando ritual começa
   if (S.isHost && !S.autoRecordingStarted) {
     S.autoRecordingStarted = true;
-    fetch("https://osl-video-server-staging.up.railway.app/recording/auto-start", {
+    fetch("https://osl-video-server-production.up.railway.app/recording/auto-start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ roomId: S.roomCode })
@@ -360,9 +417,41 @@ export function bindRitual(onSnapshotFn, orderByFn, queryFn) {
     if (!historyList) return;
     const docs = snapshot.docs.map(d => d.data());
     if (!docs.length) {
-      historyList.innerHTML = `<div class="historyItem"><div class="historyType">Aguardando</div><div class="historyText">Nenhuma carta revelada ainda.</div></div>`;
+      historyList.innerHTML = `<div class="historyItem"><div class="historyType">${oslTr("sala:history.waiting", "Aguardando")}</div><div class="historyText">${oslTr("sala:history.none", "Nenhuma carta revelada ainda.")}</div></div>`;
       return;
     }
-    historyList.innerHTML = docs.map(item => `<div class="historyItem"><div class="historyType">${escapeHtml(item.type || "Ritual")}</div><div class="historyText">${escapeHtml(item.text || "")}</div></div>`).join("");
+    // Mensagens system gravadas em PT no histórico
+    const HIST_TEXT_PT_TO_KEY = {
+      "O ritual foi iniciado.": "sala:table.ritualStarted",
+      "O ritual foi reiniciado.": "sala:table.ritualReset"
+    };
+    historyList.innerHTML = docs.map(item => {
+      const rawType = item.type || "Ritual";
+      const localizedType = oslTr(`cards:types.${rawType}`, rawType);
+      const rawText = item.text || "";
+      let localizedText = rawText;
+      // Mensagens system conhecidas
+      const sysKey = HIST_TEXT_PT_TO_KEY[rawText];
+      if (sysKey) {
+        localizedText = oslTr(sysKey, rawText);
+      } else {
+        // Tenta localizar title de carta pelo slug (busca em basic + todos os packs)
+        const t = window.OSL_I18N && window.OSL_I18N.t;
+        const slugify = window.OSL_I18N && window.OSL_I18N.slugify;
+        if (rawText && t && slugify) {
+          const slug = slugify(rawText);
+          if (slug) {
+            const packs = ["basic", "packs.conexao", "packs.verdades", "packs.conflito", "packs.segredos", "packs.casais"];
+            for (const ns of packs) {
+              const key = `cards:${ns}.${slug}.title`;
+              const v = t(key);
+              const stub = key.includes(':') ? key.split(':')[1] : key;
+              if (typeof v === "string" && v && v !== key && v !== stub) { localizedText = v; break; }
+            }
+          }
+        }
+      }
+      return `<div class="historyItem"><div class="historyType">${escapeHtml(localizedType)}</div><div class="historyText">${escapeHtml(localizedText)}</div></div>`;
+    }).join("");
   });
 }

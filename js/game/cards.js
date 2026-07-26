@@ -117,6 +117,8 @@ export function setRitualWaitingState() {
   S.ritualStarted = false;
   S.ritualDeck    = [];
   OSL_TENSION.stop();
+  document.getElementById("revealPanel")?.style.setProperty("display","none");
+  window._lobby3d?.show();
   const ritualCardType  = document.getElementById("ritualCardType");
   const ritualCardTitle = document.getElementById("ritualCardTitle");
   const ritualCardText  = document.getElementById("ritualCardText");
@@ -289,6 +291,8 @@ export async function revealNextRitualCard() {
 // ── Iniciar deck ──────────────────────────────────────────────────────────────
 export async function startRitualDeck() {
   S.ritualStarted = true;
+  window._lobby3d?.hide();
+  document.getElementById("revealPanel")?.style.setProperty("display","");
   S.ritualDeck    = await buildRitualDeck();
 
   await setDoc(S.ritualRef, {
@@ -322,6 +326,8 @@ export async function startRitualDeck() {
 export async function resetRitualDeck() {
   if (!S.isHost) return;
   S.ritualStarted = true;
+  window._lobby3d?.hide();
+  document.getElementById("revealPanel")?.style.setProperty("display","");
   S.ritualDeck    = await buildRitualDeck();
 
   await setDoc(S.ritualRef, {
@@ -369,6 +375,9 @@ export function renderRitualCardFromState(data) {
   if (voteResult?.winner) showVoteResultOverlay(voteResult.winner, voteResult.resolvedAt);
 
   if (!started) { S.lastRevealedCardKey = null; setRitualWaitingState(); return; }
+
+  window._lobby3d?.hide();
+  document.getElementById("revealPanel")?.style.setProperty("display","");
 
   // Auto-start recording quando ritual começa
   if (S.isHost && !S.autoRecordingStarted) {

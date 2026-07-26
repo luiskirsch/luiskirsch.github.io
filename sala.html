@@ -6533,6 +6533,48 @@
   .coinModal__pkg--highlight .coinModal__pkgBtn:hover{ filter:brightness(1.1); }
 
   /* ═══════════════════════════════════════════════════════════════════
+     FEATURE: LOBBY 3D VIEWER
+  ═══════════════════════════════════════════════════════════════════ */
+  .lobbyViewer{
+    position:relative;
+    width:100%;flex:1;
+    min-height:0;
+    overflow:hidden;
+    border-radius:20px;
+    background:#080502;
+    display:flex;align-items:stretch;
+  }
+  #lobbyCanvas{
+    position:absolute;inset:0;
+    width:100%!important;height:100%!important;
+    display:block;
+  }
+  .lobbyViewer__loading{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    color:rgba(200,150,60,.45);
+    font-size:11px;letter-spacing:.14em;font-family:'Georgia',serif;
+    pointer-events:none;
+    transition:opacity .5s;
+  }
+  .lobbyViewer__loading.done{ opacity:0; }
+  @keyframes lobbyDotPulse{
+    0%,100%{opacity:.3;transform:scale(.8)}
+    50%{opacity:1;transform:scale(1.1)}
+  }
+  .lobbyViewer__loadingDot{
+    width:14px;height:14px;border-radius:50%;
+    background:rgba(200,150,60,.5);
+    animation:lobbyDotPulse 1.4s ease-in-out infinite;
+  }
+  .lobbyViewer__hint{
+    position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+    font-size:10px;letter-spacing:.1em;color:rgba(200,150,60,.28);
+    pointer-events:none;white-space:nowrap;
+    font-family:'Georgia',serif;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
      FEATURE: MODAL DE DECK
   ═══════════════════════════════════════════════════════════════════ */
   @keyframes deckModalIn  { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
@@ -6794,7 +6836,17 @@
                   <button class="aiDetectToast__dismiss" onclick="dismissAIDetection()">Ignorar</button>
                 </div>
 
-                <div class="revealPanel">
+                <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
+                <div id="lobbyViewer" class="lobbyViewer">
+                  <canvas id="lobbyCanvas"></canvas>
+                  <div id="lobbyLoading" class="lobbyViewer__loading">
+                    <div class="lobbyViewer__loadingDot"></div>
+                    <span>PREPARANDO O RITUAL</span>
+                  </div>
+                  <div class="lobbyViewer__hint">Arraste para girar</div>
+                </div>
+
+                <div class="revealPanel" id="revealPanel" style="display:none">
                   <!-- Sombra da carta projetada sobre a mesa -->
                   <div class="ritualCardShadow" id="ritualCardShadow"></div>
                   <div class="revealStage">
@@ -8116,6 +8168,132 @@
     })();
   </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+
+<!-- ── Lobby 3D Viewer ────────────────────────────────────────────────────── -->
+<script type="module">
+  import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
+  import { GLTFLoader }    from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js";
+  import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js";
+
+  const viewer  = document.getElementById("lobbyViewer");
+  const canvas  = document.getElementById("lobbyCanvas");
+  const loading = document.getElementById("lobbyLoading");
+  if (!viewer || !canvas) throw new Error("lobby elements missing");
+
+  // ── Scene ──────────────────────────────────────────────────────────
+  const scene    = new THREE.Scene();
+  scene.background = new THREE.Color(0x080502);
+  scene.fog        = new THREE.FogExp2(0x080502, 0.06);
+
+  // ── Camera ─────────────────────────────────────────────────────────
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 60);
+  camera.position.set(0, 1.55, 3.2);
+
+  // ── Renderer ───────────────────────────────────────────────────────
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+  renderer.toneMapping       = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.outputColorSpace  = THREE.SRGBColorSpace;
+
+  // ── Lights ─────────────────────────────────────────────────────────
+  scene.add(new THREE.AmbientLight(0x251508, 1.8));
+
+  const key = new THREE.DirectionalLight(0xd4a84b, 3.5);
+  key.position.set(1.5, 4, 2.5);
+  key.castShadow = true;
+  key.shadow.mapSize.set(1024, 1024);
+  key.shadow.camera.near = 0.5;
+  key.shadow.camera.far  = 20;
+  scene.add(key);
+
+  const fill = new THREE.DirectionalLight(0x1a0a35, 1.2);
+  fill.position.set(-2, 2, -1);
+  scene.add(fill);
+
+  const rim = new THREE.DirectionalLight(0xb07820, 1.8);
+  rim.position.set(-1.5, 3, -3);
+  scene.add(rim);
+
+  // ── Floor glow disc ────────────────────────────────────────────────
+  const discGeo = new THREE.CircleGeometry(1.1, 64);
+  const discMat = new THREE.MeshBasicMaterial({
+    color: 0xd4a84b, transparent: true, opacity: 0.045, depthWrite: false
+  });
+  const disc = new THREE.Mesh(discGeo, discMat);
+  disc.rotation.x = -Math.PI / 2;
+  disc.position.y = 0.001;
+  scene.add(disc);
+
+  // ── Controls ───────────────────────────────────────────────────────
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.target.set(0, 1.0, 0);
+  controls.enableZoom   = false;
+  controls.enablePan    = false;
+  controls.rotateSpeed  = 0.55;
+  controls.minPolarAngle = Math.PI * 0.28;
+  controls.maxPolarAngle = Math.PI * 0.62;
+  controls.autoRotate      = true;
+  controls.autoRotateSpeed = 0.45;
+  controls.update();
+
+  let autoRotateTimer = null;
+  renderer.domElement.addEventListener("pointerdown", () => {
+    controls.autoRotate = false;
+    clearTimeout(autoRotateTimer);
+  });
+  renderer.domElement.addEventListener("pointerup", () => {
+    autoRotateTimer = setTimeout(() => { controls.autoRotate = true; }, 4000);
+  });
+
+  // ── Load GLB ───────────────────────────────────────────────────────
+  new GLTFLoader().load("/assets/characters/host.glb", (gltf) => {
+    const model = gltf.scene;
+    model.traverse(n => {
+      if (n.isMesh) { n.castShadow = true; n.receiveShadow = true; }
+    });
+
+    const box    = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= box.min.y;
+
+    // Scale to ~1.8m height
+    const height = box.max.y - box.min.y;
+    if (height > 0) model.scale.setScalar(1.8 / height);
+
+    scene.add(model);
+    loading.classList.add("done");
+    setTimeout(() => { loading.style.display = "none"; }, 600);
+  }, undefined, (err) => { console.error("lobby GLB:", err); });
+
+  // ── Resize ─────────────────────────────────────────────────────────
+  function resize() {
+    const w = viewer.clientWidth, h = viewer.clientHeight;
+    if (!w || !h) return;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }
+  new ResizeObserver(resize).observe(viewer);
+  resize();
+
+  // ── Animate ────────────────────────────────────────────────────────
+  (function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  })();
+
+  // ── Expose toggle so cards.js can call it ──────────────────────────
+  window._lobby3d = {
+    show() { viewer.style.display = "flex"; resize(); },
+    hide() { viewer.style.display = "none"; }
+  };
+</script>
 
   <!-- ── Partidas Rolando: refresh + painel espectador ─────────────────────── -->
   <script>
