@@ -6541,37 +6541,127 @@
     height:clamp(300px, calc(100svh - 300px), 580px);
     overflow:hidden;
     border-radius:20px;
-    background:#080502;
+    background:#04020a;
     display:flex;align-items:stretch;
   }
   #lobbyCanvas{
     position:absolute;inset:0;
     width:100%!important;height:100%!important;
-    display:block;
+    display:block;z-index:0;
+  }
+  .lobbyViewer__vignette{
+    position:absolute;inset:0;pointer-events:none;z-index:2;
+    background:
+      radial-gradient(ellipse 90% 55% at 50% 108%, transparent 18%, rgba(4,2,10,.8) 100%),
+      radial-gradient(ellipse 90% 25% at 50% -5%, rgba(4,2,10,.6) 0%, transparent 100%),
+      linear-gradient(90deg, rgba(4,2,10,.7) 0%, transparent 20%, transparent 80%, rgba(4,2,10,.7) 100%);
   }
   .lobbyViewer__loading{
-    position:absolute;inset:0;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-    color:rgba(200,150,60,.45);
-    font-size:11px;letter-spacing:.14em;font-family:'Georgia',serif;
+    position:absolute;inset:0;z-index:5;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    color:rgba(200,150,60,.55);
+    font-size:10px;letter-spacing:.24em;font-family:'Georgia',serif;
     pointer-events:none;
-    transition:opacity .5s;
+    transition:opacity .6s;
   }
   .lobbyViewer__loading.done{ opacity:0; }
-  @keyframes lobbyDotPulse{
-    0%,100%{opacity:.3;transform:scale(.8)}
-    50%{opacity:1;transform:scale(1.1)}
+  .lobbyViewer__ring{
+    width:54px;height:54px;
+    animation:lobbyRingSpin 2.2s linear infinite;
+    overflow:visible;
+    filter:drop-shadow(0 0 6px rgba(200,150,60,.35));
   }
-  .lobbyViewer__loadingDot{
-    width:14px;height:14px;border-radius:50%;
-    background:rgba(200,150,60,.5);
-    animation:lobbyDotPulse 1.4s ease-in-out infinite;
-  }
+  @keyframes lobbyRingSpin{ to{ transform:rotate(360deg); } }
   .lobbyViewer__hint{
-    position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
-    font-size:10px;letter-spacing:.1em;color:rgba(200,150,60,.28);
+    position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+    font-size:10px;letter-spacing:.12em;color:rgba(200,150,60,.2);
     pointer-events:none;white-space:nowrap;
-    font-family:'Georgia',serif;
+    font-family:'Georgia',serif;z-index:6;
+  }
+
+  /* ── LOBBY MODE — AAA full-bleed (ativo via body.lobby-mode) ──────── */
+  body.lobby-mode .tableCard{
+    background:transparent!important;
+    border:none!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+  }
+  body.lobby-mode .tableCard::before{ display:none!important; }
+  body.lobby-mode .tableHead{
+    background:linear-gradient(180deg,rgba(4,2,10,.92) 0%,rgba(4,2,10,0) 100%)!important;
+    border-bottom:none!important;
+    position:relative;z-index:50;
+    padding-bottom:38px!important;
+    margin-bottom:-26px;
+  }
+  body.lobby-mode .gameTableGrid{
+    position:relative!important;
+    display:block!important;
+    height:clamp(400px,calc(100svh - 165px),1020px)!important;
+    min-height:unset!important;
+    overflow:hidden!important;
+    border-radius:0 0 20px 20px!important;
+  }
+  body.lobby-mode .gameTableGrid::before,
+  body.lobby-mode .gameTableGrid::after{
+    content:"";position:absolute;
+    width:38px;height:38px;
+    border-color:rgba(212,168,75,.22);border-style:solid;
+    z-index:30;pointer-events:none;
+  }
+  body.lobby-mode .gameTableGrid::before{ top:18px;left:18px;border-width:2px 0 0 2px; }
+  body.lobby-mode .gameTableGrid::after { bottom:18px;right:18px;border-width:0 2px 2px 0; }
+  body.lobby-mode #lobbyViewer{
+    position:absolute!important;inset:0!important;
+    width:100%!important;height:100%!important;
+    border-radius:0!important;z-index:1!important;
+  }
+  body.lobby-mode .cardCenter{
+    position:absolute!important;inset:0!important;
+    background:transparent!important;
+    display:flex!important;flex-direction:column!important;
+    align-items:center!important;justify-content:flex-end!important;
+    padding-bottom:32px!important;gap:0!important;
+    z-index:10!important;pointer-events:none!important;
+    height:auto!important;min-height:unset!important;
+  }
+  body.lobby-mode #deckInfo{
+    background:rgba(4,2,10,.75)!important;
+    backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;
+    border:1px solid rgba(212,168,75,.2)!important;
+    border-radius:6px!important;padding:9px 34px!important;
+    font-size:10px!important;letter-spacing:.26em!important;text-transform:uppercase!important;
+    color:rgba(212,168,75,.62)!important;font-family:'Georgia',serif!important;
+    text-align:center!important;pointer-events:none!important;
+    white-space:nowrap!important;margin:0!important;
+  }
+  body.lobby-mode .effectPanel{ z-index:20!important;pointer-events:auto!important; }
+  body.lobby-mode .aiDetectToast{ z-index:20!important;pointer-events:auto!important; }
+  body.lobby-mode .videoSelfSlot{ display:none!important; }
+  body.lobby-mode .arenaControls{ z-index:20!important;pointer-events:auto!important; }
+  body.lobby-mode .videoColLeft,
+  body.lobby-mode .videoColRight{
+    position:absolute!important;top:50%!important;transform:translateY(-50%)!important;
+    z-index:20!important;display:flex!important;flex-direction:column!important;
+    gap:14px!important;width:clamp(72px,9vw,105px)!important;pointer-events:auto!important;
+  }
+  body.lobby-mode .videoColLeft { left:18px!important; }
+  body.lobby-mode .videoColRight{ right:18px!important; }
+  body.lobby-mode .videoColLeft .videoTile,
+  body.lobby-mode .videoColRight .videoTile{
+    background:rgba(4,2,10,.68)!important;
+    backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;
+    border:1px solid rgba(212,168,75,.14)!important;
+    border-left:2px solid rgba(212,168,75,.48)!important;
+    box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 20px rgba(212,168,75,.04) inset!important;
+    border-radius:10px!important;overflow:hidden!important;
+  }
+  body.lobby-mode .videoColLeft .videoColPlaceholder,
+  body.lobby-mode .videoColRight .videoColPlaceholder{
+    background:rgba(4,2,10,.32)!important;
+    backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;
+    border:1px solid rgba(212,168,75,.07)!important;
+    border-radius:10px!important;min-height:72px!important;width:100%!important;
   }
 
   /* ═══════════════════════════════════════════════════════════════════
@@ -6839,9 +6929,13 @@
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
                 <div id="lobbyViewer" class="lobbyViewer">
                   <canvas id="lobbyCanvas"></canvas>
+                  <div class="lobbyViewer__vignette" aria-hidden="true"></div>
                   <div id="lobbyLoading" class="lobbyViewer__loading">
-                    <div class="lobbyViewer__loadingDot"></div>
-                    <span>PREPARANDO O RITUAL</span>
+                    <svg class="lobbyViewer__ring" viewBox="0 0 44 44" aria-hidden="true">
+                      <circle cx="22" cy="22" r="17" fill="none" stroke="rgba(200,150,60,.12)" stroke-width="2.5"/>
+                      <circle cx="22" cy="22" r="17" fill="none" stroke="rgba(200,150,60,.72)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="26 81"/>
+                    </svg>
+                    <span id="lobbyLoadingText">PREPARANDO O RITUAL</span>
                   </div>
                   <div class="lobbyViewer__hint">Arraste para girar</div>
                 </div>
@@ -8181,13 +8275,13 @@
   if (!viewer || !canvas) throw new Error("lobby elements missing");
 
   // ── Scene ──────────────────────────────────────────────────────────
-  const scene    = new THREE.Scene();
-  scene.background = new THREE.Color(0x080502);
-  scene.fog        = new THREE.FogExp2(0x080502, 0.06);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x04020a);
+  scene.fog = new THREE.FogExp2(0x04020a, 0.036);
 
   // ── Camera ─────────────────────────────────────────────────────────
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 60);
-  camera.position.set(0, 1.55, 3.2);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 80);
+  camera.position.set(0, 1.45, 3.9);
 
   // ── Renderer ───────────────────────────────────────────────────────
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
@@ -8195,80 +8289,121 @@
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
   renderer.toneMapping       = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMappingExposure = 1.3;
   renderer.outputColorSpace  = THREE.SRGBColorSpace;
 
   // ── Lights ─────────────────────────────────────────────────────────
-  scene.add(new THREE.AmbientLight(0x251508, 1.8));
+  scene.add(new THREE.AmbientLight(0x150822, 2.5));
 
-  const key = new THREE.DirectionalLight(0xd4a84b, 3.5);
-  key.position.set(1.5, 4, 2.5);
+  const key = new THREE.DirectionalLight(0xe8b840, 5.0);
+  key.position.set(2.5, 5.5, 3.5);
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
   key.shadow.camera.near = 0.5;
   key.shadow.camera.far  = 20;
+  key.shadow.bias = -0.001;
   scene.add(key);
 
-  const fill = new THREE.DirectionalLight(0x1a0a35, 1.2);
-  fill.position.set(-2, 2, -1);
+  const fill = new THREE.DirectionalLight(0x2a1050, 2.5);
+  fill.position.set(-3.5, 2.5, -1.5);
   scene.add(fill);
 
-  const rim = new THREE.DirectionalLight(0xb07820, 1.8);
-  rim.position.set(-1.5, 3, -3);
+  const rim = new THREE.DirectionalLight(0xd09030, 3.0);
+  rim.position.set(-2.5, 4.5, -4.5);
   scene.add(rim);
 
-  // ── Floor glow disc ────────────────────────────────────────────────
-  const discGeo = new THREE.CircleGeometry(1.1, 64);
-  const discMat = new THREE.MeshBasicMaterial({
-    color: 0xd4a84b, transparent: true, opacity: 0.045, depthWrite: false
+  const godray = new THREE.PointLight(0x6010b0, 5.5, 7.5);
+  godray.position.set(0, 3.8, -2.8);
+  scene.add(godray);
+
+  const bounce = new THREE.PointLight(0xc07020, 1.8, 3.5);
+  bounce.position.set(0, 0.2, 1.5);
+  scene.add(bounce);
+
+  // ── Floor ──────────────────────────────────────────────────────────
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(20, 20),
+    new THREE.MeshStandardMaterial({ color: 0x03010a, roughness: 0.96, metalness: 0 })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // ── Pulsing floor rings ─────────────────────────────────────────────
+  const rings = [];
+  [0.5, 0.95, 1.48, 2.1].forEach((r, i) => {
+    const mat = new THREE.MeshBasicMaterial({ color: 0xd4a030, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
+    const mesh = new THREE.Mesh(new THREE.RingGeometry(r, r + 0.011, 80), mat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.y = 0.002;
+    scene.add(mesh);
+    rings.push({ mesh, phase: i * (Math.PI * 0.6), baseOp: 0.24 - i * 0.045 });
   });
-  const disc = new THREE.Mesh(discGeo, discMat);
+
+  const discMat = new THREE.MeshBasicMaterial({ color: 0xd4a030, transparent: true, opacity: 0.08, depthWrite: false });
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(0.48, 64), discMat);
   disc.rotation.x = -Math.PI / 2;
   disc.position.y = 0.001;
   scene.add(disc);
 
+  // ── Particles (embers) ─────────────────────────────────────────────
+  const N = 130;
+  const pPos = new Float32Array(N * 3);
+  const pVel = [];
+  for (let i = 0; i < N; i++) {
+    const r = Math.random() * 3.4, θ = Math.random() * Math.PI * 2;
+    pPos[i*3]   = Math.cos(θ) * r;
+    pPos[i*3+1] = Math.random() * 5;
+    pPos[i*3+2] = Math.sin(θ) * r;
+    pVel.push({ x: (Math.random()-.5)*.003, y: .004+Math.random()*.008, z: (Math.random()-.5)*.003 });
+  }
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
+  const pMat = new THREE.PointsMaterial({ color: 0xe8a030, size: .02, transparent: true, opacity: .48, depthWrite: false, sizeAttenuation: true });
+  scene.add(new THREE.Points(pGeo, pMat));
+
   // ── Controls ───────────────────────────────────────────────────────
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 1.0, 0);
-  controls.enableZoom   = false;
-  controls.enablePan    = false;
-  controls.rotateSpeed  = 0.55;
-  controls.minPolarAngle = Math.PI * 0.28;
-  controls.maxPolarAngle = Math.PI * 0.62;
+  controls.target.set(0, 1.05, 0);
+  controls.enableZoom      = false;
+  controls.enablePan       = false;
+  controls.rotateSpeed     = 0.55;
+  controls.minPolarAngle   = Math.PI * 0.23;
+  controls.maxPolarAngle   = Math.PI * 0.55;
   controls.autoRotate      = true;
-  controls.autoRotateSpeed = 0.45;
+  controls.autoRotateSpeed = 0.5;
   controls.update();
 
-  let autoRotateTimer = null;
-  renderer.domElement.addEventListener("pointerdown", () => {
-    controls.autoRotate = false;
-    clearTimeout(autoRotateTimer);
-  });
-  renderer.domElement.addEventListener("pointerup", () => {
-    autoRotateTimer = setTimeout(() => { controls.autoRotate = true; }, 4000);
-  });
+  let arTimer = null;
+  renderer.domElement.addEventListener("pointerdown", () => { controls.autoRotate=false; clearTimeout(arTimer); });
+  renderer.domElement.addEventListener("pointerup",   () => { arTimer=setTimeout(()=>{ controls.autoRotate=true; }, 4000); });
 
-  // ── Load GLB ───────────────────────────────────────────────────────
-  new GLTFLoader().load("/assets/characters/host.glb", (gltf) => {
-    const model = gltf.scene;
-    model.traverse(n => {
-      if (n.isMesh) { n.castShadow = true; n.receiveShadow = true; }
-    });
-
-    const box    = new THREE.Box3().setFromObject(model);
-    const center = box.getCenter(new THREE.Vector3());
-    model.position.x -= center.x;
-    model.position.z -= center.z;
-    model.position.y -= box.min.y;
-
-    // Scale to ~1.8m height
-    const height = box.max.y - box.min.y;
-    if (height > 0) model.scale.setScalar(1.8 / height);
-
-    scene.add(model);
-    loading.classList.add("done");
-    setTimeout(() => { loading.style.display = "none"; }, 600);
-  }, undefined, (err) => { console.error("lobby GLB:", err); });
+  // ── GLB loader ─────────────────────────────────────────────────────
+  const loadingText = document.getElementById("lobbyLoadingText");
+  new GLTFLoader().load(
+    "/assets/characters/host.glb",
+    (gltf) => {
+      const model = gltf.scene;
+      model.traverse(n => { if (n.isMesh) { n.castShadow=true; n.receiveShadow=true; } });
+      const box = new THREE.Box3().setFromObject(model);
+      const c   = box.getCenter(new THREE.Vector3());
+      model.position.x -= c.x;
+      model.position.z -= c.z;
+      model.position.y -= box.min.y;
+      const h = box.max.y - box.min.y;
+      if (h > 0) model.scale.setScalar(1.92 / h);
+      scene.add(model);
+      loading.classList.add("done");
+      setTimeout(() => { loading.style.display = "none"; }, 650);
+    },
+    (prog) => {
+      if (prog.total > 0 && loadingText) {
+        const pct = Math.round(prog.loaded / prog.total * 100);
+        loadingText.textContent = pct < 100 ? `CARREGANDO  ${pct}%` : "PREPARANDO O RITUAL";
+      }
+    },
+    (err) => { console.error("lobby GLB:", err); }
+  );
 
   // ── Resize ─────────────────────────────────────────────────────────
   function resize() {
@@ -8281,17 +8416,44 @@
   new ResizeObserver(resize).observe(viewer);
   resize();
 
-  // ── Animate ────────────────────────────────────────────────────────
+  // ── Render loop ────────────────────────────────────────────────────
+  const clock = new THREE.Clock();
   (function animate() {
     requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+
+    rings.forEach(r => {
+      const wave = Math.sin(t * 1.2 + r.phase) * .5 + .5;
+      r.mesh.material.opacity = r.baseOp * (0.35 + wave * 0.85);
+      const s = 1 + wave * .05;
+      r.mesh.scale.set(s, s, s);
+    });
+
+    for (let i = 0; i < N; i++) {
+      const v = pVel[i];
+      pPos[i*3]   += v.x; pPos[i*3+1] += v.y; pPos[i*3+2] += v.z;
+      v.x += (Math.random()-.5)*.00018;
+      v.z += (Math.random()-.5)*.00018;
+      if (pPos[i*3+1] > 5.2) {
+        const r2=Math.random()*2.6, θ2=Math.random()*Math.PI*2;
+        pPos[i*3]=Math.cos(θ2)*r2; pPos[i*3+1]=-0.1; pPos[i*3+2]=Math.sin(θ2)*r2;
+        v.x=(Math.random()-.5)*.003; v.y=.004+Math.random()*.008; v.z=(Math.random()-.5)*.003;
+      }
+    }
+    pGeo.attributes.position.needsUpdate = true;
+
+    discMat.opacity = 0.055 + Math.sin(t * .65) * .038;
+    godray.intensity = 5.0 + Math.sin(t * .85 + 1.2) * 1.4;
+
     controls.update();
     renderer.render(scene, camera);
   })();
 
-  // ── Expose toggle so cards.js can call it ──────────────────────────
+  // ── Bridge ─────────────────────────────────────────────────────────
+  document.body.classList.add("lobby-mode");
   window._lobby3d = {
-    show() { viewer.style.display = "flex"; resize(); },
-    hide() { viewer.style.display = "none"; }
+    show() { viewer.style.display="flex"; document.body.classList.add("lobby-mode"); resize(); },
+    hide() { viewer.style.display="none"; document.body.classList.remove("lobby-mode"); }
   };
 </script>
 
