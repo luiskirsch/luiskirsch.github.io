@@ -181,6 +181,9 @@ window.dismissAIDetection = dismissAIDetection;
     document.getElementById("coinBalanceWrap")?.addEventListener("click", () => {
       import("./game/rewards.js").then(({ showCoinModal }) => showCoinModal(S._currentXp));
     });
+    document.getElementById("deckModalBtn")?.addEventListener("click", () => {
+      import("./game/deckModal.js").then(({ showDeckModal }) => showDeckModal());
+    });
   } catch (error) {
     console.error(error);
     const footerStatusEl = document.getElementById("footerStatus");
