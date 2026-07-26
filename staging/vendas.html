@@ -1,15 +1,13 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR" data-i18n-ns="vendas">
 <head>
-<meta name="robots" content="noindex, nofollow">
-<script src="_staging.js" defer></script>
 <script src="./i18n/init.js" defer></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title data-i18n="vendas:title">SEXTOLUGAR — Loja</title>
 <script>/* osl-theme-bootstrap inline · zero flash · src=js/theme-bootstrap.js */!function(){"use strict";var O="osl_theme_override",C="osl_active_theme_cached",F="osl_theme_full_cached_",S="osl_theme_css_cached_",t=null;try{t=new URL(location.href).searchParams.get("theme")}catch(e){}if(!t)try{t=localStorage.getItem(O)}catch(e){}if(!t)try{t=localStorage.getItem(C)}catch(e){}if(!t||"default"===t)return;var T=null;try{var r=localStorage.getItem(F+t);r&&(T=JSON.parse(r))}catch(e){}if(!T||T.id!==t)return;var R=document.documentElement;if(T.cssVars)for(var k in T.cssVars)Object.prototype.hasOwnProperty.call(T.cssVars,k)&&R.style.setProperty(k,T.cssVars[k]);if(!document.getElementById("osl-theme-early")){var eS=document.createElement("style");eS.id="osl-theme-early";eS.appendChild(document.createTextNode(":root.osl-theme-"+t+"{background:var(--bg)!important;color:var(--text)!important}html.osl-theme-"+t+" body{background:var(--bg)!important;color:var(--text)!important}"));var H=document.head||R;H.firstChild?H.insertBefore(eS,H.firstChild):H.appendChild(eS)}var cs=["osl-theme","osl-theme-"+t];if(T.bodyClass)String(T.bodyClass).split(/\s+/).forEach(function(c){c&&cs.push(c)});cs.forEach(function(c){R.classList.add(c)});function aB(b){cs.forEach(function(c){b.classList.add(c)})}if(document.body)aB(document.body);else{var mo=new MutationObserver(function(){if(document.body){aB(document.body);mo.disconnect()}});mo.observe(R,{childList:!0})}if(!document.getElementById("osl-theme-stylesheet")){var cT=null;try{cT=localStorage.getItem(S+t)}catch(e){}if(cT){var sE=document.createElement("style");sE.id="osl-theme-stylesheet";sE.appendChild(document.createTextNode(cT));(document.head||R).appendChild(sE)}else if(T.stylesheet){var h=T.stylesheet;if(!/^https?:|^\//.test(h)){var p=location.pathname,b=0===p.indexOf("/staging/")?"/staging/":"/";h=b+h.replace(/^\.\//,"")}var L=document.createElement("link");L.id="osl-theme-stylesheet";L.rel="stylesheet";L.href=h;(document.head||R).appendChild(L)}}window.OSL_THEME_BOOTSTRAPPED=t}();</script>
 <script src="js/theme-loader.js"></script>
 <script type="module" src="js/active-theme.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title data-i18n="vendas:title">SEXTOLUGAR — Loja</title>
 <link rel="icon" href="./favicon.png">
 <link rel="preload" href="./img/luis.png" as="image" fetchpriority="high">
 <style>
@@ -340,6 +338,46 @@ body{
 }
 .pack-buy-btn:hover{background:rgba(230,192,123,.16);border-color:rgba(230,192,123,.52);}
 
+.pack-coins-row{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding-top:8px;border-top:1px solid rgba(255,255,255,.06);
+  margin-top:-4px;
+}
+.pack-coins-price{
+  font-size:13px;font-weight:700;color:rgba(240,192,64,.75);
+  display:flex;align-items:center;gap:4px;
+}
+.pack-coins-btn{
+  flex-shrink:0;padding:7px 12px;border-radius:8px;
+  border:1px solid rgba(240,192,64,.3);
+  background:rgba(240,192,64,.07);
+  color:rgba(240,192,64,.85);font-size:12px;font-weight:700;
+  cursor:pointer;transition:.15s;font-family:inherit;white-space:nowrap;
+}
+.pack-coins-btn:hover{background:rgba(240,192,64,.15);border-color:rgba(240,192,64,.55);}
+.pack-coins-btn:disabled{opacity:.4;cursor:not-allowed;}
+.pack-coins-msg{
+  font-size:11px;margin-top:3px;padding:0 2px;
+  color:rgba(255,255,255,.4);line-height:1.4;
+}
+.pack-coins-msg--err{color:rgba(255,100,100,.8);}
+.pack-coins-msg--ok{color:rgba(100,220,120,.8);}
+.pack-coins-confirm{
+  display:flex;gap:6px;align-items:center;margin-top:3px;
+}
+.pack-coins-confirm button{
+  padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:inherit;border:1px solid;
+}
+.pack-coins-confirm__yes{
+  background:rgba(240,192,64,.18);border-color:rgba(240,192,64,.5)!important;
+  color:#f0c040;
+}
+.pack-coins-confirm__no{
+  background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15)!important;
+  color:rgba(255,255,255,.4);
+}
+
 /* ---- IN-SESSION LIST ---- */
 .insession-list{
   display:grid;
@@ -653,7 +691,7 @@ body{
 <!-- BINARY PORTRAIT BANNER -->
 <div class="binary-banner">
   <canvas id="binaryScatter"></canvas>
-  <img src="./img/luis.png" data-theme-img="vendas.heroBanner" alt="" fetchpriority="high" decoding="sync" style="height:100%;width:auto;display:block;position:relative;z-index:2;opacity:0.82;filter:sepia(0.25) brightness(0.90);">
+  <img src="./img/luis.png" alt="" fetchpriority="high" decoding="sync" style="height:100%;width:auto;display:block;position:relative;z-index:2;opacity:0.82;filter:sepia(0.25) brightness(0.90);">
   <span class="binary-banner__label" data-i18n="vendas:banner.label">Luis Kirsch · Criador</span>
 </div>
 
@@ -664,9 +702,9 @@ body{
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-eyebrow" data-theme-key="vendas.heroEyebrow" data-i18n="vendas:hero.eyebrow">Prelúdio Jogos · 2026</div>
-  <h1 data-theme-key="vendas.heroTitle" data-i18n-html="vendas:hero.title">Jogar é grátis.<br>Ir fundo tem preço.</h1>
-  <p class="hero-sub" data-theme-key="vendas.heroSub" data-i18n="vendas:hero.sub">Entre, crie uma sala, jogue com seu grupo — sem pagar nada. Os pacotes existem para quem quer que a experiência vá mais longe.</p>
+  <div class="hero-eyebrow" data-i18n="vendas:hero.eyebrow">Prelúdio Jogos · 2026</div>
+  <h1 data-i18n-html="vendas:hero.title">Jogar é grátis.<br>Ir fundo tem preço.</h1>
+  <p class="hero-sub" data-i18n="vendas:hero.sub">Entre, crie uma sala, jogue com seu grupo — sem pagar nada. Os pacotes existem para quem quer que a experiência vá mais longe.</p>
 
   <div class="hero-free">
     <span class="hero-free-item" data-i18n="vendas:hero.free.1">Criar e entrar em salas</span>
@@ -675,8 +713,8 @@ body{
     <span class="hero-free-item" data-i18n="vendas:hero.free.4">Sessões completas</span>
   </div>
 
-  <a href="./entrada.html" class="hero-btn" data-theme-key="vendas.heroCta" data-i18n="vendas:hero.cta">Jogar Agora — Grátis</a>
-  <p class="hero-note" data-theme-key="vendas.heroNote" data-i18n="vendas:hero.note">Sem assinatura · Grátis para sempre</p>
+  <a href="./entrada.html" class="hero-btn" data-i18n="vendas:hero.cta">Jogar Agora — Grátis</a>
+  <p class="hero-note" data-i18n="vendas:hero.note">Sem assinatura · Grátis para sempre</p>
 </section>
 
 <div class="divider"></div>
@@ -701,6 +739,11 @@ body{
         <span class="pack-price">R$ 9,90</span>
       </div>
       <button class="pack-buy-btn" data-i18n="vendas:sections.packs.buyButton" onclick="abrirCheckout('pacote-conexao','vendas:sections.packs.items.conexao.checkoutTitle','9.90')">Adicionar ao ritual</button>
+      <div class="pack-coins-row" id="coins-row-pacote-conexao">
+        <span class="pack-coins-price">🪙 600 moedas</span>
+        <button class="pack-coins-btn" onclick="comprarComMoedas('pacote-conexao',600,'Conexão',this)">Usar moedas</button>
+      </div>
+      <div class="pack-coins-msg" id="coins-msg-pacote-conexao"></div>
     </div>
 
     <div class="pack-card pack-verdades">
@@ -713,6 +756,11 @@ body{
         <span class="pack-price">R$ 12,90</span>
       </div>
       <button class="pack-buy-btn" data-i18n="vendas:sections.packs.buyButton" onclick="abrirCheckout('pacote-verdades','vendas:sections.packs.items.verdades.checkoutTitle','12.90')">Adicionar ao ritual</button>
+      <div class="pack-coins-row" id="coins-row-pacote-verdades">
+        <span class="pack-coins-price">🪙 800 moedas</span>
+        <button class="pack-coins-btn" onclick="comprarComMoedas('pacote-verdades',800,'Verdades',this)">Usar moedas</button>
+      </div>
+      <div class="pack-coins-msg" id="coins-msg-pacote-verdades"></div>
     </div>
 
     <div class="pack-card pack-conflito">
@@ -725,6 +773,11 @@ body{
         <span class="pack-price">R$ 14,90</span>
       </div>
       <button class="pack-buy-btn" data-i18n="vendas:sections.packs.buyButton" onclick="abrirCheckout('pacote-conflito','vendas:sections.packs.items.conflito.checkoutTitle','14.90')">Adicionar ao ritual</button>
+      <div class="pack-coins-row" id="coins-row-pacote-conflito">
+        <span class="pack-coins-price">🪙 950 moedas</span>
+        <button class="pack-coins-btn" onclick="comprarComMoedas('pacote-conflito',950,'Conflito',this)">Usar moedas</button>
+      </div>
+      <div class="pack-coins-msg" id="coins-msg-pacote-conflito"></div>
     </div>
 
     <div class="pack-card pack-segredos">
@@ -737,6 +790,11 @@ body{
         <span class="pack-price">R$ 19,90</span>
       </div>
       <button class="pack-buy-btn" data-i18n="vendas:sections.packs.buyButton" onclick="abrirCheckout('pacote-segredos','vendas:sections.packs.items.segredos.checkoutTitle','19.90')">Adicionar ao ritual</button>
+      <div class="pack-coins-row" id="coins-row-pacote-segredos">
+        <span class="pack-coins-price">🪙 1.200 moedas</span>
+        <button class="pack-coins-btn" onclick="comprarComMoedas('pacote-segredos',1200,'Segredos',this)">Usar moedas</button>
+      </div>
+      <div class="pack-coins-msg" id="coins-msg-pacote-segredos"></div>
     </div>
 
     <div class="pack-card pack-casais">
@@ -749,6 +807,11 @@ body{
         <span class="pack-price">R$ 19,90</span>
       </div>
       <button class="pack-buy-btn" data-i18n="vendas:sections.packs.buyButton" onclick="abrirCheckout('pacote-casais','vendas:sections.packs.items.casais.checkoutTitle','19.90')">Adicionar ao ritual</button>
+      <div class="pack-coins-row" id="coins-row-pacote-casais">
+        <span class="pack-coins-price">🪙 1.500 moedas</span>
+        <button class="pack-coins-btn" onclick="comprarComMoedas('pacote-casais',1500,'Casais',this)">Usar moedas</button>
+      </div>
+      <div class="pack-coins-msg" id="coins-msg-pacote-casais"></div>
     </div>
 
   </div>
@@ -952,28 +1015,19 @@ body{
 </footer>
 
 <script>
-  const OSL_BASE = "https://osl-video-server-staging.up.railway.app";
+  const OSL_BASE = "https://osl-video-server.onrender.com";
   let currentProduct = null;
 
-  // Helper i18n com fallback (init.js pode ainda não estar pronto no momento de cliques iniciais)
-  const _t = (key, fallback, vars) => (window.OSL_I18N?.t(key, vars)) || fallback;
+  function abrirCheckout(produtoId, nome, valor) {
+    currentProduct = { id: produtoId, nome, valor };
 
-  function abrirCheckout(produtoId, tituloOuKey, valor) {
-    // tituloOuKey aceita: chave i18n (ex "vendas:sections.packs.items.conexao.checkoutTitle")
-    // OU literal (fallback de pageload sem i18n).
-    const titulo = (tituloOuKey && tituloOuKey.includes(':'))
-      ? _t(tituloOuKey, tituloOuKey)
-      : tituloOuKey;
-
-    currentProduct = { id: produtoId, nome: titulo, valor };
-
-    document.getElementById("checkoutTitle").textContent = titulo;
+    document.getElementById("checkoutTitle").textContent = nome;
     document.getElementById("checkoutPrice").textContent = "R$ " + valor.replace(".", ",");
     document.getElementById("checkoutStatus").textContent = "";
 
     const btn = document.getElementById("checkoutSubmit");
     btn.disabled = false;
-    btn.textContent = _t('vendas:checkout.buttons.submit', "Ir para o pagamento");
+    btn.textContent = "Ir para o pagamento";
 
     const savedNome = localStorage.getItem("osl_checkout_nome") || "";
     const savedEmail = localStorage.getItem("osl_checkout_email") || "";
@@ -999,6 +1053,71 @@ body{
     if (e.key === "Escape") fecharCheckout();
   });
 
+  // ── Compra com moedas ──
+  function getCoins() { try { return parseInt(localStorage.getItem("osl_coins") || "0", 10); } catch(_) { return 0; } }
+  function setCoins(v) { try { localStorage.setItem("osl_coins", String(Math.max(0, v))); } catch(_) {} }
+  function getCompras() { try { return JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch(_) { return []; } }
+  function jaComprou(produtoId) { return getCompras().some(c => c.produto === produtoId); }
+
+  function initCoinsBtns() {
+    ["pacote-conexao","pacote-verdades","pacote-conflito","pacote-segredos","pacote-casais"].forEach(id => {
+      const msgEl = document.getElementById("coins-msg-" + id);
+      const btn   = document.querySelector(`#coins-row-${id} .pack-coins-btn`);
+      if (!btn || !msgEl) return;
+      if (jaComprou(id)) {
+        btn.disabled = true; btn.textContent = "✓ Desbloqueado";
+        msgEl.className = "pack-coins-msg pack-coins-msg--ok";
+        msgEl.textContent = "Pacote já está no seu deck.";
+      }
+    });
+  }
+  document.addEventListener("DOMContentLoaded", initCoinsBtns);
+
+  function comprarComMoedas(produtoId, custo, nome, btnEl) {
+    const msgEl = document.getElementById("coins-msg-" + produtoId);
+    if (!msgEl) return;
+
+    if (jaComprou(produtoId)) {
+      btnEl.disabled = true; btnEl.textContent = "✓ Desbloqueado";
+      msgEl.className = "pack-coins-msg pack-coins-msg--ok";
+      msgEl.textContent = "Pacote já está no seu deck."; return;
+    }
+
+    const saldo = getCoins();
+    if (saldo < custo) {
+      msgEl.className = "pack-coins-msg pack-coins-msg--err";
+      msgEl.textContent = `Saldo insuficiente. Você tem 🪙 ${saldo.toLocaleString("pt-BR")} (faltam ${(custo - saldo).toLocaleString("pt-BR")}).`;
+      return;
+    }
+
+    // Confirmação inline
+    msgEl.className = "pack-coins-msg";
+    msgEl.innerHTML = `<div class="pack-coins-confirm">
+      <span style="color:rgba(255,255,255,.55);font-size:11px">Gastar 🪙 ${custo.toLocaleString("pt-BR")} em "${nome}"?</span>
+      <button class="pack-coins-confirm__yes" id="coins-yes-${produtoId}">Confirmar</button>
+      <button class="pack-coins-confirm__no"  id="coins-no-${produtoId}">Cancelar</button>
+    </div>`;
+
+    document.getElementById("coins-yes-" + produtoId).onclick = () => {
+      const saldoNow = getCoins();
+      if (saldoNow < custo) {
+        msgEl.className = "pack-coins-msg pack-coins-msg--err";
+        msgEl.textContent = "Saldo mudou. Tente novamente."; return;
+      }
+      setCoins(saldoNow - custo);
+      const compras = getCompras();
+      compras.push({ produto: produtoId, ref: "coins_" + Date.now(), via: "coins", ts: Date.now() });
+      try { localStorage.setItem("osl_compras", JSON.stringify(compras)); } catch(_) {}
+
+      btnEl.disabled = true; btnEl.textContent = "✓ Desbloqueado";
+      msgEl.className = "pack-coins-msg pack-coins-msg--ok";
+      msgEl.textContent = `Pacote ${nome} desbloqueado! 🪙 ${getCoins().toLocaleString("pt-BR")} restantes.`;
+    };
+    document.getElementById("coins-no-" + produtoId).onclick = () => {
+      msgEl.className = "pack-coins-msg"; msgEl.innerHTML = "";
+    };
+  }
+
   async function processarCompra() {
     if (!currentProduct) return;
 
@@ -1007,22 +1126,19 @@ body{
     const statusEl = document.getElementById("checkoutStatus");
     const btn = document.getElementById("checkoutSubmit");
 
-    if (!nome) { statusEl.textContent = _t('vendas:checkout.errors.needName', "Digite seu nome."); return; }
+    if (!nome) { statusEl.textContent = "Digite seu nome."; return; }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      statusEl.textContent = _t('vendas:checkout.errors.invalidEmail', "Digite um e-mail válido."); return;
+      statusEl.textContent = "Digite um e-mail válido."; return;
     }
 
     btn.disabled = true;
-    btn.textContent = _t('vendas:checkout.buttons.creating', "Criando pagamento...");
+    btn.textContent = "Criando pagamento...";
     statusEl.textContent = "";
 
     try {
       const res = await fetch(OSL_BASE + "/criar-pagamento", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Locale": (window.OSL_I18N?.locale && window.OSL_I18N.locale()) || "pt-BR"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nome,
           email,
@@ -1034,13 +1150,12 @@ body{
       const data = await res.json();
 
       if (!res.ok || !data.url) {
-        let erro = _t('vendas:checkout.errors.createFailed', "Não foi possível criar o pagamento.");
-        // Tenta traduzir error code do backend via backend.json
-        const localized = window.OSL_I18N?.localizeBackendError?.(data);
-        if (localized) erro = localized;
+        let erro = "Não foi possível criar o pagamento.";
+        if (data?.message) erro = data.message;
+        else if (data?.error) erro = data.error;
         statusEl.textContent = erro;
         btn.disabled = false;
-        btn.textContent = _t('vendas:checkout.buttons.submit', "Ir para o pagamento");
+        btn.textContent = "Ir para o pagamento";
         return;
       }
 
@@ -1051,13 +1166,13 @@ body{
       window.location.href = data.url;
 
     } catch(e) {
-      statusEl.textContent = _t('vendas:checkout.errors.serverError', "Erro ao conectar com o servidor. Tente novamente.");
+      statusEl.textContent = "Erro ao conectar com o servidor. Tente novamente.";
       btn.disabled = false;
-      btn.textContent = _t('vendas:checkout.buttons.submit', "Ir para o pagamento");
+      btn.textContent = "Ir para o pagamento";
     }
   }
 </script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 <script type="module">
   (function() {
     const canvas = document.getElementById('binaryScatter');

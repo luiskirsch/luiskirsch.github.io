@@ -338,6 +338,46 @@ body{
 }
 .pack-buy-btn:hover{background:rgba(230,192,123,.16);border-color:rgba(230,192,123,.52);}
 
+.pack-coins-row{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding-top:8px;border-top:1px solid rgba(255,255,255,.06);
+  margin-top:-4px;
+}
+.pack-coins-price{
+  font-size:13px;font-weight:700;color:rgba(240,192,64,.75);
+  display:flex;align-items:center;gap:4px;
+}
+.pack-coins-btn{
+  flex-shrink:0;padding:7px 12px;border-radius:8px;
+  border:1px solid rgba(240,192,64,.3);
+  background:rgba(240,192,64,.07);
+  color:rgba(240,192,64,.85);font-size:12px;font-weight:700;
+  cursor:pointer;transition:.15s;font-family:inherit;white-space:nowrap;
+}
+.pack-coins-btn:hover{background:rgba(240,192,64,.15);border-color:rgba(240,192,64,.55);}
+.pack-coins-btn:disabled{opacity:.4;cursor:not-allowed;}
+.pack-coins-msg{
+  font-size:11px;margin-top:3px;padding:0 2px;
+  color:rgba(255,255,255,.4);line-height:1.4;
+}
+.pack-coins-msg--err{color:rgba(255,100,100,.8);}
+.pack-coins-msg--ok{color:rgba(100,220,120,.8);}
+.pack-coins-confirm{
+  display:flex;gap:6px;align-items:center;margin-top:3px;
+}
+.pack-coins-confirm button{
+  padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:inherit;border:1px solid;
+}
+.pack-coins-confirm__yes{
+  background:rgba(240,192,64,.18);border-color:rgba(240,192,64,.5)!important;
+  color:#f0c040;
+}
+.pack-coins-confirm__no{
+  background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15)!important;
+  color:rgba(255,255,255,.4);
+}
+
 /* ---- IN-SESSION LIST ---- */
 .insession-list{
   display:grid;
@@ -699,6 +739,11 @@ body{
         <span class="pack-price">R$ 9,90</span>
       </div>
       <button class="pack-buy-btn" data-i18n="vendas:sections.packs.buyButton" onclick="abrirCheckout('pacote-conexao','vendas:sections.packs.items.conexao.checkoutTitle','9.90')">Adicionar ao ritual</button>
+      <div class="pack-coins-row" id="coins-row-pacote-conexao">
+        <span class="pack-coins-price">🪙 600 moedas</span>
+        <button class="pack-coins-btn" onclick="comprarComMoedas('pacote-conexao',600,'Conexão',this)">Usar moedas</button>
+      </div>
+      <div class="pack-coins-msg" id="coins-msg-pacote-conexao"></div>
     </div>
 
     <div class="pack-card pack-verdades">
@@ -711,6 +756,11 @@ body{
         <span class="pack-price">R$ 12,90</span>
       </div>
       <button class="pack-buy-btn" data-i18n="vendas:sections.packs.buyButton" onclick="abrirCheckout('pacote-verdades','vendas:sections.packs.items.verdades.checkoutTitle','12.90')">Adicionar ao ritual</button>
+      <div class="pack-coins-row" id="coins-row-pacote-verdades">
+        <span class="pack-coins-price">🪙 800 moedas</span>
+        <button class="pack-coins-btn" onclick="comprarComMoedas('pacote-verdades',800,'Verdades',this)">Usar moedas</button>
+      </div>
+      <div class="pack-coins-msg" id="coins-msg-pacote-verdades"></div>
     </div>
 
     <div class="pack-card pack-conflito">
@@ -723,6 +773,11 @@ body{
         <span class="pack-price">R$ 14,90</span>
       </div>
       <button class="pack-buy-btn" data-i18n="vendas:sections.packs.buyButton" onclick="abrirCheckout('pacote-conflito','vendas:sections.packs.items.conflito.checkoutTitle','14.90')">Adicionar ao ritual</button>
+      <div class="pack-coins-row" id="coins-row-pacote-conflito">
+        <span class="pack-coins-price">🪙 950 moedas</span>
+        <button class="pack-coins-btn" onclick="comprarComMoedas('pacote-conflito',950,'Conflito',this)">Usar moedas</button>
+      </div>
+      <div class="pack-coins-msg" id="coins-msg-pacote-conflito"></div>
     </div>
 
     <div class="pack-card pack-segredos">
@@ -735,6 +790,11 @@ body{
         <span class="pack-price">R$ 19,90</span>
       </div>
       <button class="pack-buy-btn" data-i18n="vendas:sections.packs.buyButton" onclick="abrirCheckout('pacote-segredos','vendas:sections.packs.items.segredos.checkoutTitle','19.90')">Adicionar ao ritual</button>
+      <div class="pack-coins-row" id="coins-row-pacote-segredos">
+        <span class="pack-coins-price">🪙 1.200 moedas</span>
+        <button class="pack-coins-btn" onclick="comprarComMoedas('pacote-segredos',1200,'Segredos',this)">Usar moedas</button>
+      </div>
+      <div class="pack-coins-msg" id="coins-msg-pacote-segredos"></div>
     </div>
 
     <div class="pack-card pack-casais">
@@ -747,6 +807,11 @@ body{
         <span class="pack-price">R$ 19,90</span>
       </div>
       <button class="pack-buy-btn" data-i18n="vendas:sections.packs.buyButton" onclick="abrirCheckout('pacote-casais','vendas:sections.packs.items.casais.checkoutTitle','19.90')">Adicionar ao ritual</button>
+      <div class="pack-coins-row" id="coins-row-pacote-casais">
+        <span class="pack-coins-price">🪙 1.500 moedas</span>
+        <button class="pack-coins-btn" onclick="comprarComMoedas('pacote-casais',1500,'Casais',this)">Usar moedas</button>
+      </div>
+      <div class="pack-coins-msg" id="coins-msg-pacote-casais"></div>
     </div>
 
   </div>
@@ -987,6 +1052,71 @@ body{
   document.addEventListener("keydown", function(e) {
     if (e.key === "Escape") fecharCheckout();
   });
+
+  // ── Compra com moedas ──
+  function getCoins() { try { return parseInt(localStorage.getItem("osl_coins") || "0", 10); } catch(_) { return 0; } }
+  function setCoins(v) { try { localStorage.setItem("osl_coins", String(Math.max(0, v))); } catch(_) {} }
+  function getCompras() { try { return JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch(_) { return []; } }
+  function jaComprou(produtoId) { return getCompras().some(c => c.produto === produtoId); }
+
+  function initCoinsBtns() {
+    ["pacote-conexao","pacote-verdades","pacote-conflito","pacote-segredos","pacote-casais"].forEach(id => {
+      const msgEl = document.getElementById("coins-msg-" + id);
+      const btn   = document.querySelector(`#coins-row-${id} .pack-coins-btn`);
+      if (!btn || !msgEl) return;
+      if (jaComprou(id)) {
+        btn.disabled = true; btn.textContent = "✓ Desbloqueado";
+        msgEl.className = "pack-coins-msg pack-coins-msg--ok";
+        msgEl.textContent = "Pacote já está no seu deck.";
+      }
+    });
+  }
+  document.addEventListener("DOMContentLoaded", initCoinsBtns);
+
+  function comprarComMoedas(produtoId, custo, nome, btnEl) {
+    const msgEl = document.getElementById("coins-msg-" + produtoId);
+    if (!msgEl) return;
+
+    if (jaComprou(produtoId)) {
+      btnEl.disabled = true; btnEl.textContent = "✓ Desbloqueado";
+      msgEl.className = "pack-coins-msg pack-coins-msg--ok";
+      msgEl.textContent = "Pacote já está no seu deck."; return;
+    }
+
+    const saldo = getCoins();
+    if (saldo < custo) {
+      msgEl.className = "pack-coins-msg pack-coins-msg--err";
+      msgEl.textContent = `Saldo insuficiente. Você tem 🪙 ${saldo.toLocaleString("pt-BR")} (faltam ${(custo - saldo).toLocaleString("pt-BR")}).`;
+      return;
+    }
+
+    // Confirmação inline
+    msgEl.className = "pack-coins-msg";
+    msgEl.innerHTML = `<div class="pack-coins-confirm">
+      <span style="color:rgba(255,255,255,.55);font-size:11px">Gastar 🪙 ${custo.toLocaleString("pt-BR")} em "${nome}"?</span>
+      <button class="pack-coins-confirm__yes" id="coins-yes-${produtoId}">Confirmar</button>
+      <button class="pack-coins-confirm__no"  id="coins-no-${produtoId}">Cancelar</button>
+    </div>`;
+
+    document.getElementById("coins-yes-" + produtoId).onclick = () => {
+      const saldoNow = getCoins();
+      if (saldoNow < custo) {
+        msgEl.className = "pack-coins-msg pack-coins-msg--err";
+        msgEl.textContent = "Saldo mudou. Tente novamente."; return;
+      }
+      setCoins(saldoNow - custo);
+      const compras = getCompras();
+      compras.push({ produto: produtoId, ref: "coins_" + Date.now(), via: "coins", ts: Date.now() });
+      try { localStorage.setItem("osl_compras", JSON.stringify(compras)); } catch(_) {}
+
+      btnEl.disabled = true; btnEl.textContent = "✓ Desbloqueado";
+      msgEl.className = "pack-coins-msg pack-coins-msg--ok";
+      msgEl.textContent = `Pacote ${nome} desbloqueado! 🪙 ${getCoins().toLocaleString("pt-BR")} restantes.`;
+    };
+    document.getElementById("coins-no-" + produtoId).onclick = () => {
+      msgEl.className = "pack-coins-msg"; msgEl.innerHTML = "";
+    };
+  }
 
   async function processarCompra() {
     if (!currentProduct) return;
