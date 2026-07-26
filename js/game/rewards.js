@@ -188,6 +188,93 @@ export function showLevelPanel(currentXp) {
   overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
 }
 
+// ── Modal de moedas ───────────────────────────────────────────────────────────
+export function showCoinModal(currentXp) {
+  const lv = OSL_XP.levelFromXP(currentXp ?? S._currentXp ?? 0);
+  const balance = getCoinDisplay();
+
+  // Earn tab: lista todos os 50 níveis com moedas
+  const earnRows = OSL_COINS_PER_LEVEL.slice(0, 50).map((coins, i) => {
+    const n = i + 1;
+    const t = localizedTitleInfo(n, OSL_XP.titleForLevel(n));
+    const isMilestone = n % 5 === 0;
+    const isDone = n < lv, isNow = n === lv;
+    return `<div class="coinModal__row${isDone ? " coinModal__row--done" : ""}${isNow ? " coinModal__row--now" : ""}${isMilestone ? " coinModal__row--milestone" : ""}" data-coinrow="${n}">
+      <span class="coinModal__rowLv">${n}</span>
+      <span class="coinModal__rowIcon">${t.icon}</span>
+      <span class="coinModal__rowTitle">${escapeHtml(t.title)}</span>
+      <span class="coinModal__rowCoins">${isMilestone ? "⭐ " : ""}+${coins} 🪙</span>
+    </div>`;
+  }).join("");
+
+  // Buy tab: 3 pacotes
+  const packages = [
+    { label:"Pacote Explorador", coins:150,  price:"R$ 4,90",  badge:""          },
+    { label:"Pacote Aliado",     coins:500,  price:"R$ 12,90", badge:"POPULAR"   },
+    { label:"Pacote Mestre",     coins:1500, price:"R$ 29,90", badge:"MELHOR"    },
+  ];
+  const buyRows = packages.map(p => `
+    <div class="coinModal__pkg${p.badge ? " coinModal__pkg--highlight" : ""}">
+      ${p.badge ? `<span class="coinModal__pkgBadge">${p.badge}</span>` : ""}
+      <span class="coinModal__pkgCoins">🪙 ${p.coins}</span>
+      <span class="coinModal__pkgLabel">${p.label}</span>
+      <button class="coinModal__pkgBtn" onclick="document.getElementById('oslShopFab')?.click();document.getElementById('coinModalClose')?.click()">${p.price}</button>
+    </div>`).join("");
+
+  const overlay = document.createElement("div");
+  overlay.className = "coinModalOverlay";
+  overlay.innerHTML = `
+    <div class="coinModal">
+      <div class="coinModal__header">
+        <span class="coinModal__headerTitle">🪙 Moedas</span>
+        <button class="coinModal__close" id="coinModalClose">✕</button>
+      </div>
+      <div class="coinModal__hero">
+        <div class="coinModal__heroBalance">${balance.toLocaleString("pt-BR")}</div>
+        <div class="coinModal__heroSub">moedas disponíveis</div>
+      </div>
+      <div class="coinModal__tabs">
+        <button class="coinModal__tab coinModal__tab--active" id="coinTabEarn">Como ganhar</button>
+        <button class="coinModal__tab" id="coinTabBuy">Comprar</button>
+      </div>
+      <div class="coinModal__body">
+        <div class="coinModal__pane" id="coinPaneEarn">
+          <p class="coinModal__hint">Suba de nível jogando para ganhar moedas automaticamente.</p>
+          <div class="coinModal__list" id="coinModalCurrRow">${earnRows}</div>
+        </div>
+        <div class="coinModal__pane coinModal__pane--hidden" id="coinPaneBuy">
+          <p class="coinModal__hint">Compre moedas para desbloquear itens exclusivos na loja.</p>
+          <div class="coinModal__pkgList">${buyRows}</div>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  // Tab switching
+  const tabEarn = overlay.querySelector("#coinTabEarn");
+  const tabBuy  = overlay.querySelector("#coinTabBuy");
+  const paneEarn = overlay.querySelector("#coinPaneEarn");
+  const paneBuy  = overlay.querySelector("#coinPaneBuy");
+  tabEarn.addEventListener("click", () => {
+    tabEarn.classList.add("coinModal__tab--active"); tabBuy.classList.remove("coinModal__tab--active");
+    paneEarn.classList.remove("coinModal__pane--hidden"); paneBuy.classList.add("coinModal__pane--hidden");
+  });
+  tabBuy.addEventListener("click", () => {
+    tabBuy.classList.add("coinModal__tab--active"); tabEarn.classList.remove("coinModal__tab--active");
+    paneBuy.classList.remove("coinModal__pane--hidden"); paneEarn.classList.add("coinModal__pane--hidden");
+  });
+
+  const close = () => { overlay.classList.add("closing"); setTimeout(() => overlay.remove(), 300); };
+  overlay.querySelector("#coinModalClose").addEventListener("click", close);
+  overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
+
+  // Scroll até o nível atual na lista
+  requestAnimationFrame(() => {
+    overlay.querySelector(`[data-coinrow="${lv}"]`)?.scrollIntoView({ block:"center", behavior:"smooth" });
+  });
+}
+
 // ── Recompensa diária ─────────────────────────────────────────────────────────
 function todayLocal()     { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 function yesterdayLocal() { const d = new Date(Date.now() - 86400000); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }

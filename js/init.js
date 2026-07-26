@@ -178,6 +178,9 @@ window.dismissAIDetection = dismissAIDetection;
     document.getElementById("xpCardLevel")?.addEventListener("click", () => {
       import("./game/rewards.js").then(({ showLevelPanel }) => showLevelPanel(S._currentXp));
     });
+    document.getElementById("coinBalanceWrap")?.addEventListener("click", () => {
+      import("./game/rewards.js").then(({ showCoinModal }) => showCoinModal(S._currentXp));
+    });
   } catch (error) {
     console.error(error);
     const footerStatusEl = document.getElementById("footerStatus");

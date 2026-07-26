@@ -2302,7 +2302,10 @@
     .topMeta__coins{
       font-size:13px;color:rgba(240,192,64,.85);font-weight:600;
       display:inline-flex;align-items:center;gap:2px;white-space:nowrap;
+      cursor:pointer;border-radius:6px;padding:1px 5px;margin:-1px -5px;
+      transition:background .15s;
     }
+    .topMeta__coins:hover{ background:rgba(240,192,64,.12); }
     .topMeta__xp{
       display:inline-flex;
       align-items:center;
@@ -6357,6 +6360,162 @@
      FEATURE: CARD COMPARTILHÁVEL — Share button in recap
   ═══════════════════════════════════════════════════════════════════ */
   /* Share btn já definido no bloco principal — sem override aqui */
+
+  /* ═══════════════════════════════════════════════════════════════════
+     FEATURE: MODAL DE MOEDAS
+  ═══════════════════════════════════════════════════════════════════ */
+  @keyframes coinModalIn  { from{opacity:0;transform:translateY(100%)} to{opacity:1;transform:translateY(0)} }
+  @keyframes coinModalOut { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(100%)} }
+
+  .coinModalOverlay{
+    position:fixed;inset:0;z-index:11500;
+    background:rgba(0,0,0,.72);backdrop-filter:blur(4px);
+    display:flex;align-items:flex-end;justify-content:center;
+    animation:fadeInBg .25s ease;
+  }
+  .coinModalOverlay.closing{ animation:fadeOutBg .28s ease forwards; }
+  .coinModalOverlay.closing .coinModal{ animation:coinModalOut .28s cubic-bezier(.4,0,1,1) forwards; }
+
+  .coinModal{
+    width:100%;max-width:560px;max-height:90svh;
+    display:flex;flex-direction:column;
+    background:linear-gradient(180deg,#111008 0%,#0c0a06 100%);
+    border:1px solid rgba(212,168,75,.28);border-bottom:none;
+    border-radius:24px 24px 0 0;overflow:hidden;
+    animation:coinModalIn .38s cubic-bezier(.2,1,.4,1);
+    box-shadow:0 -12px 60px rgba(0,0,0,.7),0 0 0 1px rgba(212,168,75,.08) inset;
+    will-change:transform;
+  }
+
+  .coinModal__header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 20px 0;flex-shrink:0;
+  }
+  .coinModal__headerTitle{
+    color:rgba(212,168,75,.7);font-size:10px;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;
+  }
+  .coinModal__close{
+    appearance:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+    border-radius:50%;width:28px;height:28px;
+    color:rgba(255,255,255,.45);font-size:13px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s,color .15s;
+  }
+  .coinModal__close:hover{ background:rgba(255,255,255,.12);color:#fff; }
+
+  .coinModal__hero{
+    padding:20px 24px 18px;flex-shrink:0;text-align:center;
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .coinModal__heroBalance{
+    font-size:48px;font-weight:900;line-height:1;
+    background:linear-gradient(135deg,#c47e10,#f0b840,#ffd870);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .coinModal__heroSub{
+    color:rgba(255,255,255,.3);font-size:12px;margin-top:4px;
+  }
+
+  .coinModal__tabs{
+    display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,.07);
+    flex-shrink:0;
+  }
+  .coinModal__tab{
+    flex:1;padding:12px 0;background:none;border:none;
+    color:rgba(255,255,255,.35);font-size:13px;font-weight:600;cursor:pointer;
+    position:relative;transition:color .15s;
+  }
+  .coinModal__tab--active{ color:#f0b840; }
+  .coinModal__tab--active::after{
+    content:"";position:absolute;bottom:0;left:20%;right:20%;height:2px;
+    background:#f0b840;border-radius:2px 2px 0 0;
+  }
+
+  .coinModal__body{
+    overflow-y:auto;flex:1;overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;touch-action:pan-y;
+    scrollbar-width:thin;scrollbar-color:rgba(212,168,75,.2) transparent;
+  }
+  .coinModal__body::-webkit-scrollbar{ width:4px; }
+  .coinModal__body::-webkit-scrollbar-thumb{ background:rgba(212,168,75,.2);border-radius:2px; }
+
+  .coinModal__pane{ padding-bottom:32px; }
+  .coinModal__pane--hidden{ display:none; }
+
+  .coinModal__hint{
+    color:rgba(255,255,255,.28);font-size:11px;
+    padding:12px 20px 4px;margin:0;
+  }
+
+  .coinModal__list{ padding:0 0 8px; }
+
+  .coinModal__row{
+    display:flex;align-items:center;gap:12px;
+    padding:9px 20px;transition:background 50ms ease-out;
+  }
+  .coinModal__row:hover{ background:rgba(255,255,255,.03); }
+  .coinModal__row--now{
+    background:rgba(212,168,75,.07) !important;
+    border-left:2px solid rgba(212,168,75,.6);
+  }
+  .coinModal__row--done{ opacity:.45; }
+  .coinModal__row--milestone{ background:rgba(212,168,75,.03); }
+
+  .coinModal__rowLv{
+    width:28px;text-align:center;flex-shrink:0;
+    color:rgba(255,255,255,.25);font-size:12px;font-weight:700;
+  }
+  .coinModal__row--now .coinModal__rowLv{ color:#f0b840; }
+
+  .coinModal__rowIcon{ font-size:20px;width:26px;text-align:center;flex-shrink:0; }
+  .coinModal__rowTitle{ flex:1;min-width:0;color:#ede0cc;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .coinModal__row--done .coinModal__rowTitle{ color:rgba(255,255,255,.35); }
+  .coinModal__rowCoins{
+    flex-shrink:0;font-size:12px;font-weight:700;
+    color:rgba(240,192,64,.7);
+  }
+  .coinModal__row--milestone .coinModal__rowCoins{ color:#f0b840; }
+
+  /* Pacotes de compra */
+  .coinModal__pkgList{
+    display:flex;flex-direction:column;gap:10px;padding:12px 16px 0;
+  }
+  .coinModal__pkg{
+    position:relative;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+    border-radius:14px;padding:16px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .coinModal__pkg--highlight{
+    background:rgba(212,168,75,.07);border-color:rgba(212,168,75,.3);
+  }
+  .coinModal__pkgBadge{
+    position:absolute;top:-8px;right:14px;
+    background:linear-gradient(135deg,#c47e10,#f0b840);
+    color:#1a1208;font-size:9px;font-weight:900;letter-spacing:.1em;
+    padding:2px 8px;border-radius:20px;
+  }
+  .coinModal__pkgCoins{
+    font-size:20px;font-weight:900;
+    background:linear-gradient(135deg,#c47e10,#f0b840);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    white-space:nowrap;
+  }
+  .coinModal__pkgLabel{
+    flex:1;color:rgba(255,255,255,.7);font-size:13px;font-weight:600;
+  }
+  .coinModal__pkgBtn{
+    appearance:none;background:rgba(212,168,75,.15);border:1px solid rgba(212,168,75,.35);
+    border-radius:8px;padding:8px 14px;
+    color:#f0b840;font-size:13px;font-weight:700;cursor:pointer;
+    transition:background .15s;white-space:nowrap;
+  }
+  .coinModal__pkgBtn:hover{ background:rgba(212,168,75,.28); }
+  .coinModal__pkg--highlight .coinModal__pkgBtn{
+    background:linear-gradient(135deg,#9a6e0a,#d4a84b);color:#1a1208;border-color:transparent;
+  }
+  .coinModal__pkg--highlight .coinModal__pkgBtn:hover{ filter:brightness(1.1); }
 
   </style>
 </head>
