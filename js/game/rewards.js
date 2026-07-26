@@ -207,18 +207,20 @@ export function showCoinModal(currentXp) {
     </div>`;
   }).join("");
 
-  // Buy tab: 3 pacotes
+  // Buy tab: 3 pacotes com checkout real via MP
   const packages = [
-    { label:"Pacote Explorador", coins:150,  price:"R$ 4,90",  badge:""          },
-    { label:"Pacote Aliado",     coins:500,  price:"R$ 12,90", badge:"POPULAR"   },
-    { label:"Pacote Mestre",     coins:1500, price:"R$ 29,90", badge:"MELHOR"    },
+    { id:"coins_150",  label:"Pacote Explorador", coins:150,  price:"R$ 4,90",  badge:""        },
+    { id:"coins_500",  label:"Pacote Aliado",     coins:500,  price:"R$ 12,90", badge:"POPULAR" },
+    { id:"coins_1500", label:"Pacote Mestre",     coins:1500, price:"R$ 29,90", badge:"MELHOR"  },
   ];
+  const savedNome  = (()=>{ try { return localStorage.getItem("osl_checkout_nome") || localStorage.getItem("osl_nome") || ""; } catch(_){return "";} })();
+  const savedEmail = (()=>{ try { return localStorage.getItem("osl_checkout_email") || ""; } catch(_){return "";} })();
   const buyRows = packages.map(p => `
-    <div class="coinModal__pkg${p.badge ? " coinModal__pkg--highlight" : ""}">
+    <div class="coinModal__pkg${p.badge ? " coinModal__pkg--highlight" : ""}" data-pkg="${p.id}">
       ${p.badge ? `<span class="coinModal__pkgBadge">${p.badge}</span>` : ""}
-      <span class="coinModal__pkgCoins">🪙 ${p.coins}</span>
+      <span class="coinModal__pkgCoins">🪙 ${p.coins.toLocaleString("pt-BR")}</span>
       <span class="coinModal__pkgLabel">${p.label}</span>
-      <button class="coinModal__pkgBtn" onclick="document.getElementById('oslShopFab')?.click();document.getElementById('coinModalClose')?.click()">${p.price}</button>
+      <button class="coinModal__pkgBtn" data-pkg="${p.id}">${p.price}</button>
     </div>`).join("");
 
   const overlay = document.createElement("div");
@@ -243,13 +245,60 @@ export function showCoinModal(currentXp) {
           <div class="coinModal__list" id="coinModalCurrRow">${earnRows}</div>
         </div>
         <div class="coinModal__pane coinModal__pane--hidden" id="coinPaneBuy">
-          <p class="coinModal__hint">Compre moedas para desbloquear itens exclusivos na loja.</p>
+          <div class="coinModal__buyForm">
+            <div class="coinModal__fieldRow">
+              <div class="coinModal__field">
+                <label class="coinModal__fieldLabel">Nome</label>
+                <input class="coinModal__fieldInput" id="coinBuyNome" type="text" placeholder="Seu nome" value="${escapeHtml(savedNome)}" autocomplete="name" />
+              </div>
+              <div class="coinModal__field">
+                <label class="coinModal__fieldLabel">E-mail</label>
+                <input class="coinModal__fieldInput" id="coinBuyEmail" type="email" placeholder="seu@email.com" value="${escapeHtml(savedEmail)}" autocomplete="email" />
+              </div>
+            </div>
+            <p class="coinModal__buyStatus" id="coinBuyStatus"></p>
+          </div>
           <div class="coinModal__pkgList">${buyRows}</div>
         </div>
       </div>
     </div>`;
 
   document.body.appendChild(overlay);
+
+  // Compra real via MP
+  const OSL_BASE = "https://osl-video-server-production.up.railway.app";
+  overlay.querySelectorAll(".coinModal__pkgBtn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const nome  = overlay.querySelector("#coinBuyNome").value.trim();
+      const email = overlay.querySelector("#coinBuyEmail").value.trim().toLowerCase();
+      const statusEl = overlay.querySelector("#coinBuyStatus");
+      if (!nome)  { statusEl.textContent = "Digite seu nome."; statusEl.style.color = "#f88"; return; }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { statusEl.textContent = "E-mail inválido."; statusEl.style.color = "#f88"; return; }
+      const produto = btn.dataset.pkg;
+      btn.disabled = true;
+      statusEl.style.color = "rgba(255,255,255,.4)";
+      statusEl.textContent = "Criando pagamento…";
+      try {
+        const res  = await fetch(`${OSL_BASE}/criar-pagamento`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ nome, email, produto }) });
+        const data = await res.json();
+        if (data?.url) {
+          try { localStorage.setItem("osl_checkout_nome", nome); localStorage.setItem("osl_checkout_email", email); } catch(_){}
+          window.open(data.url, "_blank");
+          statusEl.style.color = "rgba(120,220,120,.8)";
+          statusEl.textContent = "Pagamento aberto em nova aba. Retorne após confirmar.";
+          btn.textContent = "✓ Aguardando…";
+        } else {
+          statusEl.style.color = "#f88";
+          statusEl.textContent = data?.message || "Erro ao criar pagamento.";
+          btn.disabled = false;
+        }
+      } catch(_) {
+        statusEl.style.color = "#f88";
+        statusEl.textContent = "Erro de conexão. Tente novamente.";
+        btn.disabled = false;
+      }
+    });
+  });
 
   // Tab switching
   const tabEarn = overlay.querySelector("#coinTabEarn");
