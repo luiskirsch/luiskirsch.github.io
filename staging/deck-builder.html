@@ -238,6 +238,65 @@
     }
     .cardChip--inDeck .cardChip__action { color: var(--red); }
 
+    /* ── Cartas Personalizadas ── */
+    .customSection { margin-bottom: 18px; }
+    .customSection__header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px;
+    }
+    .customBadge {
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      background: rgba(140,100,220,.18); border: 1px solid rgba(140,100,220,.4);
+      color: #b090e8; border-radius: 20px; padding: 2px 8px;
+    }
+    .customSlot {
+      border-radius: 8px; margin-bottom: 6px;
+      border: 1px solid rgba(140,100,220,.28);
+      transition: border-color .15s, background .15s;
+    }
+    .customSlot--empty {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; cursor: pointer;
+      border-style: dashed; color: rgba(240,232,216,.4);
+      font-size: 13px;
+    }
+    .customSlot--empty:hover { border-color: rgba(140,100,220,.7); color: #b090e8; background: rgba(140,100,220,.08); }
+    .customSlot__emptyIcon { font-size: 16px; }
+    .customSlot--locked {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 14px; font-size: 12px;
+      color: rgba(240,232,216,.25); border-color: rgba(255,255,255,.06);
+    }
+    .customSlot--filled { background: rgba(140,100,220,.06); }
+    .customSlot--filled:hover { border-color: rgba(140,100,220,.55); }
+    .customSlot__card { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; }
+    .customSlot__actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+    .customSlot__actionBtn {
+      appearance: none; background: none; border: 1px solid rgba(140,100,220,.3);
+      color: #b090e8; font-size: 14px; cursor: pointer; border-radius: 6px;
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .customSlot__actionBtn:hover { background: rgba(140,100,220,.2); }
+    .customSlot__actionBtn--inDeck { border-color: var(--red); color: var(--red); }
+    .customSlot__actionBtn--inDeck:hover { background: rgba(192,80,80,.15); }
+    .customSlot--editing { padding: 12px; background: rgba(140,100,220,.07); }
+    .customSlot__formLabel { font-size: 10px; letter-spacing: .1em; color: #b090e8; text-transform: uppercase; margin-bottom: 8px; }
+    .customSlot__input {
+      width: 100%; background: rgba(0,0,0,.35); border: 1px solid rgba(140,100,220,.3);
+      border-radius: 6px; padding: 7px 10px; color: var(--fg); font-size: 13px;
+      font-family: inherit; margin-bottom: 6px;
+    }
+    .customSlot__textarea {
+      width: 100%; background: rgba(0,0,0,.35); border: 1px solid rgba(140,100,220,.3);
+      border-radius: 6px; padding: 8px 10px; color: var(--fg); font-size: 13px;
+      font-family: inherit; resize: vertical; min-height: 72px; margin-bottom: 6px;
+    }
+    .customSlot__input:focus, .customSlot__textarea:focus {
+      outline: none; border-color: rgba(140,100,220,.7);
+    }
+    .customSlot__formBtns { display: flex; gap: 6px; margin-top: 4px; }
+
     .emptyState {
       text-align: center;
       color: var(--muted);
@@ -557,6 +616,9 @@
   let deckCards = [];       // cards in the deck being edited
   let deckName = "";
   let filterType = "all";
+  let customCards = [];     // [{id, slotIndex, title, text, rule}]
+  let userXp = 0;
+  let editingSlot = null;   // índice do slot em edição (null = nenhum)
 
   // Cartas disponíveis para o usuário
   function getOwnedCards() {
@@ -590,6 +652,166 @@
   async function deleteDeck(uid, deckId) {
     await deleteDoc(doc(db, "users", uid, "decks", deckId));
   }
+
+  // ── Custom Cards ───────────────────────────────────────────────────────
+  function customSlotCount() {
+    return Math.floor(levelFromXP(userXp) / 10) + 1;
+  }
+
+  function escHtml(s) {
+    return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  async function loadCustomCards(uid) {
+    const snap = await getDocs(collection(db, "users", uid, "customCards"));
+    customCards = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a,b) => (a.slotIndex||0) - (b.slotIndex||0));
+  }
+
+  async function persistCustomCard(uid, slotIndex, data) {
+    const existing = customCards.find(c => c.slotIndex === slotIndex);
+    const r = existing
+      ? doc(db, "users", uid, "customCards", existing.id)
+      : doc(collection(db, "users", uid, "customCards"));
+    const payload = { slotIndex, type: "Pessoal", isCustom: true, ...data };
+    await setDoc(r, payload, { merge: true });
+    if (existing) {
+      Object.assign(existing, payload);
+    } else {
+      customCards.push({ id: r.id, ...payload });
+      customCards.sort((a,b) => (a.slotIndex||0) - (b.slotIndex||0));
+    }
+  }
+
+  function renderCustomSection() {
+    const el = document.getElementById("customSectionArea");
+    if (!el) return;
+
+    const slots = customSlotCount();
+    const deckTitles = new Set(deckCards.map(c => c.title));
+
+    let html = `
+      <div class="customSection">
+        <div class="customSection__header">
+          <div class="sectionTitle" style="margin:0">Cartas Pessoais</div>
+          <span class="customBadge">${slots} slot${slots !== 1 ? "s" : ""}</span>
+        </div>`;
+
+    for (let i = 0; i < 10; i++) {
+      const card = customCards.find(c => c.slotIndex === i);
+      const unlocked = i < slots;
+
+      if (!unlocked) {
+        const neededLevel = i * 10;
+        html += `<div class="customSlot customSlot--locked">🔒 Slot ${i+1} — Disponível no Nível ${neededLevel}</div>`;
+        continue;
+      }
+
+      if (editingSlot === i) {
+        const t  = escHtml(card?.title || "");
+        const tx = escHtml(card?.text  || "");
+        const ru = escHtml(card?.rule  || "");
+        html += `
+          <div class="customSlot customSlot--editing">
+            <div class="customSlot__formLabel">Slot ${i+1} — Carta Pessoal</div>
+            <input  class="customSlot__input"    id="cs_title_${i}" placeholder="Título da carta" value="${t}">
+            <textarea class="customSlot__textarea" id="cs_text_${i}"  placeholder="O que acontece quando esta carta é revelada no ritual?">${tx}</textarea>
+            <input  class="customSlot__input"    id="cs_rule_${i}"  placeholder="Regra especial (opcional)" value="${ru}">
+            <div class="customSlot__formBtns">
+              <button class="btn btn--green" style="flex:1;padding:7px" onclick="saveCustomSlot(${i})">Salvar</button>
+              <button class="btn" style="flex:0;padding:7px 14px"       onclick="cancelCustomEdit()">Cancelar</button>
+            </div>
+          </div>`;
+      } else if (card?.text) {
+        const inDeck = card.title && deckTitles.has(card.title);
+        html += `
+          <div class="customSlot customSlot--filled">
+            <div class="customSlot__card">
+              <div class="cardChip__info">
+                <div class="cardChip__title">${escHtml(card.title || "Carta Pessoal")}</div>
+                <div class="cardChip__type">Pessoal · Slot ${i+1}</div>
+                <div class="cardChip__text">${escHtml(card.text)}</div>
+                ${card.rule ? `<div class="cardChip__rule">⚠ ${escHtml(card.rule)}</div>` : ""}
+              </div>
+              <div class="customSlot__actions">
+                <button class="customSlot__actionBtn" title="Editar" onclick="editCustomSlot(${i})">✏</button>
+                <button class="customSlot__actionBtn${inDeck ? " customSlot__actionBtn--inDeck" : ""}"
+                  title="${inDeck ? "Remover do deck" : "Adicionar ao deck"}"
+                  onclick="toggleCustomCard(${i})">${inDeck ? "−" : "+"}</button>
+              </div>
+            </div>
+          </div>`;
+      } else {
+        html += `
+          <div class="customSlot customSlot--empty" onclick="editCustomSlot(${i})">
+            <span class="customSlot__emptyIcon">✦</span>
+            <span>Slot ${i+1} — Criar carta pessoal</span>
+          </div>`;
+      }
+    }
+
+    html += `</div>`;
+    el.innerHTML = html;
+  }
+
+  window.editCustomSlot = function(i) {
+    editingSlot = i;
+    renderCustomSection();
+    setTimeout(() => document.getElementById(`cs_title_${i}`)?.focus(), 40);
+  };
+
+  window.cancelCustomEdit = function() {
+    editingSlot = null;
+    renderCustomSection();
+  };
+
+  window.saveCustomSlot = async function(i) {
+    const title = (document.getElementById(`cs_title_${i}`)?.value || "").trim();
+    const text  = (document.getElementById(`cs_text_${i}`)?.value  || "").trim();
+    const rule  = (document.getElementById(`cs_rule_${i}`)?.value  || "").trim();
+    if (!title) { showToast("Dê um título à carta.", true); return; }
+    if (!text)  { showToast("Escreva o conteúdo da carta.", true); return; }
+    try {
+      await persistCustomCard(userId, i, { title, text, rule });
+      editingSlot = null;
+      renderCustomSection();
+      showToast("Carta salva!");
+    } catch(e) {
+      console.error(e);
+      showToast("Erro ao salvar.", true);
+    }
+  };
+
+  window.toggleCustomCard = function(i) {
+    const card = customCards.find(c => c.slotIndex === i);
+    if (!card?.text) return;
+    const cardObj = {
+      title: card.title || "Carta Pessoal",
+      text: card.text, rule: card.rule || "",
+      type: "Pessoal", isCustom: true
+    };
+    const idx = deckCards.findIndex(c => c.isCustom && c.title === cardObj.title);
+    if (idx >= 0) deckCards.splice(idx, 1);
+    else deckCards.push(cardObj);
+    renderCustomSection();
+    // atualiza só o painel direito sem destruir o formulário
+    const deckGrid = document.getElementById("deckCardGrid");
+    const countEl  = document.querySelector(".deckEditor__count");
+    if (countEl) countEl.textContent = `${deckCards.length} carta(s)`;
+    if (deckGrid) {
+      deckGrid.innerHTML = deckCards.length === 0
+        ? `<div class="emptyState">Adicione cartas do painel esquerdo.</div>`
+        : deckCards.map(c => `
+            <div class="cardChip cardChip--inDeck" onclick="removeCard('${escHtml(c.title).replace(/'/g,"\\'")}')">
+              <div class="cardChip__info">
+                <div class="cardChip__title">${escHtml(c.title)}</div>
+                <div class="cardChip__type">${escHtml(c.type)}</div>
+                ${c.text ? `<div class="cardChip__text">${escHtml(c.text)}</div>` : ""}
+              </div>
+              <button class="cardChip__action" title="Remover">−</button>
+            </div>`).join("");
+    }
+  };
 
   // ── UI ─────────────────────────────────────────────────────────────────
   function showToast(msg, isError = false) {
@@ -636,10 +858,16 @@
     const deck = userDecks.find(d => d.id === activeDeckId);
     if (!deck && activeDeckId !== "__new__") {
       main.innerHTML = `
-        <div class="noDeckState">
-          <span class="noDeckState__icon">🃏</span>
-          <p class="noDeckState__text">Selecione um deck na lista<br>ou crie um novo para começar.</p>
+        <div class="deckEditor">
+          <div class="deckEditor__body" style="display:block;padding:20px">
+            <div id="customSectionArea"></div>
+            <div class="noDeckState" style="margin-top:24px">
+              <span class="noDeckState__icon">🃏</span>
+              <p class="noDeckState__text">Selecione um deck na lista<br>ou crie um novo para começar.</p>
+            </div>
+          </div>
         </div>`;
+      renderCustomSection();
       return;
     }
 
@@ -658,6 +886,7 @@
         </div>
         <div class="deckEditor__body">
           <div class="cardPool">
+            <div id="customSectionArea"></div>
             <div class="sectionTitle">Cartas disponíveis</div>
             <div class="filterBar">
               ${types.map(t => `
@@ -704,6 +933,7 @@
           </div>
         </div>
       </div>`;
+    renderCustomSection();
   }
 
   // ── Actions ────────────────────────────────────────────────────────────
@@ -790,8 +1020,10 @@
 
     const userSnap = await getDoc(doc(db, "users", userId));
     const userData = userSnap.data() || {};
-    renderXP(userData.xp || 0);
+    userXp = userData.xp || 0;
+    renderXP(userXp);
 
+    await loadCustomCards(userId);
     userDecks = await loadDecks(userId);
     renderDeckList();
     renderEditor();
