@@ -6579,6 +6579,96 @@
     font-family:'Georgia',serif;z-index:6;
   }
 
+  /* ── Raio de lâmpada (cone de luz quente, CSS puro) ─────────────── */
+  .lobbyViewer__lampray{
+    position:absolute;
+    top:0; left:50%; transform:translateX(-50%);
+    width:520px; height:82%;
+    background:linear-gradient(to bottom,
+      rgba(255,210,70,.20) 0%,
+      rgba(255,190,50,.10) 30%,
+      rgba(255,160,30,.04) 65%,
+      transparent 100%
+    );
+    clip-path:polygon(43% 0%, 57% 0%, 100% 100%, 0% 100%);
+    filter:blur(12px);
+    pointer-events:none;
+    z-index:3;
+    animation:lampFlicker 2.4s ease-in-out infinite;
+  }
+  @keyframes lampFlicker{
+    0%,100%{ opacity:.85; }
+    10%{ opacity:.55; }
+    22%{ opacity:.80; }
+    38%{ opacity:.60; }
+    52%{ opacity:.88; }
+    67%{ opacity:.52; }
+    80%{ opacity:.78; }
+  }
+
+  /* ── Raio de lua (da janela esquerda, azul frio) ─────────────────── */
+  .lobbyViewer__moonray{
+    position:absolute;
+    top:0; left:0;
+    width:38%; height:72%;
+    background:linear-gradient(128deg,
+      rgba(40,75,210,.13) 0%,
+      rgba(30,55,170,.07) 40%,
+      transparent 75%
+    );
+    filter:blur(20px);
+    pointer-events:none;
+    z-index:3;
+    animation:moonDrift 16s ease-in-out infinite;
+  }
+  @keyframes moonDrift{
+    0%,100%{ opacity:.65; transform:scaleX(1) scaleY(1); }
+    50%{ opacity:.90; transform:scaleX(1.07) scaleY(1.03); }
+  }
+
+  /* ── Partículas de poeira CSS (camada extra, não-Three.js) ──────── */
+  .lobbyViewer__dust{
+    position:absolute;inset:0;pointer-events:none;z-index:4;overflow:hidden;
+  }
+  .lobbyViewer__dust::before,.lobbyViewer__dust::after{
+    content:"";position:absolute;
+    background:radial-gradient(circle, rgba(255,240,200,.55) 0%, transparent 70%);
+    border-radius:50%;
+    animation:dustFloat1 18s ease-in-out infinite;
+  }
+  .lobbyViewer__dust::before{ width:3px;height:3px; top:30%; left:45%; animation-delay:0s; }
+  .lobbyViewer__dust::after { width:2px;height:2px; top:55%; left:62%; animation-delay:-7s; animation-name:dustFloat2; }
+  @keyframes dustFloat1{
+    0%{ transform:translate(0,0); opacity:0; }
+    10%{ opacity:.7; }
+    50%{ transform:translate(18px,-80px); opacity:.5; }
+    90%{ opacity:0; }
+    100%{ transform:translate(8px,-160px); opacity:0; }
+  }
+  @keyframes dustFloat2{
+    0%{ transform:translate(0,0); opacity:0; }
+    15%{ opacity:.6; }
+    50%{ transform:translate(-12px,-70px); opacity:.4; }
+    85%{ opacity:0; }
+    100%{ transform:translate(-5px,-140px); opacity:0; }
+  }
+
+  /* ── Sobreposição de grão de filme (textura, dá profundidade) ────── */
+  .lobbyViewer__grain{
+    position:absolute;inset:0;z-index:5;pointer-events:none;
+    opacity:.032;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:200px 200px;
+    animation:grainShift .12s steps(1) infinite;
+  }
+  @keyframes grainShift{
+    0%{ background-position:0 0; }
+    25%{ background-position:-50px -30px; }
+    50%{ background-position:30px -60px; }
+    75%{ background-position:-20px 40px; }
+    100%{ background-position:50px 20px; }
+  }
+
   /* ── LOBBY MODE — AAA full-bleed (ativo via body.lobby-mode) ──────── */
   /* Cadeia de altura: layout → mainArea → tableCard → gameTableGrid */
   body.lobby-mode .layout{
@@ -6616,14 +6706,7 @@
     border-radius:0 0 20px 20px!important;
   }
   body.lobby-mode .gameTableGrid::before,
-  body.lobby-mode .gameTableGrid::after{
-    content:"";position:absolute;
-    width:38px;height:38px;
-    border-color:rgba(212,168,75,.22);border-style:solid;
-    z-index:30;pointer-events:none;
-  }
-  body.lobby-mode .gameTableGrid::before{ top:18px;left:18px;border-width:2px 0 0 2px; }
-  body.lobby-mode .gameTableGrid::after { bottom:18px;right:18px;border-width:0 2px 2px 0; }
+  body.lobby-mode .gameTableGrid::after{ display:none!important; }
   body.lobby-mode #lobbyViewer{
     position:absolute!important;inset:0!important;
     width:100%!important;height:100%!important;
@@ -6942,14 +7025,11 @@
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
                 <div id="lobbyViewer" class="lobbyViewer">
                   <canvas id="lobbyCanvas"></canvas>
+                  <div class="lobbyViewer__lampray" aria-hidden="true"></div>
+                  <div class="lobbyViewer__moonray" aria-hidden="true"></div>
+                  <div class="lobbyViewer__dust" aria-hidden="true"></div>
+                  <div class="lobbyViewer__grain" aria-hidden="true"></div>
                   <div class="lobbyViewer__vignette" aria-hidden="true"></div>
-                  <div id="lobbyLoading" class="lobbyViewer__loading">
-                    <svg class="lobbyViewer__ring" viewBox="0 0 44 44" aria-hidden="true">
-                      <circle cx="22" cy="22" r="17" fill="none" stroke="rgba(200,150,60,.12)" stroke-width="2.5"/>
-                      <circle cx="22" cy="22" r="17" fill="none" stroke="rgba(200,150,60,.72)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="26 81"/>
-                    </svg>
-                    <span id="lobbyLoadingText">PREPARANDO O RITUAL</span>
-                  </div>
                   <div class="lobbyViewer__hint">Arraste para girar</div>
                 </div>
 
@@ -8287,7 +8367,6 @@
 
   const viewer  = document.getElementById("lobbyViewer");
   const canvas  = document.getElementById("lobbyCanvas");
-  const loading = document.getElementById("lobbyLoading");
   if (!viewer || !canvas) throw new Error("lobby elements missing");
 
   // ── Scene ──────────────────────────────────────────────────────────
@@ -8355,21 +8434,37 @@
   shadowCatcher.receiveShadow = true;
   scene.add(shadowCatcher);
 
-  // ── Partículas (poeira/brasa flutuando na sala) ─────────────────────
-  const N = 70;
+  // ── Partículas: poeira fina (brancas/douradas, lentas) ─────────────
+  const N = 140;
   const pPos = new Float32Array(N * 3);
   const pVel = [];
   for (let i = 0; i < N; i++) {
-    const r = Math.random() * 2.2, th = Math.random() * Math.PI * 2;
+    const r = Math.random() * 2.6, th = Math.random() * Math.PI * 2;
     pPos[i*3]   = Math.cos(th) * r;
-    pPos[i*3+1] = Math.random() * 4.5;
-    pPos[i*3+2] = Math.sin(th) * r - 0.5;
-    pVel.push({ x: (Math.random()-.5)*.0018, y: .002+Math.random()*.005, z: (Math.random()-.5)*.0018 });
+    pPos[i*3+1] = Math.random() * 5;
+    pPos[i*3+2] = Math.sin(th) * r - 0.3;
+    pVel.push({ x: (Math.random()-.5)*.001, y: .0008+Math.random()*.003, z: (Math.random()-.5)*.001 });
   }
   const pGeo = new THREE.BufferGeometry();
   pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
-  const pMat = new THREE.PointsMaterial({ color: 0xffd580, size: .013, transparent: true, opacity: .28, depthWrite: false, sizeAttenuation: true });
+  const pMat = new THREE.PointsMaterial({ color: 0xfff0c0, size: .009, transparent: true, opacity: .55, depthWrite: false, sizeAttenuation: true });
   scene.add(new THREE.Points(pGeo, pMat));
+
+  // ── Partículas: brasas maiores (âmbar, movimento errático) ──────────
+  const N2 = 30;
+  const p2Pos = new Float32Array(N2 * 3);
+  const p2Vel = [];
+  for (let i = 0; i < N2; i++) {
+    const r = Math.random() * 1.5, th = Math.random() * Math.PI * 2;
+    p2Pos[i*3]   = Math.cos(th) * r;
+    p2Pos[i*3+1] = Math.random() * 3;
+    p2Pos[i*3+2] = Math.sin(th) * r;
+    p2Vel.push({ x: (Math.random()-.5)*.004, y: .003+Math.random()*.007, z: (Math.random()-.5)*.004 });
+  }
+  const p2Geo = new THREE.BufferGeometry();
+  p2Geo.setAttribute("position", new THREE.BufferAttribute(p2Pos, 3));
+  const p2Mat = new THREE.PointsMaterial({ color: 0xffaa30, size: .022, transparent: true, opacity: .35, depthWrite: false, sizeAttenuation: true });
+  scene.add(new THREE.Points(p2Geo, p2Mat));
 
   // ── Controls ───────────────────────────────────────────────────────
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -8388,7 +8483,6 @@
   renderer.domElement.addEventListener("pointerup",   () => { arTimer=setTimeout(()=>{ controls.autoRotate=true; }, 4000); });
 
   // ── GLB loader ─────────────────────────────────────────────────────
-  const loadingText = document.getElementById("lobbyLoadingText");
   new GLTFLoader().load(
     "/assets/characters/host.glb",
     (gltf) => {
@@ -8402,23 +8496,9 @@
       const h = box.max.y - box.min.y;
       if (h > 0) model.scale.setScalar(1.88 / h);
       scene.add(model);
-      loading.classList.add("done");
-      setTimeout(() => { loading.style.display = "none"; }, 650);
     },
-    (prog) => {
-      if (!loadingText) return;
-      if (prog.total > 0) {
-        const pct = Math.round(prog.loaded / prog.total * 100);
-        loadingText.textContent = pct < 100 ? `CARREGANDO  ${pct}%` : "PREPARANDO O RITUAL";
-      } else if (prog.loaded > 0) {
-        loadingText.textContent = `CARREGANDO  ${(prog.loaded/1048576).toFixed(1)} MB`;
-      }
-    },
-    (err) => {
-      console.error("lobby GLB:", err);
-      if (loadingText) loadingText.textContent = "ERRO AO CARREGAR";
-      if (loading) loading.style.opacity = "0.5";
-    }
+    () => {},
+    (err) => { console.error("lobby GLB:", err); }
   );
 
   // ── Resize ─────────────────────────────────────────────────────────
@@ -8438,22 +8518,36 @@
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
 
-    // poeira flutua
+    // poeira fina flutua (muito devagar, ondulação sutil)
     for (let i = 0; i < N; i++) {
       const v = pVel[i];
-      pPos[i*3] += v.x; pPos[i*3+1] += v.y; pPos[i*3+2] += v.z;
-      v.x += (Math.random()-.5)*.00012;
-      v.z += (Math.random()-.5)*.00012;
-      if (pPos[i*3+1] > 4.8) {
-        const r2=Math.random()*1.8, th2=Math.random()*Math.PI*2;
-        pPos[i*3]=Math.cos(th2)*r2; pPos[i*3+1]=-0.1; pPos[i*3+2]=Math.sin(th2)*r2-0.5;
-        v.x=(Math.random()-.5)*.0018; v.y=.002+Math.random()*.005; v.z=(Math.random()-.5)*.0018;
+      pPos[i*3] += v.x + Math.sin(t * 0.3 + i) * 0.0004;
+      pPos[i*3+1] += v.y;
+      pPos[i*3+2] += v.z;
+      if (pPos[i*3+1] > 5.2) {
+        const r2=Math.random()*2.4, th2=Math.random()*Math.PI*2;
+        pPos[i*3]=Math.cos(th2)*r2; pPos[i*3+1]=-0.1; pPos[i*3+2]=Math.sin(th2)*r2-0.3;
+        v.x=(Math.random()-.5)*.001; v.y=.0008+Math.random()*.003; v.z=(Math.random()-.5)*.001;
       }
     }
     pGeo.attributes.position.needsUpdate = true;
 
-    // lâmpada pisca levemente (chama/incandescência)
-    lamp.intensity = 9.5 + Math.sin(t * 1.8) * 0.7 + Math.sin(t * 4.3) * 0.3;
+    // brasas sobem com movimento errático
+    for (let i = 0; i < N2; i++) {
+      const v = p2Vel[i];
+      p2Pos[i*3] += v.x + Math.sin(t * 1.5 + i * 0.8) * 0.0012;
+      p2Pos[i*3+1] += v.y;
+      p2Pos[i*3+2] += v.z;
+      if (p2Pos[i*3+1] > 4.0) {
+        const r2=Math.random()*1.2, th2=Math.random()*Math.PI*2;
+        p2Pos[i*3]=Math.cos(th2)*r2; p2Pos[i*3+1]=0; p2Pos[i*3+2]=Math.sin(th2)*r2;
+        v.x=(Math.random()-.5)*.004; v.y=.003+Math.random()*.007; v.z=(Math.random()-.5)*.004;
+      }
+    }
+    p2Geo.attributes.position.needsUpdate = true;
+
+    // lâmpada pisca (incandescência irregular)
+    lamp.intensity = 9.5 + Math.sin(t * 1.8) * 0.7 + Math.sin(t * 4.3) * 0.3 + Math.sin(t * 11.7) * 0.15;
     // rádio verde pulsa
     radio.intensity = 2.8 + Math.sin(t * 2.1) * 0.6;
 
