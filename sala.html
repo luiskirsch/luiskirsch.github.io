@@ -6579,34 +6579,49 @@
     font-family:'Georgia',serif;z-index:6;
   }
 
-  /* ── Raio de lâmpada (cone saindo exatamente da lâmpada na imagem) ─ */
-  .lobbyViewer__lampray{
+  /* ── Glow da lâmpada (brilho do abajur/bulbo) ───────────────────── */
+  .lobbyViewer__lampglow{
     position:absolute;
-    /* lâmpada fica em ~50% horizontal, ~7% vertical na imagem */
-    top:6%; left:50%; transform:translateX(-50%);
-    width:580px; height:93%;
-    background:linear-gradient(to bottom,
-      rgba(255,245,130,.55) 0%,
-      rgba(255,220,80,.32) 10%,
-      rgba(255,200,60,.16) 35%,
-      rgba(255,180,50,.05) 70%,
+    top:0; left:50%; transform:translateX(-50%);
+    width:110px; height:75px;
+    background:radial-gradient(ellipse at 50% 60%,
+      rgba(255,252,230,.60) 0%,
+      rgba(255,245,200,.35) 35%,
+      rgba(250,230,165,.10) 65%,
       transparent 100%
     );
-    /* cone estreitíssimo no topo (nasce da lâmpada), abre para baixo */
-    clip-path:polygon(49.5% 0%, 50.5% 0%, 80% 100%, 20% 100%);
-    filter:blur(11px);
+    pointer-events:none; z-index:3;
+    animation:lampFlicker 2.4s ease-in-out infinite;
+  }
+
+  /* ── Raio de lâmpada (cone saindo do abajur) ─────────────────────── */
+  .lobbyViewer__lampray{
+    position:absolute;
+    /* abajur: top ~1%, o cone começa logo abaixo cobrindo todo o abajur */
+    top:1%; left:50%; transform:translateX(-50%);
+    width:580px; height:96%;
+    background:linear-gradient(to bottom,
+      rgba(255,245,210,.28) 0%,
+      rgba(255,235,175,.16) 10%,
+      rgba(245,220,145,.08) 35%,
+      rgba(230,205,120,.02) 68%,
+      transparent 100%
+    );
+    /* top: largura do abajur (~10%), abre em cone natural */
+    clip-path:polygon(45% 0%, 55% 0%, 80% 100%, 20% 100%);
+    filter:blur(10px);
     pointer-events:none;
     z-index:3;
     animation:lampFlicker 2.4s ease-in-out infinite;
   }
   @keyframes lampFlicker{
-    0%,100%{ opacity:.90; }
-    10%{ opacity:.58; }
-    22%{ opacity:.82; }
-    38%{ opacity:.62; }
-    52%{ opacity:.92; }
-    67%{ opacity:.55; }
-    80%{ opacity:.80; }
+    0%,100%{ opacity:.88; }
+    10%{ opacity:.60; }
+    22%{ opacity:.84; }
+    38%{ opacity:.65; }
+    52%{ opacity:.90; }
+    67%{ opacity:.58; }
+    80%{ opacity:.82; }
   }
 
   /* ── Raio de lua (da janela esquerda, azul frio) ─────────────────── */
@@ -7008,6 +7023,7 @@
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
                 <div id="lobbyViewer" class="lobbyViewer">
                   <canvas id="lobbyCanvas"></canvas>
+                  <div class="lobbyViewer__lampglow" aria-hidden="true"></div>
                   <div class="lobbyViewer__lampray" aria-hidden="true"></div>
                   <div class="lobbyViewer__moonray" aria-hidden="true"></div>
                   <canvas id="dustCanvas" class="lobbyViewer__dustCanvas" aria-hidden="true"></canvas>
@@ -8553,7 +8569,7 @@
     if(!cv) return;
     var cx = cv.getContext('2d');
     var W=1, H=1, dpr=Math.min(window.devicePixelRatio||1,2);
-    var N=150, pts=[];
+    var N=90, pts=[];
 
     function rz(){
       var r=cv.getBoundingClientRect();
@@ -8562,17 +8578,21 @@
       cx.scale(dpr,dpr);
     }
     function mk(p){
-      /* lâmpada: 50% horizontal, 7% vertical */
-      var lx=W*0.50, ly=H*0.07;
-      var beam=Math.random()<0.75;
-      p.y = ly + Math.random()*(H*0.93);
-      var cR = ((p.y-ly)/H)*W*0.30;
-      p.x = beam ? lx+(Math.random()*2-1)*cR*Math.random() : Math.random()*W;
-      p.vx=(Math.random()-0.5)*0.10;
-      p.vy=-(0.06+Math.random()*0.14);
-      p.r=0.7+Math.random()*1.8;
-      p.beam=beam;
-      p.ph=Math.random()*Math.PI*2;
+      /* abajur: ~50% horizontal, ~3% vertical */
+      var lx=W*0.50, ly=H*0.03;
+      /* quase todas dentro do cone — raras fora (e bem escuras) */
+      var beam = Math.random() < 0.96;
+      p.y = ly + Math.random()*(H*0.90);
+      /* cone: metade-largura = (distância do abajur / H) * W * 0.26 */
+      var cR = Math.max(2, ((p.y-ly)/H)*W*0.26);
+      p.x = beam
+        ? lx + (Math.random()*2-1)*cR*(0.2+Math.random()*0.75)
+        : lx + (Math.random()*2-1)*(cR*1.4+30);  /* ligeiramente fora */
+      p.vx = (Math.random()-0.5)*0.055;
+      p.vy = -(0.045+Math.random()*0.10);
+      p.r  = 0.25 + Math.random()*0.45;   /* 0.25–0.70 px — minúsculas */
+      p.beam = beam;
+      p.ph = Math.random()*Math.PI*2;
     }
     rz();
     for(var i=0;i<N;i++){var p={};mk(p);p.y=Math.random()*H;pts.push(p);}
@@ -8583,15 +8603,16 @@
       var t=ts/1000;
       for(var i=0;i<N;i++){
         var p=pts[i];
-        p.x+=p.vx+Math.sin(t*0.55+p.ph)*0.035;
-        p.y+=p.vy;
-        if(p.y<H*0.04||p.x<-4||p.x>W+4){ mk(p); }
+        p.x += p.vx + Math.sin(t*0.5+p.ph)*0.028;
+        p.y += p.vy;
+        if(p.y < H*0.02 || p.x < -6 || p.x > W+6) mk(p);
+        /* no feixe: pulsam suavemente; fora: quase invisíveis */
         var a = p.beam
-          ? (0.30+Math.sin(t*2.8+p.ph)*0.20)
-          : (0.04+Math.random()*0.03);
+          ? (0.14 + Math.sin(t*2.4+p.ph)*0.10)
+          : 0.025;
         cx.beginPath();
-        cx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        cx.fillStyle=p.beam?'rgba(255,248,220,'+a+')':'rgba(220,215,200,'+a+')';
+        cx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        cx.fillStyle = p.beam ? 'rgba(255,252,230,'+a+')' : 'rgba(200,195,180,'+a+')';
         cx.fill();
       }
       requestAnimationFrame(draw);
