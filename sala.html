@@ -6979,7 +6979,10 @@
 
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
                 <div id="lobbyViewer" class="lobbyViewer">
-                  <video id="lobbyVideo" class="lobbyViewer__video" autoplay loop muted playsinline>
+                  <video id="lobbyVideoA" class="lobbyViewer__video" autoplay muted playsinline preload="auto">
+                    <source src="/assets/lobby-room.mp4" type="video/mp4">
+                  </video>
+                  <video id="lobbyVideoB" class="lobbyViewer__video" muted playsinline preload="auto" style="opacity:0">
                     <source src="/assets/lobby-room.mp4" type="video/mp4">
                   </video>
                   <canvas id="lobbyCanvas"></canvas>
@@ -6988,11 +6991,51 @@
                 </div>
                 <script>
                 (function(){
-                  var v = document.getElementById('lobbyVideo');
-                  if (!v) return;
-                  function unlock(){
-                    v.muted = false;
-                    v.play();
+                  var vA = document.getElementById('lobbyVideoA');
+                  var vB = document.getElementById('lobbyVideoB');
+                  if (!vA || !vB) return;
+
+                  var FADE = 0.6;      // segundos de crossfade
+                  var OVERLAP = 0.8;   // segundos antes do fim para iniciar o próximo
+                  var active = vA, next = vB;
+                  var switching = false;
+
+                  function setOpacity(el, val) {
+                    el.style.transition = 'opacity '+FADE+'s linear';
+                    el.style.opacity = val;
+                  }
+
+                  function doSwap() {
+                    if (switching) return;
+                    switching = true;
+                    next.currentTime = 0;
+                    next.muted = active.muted;
+                    next.play().catch(function(){});
+                    setOpacity(next, '1');
+                    setOpacity(active, '0');
+                    var prev = active;
+                    active = next;
+                    next = prev;
+                    setTimeout(function(){
+                      next.pause();
+                      next.currentTime = 0;
+                      switching = false;
+                    }, FADE * 1000 + 100);
+                  }
+
+                  function watchLoop() {
+                    if (!active.duration || switching) return;
+                    if (active.currentTime >= active.duration - OVERLAP) doSwap();
+                  }
+
+                  vA.addEventListener('timeupdate', watchLoop);
+                  vB.addEventListener('timeupdate', watchLoop);
+
+                  // Desbloqueia som no primeiro gesto
+                  function unlock() {
+                    active.muted = false;
+                    next.muted   = false;
+                    active.play();
                   }
                   document.addEventListener('pointerdown', unlock, { once: true, capture: true });
                   document.addEventListener('touchstart',  unlock, { once: true, capture: true });
