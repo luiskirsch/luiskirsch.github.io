@@ -6977,13 +6977,26 @@
 
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
                 <div id="lobbyViewer" class="lobbyViewer">
-                  <video class="lobbyViewer__video" autoplay loop muted playsinline>
+                  <video id="lobbyVideo" class="lobbyViewer__video" autoplay loop muted playsinline>
                     <source src="/assets/lobby-room.mp4" type="video/mp4">
                   </video>
                   <canvas id="lobbyCanvas"></canvas>
                   <div class="lobbyViewer__vignette" aria-hidden="true"></div>
                   <div class="lobbyViewer__hint">Arraste para girar</div>
                 </div>
+                <script>
+                (function(){
+                  var v = document.getElementById('lobbyVideo');
+                  if (!v) return;
+                  v.muted = false;
+                  v.play().catch(function(){
+                    v.muted = true;
+                    function unlock(){ v.muted = false; }
+                    document.addEventListener('pointerdown', unlock, { once: true, capture: true });
+                    document.addEventListener('touchstart',  unlock, { once: true, capture: true });
+                  });
+                })();
+                </script>
 
                 <div class="revealPanel" id="revealPanel" style="display:none">
                   <!-- Sombra da carta projetada sobre a mesa -->
