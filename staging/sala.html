@@ -6990,10 +6990,11 @@
                   if (!v) return;
                   function unlock(){
                     v.muted = false;
+                    v.play();
                   }
-                  v.muted = false;
                   document.addEventListener('pointerdown', unlock, { once: true, capture: true });
                   document.addEventListener('touchstart',  unlock, { once: true, capture: true });
+                  document.addEventListener('keydown',     unlock, { once: true, capture: true });
                 })();
                 </script>
 
