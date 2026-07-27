@@ -6990,15 +6990,14 @@
                 (function(){
                   var v = document.getElementById('lobbyVideo');
                   if (!v) return;
-                  // Tenta tocar com som imediatamente
+                  function unlock(){
+                    v.muted = false;
+                  }
+                  // Tenta imediatamente (funciona em browsers com alto engagement score)
                   v.muted = false;
-                  v.play().catch(function(){
-                    // Browser bloqueou — volta muted e desbloqueia no primeiro toque
-                    v.muted = true;
-                    function unlock(){ v.muted = false; }
-                    document.addEventListener('pointerdown', unlock, { once: true, capture: true });
-                    document.addEventListener('touchstart',  unlock, { once: true, capture: true });
-                  });
+                  // Garante desbloqueio no primeiro toque/clique independente do resultado acima
+                  document.addEventListener('pointerdown', unlock, { once: true, capture: true });
+                  document.addEventListener('touchstart',  unlock, { once: true, capture: true });
                 })();
                 </script>
 
