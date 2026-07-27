@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
-  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
+  getFirestore, doc, getDoc, getDocFromServer, getDocs, setDoc, updateDoc, deleteDoc,
   collection, addDoc, onSnapshot, query, where, limit, orderBy,
   serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -43,7 +43,7 @@ export {
   db, auth,
   initFirebaseRefs,
   // Firestore functions re-exportadas para que os módulos não precisem importar CDN diretamente
-  doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
+  doc, getDoc, getDocFromServer, getDocs, setDoc, updateDoc, deleteDoc,
   collection, addDoc, onSnapshot, query, where, limit, orderBy,
   serverTimestamp, increment, onAuthStateChanged
 };

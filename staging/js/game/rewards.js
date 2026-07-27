@@ -1,6 +1,6 @@
 // Recompensas diárias, sistema de XP, level-up, painel de níveis, compartilhamento
 import { S } from "../state.js";
-import { setDoc, getDoc, getDocs, query, orderBy } from "../firebase.js";
+import { setDoc, getDoc, getDocFromServer, getDocs, query, orderBy } from "../firebase.js";
 import { escapeHtml } from "../utils.js";
 import { OSL_XP_TITLES, OSL_XP_EVENTS, DAILY_STREAK_XP, OSL_REACTION_UNLOCKS, OSL_COINS_PER_LEVEL } from "../constants.js";
 import { OSL_XP, OSL_ACHIEVEMENTS } from "./effects.js";
@@ -69,11 +69,17 @@ export function updateXpCard(xp) {
   } else if (S._xpPrevLevel === 0) {
     updateCoinDisplay();
     if (S.userRef) {
-      getDoc(S.userRef).then(snap => {
+      getDocFromServer(S.userRef).then(snap => {
         const coins = snap.data()?.coins ?? 0;
         try { localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
         updateCoinDisplay();
-      }).catch(() => {});
+      }).catch(() => {
+        getDoc(S.userRef).then(snap => {
+          const coins = snap.data()?.coins ?? 0;
+          try { localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
+          updateCoinDisplay();
+        }).catch(() => {});
+      });
     }
   }
   S._xpPrevLevel = lv;
