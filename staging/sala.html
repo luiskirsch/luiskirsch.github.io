@@ -6579,22 +6579,22 @@
     font-family:'Georgia',serif;z-index:6;
   }
   .lobbyViewer__lampglow{
-    position:absolute;top:9%;left:50%;transform:translateX(-50%);
-    width:52%;height:22px;
-    background:radial-gradient(ellipse at 50% 0%,rgba(255,252,235,.22) 0%,rgba(255,248,220,.10) 55%,transparent 100%);
-    filter:blur(7px);pointer-events:none;z-index:3;
-    animation:lampFlicker 2.4s ease-in-out infinite;
+    position:absolute;top:2.5%;left:50%;transform:translateX(-50%);
+    width:46px;height:34px;
+    background:radial-gradient(ellipse at 50% 55%,rgba(255,255,240,.55) 0%,rgba(255,252,220,.28) 40%,rgba(255,248,200,.08) 72%,transparent 100%);
+    filter:blur(5px);pointer-events:none;z-index:4;
+    animation:lampFlicker 2.2s ease-in-out infinite;
   }
   .lobbyViewer__lampray{
-    position:absolute;top:9%;left:50%;transform:translateX(-50%);
-    width:580px;height:90%;
-    background:linear-gradient(to bottom,rgba(255,248,215,.08) 0%,rgba(255,240,185,.04) 22%,rgba(245,225,150,.015) 50%,transparent 68%);
+    position:absolute;top:7%;left:50%;transform:translateX(-50%);
+    width:580px;height:92%;
+    background:linear-gradient(to bottom,rgba(255,248,215,.06) 0%,rgba(255,240,185,.03) 28%,rgba(245,225,145,.01) 58%,transparent 72%);
     clip-path:polygon(40% 0%,60% 0%,82% 100%,18% 100%);
-    filter:blur(14px);pointer-events:none;z-index:3;
-    animation:lampFlicker 2.4s ease-in-out infinite;
+    filter:blur(15px);pointer-events:none;z-index:3;
+    animation:lampFlicker 2.2s ease-in-out infinite;
   }
   @keyframes lampFlicker{
-    0%,100%{opacity:.90;}10%{opacity:.55;}25%{opacity:.85;}40%{opacity:.62;}55%{opacity:.92;}70%{opacity:.50;}82%{opacity:.80;}
+    0%,100%{opacity:.92;}8%{opacity:.58;}20%{opacity:.86;}35%{opacity:.64;}50%{opacity:.94;}65%{opacity:.52;}80%{opacity:.82;}
   }
   .lobbyViewer__moonray{
     position:absolute;top:0;left:0;width:38%;height:72%;
@@ -8430,7 +8430,7 @@
     var cx=cv.getContext('2d'),W=1,H=1,dpr=Math.min(window.devicePixelRatio||1,2),N=90,pts=[];
     function rz(){var r=cv.getBoundingClientRect();W=r.width||800;H=r.height||500;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cx.scale(dpr,dpr);}
     function mk(p){
-      var lx=W*0.50,ly=H*0.09,beam=Math.random()<0.96;
+      var lx=W*0.50,ly=H*0.07,beam=Math.random()<0.96;
       p.y=ly+Math.random()*(H*0.90);
       var cR=Math.max(2,((p.y-ly)/H)*W*0.26);
       p.x=beam?lx+(Math.random()*2-1)*cR*(0.2+Math.random()*0.75):lx+(Math.random()*2-1)*(cR*1.4+30);
