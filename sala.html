@@ -173,13 +173,24 @@
       z-index:-1;
       pointer-events:none;
       background:
-        radial-gradient(65vw 45vh at 50% 48%, rgba(190,130,52,.11) 0%, transparent 55%),
-        radial-gradient(34vw 52vh at 8% 47%, rgba(58,78,130,.08) 0%, transparent 60%),
         radial-gradient(80vw 60vh at 50% 0%, rgba(215,176,107,.07), transparent 55%),
         radial-gradient(55vw 45vh at 10% 30%, rgba(255,255,255,.03), transparent 60%),
         linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 52%, var(--bg-3) 100%);
       will-change:transform;
     }
+
+    /* Camada atmosférica fixa — fica ACIMA do background do body (z-index 0) */
+    /* Visível através dos cards semi-transparentes, criando o glow da sala */
+    .pageAtmosphere{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background:
+        radial-gradient(60vw 52vh at 50% 52%, rgba(175,112,38,.36) 0%, transparent 58%),
+        radial-gradient(30vw 54vh at 7% 50%, rgba(50,70,128,.22) 0%, transparent 64%);
+    }
+    html[class*="bg-"] .pageAtmosphere{ display:none; }
 
     /* ── Temas de fundo da sala (gratuitos) ────────────────────────────── */
 
@@ -651,6 +662,8 @@
       gap:14px;
       min-height:calc(100vh - 116px);
       min-height:calc(100svh - 116px);
+      position:relative;
+      z-index:1;
     }
 
     .card{
@@ -665,12 +678,12 @@
       position:relative;
     }
 
-    /* Sidebar e coluna direita: levemente translúcidos para o glow ambiente do fundo sangrar */
+    /* Sidebar e coluna direita: translúcidos para o glow atmosférico da sala sangrar */
     .sidebar > .card,
     .rightColumn > .card {
       background:
-        linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,.008)),
-        linear-gradient(180deg, rgba(19,14,10,.80), rgba(11,8,6,.87));
+        linear-gradient(180deg, rgba(255,255,255,.016), rgba(255,255,255,.006)),
+        linear-gradient(180deg, rgba(14,10,7,.65), rgba(9,6,4,.72));
     }
 
     .card::before{
@@ -6867,6 +6880,8 @@
           </div>
         </div>
       </header>
+
+      <div class="pageAtmosphere" aria-hidden="true"></div>
 
       <section class="layout">
 
