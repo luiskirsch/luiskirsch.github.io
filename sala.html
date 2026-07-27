@@ -6579,49 +6579,45 @@
     font-family:'Georgia',serif;z-index:6;
   }
 
-  /* ── Glow da lâmpada (brilho do abajur/bulbo) ───────────────────── */
+  /* ── Glow do bulbo (sutil — o cone real já existe na imagem) ──────── */
   .lobbyViewer__lampglow{
     position:absolute;
     top:0; left:50%; transform:translateX(-50%);
-    width:110px; height:75px;
-    background:radial-gradient(ellipse at 50% 60%,
-      rgba(255,252,230,.60) 0%,
-      rgba(255,245,200,.35) 35%,
-      rgba(250,230,165,.10) 65%,
+    width:72px; height:48px;
+    background:radial-gradient(ellipse at 50% 55%,
+      rgba(255,252,235,.18) 0%,
+      rgba(255,248,220,.08) 55%,
       transparent 100%
     );
+    filter:blur(5px);
     pointer-events:none; z-index:3;
     animation:lampFlicker 2.4s ease-in-out infinite;
   }
 
-  /* ── Raio de lâmpada (cone saindo do abajur) ─────────────────────── */
+  /* ── Raio de lâmpada (flickering overlay sobre o cone da imagem) ─── */
   .lobbyViewer__lampray{
     position:absolute;
-    /* abajur: top ~1%, o cone começa logo abaixo cobrindo todo o abajur */
     top:1%; left:50%; transform:translateX(-50%);
     width:580px; height:96%;
     background:linear-gradient(to bottom,
-      rgba(255,245,210,.28) 0%,
-      rgba(255,235,175,.16) 10%,
-      rgba(245,220,145,.08) 35%,
-      rgba(230,205,120,.02) 68%,
-      transparent 100%
+      rgba(255,248,215,.09) 0%,
+      rgba(255,240,185,.05) 18%,
+      rgba(245,225,150,.02) 45%,
+      transparent 65%
     );
-    /* top: largura do abajur (~10%), abre em cone natural */
     clip-path:polygon(45% 0%, 55% 0%, 80% 100%, 20% 100%);
-    filter:blur(10px);
-    pointer-events:none;
-    z-index:3;
+    filter:blur(14px);
+    pointer-events:none; z-index:3;
     animation:lampFlicker 2.4s ease-in-out infinite;
   }
   @keyframes lampFlicker{
-    0%,100%{ opacity:.88; }
-    10%{ opacity:.60; }
-    22%{ opacity:.84; }
-    38%{ opacity:.65; }
-    52%{ opacity:.90; }
-    67%{ opacity:.58; }
-    80%{ opacity:.82; }
+    0%,100%{ opacity:.90; }
+    10%{ opacity:.55; }
+    25%{ opacity:.85; }
+    40%{ opacity:.62; }
+    55%{ opacity:.92; }
+    70%{ opacity:.50; }
+    82%{ opacity:.80; }
   }
 
   /* ── Raio de lua (da janela esquerda, azul frio) ─────────────────── */
