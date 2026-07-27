@@ -6552,8 +6552,8 @@
   .lobbyViewer__vignette{
     position:absolute;inset:0;pointer-events:none;z-index:2;
     background:
-      radial-gradient(ellipse 90% 55% at 50% 108%, transparent 18%, rgba(4,2,10,.8) 100%),
-      radial-gradient(ellipse 90% 25% at 50% -5%, rgba(4,2,10,.6) 0%, transparent 100%),
+      radial-gradient(ellipse 90% 90% at 50% 50%, transparent 28%, rgba(4,2,10,.9) 100%),
+      linear-gradient(180deg, rgba(4,2,10,.5) 0%, transparent 16%, transparent 82%, rgba(4,2,10,.5) 100%),
       linear-gradient(90deg, rgba(4,2,10,.7) 0%, transparent 20%, transparent 80%, rgba(4,2,10,.7) 100%);
   }
   .lobbyViewer__loading{
@@ -8363,12 +8363,19 @@
       loading.classList.add("done"); setTimeout(()=>{loading.style.display="none";},650);
     },
     (prog)=>{
-      if(prog.total>0&&loadingText){
+      if(!loadingText) return;
+      if(prog.total>0){
         const pct=Math.round(prog.loaded/prog.total*100);
         loadingText.textContent=pct<100?`CARREGANDO  ${pct}%`:"PREPARANDO O RITUAL";
+      } else if(prog.loaded>0){
+        loadingText.textContent=`CARREGANDO  ${(prog.loaded/1048576).toFixed(1)} MB`;
       }
     },
-    (err)=>{console.error("lobby GLB:",err);}
+    (err)=>{
+      console.error("lobby GLB:",err);
+      if(loadingText) loadingText.textContent="ERRO AO CARREGAR";
+      if(loading) loading.style.opacity="0.5";
+    }
   );
 
   function resize(){const w=viewer.clientWidth,h=viewer.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);}
