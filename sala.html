@@ -6579,31 +6579,34 @@
     font-family:'Georgia',serif;z-index:6;
   }
 
-  /* ── Raio de lâmpada (cone de luz quente, CSS puro) ─────────────── */
+  /* ── Raio de lâmpada (cone saindo exatamente da lâmpada na imagem) ─ */
   .lobbyViewer__lampray{
     position:absolute;
-    top:0; left:50%; transform:translateX(-50%);
-    width:520px; height:82%;
+    /* lâmpada fica em ~50% horizontal, ~7% vertical na imagem */
+    top:6%; left:50%; transform:translateX(-50%);
+    width:580px; height:93%;
     background:linear-gradient(to bottom,
-      rgba(255,210,70,.20) 0%,
-      rgba(255,190,50,.10) 30%,
-      rgba(255,160,30,.04) 65%,
+      rgba(255,245,130,.55) 0%,
+      rgba(255,220,80,.32) 10%,
+      rgba(255,200,60,.16) 35%,
+      rgba(255,180,50,.05) 70%,
       transparent 100%
     );
-    clip-path:polygon(43% 0%, 57% 0%, 100% 100%, 0% 100%);
-    filter:blur(12px);
+    /* cone estreitíssimo no topo (nasce da lâmpada), abre para baixo */
+    clip-path:polygon(49.5% 0%, 50.5% 0%, 80% 100%, 20% 100%);
+    filter:blur(11px);
     pointer-events:none;
     z-index:3;
     animation:lampFlicker 2.4s ease-in-out infinite;
   }
   @keyframes lampFlicker{
-    0%,100%{ opacity:.85; }
-    10%{ opacity:.55; }
-    22%{ opacity:.80; }
-    38%{ opacity:.60; }
-    52%{ opacity:.88; }
-    67%{ opacity:.52; }
-    80%{ opacity:.78; }
+    0%,100%{ opacity:.90; }
+    10%{ opacity:.58; }
+    22%{ opacity:.82; }
+    38%{ opacity:.62; }
+    52%{ opacity:.92; }
+    67%{ opacity:.55; }
+    80%{ opacity:.80; }
   }
 
   /* ── Raio de lua (da janela esquerda, azul frio) ─────────────────── */
@@ -6626,31 +6629,11 @@
     50%{ opacity:.90; transform:scaleX(1.07) scaleY(1.03); }
   }
 
-  /* ── Partículas de poeira CSS (camada extra, não-Three.js) ──────── */
-  .lobbyViewer__dust{
-    position:absolute;inset:0;pointer-events:none;z-index:4;overflow:hidden;
-  }
-  .lobbyViewer__dust::before,.lobbyViewer__dust::after{
-    content:"";position:absolute;
-    background:radial-gradient(circle, rgba(255,240,200,.55) 0%, transparent 70%);
-    border-radius:50%;
-    animation:dustFloat1 18s ease-in-out infinite;
-  }
-  .lobbyViewer__dust::before{ width:3px;height:3px; top:30%; left:45%; animation-delay:0s; }
-  .lobbyViewer__dust::after { width:2px;height:2px; top:55%; left:62%; animation-delay:-7s; animation-name:dustFloat2; }
-  @keyframes dustFloat1{
-    0%{ transform:translate(0,0); opacity:0; }
-    10%{ opacity:.7; }
-    50%{ transform:translate(18px,-80px); opacity:.5; }
-    90%{ opacity:0; }
-    100%{ transform:translate(8px,-160px); opacity:0; }
-  }
-  @keyframes dustFloat2{
-    0%{ transform:translate(0,0); opacity:0; }
-    15%{ opacity:.6; }
-    50%{ transform:translate(-12px,-70px); opacity:.4; }
-    85%{ opacity:0; }
-    100%{ transform:translate(-5px,-140px); opacity:0; }
+  /* ── Canvas de poeira 2D (substituiu pseudo-elementos) ──────────── */
+  .lobbyViewer__dustCanvas{
+    position:absolute;inset:0;
+    width:100%!important;height:100%!important;
+    pointer-events:none;z-index:4;
   }
 
   /* ── Sobreposição de grão de filme (textura, dá profundidade) ────── */
@@ -7027,7 +7010,7 @@
                   <canvas id="lobbyCanvas"></canvas>
                   <div class="lobbyViewer__lampray" aria-hidden="true"></div>
                   <div class="lobbyViewer__moonray" aria-hidden="true"></div>
-                  <div class="lobbyViewer__dust" aria-hidden="true"></div>
+                  <canvas id="dustCanvas" class="lobbyViewer__dustCanvas" aria-hidden="true"></canvas>
                   <div class="lobbyViewer__grain" aria-hidden="true"></div>
                   <div class="lobbyViewer__vignette" aria-hidden="true"></div>
                   <div class="lobbyViewer__hint">Arraste para girar</div>
@@ -8562,6 +8545,60 @@
     hide() { viewer.style.display="none"; document.body.classList.remove("lobby-mode"); }
   };
 </script>
+
+  <!-- ── Poeira 2D: 150 partículas no feixe da lâmpada ───────────────────── -->
+  <script>
+  (function(){
+    var cv = document.getElementById('dustCanvas');
+    if(!cv) return;
+    var cx = cv.getContext('2d');
+    var W=1, H=1, dpr=Math.min(window.devicePixelRatio||1,2);
+    var N=150, pts=[];
+
+    function rz(){
+      var r=cv.getBoundingClientRect();
+      W=r.width||800; H=r.height||500;
+      cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+      cx.scale(dpr,dpr);
+    }
+    function mk(p){
+      /* lâmpada: 50% horizontal, 7% vertical */
+      var lx=W*0.50, ly=H*0.07;
+      var beam=Math.random()<0.75;
+      p.y = ly + Math.random()*(H*0.93);
+      var cR = ((p.y-ly)/H)*W*0.30;
+      p.x = beam ? lx+(Math.random()*2-1)*cR*Math.random() : Math.random()*W;
+      p.vx=(Math.random()-0.5)*0.10;
+      p.vy=-(0.06+Math.random()*0.14);
+      p.r=0.7+Math.random()*1.8;
+      p.beam=beam;
+      p.ph=Math.random()*Math.PI*2;
+    }
+    rz();
+    for(var i=0;i<N;i++){var p={};mk(p);p.y=Math.random()*H;pts.push(p);}
+    new ResizeObserver(rz).observe(cv.parentElement||cv);
+
+    function draw(ts){
+      cx.clearRect(0,0,W,H);
+      var t=ts/1000;
+      for(var i=0;i<N;i++){
+        var p=pts[i];
+        p.x+=p.vx+Math.sin(t*0.55+p.ph)*0.035;
+        p.y+=p.vy;
+        if(p.y<H*0.04||p.x<-4||p.x>W+4){ mk(p); }
+        var a = p.beam
+          ? (0.30+Math.sin(t*2.8+p.ph)*0.20)
+          : (0.04+Math.random()*0.03);
+        cx.beginPath();
+        cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        cx.fillStyle=p.beam?'rgba(255,248,220,'+a+')':'rgba(220,215,200,'+a+')';
+        cx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  })();
+  </script>
 
   <!-- ── Partidas Rolando: refresh + painel espectador ─────────────────────── -->
   <script>
