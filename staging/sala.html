@@ -183,11 +183,9 @@
       position:fixed;inset:0;z-index:0;pointer-events:none;
       background:
         radial-gradient(ellipse 52% 60% at 50% 51%, rgba(210,132,42,.22) 0%, rgba(175,95,25,.08) 32%, transparent 58%),
-        radial-gradient(ellipse 94% 94% at 50% 50%, transparent 50%, rgba(62,92,170,.26) 70%, rgba(42,68,140,.14) 84%, transparent 92%),
-        radial-gradient(ellipse 68% 38% at 50% 87%, rgba(112,150,220,.68) 0%, rgba(88,120,200,.28) 50%, transparent 82%),
-        radial-gradient(ellipse 28% 68% at 3% 46%, rgba(88,118,200,.24) 0%, rgba(55,80,155,.10) 44%, transparent 70%),
-        radial-gradient(ellipse 22% 30% at 10% 78%, rgba(65,90,165,.12) 0%, transparent 60%),
-        radial-gradient(ellipse 96% 88% at 50% 50%, transparent 40%, rgba(2,1,0,.96) 100%);
+        radial-gradient(ellipse 28% 68% at 3% 46%, rgba(88,118,200,.26) 0%, rgba(55,80,155,.10) 44%, transparent 70%),
+        linear-gradient(to top, rgba(75,108,195,.65) 0%, rgba(58,88,178,.28) 18%, transparent 34%),
+        radial-gradient(ellipse 96% 88% at 50% 50%, transparent 40%, rgba(2,1,0,.94) 100%);
     }
     .pageAtmosphere::after{
       content:'';
@@ -6647,19 +6645,15 @@
     border-radius:0;
     background:transparent;
     display:flex;align-items:stretch;
-    /* raio V menor (46%) amplifica zona de fade no topo/base sem tocar nas laterais */
-    -webkit-mask-image: radial-gradient(ellipse 50% 46% at 50% 50%,
-      black 0%,
-      black 88%,
-      rgba(0,0,0,.65) 94%,
-      rgba(0,0,0,.20) 98%,
-      transparent 100%);
-    mask-image: radial-gradient(ellipse 50% 46% at 50% 50%,
-      black 0%,
-      black 88%,
-      rgba(0,0,0,.65) 94%,
-      rgba(0,0,0,.20) 98%,
-      transparent 100%);
+    /* 4 lados independentes: L/R via gradient horizontal, T/B via vertical, intersectados */
+    -webkit-mask-image:
+      linear-gradient(to right,  transparent 0%, black 7%, black 93%, transparent 100%),
+      linear-gradient(to bottom, transparent 0%, black 5%, black 87%, transparent 100%);
+    -webkit-mask-composite: destination-in;
+    mask-image:
+      linear-gradient(to right,  transparent 0%, black 7%, black 93%, transparent 100%),
+      linear-gradient(to bottom, transparent 0%, black 5%, black 87%, transparent 100%);
+    mask-composite: intersect;
   }
   .lobbyViewer__video{
     position:absolute;inset:0;
@@ -6675,9 +6669,7 @@
   }
   .lobbyViewer__vignette{
     position:absolute;inset:0;pointer-events:none;z-index:2;
-    background:
-      linear-gradient(180deg, rgba(8,6,4,.30) 0%, transparent 12%),
-      linear-gradient(0deg, rgba(85,118,200,.34) 0%, rgba(62,92,175,.14) 14%, transparent 30%);
+    background: linear-gradient(180deg, rgba(8,6,4,.28) 0%, transparent 14%);
   }
   .lobbyViewer__loading{
     position:absolute;inset:0;z-index:5;
