@@ -183,22 +183,21 @@
     .pageAtmosphere{
       position:fixed;inset:0;z-index:0;pointer-events:none;
       background:
-        /* Glow principal da lanterna — elipse quente centrada na mesa */
-        radial-gradient(ellipse 52% 60% at 50% 51%, rgba(210,132,42,.52) 0%, rgba(175,95,25,.24) 32%, transparent 62%),
-        /* Ambient quente secundário — ilumina paredes e cards laterais */
-        radial-gradient(ellipse 94% 52% at 50% 57%, rgba(150,85,18,.20) 0%, transparent 58%),
-        /* Luz da janela/lua — borda esquerda */
-        radial-gradient(ellipse 26% 66% at 4% 46%, rgba(88,118,200,.34) 0%, rgba(55,80,155,.15) 44%, transparent 70%),
-        /* Reflexo da lua no chão — esquerda-baixo */
-        radial-gradient(ellipse 20% 28% at 11% 76%, rgba(65,90,165,.18) 0%, transparent 58%),
-        /* Vignette profunda — cantos quase pretos */
+        /* Glow da lanterna — sutil, não domina */
+        radial-gradient(ellipse 52% 60% at 50% 51%, rgba(210,132,42,.28) 0%, rgba(175,95,25,.12) 32%, transparent 62%),
+        /* Ambient quente secundário */
+        radial-gradient(ellipse 94% 52% at 50% 57%, rgba(150,85,18,.11) 0%, transparent 58%),
+        /* Luz da janela/lua — esquerda */
+        radial-gradient(ellipse 26% 66% at 4% 46%, rgba(88,118,200,.20) 0%, rgba(55,80,155,.09) 44%, transparent 70%),
+        /* Reflexo da lua no chão */
+        radial-gradient(ellipse 20% 28% at 11% 76%, rgba(65,90,165,.10) 0%, transparent 58%),
+        /* Vignette profunda */
         radial-gradient(ellipse 96% 88% at 50% 50%, transparent 40%, rgba(2,1,0,.96) 100%);
     }
-    /* Pulso suave da lanterna — como se a chama respirasse */
     .pageAtmosphere::after{
       content:'';
       position:absolute;inset:0;
-      background:radial-gradient(ellipse 36% 42% at 50% 51%, rgba(240,148,42,.22) 0%, transparent 52%);
+      background:radial-gradient(ellipse 36% 42% at 50% 51%, rgba(240,148,42,.12) 0%, transparent 52%);
       animation:lampBreath 4.2s ease-in-out infinite;
     }
     @keyframes lampBreath{
@@ -6657,23 +6656,22 @@
     border-radius:0;
     background:transparent;
     display:flex;align-items:stretch;
-    /* raio 50% = borda L/R cai a 100% do gradiente → além do stop transparent 96% → zero opacity */
-    -webkit-mask-image: radial-gradient(ellipse 50% 90% at 50% 50%,
+    /* ellipse 50% H → borda L/R = 100% gradiente → transparent. 130% V → topo/base ficam opacos */
+    /* fade zone = últimos 12% de cada lado (~85px) — vídeo central intocado */
+    -webkit-mask-image: radial-gradient(ellipse 50% 130% at 50% 50%,
       black 0%,
-      black 28%,
-      rgba(0,0,0,.85) 44%,
-      rgba(0,0,0,.60) 58%,
-      rgba(0,0,0,.32) 72%,
-      rgba(0,0,0,.10) 86%,
-      transparent 96%);
-    mask-image: radial-gradient(ellipse 50% 90% at 50% 50%,
+      black 76%,
+      rgba(0,0,0,.88) 84%,
+      rgba(0,0,0,.62) 91%,
+      rgba(0,0,0,.28) 96%,
+      transparent 100%);
+    mask-image: radial-gradient(ellipse 50% 130% at 50% 50%,
       black 0%,
-      black 28%,
-      rgba(0,0,0,.85) 44%,
-      rgba(0,0,0,.60) 58%,
-      rgba(0,0,0,.32) 72%,
-      rgba(0,0,0,.10) 86%,
-      transparent 96%);
+      black 76%,
+      rgba(0,0,0,.88) 84%,
+      rgba(0,0,0,.62) 91%,
+      rgba(0,0,0,.28) 96%,
+      transparent 100%);
   }
   .lobbyViewer__video{
     position:absolute;inset:0;
