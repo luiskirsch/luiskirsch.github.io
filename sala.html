@@ -183,16 +183,16 @@
     .pageAtmosphere{
       position:fixed;inset:0;z-index:0;pointer-events:none;
       background:
-        /* Glow da lanterna — centro */
-        radial-gradient(ellipse 52% 60% at 50% 51%, rgba(210,132,42,.28) 0%, rgba(175,95,25,.12) 32%, transparent 62%),
-        /* Ambient quente secundário */
-        radial-gradient(ellipse 94% 52% at 50% 57%, rgba(150,85,18,.11) 0%, transparent 58%),
-        /* Reflexo quente no chão — revela a borda inferior do vídeo com cor */
-        radial-gradient(ellipse 62% 20% at 50% 93%, rgba(158,80,14,.32) 0%, rgba(120,58,8,.12) 55%, transparent 85%),
+        /* Glow da lanterna — centro quente (toque de cor na cena) */
+        radial-gradient(ellipse 52% 60% at 50% 51%, rgba(210,132,42,.22) 0%, rgba(175,95,25,.08) 32%, transparent 58%),
+        /* Anel lunar azul em toda a periferia — visible nas bordas do vídeo */
+        radial-gradient(ellipse 94% 94% at 50% 50%, transparent 50%, rgba(62,92,170,.26) 70%, rgba(42,68,140,.14) 84%, transparent 92%),
+        /* Pool de luz lunar no chão — fundo azul que emerge quando a borda inferior dissolve */
+        radial-gradient(ellipse 68% 38% at 50% 87%, rgba(72,102,188,.32) 0%, rgba(52,78,152,.13) 50%, transparent 82%),
         /* Luz da janela/lua — esquerda */
-        radial-gradient(ellipse 26% 66% at 4% 46%, rgba(88,118,200,.20) 0%, rgba(55,80,155,.09) 44%, transparent 70%),
-        /* Reflexo da lua no chão */
-        radial-gradient(ellipse 20% 28% at 11% 76%, rgba(65,90,165,.10) 0%, transparent 58%),
+        radial-gradient(ellipse 28% 68% at 3% 46%, rgba(88,118,200,.24) 0%, rgba(55,80,155,.10) 44%, transparent 70%),
+        /* Reflexo da lua no chão esquerdo */
+        radial-gradient(ellipse 22% 30% at 10% 78%, rgba(65,90,165,.12) 0%, transparent 60%),
         /* Vignette profunda */
         radial-gradient(ellipse 96% 88% at 50% 50%, transparent 40%, rgba(2,1,0,.96) 100%);
     }
@@ -6688,9 +6688,9 @@
     position:absolute;inset:0;pointer-events:none;z-index:2;
     background:
       /* sombra topo sutil */
-      linear-gradient(180deg, rgba(8,6,4,.32) 0%, transparent 14%),
-      /* glow âmbar no chão — transição visível p/ atmosfera */
-      linear-gradient(0deg, rgba(158,80,14,.26) 0%, rgba(120,58,8,.10) 12%, transparent 26%);
+      linear-gradient(180deg, rgba(8,6,4,.30) 0%, transparent 12%),
+      /* bruma lunar na base — prepara a cor antes de dissolver */
+      linear-gradient(0deg, rgba(52,78,152,.24) 0%, rgba(40,62,130,.09) 14%, transparent 28%);
   }
   .lobbyViewer__loading{
     position:absolute;inset:0;z-index:5;
