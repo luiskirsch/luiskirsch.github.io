@@ -187,8 +187,8 @@
         radial-gradient(ellipse 52% 60% at 50% 51%, rgba(210,132,42,.22) 0%, rgba(175,95,25,.08) 32%, transparent 58%),
         /* Anel lunar azul em toda a periferia — visible nas bordas do vídeo */
         radial-gradient(ellipse 94% 94% at 50% 50%, transparent 50%, rgba(62,92,170,.26) 70%, rgba(42,68,140,.14) 84%, transparent 92%),
-        /* Pool de luz lunar no chão — fundo azul que emerge quando a borda inferior dissolve */
-        radial-gradient(ellipse 68% 38% at 50% 87%, rgba(72,102,188,.32) 0%, rgba(52,78,152,.13) 50%, transparent 82%),
+        /* Pool de luz lunar no chão — azul claro e visível pra contrastrar com o chão escuro */
+        radial-gradient(ellipse 68% 38% at 50% 87%, rgba(112,150,220,.68) 0%, rgba(88,120,200,.28) 50%, transparent 82%),
         /* Luz da janela/lua — esquerda */
         radial-gradient(ellipse 28% 68% at 3% 46%, rgba(88,118,200,.24) 0%, rgba(55,80,155,.10) 44%, transparent 70%),
         /* Reflexo da lua no chão esquerdo */
@@ -6658,18 +6658,18 @@
     border-radius:0;
     background:transparent;
     display:flex;align-items:stretch;
-    /* bordas finas: opaco até 90%, fade nos últimos 10% de cada lado */
-    -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%,
+    /* raio V menor (46%) amplifica zona de fade no topo/base sem tocar nas laterais */
+    -webkit-mask-image: radial-gradient(ellipse 50% 46% at 50% 50%,
       black 0%,
-      black 90%,
-      rgba(0,0,0,.62) 95%,
-      rgba(0,0,0,.18) 98%,
+      black 88%,
+      rgba(0,0,0,.65) 94%,
+      rgba(0,0,0,.20) 98%,
       transparent 100%);
-    mask-image: radial-gradient(ellipse 50% 50% at 50% 50%,
+    mask-image: radial-gradient(ellipse 50% 46% at 50% 50%,
       black 0%,
-      black 90%,
-      rgba(0,0,0,.62) 95%,
-      rgba(0,0,0,.18) 98%,
+      black 88%,
+      rgba(0,0,0,.65) 94%,
+      rgba(0,0,0,.20) 98%,
       transparent 100%);
   }
   .lobbyViewer__video{
@@ -6689,8 +6689,8 @@
     background:
       /* sombra topo sutil */
       linear-gradient(180deg, rgba(8,6,4,.30) 0%, transparent 12%),
-      /* bruma lunar na base — prepara a cor antes de dissolver */
-      linear-gradient(0deg, rgba(52,78,152,.24) 0%, rgba(40,62,130,.09) 14%, transparent 28%);
+      /* bruma lunar na base — azul mais claro p/ criar contraste com o chão escuro */
+      linear-gradient(0deg, rgba(85,118,200,.34) 0%, rgba(62,92,175,.14) 14%, transparent 30%);
   }
   .lobbyViewer__loading{
     position:absolute;inset:0;z-index:5;
