@@ -906,6 +906,11 @@
       grid-template-rows:auto 1fr;
       min-height:0;
       overflow:visible; /* permite o 3D da carta sair dos limites sem ser clipado */
+      /* Bg sólido só no header (150px topo); área do vídeo transparente → atmosphere sangra */
+      background:
+        linear-gradient(to bottom, rgba(16,11,8,.97) 0px, rgba(16,11,8,.97) 150px, transparent 178px) !important;
+      border:none !important;
+      box-shadow:none !important;
     }
 
     .tableHead{
@@ -6649,8 +6654,8 @@
     width:100%;
     height:clamp(300px, calc(100svh - 300px), 580px);
     overflow:hidden;
-    border-radius:20px;
-    background:#04020a;
+    border-radius:0;
+    background:transparent;
     display:flex;align-items:stretch;
     /* Dissolve em névoa — multi-stop cria transição orgânica, não linear */
     -webkit-mask-image: radial-gradient(ellipse 88% 92% at 50% 50%,
