@@ -184,6 +184,7 @@
       background:
         radial-gradient(ellipse 52% 60% at 50% 51%, rgba(210,132,42,.28) 0%, rgba(175,95,25,.12) 32%, transparent 62%),
         radial-gradient(ellipse 94% 52% at 50% 57%, rgba(150,85,18,.11) 0%, transparent 58%),
+        radial-gradient(ellipse 62% 20% at 50% 93%, rgba(158,80,14,.32) 0%, rgba(120,58,8,.12) 55%, transparent 85%),
         radial-gradient(ellipse 26% 66% at 4% 46%, rgba(88,118,200,.20) 0%, rgba(55,80,155,.09) 44%, transparent 70%),
         radial-gradient(ellipse 20% 28% at 11% 76%, rgba(65,90,165,.10) 0%, transparent 58%),
         radial-gradient(ellipse 96% 88% at 50% 50%, transparent 40%, rgba(2,1,0,.96) 100%);
@@ -6646,20 +6647,18 @@
     border-radius:0;
     background:transparent;
     display:flex;align-items:stretch;
-    /* 50% 50% → todas as 4 bordas chegam a 100% do gradiente → transparent em toda volta */
+    /* bordas finas: opaco até 90%, fade nos últimos 10% de cada lado */
     -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%,
       black 0%,
-      black 72%,
-      rgba(0,0,0,.88) 81%,
-      rgba(0,0,0,.60) 89%,
-      rgba(0,0,0,.28) 95%,
+      black 90%,
+      rgba(0,0,0,.62) 95%,
+      rgba(0,0,0,.18) 98%,
       transparent 100%);
     mask-image: radial-gradient(ellipse 50% 50% at 50% 50%,
       black 0%,
-      black 72%,
-      rgba(0,0,0,.88) 81%,
-      rgba(0,0,0,.60) 89%,
-      rgba(0,0,0,.28) 95%,
+      black 90%,
+      rgba(0,0,0,.62) 95%,
+      rgba(0,0,0,.18) 98%,
       transparent 100%);
   }
   .lobbyViewer__video{
@@ -6677,7 +6676,8 @@
   .lobbyViewer__vignette{
     position:absolute;inset:0;pointer-events:none;z-index:2;
     background:
-      linear-gradient(180deg, rgba(8,6,4,.55) 0%, transparent 15%, transparent 82%, rgba(8,6,4,.60) 100%);
+      linear-gradient(180deg, rgba(8,6,4,.32) 0%, transparent 14%),
+      linear-gradient(0deg, rgba(158,80,14,.26) 0%, rgba(120,58,8,.10) 12%, transparent 26%);
   }
   .lobbyViewer__loading{
     position:absolute;inset:0;z-index:5;
