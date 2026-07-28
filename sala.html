@@ -6656,21 +6656,20 @@
     border-radius:0;
     background:transparent;
     display:flex;align-items:stretch;
-    /* ellipse 50% H → borda L/R = 100% gradiente → transparent. 130% V → topo/base ficam opacos */
-    /* fade zone = últimos 12% de cada lado (~85px) — vídeo central intocado */
-    -webkit-mask-image: radial-gradient(ellipse 50% 130% at 50% 50%,
+    /* 50% 50% → todas as 4 bordas chegam a 100% do gradiente → transparent em toda volta */
+    -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%,
       black 0%,
-      black 76%,
-      rgba(0,0,0,.88) 84%,
-      rgba(0,0,0,.62) 91%,
-      rgba(0,0,0,.28) 96%,
+      black 72%,
+      rgba(0,0,0,.88) 81%,
+      rgba(0,0,0,.60) 89%,
+      rgba(0,0,0,.28) 95%,
       transparent 100%);
-    mask-image: radial-gradient(ellipse 50% 130% at 50% 50%,
+    mask-image: radial-gradient(ellipse 50% 50% at 50% 50%,
       black 0%,
-      black 76%,
-      rgba(0,0,0,.88) 84%,
-      rgba(0,0,0,.62) 91%,
-      rgba(0,0,0,.28) 96%,
+      black 72%,
+      rgba(0,0,0,.88) 81%,
+      rgba(0,0,0,.60) 89%,
+      rgba(0,0,0,.28) 95%,
       transparent 100%);
   }
   .lobbyViewer__video{
