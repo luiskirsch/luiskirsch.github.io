@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Encontro Marcado — O SextoLugar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<style>
+:root {
+  --bg:    #080604;
+  --bg2:   #0e0608;
+  --rose:  #c96b7a;
+  --rose2: #e87b8f;
+  --gold:  #d7b06b;
+  --text:  #f5e8ec;
+  --muted: #9a7e84;
+  --line:  rgba(201,107,122,.15);
+  --line2: rgba(201,107,122,.28);
+  --radius: 20px;
+  --shadow: 0 20px 60px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;overflow-x:hidden}
+body{
+  background:
+    radial-gradient(circle at 20% 10%, rgba(201,107,122,.12), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(215,176,107,.08), transparent 35%),
+    var(--bg);
+}
+
+/* ── Layout ── */
+.page{min-height:100svh;display:flex;flex-direction:column;align-items:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.shell{width:min(480px,100%);padding:20px 16px 40px;display:flex;flex-direction:column;gap:20px}
+
+/* ── Header ── */
+.logo{text-align:center;padding:28px 0 8px}
+.logo-hearts{font-size:22px;letter-spacing:6px;opacity:.7;margin-bottom:6px}
+.logo-title{font-size:clamp(22px,6vw,28px);font-weight:700;letter-spacing:.04em;color:var(--text)}
+.logo-sub{font-size:13px;color:var(--muted);margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
+
+/* ── Card ── */
+.card{background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid var(--line2);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.card-title{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:14px}
+
+/* ── Evento info ── */
+.event-date{font-size:clamp(18px,5vw,22px);font-weight:700;color:var(--text);margin-bottom:4px}
+.event-time{font-size:15px;color:var(--gold);margin-bottom:16px}
+.event-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px}
+.event-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.pill{background:rgba(201,107,122,.12);border:1px solid var(--line2);border-radius:40px;padding:5px 14px;font-size:12px;color:var(--rose2);font-weight:500}
+
+/* ── Botões ── */
+.btn{display:block;width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;text-align:center;transition:opacity .15s,transform .1s;letter-spacing:.02em;text-decoration:none;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--rose),var(--rose2));color:#fff;box-shadow:0 4px 20px rgba(201,107,122,.35)}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{background:rgba(255,255,255,.06);border:1px solid var(--line2);color:var(--text)}
+.btn-secondary:hover{background:rgba(255,255,255,.1)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* ── Ticket badge ── */
+.ticket-badge{display:flex;align-items:center;gap:12px;background:rgba(215,176,107,.08);border:1px solid rgba(215,176,107,.25);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.ticket-icon{font-size:24px;flex-shrink:0}
+.ticket-label{font-size:13px;color:var(--gold);font-weight:600}
+.ticket-sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── Countdown ── */
+.countdown{text-align:center;padding:10px 0 4px}
+.countdown-label{font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.countdown-value{font-size:clamp(28px,8vw,42px);font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+
+/* ── Waiting room ── */
+.waiting-counts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.count-box{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.count-num{font-size:28px;font-weight:700;color:var(--text);line-height:1}
+.count-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+.pulse{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;color:var(--muted);font-size:13px}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--rose);animation:pulse 1.4s infinite}
+.pulse-dot:nth-child(2){animation-delay:.2s}
+.pulse-dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+
+/* ── Round: videocall ── */
+#roundView{display:none;flex-direction:column;min-height:100svh;background:var(--bg);position:fixed;inset:0;z-index:100}
+.round-top{padding:14px 16px 0;display:flex;align-items:center;justify-content:space-between}
+.round-info{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.round-timer{font-size:20px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.round-timer.warn{color:var(--rose2);animation:timerPulse .7s infinite}
+@keyframes timerPulse{50%{opacity:.6}}
+.video-area{flex:1;display:grid;grid-template-rows:1fr auto;gap:0;position:relative;overflow:hidden}
+.remote-video-wrap{position:relative;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.remote-video-wrap video{width:100%;height:100%;object-fit:cover}
+.partner-name{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);padding:5px 12px;border-radius:20px;font-size:13px;font-weight:600;color:#fff}
+.local-video-wrap{position:absolute;bottom:90px;right:12px;width:90px;height:130px;border-radius:12px;overflow:hidden;border:2px solid rgba(201,107,122,.4);background:#111}
+.local-video-wrap video{width:100%;height:100%;object-fit:cover}
+.round-bottom{padding:12px 16px max(12px,env(safe-area-inset-bottom));background:rgba(8,6,4,.9);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.round-bottom-left{font-size:13px;color:var(--muted)}
+.round-bottom-left span{display:block;color:var(--text);font-weight:600;font-size:15px;margin-top:1px}
+.ctrl-btn{width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:opacity .15s;-webkit-tap-highlight-color:transparent;background:rgba(255,255,255,.08)}
+.ctrl-btn:active{opacity:.6}
+.ctrl-btn.active{background:var(--rose)}
+.sitting-out-overlay{position:absolute;inset:0;background:rgba(8,6,4,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:10;font-size:15px;color:var(--muted);text-align:center;padding:24px}
+.sitting-out-overlay .icon{font-size:40px;margin-bottom:4px}
+
+/* ── Transition overlay ── */
+#transitionView{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100svh;position:fixed;inset:0;z-index:200;background:rgba(8,6,4,.97);gap:16px;text-align:center;padding:24px}
+.trans-icon{font-size:56px;animation:bellSwing 1s ease}
+@keyframes bellSwing{0%{transform:rotate(-20deg)}30%{transform:rotate(20deg)}60%{transform:rotate(-10deg)}80%{transform:rotate(10deg)}100%{transform:rotate(0)}}
+.trans-title{font-size:20px;font-weight:700;color:var(--text)}
+.trans-sub{font-size:14px;color:var(--muted)}
+.trans-progress{width:200px;height:4px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin-top:4px}
+.trans-bar{height:100%;background:var(--rose);border-radius:4px;width:0;transition:width linear}
+
+/* ── Voting ── */
+#votingView{display:none}
+.people-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.person-card{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:16px;padding:16px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.person-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--rose),#8b3a4a);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex-shrink:0}
+.person-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.2}
+.vote-btns{display:flex;gap:6px;margin-top:4px}
+.vote-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line2);background:transparent;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--muted);-webkit-tap-highlight-color:transparent}
+.vote-btn:active{transform:scale(.88)}
+.vote-btn.liked{background:var(--rose);border-color:var(--rose);color:#fff}
+.vote-btn.noped{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:var(--text)}
+
+/* ── Match notification ── */
+#matchToast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:linear-gradient(135deg,var(--rose),var(--rose2));color:#fff;border-radius:16px;padding:14px 20px;font-weight:700;font-size:15px;box-shadow:0 8px 30px rgba(201,107,122,.5);z-index:500;opacity:0;transition:all .4s;pointer-events:none;text-align:center;min-width:220px}
+#matchToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── Spinner ── */
+.spinner{width:32px;height:32px;border:3px solid rgba(201,107,122,.2);border-top-color:var(--rose);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── No-event state ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty-state .icon{font-size:44px;opacity:.5}
+.empty-state p{font-size:14px;line-height:1.6}
+
+/* ── Modal ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-bg.open{opacity:1;pointer-events:auto}
+.modal{background:linear-gradient(180deg,#1a0c10,#0e060a);border:1px solid var(--line2);border-radius:24px 24px 0 0;padding:24px 20px max(24px,env(safe-area-inset-bottom));width:100%;max-width:480px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:20px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.field input,.field select{background:rgba(255,255,255,.05);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);outline:none;-webkit-appearance:none}
+.field input::placeholder{color:var(--muted)}
+.field input:focus,.field select:focus{border-color:var(--rose)}
+.gender-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gender-opt{display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.04);border:1.5px solid var(--line2);border-radius:12px;padding:12px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);transition:all .15s;-webkit-tap-highlight-color:transparent}
+.gender-opt.selected{border-color:var(--rose);background:rgba(201,107,122,.12);color:var(--rose2)}
+.gender-icon{font-size:18px}
+
+/* ── States visibility ── */
+[data-state]{display:none}
+[data-state].active{display:block}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="shell">
+
+    <!-- Header -->
+    <div class="logo">
+      <div class="logo-hearts">♥ ♥ ♥</div>
+      <div class="logo-title">Encontro Marcado</div>
+      <div class="logo-sub">O SextoLugar · Speed Dating Online</div>
+    </div>
+
+    <!-- Estado: carregando -->
+    <div data-state="loading" class="active">
+      <div class="card" style="text-align:center;padding:40px">
+        <div class="spinner"></div>
+        <p style="color:var(--muted);font-size:13px;margin-top:16px">Carregando...</p>
+      </div>
+    </div>
+
+    <!-- Estado: sem evento -->
+    <div data-state="no-event">
+      <div class="card">
+        <div class="empty-state">
+          <div class="icon">🌙</div>
+          <p>Nenhum evento programado no momento.<br>Acompanhe nossas redes para saber quando o próximo acontece.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado: evento disponível (sem ingresso) -->
+    <div data-state="buy">
+      <div class="card">
+        <div class="card-title">Próximo Evento</div>
+        <div class="event-date" id="evDate"></div>
+        <div class="event-time" id="evTime"></div>
+        <div class="event-pills">
+          <span class="pill">4 min por encontro</span>
+          <span class="pill">Homens × Mulheres</span>
+          <span class="pill">Online</span>
+        </div>
+        <div class="event-desc">Converse 4 minutos com cada parceiro(a). Quando o sino tocar, próxima pessoa. No final, marque quem você curtiu — se for mútuo, é um match!</div>
+        <button class="btn btn-primary" id="btnBuy">Comprar Ingresso · R$ 15</button>
+      </div>
+    </div>
+
+    <!-- Estado: tem ingresso -->
+    <div data-state="ticket">
+      <div class="card">
+        <div class="card-title">Seu Ingresso</div>
+        <div class="ticket-badge">
+          <div class="ticket-icon">🎫</div>
+          <div>
+            <div class="ticket-label">Ingresso Confirmado</div>
+            <div class="ticket-sub" id="ticketEvDate"></div>
+          </div>
+        </div>
+        <div class="countdown">
+          <div class="countdown-label">Evento começa em</div>
+          <div class="countdown-value" id="cdValue">--:--:--</div>
+        </div>
+        <div style="margin-top:20px">
+          <button class="btn btn-primary" id="btnCheckin" disabled>Entrar na Sala de Espera</button>
+          <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px" id="checkinHint">Disponível 30 minutos antes do início</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado: sala de espera -->
+    <div data-state="waiting">
+      <div class="card">
+        <div class="card-title">Sala de Espera</div>
+        <div class="waiting-counts">
+          <div class="count-box">
+            <div class="count-num" id="wMen">0</div>
+            <div class="count-lbl">Homens</div>
+          </div>
+          <div class="count-box">
+            <div class="count-num" id="wWomen">0</div>
+            <div class="count-lbl">Mulheres</div>
+          </div>
+        </div>
+        <div class="pulse">
+          <div class="pulse-dot"></div>
+          <div class="pulse-dot"></div>
+          <div class="pulse-dot"></div>
+          <span>Aguardando início do evento</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado: votação -->
+    <div data-state="voting" id="votingView">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Evento encerrado · Quem você curtiu?</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Marque as pessoas que te interessaram. Se for mútuo, você recebe um match!</p>
+        <div class="people-grid" id="peopleGrid"></div>
+      </div>
+    </div>
+
+    <!-- Matches confirmados -->
+    <div data-state="matches" id="matchesSection" style="display:none">
+      <div class="card">
+        <div class="card-title" style="color:var(--gold)">✨ Seus Matches</div>
+        <div id="matchesList"></div>
+      </div>
+    </div>
+
+  </div><!-- /shell -->
+</div><!-- /page -->
+
+<!-- Round view (fullscreen) -->
+<div id="roundView">
+  <div class="round-top">
+    <div>
+      <div class="round-info" id="roundLabel">Rodada 1 de ?</div>
+    </div>
+    <div class="round-timer" id="roundTimer">4:00</div>
+  </div>
+  <div class="video-area" id="videoArea">
+    <div class="remote-video-wrap" id="remoteWrap">
+      <div style="color:var(--muted);font-size:13px">Aguardando parceiro(a)...</div>
+      <div class="partner-name" id="partnerNameLabel"></div>
+    </div>
+    <div class="local-video-wrap" id="localWrap"></div>
+    <div class="sitting-out-overlay" id="sittingOut" style="display:none">
+      <div class="icon">⏳</div>
+      <p>Você está de fora nesta rodada.<br>Próxima logo mais!</p>
+    </div>
+  </div>
+  <div class="round-bottom">
+    <div class="round-bottom-left">
+      Com
+      <span id="partnerLabel">—</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="ctrl-btn" id="btnMic" title="Microfone">🎤</button>
+      <button class="ctrl-btn" id="btnCam" title="Câmera">📷</button>
+    </div>
+  </div>
+</div>
+
+<!-- Transition overlay -->
+<div id="transitionView">
+  <div class="trans-icon">🔔</div>
+  <div class="trans-title" id="transTitle">Tempo esgotado!</div>
+  <div class="trans-sub" id="transSub">Próxima pessoa em instantes...</div>
+  <div class="trans-progress"><div class="trans-bar" id="transBar"></div></div>
+</div>
+
+<!-- Modal de check-in -->
+<div class="modal-bg" id="checkinModal">
+  <div class="modal">
+    <div class="modal-title">Entrar no Evento</div>
+    <div class="field">
+      <label>Seu nome no evento</label>
+      <input type="text" id="ciName" placeholder="Como quer ser chamado(a)?" maxlength="40" />
+    </div>
+    <div class="field">
+      <label>Você é</label>
+      <div class="gender-row">
+        <div class="gender-opt" data-g="M" id="gOptM" onclick="selectGender('M')">
+          <span class="gender-icon">👨</span> Homem
+        </div>
+        <div class="gender-opt" data-g="F" id="gOptF" onclick="selectGender('F')">
+          <span class="gender-icon">👩</span> Mulher
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btnConfirmCheckin" onclick="confirmCheckin()" style="margin-top:8px">Confirmar e Entrar</button>
+    <button class="btn btn-secondary" onclick="closeModal()" style="margin-top:10px">Cancelar</button>
+  </div>
+</div>
+
+<!-- Match toast -->
+<div id="matchToast"></div>
+
+<script type="module">
+// ─── Config ──────────────────────────────────────────────────────────────────
+const BACKEND = "https://osl-video-server-production.up.railway.app";
+const LIVEKIT_URL = "wss://osextolugar-eqa7q1iz.livekit.cloud";
+
+// ─── Firebase ────────────────────────────────────────────────────────────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+const app  = initializeApp({
+  apiKey:            "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+  authDomain:        "osextolugar-game.firebaseapp.com",
+  projectId:         "osextolugar-game",
+  storageBucket:     "osextolugar-game.firebasestorage.app",
+  messagingSenderId: "947922328721",
+  appId:             "1:947922328721:web:989522c99e16ab449f3330",
+});
+const auth = getAuth(app);
+
+// ─── Estado ──────────────────────────────────────────────────────────────────
+let user       = null;
+let idToken    = null;
+let activeEvent   = null;
+let hasTicket  = false;
+let checkedIn  = false;
+let myGender   = localStorage.getItem("em_gender") || "";
+let myName     = localStorage.getItem("em_name")   || "";
+let currentRoom = null; // LiveKit Room
+let micEnabled = true;
+let camEnabled = true;
+let cdInterval = null;
+let roundInterval = null;
+let transTimeout  = null;
+let votedUids     = {};
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function setState(name) {
+  document.querySelectorAll("[data-state]").forEach(el => el.classList.remove("active"));
+  const el = document.querySelector(`[data-state="${name}"]`);
+  if (el) el.classList.add("active");
+}
+
+async function getFreshToken() {
+  if (!user) return null;
+  idToken = await user.getIdToken(true);
+  return idToken;
+}
+
+async function api(path, opts = {}) {
+  const tok = idToken || await getFreshToken();
+  return fetch(BACKEND + path, {
+    ...opts,
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${tok}`, ...(opts.headers||{}) },
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  }).then(r => r.json());
+}
+
+function fmt2(n) { return String(n).padStart(2,"0"); }
+
+function fmtTime(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}h ${fmt2(m)}min`;
+  return `${fmt2(m)}:${fmt2(sec)}`;
+}
+
+function fmtEventDate(ts) {
+  return new Date(ts).toLocaleDateString("pt-BR", { weekday:"long", day:"2-digit", month:"long" });
+}
+function fmtEventTime(ts) {
+  return new Date(ts).toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" }) + "h";
+}
+
+// ─── Bell ────────────────────────────────────────────────────────────────────
+function playBell() {
+  try {
+    const ctx  = new AudioContext();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = 880; osc.type = "sine";
+    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 2.5);
+  } catch (_) {}
+}
+
+// ─── Socket.IO ───────────────────────────────────────────────────────────────
+let socket = null;
+
+async function connectSocket() {
+  if (socket?.connected) return;
+  const tok = idToken || await getFreshToken();
+  // Carrega socket.io client dinamicamente
+  if (!window.io) {
+    await new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "https://cdn.socket.io/4.7.5/socket.io.min.js";
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+  socket = window.io(BACKEND, { auth: { token: tok }, transports: ["websocket","polling"] });
+
+  socket.on("encontro:count_update", ({ men, women, status }) => {
+    document.getElementById("wMen").textContent   = men;
+    document.getElementById("wWomen").textContent = women;
+    if (status === "running" && !checkedIn) return;
+  });
+
+  socket.on("encontro:round_started", async ({ round, totalRounds, room, livekitToken, partnerName, durationMs }) => {
+    hideTransition();
+    await startLiveKitRoom(room, livekitToken, partnerName, round, totalRounds, durationMs);
+  });
+
+  socket.on("encontro:sitting_out", ({ round, totalRounds, durationMs }) => {
+    hideTransition();
+    showRoundView(round, totalRounds, durationMs);
+    document.getElementById("sittingOut").style.display = "flex";
+    document.getElementById("localWrap").style.display  = "none";
+  });
+
+  socket.on("encontro:round_warning", () => {
+    playBell();
+    document.getElementById("roundTimer").classList.add("warn");
+  });
+
+  socket.on("encontro:round_ended", ({ completedRound, isLastRound, transitionMs }) => {
+    stopRoundTimer();
+    disconnectLiveKit();
+    showTransition(isLastRound, transitionMs);
+  });
+
+  socket.on("encontro:event_ended", ({ metPeople }) => {
+    hideTransition();
+    document.getElementById("roundView").style.display = "none";
+    disconnectLiveKit();
+    showVoting(metPeople);
+  });
+
+  socket.on("encontro:match", ({ matchName }) => {
+    showMatchToast(matchName);
+    loadMatches();
+  });
+}
+
+// ─── LiveKit ─────────────────────────────────────────────────────────────────
+async function loadLiveKit() {
+  if (window.LivekitClient) return;
+  await new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = "https://unpkg.com/livekit-client@2.5.4/dist/livekit-client.umd.min.js";
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+function showRoundView(round, totalRounds, durationMs) {
+  document.getElementById("roundView").style.display     = "flex";
+  document.getElementById("roundLabel").textContent      = `Rodada ${round} de ${totalRounds}`;
+  document.getElementById("sittingOut").style.display    = "none";
+  document.getElementById("localWrap").style.display     = "block";
+  startRoundTimer(durationMs);
+}
+
+async function startLiveKitRoom(roomName, token, partnerName, round, totalRounds, durationMs) {
+  await loadLiveKit();
+  disconnectLiveKit();
+
+  const LK   = window.LivekitClient;
+  currentRoom = new LK.Room({
+    adaptiveStream: true,
+    dynacast:       true,
+    videoCaptureDefaults: { resolution: LK.VideoPresets.h360.resolution },
+  });
+
+  showRoundView(round, totalRounds, durationMs);
+  document.getElementById("partnerLabel").textContent    = partnerName;
+  document.getElementById("partnerNameLabel").textContent = partnerName;
+
+  const remoteWrap = document.getElementById("remoteWrap");
+  // Remove vídeos anteriores
+  remoteWrap.querySelectorAll("video").forEach(v => v.remove());
+  const localWrap  = document.getElementById("localWrap");
+  localWrap.querySelectorAll("video").forEach(v => v.remove());
+
+  currentRoom.on(LK.RoomEvent.TrackSubscribed, (track) => {
+    if (track.kind === "video" || track.kind === "audio") {
+      const el = track.attach();
+      if (track.kind === "video") {
+        el.style.cssText = "width:100%;height:100%;object-fit:cover";
+        remoteWrap.prepend(el);
+      } else {
+        document.body.appendChild(el);
+      }
+    }
+  });
+
+  currentRoom.on(LK.RoomEvent.TrackUnsubscribed, (track) => { track.detach(); });
+
+  await currentRoom.connect(LIVEKIT_URL, token, { autoSubscribe: true });
+
+  // Publica câmera e mic local
+  const camTrack = await LK.createLocalVideoTrack({ resolution: LK.VideoPresets.h360.resolution });
+  const micTrack = await LK.createLocalAudioTrack();
+  await currentRoom.localParticipant.publishTrack(camTrack);
+  await currentRoom.localParticipant.publishTrack(micTrack);
+
+  const localVid = camTrack.attach();
+  localVid.style.cssText = "width:100%;height:100%;object-fit:cover;transform:scaleX(-1)";
+  localWrap.appendChild(localVid);
+
+  window._lkCamTrack = camTrack;
+  window._lkMicTrack = micTrack;
+
+  micEnabled = true; camEnabled = true;
+  updateCtrlBtns();
+}
+
+function disconnectLiveKit() {
+  if (currentRoom) { try { currentRoom.disconnect(); } catch(_){} currentRoom = null; }
+  document.getElementById("remoteWrap").querySelectorAll("video,audio").forEach(e => e.remove());
+  document.getElementById("localWrap").querySelectorAll("video").forEach(e => e.remove());
+  document.querySelectorAll("audio").forEach(e => e.remove());
+}
+
+// ─── Timers ───────────────────────────────────────────────────────────────────
+function startRoundTimer(durationMs) {
+  clearInterval(roundInterval);
+  const end = Date.now() + durationMs;
+  function tick() {
+    const left = end - Date.now();
+    document.getElementById("roundTimer").textContent = fmtTime(left);
+    if (left <= 0) {
+      clearInterval(roundInterval);
+      document.getElementById("roundTimer").textContent = "0:00";
+    }
+  }
+  tick();
+  roundInterval = setInterval(tick, 500);
+}
+
+function stopRoundTimer() {
+  clearInterval(roundInterval);
+  document.getElementById("roundTimer").classList.remove("warn");
+}
+
+// ─── Transition ───────────────────────────────────────────────────────────────
+function showTransition(isLast, ms) {
+  playBell();
+  const tv   = document.getElementById("transitionView");
+  const bar  = document.getElementById("transBar");
+  document.getElementById("transTitle").textContent = isLast ? "Evento encerrado! 🎉" : "Tempo esgotado!";
+  document.getElementById("transSub").textContent   = isLast ? "Calculando resultados..." : "Próxima pessoa em instantes...";
+  tv.style.display = "flex";
+  bar.style.width  = "0";
+  bar.style.transition = "none";
+  setTimeout(() => {
+    bar.style.transition = `width ${ms}ms linear`;
+    bar.style.width      = "100%";
+  }, 50);
+}
+
+function hideTransition() {
+  document.getElementById("transitionView").style.display = "none";
+}
+
+// ─── Voting ──────────────────────────────────────────────────────────────────
+function showVoting(metPeople) {
+  setState("voting");
+  const grid = document.getElementById("peopleGrid");
+  grid.innerHTML = "";
+  if (!metPeople || metPeople.length === 0) {
+    grid.innerHTML = '<p style="color:var(--muted);font-size:13px">Nenhuma pessoa encontrada neste evento.</p>';
+    return;
+  }
+  metPeople.forEach(p => {
+    const initial = (p.name||"?")[0].toUpperCase();
+    const card    = document.createElement("div");
+    card.className = "person-card";
+    card.innerHTML = `
+      <div class="person-avatar">${initial}</div>
+      <div class="person-name">${p.name}</div>
+      <div class="vote-btns">
+        <button class="vote-btn" id="like_${p.uid}" onclick="vote('${p.uid}','${escHtml(p.name)}',true)" title="Gostei">♥</button>
+        <button class="vote-btn" id="nope_${p.uid}" onclick="vote('${p.uid}','${escHtml(p.name)}',false)" title="Não curti">✕</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function escHtml(str) { return (str||"").replace(/[<>"'&]/g, c => ({
+  "<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;","&":"&amp;"
+}[c])); }
+
+window.vote = async function(targetUid, targetName, liked) {
+  if (votedUids[targetUid] !== undefined) return;
+  votedUids[targetUid] = liked;
+  const likeBtn = document.getElementById(`like_${targetUid}`);
+  const nopeBtn = document.getElementById(`nope_${targetUid}`);
+  if (liked) { likeBtn?.classList.add("liked"); }
+  else       { nopeBtn?.classList.add("noped"); }
+  if (!activeEvent || !idToken) return;
+  await api("/encontro/match", { method:"POST", body: { eventId: activeEvent.eventId, targetUid, liked }});
+};
+
+async function loadMatches() {
+  if (!activeEvent) return;
+  const data = await api(`/encontro/matches?eventId=${activeEvent.eventId}`);
+  if (!data.ok || !data.matches?.length) return;
+  const section = document.getElementById("matchesSection");
+  const list    = document.getElementById("matchesList");
+  section.style.display = "block";
+  list.innerHTML = data.matches.map(m => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)">
+      <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--rose),#8b3a4a);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0">${(m.name||"?")[0].toUpperCase()}</div>
+      <div>
+        <div style="font-weight:600;font-size:14px">${escHtml(m.name)}</div>
+        <div style="font-size:12px;color:var(--rose2);margin-top:2px">Match mútuo ♥</div>
+      </div>
+    </div>`).join("");
+}
+
+// ─── Match toast ─────────────────────────────────────────────────────────────
+function showMatchToast(matchName) {
+  const el = document.getElementById("matchToast");
+  el.innerHTML = `♥ Match com ${escHtml(matchName)}!<br><span style="font-size:12px;opacity:.8">Ambos se curtiram ✨</span>`;
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 4000);
+}
+
+// ─── Controles de mídia ───────────────────────────────────────────────────────
+function updateCtrlBtns() {
+  document.getElementById("btnMic").textContent = micEnabled ? "🎤" : "🔇";
+  document.getElementById("btnCam").textContent = camEnabled ? "📷" : "🚫";
+}
+
+document.getElementById("btnMic").onclick = async () => {
+  if (!window._lkMicTrack) return;
+  micEnabled = !micEnabled;
+  micEnabled ? await window._lkMicTrack.unmute() : await window._lkMicTrack.mute();
+  updateCtrlBtns();
+};
+
+document.getElementById("btnCam").onclick = async () => {
+  if (!window._lkCamTrack) return;
+  camEnabled = !camEnabled;
+  camEnabled ? await window._lkCamTrack.unmute() : await window._lkCamTrack.mute();
+  updateCtrlBtns();
+};
+
+// ─── Countdown (pré-evento) ───────────────────────────────────────────────────
+function startCountdown(scheduledAt) {
+  clearInterval(cdInterval);
+  const btnCheckin  = document.getElementById("btnCheckin");
+  const hint        = document.getElementById("checkinHint");
+  const cdVal       = document.getElementById("cdValue");
+
+  function tick() {
+    const diff = scheduledAt - Date.now();
+    cdVal.textContent = diff <= 0 ? "Ao vivo!" : fmtTime(diff);
+    // Habilita check-in 30min antes
+    if (diff <= 30 * 60 * 1000) {
+      btnCheckin.disabled = false;
+      hint.textContent    = "O evento está prestes a começar!";
+    }
+  }
+  tick();
+  cdInterval = setInterval(tick, 1000);
+}
+
+// ─── Modal check-in ───────────────────────────────────────────────────────────
+let selectedGender = myGender;
+
+window.selectGender = function(g) {
+  selectedGender = g;
+  document.getElementById("gOptM").classList.toggle("selected", g === "M");
+  document.getElementById("gOptF").classList.toggle("selected", g === "F");
+};
+
+// Pré-seleciona gênero salvo
+if (myGender) selectGender(myGender);
+
+document.getElementById("btnCheckin").onclick = () => {
+  document.getElementById("ciName").value = myName;
+  document.getElementById("checkinModal").classList.add("open");
+};
+
+window.closeModal = function() {
+  document.getElementById("checkinModal").classList.remove("open");
+};
+
+window.confirmCheckin = async function() {
+  const name   = document.getElementById("ciName").value.trim();
+  const gender = selectedGender;
+  if (!name)   { alert("Digite seu nome."); return; }
+  if (!gender) { alert("Selecione se você é Homem ou Mulher."); return; }
+  if (!activeEvent) return;
+
+  myName   = name; myGender = gender;
+  localStorage.setItem("em_name", name); localStorage.setItem("em_gender", gender);
+
+  document.getElementById("btnConfirmCheckin").disabled = true;
+  document.getElementById("btnConfirmCheckin").textContent = "Entrando...";
+
+  try {
+    const data = await api("/encontro/checkin", { method:"POST", body: {
+      eventId: activeEvent.eventId, name, gender
+    }});
+    if (!data.ok) {
+      alert("Erro: " + data.error);
+      return;
+    }
+    closeModal();
+    checkedIn = true;
+    document.getElementById("wMen").textContent   = data.men;
+    document.getElementById("wWomen").textContent = data.women;
+    setState("waiting");
+    await connectSocket();
+  } catch (err) {
+    alert("Falha ao fazer check-in. Tente novamente.");
+  } finally {
+    document.getElementById("btnConfirmCheckin").disabled = false;
+    document.getElementById("btnConfirmCheckin").textContent = "Confirmar e Entrar";
+  }
+};
+
+// ─── Compra de ingresso ───────────────────────────────────────────────────────
+document.getElementById("btnBuy").onclick = async () => {
+  if (!user || !activeEvent) {
+    alert("Faça login primeiro para comprar o ingresso.");
+    return;
+  }
+  const nome  = user.displayName || prompt("Seu nome completo:");
+  if (!nome) return;
+  const email = user.email;
+  if (!email) { alert("É necessário uma conta com e-mail."); return; }
+
+  document.getElementById("btnBuy").disabled    = true;
+  document.getElementById("btnBuy").textContent = "Redirecionando...";
+
+  try {
+    const data = await fetch(BACKEND + "/criar-pagamento", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, email, produto: "encontro-ingresso", roomId: activeEvent.eventId }),
+    }).then(r => r.json());
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Erro ao criar pagamento: " + (data.message || data.error));
+    }
+  } catch {
+    alert("Falha de conexão. Tente novamente.");
+  } finally {
+    document.getElementById("btnBuy").disabled    = false;
+    document.getElementById("btnBuy").textContent = "Comprar Ingresso · R$ 15";
+  }
+};
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  // Eventos
+  let events = [];
+  try {
+    const data = await fetch(BACKEND + "/encontro/eventos").then(r => r.json());
+    events = (data.events || []).filter(e => ["upcoming","waiting","running"].includes(e.status));
+  } catch { /* offline */ }
+
+  if (!events.length) {
+    setState("no-event");
+    return;
+  }
+
+  // Pega o evento mais próximo
+  activeEvent = events.reduce((a, b) => a.scheduledAt < b.scheduledAt ? a : b);
+
+  // Preenche datas
+  document.getElementById("evDate").textContent    = fmtEventDate(activeEvent.scheduledAt);
+  document.getElementById("evTime").textContent    = fmtEventTime(activeEvent.scheduledAt);
+  document.getElementById("ticketEvDate").textContent = fmtEventDate(activeEvent.scheduledAt) + " · " + fmtEventTime(activeEvent.scheduledAt);
+
+  // Se evento já está rodando, aguarda check-in via socket
+  if (activeEvent.status === "running" || activeEvent.status === "waiting") {
+    // Verificar se já fez check-in (em memória via reload)
+    // Para simplificar, se já fez check-in salvo em sessionStorage → vai direto
+    const savedCheckin = sessionStorage.getItem(`em_checkin_${activeEvent.eventId}`);
+    if (savedCheckin) {
+      checkedIn = true;
+      setState("waiting");
+      await connectSocket();
+      return;
+    }
+  }
+
+  // Verifica ingresso (requer auth)
+  if (user) {
+    try {
+      const data = await api(`/encontro/meu-ingresso?eventId=${activeEvent.eventId}`);
+      hasTicket  = data.hasTicket;
+    } catch { hasTicket = false; }
+
+    if (hasTicket) {
+      startCountdown(activeEvent.scheduledAt);
+      setState("ticket");
+      return;
+    }
+  }
+
+  setState("buy");
+}
+
+onAuthStateChanged(auth, async (u) => {
+  user = u;
+  if (u) idToken = await u.getIdToken();
+  await init();
+});
+</script>
+</body>
+</html>
