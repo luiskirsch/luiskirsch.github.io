@@ -501,57 +501,63 @@ function showRoundView(round, totalRounds, durationMs) {
 }
 
 async function startLiveKitRoom(roomName, token, partnerName, round, totalRounds, durationMs) {
-  await loadLiveKit();
+  // Mostra a UI da rodada PRIMEIRO — LiveKit pode falhar mas o usuário sempre vê a tela
   disconnectLiveKit();
-
-  const LK   = window.LivekitClient;
-  currentRoom = new LK.Room({
-    adaptiveStream: true,
-    dynacast:       true,
-    videoCaptureDefaults: { resolution: LK.VideoPresets.h360.resolution },
-  });
-
   showRoundView(round, totalRounds, durationMs);
-  document.getElementById("partnerLabel").textContent    = partnerName;
+  document.getElementById("partnerLabel").textContent     = partnerName;
   document.getElementById("partnerNameLabel").textContent = partnerName;
 
   const remoteWrap = document.getElementById("remoteWrap");
-  // Remove vídeos anteriores
-  remoteWrap.querySelectorAll("video").forEach(v => v.remove());
   const localWrap  = document.getElementById("localWrap");
+  remoteWrap.querySelectorAll("video").forEach(v => v.remove());
   localWrap.querySelectorAll("video").forEach(v => v.remove());
 
-  currentRoom.on(LK.RoomEvent.TrackSubscribed, (track) => {
-    if (track.kind === "video" || track.kind === "audio") {
-      const el = track.attach();
-      if (track.kind === "video") {
-        el.style.cssText = "width:100%;height:100%;object-fit:cover";
-        remoteWrap.prepend(el);
-      } else {
-        document.body.appendChild(el);
+  // Tenta conectar ao LiveKit — falhas não travam a UI
+  try {
+    await loadLiveKit();
+    const LK = window.LivekitClient;
+    currentRoom = new LK.Room({ adaptiveStream: true, dynacast: true });
+
+    currentRoom.on(LK.RoomEvent.TrackSubscribed, (track) => {
+      if (track.kind === "video" || track.kind === "audio") {
+        const el = track.attach();
+        if (track.kind === "video") {
+          el.style.cssText = "width:100%;height:100%;object-fit:cover";
+          remoteWrap.prepend(el);
+        } else {
+          document.body.appendChild(el);
+        }
       }
+    });
+    currentRoom.on(LK.RoomEvent.TrackUnsubscribed, (track) => { track.detach(); });
+
+    await currentRoom.connect(LIVEKIT_URL, token, { autoSubscribe: true });
+
+    // Câmera e microfone — falha silenciosa (usuário pode negar permissão)
+    const camTrack = await LK.createLocalVideoTrack({ resolution: { width: 640, height: 360 } }).catch(() => null);
+    const micTrack = await LK.createLocalAudioTrack().catch(() => null);
+
+    if (camTrack) {
+      await currentRoom.localParticipant.publishTrack(camTrack).catch(() => {});
+      const localVid = camTrack.attach();
+      localVid.style.cssText = "width:100%;height:100%;object-fit:cover;transform:scaleX(-1)";
+      localWrap.appendChild(localVid);
+      window._lkCamTrack = camTrack;
     }
-  });
+    if (micTrack) {
+      await currentRoom.localParticipant.publishTrack(micTrack).catch(() => {});
+      window._lkMicTrack = micTrack;
+    }
 
-  currentRoom.on(LK.RoomEvent.TrackUnsubscribed, (track) => { track.detach(); });
-
-  await currentRoom.connect(LIVEKIT_URL, token, { autoSubscribe: true });
-
-  // Publica câmera e mic local
-  const camTrack = await LK.createLocalVideoTrack({ resolution: LK.VideoPresets.h360.resolution });
-  const micTrack = await LK.createLocalAudioTrack();
-  await currentRoom.localParticipant.publishTrack(camTrack);
-  await currentRoom.localParticipant.publishTrack(micTrack);
-
-  const localVid = camTrack.attach();
-  localVid.style.cssText = "width:100%;height:100%;object-fit:cover;transform:scaleX(-1)";
-  localWrap.appendChild(localVid);
-
-  window._lkCamTrack = camTrack;
-  window._lkMicTrack = micTrack;
-
-  micEnabled = true; camEnabled = true;
-  updateCtrlBtns();
+    micEnabled = true; camEnabled = true;
+    updateCtrlBtns();
+  } catch (err) {
+    // Mostra erro no espaço do vídeo remoto mas mantém a rodada ativa
+    const errEl = remoteWrap.querySelector("div") || document.createElement("div");
+    errEl.style.cssText = "color:rgba(255,100,100,.8);font-size:12px;text-align:center;padding:16px";
+    errEl.textContent = "Erro de vídeo: " + (err?.message || err);
+    remoteWrap.appendChild(errEl);
+  }
 }
 
 function disconnectLiveKit() {
@@ -774,6 +780,7 @@ window.confirmCheckin = async function() {
     }
     closeModal();
     checkedIn = true;
+    sessionStorage.setItem(`em_checkin_${activeEvent.eventId}`, "1");
     document.getElementById("wMen").textContent   = data.men;
     document.getElementById("wWomen").textContent = data.women;
     setState("waiting");
