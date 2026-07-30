@@ -849,16 +849,25 @@ async function init() {
   document.getElementById("evTime").textContent    = fmtEventTime(activeEvent.scheduledAt);
   document.getElementById("ticketEvDate").textContent = fmtEventDate(activeEvent.scheduledAt) + " · " + fmtEventTime(activeEvent.scheduledAt);
 
-  // Se evento já está rodando, aguarda check-in via socket
+  // Se evento já está rodando/esperando, verifica check-in no servidor antes de pular o formulário
   if (activeEvent.status === "running" || activeEvent.status === "waiting") {
-    // Verificar se já fez check-in (em memória via reload)
-    // Para simplificar, se já fez check-in salvo em sessionStorage → vai direto
     const savedCheckin = sessionStorage.getItem(`em_checkin_${activeEvent.eventId}`);
-    if (savedCheckin) {
-      checkedIn = true;
-      setState("waiting");
-      await connectSocket();
-      return;
+    if (savedCheckin && user) {
+      try {
+        const ck = await api(`/encontro/meu-checkin?eventId=${activeEvent.eventId}`);
+        if (ck.checkedIn) {
+          checkedIn = true;
+          setState("waiting");
+          await connectSocket();
+          return;
+        } else {
+          // Check-in foi resetado no servidor — limpa sessionStorage e mostra formulário
+          sessionStorage.removeItem(`em_checkin_${activeEvent.eventId}`);
+        }
+      } catch {
+        // Falha na verificação — limpa sessionStorage para forçar re-check-in
+        sessionStorage.removeItem(`em_checkin_${activeEvent.eventId}`);
+      }
     }
   }
 
