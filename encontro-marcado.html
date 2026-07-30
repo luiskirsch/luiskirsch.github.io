@@ -249,8 +249,8 @@ body{
     <!-- Estado: votação -->
     <div data-state="voting" id="votingView">
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">Evento encerrado · Quem você curtiu?</div>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Marque as pessoas que te interessaram. Se for mútuo, você recebe um match!</p>
+        <div class="card-title" id="votingTitle">Evento encerrado · Quem você curtiu?</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px" id="votingSubtitle">Marque as pessoas que te interessaram. Se for mútuo, você recebe um match!</p>
         <div class="people-grid" id="peopleGrid"></div>
       </div>
     </div>
@@ -468,6 +468,7 @@ async function connectSocket() {
   });
 
   socket.on("encontro:event_ended", ({ metPeople }) => {
+    clearTransitionTimeout();
     hideTransition();
     document.getElementById("roundView").style.display = "none";
     disconnectLiveKit();
@@ -582,6 +583,12 @@ function stopRoundTimer() {
 }
 
 // ─── Transition ───────────────────────────────────────────────────────────────
+let _transEndTimeout = null;
+
+function clearTransitionTimeout() {
+  if (_transEndTimeout) { clearTimeout(_transEndTimeout); _transEndTimeout = null; }
+}
+
 function showTransition(isLast, ms) {
   playBell();
   const tv   = document.getElementById("transitionView");
@@ -595,6 +602,17 @@ function showTransition(isLast, ms) {
     bar.style.transition = `width ${ms}ms linear`;
     bar.style.width      = "100%";
   }, 50);
+
+  // Safety net: se o servidor não enviar event_ended (ex: restart), avança mesmo assim
+  if (isLast) {
+    clearTransitionTimeout();
+    _transEndTimeout = setTimeout(() => {
+      hideTransition();
+      document.getElementById("roundView").style.display = "none";
+      disconnectLiveKit();
+      showVoting([]);
+    }, ms + 5000);
+  }
 }
 
 function hideTransition() {
@@ -606,8 +624,15 @@ function showVoting(metPeople) {
   setState("voting");
   const grid = document.getElementById("peopleGrid");
   grid.innerHTML = "";
-  if (!metPeople || metPeople.length === 0) {
-    grid.innerHTML = '<p style="color:var(--muted);font-size:13px">Nenhuma pessoa encontrada neste evento.</p>';
+  const hasMet = metPeople && metPeople.length > 0;
+  document.getElementById("votingTitle").textContent    = hasMet ? "Evento encerrado · Quem você curtiu?" : "Evento encerrado!";
+  document.getElementById("votingSubtitle").textContent = hasMet ? "Marque as pessoas que te interessaram. Se for mútuo, você recebe um match!" : "";
+  if (!hasMet) {
+    grid.innerHTML = `
+      <div style="text-align:center;padding:24px 0;color:var(--muted)">
+        <div style="font-size:40px;margin-bottom:12px">🌙</div>
+        <p style="font-size:14px;line-height:1.6">Você ficou de fora desta rodada.<br>Fique de olho no próximo evento!</p>
+      </div>`;
     return;
   }
   metPeople.forEach(p => {
