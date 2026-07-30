@@ -484,12 +484,21 @@ async function connectSocket() {
 // ─── LiveKit ─────────────────────────────────────────────────────────────────
 async function loadLiveKit() {
   if (window.LivekitClient) return;
-  await new Promise((res, rej) => {
-    const s = document.createElement("script");
-    s.src = "https://unpkg.com/livekit-client@2.5.4/dist/livekit-client.umd.min.js";
-    s.onload = res; s.onerror = rej;
-    document.head.appendChild(s);
-  });
+  const CDNS = [
+    "https://cdn.jsdelivr.net/npm/livekit-client@2.5.4/dist/livekit-client.umd.min.js",
+    "https://unpkg.com/livekit-client@2.5.4/dist/livekit-client.umd.min.js",
+  ];
+  for (const src of CDNS) {
+    const ok = await new Promise(res => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = () => res(true);
+      s.onerror = () => res(false);
+      document.head.appendChild(s);
+    });
+    if (ok && window.LivekitClient) return;
+  }
+  throw new Error("Falha ao carregar LiveKit SDK (ambos CDNs falharam)");
 }
 
 function showRoundView(round, totalRounds, durationMs) {
@@ -553,9 +562,12 @@ async function startLiveKitRoom(roomName, token, partnerName, round, totalRounds
     updateCtrlBtns();
   } catch (err) {
     // Mostra erro no espaço do vídeo remoto mas mantém a rodada ativa
+    const msg = (err instanceof Error) ? err.message
+              : (err instanceof Event)  ? `falha de rede (${err.type || "error"})`
+              : String(err?.message || err || "desconhecido");
     const errEl = remoteWrap.querySelector("div") || document.createElement("div");
     errEl.style.cssText = "color:rgba(255,100,100,.8);font-size:12px;text-align:center;padding:16px";
-    errEl.textContent = "Erro de vídeo: " + (err?.message || err);
+    errEl.textContent = "Erro de vídeo: " + msg;
     remoteWrap.appendChild(errEl);
   }
 }
