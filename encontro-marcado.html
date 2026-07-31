@@ -20,11 +20,24 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;overflow-x:hidden}
-body{
-  background:
-    radial-gradient(circle at 20% 10%, rgba(201,107,122,.12), transparent 40%),
-    radial-gradient(circle at 80% 90%, rgba(215,176,107,.08), transparent 35%),
-    var(--bg);
+body{background:var(--bg)}
+
+/* ── Bokeh cinematic bg ── */
+#bokeh-bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:#080604}
+.bk{position:absolute;border-radius:50%;will-change:transform,opacity}
+@keyframes bkA{
+  0%,100%{transform:translate(0,0) scale(1);opacity:.7}
+  30%{transform:translate(40px,-55px) scale(1.08);opacity:.45}
+  65%{transform:translate(-20px,35px) scale(.94);opacity:.65}
+}
+@keyframes bkB{
+  0%,100%{transform:translate(0,0) scale(1.02);opacity:.55}
+  38%{transform:translate(-45px,40px) scale(.91);opacity:.75}
+  72%{transform:translate(25px,-25px) scale(1.07);opacity:.38}
+}
+@keyframes bkC{
+  0%,100%{transform:translate(12px,-8px) scale(.96);opacity:.5}
+  50%{transform:translate(-28px,45px) scale(1.08);opacity:.72}
 }
 
 /* ── Layout ── */
@@ -38,7 +51,7 @@ body{
 .logo-sub{font-size:13px;color:var(--muted);margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
 
 /* ── Card ── */
-.card{background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid var(--line2);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.card{background:linear-gradient(160deg,rgba(14,6,10,.82),rgba(8,4,6,.88));border:1px solid var(--line2);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);backdrop-filter:blur(2px)}
 .card-title{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:14px}
 
 /* ── Evento info ── */
@@ -210,6 +223,22 @@ body{
 </style>
 </head>
 <body>
+<!-- Bokeh bg -->
+<div id="bokeh-bg" aria-hidden="true">
+  <!-- Rose: canto superior esquerdo -->
+  <div class="bk" style="width:640px;height:640px;left:-160px;top:-120px;background:#c96b7a;filter:blur(110px);animation:bkA 15s ease-in-out infinite"></div>
+  <!-- Rose2: canto inferior direito -->
+  <div class="bk" style="width:500px;height:500px;right:-100px;bottom:-80px;background:#c96b7a;filter:blur(95px);animation:bkB 18s ease-in-out infinite;animation-delay:-6s"></div>
+  <!-- Gold: direita superior -->
+  <div class="bk" style="width:420px;height:420px;right:0;top:15%;background:#d7b06b;filter:blur(90px);animation:bkC 20s ease-in-out infinite;animation-delay:-3s"></div>
+  <!-- Gold: esquerda inferior -->
+  <div class="bk" style="width:340px;height:340px;left:5%;bottom:8%;background:#c9a050;filter:blur(80px);animation:bkB 14s ease-in-out infinite;animation-delay:-11s"></div>
+  <!-- Rose profundo: centro -->
+  <div class="bk" style="width:520px;height:520px;left:20%;top:25%;background:#8b3a4a;filter:blur(120px);animation:bkC 23s ease-in-out infinite;animation-delay:-7s"></div>
+  <!-- Rose2 claro: centro inferior -->
+  <div class="bk" style="width:360px;height:360px;left:35%;bottom:-40px;background:#e87b8f;filter:blur(85px);animation:bkA 12s ease-in-out infinite;animation-delay:-9s"></div>
+</div>
+
 <div class="page">
   <div class="shell">
 
