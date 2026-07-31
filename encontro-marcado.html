@@ -483,9 +483,11 @@ async function connectSocket() {
     showVoting(metPeople);
   });
 
-  socket.on("encontro:match", ({ matchName }) => {
+  socket.on("encontro:match", ({ matchName, matchUid }) => {
     showMatchToast(matchName);
-    loadMatches();
+    addMatchCard(matchUid || "bot", matchName);
+    // Também recarrega do servidor (para matches com usuários reais)
+    setTimeout(loadMatches, 1500);
   });
 }
 
@@ -691,6 +693,30 @@ window.vote = async function(targetUid, targetName, liked) {
   await api("/encontro/match", { method:"POST", body: { eventId: activeEvent.eventId, targetUid, liked }});
 };
 
+function matchCardHtml(name) {
+  const initial = (name || "?")[0].toUpperCase();
+  return `<div class="match-card-item" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)">
+      <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--rose),#8b3a4a);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0">${initial}</div>
+      <div>
+        <div style="font-weight:600;font-size:14px">${escHtml(name)}</div>
+        <div style="font-size:12px;color:var(--rose2);margin-top:2px">Match mútuo ♥</div>
+      </div>
+    </div>`;
+}
+
+function addMatchCard(uid, name) {
+  const section = document.getElementById("matchesSection");
+  const list    = document.getElementById("matchesList");
+  // Evita duplicata
+  if (list.querySelector(`[data-match-uid="${uid}"]`)) return;
+  const wrapper = document.createElement("div");
+  wrapper.setAttribute("data-match-uid", uid);
+  wrapper.innerHTML = matchCardHtml(name || "Convidado(a)");
+  list.appendChild(wrapper);
+  section.style.display = "block";
+  setTimeout(() => section.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+}
+
 async function loadMatches() {
   if (!activeEvent) return;
   const data = await api(`/encontro/matches?eventId=${activeEvent.eventId}`);
@@ -698,14 +724,15 @@ async function loadMatches() {
   const section = document.getElementById("matchesSection");
   const list    = document.getElementById("matchesList");
   section.style.display = "block";
-  list.innerHTML = data.matches.map(m => `
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)">
-      <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--rose),#8b3a4a);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0">${(m.name||"?")[0].toUpperCase()}</div>
-      <div>
-        <div style="font-weight:600;font-size:14px">${escHtml(m.name)}</div>
-        <div style="font-size:12px;color:var(--rose2);margin-top:2px">Match mútuo ♥</div>
-      </div>
-    </div>`).join("");
+  // Adiciona apenas matches novos (não duplica o que addMatchCard já inseriu)
+  for (const m of data.matches) {
+    if (!list.querySelector(`[data-match-uid="${m.uid}"]`)) {
+      const wrapper = document.createElement("div");
+      wrapper.setAttribute("data-match-uid", m.uid);
+      wrapper.innerHTML = matchCardHtml(m.name);
+      list.appendChild(wrapper);
+    }
+  }
 }
 
 // ─── Match toast ─────────────────────────────────────────────────────────────
