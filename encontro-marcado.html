@@ -287,8 +287,8 @@ body{
   </div>
   <div class="round-bottom">
     <div class="round-bottom-left">
-      Com
-      <span id="partnerLabel">—</span>
+      Você
+      <span id="myNameLabel">—</span>
     </div>
     <div style="display:flex;gap:10px">
       <button class="ctrl-btn" id="btnMic" title="Microfone">🎤</button>
@@ -513,7 +513,7 @@ async function startLiveKitRoom(roomName, token, partnerName, round, totalRounds
   // Mostra a UI da rodada PRIMEIRO — LiveKit pode falhar mas o usuário sempre vê a tela
   disconnectLiveKit();
   showRoundView(round, totalRounds, durationMs);
-  document.getElementById("partnerLabel").textContent     = partnerName;
+  document.getElementById("myNameLabel").textContent      = myName || "Você";
   document.getElementById("partnerNameLabel").textContent = partnerName;
 
   const remoteWrap = document.getElementById("remoteWrap");
