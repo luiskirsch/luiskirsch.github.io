@@ -6934,6 +6934,7 @@
             <button class="videoCtrlBtn" id="toggleMicBtn" disabled data-i18n="sala:topbar.video.muteToggle">🎤 Mutar</button>
             <button class="videoCtrlBtn" id="toggleCamBtn" disabled data-i18n="sala:topbar.video.camToggle">📷 Câmera</button>
             <button class="videoCtrlBtn danger" id="leaveVideoBtn" disabled data-i18n="sala:topbar.video.leave">✕ Sair</button>
+            <button class="videoCtrlBtn" id="toggleLobbyAudioBtn" title="Silenciar som ambiente" onclick="window._toggleLobbyMute && window._toggleLobbyMute()">🔊 Ambiente</button>
           </div>
         </div>
       </header>
@@ -7119,10 +7120,25 @@
                     active.muted = false;
                     next.muted   = false;
                     active.play();
+                    updateLobbyMuteBtn();
                   }
                   document.addEventListener('pointerdown', unlock, { once: true, capture: true });
                   document.addEventListener('touchstart',  unlock, { once: true, capture: true });
                   document.addEventListener('keydown',     unlock, { once: true, capture: true });
+
+                  function updateLobbyMuteBtn() {
+                    var btn = document.getElementById('toggleLobbyAudioBtn');
+                    if (!btn) return;
+                    btn.textContent = active.muted ? '🔇 Ambiente' : '🔊 Ambiente';
+                    btn.title = active.muted ? 'Ativar som ambiente' : 'Silenciar som ambiente';
+                  }
+
+                  window._toggleLobbyMute = function() {
+                    var m = !active.muted;
+                    active.muted = m;
+                    next.muted   = m;
+                    updateLobbyMuteBtn();
+                  };
                 })();
                 </script>
 
