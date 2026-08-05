@@ -205,7 +205,7 @@ function formatMemberSince(ts) { if (!ts) return "—"; const date = ts.toDate ?
 function fillContaTab() {
   const email = localStorage.getItem("osl_license_email") || "";
   const lic   = localStorage.getItem("osl_license_code") || "";
-  const expires = localStorage.getItem("osl_access_expires_at");
+  const expires = sessionStorage.getItem("osl_access_expires_at");
   const uid   = localStorage.getItem("osl_auth_uid") || S.userId || "";
   const emailEl = document.getElementById("contaEmail");   if (emailEl) emailEl.textContent = maskEmail(email);
   const licEl   = document.getElementById("contaLicenca"); if (licEl) licEl.textContent = maskLicense(lic);

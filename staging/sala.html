@@ -14,8 +14,8 @@
       const BASE = "https://osl-video-server-production.up.railway.app";
 
       function tokenLocalValido() {
-        const token = localStorage.getItem("osl_access_token");
-        const exp   = Number(localStorage.getItem("osl_access_expires_at") || 0);
+        const token = sessionStorage.getItem("osl_access_token");
+        const exp   = Number(sessionStorage.getItem("osl_access_expires_at") || 0);
         return !!token && (exp === 0 || Date.now() < exp);
       }
 
@@ -38,8 +38,8 @@
           clearTimeout(timer);
           const data = await res.json().catch(() => ({}));
           if (res.ok && data.accessToken) {
-            localStorage.setItem("osl_access_token", data.accessToken);
-            localStorage.setItem("osl_access_expires_at", String(data.expiresAt || ""));
+            sessionStorage.setItem("osl_access_token", data.accessToken);
+            sessionStorage.setItem("osl_access_expires_at", String(data.expiresAt || ""));
             return true;
           }
           return false;
@@ -88,7 +88,7 @@
   <title data-i18n="sala:title">SEXTOLUGAR — Sala</title>
 
   <!-- Lottie: animated emoji (Noto Animated Emoji by Google) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" integrity="sha512-jEnuDt6jfecCjthQAJ+ed0MTVA++5ZKmlUcmDGBv2vUI/REn6FuIdixLNnQT+vKusE2hhTk2is3cFvv5wA+Sgg==" crossorigin="anonymous" defer></script>
 
   <style>
     html{

@@ -61,6 +61,9 @@ export function getParticipantId() {
 }
 
 export function getUserId() {
+  // Prefer Firebase UID (server-verified, not forgeable client-side)
+  const authUid = localStorage.getItem("osl_auth_uid");
+  if (authUid) return authUid;
   let id = localStorage.getItem("osl_user_id");
   if (!id) {
     id = "u_" + Math.random().toString(36).slice(2, 12);
