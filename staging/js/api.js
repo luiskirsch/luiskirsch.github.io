@@ -1,7 +1,7 @@
 import { S } from "./state.js";
 import { BACKEND_BASE_URL } from "./constants.js";
 
-const SERVER_BASE = localStorage.getItem("PANEL_SERVER_BASE") || BACKEND_BASE_URL;
+const SERVER_BASE = BACKEND_BASE_URL;
 
 async function _post(path, data = {}) {
   try {
