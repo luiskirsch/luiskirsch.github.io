@@ -81,6 +81,9 @@ export const S = {
   _currentXp: 0,
   _isPrestige: false,
 
+  // ── Compras verificadas pelo servidor (não forjáveis via localStorage) ───
+  _serverUnlockedPacks: null, // null = ainda não sincronizado; [] = sincronizado sem packs
+
   // ── Perfil & customização ────────────────────────────────────────────
   selectedAvatarEmoji: "🔮",
   selectedAvatarColor: "#342718",

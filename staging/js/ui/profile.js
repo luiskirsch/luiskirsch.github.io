@@ -31,20 +31,16 @@ export async function syncAccountPurchases() {
     const user = await new Promise(resolve => {
       const unsub = onAuthStateChanged(S.auth, u => { unsub(); resolve(u); });
     });
-    if (!user) return;
+    if (!user) { S._serverUnlockedPacks = []; return; }
     const idToken = await user.getIdToken();
     const res     = await fetch(BACKEND_BASE_URL_OSL + "/minhas-compras", { headers:{"Authorization":"Bearer " + idToken} });
-    if (!res.ok) return;
-    const data        = await res.json();
+    if (!res.ok) { S._serverUnlockedPacks = []; return; }
+    const data          = await res.json();
     const serverCompras = Array.isArray(data.compras) ? data.compras : [];
-    if (!serverCompras.length) return;
-    let localCompras = [];
-    try { localCompras = JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch (_) {}
-    const localRefs = new Set(localCompras.map(c => c.ref));
-    serverCompras.forEach(c => { if (!localRefs.has(c.ref)) localCompras.push(c); });
-    localStorage.setItem("osl_compras", JSON.stringify(localCompras));
+    // Armazena em memória — não escreve em localStorage para impedir bypass via DevTools
+    S._serverUnlockedPacks = serverCompras.map(c => c.produto);
     refreshPackSwatches();
-  } catch (_) {}
+  } catch (_) { S._serverUnlockedPacks = []; }
 }
 
 // ── Avatar ────────────────────────────────────────────────────────────────────

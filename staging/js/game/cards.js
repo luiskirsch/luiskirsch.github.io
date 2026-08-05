@@ -50,10 +50,9 @@ const OSL_EFFECTS = {
 // ── Deck building ─────────────────────────────────────────────────────────────
 export function getUnlockedPacks() {
   if (S._isPrestige) return Object.keys(OSL_PACK_CARDS);
-  try {
-    const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
-    return compras.map(c => c.produto);
-  } catch (_) { return []; }
+  // S._serverUnlockedPacks é null até syncAccountPurchases() completar;
+  // null retorna [] para não dar falso-positivo enquanto não sincronizou.
+  return Array.isArray(S._serverUnlockedPacks) ? S._serverUnlockedPacks : [];
 }
 
 export function getUnlockedPackCards() {
