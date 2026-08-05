@@ -129,11 +129,12 @@ function renderTyping(names) {
   const mobileBar   = document.getElementById("mobileTypingBar");
   const wasEmpty    = !(typingBarEl && typingBarEl.firstChild);
   if (!names.length) { if (typingBarEl) typingBarEl.innerHTML = ""; if (mobileBar) mobileBar.innerHTML = ""; return; }
+  const _n = names.map(escapeHtml);
   let label;
-  if (names.length === 1)      label = `${names[0]} está digitando`;
-  else if (names.length === 2) label = `${names[0]} e ${names[1]} estão digitando`;
-  else if (names.length === 3) label = `${names[0]}, ${names[1]} e ${names[2]} estão digitando`;
-  else                          label = `${names[0]}, ${names[1]}, ${names[2]} e mais ${names.length - 3} estão digitando`;
+  if (_n.length === 1)      label = `${_n[0]} está digitando`;
+  else if (_n.length === 2) label = `${_n[0]} e ${_n[1]} estão digitando`;
+  else if (_n.length === 3) label = `${_n[0]}, ${_n[1]} e ${_n[2]} estão digitando`;
+  else                       label = `${_n[0]}, ${_n[1]}, ${_n[2]} e mais ${_n.length - 3} estão digitando`;
   const html = label + DOTS_HTML;
   if (typingBarEl) typingBarEl.innerHTML = html;
   if (mobileBar)   mobileBar.innerHTML   = html;
@@ -397,9 +398,9 @@ export function renderLiveRooms(rooms) {
     const full = r.playerCount >= 5, live = r.sessionActive;
     const badge = full ? '<span class="multiRoomBadge multiRoomBadge--full">LOTADA</span>' : live ? '<span class="multiRoomBadge multiRoomBadge--live">🔴 AO VIVO</span>' : '<span class="multiRoomBadge multiRoomBadge--open">ABERTA</span>';
     const cls   = full ? " multiRoom--full" : "";
-    const safeName = (r.name || "Sala").replace(/"/g,"&quot;");
-    return `<div class="multiRoom${cls}" data-code="${r.roomId}" data-name="${safeName}" data-host="${(r.host||"").replace(/"/g,"&quot;")}" data-count="${r.playerCount||0}" data-live="${live}">
-      <div class="multiRoomInfo"><div class="multiRoomName">${r.name || r.roomId}</div><div class="multiRoomMeta">${r.playerCount||0}/5 jogadores · ${r.host || "anfitrião"}</div></div>
+    const safeName = escapeHtml(r.name || "Sala").replace(/"/g,"&quot;");
+    return `<div class="multiRoom${cls}" data-code="${r.roomId}" data-name="${safeName}" data-host="${escapeHtml(r.host||"").replace(/"/g,"&quot;")}" data-count="${r.playerCount||0}" data-live="${live}">
+      <div class="multiRoomInfo"><div class="multiRoomName">${escapeHtml(r.name || r.roomId)}</div><div class="multiRoomMeta">${r.playerCount||0}/5 jogadores · ${escapeHtml(r.host || "anfitrião")}</div></div>
       ${badge}<button class="multiSpectateBtn" title="Assistir em stand-by">👁</button></div>`;
   }).join("");
 
@@ -419,7 +420,7 @@ export function renderLiveRooms(rooms) {
 export function showJoinLoadingOverlay(name) {
   const el = document.createElement("div");
   el.className = "joinLoadingOverlay";
-  el.innerHTML = `<div class="joinLoadingSpinner"></div><div class="joinLoadingName">${name || "Sala"}</div><div class="joinLoadingSub">Entrando na partida…</div>`;
+  el.innerHTML = `<div class="joinLoadingSpinner"></div><div class="joinLoadingName">${escapeHtml(name || "Sala")}</div><div class="joinLoadingSub">Entrando na partida…</div>`;
   document.body.appendChild(el);
 }
 

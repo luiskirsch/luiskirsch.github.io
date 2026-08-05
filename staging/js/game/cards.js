@@ -234,14 +234,15 @@ export function applyCardContent(card) {
         ensureCardTitleObserver();
       }));
     }
-    if (ritualCardText)  ritualCardText.innerHTML = (card.text || "").replace(/\n/g, "<br>");
+    const _esc = s => escapeHtml(s || "").replace(/\n/g, "<br>");
+    if (ritualCardText)  ritualCardText.innerHTML = _esc(card.text);
     const hasRule = !!card.rule, hasSubrule = !!card.subrule, hasPhrase = !!card.phrase;
     if (midDetails)    midDetails.style.display    = (hasRule || hasSubrule) ? "" : "none";
-    if (cardRule)      cardRule.innerHTML           = hasRule ? card.rule.replace(/\n/g, "<br>") : "";
+    if (cardRule)      cardRule.innerHTML           = hasRule ? _esc(card.rule) : "";
     if (subruleDivider)subruleDivider.style.display = hasSubrule ? "" : "none";
-    if (cardSubrule)   { cardSubrule.style.display = hasSubrule ? "" : "none"; if (hasSubrule) cardSubrule.innerHTML = card.subrule.replace(/\n/g, "<br>"); }
+    if (cardSubrule)   { cardSubrule.style.display = hasSubrule ? "" : "none"; if (hasSubrule) cardSubrule.innerHTML = _esc(card.subrule); }
     if (cardDivider)   cardDivider.style.display   = hasPhrase ? "" : "none";
-    if (cardPhrase)    { cardPhrase.style.display  = hasPhrase ? "" : "none"; if (hasPhrase) cardPhrase.innerHTML = card.phrase.replace(/\n/g, "<br>"); }
+    if (cardPhrase)    { cardPhrase.style.display  = hasPhrase ? "" : "none"; if (hasPhrase) cardPhrase.innerHTML = _esc(card.phrase); }
   } else {
     if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
     if (ritualCardTitle) ritualCardTitle.textContent = oslTr("sala:table.ritualWaitingTitle", "Aguardando revelação");

@@ -224,7 +224,7 @@ async function loadActiveTheme() {
     if (data.updatedAt) {
       const ts = data.updatedAt.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt);
       $('metaInfo').innerHTML += ` · última atualização: ${ts.toLocaleString('pt-BR')}`;
-      if (data.updatedBy) $('metaInfo').innerHTML += ` por <code>${data.updatedBy}</code>`;
+      if (data.updatedBy) $('metaInfo').innerHTML += ` por <code>${data.updatedBy.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</code>`;
     }
   } catch (err) {
     show($('saveStatus'), 'Falha ao ler doc: ' + err.message, 'err');

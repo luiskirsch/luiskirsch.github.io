@@ -470,13 +470,18 @@
     let revealAnimating = false;
     let lastCardKey   = null;
 
+    function _esc(s) {
+      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    }
+    function _escBr(s) { return _esc(s).replace(/\n/g, "<br>"); }
+
     function applyCardContent(card) {
       if (!card) return;
       cardTypeEl.textContent    = (card.type || "Ritual").toUpperCase();
       cardTitleEl.textContent   = card.title || "";
-      cardTextEl.innerHTML      = String(card.text   || "").replace(/\n/g, "<br>");
-      ruleTextEl.innerHTML      = String(card.rule   || "").replace(/\n/g, "<br>");
-      ruleSubtleEl.innerHTML    = String(card.subtle || "").replace(/\n/g, "<br>");
+      cardTextEl.innerHTML      = _escBr(card.text);
+      ruleTextEl.innerHTML      = _escBr(card.rule);
+      ruleSubtleEl.innerHTML    = _escBr(card.subtle);
       finalPhraseEl.textContent = card.phrase || "";
     }
 
