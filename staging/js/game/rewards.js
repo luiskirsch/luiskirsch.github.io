@@ -68,21 +68,24 @@ export function updateXpCard(xp) {
     awardCoins(lv).then(amount => showLevelUpModal(lv, info, amount));
   } else if (S._xpPrevLevel === 0) {
     updateCoinDisplay();
-    if (S.userRef) {
-      getDocFromServer(S.userRef).then(snap => {
-        const coins = snap.data()?.coins ?? 0;
-        try { localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
-        updateCoinDisplay();
-      }).catch(() => {
-        getDoc(S.userRef).then(snap => {
-          const coins = snap.data()?.coins ?? 0;
-          try { localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
-          updateCoinDisplay();
-        }).catch(() => {});
-      });
-    }
   }
   S._xpPrevLevel = lv;
+}
+
+export async function syncCoinsFromFirestore() {
+  if (!S.userRef) return;
+  try {
+    const snap = await getDocFromServer(S.userRef);
+    const coins = snap.data()?.coins ?? 0;
+    try { localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
+    updateCoinDisplay();
+  } catch(_) {
+    getDoc(S.userRef).then(snap => {
+      const coins = snap.data()?.coins ?? 0;
+      try { localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
+      updateCoinDisplay();
+    }).catch(() => {});
+  }
 }
 
 export function showLevelUpModal(lv, info, coinsEarned) {

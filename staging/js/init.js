@@ -6,7 +6,7 @@ import { applyBgTheme, applyCardStyle, applyVisualEffect, syncAccountPurchases, 
 import { bindUserDoc, bindRoom, bindPlayers, bindTyping, bindMessages, bindRoomEvents, ensureRoom, ensureUserProfile, upsertSelf, startHeartbeat, startMultiPoller, connectHostSse, fetchLiveRooms, renderLiveRooms, spectateRoom, closeSpectatorRoom } from "./ui/room.js";
 import { bindMyMission } from "./game/missions.js";
 import { bindRitual } from "./game/cards.js";
-import { checkDailyReward, updateXpCard } from "./game/rewards.js";
+import { checkDailyReward, updateXpCard, syncCoinsFromFirestore } from "./game/rewards.js";
 import { sendReaction, castEffectVote, confirmAIDetection, dismissAIDetection } from "./game/effects.js";
 import { startSession, leaveRoom, sendLeaveBeacon } from "./ui/room.js";
 import { revealNextRitualCard, resetRitualDeck } from "./game/cards.js";
@@ -166,6 +166,7 @@ window.dismissAIDetection = dismissAIDetection;
   // Operações paralelas de inicialização
   try {
     await Promise.all([ensureUserProfile(), ensureRoom()]);
+    syncCoinsFromFirestore();
     if (!S._isSpectator) await upsertSelf();
     if (!S._isSpectator) startHeartbeat();
 
