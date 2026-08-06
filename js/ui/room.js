@@ -364,7 +364,25 @@ export async function ensureRoom() {
 }
 
 export async function ensureUserProfile() {
-  const snap = await getDoc(S.userRef);
+  let snap = await getDoc(S.userRef);
+  if (!snap.exists()) {
+    // Tenta migrar perfil antigo (osl_user_id) para o Firebase UID atual.
+    // Necessário para usuários que criaram perfil antes do F6 (getUserId agora prioriza osl_auth_uid).
+    const oldUserId = localStorage.getItem("osl_user_id");
+    if (oldUserId && oldUserId !== S.userId && /^u_[a-z0-9]{5,30}$/.test(oldUserId)) {
+      try {
+        const idToken = await S.auth?.currentUser?.getIdToken();
+        if (idToken) {
+          const res = await fetch(MULTI_SERVER + "/game/migrar-perfil", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },
+            body: JSON.stringify({ oldUserId })
+          });
+          if (res.ok) snap = await getDoc(S.userRef);
+        }
+      } catch (_) {}
+    }
+  }
   if (!snap.exists()) {
     const usernameBase = (S.playerName || "jogador").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"").slice(0,20) || "jogador";
     await setDoc(S.userRef, { userId: S.userId, displayName: S.playerName, username: usernameBase, bio: oslTr("sala:newProfile.bio", "Novo participante do ritual."), avatarEmoji:"🔮", avatarColor:"#1f86d9", memberSince: serverTimestamp(), lastSeen: serverTimestamp(), friends:[], incomingRequests:[], outgoingRequests:[], stats:{ gamesPlayed:0, wins:0 } });
