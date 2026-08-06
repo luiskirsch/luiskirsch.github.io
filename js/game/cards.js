@@ -300,11 +300,9 @@ export async function startRitualDeck() {
   window._lobby3d?.hide();
   document.getElementById("revealPanel")?.style.setProperty("display","");
 
-  // Constrói o deck localmente (inclui cartas customizadas dos jogadores)
-  // e envia ao backend que re-embaralha com crypto.randomBytes + escreve no Firestore.
-  S.ritualDeck = await buildRitualDeck();
-
-  const result = await ritualStart(S.ritualDeck, S.currentPlayers.map(p => ({ id: p.id, name: p.name })));
+  // Backend constrói o deck com compras/prestige verificados via Firebase Admin SDK
+  const players = S.currentPlayers.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
+  const result = await ritualStart(players);
   if (!result?.ok) {
     console.error("Erro ao iniciar ritual no servidor:", result?.error);
     return;
@@ -327,9 +325,8 @@ export async function resetRitualDeck() {
   window._lobby3d?.hide();
   document.getElementById("revealPanel")?.style.setProperty("display","");
 
-  S.ritualDeck = await buildRitualDeck();
-
-  const result = await ritualReset(S.ritualDeck);
+  const players = S.currentPlayers.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
+  const result = await ritualReset(players);
   if (!result?.ok) {
     console.error("Erro ao reiniciar ritual no servidor:", result?.error);
     return;

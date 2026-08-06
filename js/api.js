@@ -53,9 +53,14 @@ export async function panelBootRoom() {
   }
 }
 
-export async function ritualStart(deckCards, players) {
+async function _getFirebaseIdToken() {
+  try { return (await S.auth?.currentUser?.getIdToken()) || null; } catch (_) { return null; }
+}
+
+export async function ritualStart(players) {
   const hostToken = sessionStorage.getItem("osl_host_token");
-  return _post("/game/ritual/start", { roomId: S.roomCode, hostToken, deckCards, players });
+  const firebaseIdToken = await _getFirebaseIdToken();
+  return _post("/game/ritual/start", { roomId: S.roomCode, hostToken, firebaseIdToken, players });
 }
 
 export async function ritualNextCard(players) {
@@ -63,9 +68,10 @@ export async function ritualNextCard(players) {
   return _post("/game/ritual/next-card", { roomId: S.roomCode, hostToken, players });
 }
 
-export async function ritualReset(deckCards) {
+export async function ritualReset(players) {
   const hostToken = sessionStorage.getItem("osl_host_token");
-  return _post("/game/ritual/reset", { roomId: S.roomCode, hostToken, deckCards });
+  const firebaseIdToken = await _getFirebaseIdToken();
+  return _post("/game/ritual/reset", { roomId: S.roomCode, hostToken, firebaseIdToken, players });
 }
 
 export async function panelMarkSessionStart() {
