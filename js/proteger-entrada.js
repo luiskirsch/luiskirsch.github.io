@@ -1,5 +1,5 @@
 (async function protegerEntrada() {
-  const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";
+  const BACKEND_BASE_URL = "https://osl-video-server-production.up.railway.app";
 
   function liberarPagina() {
     function doLiberar() {

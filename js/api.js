@@ -2,7 +2,6 @@ import { S } from "./state.js";
 
 const SERVER_BASE =
   window.PANEL_SERVER_BASE ||
-  localStorage.getItem("PANEL_SERVER_BASE") ||
   "https://osl-video-server-production.up.railway.app";
 
 async function _post(path, data = {}) {

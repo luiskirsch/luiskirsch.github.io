@@ -6,6 +6,13 @@ import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, PRESTIGE_PRODUTOS, B
 
 const BACKEND_BASE_URL_OSL = BACKEND_BASE_URL; // alias mantido pra não trocar 1000 referências
 
+Object.defineProperty(window, "_isPrestige", {
+  get: () => S._isPrestige,
+  set: () => {},
+  enumerable: false,
+  configurable: false
+});
+
 // Set populado pelo servidor — null enquanto não carregou, Set após resposta
 let _verifiedProdutos = null;
 
@@ -18,7 +25,6 @@ export function getVerifiedProdutos() { return _verifiedProdutos; }
 // ── Prestige ──────────────────────────────────────────────────────────────────
 export function applyPrestigeUnlocks() {
   S._isPrestige = true;
-  window._isPrestige = true;
   if (_verifiedProdutos !== null) {
     PRESTIGE_PRODUTOS.forEach(p => _verifiedProdutos.add(p));
   }
@@ -54,7 +60,7 @@ export async function syncAccountPurchases() {
     _verifiedProdutos = new Set(serverCompras.map(c => c.produto));
 
     // Preserva prestige se já foi aplicado nesta sessão
-    if (S._isPrestige || window._isPrestige) {
+    if (S._isPrestige) {
       PRESTIGE_PRODUTOS.forEach(p => _verifiedProdutos.add(p));
     }
 
@@ -153,7 +159,7 @@ export function setAvatarPhoto(dataUrl) {
 export function isThemeUnlocked(theme) {
   const requiredPack = BG_PACK_THEMES[theme];
   if (!requiredPack) return true;
-  if (S._isPrestige || window._isPrestige) return true;
+  if (S._isPrestige) return true;
   return _hasCompra(requiredPack);
 }
 
@@ -182,7 +188,7 @@ export function refreshPackSwatches() {
 // ── Estilos de carta ──────────────────────────────────────────────────────────
 export function isCardStyleUnlocked(style) {
   if (style === "padrao") return true;
-  if (S._isPrestige || window._isPrestige) return true;
+  if (S._isPrestige) return true;
   return _hasCompra("estilo-carta");
 }
 
@@ -209,7 +215,7 @@ export function refreshCardStyleSwatches() {
 
 // ── Efeitos visuais ───────────────────────────────────────────────────────────
 export function isFxUnlocked() {
-  if (S._isPrestige || window._isPrestige) return true;
+  if (S._isPrestige) return true;
   return _hasCompra("efeitos-visuais");
 }
 
