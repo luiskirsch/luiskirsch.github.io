@@ -609,6 +609,8 @@
   function xpForLevel(lv) { return Math.pow(lv - 1, 2) * 50; }
   function xpForNextLevel(lv) { return Math.pow(lv, 2) * 50; }
 
+  const BACKEND_BASE_URL = "https://osl-video-server-production.up.railway.app";
+
   // ── State ──────────────────────────────────────────────────────────────
   let userId = null;
   let userDecks = [];       // [{id, name, cards:[]}]
@@ -619,16 +621,14 @@
   let customCards = [];     // [{id, slotIndex, title, text, rule}]
   let userXp = 0;
   let editingSlot = null;   // índice do slot em edição (null = nenhum)
+  let _ownedPacks = null;   // Set populado pelo servidor; null = ainda carregando
 
-  // Cartas disponíveis para o usuário
+  // Cartas disponíveis para o usuário — usa Set verificado pelo servidor
   function getOwnedCards() {
-    try {
-      const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
-      const packs = compras.map(c => c.produto);
-      let cards = [...BASIC_CARDS];
-      packs.forEach(p => { if (PACK_CARDS[p]) cards = cards.concat(PACK_CARDS[p]); });
-      return cards;
-    } catch { return [...BASIC_CARDS]; }
+    const packs = _ownedPacks !== null ? [..._ownedPacks] : [];
+    let cards = [...BASIC_CARDS];
+    packs.forEach(p => { if (PACK_CARDS[p]) cards = cards.concat(PACK_CARDS[p]); });
+    return cards;
   }
 
   function getUniqueTypes(cards) {
@@ -1017,6 +1017,16 @@
       return;
     }
     userId = user.uid;
+
+    // Busca compras verificadas pelo servidor antes de renderizar
+    try {
+      const idToken = await user.getIdToken();
+      const r = await fetch(BACKEND_BASE_URL + "/minhas-compras", { headers: { "Authorization": "Bearer " + idToken } });
+      if (r.ok) {
+        const d = await r.json();
+        _ownedPacks = new Set((Array.isArray(d.compras) ? d.compras : []).map(c => c.produto));
+      }
+    } catch (_) { _ownedPacks = new Set(); }
 
     const userSnap = await getDoc(doc(db, "users", userId));
     const userData = userSnap.data() || {};

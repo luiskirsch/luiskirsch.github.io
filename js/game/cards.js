@@ -3,6 +3,7 @@ import { S } from "../state.js";
 import { setDoc, addDoc, getDoc, getDocs, updateDoc, serverTimestamp } from "../firebase.js";
 import { escapeHtml } from "../utils.js";
 import { OSL_BASIC_CARDS, OSL_PACK_CARDS, OSL_CARD_EFFECTS } from "../constants.js";
+import { getVerifiedProdutos } from "../ui/profile.js";
 import { fireRevealAnimation } from "../ui/animations.js";
 import { renderActiveEffect, checkAIDetection, renderReactions, OSL_XP, OSL_TENSION, OSL_ACHIEVEMENTS, initPressureBtn, resetPressureBtn, bindSocialPressure } from "./effects.js";
 import { showVoteResultOverlay } from "./rewards.js";
@@ -50,9 +51,10 @@ const OSL_EFFECTS = {
 // ── Deck building ─────────────────────────────────────────────────────────────
 export function getUnlockedPacks() {
   if (S._isPrestige) return Object.keys(OSL_PACK_CARDS);
+  const verified = getVerifiedProdutos();
+  if (verified !== null) return [...verified];
   try {
-    const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
-    return compras.map(c => c.produto);
+    return JSON.parse(localStorage.getItem("osl_compras") || "[]").map(c => c.produto);
   } catch (_) { return []; }
 }
 

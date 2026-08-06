@@ -6,10 +6,22 @@ import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, PRESTIGE_PRODUTOS, B
 
 const BACKEND_BASE_URL_OSL = BACKEND_BASE_URL; // alias mantido pra não trocar 1000 referências
 
+// Set populado pelo servidor — null enquanto não carregou, Set após resposta
+let _verifiedProdutos = null;
+
+function _hasCompra(produto) {
+  return _verifiedProdutos !== null ? _verifiedProdutos.has(produto) : false;
+}
+
+export function getVerifiedProdutos() { return _verifiedProdutos; }
+
 // ── Prestige ──────────────────────────────────────────────────────────────────
 export function applyPrestigeUnlocks() {
   S._isPrestige = true;
   window._isPrestige = true;
+  if (_verifiedProdutos !== null) {
+    PRESTIGE_PRODUTOS.forEach(p => _verifiedProdutos.add(p));
+  }
   let compras = [];
   try { compras = JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch (_) {}
   const existingProds = new Set(compras.map(c => c.produto));
@@ -31,16 +43,28 @@ export async function syncAccountPurchases() {
     const user = await new Promise(resolve => {
       const unsub = onAuthStateChanged(S.auth, u => { unsub(); resolve(u); });
     });
-    if (!user) { S._serverUnlockedPacks = []; return; }
+    if (!user) return;
     const idToken = await user.getIdToken();
     const res     = await fetch(BACKEND_BASE_URL_OSL + "/minhas-compras", { headers:{"Authorization":"Bearer " + idToken} });
-    if (!res.ok) { S._serverUnlockedPacks = []; return; }
+    if (!res.ok) return;
     const data          = await res.json();
     const serverCompras = Array.isArray(data.compras) ? data.compras : [];
-    // Armazena em memória — não escreve em localStorage para impedir bypass via DevTools
-    S._serverUnlockedPacks = serverCompras.map(c => c.produto);
+
+    // Fonte da verdade: Set in-memory verificado pelo servidor
+    _verifiedProdutos = new Set(serverCompras.map(c => c.produto));
+
+    // Preserva prestige se já foi aplicado nesta sessão
+    if (S._isPrestige || window._isPrestige) {
+      PRESTIGE_PRODUTOS.forEach(p => _verifiedProdutos.add(p));
+    }
+
+    // Substitui localStorage (não mergeia — evita que valores injetados persistam)
+    localStorage.setItem("osl_compras", JSON.stringify(serverCompras));
+
     refreshPackSwatches();
-  } catch (_) { S._serverUnlockedPacks = []; }
+    refreshCardStyleSwatches();
+    refreshFxSwatches();
+  } catch (_) {}
 }
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
@@ -108,8 +132,7 @@ export function isThemeUnlocked(theme) {
   const requiredPack = BG_PACK_THEMES[theme];
   if (!requiredPack) return true;
   if (S._isPrestige || window._isPrestige) return true;
-  const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
-  return compras.some(c => c.produto === requiredPack);
+  return _hasCompra(requiredPack);
 }
 
 export function applyBgTheme(theme) {
@@ -138,7 +161,7 @@ export function refreshPackSwatches() {
 export function isCardStyleUnlocked(style) {
   if (style === "padrao") return true;
   if (S._isPrestige || window._isPrestige) return true;
-  return JSON.parse(localStorage.getItem("osl_compras") || "[]").some(c => c.produto === "estilo-carta");
+  return _hasCompra("estilo-carta");
 }
 
 export function applyCardStyle(style) {
@@ -165,7 +188,7 @@ export function refreshCardStyleSwatches() {
 // ── Efeitos visuais ───────────────────────────────────────────────────────────
 export function isFxUnlocked() {
   if (S._isPrestige || window._isPrestige) return true;
-  return JSON.parse(localStorage.getItem("osl_compras") || "[]").some(c => c.produto === "efeitos-visuais");
+  return _hasCompra("efeitos-visuais");
 }
 
 export function applyVisualEffect(fx) {
@@ -222,7 +245,6 @@ function fillSessaoTab() {
 
 function fillPacksTab() {
   const grid = document.getElementById("profPackGrid"); if (!grid) return;
-  const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
   const packs = [
     { id:"pacote-conexao",  name:"Conexão",  price:"R$ 9,90",  desc:"12 cartas · leve e emocional",   theme:"ambar",   themeName:"Âmbar",   themeColor:"#0e0a02" },
     { id:"pacote-verdades", name:"Verdades", price:"R$ 12,90", desc:"15 cartas · desconforto leve",    theme:"cristal", themeName:"Cristal", themeColor:"#05070e" },
@@ -235,7 +257,9 @@ function fillPacksTab() {
   basicCard.innerHTML = `<div class="profPackName">Deck Básico</div><div class="profPackDesc">8 cartas · sempre incluído</div><span class="profPackBadge profPackBadge--ok">✓ Incluído</span>`;
   grid.appendChild(basicCard);
   packs.forEach(pack => {
-    const unlocked = compras.some(c => c.produto === pack.id);
+    const unlocked = _verifiedProdutos !== null
+      ? _verifiedProdutos.has(pack.id)
+      : JSON.parse(localStorage.getItem("osl_compras") || "[]").some(c => c.produto === pack.id);
     const card = document.createElement("div"); card.className = `profPackCard ${unlocked ? "profPackCard--unlocked" : "profPackCard--locked"}`;
     card.innerHTML = `<div class="profPackName">${pack.name}</div><div class="profPackDesc">${pack.desc}</div><div class="profPackDesc" style="display:flex;align-items:center;gap:6px;margin-top:4px"><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${pack.themeColor};border:1px solid rgba(255,255,255,.15);flex-shrink:0"></span><span style="color:rgba(243,237,229,.5);font-size:.7rem">Tema <strong style="color:rgba(215,176,107,.75)">${pack.themeName}</strong></span></div>${unlocked ? `<span class="profPackBadge profPackBadge--ok">✓ Desbloqueado</span>` : `<span class="profPackBadge profPackBadge--locked">🔒 ${pack.price}</span><a class="profileActionBtn" href="./vendas.html" style="margin-top:6px;font-size:.75rem;padding:4px 10px">Ver na loja</a>`}`;
     grid.appendChild(card);

@@ -6,10 +6,23 @@ import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, PRESTIGE_PRODUTOS } 
 
 const BACKEND_BASE_URL_OSL = "https://osl-video-server-production.up.railway.app";
 
+// Set populado pelo servidor — null enquanto não carregou, Set após resposta
+let _verifiedProdutos = null;
+
+function _hasCompra(produto) {
+  return _verifiedProdutos !== null ? _verifiedProdutos.has(produto) : false;
+}
+
+// Expõe o Set para cards.js (mesmo módulo ES, sem circular dep)
+export function getVerifiedProdutos() { return _verifiedProdutos; }
+
 // ── Prestige ──────────────────────────────────────────────────────────────────
 export function applyPrestigeUnlocks() {
   S._isPrestige = true;
   window._isPrestige = true;
+  if (_verifiedProdutos !== null) {
+    PRESTIGE_PRODUTOS.forEach(p => _verifiedProdutos.add(p));
+  }
   let compras = [];
   try { compras = JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch (_) {}
   const existingProds = new Set(compras.map(c => c.produto));
@@ -37,13 +50,21 @@ export async function syncAccountPurchases() {
     if (!res.ok) return;
     const data        = await res.json();
     const serverCompras = Array.isArray(data.compras) ? data.compras : [];
-    if (!serverCompras.length) return;
-    let localCompras = [];
-    try { localCompras = JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch (_) {}
-    const localRefs = new Set(localCompras.map(c => c.ref));
-    serverCompras.forEach(c => { if (!localRefs.has(c.ref)) localCompras.push(c); });
-    localStorage.setItem("osl_compras", JSON.stringify(localCompras));
+
+    // Fonte da verdade: Set in-memory verificado pelo servidor
+    _verifiedProdutos = new Set(serverCompras.map(c => c.produto));
+
+    // Preserva prestige se já foi aplicado nesta sessão
+    if (S._isPrestige || window._isPrestige) {
+      PRESTIGE_PRODUTOS.forEach(p => _verifiedProdutos.add(p));
+    }
+
+    // Substitui localStorage (não mergeia — evita que valores injetados persistam)
+    localStorage.setItem("osl_compras", JSON.stringify(serverCompras));
+
     refreshPackSwatches();
+    refreshCardStyleSwatches();
+    refreshFxSwatches();
   } catch (_) {}
 }
 
@@ -116,8 +137,7 @@ export function isThemeUnlocked(theme) {
   const requiredPack = BG_PACK_THEMES[theme];
   if (!requiredPack) return true;
   if (S._isPrestige || window._isPrestige) return true;
-  const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
-  return compras.some(c => c.produto === requiredPack);
+  return _hasCompra(requiredPack);
 }
 
 export function applyBgTheme(theme) {
@@ -146,7 +166,7 @@ export function refreshPackSwatches() {
 export function isCardStyleUnlocked(style) {
   if (style === "padrao") return true;
   if (S._isPrestige || window._isPrestige) return true;
-  return JSON.parse(localStorage.getItem("osl_compras") || "[]").some(c => c.produto === "estilo-carta");
+  return _hasCompra("estilo-carta");
 }
 
 export function applyCardStyle(style) {
@@ -173,7 +193,7 @@ export function refreshCardStyleSwatches() {
 // ── Efeitos visuais ───────────────────────────────────────────────────────────
 export function isFxUnlocked() {
   if (S._isPrestige || window._isPrestige) return true;
-  return JSON.parse(localStorage.getItem("osl_compras") || "[]").some(c => c.produto === "efeitos-visuais");
+  return _hasCompra("efeitos-visuais");
 }
 
 export function applyVisualEffect(fx) {
@@ -238,7 +258,6 @@ function fillSessaoTab() {
 
 function fillPacksTab() {
   const grid = document.getElementById("profPackGrid"); if (!grid) return;
-  const compras = JSON.parse(localStorage.getItem("osl_compras") || "[]");
   // name/desc/themeName são localizados via sala:profile.packs.items.{id}; price/themeColor mantidos.
   const packs = [
     { id:"pacote-conexao",  price:"R$ 9,90",  themeColor:"#0e0a02" },
@@ -255,7 +274,9 @@ function fillPacksTab() {
   const unlockedLabel = oslTr("sala:profile.packs.unlocked", "✓ Desbloqueado");
   const shopBtnLabel = oslTr("sala:profile.packs.shopBtn", "Ver na loja");
   packs.forEach(pack => {
-    const unlocked = compras.some(c => c.produto === pack.id);
+    const unlocked = _verifiedProdutos !== null
+      ? _verifiedProdutos.has(pack.id)
+      : JSON.parse(localStorage.getItem("osl_compras") || "[]").some(c => c.produto === pack.id);
     const name = oslTr(`sala:profile.packs.items.${pack.id}.name`, pack.id);
     const desc = oslTr(`sala:profile.packs.items.${pack.id}.desc`, "");
     const themeName = oslTr(`sala:profile.packs.items.${pack.id}.themeName`, "");
