@@ -50,6 +50,17 @@ export function safeParseJSON(key, fallback) {
 }
 
 export function getParticipantId() {
+  // Prefer Firebase UID — set by login.html/cadastro.html before sala.html loads.
+  // Firebase UIDs are server-verified; a client can't forge another user's UID without
+  // their credentials. Also written to sessionStorage so video.js picks the same identity.
+  const authUid = localStorage.getItem("osl_auth_uid");
+  if (authUid) {
+    sessionStorage.setItem("osl_participant_id", authUid);
+    sessionStorage.setItem("osl_player_id", authUid);
+    localStorage.setItem("osl_player_id", authUid);
+    return authUid;
+  }
+  // Anonymous fallback (free play without a Firebase account)
   const navType = performance.getEntriesByType("navigation")[0]?.type;
   const isReload = navType === "reload";
   let id = isReload ? sessionStorage.getItem("osl_participant_id") : null;
