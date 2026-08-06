@@ -58,8 +58,30 @@ export async function syncAccountPurchases() {
       PRESTIGE_PRODUTOS.forEach(p => _verifiedProdutos.add(p));
     }
 
-    // Substitui localStorage (não mergeia — evita que valores injetados persistam)
-    localStorage.setItem("osl_compras", JSON.stringify(serverCompras));
+    // Compras locais não confirmadas (compradas antes de fazer login/vincular conta)
+    let localCompras = [];
+    try { localCompras = JSON.parse(localStorage.getItem("osl_compras") || "[]"); } catch (_) {}
+    const serverRefs = new Set(serverCompras.map(c => c.ref));
+    const localOnly = localCompras.filter(c => c.tipo !== "prestige" && !serverRefs.has(c.ref));
+
+    // Tenta registrar no servidor cada compra local não sincronizada (best-effort)
+    for (const c of localOnly) {
+      try {
+        const r = await fetch(BACKEND_BASE_URL_OSL + "/registrar-compra", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },
+          body: JSON.stringify({ ref: c.ref })
+        });
+        if (r.ok) {
+          const d = await r.json();
+          if (d.compra) { serverCompras.push(d.compra); _verifiedProdutos.add(d.compra.produto); }
+        }
+      } catch (_) {}
+    }
+
+    // localStorage: dados do servidor + itens ainda não recuperáveis (para não perder rastro)
+    const unregistered = localOnly.filter(c => !serverCompras.some(s => s.ref === c.ref));
+    localStorage.setItem("osl_compras", JSON.stringify([...serverCompras, ...unregistered]));
 
     refreshPackSwatches();
     refreshCardStyleSwatches();
