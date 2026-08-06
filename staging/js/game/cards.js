@@ -1,6 +1,6 @@
 // Sistema de cartas: deck, revelação, renderização e estado do ritual
 import { S } from "../state.js";
-import { setDoc, addDoc, getDoc, getDocs, updateDoc, serverTimestamp } from "../firebase.js";
+import { setDoc, addDoc, getDoc, getDocs, serverTimestamp } from "../firebase.js";
 import { escapeHtml } from "../utils.js";
 import { OSL_BASIC_CARDS, OSL_PACK_CARDS, OSL_CARD_EFFECTS } from "../constants.js";
 import { getVerifiedProdutos } from "../ui/profile.js";
@@ -8,7 +8,7 @@ import { fireRevealAnimation } from "../ui/animations.js";
 import { renderActiveEffect, checkAIDetection, renderReactions, OSL_XP, OSL_TENSION, OSL_ACHIEVEMENTS, initPressureBtn, resetPressureBtn, bindSocialPressure } from "./effects.js";
 import { showVoteResultOverlay } from "./rewards.js";
 import { assignSecretMissions } from "./missions.js";
-import { panelMarkSessionStart } from "../api.js";
+import { panelMarkSessionStart, ritualStart, ritualNextCard, ritualReset } from "../api.js";
 
 // ── Engine de efeitos (prepare) ───────────────────────────────────────────────
 const OSL_EFFECTS = {
@@ -270,12 +270,14 @@ export function applyCardContent(card) {
 export async function revealNextRitualCard() {
   if (!S.ritualStarted || !S.isHost || !S.ritualDeck.length) return;
 
-  const nextCard = S.ritualDeck.shift();
-  S.ritualCardsRevealedCount++;
-  const { battlecry, deathrattle } = OSL_EFFECTS.prepareCard(nextCard, S.currentPlayers);
+  const result = await ritualNextCard(S.currentPlayers.map(p => ({ id: p.id, name: p.name })));
+  if (!result?.ok) {
+    console.error("Erro ao revelar carta no servidor:", result?.error);
+    return;
+  }
 
-  await saveRitualState(nextCard, battlecry, deathrattle);
-  await addHistoryItem(nextCard.type, nextCard.title);
+  const nextCard = result.card;
+  S.ritualCardsRevealedCount = result.cardsRevealedCount;
 
   if (S.ritualCardsRevealedCount === 2 && !S.missionsAssigned) {
     S.missionsAssigned = true;
@@ -283,10 +285,10 @@ export async function revealNextRitualCard() {
   }
 
   await OSL_XP.award(S.userRef, "CARD_REVEALED");
-  if (["Segredo","Casais"].includes(nextCard.type)) await OSL_XP.award(S.userRef, "DEEP_CARD");
+  if (["Segredo","Casais"].includes(nextCard?.type)) await OSL_XP.award(S.userRef, "DEEP_CARD");
 
   OSL_TENSION.heat(12);
-  OSL_ACHIEVEMENTS.onCardRevealed((await getDocs(S.ritualHistoryRef)).size, nextCard.type);
+  OSL_ACHIEVEMENTS.onCardRevealed((await getDocs(S.ritualHistoryRef)).size, nextCard?.type);
   resetPressureBtn();
   updateRitualButtons();
 }
@@ -296,27 +298,16 @@ export async function startRitualDeck() {
   S.ritualStarted = true;
   window._lobby3d?.hide();
   document.getElementById("revealPanel")?.style.setProperty("display","");
-  S.ritualDeck    = await buildRitualDeck();
 
-  await setDoc(S.ritualRef, {
-    started: true,
-    remainingDeck: S.ritualDeck,
-    currentCard: null,
-    activeEffect: null,
-    pendingDeathrattle: null,
-    cardsRevealedCount: 0,
-    updatedAt: serverTimestamp(),
-    updatedBy: S.participantId
-  }, { merge: true });
+  const players = S.currentPlayers.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
+  const result = await ritualStart(players);
+  if (!result?.ok) {
+    console.error("Erro ao iniciar ritual no servidor:", result?.error);
+    return;
+  }
 
   S.ritualCardsRevealedCount = 0;
   S.missionsAssigned = false;
-  // Grava em PT para consistência cross-locale; histórico é localizado no render.
-  await addHistoryItem("Ritual", "O ritual foi iniciado.");
-  await setDoc(S.ritualRef, { sessionStartedAt: Date.now() }, { merge: true });
-
-  await updateDoc(S.roomRef, { arenaActive: true });
-
   await OSL_XP.award(S.userRef, "SESSION_JOIN");
   OSL_TENSION.startDecay();
   resetPressureBtn();
@@ -331,22 +322,16 @@ export async function resetRitualDeck() {
   S.ritualStarted = true;
   window._lobby3d?.hide();
   document.getElementById("revealPanel")?.style.setProperty("display","");
-  S.ritualDeck    = await buildRitualDeck();
 
-  await setDoc(S.ritualRef, {
-    started: true,
-    remainingDeck: S.ritualDeck,
-    currentCard: null,
-    activeEffect: null,
-    pendingDeathrattle: null,
-    cardsRevealedCount: 0,
-    updatedAt: serverTimestamp(),
-    updatedBy: S.participantId
-  }, { merge: true });
+  const players = S.currentPlayers.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
+  const result = await ritualReset(players);
+  if (!result?.ok) {
+    console.error("Erro ao reiniciar ritual no servidor:", result?.error);
+    return;
+  }
 
   S.ritualCardsRevealedCount = 0;
   S.missionsAssigned = false;
-  await addHistoryItem("Ritual", "O ritual foi reiniciado.");
   await panelMarkSessionStart();
   updateRitualButtons();
 }

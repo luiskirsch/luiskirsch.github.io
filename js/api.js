@@ -57,6 +57,10 @@ async function _getFirebaseIdToken() {
   try { return (await S.auth?.currentUser?.getIdToken()) || null; } catch (_) { return null; }
 }
 
+async function _participantAuth() {
+  return { participantId: S.participantId, firebaseIdToken: await _getFirebaseIdToken() };
+}
+
 export async function ritualStart(players) {
   const hostToken = sessionStorage.getItem("osl_host_token");
   const firebaseIdToken = await _getFirebaseIdToken();
@@ -72,6 +76,32 @@ export async function ritualReset(players) {
   const hostToken = sessionStorage.getItem("osl_host_token");
   const firebaseIdToken = await _getFirebaseIdToken();
   return _post("/game/ritual/reset", { roomId: S.roomCode, hostToken, firebaseIdToken, players });
+}
+
+// ── Ações de participante (votos, reações, AI, pressão social) ────────────────
+// Todas verificadas server-side via Firebase ID token ou membership na sala.
+
+export async function ritualVote(option) {
+  return _post("/game/ritual/vote", { roomId: S.roomCode, ...(await _participantAuth()), option });
+}
+
+export async function ritualReact(emoji) {
+  return _post("/game/ritual/react", { roomId: S.roomCode, ...(await _participantAuth()), emoji, playerName: S.playerName });
+}
+
+export async function ritualAiDetect(source, playerName, message) {
+  return _post("/game/ritual/ai-detect", { roomId: S.roomCode, ...(await _participantAuth()), source, playerName, message: message || null });
+}
+
+export async function ritualSocialPressure() {
+  return _post("/game/ritual/social-pressure", { roomId: S.roomCode, ...(await _participantAuth()), playerName: S.playerName });
+}
+
+// Ação exclusiva do host: resolve efeito ativo e/ou descarta AI detection.
+// dismissOnly=true → apenas limpa aiDetection sem encerrar o efeito.
+export async function ritualResolveEffect(winner, dismissOnly) {
+  const hostToken = sessionStorage.getItem("osl_host_token");
+  return _post("/game/ritual/resolve-effect", { roomId: S.roomCode, hostToken, winner: winner || null, dismissOnly: !!dismissOnly });
 }
 
 export async function panelMarkSessionStart() {

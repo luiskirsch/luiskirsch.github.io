@@ -41,11 +41,62 @@ export async function panelBootRoom() {
   if (S.panelRoomBooted) return;
   S.panelRoomBooted = true;
   try {
-    await PanelBridge.roomCreate(S.roomCode, S.roomName, S.playerName);
+    const result = await PanelBridge.roomCreate(S.roomCode, S.roomName, S.playerName);
+    if (result?.ok && result?.hostToken) {
+      try { sessionStorage.setItem("osl_host_token", result.hostToken); } catch (_) {}
+    }
     await PanelBridge.playerJoin(S.roomCode, S.participantId, S.playerName);
   } catch (error) {
     console.error("Erro ao registrar sala no painel:", error);
   }
+}
+
+async function _getFirebaseIdToken() {
+  try { return (await S.auth?.currentUser?.getIdToken()) || null; } catch (_) { return null; }
+}
+
+async function _participantAuth() {
+  return { participantId: S.participantId, firebaseIdToken: await _getFirebaseIdToken() };
+}
+
+// ── Ritual: ações de host (backend constrói deck e avança cartas) ─────────────
+export async function ritualStart(players) {
+  const hostToken = sessionStorage.getItem("osl_host_token");
+  const firebaseIdToken = await _getFirebaseIdToken();
+  return _post("/game/ritual/start", { roomId: S.roomCode, hostToken, firebaseIdToken, players });
+}
+
+export async function ritualNextCard(players) {
+  const hostToken = sessionStorage.getItem("osl_host_token");
+  return _post("/game/ritual/next-card", { roomId: S.roomCode, hostToken, players });
+}
+
+export async function ritualReset(players) {
+  const hostToken = sessionStorage.getItem("osl_host_token");
+  const firebaseIdToken = await _getFirebaseIdToken();
+  return _post("/game/ritual/reset", { roomId: S.roomCode, hostToken, firebaseIdToken, players });
+}
+
+// ── Ações de participante (votos, reações, AI, pressão social) ────────────────
+export async function ritualVote(option) {
+  return _post("/game/ritual/vote", { roomId: S.roomCode, ...(await _participantAuth()), option });
+}
+
+export async function ritualReact(emoji) {
+  return _post("/game/ritual/react", { roomId: S.roomCode, ...(await _participantAuth()), emoji, playerName: S.playerName });
+}
+
+export async function ritualAiDetect(source, playerName, message) {
+  return _post("/game/ritual/ai-detect", { roomId: S.roomCode, ...(await _participantAuth()), source, playerName, message: message || null });
+}
+
+export async function ritualSocialPressure() {
+  return _post("/game/ritual/social-pressure", { roomId: S.roomCode, ...(await _participantAuth()), playerName: S.playerName });
+}
+
+export async function ritualResolveEffect(winner, dismissOnly) {
+  const hostToken = sessionStorage.getItem("osl_host_token");
+  return _post("/game/ritual/resolve-effect", { roomId: S.roomCode, hostToken, winner: winner || null, dismissOnly: !!dismissOnly });
 }
 
 export async function panelMarkSessionStart() {

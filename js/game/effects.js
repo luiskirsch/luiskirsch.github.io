@@ -1,6 +1,7 @@
 // Motor de efeitos, votação, AI VAD, reações, tensão, conquistas e pressão social
 import { S } from "../state.js";
-import { setDoc, updateDoc, increment, onSnapshot } from "../firebase.js";
+import { setDoc, increment, onSnapshot } from "../firebase.js";
+import { ritualVote, ritualReact, ritualAiDetect, ritualSocialPressure, ritualResolveEffect } from "../api.js";
 import { escapeHtml } from "../utils.js";
 import { spawnReactionFloat } from "../ui/animations.js";
 import { OSL_XP_EVENTS, OSL_XP_TITLES } from "../constants.js";
@@ -168,9 +169,7 @@ export function initPressureBtn() {
     btn.textContent = oslTr("achievements:effects.votedButton", "✓ Votado");
     if (S.userRef) OSL_XP.award(S.userRef, "PRESSURE_VOTE");
     OSL_ACHIEVEMENTS.onPressureVote();
-    try {
-      await setDoc(S.ritualRef, { socialPressure: { ts: Date.now(), votedBy: S.playerName, roomCode: S.roomCode } }, { merge: true });
-    } catch (e) { console.warn("Pressure vote error:", e); }
+    ritualSocialPressure().catch(e => console.warn("Pressure vote error:", e));
     OSL_TENSION.heat(20);
   });
 }
@@ -208,11 +207,8 @@ export function clearEffectTimer() {
 
 export async function resolveActiveEffect(winner) {
   if (!S.isHost) return;
-  const update = { activeEffect: null, aiDetection: null };
-  if (winner) update.voteResult = { winner, resolvedAt: Date.now() };
-  await setDoc(S.ritualRef, update, { merge: true });
-  const toast = document.getElementById("aiDetectToast");
-  if (toast) toast.classList.remove("aiDetectToast--visible");
+  try { await ritualResolveEffect(winner || null, false); } catch (e) { console.warn("resolveActiveEffect:", e); }
+  document.getElementById("aiDetectToast")?.classList.remove("aiDetectToast--visible");
 }
 
 export function getVoteWinner(votes) {
@@ -222,7 +218,7 @@ export function getVoteWinner(votes) {
 }
 
 export async function castEffectVote(option) {
-  await updateDoc(S.ritualRef, { [`activeEffect.votes.${S.participantId}`]: option });
+  await ritualVote(option);
 }
 window.castEffectVote = castEffectVote;
 
@@ -249,8 +245,7 @@ export function stopAIVAD() {
 }
 
 export async function writeAIDetection(source, name, message) {
-  try { await setDoc(S.ritualRef, { aiDetection: { source, playerName: name, message: message || null, detectedAt: Date.now() } }, { merge: true }); }
-  catch (_) {}
+  try { await ritualAiDetect(source, name, message || null); } catch (_) {}
 }
 
 export function checkAIDetection(aiDetection) {
@@ -266,13 +261,14 @@ export function checkAIDetection(aiDetection) {
 }
 
 export async function confirmAIDetection() {
-  await resolveActiveEffect();
-  await setDoc(S.ritualRef, { aiDetection: null }, { merge: true });
+  if (!S.isHost) return;
+  try { await ritualResolveEffect(null, false); } catch (_) {}
   document.getElementById("aiDetectToast")?.classList.remove("aiDetectToast--visible");
 }
 
 export async function dismissAIDetection() {
-  await setDoc(S.ritualRef, { aiDetection: null }, { merge: true });
+  if (!S.isHost) return;
+  try { await ritualResolveEffect(null, true); } catch (_) {}
   document.getElementById("aiDetectToast")?.classList.remove("aiDetectToast--visible");
 }
 
@@ -288,12 +284,7 @@ export async function sendReaction(emoji, sourceEl) {
   OSL_TENSION.heat(8);
   OSL_ACHIEVEMENTS.onReaction(emoji);
   if (S.userRef) OSL_XP.award(S.userRef, "REACTION_SENT");
-  try {
-    await setDoc(S.ritualRef, {
-      [`reactions.${S.participantId}`]: { emoji, name: S.playerName, ts },
-      [`reactionCounts.${S.participantId}`]: increment(1)
-    }, { merge: true });
-  } catch (_) {}
+  ritualReact(emoji).catch(() => {});
 }
 
 export function renderReactions(reactions) {
