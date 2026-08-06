@@ -25,7 +25,8 @@ export async function assignSecretMissions(players) {
     try {
       // text (PT): retrocompat + detecção por palavras-chave normalizadas (rir/elogie/etc)
       // idx + targetName: usado no render para localizar via missions:list.{idx}
-      await setDoc(doc(S.db, "salas", S.roomCode, "players", player.id), { secretMission: { text, idx: pick.idx, targetName, assignedAt: Date.now() } }, { merge: true });
+      // Missão gravada em /missions/{playerId} — leitura restrita ao próprio jogador via Firestore rules.
+      await setDoc(doc(S.db, "salas", S.roomCode, "missions", player.id), { text, idx: pick.idx, targetName, assignedAt: Date.now() });
     } catch (_) {}
   }
 }
@@ -45,9 +46,11 @@ function getDisplayMissionText(mission) {
 
 // ── Listener de missão do próprio jogador ─────────────────────────────────────
 export function bindMyMission(onSnapshotFn) {
-  onSnapshotFn(S.playerRef, (snap) => {
+  // Lê de /missions/{uid} — acessível só pelo próprio jogador (regra Firestore)
+  const myMissionRef = doc(S.db, "salas", S.roomCode, "missions", S.participantId);
+  onSnapshotFn(myMissionRef, (snap) => {
     if (!snap.exists()) return;
-    const mission = snap.data()?.secretMission;
+    const mission = snap.data();
     if (!mission?.text || !mission?.assignedAt) return;
     if (mission.assignedAt === S.missionShownTs) return;
     S.missionShownTs   = mission.assignedAt;

@@ -148,7 +148,7 @@ export const OSL_ACHIEVEMENTS = (() => {
         if (!S._isPrestige) {
           S._isPrestige = true;
           document.dispatchEvent(new CustomEvent("osl:applyPrestige"));
-          setDoc(document.__oslFirebaseDoc || S.userRef, { prestige: true }, { merge: true }).catch(() => {});
+          setDoc(S.userRef, { prestige: true }, { merge: true }).catch(() => {});
         }
       }
     },

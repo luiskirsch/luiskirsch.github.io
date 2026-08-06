@@ -47,9 +47,11 @@ function resolveMissionText(mission) {
 
 // ── Listener de missão do próprio jogador ─────────────────────────────────────
 export function bindMyMission(onSnapshotFn) {
-  onSnapshotFn(S.playerRef, (snap) => {
+  // Lê de /missions/{uid} — acessível só pelo próprio jogador (regra Firestore)
+  const myMissionRef = doc(S.db, "salas", S.roomCode, "missions", S.participantId);
+  onSnapshotFn(myMissionRef, (snap) => {
     if (!snap.exists()) return;
-    const mission = snap.data()?.secretMission;
+    const mission = snap.data();
     if (!mission?.assignedAt) return;
     const text = resolveMissionText(mission);
     if (!text) return;
