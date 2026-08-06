@@ -43,11 +43,29 @@ export async function panelBootRoom() {
   if (S.panelRoomBooted) return;
   S.panelRoomBooted = true;
   try {
-    await PanelBridge.roomCreate(S.roomCode, S.roomName, S.playerName);
+    const result = await PanelBridge.roomCreate(S.roomCode, S.roomName, S.playerName);
+    if (result?.ok && result?.hostToken) {
+      sessionStorage.setItem("osl_host_token", result.hostToken);
+    }
     await PanelBridge.playerJoin(S.roomCode, S.participantId, S.playerName);
   } catch (error) {
     console.error("Erro ao registrar sala no painel:", error);
   }
+}
+
+export async function ritualStart(deckCards, players) {
+  const hostToken = sessionStorage.getItem("osl_host_token");
+  return _post("/game/ritual/start", { roomId: S.roomCode, hostToken, deckCards, players });
+}
+
+export async function ritualNextCard(players) {
+  const hostToken = sessionStorage.getItem("osl_host_token");
+  return _post("/game/ritual/next-card", { roomId: S.roomCode, hostToken, players });
+}
+
+export async function ritualReset(deckCards) {
+  const hostToken = sessionStorage.getItem("osl_host_token");
+  return _post("/game/ritual/reset", { roomId: S.roomCode, hostToken, deckCards });
 }
 
 export async function panelMarkSessionStart() {

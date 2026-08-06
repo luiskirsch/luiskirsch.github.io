@@ -44,11 +44,15 @@ const PanelBridge = (() => {
     baseUrl: SERVER_BASE,
 
     async roomCreate(roomId, name = "", host = "") {
-      return post("/game/room/create", {
+      const result = await post("/game/room/create", {
         roomId: normalizeRoomId(roomId),
         name: String(name || "").trim(),
         host: String(host || "").trim()
       });
+      if (result?.ok && result?.hostToken) {
+        try { sessionStorage.setItem("osl_host_token", result.hostToken); } catch (_) {}
+      }
+      return result;
     },
 
     async playerJoin(roomId, playerId, playerName = "") {
