@@ -172,12 +172,15 @@
   }
 
   const sess = await requireTherapist({ requireDek: true });
-  const { idToken, therapist, dek } = sess;
+  const { user, therapist, dek } = sess;
+  // Firebase auto-renova o token quando está próximo de vencer (TTL 1h).
+  // Usar getFreshToken() em cada request garante que sessões longas não expiram.
+  const getFreshToken = () => user.getIdToken();
 
   // ─── Pega token LiveKit + e2eeKey ───────────────────────────
   const tokenRes = await fetch(`${BACKEND_BASE_URL}/therapy/sessao/${encodeURIComponent(sessionId)}/livekit-token`, {
     method: "POST",
-    headers: { "Authorization": `Bearer ${idToken}` }
+    headers: { "Authorization": `Bearer ${await getFreshToken()}` }
   });
   const tokenData = await tokenRes.json().catch(() => ({}));
   if (!tokenRes.ok || !tokenData.ok) {
@@ -330,7 +333,7 @@
     try {
       await fetch(`${BACKEND_BASE_URL}/therapy/sessao/${encodeURIComponent(sessionId)}/encerrar`, {
         method: "POST",
-        headers: { "Authorization": `Bearer ${idToken}` }
+        headers: { "Authorization": `Bearer ${await getFreshToken()}` }
       });
     } catch {}
     try { await room?.disconnect(); } catch {}
@@ -343,7 +346,7 @@
   async function loadNotes() {
     try {
       const res = await fetch(`${BACKEND_BASE_URL}/therapy/sessao/${encodeURIComponent(sessionId)}/notas`, {
-        headers: { "Authorization": `Bearer ${idToken}` }
+        headers: { "Authorization": `Bearer ${await getFreshToken()}` }
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) {
@@ -388,7 +391,7 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`
+          "Authorization": `Bearer ${await getFreshToken()}`
         },
         body: JSON.stringify({ ciphertext, iv })
       });
