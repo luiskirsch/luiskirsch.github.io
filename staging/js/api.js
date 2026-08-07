@@ -23,7 +23,7 @@ export const PanelBridge = {
   baseUrl: SERVER_BASE,
 
   roomCreate:   (roomId, name, host)           => _post("/game/room/create",   { roomId: String(roomId||"").trim(), name: String(name||"").trim(), host: String(host||"").trim() }),
-  playerJoin:   (roomId, playerId, playerName) => _post("/game/player/join",   { roomId: String(roomId||"").trim(), playerId: String(playerId||"").trim(), playerName: String(playerName||"").trim() }),
+  playerJoin:   (roomId, playerId, playerName, hostToken) => _post("/game/player/join",   { roomId: String(roomId||"").trim(), playerId: String(playerId||"").trim(), playerName: String(playerName||"").trim(), ...(hostToken ? { hostToken: String(hostToken) } : {}) }),
   playerLeave:  (roomId, playerId)             => _post("/game/player/leave",  { roomId: String(roomId||"").trim(), playerId: String(playerId||"").trim() }),
   sessionStart: (roomId)                        => _post("/game/session/start", { roomId: String(roomId||"").trim() }),
   sessionEnd:   (roomId)                        => _post("/game/session/end",   { roomId: String(roomId||"").trim() }),
@@ -41,11 +41,14 @@ export async function panelBootRoom() {
   if (S.panelRoomBooted) return;
   S.panelRoomBooted = true;
   try {
+    let hostToken = null;
+    try { hostToken = sessionStorage.getItem("osl_host_token") || null; } catch (_) {}
     const result = await PanelBridge.roomCreate(S.roomCode, S.roomName, S.playerName);
     if (result?.ok && result?.hostToken) {
-      try { sessionStorage.setItem("osl_host_token", result.hostToken); } catch (_) {}
+      hostToken = result.hostToken;
+      try { sessionStorage.setItem("osl_host_token", hostToken); } catch (_) {}
     }
-    await PanelBridge.playerJoin(S.roomCode, S.participantId, S.playerName);
+    await PanelBridge.playerJoin(S.roomCode, S.participantId, S.playerName, hostToken);
   } catch (error) {
     console.error("Erro ao registrar sala no painel:", error);
   }
