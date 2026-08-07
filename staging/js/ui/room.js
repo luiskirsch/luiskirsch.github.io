@@ -5,7 +5,7 @@ import { escapeHtml, nowTimeFromDate, initials } from "../utils.js";
 import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
-import { checkDailyReward, showSessionRecap, updateXpCard, showLevelPanel } from "../game/rewards.js";
+import { checkDailyReward, showSessionRecap, updateXpCard, showLevelPanel, showCoinModal } from "../game/rewards.js";
 import { OSL_ACHIEVEMENTS } from "../game/effects.js";
 import { BACKEND_BASE_URL } from "../constants.js";
 
@@ -579,6 +579,8 @@ export function bindRoomEvents() {
   document.getElementById("hostApproveBtn")?.addEventListener("click", () => respondJoin(true));
   document.getElementById("hostDenyBtn")?.addEventListener("click",    () => respondJoin(false));
   document.getElementById("xpCardLevel")?.addEventListener("click",    () => showLevelPanel(S._currentXp));
+  document.getElementById("coinBalanceWrap")?.addEventListener("click", () => showCoinModal(S._currentXp));
+  document.getElementById("deckModalBtn")?.addEventListener("click",    () => import("../game/deckModal.js").then(m => m.showDeckModal()));
 
   window.addEventListener("pagehide",     sendLeaveBeacon);
   window.addEventListener("beforeunload", sendLeaveBeacon);
