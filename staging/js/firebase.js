@@ -1,7 +1,7 @@
 // Game-runtime Firebase wrapper. Imports the shared app from firebase-app.js
 // and re-exports the Firestore/auth functions used across the room modules.
 
-import { db, auth } from "./firebase-app.js";
+import { db, auth, _authReady } from "./firebase-app.js";
 import {
   doc, getDoc, getDocFromServer, getDocs, setDoc, updateDoc, deleteDoc,
   collection, addDoc, onSnapshot, query, where, limit, orderBy,
@@ -29,7 +29,7 @@ function initFirebaseRefs() {
 }
 
 export {
-  db, auth,
+  db, auth, _authReady,
   initFirebaseRefs,
   // Firestore functions re-exportadas para que os módulos não precisem importar CDN diretamente
   doc, getDoc, getDocFromServer, getDocs, setDoc, updateDoc, deleteDoc,

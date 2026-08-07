@@ -76,6 +76,10 @@
     updateLobbyMuteBtn();
   };
 
+  // Registra listener via JS (inline onclick bloqueado por CSP)
+  var lobbyBtn = document.getElementById('toggleLobbyAudioBtn');
+  if (lobbyBtn) lobbyBtn.addEventListener('click', function() { window._toggleLobbyMute(); });
+
   // Sincroniza ícone com estado real (vídeo começa muted pelo atributo HTML)
   updateLobbyMuteBtn();
 })();

@@ -4,7 +4,7 @@ import {
   collection, addDoc, onSnapshot, query, where, limit, orderBy,
   serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { S } from "./state.js";
 
 const firebaseConfig = {
@@ -20,6 +20,12 @@ const firebaseConfig = {
 const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
 const auth = getAuth(app);
+
+// sala.html pode ser aberta diretamente sem passar pela entrada.html que chama signInAnonymously.
+// Garante que sempre existe um currentUser para as regras Firestore (request.auth != null).
+const _authReady = auth.currentUser
+  ? Promise.resolve(auth.currentUser)
+  : signInAnonymously(auth).then(c => c.user).catch(() => null);
 
 // Popula state com as referências Firebase após inicialização
 function initFirebaseRefs() {
@@ -40,7 +46,7 @@ function initFirebaseRefs() {
 }
 
 export {
-  db, auth,
+  db, auth, _authReady,
   initFirebaseRefs,
   // Firestore functions re-exportadas para que os módulos não precisem importar CDN diretamente
   doc, getDoc, getDocFromServer, getDocs, setDoc, updateDoc, deleteDoc,

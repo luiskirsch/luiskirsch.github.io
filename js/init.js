@@ -1,6 +1,6 @@
 // Entry point principal — inicializa o jogo conectando todos os módulos
 import { S } from "./state.js";
-import { db, auth, initFirebaseRefs, onSnapshot, query, orderBy } from "./firebase.js";
+import { db, auth, _authReady, initFirebaseRefs, onSnapshot, query, orderBy } from "./firebase.js";
 import { getParticipantId, getUserId, showOslToast } from "./utils.js";
 import { applyBgTheme, applyCardStyle, applyVisualEffect, syncAccountPurchases, bindProfileEvents, openProfile, updateDesktopProfileBtn, applyAvatarDisplay } from "./ui/profile.js";
 import { bindUserDoc, bindRoom, bindPlayers, bindTyping, bindMessages, bindRoomEvents, ensureRoom, ensureUserProfile, upsertSelf, startHeartbeat, startMultiPoller, connectHostSse, fetchLiveRooms, renderLiveRooms, spectateRoom, closeSpectatorRoom } from "./ui/room.js";
@@ -91,7 +91,7 @@ window._osl.fetchLiveRooms       = fetchLiveRooms;
 window._osl.renderLiveRooms      = renderLiveRooms;
 window._osl.spectateRoom         = spectateRoom;
 window._osl.closeSpectatorRoom   = closeSpectatorRoom;
-window._osl.getFirebaseIdToken   = async () => { try { return (await S.auth?.currentUser?.getIdToken()) || null; } catch(_) { return null; } };
+window._osl.getFirebaseIdToken   = async () => { try { await _authReady; return (await S.auth?.currentUser?.getIdToken()) || null; } catch(_) { return null; } };
 window.oslOpenProfile        = window._osl.openSelfProfile; // atalho para scripts não-módulo
 document.addEventListener("osl:openSelfProfile", () => window._osl.openSelfProfile());
 

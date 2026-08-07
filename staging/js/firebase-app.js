@@ -9,12 +9,16 @@ import {
   getApp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+
+export const _authReady = auth.currentUser
+  ? Promise.resolve(auth.currentUser)
+  : signInAnonymously(auth).then(c => c.user).catch(() => null);
 
 export const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
 export const IS_REAL_STAGING_PROJECT = firebaseConfig.__isStagingProject === true;

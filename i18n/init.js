@@ -7,8 +7,8 @@
   const SUPPORTED = ['pt-BR', 'en-US'];
   const DEFAULT_LOCALE = 'pt-BR';
   const STORAGE_KEY = 'osl_lang';
-  const I18NEXT_CDN = 'https://unpkg.com/i18next@23.16.4/dist/umd/i18next.min.js';
-  const BACKEND_CDN = 'https://unpkg.com/i18next-http-backend@2.6.2/i18nextHttpBackend.min.js';
+  const I18NEXT_CDN = 'https://cdn.jsdelivr.net/npm/i18next@23.16.4/dist/umd/i18next.min.js';
+  const BACKEND_CDN = 'https://cdn.jsdelivr.net/npm/i18next-http-backend@2.6.2/i18nextHttpBackend.min.js';
 
   function detectLocale() {
     try {
