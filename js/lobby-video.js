@@ -7,6 +7,7 @@
   var OVERLAP = 0.8;   // segundos antes do fim para iniciar o próximo
   var active = vA, next = vB;
   var switching = false;
+  var unlocked = false;
 
   function setOpacity(el, val) {
     el.style.transition = 'opacity '+FADE+'s linear';
@@ -39,17 +40,6 @@
   vA.addEventListener('timeupdate', watchLoop);
   vB.addEventListener('timeupdate', watchLoop);
 
-  // Desbloqueia som no primeiro gesto
-  function unlock() {
-    active.muted = false;
-    next.muted   = false;
-    active.play();
-    updateLobbyMuteBtn();
-  }
-  document.addEventListener('pointerdown', unlock, { once: true, capture: true });
-  document.addEventListener('touchstart',  unlock, { once: true, capture: true });
-  document.addEventListener('keydown',     unlock, { once: true, capture: true });
-
   function updateLobbyMuteBtn() {
     var btn = document.getElementById('toggleLobbyAudioBtn');
     if (!btn) return;
@@ -57,10 +47,35 @@
     btn.title = active.muted ? 'Ativar som ambiente' : 'Silenciar som ambiente';
   }
 
+  // Desbloqueia som no primeiro gesto.
+  // Usa microtask para que um onclick simultâneo (fase bubble) já encontre unlocked=true
+  // e execute o toggle real em vez de brigar com unlock().
+  function unlock() {
+    if (unlocked) return;
+    unlocked = true;
+    Promise.resolve().then(function() {
+      active.muted = false;
+      next.muted   = false;
+      active.play();
+      updateLobbyMuteBtn();
+    });
+  }
+  document.addEventListener('pointerdown', unlock, { once: true, capture: true });
+  document.addEventListener('touchstart',  unlock, { once: true, capture: true });
+  document.addEventListener('keydown',     unlock, { once: true, capture: true });
+
   window._toggleLobbyMute = function() {
+    if (!unlocked) {
+      // Primeiro toque direto no botão Ambiente — desbloqueia sem re-mutar
+      unlock();
+      return;
+    }
     var m = !active.muted;
     active.muted = m;
     next.muted   = m;
     updateLobbyMuteBtn();
   };
+
+  // Sincroniza ícone com estado real (vídeo começa muted pelo atributo HTML)
+  updateLobbyMuteBtn();
 })();

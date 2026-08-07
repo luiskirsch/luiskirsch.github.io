@@ -91,6 +91,7 @@ window._osl.fetchLiveRooms       = fetchLiveRooms;
 window._osl.renderLiveRooms      = renderLiveRooms;
 window._osl.spectateRoom         = spectateRoom;
 window._osl.closeSpectatorRoom   = closeSpectatorRoom;
+window._osl.getFirebaseIdToken   = async () => { try { return (await S.auth?.currentUser?.getIdToken()) || null; } catch(_) { return null; } };
 window.oslOpenProfile        = window._osl.openSelfProfile; // atalho para scripts não-módulo
 document.addEventListener("osl:openSelfProfile", () => window._osl.openSelfProfile());
 

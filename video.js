@@ -582,8 +582,9 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
 }
 
 async function requestToken() {
+  const firebaseIdToken = await (window._osl?.getFirebaseIdToken?.() || Promise.resolve(null));
   const url = `${TOKEN_ENDPOINT}?room=${encodeURIComponent(roomCode)}&user=${encodeURIComponent(participantId)}`;
-  const opts = { headers: {} };
+  const opts = { headers: firebaseIdToken ? { Authorization: `Bearer ${firebaseIdToken}` } : {} };
 
   const MAX_TENTATIVAS = 3;
   let lastErr;
