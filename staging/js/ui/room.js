@@ -369,7 +369,7 @@ export async function ensureUserProfile() {
   }
   if (!snap.exists()) {
     const usernameBase = (S.playerName || "jogador").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"").slice(0,20) || "jogador";
-    await setDoc(S.userRef, { userId: S.userId, displayName: S.playerName, username: usernameBase, bio:"Novo participante do ritual.", avatarEmoji:"🔮", avatarColor:"#1f86d9", memberSince: serverTimestamp(), lastSeen: serverTimestamp(), friends:[], incomingRequests:[], outgoingRequests:[], stats:{ gamesPlayed:0, wins:0 } });
+    await setDoc(S.userRef, { userId: S.userId, displayName: S.playerName, username: usernameBase, bio:"Novo participante do ritual.", avatarEmoji:"🔮", avatarColor:"#1f86d9", memberSince: new Date(), lastSeen: serverTimestamp(), friends:[], incomingRequests:[], outgoingRequests:[], stats:{ gamesPlayed:0, wins:0 } });
     S.selectedAvatarEmoji = "🔮"; S.selectedAvatarColor = "#1f86d9";
     const fab = document.getElementById("mobileProfileBtn"); if (fab) fab.textContent = "🔮";
     const myBtn = document.getElementById("myProfileBtn"); if (myBtn) myBtn.textContent = "🔮 Perfil";
