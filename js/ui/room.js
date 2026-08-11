@@ -4,6 +4,7 @@ import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, quer
 import { escapeHtml, nowTimeFromDate, initials } from "../utils.js";
 import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
+import { logEvent } from "../game/session.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
 import { checkDailyReward, showSessionRecap, updateXpCard, showLevelPanel, showCoinModal } from "../game/rewards.js";
 import { OSL_ACHIEVEMENTS } from "../game/effects.js";
@@ -318,6 +319,7 @@ export async function leaveRoom(redirect = true) {
     if (S.typingUnsub)        S.typingUnsub();
     if (S.ritualUnsub)        S.ritualUnsub();
     if (S.ritualHistoryUnsub) S.ritualHistoryUnsub();
+    logEvent("PLAYER_LEFT", { nickname: S.playerName, isHost: S.isHost }).catch(() => {});
     await panelMarkSessionEnd();
     await PanelBridge.playerLeave(S.roomCode, S.participantId);
     await deleteDoc(S.playerRef);

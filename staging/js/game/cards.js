@@ -9,6 +9,7 @@ import { renderActiveEffect, checkAIDetection, renderReactions, OSL_XP, OSL_TENS
 import { showVoteResultOverlay } from "./rewards.js";
 import { assignSecretMissions } from "./missions.js";
 import { panelMarkSessionStart, ritualStart, ritualNextCard, ritualReset } from "../api.js";
+import { createGameSession, logEvent, endGameSession } from "./session.js";
 
 // ── Lobby/Arena visibility helpers ───────────────────────────────────────────
 function hideLobbyView() {
@@ -130,8 +131,10 @@ document.addEventListener("osl:updateRitualButtons", updateRitualButtons);
 
 // ── Estado de espera ──────────────────────────────────────────────────────────
 export function setRitualWaitingState() {
+  const _wasStarted = S.ritualStarted;
   S.ritualStarted = false;
   S.ritualDeck    = [];
+  if (_wasStarted) endGameSession().catch(() => {});
   OSL_TENSION.stop();
   document.getElementById("revealPanel")?.style.setProperty("display","none");
   showLobbyView();
@@ -291,6 +294,7 @@ export async function revealNextRitualCard() {
   }
 
   const nextCard = result.card;
+  logEvent("CARD_REVEALED", { title: nextCard?.title || null, type: nextCard?.type || null, count: result.cardsRevealedCount }).catch(() => {});
   S.ritualCardsRevealedCount = result.cardsRevealedCount;
 
   if (S.ritualCardsRevealedCount === 2 && !S.missionsAssigned) {
@@ -320,6 +324,7 @@ export async function startRitualDeck() {
     return;
   }
 
+  await createGameSession();
   S.ritualCardsRevealedCount = 0;
   S.missionsAssigned = false;
   await OSL_XP.award(S.userRef, "SESSION_JOIN");
@@ -344,6 +349,7 @@ export async function resetRitualDeck() {
     return;
   }
 
+  await createGameSession();
   S.ritualCardsRevealedCount = 0;
   S.missionsAssigned = false;
   await panelMarkSessionStart();

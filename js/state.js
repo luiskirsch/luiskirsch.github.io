@@ -17,6 +17,9 @@ export const S = {
   typingRef:            null,
   typingCollectionRef:  null,
   playersCollectionRef: null,
+  sessionRef:           null,
+  sessionEventsRef:     null,
+  sessionId:            null,
 
   // ── Identidade da sessão ─────────────────────────────────────────────
   playerName: (params.get("nome") || localStorage.getItem("osl_nome") || "Visitante").trim().slice(0, 40),
