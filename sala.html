@@ -6588,11 +6588,13 @@
     overflow:hidden;
     border-radius:0;
     background:transparent;
-    display:flex;align-items:stretch;
+    display:none;align-items:stretch; /* default none — show() do lobby-3d.js seta display:flex */
     /* mask-image no pai clippa o output composto de video+canvas antes de pintar */
     mask-image:linear-gradient(to bottom, transparent 0%, black 7%, black 82%, transparent 100%);
     -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 7%, black 82%, transparent 100%);
   }
+  /* Camada extra: ritual ativo nunca mostra o lobby, independente de _lobby3d */
+  body.ritual-started #lobbyViewer { display:none!important; }
   .lobbyViewer::after{ display:none; }
   .lobbyViewer__video{
     position:absolute;inset:0;

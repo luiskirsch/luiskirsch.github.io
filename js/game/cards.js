@@ -10,6 +10,21 @@ import { showVoteResultOverlay } from "./rewards.js";
 import { assignSecretMissions } from "./missions.js";
 import { panelMarkSessionStart, ritualStart, ritualNextCard, ritualReset } from "../api.js";
 
+// ── Lobby/Arena visibility helpers ───────────────────────────────────────────
+// Não dependem de window._lobby3d para evitar falhas silenciosas se o CDN falhar.
+function hideLobbyView() {
+  const lv = document.getElementById("lobbyViewer");
+  if (lv) lv.style.display = "none";
+  document.body.classList.remove("lobby-mode");
+  document.body.classList.add("ritual-started");
+  window._lobby3d?.hide();
+}
+
+function showLobbyView() {
+  document.body.classList.remove("ritual-started");
+  window._lobby3d?.show();
+}
+
 // ── Engine de efeitos (prepare) ───────────────────────────────────────────────
 const OSL_EFFECTS = {
   prepare(effect, players, phase) {
@@ -120,7 +135,7 @@ export function setRitualWaitingState() {
   S.ritualDeck    = [];
   OSL_TENSION.stop();
   document.getElementById("revealPanel")?.style.setProperty("display","none");
-  window._lobby3d?.show();
+  showLobbyView();
   const ritualCardType  = document.getElementById("ritualCardType");
   const ritualCardTitle = document.getElementById("ritualCardTitle");
   const ritualCardText  = document.getElementById("ritualCardText");
@@ -297,7 +312,7 @@ export async function revealNextRitualCard() {
 // ── Iniciar deck ──────────────────────────────────────────────────────────────
 export async function startRitualDeck() {
   S.ritualStarted = true;
-  window._lobby3d?.hide();
+  hideLobbyView();
   document.getElementById("revealPanel")?.style.setProperty("display","");
 
   // Backend constrói o deck com compras/prestige verificados via Firebase Admin SDK
@@ -322,7 +337,7 @@ export async function startRitualDeck() {
 export async function resetRitualDeck() {
   if (!S.isHost) return;
   S.ritualStarted = true;
-  window._lobby3d?.hide();
+  hideLobbyView();
   document.getElementById("revealPanel")?.style.setProperty("display","");
 
   const players = S.currentPlayers.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
@@ -366,7 +381,7 @@ export function renderRitualCardFromState(data) {
 
   if (!started) { S.lastRevealedCardKey = null; setRitualWaitingState(); return; }
 
-  window._lobby3d?.hide();
+  hideLobbyView();
   document.getElementById("revealPanel")?.style.setProperty("display","");
 
   // Auto-start recording quando ritual começa
