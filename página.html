@@ -56,20 +56,18 @@
   --err: rgba(255,77,77,.92);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
+html, body { height: 100%; overflow: hidden; }
 html { background: #000006; overscroll-behavior: none; }
 body {
-  min-height: 100vh;
-  overflow-x: hidden;
-  overflow-y: auto;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   -webkit-text-size-adjust: 100%;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior: none;
   color: var(--text);
   font-family: ui-serif, Georgia, "Times New Roman", serif;
   background: #000;
 }
-@supports (height: 100dvh) { body { min-height: 100dvh; } }
 
 /* ── Stars canvas ── */
 #stars {
@@ -278,15 +276,17 @@ body.transmissionFocus .soundPanel {
 .gate {
   position: relative;
   z-index: 5;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding:
-    max(168px, calc(env(safe-area-inset-top) + 150px))
+    max(120px, calc(env(safe-area-inset-top) + 110px))
     max(20px, env(safe-area-inset-left))
-    max(28px, env(safe-area-inset-bottom));
+    max(20px, env(safe-area-inset-bottom));
+  overflow: hidden;
   animation: gateIn .65s .06s ease both;
 }
 @keyframes gateIn {
@@ -297,7 +297,7 @@ body.transmissionFocus .soundPanel {
 /* ── Brand ── */
 .gateHeader {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 .gateKicker {
   display: block;
@@ -309,7 +309,7 @@ body.transmissionFocus .soundPanel {
   margin-bottom: 5px;
 }
 .gateTitle {
-  font-size: clamp(24px, 3.8vw, 54px);
+  font-size: clamp(22px, 3.4vw, 48px);
   font-weight: 700;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -344,7 +344,7 @@ body.transmissionFocus .soundPanel {
   letter-spacing: .06em;
   line-height: 1.62;
   max-width: 40ch;
-  margin-bottom: 26px;
+  margin-bottom: 14px;
 }
 .gateTagline em {
   display: block;
@@ -429,7 +429,7 @@ body.transmissionFocus .soundPanel {
 .authPanel.connectedPanel { text-align: center; }
 
 /* ── Form ── */
-.authGroup { margin-bottom: 12px; }
+.authGroup { margin-bottom: 9px; }
 .authLabel {
   display: block;
   font-family: "Courier New", monospace;
@@ -553,7 +553,7 @@ body.transmissionFocus .soundPanel {
 
 /* ── Footer ── */
 .gateFooter {
-  margin-top: 20px;
+  margin-top: 12px;
   text-align: center;
   font-size: 9px;
   letter-spacing: .16em;
@@ -565,8 +565,8 @@ body.transmissionFocus .soundPanel {
 
 /* ── Responsive ── */
 @media (max-width: 700px) {
-  .moonWrap { width: min(118px, 26vw); }
-  .gate { padding-top: max(144px, calc(env(safe-area-inset-top) + 124px)); }
+  .moonWrap { width: min(100px, 22vw); }
+  .gate { padding-top: max(100px, calc(env(safe-area-inset-top) + 90px)); }
   .soundPanel { right: 10px; left: 10px; width: auto; justify-content: space-between; border-radius: 14px; }
   #volumeSlider { width: 96px; min-width: 96px; }
   #transmissionField { left: 50%; top: 50%; width: min(86vw, 400px); transform: translate(-50%, calc(-50% + 12px)); }
@@ -574,7 +574,7 @@ body.transmissionFocus .soundPanel {
   .tfMessage, .tfGhost { font-size: clamp(13px, 3.8vw, 17px); }
 }
 @media (max-width: 480px) {
-  .gate { padding-top: max(130px, calc(env(safe-area-inset-top) + 114px)); }
+  .gate { padding-top: max(90px, calc(env(safe-area-inset-top) + 80px)); }
   .gateTagline { font-size: 13px; }
   .authCard { border-radius: 18px; }
   .authPanel { padding: 18px 18px 22px; }
