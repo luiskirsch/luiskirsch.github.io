@@ -296,19 +296,8 @@ body.transmissionFocus .soundPanel {
 
 /* ── Brand ── */
 .gateHeader {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  text-align: center;
   margin-bottom: 16px;
-}
-.gateLogo {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(255,255,255,.07));
-  user-select: none;
-  -webkit-user-drag: none;
-  flex-shrink: 0;
 }
 .gateKicker {
   display: block;
@@ -402,11 +391,11 @@ body.transmissionFocus .soundPanel {
   padding: 15px 12px;
   background: none;
   border: none;
-  color: var(--text3);
+  color: rgba(255,255,255,.58);
   cursor: pointer;
   font-family: "Courier New", monospace;
-  font-size: 10px;
-  letter-spacing: .24em;
+  font-size: 11px;
+  letter-spacing: .20em;
   text-transform: uppercase;
   transition: color .2s ease;
   position: relative;
@@ -424,8 +413,19 @@ body.transmissionFocus .soundPanel {
 }
 
 /* ── Panels ── */
-.authPanel { display: none; padding: 22px 22px 26px; }
-.authPanel.active { display: block; }
+.authPanelsWrap {
+  display: grid;
+}
+.authPanel {
+  grid-area: 1 / 1;
+  padding: 22px 22px 26px;
+  visibility: hidden;
+  pointer-events: none;
+}
+.authPanel.active {
+  visibility: visible;
+  pointer-events: auto;
+}
 .authPanel.connectedPanel { text-align: center; }
 
 /* ── Form ── */
@@ -567,8 +567,6 @@ body.transmissionFocus .soundPanel {
 @media (max-width: 700px) {
   .moonWrap { width: min(118px, 26vw); }
   .gate { padding-top: max(144px, calc(env(safe-area-inset-top) + 124px)); }
-  .gateHeader { gap: 12px; }
-  .gateLogo { width: 40px; height: 40px; }
   .soundPanel { right: 10px; left: 10px; width: auto; justify-content: space-between; border-radius: 14px; }
   #volumeSlider { width: 96px; min-width: 96px; }
   #transmissionField { left: 50%; top: 50%; width: min(86vw, 400px); transform: translate(-50%, calc(-50% + 12px)); }
@@ -687,14 +685,8 @@ requestAnimationFrame(function(t0){function step(prev){requestAnimationFrame(fun
 <main class="gate" id="gate">
 
   <header class="gateHeader">
-    <img loading="lazy" class="gateLogo"
-      src="./logo_oficial_fundo_transparente.png"
-      alt="Logo SextoLugar"
-      referrerpolicy="no-referrer">
-    <div>
-      <span class="gateKicker">Prelúdio Jogos · Uma experiência</span>
-      <h1 class="gateTitle">SextoLugar</h1>
-    </div>
+    <span class="gateKicker">Prelúdio Jogos · Uma experiência</span>
+    <h1 class="gateTitle">SextoLugar</h1>
   </header>
 
   <p class="gateTagline">
@@ -711,6 +703,7 @@ requestAnimationFrame(function(t0){function step(prev){requestAnimationFrame(fun
       <div class="authTabBar" id="authTabBar"></div>
     </div>
 
+    <div class="authPanelsWrap">
     <!-- Login -->
     <div class="authPanel active" id="panelLogin" role="tabpanel">
       <form id="loginForm" novalidate autocomplete="on">
@@ -775,6 +768,7 @@ requestAnimationFrame(function(t0){function step(prev){requestAnimationFrame(fun
       <button class="authBtn" type="button" id="btnPainel">Ir para o painel</button>
       <button class="authBtn secondary" type="button" id="btnLogout">Sair da conta</button>
     </div>
+    </div><!-- /authPanelsWrap -->
 
   </div>
 
