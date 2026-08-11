@@ -158,8 +158,17 @@ window.dismissAIDetection = dismissAIDetection;
   // salas/{id} tem allow read: if true — pode iniciar sem auth para warmup do cache IndexedDB
   bindRoom();
 
-  // Demais listeners exigem request.auth != null — aguarda Firebase SDK restaurar sessão
+  // Aguarda Firebase SDK restaurar sessão. O callback já gravou osl_auth_uid se o user
+  // é real; agora re-derivamos os IDs (no carregamento síncrono osl_auth_uid era null
+  // e getUserId() retornava um u_xxxxx aleatório que nunca bate com request.auth.uid).
   await _authReady;
+  const _freshParticipantId = getParticipantId();
+  const _freshUserId        = getUserId();
+  if (_freshParticipantId !== S.participantId || _freshUserId !== S.userId) {
+    S.participantId = _freshParticipantId;
+    S.userId        = _freshUserId;
+    initFirebaseRefs();
+  }
 
   bindPlayers();
   bindUserDoc();

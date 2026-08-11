@@ -20,6 +20,7 @@ export const _authReady = new Promise((resolve) => {
   const unsub = onAuthStateChanged(auth, (user) => {
     unsub();
     if (user) {
+      if (!user.isAnonymous) localStorage.setItem("osl_auth_uid", user.uid);
       resolve(user);
     } else {
       signInAnonymously(auth).then(c => c.user).catch(() => null).then(resolve);

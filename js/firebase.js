@@ -30,6 +30,10 @@ const _authReady = new Promise((resolve) => {
   const unsub = onAuthStateChanged(auth, (user) => {
     unsub();
     if (user) {
+      // Grava Firebase UID no localStorage para getUserId() e getParticipantId().
+      // osl_auth_uid é a chave que garante que o UID usado no Firestore bate com
+      // request.auth.uid nas regras de segurança.
+      if (!user.isAnonymous) localStorage.setItem("osl_auth_uid", user.uid);
       resolve(user);
     } else {
       signInAnonymously(auth).then(c => c.user).catch(() => null).then(resolve);

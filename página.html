@@ -1015,7 +1015,8 @@ if (loginForm) {
     setBtn("loginForm", true);
     setMsg("loginMsg","Verificando…");
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
+      const cred = await signInWithEmailAndPassword(auth, email, pass);
+      if (cred.user) localStorage.setItem("osl_auth_uid", cred.user.uid);
       setMsg("loginMsg","Acesso autorizado.","ok");
       setTimeout(() => { window.location.href = "./entrada.html"; }, 600);
     } catch(err) {
@@ -1054,6 +1055,7 @@ if (registerForm) {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       if (nome) await updateProfile(cred.user, { displayName: nome });
+      if (cred.user) localStorage.setItem("osl_auth_uid", cred.user.uid);
       setMsg("registerMsg","Conta criada! Redirecionando…","ok");
       setTimeout(() => { window.location.href = "./entrada.html"; }, 800);
     } catch(err) {
@@ -1069,7 +1071,12 @@ document.getElementById("btnLogout")?.addEventListener("click", async () => { tr
 
 /* Auth state */
 onAuthStateChanged(auth, (user) => {
-  if (user) { showConnected(user); } else { showAuth(); }
+  if (user && !user.isAnonymous) {
+    localStorage.setItem("osl_auth_uid", user.uid);
+    showConnected(user);
+  } else {
+    showAuth();
+  }
 });
 </script>
 
