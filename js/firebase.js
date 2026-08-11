@@ -21,11 +21,21 @@ const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// sala.html pode ser aberta diretamente sem passar pela entrada.html que chama signInAnonymously.
-// Garante que sempre existe um currentUser para as regras Firestore (request.auth != null).
-const _authReady = auth.currentUser
-  ? Promise.resolve(auth.currentUser)
-  : signInAnonymously(auth).then(c => c.user).catch(() => null);
+// Aguarda o Firebase SDK restaurar a sessão persistida (IndexedDB) antes de decidir se
+// precisa de sign-in anônimo. auth.currentUser é sempre null no carregamento síncrono do
+// módulo — checar diretamente causava uma corrida onde signInAnonymously sobrescrevia a
+// sessão real do usuário com um UID anônimo diferente, quebrando as regras Firestore que
+// exigem request.auth.uid == uid (adicionadas na auditoria 2026-08-04).
+const _authReady = new Promise((resolve) => {
+  const unsub = onAuthStateChanged(auth, (user) => {
+    unsub();
+    if (user) {
+      resolve(user);
+    } else {
+      signInAnonymously(auth).then(c => c.user).catch(() => null).then(resolve);
+    }
+  });
+});
 
 // Popula state com as referências Firebase após inicialização
 function initFirebaseRefs() {

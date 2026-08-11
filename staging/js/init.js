@@ -155,8 +155,12 @@ window.dismissAIDetection = dismissAIDetection;
     });
   }
 
-  // Registra listeners realtime imediatamente (Firestore usa IndexedDB cache)
+  // salas/{id} tem allow read: if true — pode iniciar sem auth para warmup do cache IndexedDB
   bindRoom();
+
+  // Demais listeners exigem request.auth != null — aguarda Firebase SDK restaurar sessão
+  await _authReady;
+
   bindPlayers();
   bindUserDoc();
   bindMessages();
