@@ -104,18 +104,18 @@ body {
 #transmissionField {
   position: fixed;
   left: 5.6vw;
-  bottom: 7vh;
-  top: auto;
+  top: 50%;
   width: min(480px, 34vw);
+  max-width: calc(50vw - 230px);
   min-height: 96px;
   z-index: 90;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(calc(-50% + 12px));
   transition: opacity .35s ease, transform .35s ease;
   contain: layout style;
 }
-#transmissionField.isActive { opacity: 1; transform: translateY(0); }
+#transmissionField.isActive { opacity: 1; transform: translateY(-50%); }
 #transmissionField::before {
   content: "";
   position: absolute;
