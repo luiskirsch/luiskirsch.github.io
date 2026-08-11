@@ -56,7 +56,9 @@ function obterNomeSala() {
 }
 
 async function registrarNoPainel({ nomeJogador, codigoSala, nomeSala }) {
-  let playerId = localStorage.getItem("osl_player_id");
+  // Prefere o Firebase UID para que request.auth.uid == playerId nas regras Firestore
+  const authUid = localStorage.getItem("osl_auth_uid");
+  let playerId = authUid || localStorage.getItem("osl_player_id");
 
   if (!playerId) {
     playerId = gerarPlayerId();

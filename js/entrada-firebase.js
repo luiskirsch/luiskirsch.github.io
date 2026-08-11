@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
@@ -11,13 +11,26 @@ const firebaseConfig = {
   appId: "1:947922328721:web:989522c99e16ab449f3330"
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// Autenticação anônima — necessária pois a regra /salas exige request.auth != null.
-// O usuário ainda não fez login no app, mas o read é legítimo (só lê status/nome da sala).
-let _authReady = signInAnonymously(auth).catch(() => null);
+// Aguarda onAuthStateChanged antes de decidir sobre signInAnonymously.
+// Chamada direta a signInAnonymously() destruía a sessão real do usuário vindo
+// de página.html, pois auth.currentUser é sempre null no carregamento síncrono.
+const _authReady = new Promise((resolve) => {
+  const unsub = onAuthStateChanged(auth, (user) => {
+    unsub();
+    if (user) {
+      // Preserva sessão real e sincroniza osl_auth_uid para utils.js
+      if (!user.isAnonymous) localStorage.setItem("osl_auth_uid", user.uid);
+      resolve(user);
+    } else {
+      // Sem sessão — sign-in anônimo para leituras Firestore (allow read: if true em salas/{id})
+      signInAnonymously(auth).then(c => c.user).catch(() => null).then(resolve);
+    }
+  });
+});
 
 async function ensureAuth() {
   await _authReady;

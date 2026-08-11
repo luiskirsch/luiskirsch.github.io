@@ -558,9 +558,12 @@ export function bindProfileEvents() {
     navigator.clipboard.writeText(lic).then(() => { const btn = document.getElementById("profCopyLicBtn"); btn.textContent = "✓"; setTimeout(() => btn.textContent = "⎘", 2000); });
   });
 
-  document.getElementById("logoutBtn")?.addEventListener("click", () => {
+  document.getElementById("logoutBtn")?.addEventListener("click", async () => {
     if (!confirm("Sair da conta? Você será redirecionado para a entrada.")) return;
-    localStorage.clear(); window.location.href = "./entrada.html";
+    try { await S.auth?.signOut(); } catch (_) {}
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = "./entrada.html";
   });
 
   // Ouve evento de abrir perfil (disparado por room.js)

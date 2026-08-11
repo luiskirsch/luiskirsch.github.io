@@ -1067,7 +1067,7 @@ if (registerForm) {
 
 /* Connected panel */
 document.getElementById("btnPainel")?.addEventListener("click", () => { window.location.href = "./entrada.html"; });
-document.getElementById("btnLogout")?.addEventListener("click", async () => { try { await signOut(auth); } catch(e) {} });
+document.getElementById("btnLogout")?.addEventListener("click", async () => { try { await signOut(auth); } catch(e) {} localStorage.removeItem("osl_auth_uid"); });
 
 /* Auth state */
 onAuthStateChanged(auth, (user) => {
