@@ -1017,7 +1017,7 @@ if (loginForm) {
     try {
       await signInWithEmailAndPassword(auth, email, pass);
       setMsg("loginMsg","Acesso autorizado.","ok");
-      setTimeout(() => { window.location.href = "./painel.html"; }, 600);
+      setTimeout(() => { window.location.href = "./entrada.html"; }, 600);
     } catch(err) {
       setMsg("loginMsg", mapErr(err.code), "err");
       setBtn("loginForm", false);
@@ -1055,7 +1055,7 @@ if (registerForm) {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       if (nome) await updateProfile(cred.user, { displayName: nome });
       setMsg("registerMsg","Conta criada! Redirecionando…","ok");
-      setTimeout(() => { window.location.href = "./painel.html"; }, 800);
+      setTimeout(() => { window.location.href = "./entrada.html"; }, 800);
     } catch(err) {
       setMsg("registerMsg", mapErr(err.code), "err");
       setBtn("registerForm", false);
@@ -1064,7 +1064,7 @@ if (registerForm) {
 }
 
 /* Connected panel */
-document.getElementById("btnPainel")?.addEventListener("click", () => { window.location.href = "./painel.html"; });
+document.getElementById("btnPainel")?.addEventListener("click", () => { window.location.href = "./entrada.html"; });
 document.getElementById("btnLogout")?.addEventListener("click", async () => { try { await signOut(auth); } catch(e) {} });
 
 /* Auth state */
