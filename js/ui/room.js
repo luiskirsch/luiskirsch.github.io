@@ -4,7 +4,7 @@ import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, quer
 import { escapeHtml, nowTimeFromDate, initials } from "../utils.js";
 import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
-import { logEvent } from "../game/session.js";
+import { logEvent, joinSessionAsPlayer, setPlayerConnected, clearActiveSession } from "../game/session.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
 import { checkDailyReward, showSessionRecap, updateXpCard, showLevelPanel, showCoinModal } from "../game/rewards.js";
 import { OSL_ACHIEVEMENTS } from "../game/effects.js";
@@ -173,6 +173,7 @@ export function startHeartbeat() {
   clearInterval(S.heartbeatTimer);
   S.heartbeatTimer = setInterval(async () => {
     try { await updateDoc(S.playerRef, { lastSeen: serverTimestamp() }); } catch (_) {}
+    setPlayerConnected(true).catch(() => {});
     PanelBridge.roomHeartbeat(S.roomCode).catch(() => {});
   }, 15000);
 }
@@ -234,6 +235,15 @@ export function bindRoom() {
     if (data.arenaActive) { if (typeof window.activateArenaMode === "function") window.activateArenaMode(); }
     else { if (typeof window.deactivateArenaMode === "function") window.deactivateArenaMode(); if (!started && !S.ritualStarted) setRitualWaitingState(); }
     await setDoc(S.playerRef, { isHost: S.isHost }, { merge: true });
+    // Non-host players join session when host publishes currentSessionId
+    const newSessionId = data.currentSessionId || null;
+    if (newSessionId && newSessionId !== S.sessionId && !S.isHost) {
+      const { doc: fsDoc, collection: fsCol } = await import("../firebase.js");
+      S.sessionId        = newSessionId;
+      S.sessionRef       = fsDoc(S.db, "salas", S.roomCode, "sessions", newSessionId);
+      S.sessionEventsRef = fsCol(S.db, "salas", S.roomCode, "sessions", newSessionId, "events");
+      joinSessionAsPlayer().catch(() => {});
+    }
   });
 }
 
@@ -320,6 +330,8 @@ export async function leaveRoom(redirect = true) {
     if (S.ritualUnsub)        S.ritualUnsub();
     if (S.ritualHistoryUnsub) S.ritualHistoryUnsub();
     logEvent("PLAYER_LEFT", { nickname: S.playerName, isHost: S.isHost }).catch(() => {});
+    setPlayerConnected(false).catch(() => {});
+    clearActiveSession().catch(() => {});
     await panelMarkSessionEnd();
     await PanelBridge.playerLeave(S.roomCode, S.participantId);
     await deleteDoc(S.playerRef);

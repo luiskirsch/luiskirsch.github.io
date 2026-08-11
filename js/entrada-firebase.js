@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const firebaseConfig = {
@@ -41,6 +41,28 @@ window.verificarCodigoDisponivel = async function (codigoSala) {
   const snap = await getDoc(doc(db, "salas", codigoSala));
   if (!snap.exists()) return true;
   return snap.data().status === "closed";
+};
+
+window.checkActiveSession = async function () {
+  const uid = localStorage.getItem("osl_auth_uid");
+  if (!uid) return null;
+  await _authReady;
+  try {
+    const userSnap = await getDoc(doc(db, "users", uid));
+    if (!userSnap.exists()) return null;
+    const { activeSession } = userSnap.data();
+    if (!activeSession?.sessionId || !activeSession?.roomCode) return null;
+    const sessSnap = await getDoc(doc(db, "salas", activeSession.roomCode, "sessions", activeSession.sessionId));
+    if (!sessSnap.exists() || sessSnap.data().status !== "active") {
+      updateDoc(doc(db, "users", uid), { activeSession: null }).catch(() => {});
+      return null;
+    }
+    return {
+      sessionId: activeSession.sessionId,
+      roomCode:  activeSession.roomCode,
+      playerCount: sessSnap.data().players?.length || 0
+    };
+  } catch (_) { return null; }
 };
 
 window.validarEntradaSala = async function (codigoSala, nomeSalaDigitado) {

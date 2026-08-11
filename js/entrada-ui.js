@@ -190,3 +190,31 @@ btnEntrarSala.addEventListener("click", async () => {
 window.addEventListener("pageshow", () => {
   scene.classList.remove("fadeOut");
 });
+
+// ── Reconnect banner ──────────────────────────────────────────────────────────
+(async function initReconnectBanner() {
+  const banner    = document.getElementById("reconnectBanner");
+  const codeEl    = document.getElementById("reconnectRoomCode");
+  const retakeBtn = document.getElementById("reconnectBtn");
+  const dismissBtn= document.getElementById("reconnectDismiss");
+  if (!banner || !retakeBtn || !dismissBtn) return;
+
+  let sess = null;
+  try { sess = await window.checkActiveSession?.(); } catch (_) {}
+  if (!sess) return;
+
+  if (codeEl) codeEl.textContent = sess.roomCode;
+  banner.style.display = "flex";
+
+  retakeBtn.addEventListener("click", () => {
+    const nome     = localStorage.getItem("osl_nome")      || "Jogador";
+    const nomeSala = localStorage.getItem("osl_nome_sala") || "Sala";
+    const url = new URL("./sala.html", window.location.href);
+    url.searchParams.set("sala",     sess.roomCode);
+    url.searchParams.set("nome",     nome);
+    url.searchParams.set("nomeSala", nomeSala);
+    window.location.href = url.toString();
+  });
+
+  dismissBtn.addEventListener("click", () => { banner.style.display = "none"; });
+})();

@@ -592,6 +592,14 @@
 </head>
 
 <body>
+
+  <!-- ── Reconnect banner ──────────────────────────────────────────────────────── -->
+  <div id="reconnectBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1208;border-bottom:1px solid #c8a96e44;padding:10px 20px;display:none;align-items:center;gap:12px;font-size:13px;color:#e0cba0;font-family:inherit">
+    <span style="flex:1">♻ Você tem uma partida em andamento na sala <strong id="reconnectRoomCode" style="color:#c8a96e"></strong></span>
+    <button id="reconnectBtn" style="background:#c8a96e;color:#1a1208;border:none;border-radius:6px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer">Retomar</button>
+    <button id="reconnectDismiss" style="background:transparent;color:#c8a96e88;border:1px solid #c8a96e44;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer">Ignorar</button>
+  </div>
+
   <main class="wrap" id="scene">
 
     <header class="pageHead">

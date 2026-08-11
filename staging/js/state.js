@@ -19,6 +19,7 @@ export const S = {
   playersCollectionRef: null,
   sessionRef:           null,
   sessionEventsRef:     null,
+  sessionPlayerRef:     null,
   sessionId:            null,
 
   // ── Identidade da sessão ─────────────────────────────────────────────

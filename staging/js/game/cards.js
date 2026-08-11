@@ -9,7 +9,7 @@ import { renderActiveEffect, checkAIDetection, renderReactions, OSL_XP, OSL_TENS
 import { showVoteResultOverlay } from "./rewards.js";
 import { assignSecretMissions } from "./missions.js";
 import { panelMarkSessionStart, ritualStart, ritualNextCard, ritualReset } from "../api.js";
-import { createGameSession, logEvent, endGameSession } from "./session.js";
+import { createGameSession, logEvent, endGameSession, updateSessionGameState } from "./session.js";
 
 // ── Lobby/Arena visibility helpers ───────────────────────────────────────────
 function hideLobbyView() {
@@ -295,6 +295,7 @@ export async function revealNextRitualCard() {
 
   const nextCard = result.card;
   logEvent("CARD_REVEALED", { title: nextCard?.title || null, type: nextCard?.type || null, count: result.cardsRevealedCount }).catch(() => {});
+  updateSessionGameState({ cardsRevealedCount: result.cardsRevealedCount, currentCardTitle: nextCard?.title || null, phase: "playing" }).catch(() => {});
   S.ritualCardsRevealedCount = result.cardsRevealedCount;
 
   if (S.ritualCardsRevealedCount === 2 && !S.missionsAssigned) {
