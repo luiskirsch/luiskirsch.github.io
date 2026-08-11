@@ -6640,18 +6640,18 @@
   }
 
 
-  /* ── LOBBY MODE — AAA full-bleed (ativo via body.lobby-mode) ──────── */
+  /* ── LOBBY MODE — AAA full-bleed (ativo via body:not(.ritual-started).lobby-mode) ──────── */
   /* Cadeia de altura: layout → mainArea → tableCard → gameTableGrid */
-  body.lobby-mode .layout{
+  body:not(.ritual-started).lobby-mode .layout{
     height:calc(100svh - 116px);
     align-items:stretch;
   }
-  body.lobby-mode .mainArea{
+  body:not(.ritual-started).lobby-mode .mainArea{
     height:100%;
     display:flex;
     flex-direction:column;
   }
-  body.lobby-mode .tableCard{
+  body:not(.ritual-started).lobby-mode .tableCard{
     background:transparent!important;
     border:none!important;
     box-shadow:none!important;
@@ -6660,15 +6660,15 @@
     min-height:0;
     border-radius:20px!important;
   }
-  body.lobby-mode .tableCard::before{ display:none!important; }
-  body.lobby-mode .tableHead{
+  body:not(.ritual-started).lobby-mode .tableCard::before{ display:none!important; }
+  body:not(.ritual-started).lobby-mode .tableHead{
     background:linear-gradient(180deg,rgba(4,2,10,.92) 0%,rgba(4,2,10,0) 100%)!important;
     border-bottom:none!important;
     position:relative;z-index:50;
     padding-bottom:38px!important;
     margin-bottom:-26px;
   }
-  body.lobby-mode .gameTableGrid{
+  body:not(.ritual-started).lobby-mode .gameTableGrid{
     position:relative!important;
     display:block!important;
     height:clamp(400px,calc(100svh - 165px),1020px)!important;
@@ -6676,14 +6676,14 @@
     overflow:hidden!important;
     border-radius:0 0 20px 20px!important;
   }
-  body.lobby-mode .gameTableGrid::before,
-  body.lobby-mode .gameTableGrid::after{ display:none!important; }
-  body.lobby-mode #lobbyViewer{
+  body:not(.ritual-started).lobby-mode .gameTableGrid::before,
+  body:not(.ritual-started).lobby-mode .gameTableGrid::after{ display:none!important; }
+  body:not(.ritual-started).lobby-mode #lobbyViewer{
     position:absolute!important;inset:0!important;
     width:100%!important;height:100%!important;
     border-radius:0!important;z-index:1!important;
   }
-  body.lobby-mode .cardCenter{
+  body:not(.ritual-started).lobby-mode .cardCenter{
     position:absolute!important;inset:0!important;
     background:transparent!important;
     display:flex!important;flex-direction:column!important;
@@ -6692,7 +6692,7 @@
     z-index:10!important;pointer-events:none!important;
     height:auto!important;min-height:unset!important;
   }
-  body.lobby-mode #deckInfo{
+  body:not(.ritual-started).lobby-mode #deckInfo{
     background:rgba(4,2,10,.75)!important;
     backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;
     border:1px solid rgba(212,168,75,.2)!important;
@@ -6702,20 +6702,20 @@
     text-align:center!important;pointer-events:none!important;
     white-space:nowrap!important;margin:0!important;
   }
-  body.lobby-mode .effectPanel{ z-index:20!important;pointer-events:auto!important; }
-  body.lobby-mode .aiDetectToast{ z-index:20!important;pointer-events:auto!important; }
-  body.lobby-mode .videoSelfSlot{ display:none!important; }
-  body.lobby-mode .arenaControls{ z-index:20!important;pointer-events:auto!important; }
-  body.lobby-mode .videoColLeft,
-  body.lobby-mode .videoColRight{
+  body:not(.ritual-started).lobby-mode .effectPanel{ z-index:20!important;pointer-events:auto!important; }
+  body:not(.ritual-started).lobby-mode .aiDetectToast{ z-index:20!important;pointer-events:auto!important; }
+  body:not(.ritual-started).lobby-mode .videoSelfSlot{ display:none!important; }
+  body:not(.ritual-started).lobby-mode .arenaControls{ z-index:20!important;pointer-events:auto!important; }
+  body:not(.ritual-started).lobby-mode .videoColLeft,
+  body:not(.ritual-started).lobby-mode .videoColRight{
     position:absolute!important;top:50%!important;transform:translateY(-50%)!important;
     z-index:20!important;display:flex!important;flex-direction:column!important;
     gap:14px!important;width:clamp(72px,9vw,105px)!important;pointer-events:auto!important;
   }
-  body.lobby-mode .videoColLeft { left:18px!important; }
-  body.lobby-mode .videoColRight{ right:18px!important; }
-  body.lobby-mode .videoColLeft .videoTile,
-  body.lobby-mode .videoColRight .videoTile{
+  body:not(.ritual-started).lobby-mode .videoColLeft { left:18px!important; }
+  body:not(.ritual-started).lobby-mode .videoColRight{ right:18px!important; }
+  body:not(.ritual-started).lobby-mode .videoColLeft .videoTile,
+  body:not(.ritual-started).lobby-mode .videoColRight .videoTile{
     background:rgba(4,2,10,.68)!important;
     backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;
     border:1px solid rgba(212,168,75,.14)!important;
@@ -6723,8 +6723,8 @@
     box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 20px rgba(212,168,75,.04) inset!important;
     border-radius:10px!important;overflow:hidden!important;
   }
-  body.lobby-mode .videoColLeft .videoColPlaceholder,
-  body.lobby-mode .videoColRight .videoColPlaceholder{
+  body:not(.ritual-started).lobby-mode .videoColLeft .videoColPlaceholder,
+  body:not(.ritual-started).lobby-mode .videoColRight .videoColPlaceholder{
     background:rgba(4,2,10,.32)!important;
     backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;
     border:1px solid rgba(212,168,75,.07)!important;

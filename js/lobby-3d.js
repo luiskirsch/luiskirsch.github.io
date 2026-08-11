@@ -193,8 +193,19 @@ const clock = new THREE.Clock();
 })();
 
 // ── Bridge ─────────────────────────────────────────────────────────
-document.body.classList.add("lobby-mode");
+// Só ativa lobby-mode se o ritual ainda não iniciou (evita race condition
+// onde este módulo carrega do CDN depois que hideLobbyView() já removeu a classe)
+if (!document.body.classList.contains("ritual-started")) {
+  document.body.classList.add("lobby-mode");
+} else {
+  viewer.style.display = "none";
+}
 window._lobby3d = {
-  show() { viewer.style.display="flex"; document.body.classList.add("lobby-mode"); resize(); },
-  hide() { viewer.style.display="none"; document.body.classList.remove("lobby-mode"); }
+  show() {
+    if (document.body.classList.contains("ritual-started")) return;
+    viewer.style.display = "flex";
+    document.body.classList.add("lobby-mode");
+    resize();
+  },
+  hide() { viewer.style.display = "none"; document.body.classList.remove("lobby-mode"); }
 };
