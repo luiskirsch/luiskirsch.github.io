@@ -15,6 +15,15 @@ import { revealNextRitualCard, resetRitualDeck } from "./game/cards.js";
 S.participantId = getParticipantId();
 S.userId        = getUserId();
 
+// ── Detecção precoce de reconexão ─────────────────────────────────────────────
+// Se o player clicou "Retomar" na entrada.html, aplica ritual-started imediatamente
+// antes do bindRoom() para que o lobby nunca apareça durante a reconexão.
+if (localStorage.getItem("osl_reconnect_flag")) {
+  localStorage.removeItem("osl_reconnect_flag");
+  S._isReconnecting = true;
+  document.body.classList.add("ritual-started");
+}
+
 // Persiste nome/sala no localStorage (exceto modo espectador)
 if (!S._isSpectator) {
   localStorage.setItem("osl_nome",      S.playerName);
@@ -119,6 +128,23 @@ window.sendReaction       = sendReaction;
 window.castEffectVote     = castEffectVote;
 window.confirmAIDetection = confirmAIDetection;
 window.dismissAIDetection = dismissAIDetection;
+
+// ── Disconnect tracking via visibilitychange ──────────────────────────────────
+// Marca connected:false após 60s de tab oculta; reconecta quando volta ao foco.
+// Complementa o heartbeat (15s) para detectar saídas sem beforeunload.
+(function bindVisibilityDisconnect() {
+  let _hideTimer = null;
+  document.addEventListener("visibilitychange", async () => {
+    if (document.visibilityState === "hidden") {
+      _hideTimer = setTimeout(async () => {
+        try { const { setPlayerConnected } = await import("./game/session.js"); await setPlayerConnected(false); } catch (_) {}
+      }, 60000);
+    } else {
+      clearTimeout(_hideTimer);
+      try { const { setPlayerConnected } = await import("./game/session.js"); setPlayerConnected(true).catch(() => {}); } catch (_) {}
+    }
+  });
+})();
 
 // ── Inicialização principal ───────────────────────────────────────────────────
 (async function init() {

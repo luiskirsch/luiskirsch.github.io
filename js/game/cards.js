@@ -401,6 +401,12 @@ export function renderRitualCardFromState(data) {
     }).catch(() => {});
   }
 
+  // Toast de boas-vindas ao reconectar (dispara apenas na primeira snapshot ativa)
+  if (S._isReconnecting && S.lastRevealedCardKey === null) {
+    S._isReconnecting = false;
+    window.showOslToast?.(oslTr("sala:reconnect.welcome", "Bem-vindo de volta! Sua partida continua."));
+  }
+
   const newKey       = card ? (card.title || "__card__") : "__waiting__";
   const isFirstRender = S.lastRevealedCardKey === null;
   const cardChanged  = !isFirstRender && newKey !== S.lastRevealedCardKey;

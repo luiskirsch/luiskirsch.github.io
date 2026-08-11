@@ -209,6 +209,7 @@ window.addEventListener("pageshow", () => {
   retakeBtn.addEventListener("click", () => {
     const nome     = localStorage.getItem("osl_nome")      || "Jogador";
     const nomeSala = localStorage.getItem("osl_nome_sala") || "Sala";
+    localStorage.setItem("osl_reconnect_flag", "1"); // Phase 3: suprime flash do lobby
     const url = new URL("./sala.html", window.location.href);
     url.searchParams.set("sala",     sess.roomCode);
     url.searchParams.set("nome",     nome);

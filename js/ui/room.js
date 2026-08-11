@@ -235,6 +235,15 @@ export function bindRoom() {
     if (data.arenaActive) { if (typeof window.activateArenaMode === "function") window.activateArenaMode(); }
     else { if (typeof window.deactivateArenaMode === "function") window.deactivateArenaMode(); if (!started && !S.ritualStarted) setRitualWaitingState(); }
     await setDoc(S.playerRef, { isHost: S.isHost }, { merge: true });
+    // Toast quando outro jogador reconecta (campo observável na sessão)
+    const notif = data.reconnectNotification;
+    if (notif?.participantId && notif.participantId !== S.participantId) {
+      const notifKey = `${notif.participantId}_${notif.ts?.toMillis?.() || notif.ts || 0}`;
+      if (S._lastReconnectNotifKey !== notifKey) {
+        S._lastReconnectNotifKey = notifKey;
+        window.showOslToast?.(`${notif.nickname} reconectou.`);
+      }
+    }
     // Non-host players join session when host publishes currentSessionId
     const newSessionId = data.currentSessionId || null;
     if (newSessionId && newSessionId !== S.sessionId && !S.isHost) {

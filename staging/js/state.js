@@ -17,10 +17,12 @@ export const S = {
   typingRef:            null,
   typingCollectionRef:  null,
   playersCollectionRef: null,
-  sessionRef:           null,
-  sessionEventsRef:     null,
-  sessionPlayerRef:     null,
-  sessionId:            null,
+  sessionRef:              null,
+  sessionEventsRef:        null,
+  sessionPlayerRef:        null,
+  sessionId:               null,
+  _isReconnecting:         false,
+  _lastReconnectNotifKey:  null,
 
   // ── Identidade da sessão ─────────────────────────────────────────────
   playerName: (params.get("nome") || localStorage.getItem("osl_nome") || "Visitante").trim().slice(0, 40),

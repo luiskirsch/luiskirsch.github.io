@@ -2,8 +2,9 @@
 // Estrutura: salas/{roomCode}/sessions/{sessionId}/events/{id}
 //            salas/{roomCode}/sessions/{sessionId}/players/{participantId}
 // Fase 1: event log. Fase 2: player tracking + gameState + reconnect bookmark.
+// Fase 3: reconnect detection, notificação cross-player, visibilitychange disconnect.
 import { S } from "../state.js";
-import { addDoc, setDoc, updateDoc, serverTimestamp, doc, collection } from "../firebase.js";
+import { addDoc, setDoc, updateDoc, getDoc, serverTimestamp, doc, collection } from "../firebase.js";
 
 // ── Internals ─────────────────────────────────────────────────────────────────
 
@@ -29,27 +30,54 @@ export async function logEvent(type, payload = {}) {
 
 // ── Player tracking ───────────────────────────────────────────────────────────
 
+// Retorna true se o player estava na sessão antes (reconnect), false se é novo join.
 export async function joinSessionAsPlayer() {
-  if (!S.db || !S.sessionId || !S.participantId || !S.userId) return;
+  if (!S.db || !S.sessionId || !S.participantId || !S.userId) return false;
   try {
-    const playerRef = doc(S.db, ...(_sessPath()), "players", S.participantId);
-    await setDoc(playerRef, {
+    const playerRef    = doc(S.db, ...(_sessPath()), "players", S.participantId);
+    const existingSnap = await getDoc(playerRef);
+    const isReconnect  = existingSnap.exists();
+
+    const playerData = {
       playerId: S.participantId,
       userId: S.userId,
       nickname: S.playerName,
       connected: true,
-      joinedAt: serverTimestamp(),
       lastSeenAt: serverTimestamp()
-    }, { merge: true });
+    };
+    if (!isReconnect) {
+      playerData.joinedAt = serverTimestamp();
+    } else {
+      playerData.reconnectCount    = (existingSnap.data().reconnectCount || 0) + 1;
+      playerData.lastReconnectedAt = serverTimestamp();
+    }
+
+    await setDoc(playerRef, playerData, { merge: true });
     S.sessionPlayerRef = playerRef;
+
     if (S.userRef) {
       await updateDoc(S.userRef, {
         activeSession: { sessionId: S.sessionId, roomCode: S.roomCode }
       });
     }
-    await logEvent("PLAYER_JOINED", { nickname: S.playerName, userId: S.userId });
+
+    if (isReconnect) {
+      await logEvent("PLAYER_RECONNECTED", { nickname: S.playerName, userId: S.userId });
+      updateDoc(S.sessionRef, {
+        reconnectNotification: {
+          nickname: S.playerName,
+          participantId: S.participantId,
+          ts: serverTimestamp()
+        }
+      }).catch(() => {});
+    } else {
+      await logEvent("PLAYER_JOINED", { nickname: S.playerName, userId: S.userId });
+    }
+
+    return isReconnect;
   } catch (e) {
     console.warn("[session] joinSessionAsPlayer:", e.message);
+    return false;
   }
 }
 
@@ -95,10 +123,9 @@ export async function createGameSession() {
       gameState: { cardsRevealedCount: 0, currentCardTitle: null, phase: "playing" },
       players
     });
-    S.sessionId = sessRef.id;
-    S.sessionRef = sessRef;
+    S.sessionId        = sessRef.id;
+    S.sessionRef       = sessRef;
     S.sessionEventsRef = collection(S.db, "salas", S.roomCode, "sessions", sessRef.id, "events");
-    // Publish sessionId to room so non-host players can join the session
     if (S.roomRef) {
       updateDoc(S.roomRef, { currentSessionId: sessRef.id }).catch(() => {});
     }
@@ -119,8 +146,8 @@ export async function endGameSession() {
   } catch (e) {
     console.warn("[session] endGameSession:", e.message);
   } finally {
-    S.sessionId = null;
-    S.sessionRef = null;
+    S.sessionId        = null;
+    S.sessionRef       = null;
     S.sessionEventsRef = null;
     S.sessionPlayerRef = null;
   }
