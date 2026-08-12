@@ -126,6 +126,38 @@ export async function panelMarkRecording(active) {
   catch (error) { console.error("Erro ao atualizar gravação no painel:", error); }
 }
 
+// ── Sessão de jogo: presença e ciclo de vida (escritas via backend/Admin SDK) ──
+
+export async function sessionPlayerJoin() {
+  const idToken = await _getFirebaseIdToken();
+  return _post("/game/session/player-join", {
+    roomId:          S.roomCode,
+    sessionId:       S.sessionId,
+    participantId:   S.participantId,
+    firebaseIdToken: idToken,
+    nickname:        S.playerName,
+  });
+}
+
+export async function sessionPlayerHeartbeat(connected = true) {
+  const idToken = await _getFirebaseIdToken();
+  return _post("/game/session/player-heartbeat", {
+    roomId:          S.roomCode,
+    sessionId:       S.sessionId,
+    firebaseIdToken: idToken,
+    connected:       !!connected,
+  });
+}
+
+export async function sessionEndGame() {
+  const hostToken = sessionStorage.getItem("osl_host_token");
+  return _post("/game/session/end-game", {
+    roomId:     S.roomCode,
+    sessionId:  S.sessionId,
+    hostToken,
+  });
+}
+
 // Exponha para o video.js (usa window.panelMarkVideo)
 window.panelMarkVideo     = panelMarkVideo;
 window.panelMarkRecording = panelMarkRecording;

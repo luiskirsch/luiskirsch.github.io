@@ -10,7 +10,7 @@
 
 import { S } from "../state.js";
 import { CMD } from "./commands.js";
-import { logEvent, createGameSession, endGameSession, updateSessionGameState } from "./session.js";
+import { setSessionId, joinSessionAsPlayer, endGameSession } from "./session.js";
 import { ritualStart, ritualNextCard, ritualReset, panelMarkSessionStart } from "../api.js";
 
 // ── Fases ─────────────────────────────────────────────────────────────────────
@@ -130,7 +130,8 @@ const _handlers = {
       return;
     }
 
-    await createGameSession();
+    if (result.sessionId) setSessionId(result.sessionId);
+    joinSessionAsPlayer().catch(() => {});
   },
 
   async [CMD.RESET_RITUAL]({ players = [] } = {}) {
@@ -144,7 +145,8 @@ const _handlers = {
       return;
     }
 
-    await createGameSession();
+    if (result.sessionId) setSessionId(result.sessionId);
+    joinSessionAsPlayer().catch(() => {});
     await panelMarkSessionStart();
   },
 
@@ -158,18 +160,7 @@ const _handlers = {
 
     const newCount = result.cardsRevealedCount ?? (_state.cardsRevealedCount + 1);
 
-    logEvent('CARD_REVEALED', {
-      title: result.card?.title ?? null,
-      type:  result.card?.type  ?? null,
-      count: newCount,
-    }).catch(() => {});
-
-    updateSessionGameState({
-      cardsRevealedCount: newCount,
-      currentCardTitle:   result.card?.title ?? null,
-      phase:              'playing',
-    }).catch(() => {});
-
+    // Backend já loga CARD_REVEALED e atualiza gameState na sessão
     // Atualização parcial local — SYNC_FROM_FIRESTORE vai completar
     _patch({ cardsRevealedCount: newCount, missionsAssigned: newCount >= 2 });
   },
