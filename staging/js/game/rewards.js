@@ -246,44 +246,11 @@ export function showVoteResultOverlay(winner, resolvedAt) {
 }
 
 // ── Recap de sessão ───────────────────────────────────────────────────────────
-export async function showSessionRecap(onNewSession, primaryLabel = "NOVA SESSÃO") {
-  const [histSnap, msgsSnap, ritualSnap] = await Promise.all([
-    getDocs(query(S.ritualHistoryRef, orderBy("createdAt", "asc"))),
-    getDocs(query(S.messagesRef, orderBy("createdAt", "asc"))),
-    getDoc(S.ritualRef)
-  ]);
-
-  const histItems    = histSnap.docs.map(d => d.data());
-  const cardsRevealed = histItems.filter(h => h.type && h.type !== "Ritual").length;
-  const ritualData   = ritualSnap?.data?.() || {};
-
-  let durationStr = "—";
-  if (ritualData.sessionStartedAt) {
-    const mins = Math.round((Date.now() - ritualData.sessionStartedAt) / 60000);
-    durationStr = mins < 1 ? "< 1 min" : `${mins} min`;
-    OSL_ACHIEVEMENTS.onSessionComplete(mins);
-  }
-
-  const reactions = ritualData.reactions || {};
-  const emojiTally = {};
-  Object.values(reactions).forEach(r => { if (r?.emoji) emojiTally[r.emoji] = (emojiTally[r.emoji] || 0) + 1; });
-  const topEmoji = Object.entries(emojiTally).sort((a,b)=>b[1]-a[1])[0]?.[0] || null;
-
-  const reactionCounts = ritualData.reactionCounts || {};
-  let topReactor = null, topCount = 0;
-  Object.entries(reactionCounts).forEach(([pid, n]) => { if (n > topCount) { topCount = n; topReactor = pid; } });
-  const topReactorName = S.currentPlayers.find(p => p.id === topReactor)?.name || null;
-
-  const msgCountByPlayer = {};
-  msgsSnap.docs.forEach(d => { const aid = d.data().authorId; if (aid) msgCountByPlayer[aid] = (msgCountByPlayer[aid] || 0) + 1; });
-  let topChatter = null, topMsgCount = 0;
-  Object.entries(msgCountByPlayer).forEach(([pid, n]) => { if (n > topMsgCount) { topMsgCount = n; topChatter = pid; } });
-  const topChatterName = S.currentPlayers.find(p => p.id === topChatter)?.name || null;
-
-  const statReactor = topReactorName ? `<div class="recapStat"><div class="recapStat__icon">🎭</div><div class="recapStat__value">${escapeHtml(topReactorName)}</div><div class="recapStat__label">Mais expressivo</div></div>` : "";
-  const statChatter = topChatterName ? `<div class="recapStat"><div class="recapStat__icon">💬</div><div class="recapStat__value">${escapeHtml(topChatterName)}</div><div class="recapStat__label">Mais no chat</div></div>` : "";
-  const statEmoji   = topEmoji       ? `<div class="recapStat"><div class="recapStat__icon">${topEmoji}</div><div class="recapStat__value">Favorita</div><div class="recapStat__label">Reação do grupo</div></div>` : "";
-  const newSessionBtn = onNewSession  ? `<button class="recapCard__btn recapCard__btn--primary" id="recapNewBtn">${primaryLabel}</button>` : "";
+function _renderRecapModal({ cardsRevealed, durationStr, topReactorName, topChatterName, topEmoji, playerCount, onNewSession, primaryLabel }) {
+  const statReactor   = topReactorName ? `<div class="recapStat"><div class="recapStat__icon">🎭</div><div class="recapStat__value">${escapeHtml(topReactorName)}</div><div class="recapStat__label">Mais expressivo</div></div>` : "";
+  const statChatter   = topChatterName ? `<div class="recapStat"><div class="recapStat__icon">💬</div><div class="recapStat__value">${escapeHtml(topChatterName)}</div><div class="recapStat__label">Mais no chat</div></div>` : "";
+  const statEmoji     = topEmoji       ? `<div class="recapStat"><div class="recapStat__icon">${topEmoji}</div><div class="recapStat__value">Favorita</div><div class="recapStat__label">Reação do grupo</div></div>` : "";
+  const newSessionBtn = onNewSession   ? `<button class="recapCard__btn recapCard__btn--primary" id="recapNewBtn">${primaryLabel}</button>` : "";
 
   const overlay = document.createElement("div");
   overlay.className = "recapOverlay";
@@ -306,8 +273,72 @@ export async function showSessionRecap(onNewSession, primaryLabel = "NOVA SESSÃ
 
   const closeRecap = () => { overlay.classList.add("closing"); setTimeout(() => overlay.remove(), 300); };
   document.getElementById("recapCloseBtn").addEventListener("click", closeRecap);
-  document.getElementById("recapShareBtn").addEventListener("click", () => shareSessionCard({ cards: cardsRevealed, duration: durationStr, topEmoji, playerCount: S.currentPlayers.length }));
+  document.getElementById("recapShareBtn").addEventListener("click", () => shareSessionCard({ cards: cardsRevealed, duration: durationStr, topEmoji, playerCount }));
   if (onNewSession) document.getElementById("recapNewBtn").addEventListener("click", () => { closeRecap(); onNewSession(); });
+}
+
+export async function showSessionRecap(onNewSession, primaryLabel = "NOVA SESSÃO") {
+  // Caminho 1: host encerrou formalmente o jogo → summary durável já computado pelo backend
+  if (S._lastSessionSummary) {
+    const s = S._lastSessionSummary;
+    const durationSec = s.durationSec || 0;
+    OSL_ACHIEVEMENTS.onSessionComplete(Math.round(durationSec / 60));
+    const topEmoji = Object.entries(s.emojiTally || {}).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+    _renderRecapModal({
+      cardsRevealed:  s.cardsRevealed || 0,
+      durationStr:    durationSec >= 60 ? `${Math.round(durationSec / 60)} min` : "< 1 min",
+      topReactorName: s.topReactor?.nickname || null,
+      topChatterName: null,
+      topEmoji,
+      playerCount:    s.playerCount || S.currentPlayers.length,
+      onNewSession,
+      primaryLabel,
+    });
+    return;
+  }
+
+  // Caminho 2: jogador saindo a meio jogo → lê dados efêmeros (comportamento legado)
+  const [histSnap, msgsSnap, ritualSnap] = await Promise.all([
+    getDocs(query(S.ritualHistoryRef, orderBy("createdAt", "asc"))),
+    getDocs(query(S.messagesRef,      orderBy("createdAt", "asc"))),
+    getDoc(S.ritualRef)
+  ]);
+
+  const histItems    = histSnap.docs.map(d => d.data());
+  const cardsRevealed = histItems.filter(h => h.type && h.type !== "Ritual").length;
+  const ritualData   = ritualSnap?.data?.() || {};
+
+  let durationStr = "—";
+  if (ritualData.sessionStartedAt) {
+    const mins = Math.round((Date.now() - ritualData.sessionStartedAt) / 60000);
+    durationStr = mins < 1 ? "< 1 min" : `${mins} min`;
+    OSL_ACHIEVEMENTS.onSessionComplete(mins);
+  }
+
+  const reactions = ritualData.reactions || {};
+  const emojiTally = {};
+  Object.values(reactions).forEach(r => { if (r?.emoji) emojiTally[r.emoji] = (emojiTally[r.emoji] || 0) + 1; });
+  const topEmoji = Object.entries(emojiTally).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+
+  const reactionCounts = ritualData.reactionCounts || {};
+  let topReactor = null, topCount = 0;
+  Object.entries(reactionCounts).forEach(([pid, n]) => { if (n > topCount) { topCount = n; topReactor = pid; } });
+
+  const msgCountByPlayer = {};
+  msgsSnap.docs.forEach(d => { const aid = d.data().authorId; if (aid) msgCountByPlayer[aid] = (msgCountByPlayer[aid] || 0) + 1; });
+  let topChatter = null, topMsgCount = 0;
+  Object.entries(msgCountByPlayer).forEach(([pid, n]) => { if (n > topMsgCount) { topMsgCount = n; topChatter = pid; } });
+
+  _renderRecapModal({
+    cardsRevealed,
+    durationStr,
+    topReactorName: S.currentPlayers.find(p => p.id === topReactor)?.name || null,
+    topChatterName: S.currentPlayers.find(p => p.id === topChatter)?.name || null,
+    topEmoji,
+    playerCount:    S.currentPlayers.length,
+    onNewSession,
+    primaryLabel,
+  });
 }
 
 // ── Compartilhamento de card ──────────────────────────────────────────────────

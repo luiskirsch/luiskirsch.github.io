@@ -160,6 +160,19 @@ export async function sessionPlayerHeartbeat(connected = true) {
   });
 }
 
+export async function fetchRoomSessions() {
+  if (!S.roomCode) return { ok: false, sessions: [] };
+  try {
+    const idToken = await _getFirebaseIdToken();
+    const res = await fetch(SERVER_BASE + `/game/room/${encodeURIComponent(S.roomCode)}/sessions`, {
+      headers: idToken ? { "Authorization": `Bearer ${idToken}` } : {}
+    });
+    return (await res.json().catch(() => null)) || { ok: false, sessions: [] };
+  } catch (_) {
+    return { ok: false, sessions: [] };
+  }
+}
+
 export async function redeemPendingCoins() {
   const idToken = await _getFirebaseIdToken();
   if (!idToken) return { ok: false, coinsAdded: 0 };

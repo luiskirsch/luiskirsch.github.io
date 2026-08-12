@@ -57,7 +57,9 @@ export async function endGameSession() {
   if (!S.sessionId) return;
   try {
     if (S.isHost) {
-      await sessionEndGame();
+      const result = await sessionEndGame();
+      // Persiste summary para o showSessionRecap que virá a seguir
+      if (result?.summary) S._lastSessionSummary = result.summary;
     } else {
       await sessionPlayerHeartbeat(false);
     }

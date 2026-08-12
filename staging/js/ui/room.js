@@ -2,7 +2,7 @@
 import { S } from "../state.js";
 import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, doc, collection } from "../firebase.js";
 import { escapeHtml, nowTimeFromDate, initials } from "../utils.js";
-import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, redeemPendingCoins } from "../api.js";
+import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, redeemPendingCoins, fetchRoomSessions } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
 import { logEvent, joinSessionAsPlayer, setSessionId, setPlayerConnected, clearActiveSession } from "../game/session.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
@@ -203,9 +203,14 @@ export function bindUserDoc() {
 }
 
 export function bindRoom() {
+  let _roomFirstSnapshot = true;
   S.roomUnsub = onSnapshot(S.roomRef, async (snap) => {
     if (!snap.exists()) return;
     const data = snap.data();
+    if (_roomFirstSnapshot) {
+      _roomFirstSnapshot = false;
+      loadSessionHistory(); // carrega histórico uma vez ao entrar na sala
+    }
     const roomNameEl   = document.getElementById("roomName");
     const roomStatusEl = document.getElementById("roomStatus");
     const sessionLabelEl = document.getElementById("sessionLabel");
@@ -340,6 +345,60 @@ export async function leaveRoom(redirect = true) {
     await deleteDoc(S.playerRef);
   } catch (_) {}
   if (redirect) window.location.href = "./entrada.html";
+}
+
+// ── Histórico de sessões ──────────────────────────────────────────────────────
+function openSessionHistoryModal(sessions) {
+  document.querySelector(".sessionHistoryOverlay")?.remove();
+  const fmt = (ms) => ms ? new Date(ms).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "—";
+  const dur = (sec) => !sec ? "—" : sec >= 60 ? `${Math.round(sec / 60)} min` : "< 1 min";
+
+  const rows = sessions.map(s => {
+    const date  = fmt(s.createdAt);
+    const cards = s.summary?.cardsRevealed ?? "—";
+    const time  = dur(s.summary?.durationSec);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px;">
+      <span style="opacity:.5">${date}</span>
+      <span>🃏 ${cards}</span>
+      <span>⏱ ${time}</span>
+    </div>`;
+  }).join("");
+
+  const overlay = document.createElement("div");
+  overlay.className = "recapOverlay sessionHistoryOverlay";
+  overlay.innerHTML = `
+    <div class="recapCard" style="max-height:80vh;overflow-y:auto;">
+      <div class="recapCard__eyebrow">Sala ${escapeHtml(S.roomCode || "")}</div>
+      <div class="recapCard__title">Sessões Anteriores</div>
+      <div style="margin:16px 0;">${rows || '<p style="opacity:.4;text-align:center;">Nenhuma sessão encerrada ainda.</p>'}</div>
+      <div class="recapCard__actions">
+        <button class="recapCard__btn recapCard__btn--ghost" id="historyModalCloseBtn">FECHAR</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById("historyModalCloseBtn").addEventListener("click", () => {
+    overlay.classList.add("closing");
+    setTimeout(() => overlay.remove(), 300);
+  });
+}
+
+async function loadSessionHistory() {
+  try {
+    const result   = await fetchRoomSessions();
+    const sessions = result?.sessions || [];
+    if (!sessions.length) return;
+
+    if (document.getElementById("historyBtn")) return;
+    const btn = document.createElement("button");
+    btn.id        = "historyBtn";
+    btn.className = "btn btn--ghost";
+    btn.style.cssText = "margin-top:8px;width:100%;font-size:12px;opacity:.6;";
+    btn.textContent = `📜 Histórico (${sessions.length} sessão${sessions.length !== 1 ? "ões" : ""})`;
+    btn.addEventListener("click", () => openSessionHistoryModal(sessions));
+
+    const anchor = document.getElementById("startBtn") || document.getElementById("arenaBtn");
+    anchor?.parentElement?.insertAdjacentElement("afterend", btn);
+  } catch (_) {}
 }
 
 // ── Beacon de saída (pagehide / beforeunload) ─────────────────────────────────
