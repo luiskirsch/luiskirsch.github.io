@@ -327,6 +327,10 @@ subscribe(snap => {
       bindSocialPressure();
     } else if (phase === PHASE.LOBBY && _efxPrevPhase === PHASE.RITUAL_ACTIVE) {
       OSL_TENSION.stop();
+      // _efxPrevCardsRevealed ainda tem o valor da última snapshot RITUAL_ACTIVE
+      if (_efxPrevCardsRevealed > 0) {
+        OSL_XP.award(S.userRef, "SESSION_COMPLETE").catch(() => {});
+      }
     }
     _efxPrevPhase = phase;
   }

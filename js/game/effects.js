@@ -48,9 +48,10 @@ export const OSL_TENSION = (() => {
   }
 
   function fireMomentoCritico() {
+    const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
     const n = document.createElement("div");
     n.className = "momentoCriticoNotif";
-    n.innerHTML = `<div class="momentoCriticoNotif__label">${oslTr("achievements:toast.criticalLabel", "⚡ Momento Crítico")}</div><div class="momentoCriticoNotif__title">${oslTr("achievements:toast.criticalTitle", "A sala está em chamas")}</div><div class="momentoCriticoNotif__sub">${oslTr("achievements:toast.criticalSubtitle", "Tensão máxima atingida pelo grupo")}</div>`;
+    n.innerHTML = `<div class="momentoCriticoNotif__label">${escapeHtml(_t('achievements:toast.criticalLabel', '⚡ Momento Crítico'))}</div><div class="momentoCriticoNotif__title">${escapeHtml(_t('achievements:toast.criticalTitle', 'A sala está em chamas'))}</div><div class="momentoCriticoNotif__sub">${escapeHtml(_t('achievements:toast.criticalSubtitle', 'Tensão máxima atingida pelo grupo'))}</div>`;
     document.body.appendChild(n);
     if (S.userRef) OSL_XP.award(S.userRef, null, 15);
     OSL_ACHIEVEMENTS.onTensionCritical();
@@ -97,10 +98,11 @@ export const OSL_ACHIEVEMENTS = (() => {
     if (!_toastQueue.length) { _toastShowing = false; return; }
     _toastShowing = true;
     const b = _toastQueue.shift();
-    const localizedName = oslTr(`achievements:badges.${b.id}`, b.name);
+    const _tx = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
+    const localizedName = _tx(`achievements:badges.${b.id}`, b.name);
     const t = document.createElement("div");
     t.className = "achievementToast";
-    t.innerHTML = `<div class="achievementToast__icon">${b.icon}</div><div class="achievementToast__body"><div class="achievementToast__name">${escapeHtml(localizedName)}</div><div class="achievementToast__sub">${oslTr("achievements:toast.unlocked", "Conquista desbloqueada!")}</div></div>`;
+    t.innerHTML = `<div class="achievementToast__icon">${b.icon}</div><div class="achievementToast__body"><div class="achievementToast__name">${escapeHtml(localizedName)}</div><div class="achievementToast__sub">${escapeHtml(_tx('achievements:toast.unlocked', 'Conquista desbloqueada!'))}</div></div>`;
     document.body.appendChild(t);
     requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add("achievementToast--visible")));
     setTimeout(() => { t.classList.remove("achievementToast--visible"); setTimeout(() => { t.remove(); drainQueue(); }, 400); }, 4000);
@@ -130,12 +132,9 @@ export const OSL_ACHIEVEMENTS = (() => {
       _sessionReactions++;
       if (emoji === "🔥") { _sessionFireReactions++; if (_sessionFireReactions >= 5) grant("fire_streak"); }
     },
-    onCardRevealed(total, type) {
+    onCardRevealed(total /*, type */) {
       if (total >= 10) grant("ten_cards");
-      if (["Segredo","Casais"].includes(type)) {
-        // Conta cartas deep numa sessão — simples: _sessionDeepCards local
-        _sessionReactions; // reuse counter trick — use separate var in closure
-      }
+      // (deep-card achievement removido — contador interno nunca foi implementado)
     },
     onSessionComplete(durationMin) { if (durationMin >= 45) grant("marathon"); },
     onPressureVote()    { _pressureVotes++; if (_pressureVotes >= 5) grant("pressure_5"); },
@@ -149,7 +148,7 @@ export const OSL_ACHIEVEMENTS = (() => {
         if (!S._isPrestige) {
           S._isPrestige = true;
           document.dispatchEvent(new CustomEvent("osl:applyPrestige"));
-          setDoc(S.userRef, { prestige: true }, { merge: true }).catch(() => {});
+          setDoc(S.userRef, { prestige: true }, { merge: true }).catch(err => console.warn("Prestige save failed:", err));
         }
       }
     },
@@ -167,7 +166,7 @@ export function initPressureBtn() {
     if (_pressureVotedThisCard) return;
     _pressureVotedThisCard = true;
     btn.classList.add("pressureBtn--voted");
-    btn.textContent = oslTr("achievements:effects.votedButton", "✓ Votado");
+    btn.textContent = (window.OSL_I18N?.t('achievements:effects.votedButton')) || "✓ Votado";
     if (S.userRef) OSL_XP.award(S.userRef, "PRESSURE_VOTE");
     OSL_ACHIEVEMENTS.onPressureVote();
     ritualSocialPressure().catch(e => console.warn("Pressure vote error:", e));
@@ -178,7 +177,7 @@ export function initPressureBtn() {
 export function resetPressureBtn() {
   _pressureVotedThisCard = false;
   const btn = document.getElementById("pressureBtn");
-  if (btn) { btn.classList.remove("pressureBtn--voted"); btn.textContent = oslTr("achievements:effects.wantMoreButton", "🔥 Quer mais"); }
+  if (btn) { btn.classList.remove("pressureBtn--voted"); btn.textContent = (window.OSL_I18N?.t('achievements:effects.wantMoreButton')) || "🔥 Quer mais"; }
 }
 
 export function bindSocialPressure() {
@@ -190,9 +189,12 @@ export function bindSocialPressure() {
     if (sp?.ts && sp.ts > _lastPressureTs) {
       _lastPressureTs = sp.ts;
       if (sp.votedBy !== S.playerName) {
+        const _tx = (k, fb, vars) => (window.OSL_I18N?.t(k, vars)) || fb;
+        const main = _tx('achievements:toast.socialPressureMain', 'A sala quer mais');
+        const sub = _tx('achievements:toast.socialPressureSub', `${sp.votedBy} votou para continuar`, { name: sp.votedBy });
         const n = document.createElement("div");
         n.className = "pressureNotif";
-        n.innerHTML = `${oslTr("achievements:toast.socialPressureMain", "A sala quer mais")}<div class="pressureNotif__sub">${oslTr("achievements:toast.socialPressureSub", "{{name}} votou para continuar", { name: escapeHtml(sp.votedBy) })}</div>`;
+        n.innerHTML = `${escapeHtml(main)}<div class="pressureNotif__sub">${escapeHtml(sub)}</div>`;
         document.body.appendChild(n);
         OSL_TENSION.heat(18);
         setTimeout(() => { n.classList.add("pressureNotif--out"); setTimeout(() => n.remove(), 380); }, 3500);
@@ -255,9 +257,11 @@ export function checkAIDetection(aiDetection) {
   const msg   = document.getElementById("aiDetectToastMsg");
   if (!toast || !msg) return;
   if (!aiDetection?.detectedAt || Date.now() - aiDetection.detectedAt > 30000) { toast.classList.remove("aiDetectToast--visible"); return; }
+  const _tx = (k, fb, vars) => (window.OSL_I18N?.t(k, vars)) || fb;
+  const playerName = aiDetection.playerName;
   msg.textContent = aiDetection.source === "voice"
-    ? oslTr("achievements:ai.spokeFinished", "{{playerName}} terminou de falar", { playerName: aiDetection.playerName })
-    : oslTr("achievements:ai.chatReply", "{{playerName}} respondeu no chat", { playerName: aiDetection.playerName });
+    ? _tx('achievements:ai.spokeFinished', `${playerName} terminou de falar`, { playerName })
+    : _tx('achievements:ai.chatReply', `${playerName} respondeu no chat`, { playerName });
   toast.classList.add("aiDetectToast--visible");
 }
 
@@ -323,6 +327,10 @@ subscribe(snap => {
       bindSocialPressure();
     } else if (phase === PHASE.LOBBY && _efxPrevPhase === PHASE.RITUAL_ACTIVE) {
       OSL_TENSION.stop();
+      // _efxPrevCardsRevealed ainda tem o valor da última snapshot RITUAL_ACTIVE
+      if (_efxPrevCardsRevealed > 0) {
+        OSL_XP.award(S.userRef, "SESSION_COMPLETE").catch(() => {});
+      }
     }
     _efxPrevPhase = phase;
   }
@@ -375,9 +383,10 @@ export function renderActiveEffect(effect) {
 
   const titleEl   = panel.querySelector(".effectPanel__title");
   const bodyEl    = panel.querySelector(".effectPanel__body");
+  const _tx = (k, fb, vars) => (window.OSL_I18N?.t(k, vars)) || fb;
   const phaseLabel = effect.phase === "deathrattle"
-    ? oslTr("achievements:effects.deathrattleLabel", "⚰ DEATHRATTLE")
-    : oslTr("achievements:effects.battlecryLabel", "⚡ BATTLECRY");
+    ? _tx('achievements:effects.deathrattleLabel', '⚰ DEATHRATTLE')
+    : _tx('achievements:effects.battlecryLabel', '⚡ BATTLECRY');
   if (titleEl) titleEl.textContent = phaseLabel;
 
   const old = panel.querySelector(".effectPanel__confirm");
@@ -390,10 +399,14 @@ export function renderActiveEffect(effect) {
       const names = effect.params.targetId2
         ? `${effect.params.targetName} & ${effect.params.targetName2}`
         : effect.params.targetName;
-      const localizedLabel = effect.label
-        ? oslTr(`achievements:effectLabels.${effect.label}`, effect.label)
-        : oslTr("achievements:vote.defaultFocusLabel", "está em foco");
-      if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__highlight">${names}</span><br>${localizedLabel}`;
+      // effect.label vem em PT (de OSL_CARD_EFFECTS); slugify e tenta traduzir
+      let labelText = effect.label || _tx('achievements:vote.defaultFocusLabel', "está em foco");
+      if (effect.label && window.OSL_I18N?.slugify) {
+        const slug = window.OSL_I18N.slugify(effect.label);
+        const localized = _tx(`effects:labels.${slug}`, '');
+        if (localized) labelText = localized;
+      }
+      if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__highlight">${escapeHtml(names)}</span><br>${escapeHtml(labelText)}`;
       startAIVAD(effect);
       break;
     }
@@ -419,32 +432,49 @@ export function renderActiveEffect(effect) {
       Object.values(votes).forEach(v => { voteCounts[v] = (voteCounts[v] || 0) + 1; });
       const totalVoted   = Object.keys(votes).length;
       const totalPlayers = S.currentPlayers.length || 1;
-      const questionTxt = effect.params.question
-        ? oslTr(`achievements:voteQuestions.${effect.params.question}`, effect.params.question)
-        : oslTr("achievements:vote.defaultQuestion", "Vote:");
+      // Localizar question (PT) via slug → effects.questions.{slug}
+      let question = effect.params.question || _tx('achievements:vote.defaultQuestion', 'Vote:');
+      if (effect.params.question && window.OSL_I18N?.slugify) {
+        const slug = window.OSL_I18N.slugify(effect.params.question);
+        const localized = _tx(`effects:questions.${slug}`, '');
+        if (localized) question = localized;
+      }
+      // Localizar options
+      const localizedOpts = opts.map(opt => {
+        if (window.OSL_I18N?.slugify) {
+          const slug = window.OSL_I18N.slugify(opt);
+          const v = _tx(`effects:options.${slug}`, '');
+          if (v) return { value: opt, label: v };
+        }
+        return { value: opt, label: opt };
+      });
+      const progress = _tx('achievements:vote.progress', `${totalVoted}/${totalPlayers} votaram`, { voted: totalVoted, total: totalPlayers });
       if (bodyEl) bodyEl.innerHTML = `
-        <div class="effectPanel__question">${questionTxt}</div>
+        <div class="effectPanel__question">${escapeHtml(question)}</div>
         <div class="effectPanel__voteOptions">
-          ${opts.map(opt => {
-            const optLabel = oslTr(`achievements:voteOptions.${opt}`, opt);
-            return `<button class="effectPanel__voteBtn${myVote === opt ? " effectPanel__voteBtn--active" : ""}" onclick="castEffectVote('${opt.replace(/'/g,"\\'")}')">
-              ${optLabel}${voteCounts[opt] ? ` <span class="effectPanel__voteCount">${voteCounts[opt]}</span>` : ""}
-            </button>`;
-          }).join("")}
+          ${localizedOpts.map(o => `<button class="effectPanel__voteBtn${myVote === o.value ? " effectPanel__voteBtn--active" : ""}" onclick="castEffectVote('${o.value.replace(/'/g,"\\'")}')">
+            ${escapeHtml(o.label)}${voteCounts[o.value] ? ` <span class="effectPanel__voteCount">${voteCounts[o.value]}</span>` : ""}
+          </button>`).join("")}
         </div>
-        <div class="effectPanel__voteProgress">${oslTr("achievements:vote.progress", "{{voted}}/{{total}} votaram", { voted: totalVoted, total: totalPlayers })}</div>`;
+        <div class="effectPanel__voteProgress">${escapeHtml(progress)}</div>`;
       if (S.isHost && totalVoted >= totalPlayers) setTimeout(() => resolveActiveEffect(getVoteWinner(votes)), 600);
       break;
     }
     case "give_xp": {
-      if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__xp">${oslTr("achievements:effects.xpAmount", "+{{amount}} XP", { amount: effect.params.amount || 10 })}</span><br>${oslTr("achievements:effects.xpForAll", "para todos na sala!")}`;
+      const amount = effect.params.amount || 10;
+      const xpAmt = _tx('achievements:effects.xpAmount', `+${amount} XP`, { amount });
+      const xpFor = _tx('achievements:effects.xpForAll', 'para todos na sala!');
+      if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__xp">${escapeHtml(xpAmt)}</span><br>${escapeHtml(xpFor)}`;
       if (!S.isHost) OSL_XP.award(S.userRef, null, effect.params.amount).catch(() => {});
       if (S.isHost) setTimeout(() => resolveActiveEffect(), 3000);
       break;
     }
     case "next_category": {
-      const categoryLocalized = oslTr(`achievements:categories.${effect.params.category}`, effect.params.category);
-      if (bodyEl) bodyEl.innerHTML = oslTr("achievements:effects.nextCategory", "Próxima carta será de <strong>{{category}}</strong>", { category: categoryLocalized });
+      const cat = effect.params.category;
+      // Tenta traduzir tipo da carta
+      const localCat = (window.OSL_I18N?.t(`cards:types.${cat}`)) || cat;
+      const html = _tx('achievements:effects.nextCategory', `Próxima carta será de <strong>${localCat}</strong>`, { category: localCat });
+      if (bodyEl) bodyEl.innerHTML = html;
       if (S.isHost) setTimeout(() => resolveActiveEffect(), 3000);
       break;
     }
@@ -456,7 +486,7 @@ export function renderActiveEffect(effect) {
   if (needsConfirm && S.isHost) {
     const btn = document.createElement("button");
     btn.className = "effectPanel__confirm";
-    btn.textContent = oslTr("achievements:effects.doneButton", "Concluído ✓");
+    btn.textContent = _tx('achievements:effects.doneButton', "Concluído ✓");
     btn.onclick = resolveActiveEffect;
     panel.appendChild(btn);
   }

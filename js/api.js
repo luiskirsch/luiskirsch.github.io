@@ -160,6 +160,12 @@ export async function sessionPlayerHeartbeat(connected = true) {
   });
 }
 
+export async function redeemPendingCoins() {
+  const idToken = await _getFirebaseIdToken();
+  if (!idToken) return { ok: false, coinsAdded: 0 };
+  return _post("/game/redeem-pending-coins", { firebaseIdToken: idToken });
+}
+
 export async function sessionEndGame() {
   const hostToken = sessionStorage.getItem("osl_host_token");
   return _post("/game/session/end-game", {

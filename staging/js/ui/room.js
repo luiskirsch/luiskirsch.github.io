@@ -2,7 +2,7 @@
 import { S } from "../state.js";
 import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, doc, collection } from "../firebase.js";
 import { escapeHtml, nowTimeFromDate, initials } from "../utils.js";
-import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge } from "../api.js";
+import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, redeemPendingCoins } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
 import { logEvent, joinSessionAsPlayer, setSessionId, setPlayerConnected, clearActiveSession } from "../game/session.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
@@ -186,6 +186,10 @@ export function bindUserDoc() {
       S._xpPrevLevel = OSL_ACHIEVEMENTS.init ? 0 : 0;
       OSL_ACHIEVEMENTS.init(Object.keys(data.achievements || {}));
       S._xpPrevLevel = Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1;
+      // Resgata moedas pendentes de compras feitas antes do perfil existir
+      redeemPendingCoins().then(r => {
+        if ((r?.coinsAdded || 0) > 0) window.showOslToast?.(`+${r.coinsAdded} moedas resgatadas!`);
+      }).catch(() => {});
     }
     const xp = data.xp || 0;
     const newLv = Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1;
