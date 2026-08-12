@@ -4,7 +4,7 @@ import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, quer
 import { escapeHtml, nowTimeFromDate, initials } from "../utils.js";
 import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
-import { logEvent, joinSessionAsPlayer, setPlayerConnected, clearActiveSession } from "../game/session.js";
+import { logEvent, joinSessionAsPlayer, setSessionId, setPlayerConnected, clearActiveSession } from "../game/session.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
 import { checkDailyReward, showSessionRecap, updateXpCard, showLevelPanel, showCoinModal } from "../game/rewards.js";
 import { OSL_ACHIEVEMENTS } from "../game/effects.js";
@@ -162,6 +162,8 @@ export function startHeartbeat() {
     try { await updateDoc(S.playerRef, { lastSeen: serverTimestamp() }); } catch (_) {}
     setPlayerConnected(true).catch(() => {});
     PanelBridge.roomHeartbeat(S.roomCode).catch(() => {});
+    // Cacheia token para uso síncrono no sendLeaveBeacon (beforeunload não permite await)
+    try { S._cachedIdToken = (await S.auth?.currentUser?.getIdToken()) || null; } catch (_) { S._cachedIdToken = null; }
   }, 15000);
 }
 
@@ -230,14 +232,16 @@ export function bindRoom() {
         window.showOslToast?.(`${notif.nickname} reconectou.`);
       }
     }
-    // Non-host players join session when host publishes currentSessionId
+    // Non-host players join session when host publishes currentSessionId.
+    // Guard newSessionId !== S.sessionId evita dupla chamada caso SYNC_FROM_FIRESTORE
+    // chegue primeiro e já tenha feito setSessionId + joinSessionAsPlayer.
     const newSessionId = data.currentSessionId || null;
     if (newSessionId && newSessionId !== S.sessionId && !S.isHost) {
-      const { doc: fsDoc, collection: fsCol } = await import("../firebase.js");
-      S.sessionId        = newSessionId;
-      S.sessionRef       = fsDoc(S.db, "salas", S.roomCode, "sessions", newSessionId);
-      S.sessionEventsRef = fsCol(S.db, "salas", S.roomCode, "sessions", newSessionId, "events");
-      joinSessionAsPlayer().catch(() => {});
+      setSessionId(newSessionId);
+      const isReconnect = await joinSessionAsPlayer().catch(() => false);
+      if (isReconnect) {
+        window.dispatchEvent(new CustomEvent("osl:session-reconnected"));
+      }
     }
   });
 }
@@ -341,6 +345,13 @@ export function sendLeaveBeacon() {
       PanelBridge.baseUrl + "/game/player/leave",
       new Blob([JSON.stringify({ roomId: S.roomCode, playerId: S.participantId, isHost: S.isHost })], { type:"application/json" })
     );
+    // Marca jogador como desconectado na sessão (best-effort; usa token cacheado do heartbeat)
+    if (S.sessionId && S._cachedIdToken) {
+      navigator.sendBeacon?.(
+        PanelBridge.baseUrl + "/game/session/player-heartbeat",
+        new Blob([JSON.stringify({ roomId: S.roomCode, sessionId: S.sessionId, firebaseIdToken: S._cachedIdToken, connected: false })], { type:"application/json" })
+      );
+    }
   } catch (_) {}
 }
 
@@ -607,6 +618,11 @@ export function bindRoomEvents() {
 
   window.addEventListener("pagehide",     sendLeaveBeacon);
   window.addEventListener("beforeunload", sendLeaveBeacon);
+
+  // Toast para o próprio jogador ao reconectar a uma sessão em andamento
+  window.addEventListener("osl:session-reconnected", () => {
+    window.showOslToast?.("🔄 Você está de volta!");
+  });
 
   // Evento customizado de osl:openProfile (disparado por renderPlayers)
   document.addEventListener("osl:openProfile", e => document.dispatchEvent(new CustomEvent("osl:openProfileModal", { detail: e.detail })));

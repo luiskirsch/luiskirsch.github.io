@@ -93,10 +93,11 @@ const _handlers = {
     _patch({ players });
   },
 
-  [CMD.SYNC_FROM_FIRESTORE](data = {}) {
-    const started   = !!data.started;
-    const prevPhase = _state.phase;
-    const nextPhase = started ? PHASE.RITUAL_ACTIVE : PHASE.LOBBY;
+  async [CMD.SYNC_FROM_FIRESTORE](data = {}) {
+    const started      = !!data.started;
+    const prevPhase    = _state.phase;
+    const nextPhase    = started ? PHASE.RITUAL_ACTIVE : PHASE.LOBBY;
+    const newSessionId = data.sessionId || null;
 
     // Transitando de RITUAL_ACTIVE → LOBBY via snapshot: encerra a sessão
     if (!started && prevPhase === PHASE.RITUAL_ACTIVE) {
@@ -115,6 +116,17 @@ const _handlers = {
       reactions:          data.reactions            ?? null,
       voteResult:         data.voteResult           ?? null,
     });
+
+    // Registra presença na sessão se o sessionId mudou (cobre reconexão do host e
+    // o caso em que SYNC_FROM_FIRESTORE chega antes do observer do room doc).
+    // Para não-hosts cujo room.js já agiu primeiro, newSessionId === S.sessionId → skip.
+    if (newSessionId && newSessionId !== S.sessionId && started) {
+      setSessionId(newSessionId);
+      const isReconnect = await joinSessionAsPlayer();
+      if (isReconnect) {
+        window.dispatchEvent(new CustomEvent("osl:session-reconnected"));
+      }
+    }
   },
 
   async [CMD.START_RITUAL]({ players = [] } = {}) {

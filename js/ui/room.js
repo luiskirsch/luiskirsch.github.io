@@ -4,10 +4,11 @@ import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, quer
 import { escapeHtml, nowTimeFromDate, initials } from "../utils.js";
 import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
-import { logEvent, joinSessionAsPlayer, setPlayerConnected, clearActiveSession } from "../game/session.js";
+import { logEvent, joinSessionAsPlayer, setSessionId, setPlayerConnected, clearActiveSession } from "../game/session.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
 import { checkDailyReward, showSessionRecap, updateXpCard, showLevelPanel, showCoinModal } from "../game/rewards.js";
 import { OSL_ACHIEVEMENTS } from "../game/effects.js";
+import { BACKEND_BASE_URL } from "../constants.js";
 
 // ── Áudio ─────────────────────────────────────────────────────────────────────
 function playIncomingMessageSound() {
@@ -47,13 +48,13 @@ export function renderPlayers(players) {
       <div class="playerLeft">
         <div class="avatar" ${avatarStyle} ${photoAttr}>${avatarContent}</div>
         <div class="playerMeta">
-          <div class="playerName">${player.id === S.participantId ? oslTr("sala:players.you", "(Você)") : escapeHtml(player.name)}</div>
-          <div class="playerRole">${player.isHost ? oslTr("sala:players.host", "Anfitrião") : oslTr("sala:players.participant", "Participante")}</div>
+          <div class="playerName">${player.id === S.participantId ? "(Você)" : escapeHtml(player.name)}</div>
+          <div class="playerRole">${player.isHost ? "Anfitrião" : "Participante"}</div>
         </div>
       </div>
       <div class="playerRight">
-        <span class="playerStatus">${oslTr("sala:players.online", "Online")}</span>
-        ${player.isHost ? `<span class="playerHost">${oslTr("sala:players.hostBadge", "Host")}</span>` : ""}
+        <span class="playerStatus">Online</span>
+        ${player.isHost ? '<span class="playerHost">Host</span>' : ""}
       </div>`;
     div.addEventListener("click", () => document.dispatchEvent(new CustomEvent("osl:openProfile", { detail: player })));
     playerListEl.appendChild(div);
@@ -94,21 +95,6 @@ export function applyVideoTileAvatars() {
   new MutationObserver(() => applyVideoTileAvatars()).observe(grid, { childList: true, subtree: true });
 })();
 
-// Mensagens system geradas em PT antes da i18n. Reescreve no render se bater.
-const SYSTEM_MSG_PT_TO_KEY = {
-  "A sala foi criada. Aguardando jogadores.": "sala:chat.systemRoomCreated",
-  "O anfitrião iniciou o ritual. A próxima etapa pode começar.": "sala:ritual.systemHostStarted",
-  "O código da sala foi copiado.": "sala:ritual.systemRoomCodeCopied",
-  "O ritual foi iniciado.": "sala:table.ritualStarted",
-  "O ritual foi reiniciado.": "sala:table.ritualReset"
-};
-function localizeSystemText(text) {
-  if (!text) return text;
-  const key = SYSTEM_MSG_PT_TO_KEY[text];
-  if (!key) return text;
-  return oslTr(key, text);
-}
-
 // ── Renderização de mensagens ─────────────────────────────────────────────────
 function renderMessages(docs) {
   const messagesEl  = document.getElementById("messages");
@@ -116,14 +102,14 @@ function renderMessages(docs) {
   if (!messagesEl) return;
   messagesEl.innerHTML = "";
   if (!docs.length) {
-    if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = oslTr("sala:chat.emptyAfterCreate", "A sala foi criada.<br>Quando houver mensagens ou eventos do sistema, eles aparecerão aqui."); }
+    if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = "A sala foi criada.<br>Quando houver mensagens ou eventos do sistema, eles aparecerão aqui."; }
     return;
   }
   if (chatEmptyEl) chatEmptyEl.style.display = "none";
   docs.forEach((item) => {
     const div = document.createElement("div");
     if (item.type === "system") {
-      div.className = "message system"; div.textContent = localizeSystemText(item.text);
+      div.className = "message system"; div.textContent = item.text;
     } else {
       const own = item.authorId === S.participantId;
       div.className = "message " + (own ? "me" : "other");
@@ -131,7 +117,7 @@ function renderMessages(docs) {
       if (item.createdAt && typeof item.createdAt.toDate === "function") timeLabel = nowTimeFromDate(item.createdAt.toDate());
       div.innerHTML = own
         ? `<span class="msgTime">${timeLabel}</span>${escapeHtml(item.text)}`
-        : `<span class="meta">${escapeHtml(item.authorName || oslTr("sala:chat.fallbackAuthor", "Jogador"))}</span><span class="msgTime">${timeLabel}</span>${escapeHtml(item.text)}`;
+        : `<span class="meta">${escapeHtml(item.authorName || "Jogador")}</span><span class="msgTime">${timeLabel}</span>${escapeHtml(item.text)}`;
     }
     messagesEl.appendChild(div);
   });
@@ -144,11 +130,12 @@ function renderTyping(names) {
   const mobileBar   = document.getElementById("mobileTypingBar");
   const wasEmpty    = !(typingBarEl && typingBarEl.firstChild);
   if (!names.length) { if (typingBarEl) typingBarEl.innerHTML = ""; if (mobileBar) mobileBar.innerHTML = ""; return; }
+  const _n = names.map(escapeHtml);
   let label;
-  if (names.length === 1)      label = oslTr("sala:typing.one",   "{{name}} está digitando", { name: names[0] });
-  else if (names.length === 2) label = oslTr("sala:typing.two",   "{{name1}} e {{name2}} estão digitando", { name1: names[0], name2: names[1] });
-  else if (names.length === 3) label = oslTr("sala:typing.three", "{{name1}}, {{name2}} e {{name3}} estão digitando", { name1: names[0], name2: names[1], name3: names[2] });
-  else                          label = oslTr("sala:typing.many", "{{name1}}, {{name2}}, {{name3}} e mais {{count}} estão digitando", { name1: names[0], name2: names[1], name3: names[2], count: names.length - 3 });
+  if (_n.length === 1)      label = `${_n[0]} está digitando`;
+  else if (_n.length === 2) label = `${_n[0]} e ${_n[1]} estão digitando`;
+  else if (_n.length === 3) label = `${_n[0]}, ${_n[1]} e ${_n[2]} estão digitando`;
+  else                       label = `${_n[0]}, ${_n[1]}, ${_n[2]} e mais ${_n.length - 3} estão digitando`;
   const html = label + DOTS_HTML;
   if (typingBarEl) typingBarEl.innerHTML = html;
   if (mobileBar)   mobileBar.innerHTML   = html;
@@ -175,6 +162,8 @@ export function startHeartbeat() {
     try { await updateDoc(S.playerRef, { lastSeen: serverTimestamp() }); } catch (_) {}
     setPlayerConnected(true).catch(() => {});
     PanelBridge.roomHeartbeat(S.roomCode).catch(() => {});
+    // Cacheia token para uso síncrono no sendLeaveBeacon (beforeunload não permite await)
+    try { S._cachedIdToken = (await S.auth?.currentUser?.getIdToken()) || null; } catch (_) { S._cachedIdToken = null; }
   }, 15000);
 }
 
@@ -220,18 +209,17 @@ export function bindRoom() {
     const startBtn       = document.getElementById("startBtn");
     if (roomNameEl) roomNameEl.textContent = data.name || S.roomName;
     const started = data.status === "started";
-    if (roomStatusEl)    roomStatusEl.textContent    = started ? oslTr("sala:footer.ritualActive", "Ritual em andamento") : oslTr("sala:footer.ritualWaiting", "Aguardando jogadores");
-    if (sessionLabelEl)  sessionLabelEl.textContent  = started ? oslTr("sala:table.session.started", "Sessão iniciada") : oslTr("sala:table.session.notStarted", "Sessão não iniciada");
-    if (footerStatusEl)  footerStatusEl.textContent  = started ? oslTr("sala:footer.ritualStarted", "Ritual iniciado") : oslTr("sala:footer.ritualWaitingStart", "Aguardando início");
+    if (roomStatusEl)    roomStatusEl.textContent    = started ? "Ritual em andamento" : "Aguardando jogadores";
+    if (sessionLabelEl)  sessionLabelEl.textContent  = started ? "Sessão iniciada" : "Sessão não iniciada";
+    if (footerStatusEl)  footerStatusEl.textContent  = started ? "Ritual iniciado" : "Aguardando início";
     S.isHost = data.hostId === S.participantId;
-    if (startBtn) {
-      startBtn.disabled = !S.isHost || S._isSpectator;
-      startBtn.textContent = S.isHost
-        ? (started ? oslTr("sala:buttons.startRitualBtnStarted", "Ritual iniciado") : oslTr("sala:buttons.startRitualBtn", "Iniciar Ritual"))
-        : oslTr("sala:buttons.startRitualBtnWaitHost", "Aguardando anfitrião");
-    }
+    if (startBtn) { startBtn.disabled = !S.isHost || S._isSpectator; startBtn.textContent = S.isHost ? (started ? "Ritual iniciado" : "Iniciar Ritual") : "Aguardando anfitrião"; }
     const arenaBtn = document.getElementById("arenaBtn");
     if (arenaBtn) arenaBtn.hidden = !S.isHost;
+    const streamModeBtn = document.getElementById("streamModeBtn");
+    if (streamModeBtn) streamModeBtn.hidden = !S.isHost;
+    const liveBtn = document.getElementById("liveBtn");
+    if (liveBtn) liveBtn.hidden = !S.isHost;
     if (data.arenaActive) { if (typeof window.activateArenaMode === "function") window.activateArenaMode(); }
     else { if (typeof window.deactivateArenaMode === "function") window.deactivateArenaMode(); if (!started && !S.ritualStarted) setRitualWaitingState(); }
     await setDoc(S.playerRef, { isHost: S.isHost }, { merge: true });
@@ -244,14 +232,16 @@ export function bindRoom() {
         window.showOslToast?.(`${notif.nickname} reconectou.`);
       }
     }
-    // Non-host players join session when host publishes currentSessionId
+    // Non-host players join session when host publishes currentSessionId.
+    // Guard newSessionId !== S.sessionId evita dupla chamada caso SYNC_FROM_FIRESTORE
+    // chegue primeiro e já tenha feito setSessionId + joinSessionAsPlayer.
     const newSessionId = data.currentSessionId || null;
     if (newSessionId && newSessionId !== S.sessionId && !S.isHost) {
-      const { doc: fsDoc, collection: fsCol } = await import("../firebase.js");
-      S.sessionId        = newSessionId;
-      S.sessionRef       = fsDoc(S.db, "salas", S.roomCode, "sessions", newSessionId);
-      S.sessionEventsRef = fsCol(S.db, "salas", S.roomCode, "sessions", newSessionId, "events");
-      joinSessionAsPlayer().catch(() => {});
+      setSessionId(newSessionId);
+      const isReconnect = await joinSessionAsPlayer().catch(() => false);
+      if (isReconnect) {
+        window.dispatchEvent(new CustomEvent("osl:session-reconnected"));
+      }
     }
   });
 }
@@ -261,7 +251,7 @@ export function bindPlayers() {
   S.playersUnsub = onSnapshot(q, (snapshot) => {
     const players = snapshot.docs.map(docSnap => {
       const data = docSnap.data();
-      return { id: docSnap.id, userId: data.userId || null, name: data.name || oslTr("sala:players.fallbackName", "Jogador"), isHost: !!data.isHost, activeDeckId: data.activeDeckId || null, avatarEmoji: data.avatarEmoji || null, avatarPhotoUrl: data.avatarPhotoUrl || null, avatarColor: data.avatarColor || null, joinedAt: data.joinedAt || null, lastSeen: data.lastSeen || null };
+      return { id: docSnap.id, userId: data.userId || null, name: data.name || "Jogador", isHost: !!data.isHost, activeDeckId: data.activeDeckId || null, avatarEmoji: data.avatarEmoji || null, avatarPhotoUrl: data.avatarPhotoUrl || null, avatarColor: data.avatarColor || null, joinedAt: data.joinedAt || null, lastSeen: data.lastSeen || null };
     }).filter(isPlayerActive);
     S.currentPlayers = players;
     renderPlayers(players);
@@ -313,14 +303,14 @@ export async function startSession() {
   if (!snap.exists()) return;
   const data = snap.data();
   if (data.status === "started") {
-    const ok = confirm(oslTr("sala:ritual.confirmRestart", "O ritual já está em andamento. Deseja reiniciá-lo com um novo deck embaralhado?"));
+    const ok = confirm("O ritual já está em andamento. Deseja reiniciá-lo com um novo deck embaralhado?");
     if (ok) await resetRitualDeck();
     return;
   }
   const deckInfo = document.getElementById("deckInfo");
-  if (deckInfo) deckInfo.textContent = oslTr("sala:ritual.starting", "Iniciando o ritual...");
+  if (deckInfo) deckInfo.textContent = "Iniciando o ritual...";
   await updateDoc(S.roomRef, { status:"started", startedAt: serverTimestamp(), updatedAt: serverTimestamp() });
-  await addDoc(S.messagesRef, { type:"system", text: oslTr("sala:ritual.systemHostStarted", "O anfitrião iniciou o ritual. A próxima etapa pode começar."), createdAt: serverTimestamp() });
+  await addDoc(S.messagesRef, { type:"system", text:"O anfitrião iniciou o ritual. A próxima etapa pode começar.", createdAt: serverTimestamp() });
   await startRitualDeck();
   await panelMarkSessionStart();
 }
@@ -355,6 +345,13 @@ export function sendLeaveBeacon() {
       PanelBridge.baseUrl + "/game/player/leave",
       new Blob([JSON.stringify({ roomId: S.roomCode, playerId: S.participantId, isHost: S.isHost })], { type:"application/json" })
     );
+    // Marca jogador como desconectado na sessão (best-effort; usa token cacheado do heartbeat)
+    if (S.sessionId && S._cachedIdToken) {
+      navigator.sendBeacon?.(
+        PanelBridge.baseUrl + "/game/session/player-heartbeat",
+        new Blob([JSON.stringify({ roomId: S.roomCode, sessionId: S.sessionId, firebaseIdToken: S._cachedIdToken, connected: false })], { type:"application/json" })
+      );
+    }
   } catch (_) {}
 }
 
@@ -379,7 +376,7 @@ export async function ensureRoom() {
     S.isHost = true;
     if (isClosed) await clearRoomData();
     await setDoc(S.roomRef, { code: S.roomCode, name: S.roomName, status:"waiting", arenaActive: false, hostId: S.participantId, hostName: S.playerName, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-    await addDoc(S.messagesRef, { type:"system", text: oslTr("sala:chat.systemRoomCreated", "A sala foi criada. Aguardando jogadores."), createdAt: serverTimestamp() });
+    await addDoc(S.messagesRef, { type:"system", text:"A sala foi criada. Aguardando jogadores.", createdAt: serverTimestamp() });
   } else {
     S.isHost = snap.data().hostId === S.participantId;
   }
@@ -389,14 +386,12 @@ export async function ensureRoom() {
 export async function ensureUserProfile() {
   let snap = await getDoc(S.userRef);
   if (!snap.exists()) {
-    // Tenta migrar perfil antigo (osl_user_id) para o Firebase UID atual.
-    // Necessário para usuários que criaram perfil antes do F6 (getUserId agora prioriza osl_auth_uid).
     const oldUserId = localStorage.getItem("osl_user_id");
     if (oldUserId && oldUserId !== S.userId && /^u_[a-z0-9]{5,30}$/.test(oldUserId)) {
       try {
         const idToken = await S.auth?.currentUser?.getIdToken();
         if (idToken) {
-          const res = await fetch(MULTI_SERVER + "/game/migrar-perfil", {
+          const res = await fetch(BACKEND_BASE_URL + "/game/migrar-perfil", {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },
             body: JSON.stringify({ oldUserId })
@@ -408,14 +403,10 @@ export async function ensureUserProfile() {
   }
   if (!snap.exists()) {
     const usernameBase = (S.playerName || "jogador").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"").slice(0,20) || "jogador";
-    await setDoc(S.userRef, { userId: S.userId, displayName: S.playerName, username: usernameBase, bio: oslTr("sala:newProfile.bio", "Novo participante do ritual."), avatarEmoji:"🔮", avatarColor:"#1f86d9", memberSince: new Date(), lastSeen: serverTimestamp(), friends:[], incomingRequests:[], outgoingRequests:[], stats:{ gamesPlayed:0, wins:0 } });
+    await setDoc(S.userRef, { userId: S.userId, displayName: S.playerName, username: usernameBase, bio:"Novo participante do ritual.", avatarEmoji:"🔮", avatarColor:"#1f86d9", memberSince: new Date(), lastSeen: serverTimestamp(), friends:[], incomingRequests:[], outgoingRequests:[], stats:{ gamesPlayed:0, wins:0 } });
     S.selectedAvatarEmoji = "🔮"; S.selectedAvatarColor = "#1f86d9";
     const fab = document.getElementById("mobileProfileBtn"); if (fab) fab.textContent = "🔮";
-    const myBtn = document.getElementById("myProfileBtn"); if (myBtn) {
-      const fullLabel = oslTr("sala:topbar.actions.profile", "👤 Perfil");
-      const labelText = fullLabel.replace(/^[^\s]+\s*/, "");
-      myBtn.textContent = "🔮 " + labelText;
-    }
+    const myBtn = document.getElementById("myProfileBtn"); if (myBtn) myBtn.textContent = "🔮 Perfil";
     localStorage.setItem("osl_avatar", "🔮");
   } else {
     await updateDoc(S.userRef, { lastSeen: serverTimestamp() });
@@ -439,7 +430,7 @@ export async function upsertSelf() {
 }
 
 // ── Partidas ao vivo (multiplayer) ────────────────────────────────────────────
-const MULTI_SERVER = window.PANEL_SERVER_BASE || "https://osl-video-server-production.up.railway.app";
+const MULTI_SERVER = BACKEND_BASE_URL;
 
 export async function fetchLiveRooms() {
   try { const r = await fetch(MULTI_SERVER + "/game/rooms"); const d = await r.json(); return Array.isArray(d.rooms) ? d.rooms : []; }
@@ -452,18 +443,20 @@ export function renderLiveRooms(rooms) {
   if (!body) return;
   const others = rooms.filter(r => r.roomId !== S.roomCode);
   if (countEl) countEl.textContent = others.length;
-  if (!others.length) { body.innerHTML = `<div class="multiEmpty">${oslTr("sala:matches.empty", "Nenhuma partida ativa no momento.")}</div>`; return; }
+  if (!others.length) { body.innerHTML = '<div class="multiEmpty">Nenhuma partida ativa no momento.</div>'; return; }
   body.innerHTML = others.map(r => {
     const full = r.playerCount >= 5, live = r.sessionActive;
-    const badge = full ? `<span class="multiRoomBadge multiRoomBadge--full">${oslTr("sala:matches.badge.full", "LOTADA")}</span>` : live ? `<span class="multiRoomBadge multiRoomBadge--live">${oslTr("sala:matches.badge.live", "🔴 AO VIVO")}</span>` : `<span class="multiRoomBadge multiRoomBadge--open">${oslTr("sala:matches.badge.open", "ABERTA")}</span>`;
+    const badge = full ? '<span class="multiRoomBadge multiRoomBadge--full">LOTADA</span>' : live ? '<span class="multiRoomBadge multiRoomBadge--live">🔴 AO VIVO</span>' : '<span class="multiRoomBadge multiRoomBadge--open">ABERTA</span>';
     const cls   = full ? " multiRoom--full" : "";
-    const safeName = (r.name || oslTr("sala:matches.fallbackName", "Sala")).replace(/"/g,"&quot;");
-    return `<div class="multiRoom${cls}" data-code="${r.roomId}" data-name="${safeName}" data-host="${(r.host||"").replace(/"/g,"&quot;")}" data-count="${r.playerCount||0}" data-live="${live}">
-      <div class="multiRoomInfo"><div class="multiRoomName">${r.name || r.roomId}</div><div class="multiRoomMeta">${r.playerCount||0}/5 ${oslTr("sala:matches.playersWord", "jogadores")} · ${r.host || oslTr("sala:matches.fallbackHost", "anfitrião")}</div></div>
-      ${badge}<button class="multiSpectateBtn" title="${oslTr("sala:matches.spectateTitle", "Assistir em stand-by")}">👁</button></div>`;
+    const safeName = escapeHtml(r.name || "Sala").replace(/"/g,"&quot;");
+    return `<div class="multiRoom${cls}" data-code="${r.roomId}" data-name="${safeName}" data-host="${escapeHtml(r.host||"").replace(/"/g,"&quot;")}" data-count="${r.playerCount||0}" data-live="${live}">
+      <div class="multiRoomInfo"><div class="multiRoomName">${escapeHtml(r.name || r.roomId)}</div><div class="multiRoomMeta">${r.playerCount||0}/5 jogadores · ${escapeHtml(r.host || "anfitrião")}</div></div>
+      ${badge}<button class="multiSpectateBtn" title="Assistir em stand-by">👁</button></div>`;
   }).join("");
 
-  // Clique no join: delegado via #multiBody em sala.html (não registrado aqui para sobreviver re-renders)
+  body.querySelectorAll(".multiSpectateBtn").forEach(btn => {
+    btn.addEventListener("click", e => { e.stopPropagation(); const row = btn.closest(".multiRoom"); document.dispatchEvent(new CustomEvent("osl:openSpectator", { detail:{ roomId: row.dataset.code, name: row.dataset.name, host: row.dataset.host } })); });
+  });
   body.querySelectorAll(".multiRoom:not(.multiRoom--full)").forEach(el => {
     el.addEventListener("click", e => {
       if (e.target.classList.contains("multiSpectateBtn")) return;
@@ -477,7 +470,7 @@ export function renderLiveRooms(rooms) {
 export function showJoinLoadingOverlay(name) {
   const el = document.createElement("div");
   el.className = "joinLoadingOverlay";
-  el.innerHTML = `<div class="joinLoadingSpinner"></div><div class="joinLoadingName">${name || "Sala"}</div><div class="joinLoadingSub">Entrando na partida…</div>`;
+  el.innerHTML = `<div class="joinLoadingSpinner"></div><div class="joinLoadingName">${escapeHtml(name || "Sala")}</div><div class="joinLoadingSub">Entrando na partida…</div>`;
   document.body.appendChild(el);
 }
 
@@ -493,11 +486,11 @@ export function openJoinModal(room) {
   const overlay    = document.getElementById("joinOverlay");
   const nameInput  = document.getElementById("joinNameInput");
   document.getElementById("joinRoomName").textContent = room.name;
-  document.getElementById("joinRoomMeta").textContent = oslTr("sala:joinRoom.meta", "{{count}}/5 jogadores · anfitrião: {{host}}", { count: room.playerCount, host: room.host || "—" });
+  document.getElementById("joinRoomMeta").textContent = `${room.playerCount}/5 jogadores · anfitrião: ${room.host || "—"}`;
   document.getElementById("joinStatus").textContent = "";
   document.getElementById("joinStatus").className   = "joinPanel__status";
   document.getElementById("joinSendBtn").disabled   = false;
-  document.getElementById("joinSendBtn").textContent = oslTr("sala:joinRoom.send", "Enviar pedido");
+  document.getElementById("joinSendBtn").textContent = "Enviar pedido";
   nameInput.value = S.playerName;
   overlay.style.display = "flex";
 }
@@ -514,25 +507,20 @@ export async function sendJoinRequest() {
   if (!S._joinTarget) return;
   const name = document.getElementById("joinNameInput").value.trim() || S.playerName;
   const btn  = document.getElementById("joinSendBtn");
-  btn.disabled = true; btn.textContent = oslTr("sala:joinRoom.sending", "Enviando…");
+  btn.disabled = true; btn.textContent = "Enviando…";
   document.getElementById("joinStatus").textContent = "";
   try {
     const res = await fetch(MULTI_SERVER + "/game/room/request-join", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ roomId: S._joinTarget.roomId, roomName: S._joinTarget.name, playerId: S.participantId, playerName: name }) });
     const d   = await res.json();
     if (!d.ok) {
-      const suggestion = d.suggestion || oslTr("sala:joinRoom.fallbackSuggestion", "outro nome");
-      const msgs = {
-        SALA_CHEIA: oslTr("sala:joinRoom.errorRoomFull", "Sala lotada."),
-        NOME_JA_EM_USO: oslTr("sala:joinRoom.errorNameUsed", "Nome em uso. Tente: {{suggestion}}", { suggestion }),
-        SALA_NAO_ENCONTRADA: oslTr("sala:joinRoom.errorRoomNotFound", "Sala não encontrada.")
-      };
-      document.getElementById("joinStatus").textContent = msgs[d.code] || oslTr("sala:joinRoom.errorGeneric", "Erro ao enviar pedido.");
-      btn.disabled = false; btn.textContent = oslTr("sala:joinRoom.send", "Enviar pedido"); return;
+      const msgs = { SALA_CHEIA:"Sala lotada.", NOME_JA_EM_USO:`Nome em uso. Tente: ${d.suggestion||"outro nome"}`, SALA_NAO_ENCONTRADA:"Sala não encontrada." };
+      document.getElementById("joinStatus").textContent = msgs[d.code] || "Erro ao enviar pedido.";
+      btn.disabled = false; btn.textContent = "Enviar pedido"; return;
     }
-    document.getElementById("joinStatus").textContent = d.hostOnline ? oslTr("sala:joinRoom.waitingApproval", "Aguardando aprovação do anfitrião…") : oslTr("sala:joinRoom.waitingHost", "Pedido enviado. Aguardando anfitrião…");
-    btn.textContent = oslTr("sala:joinRoom.waiting", "Aguardando…");
+    document.getElementById("joinStatus").textContent = d.hostOnline ? "Aguardando aprovação do anfitrião…" : "Pedido enviado. Aguardando anfitrião…";
+    btn.textContent = "Aguardando…";
     pollJoinApproval(S._joinTarget.roomId, S._joinTarget.name, name);
-  } catch (_) { document.getElementById("joinStatus").textContent = oslTr("sala:joinRoom.errorConnection", "Erro de conexão."); btn.disabled = false; btn.textContent = oslTr("sala:joinRoom.send", "Enviar pedido"); }
+  } catch (_) { document.getElementById("joinStatus").textContent = "Erro de conexão."; btn.disabled = false; btn.textContent = "Enviar pedido"; }
 }
 
 function pollJoinApproval(targetRoomId, targetRoomName, joinName) {
@@ -586,156 +574,6 @@ export async function respondJoin(approved) {
   S._pendingJoinId = null;
 }
 
-// ── Painel espectador (exposto via window._osl) ───────────────────────────────
-let _specLkRoom = null; // LiveKit room do espectador (subscriber-only)
-
-export async function closeSpectatorRoom() {
-  if (_specLkRoom) {
-    try { await _specLkRoom.disconnect(); } catch (_) {}
-    _specLkRoom = null;
-  }
-}
-
-export async function spectateRoom(roomId, name) {
-  // Desconecta sessão de espectador anterior se existir
-  await closeSpectatorRoom();
-
-  const specOverlay = document.getElementById("specOverlay");
-  if (!specOverlay || !roomId) return;
-
-  const titleEl    = document.getElementById("specTitle");
-  const statusEl   = document.getElementById("specStatusText");
-  const dotEl      = document.getElementById("specStatusDot");
-  const playersEl  = document.getElementById("specPlayers");
-  const cardWrap   = document.getElementById("specCardWrap");
-  const noticeEl   = document.getElementById("specObservingNotice");
-  const liveBadge  = document.getElementById("specLiveBadge");
-
-  if (titleEl)    titleEl.textContent     = name || roomId;
-  if (statusEl)   statusEl.textContent    = "Carregando…";
-  if (dotEl)      dotEl.className         = "specStatusDot";
-  if (liveBadge)  liveBadge.style.display = "none";
-  if (playersEl)  playersEl.innerHTML     = `<div class="specEmpty" style="padding:32px 0">⏳</div>`;
-  if (cardWrap)   cardWrap.innerHTML      = "";
-  if (noticeEl)   noticeEl.style.display  = "flex";
-  specOverlay.style.display = "flex";
-
-  try {
-    const [panelRes, playersSnap, ritualSnap] = await Promise.all([
-      fetch(MULTI_SERVER + "/game/room/" + encodeURIComponent(roomId)).then(r => r.json()).catch(() => null),
-      getDocs(collection(S.db, "salas", roomId, "players")).catch(() => null),
-      getDoc(doc(S.db, "salas", roomId, "ritual", "state")).catch(() => null)
-    ]);
-
-    const room   = panelRes?.room;
-    const isLive = !!room?.sessionActive;
-    const hasVideo = isLive && !!room?.videoActive;
-
-    if (dotEl)    dotEl.className          = "specStatusDot" + (isLive ? " specStatusDot--live" : "");
-    if (statusEl) statusEl.textContent     = isLive ? "Ritual em andamento" : "Aguardando início";
-    if (liveBadge) liveBadge.style.display = isLive ? "" : "none";
-
-    // Jogadores — Firestore é fonte principal (foto/emoji); backend é fallback
-    let players = [];
-    if (playersSnap && !playersSnap.empty) {
-      playersSnap.forEach(d => {
-        const p = d.data();
-        if (p.name) players.push({ ...p, _fsId: d.id });
-      });
-      players.sort((a, b) => {
-        if (a.isHost && !b.isHost) return -1;
-        if (!a.isHost && b.isHost) return 1;
-        return (a.joinedAt?.toMillis?.() || 0) - (b.joinedAt?.toMillis?.() || 0);
-      });
-    } else if (room?.players?.length) {
-      players = room.players.map(p => ({ name: p.playerName, isHost: p.playerName === room.host, _fsId: p.playerId || "" }));
-    }
-
-    function buildTileHtml(p) {
-      const hostCls  = p.isHost ? " specPlayerTile--host" : "";
-      const nameCls  = p.isHost ? "specPlayerTileName--host" : "specPlayerTileName";
-      const nameText = (p.isHost ? "👑 " : "") + escapeHtml(p.name || "Jogador");
-      const livePip  = hasVideo ? `<div class="specPlayerTileLive">📹 AO VIVO</div>` : (isLive ? `<div class="specPlayerTileLive">AO VIVO</div>` : "");
-      const pid      = escapeHtml(p._fsId || p.id || "");
-
-      let avatarContent;
-      if (p.avatarPhotoUrl) {
-        avatarContent = `<img class="specPlayerTileAvatarImg" src="${p.avatarPhotoUrl}" alt="">`;
-        return `<div class="specPlayerTile${hostCls}" data-participant-id="${pid}">
-          <div class="specPlayerTileAvatar">${avatarContent}</div>
-          ${livePip}<div class="${nameCls}">${nameText}</div>
-        </div>`;
-      }
-      const bg  = p.avatarColor ? `background:${p.avatarColor}22` : "background:rgba(212,168,75,.08)";
-      const col = p.isHost ? "#d4a84b" : "rgba(255,255,255,.75)";
-      avatarContent = p.avatarEmoji
-        ? `<span style="font-size:2.2em">${p.avatarEmoji}</span>`
-        : `<span style="font-size:1.6em;font-weight:800;color:${col}">${escapeHtml((p.name||"?").charAt(0).toUpperCase())}</span>`;
-      return `<div class="specPlayerTile${hostCls}" data-participant-id="${pid}">
-        <div class="specPlayerTileAvatar" style="${bg}">${avatarContent}</div>
-        ${livePip}<div class="${nameCls}">${nameText}</div>
-      </div>`;
-    }
-
-    if (playersEl) {
-      playersEl.innerHTML = players.length
-        ? players.map(buildTileHtml).join("")
-        : `<div class="specEmpty">Nenhum jogador ativo</div>`;
-    }
-
-    // Carta atual
-    const updateCard = () => {
-      if (!ritualSnap?.exists?.()) { if (cardWrap) cardWrap.innerHTML = `<div class="specEmpty">Ritual ainda não iniciado</div>`; return; }
-      const ritual = ritualSnap.data();
-      const card   = ritual?.currentCard;
-      if (card && ritual?.started && cardWrap) {
-        cardWrap.innerHTML = `<div class="specCard">
-          <div class="specCardType">${escapeHtml((card.type || "Ritual").toUpperCase())}</div>
-          <div class="specCardTitle">${escapeHtml(card.title || "")}</div>
-          <div class="specCardText">${(card.text || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</div>
-        </div>`;
-      } else if (cardWrap) {
-        cardWrap.innerHTML = `<div class="specEmpty">Ritual ainda não iniciado</div>`;
-      }
-    };
-    updateCard();
-
-    // Vídeo ao vivo — conecta como subscriber LiveKit se sala tem vídeo ativo
-    if (hasVideo) {
-      try {
-        const [tokenRes, { Room, RoomEvent }] = await Promise.all([
-          fetch(`${MULTI_SERVER}/spectate-token?room=${encodeURIComponent(roomId)}&user=${encodeURIComponent(S.participantId)}`).then(r => r.json()),
-          import("https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs")
-        ]);
-        if (tokenRes?.ok && tokenRes?.token && specOverlay.style.display !== "none") {
-          const lkRoom = new Room({ adaptiveStream: false, dynacast: false });
-          _specLkRoom = lkRoom;
-
-          lkRoom.on(RoomEvent.TrackSubscribed, (track, _pub, participant) => {
-            if (track.kind !== "video") return;
-            const tileEl = playersEl?.querySelector(`[data-participant-id="${participant.identity}"]`);
-            if (!tileEl) return;
-            const avatarEl = tileEl.querySelector(".specPlayerTileAvatar");
-            if (!avatarEl) return;
-            const videoEl = track.attach();
-            videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;border-radius:0";
-            avatarEl.innerHTML = "";
-            avatarEl.style.cssText = "position:absolute;inset:0;overflow:hidden;background:#000";
-            avatarEl.appendChild(videoEl);
-          });
-
-          lkRoom.on(RoomEvent.TrackUnsubscribed, (track) => { track.detach(); });
-
-          await lkRoom.connect(tokenRes.url || "wss://osextolugar-eqa7q1iz.livekit.cloud", tokenRes.token, { autoSubscribe: true });
-        }
-      } catch (_) { /* vídeo falhou mas modal continua visível */ }
-    }
-
-  } catch (_) {
-    if (statusEl) statusEl.textContent = "Erro ao carregar dados da sala";
-  }
-}
-
 // ── Event listeners (inicializados por init.js) ───────────────────────────────
 export function bindRoomEvents() {
   const copyCodeBtn  = document.getElementById("copyCodeBtn");
@@ -747,7 +585,7 @@ export function bindRoomEvents() {
   const leaveBtn      = document.getElementById("leaveBtn");
 
   copyCodeBtn?.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(S.roomCode); await addDoc(S.messagesRef, { type:"system", text: oslTr("sala:ritual.systemRoomCodeCopied", "O código da sala foi copiado."), createdAt: serverTimestamp() }); } catch (_) {}
+    try { await navigator.clipboard.writeText(S.roomCode); await addDoc(S.messagesRef, { type:"system", text:"O código da sala foi copiado.", createdAt: serverTimestamp() }); } catch (_) {}
   });
   sendBtn?.addEventListener("click", () => {
     const text = messageInput?.value.trim();
@@ -766,8 +604,8 @@ export function bindRoomEvents() {
     else if (confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?")) resetRitualDeck().catch(console.error);
   });
   leaveBtn?.addEventListener("click", () => {
-    if (S.ritualStarted) showSessionRecap(() => leaveRoom(true), oslTr("sala:xpUI.recap.leaveRoom", "SAIR DA SALA")).catch(console.error);
-    else if (confirm(oslTr("sala:xpUI.recap.leaveConfirm", "Deseja sair da sala?"))) leaveRoom(true);
+    if (S.ritualStarted) showSessionRecap(() => leaveRoom(true), "SAIR DA SALA").catch(console.error);
+    else if (confirm("Deseja sair da sala?")) leaveRoom(true);
   });
   document.getElementById("joinCancelBtn")?.addEventListener("click", closeJoinModal);
   document.getElementById("joinSendBtn")?.addEventListener("click", sendJoinRequest);
@@ -780,6 +618,11 @@ export function bindRoomEvents() {
 
   window.addEventListener("pagehide",     sendLeaveBeacon);
   window.addEventListener("beforeunload", sendLeaveBeacon);
+
+  // Toast para o próprio jogador ao reconectar a uma sessão em andamento
+  window.addEventListener("osl:session-reconnected", () => {
+    window.showOslToast?.("🔄 Você está de volta!");
+  });
 
   // Evento customizado de osl:openProfile (disparado por renderPlayers)
   document.addEventListener("osl:openProfile", e => document.dispatchEvent(new CustomEvent("osl:openProfileModal", { detail: e.detail })));
