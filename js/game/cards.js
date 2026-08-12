@@ -1,18 +1,18 @@
-// Sistema de cartas: deck, revelação, renderização e estado do ritual
+// Sistema de cartas: deck, revelação, renderização.
+// Comandos fluem para o engine via dispatch(). UI reage via subscribe().
+// Session, backend e efeitos colaterais são orquestrados pelo engine.
 import { S } from "../state.js";
-import { setDoc, addDoc, getDoc, getDocs, updateDoc, serverTimestamp } from "../firebase.js";
+import { addDoc, setDoc, getDoc, getDocs, serverTimestamp } from "../firebase.js";
 import { escapeHtml } from "../utils.js";
 import { OSL_BASIC_CARDS, OSL_PACK_CARDS, OSL_CARD_EFFECTS } from "../constants.js";
 import { getVerifiedProdutos } from "../ui/profile.js";
 import { fireRevealAnimation } from "../ui/animations.js";
-import { renderActiveEffect, checkAIDetection, renderReactions, OSL_XP, OSL_TENSION, OSL_ACHIEVEMENTS, initPressureBtn, resetPressureBtn, bindSocialPressure } from "./effects.js";
 import { showVoteResultOverlay } from "./rewards.js";
-import { assignSecretMissions } from "./missions.js";
-import { panelMarkSessionStart, ritualStart, ritualNextCard, ritualReset } from "../api.js";
-import { createGameSession, logEvent, endGameSession, updateSessionGameState } from "./session.js";
+import { dispatch, subscribe, getState, PHASE } from "./engine.js";
+import { CMD } from "./commands.js";
 
-// ── Lobby/Arena visibility helpers ───────────────────────────────────────────
-// Não dependem de window._lobby3d para evitar falhas silenciosas se o CDN falhar.
+// ── Lobby/Arena visibility ───────────────────────────────────────────────────
+
 function hideLobbyView() {
   const lv = document.getElementById("lobbyViewer");
   if (lv) lv.style.display = "none";
@@ -26,45 +26,8 @@ function showLobbyView() {
   window._lobby3d?.show();
 }
 
-// ── Engine de efeitos (prepare) ───────────────────────────────────────────────
-const OSL_EFFECTS = {
-  prepare(effect, players, phase) {
-    if (!effect) return null;
-    const base = { id: Math.random().toString(36).slice(2), type: effect.type, phase: phase || "battlecry", label: effect.label || null, params: {}, votes: {}, resolved: false };
-    switch (effect.type) {
-      case "force_player": {
-        const pool = players.length > 1 ? players.filter(p => p.id !== S.participantId) : players;
-        if (effect.target === "two_random") {
-          const s = [...pool].sort(() => Math.random() - 0.5);
-          base.params = { targetId: s[0]?.id || "", targetName: s[0]?.name || oslTr("sala:players.fallbackName", "Jogador"), targetId2: s[1]?.id || s[0]?.id || "", targetName2: s[1]?.name || s[0]?.name || oslTr("sala:players.fallbackName", "Jogador") };
-        } else {
-          const t = pool[Math.floor(Math.random() * pool.length)] || players[0];
-          base.params = { targetId: t?.id || "", targetName: t?.name || oslTr("sala:players.fallbackName", "Jogador") };
-        }
-        break;
-      }
-      case "set_timer":    { base.params = { duration: effect.duration || 60, startedAt: Date.now() }; break; }
-      case "vote":         { base.params = { question: effect.question || "Vote:", options: effect.options || players.map(p => p.name) }; break; }
-      case "next_category":
-      case "chain_card":   { base.params = { category: effect.category || "" }; break; }
-      case "give_xp":      { base.params = { amount: effect.amount || 10 }; break; }
-    }
-    return base;
-  },
-  prepareCard(card, players) {
-    if (!card) return { battlecry: null, deathrattle: null };
-    // OSL_CARD_EFFECTS usa títulos PT como chave; quando a carta foi localizada,
-    // _origTitle guarda o título original PT pra lookup correto em qualquer locale.
-    const lookupKey = card._origTitle || card.title;
-    const effects = OSL_CARD_EFFECTS[lookupKey] || {};
-    return {
-      battlecry:   effects.battlecry   ? this.prepare(effects.battlecry,   players, "battlecry")   : null,
-      deathrattle: effects.deathrattle ? this.prepare(effects.deathrattle, players, "deathrattle") : null
-    };
-  }
-};
-
 // ── Deck building ─────────────────────────────────────────────────────────────
+
 export function getUnlockedPacks() {
   if (S._isPrestige) return Object.keys(OSL_PACK_CARDS);
   const verified = getVerifiedProdutos();
@@ -84,8 +47,8 @@ export function getUnlockedPackCards() {
 export async function loadUserDeck(userId, deckId) {
   try {
     const { doc } = await import("../firebase.js");
-    const deckRef  = doc(S.db, "users", userId, "decks", deckId);
-    const snap     = await getDoc(deckRef);
+    const deckRef = doc(S.db, "users", userId, "decks", deckId);
+    const snap    = await getDoc(deckRef);
     if (!snap.exists()) return null;
     return snap.data().cards || [];
   } catch (_) { return null; }
@@ -114,74 +77,36 @@ export async function buildRitualDeck() {
   return shuffleArray(allCards.filter(c => { if (seen.has(c.title)) return false; seen.add(c.title); return true; }));
 }
 
-// ── Estado de botões do ritual ────────────────────────────────────────────────
-export function updateRitualButtons() {
-  const revealCardBtn = document.getElementById("revealCardBtn");
-  const resetRitualBtn = document.getElementById("resetRitualBtn");
-  const canControl    = S.isHost && S.ritualStarted;
-  const effectBlocking = !!(S.currentActiveEffect && !S.currentActiveEffect.resolved);
-  if (revealCardBtn) {
-    revealCardBtn.disabled  = !canControl || S.ritualDeck.length === 0 || effectBlocking;
-    revealCardBtn.textContent = (S.ritualStarted && !S.currentCard) ? oslTr("sala:table.revealFirst", "Revelar Primeira Carta") : oslTr("sala:table.revealNext", "Revelar Próxima Carta");
-  }
-  if (resetRitualBtn) resetRitualBtn.disabled = !S.isHost || !S.ritualStarted;
-}
+// ── Histórico (Firestore) ─────────────────────────────────────────────────────
 
-// Listener de evento customizado (disparado pelo módulo de animações ao terminar)
-document.addEventListener("osl:updateRitualButtons", updateRitualButtons);
-
-// ── Estado de espera ──────────────────────────────────────────────────────────
-export function setRitualWaitingState() {
-  const _wasStarted = S.ritualStarted;
-  S.ritualStarted = false;
-  S.ritualDeck    = [];
-  if (_wasStarted) endGameSession().catch(() => {});
-  OSL_TENSION.stop();
-  document.getElementById("revealPanel")?.style.setProperty("display","none");
-  showLobbyView();
-  const ritualCardType  = document.getElementById("ritualCardType");
-  const ritualCardTitle = document.getElementById("ritualCardTitle");
-  const ritualCardText  = document.getElementById("ritualCardText");
-  const deckInfo        = document.getElementById("deckInfo");
-  const historyList     = document.getElementById("historyList");
-  if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
-  if (ritualCardTitle) ritualCardTitle.textContent = oslTr("sala:table.ritualWaitingTitle", "Aguardando revelação");
-  if (ritualCardText)  ritualCardText.innerHTML    = oslTr("sala:ritual.noNextCardYet", "O anfitrião ainda não revelou a próxima carta.");
-  const _mid = document.getElementById("ritualMidDetails");
-  const _div = document.getElementById("ritualCardDivider");
-  const _phr = document.getElementById("ritualCardPhrase");
-  if (_mid) _mid.style.display = "none";
-  if (_div) _div.style.display = "none";
-  if (_phr) _phr.style.display = "none";
-  if (deckInfo) deckInfo.innerHTML = oslTr("sala:table.deckWaitingFull", "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.");
-  if (historyList) historyList.innerHTML = `<div class="historyItem"><div class="historyType">${oslTr("sala:history.waiting", "Aguardando")}</div><div class="historyText">${oslTr("sala:history.none", "Nenhuma carta revelada ainda.")}</div></div>`;
-  updateRitualButtons();
-}
-
-// ── Persistência ──────────────────────────────────────────────────────────────
 export async function addHistoryItem(type, text) {
   try { await addDoc(S.ritualHistoryRef, { type, text, createdAt: serverTimestamp() }); }
   catch (error) { console.error("Erro ao adicionar histórico do ritual:", error); }
 }
 
-export async function saveRitualState(card, activeEffect, pendingDeathrattle) {
-  try {
-    await setDoc(S.ritualRef, {
-      started: S.ritualStarted,
-      remainingDeck: S.ritualDeck,
-      currentCard: card || null,
-      activeEffect: activeEffect !== undefined ? (activeEffect || null) : null,
-      pendingDeathrattle: pendingDeathrattle !== undefined ? (pendingDeathrattle || null) : null,
-      cardsRevealedCount: S.ritualCardsRevealedCount,
-      updatedAt: serverTimestamp(),
-      updatedBy: S.participantId
-    }, { merge: true });
-  } catch (error) { console.error("Erro ao salvar estado do ritual:", error); }
+// ── Botões do ritual ─────────────────────────────────────────────────────────
+
+export function updateRitualButtons(snapOrEvent) {
+  // Aceita snapshot do engine ou Event do DOM (osl:updateRitualButtons)
+  const snap = (snapOrEvent && typeof snapOrEvent.phase === 'string') ? snapOrEvent : getState();
+  const { phase, deck, activeEffect, currentCard } = snap;
+  const revealCardBtn  = document.getElementById("revealCardBtn");
+  const resetRitualBtn = document.getElementById("resetRitualBtn");
+  const canControl     = S.isHost && phase === PHASE.RITUAL_ACTIVE;
+  const effectBlocking = !!(activeEffect && !activeEffect.resolved);
+  if (revealCardBtn) {
+    revealCardBtn.disabled    = !canControl || deck.length === 0 || effectBlocking;
+    revealCardBtn.textContent = (phase === PHASE.RITUAL_ACTIVE && !currentCard)
+      ? oslTr("sala:table.revealFirst", "Revelar Primeira Carta")
+      : oslTr("sala:table.revealNext",  "Revelar Próxima Carta");
+  }
+  if (resetRitualBtn) resetRitualBtn.disabled = !S.isHost || phase !== PHASE.RITUAL_ACTIVE;
 }
 
+document.addEventListener("osl:updateRitualButtons", updateRitualButtons);
+
 // ── Auto-fit do título da carta ───────────────────────────────────────────────
-// Reduz font-size até nenhuma palavra do título precisar quebrar no meio.
-// Usa canvas offscreen para medir sem causar reflow.
+
 let _fitObserver = null;
 
 function autoFitCardTitle() {
@@ -189,24 +114,18 @@ function autoFitCardTitle() {
   if (!el) return;
   const frame = el.closest(".ritualCardFrame");
   if (!frame) return;
-  const maxW = frame.clientWidth - 24; // 12px padding em cada lado
-  if (maxW <= 0) return; // card ainda não visível
-
-  // Reset para valor CSS base antes de medir
+  const maxW = frame.clientWidth - 24;
+  if (maxW <= 0) return;
   el.style.fontSize = "";
   let size = parseFloat(getComputedStyle(el).fontSize) || 17;
-
   const words = (el.textContent || "").split(/\s+/).filter(Boolean);
   if (!words.length) return;
-
-  // Canvas estático reutilizado — zero DOM extra
   if (!autoFitCardTitle._canvas) autoFitCardTitle._canvas = document.createElement("canvas");
   const ctx = autoFitCardTitle._canvas.getContext("2d");
-  const lsRatio = 0.05; // letter-spacing: 0.05em do CSS
-
+  const lsRatio = 0.05;
   for (let i = 0; i < 24; i++) {
     ctx.font = `700 ${size}px Georgia,"Times New Roman",serif`;
-    const lsPx = size * lsRatio;
+    const lsPx    = size * lsRatio;
     const longest = words.reduce((max, w) => {
       const pw = ctx.measureText(w).width + (w.length - 1) * lsPx;
       return pw > max ? pw : max;
@@ -225,10 +144,9 @@ function ensureCardTitleObserver() {
   _fitObserver.observe(wrap);
 }
 
-// ── Aplicar conteúdo de carta no DOM ─────────────────────────────────────────
+// ── Conteúdo de carta no DOM ──────────────────────────────────────────────────
+
 export function applyCardContent(card) {
-  // Localiza title/text/rule/subrule/phrase pelo idioma corrente.
-  // Cards são gravados em PT no Firestore (consistência cross-locale).
   if (card && window.OSL_I18N && typeof window.OSL_I18N.localizeCard === "function") {
     card = window.OSL_I18N.localizeCard(card);
   }
@@ -236,32 +154,33 @@ export function applyCardContent(card) {
   const ritualCardTitle = document.getElementById("ritualCardTitle");
   const ritualCardText  = document.getElementById("ritualCardText");
   const deckInfo        = document.getElementById("deckInfo");
-  const midDetails    = document.getElementById("ritualMidDetails");
-  const cardRule      = document.getElementById("ritualCardRule");
-  const subruleDivider= document.getElementById("ritualSubruleDivider");
-  const cardSubrule   = document.getElementById("ritualCardSubrule");
-  const cardDivider   = document.getElementById("ritualCardDivider");
-  const cardPhrase    = document.getElementById("ritualCardPhrase");
+  const midDetails      = document.getElementById("ritualMidDetails");
+  const cardRule        = document.getElementById("ritualCardRule");
+  const subruleDivider  = document.getElementById("ritualSubruleDivider");
+  const cardSubrule     = document.getElementById("ritualCardSubrule");
+  const cardDivider     = document.getElementById("ritualCardDivider");
+  const cardPhrase      = document.getElementById("ritualCardPhrase");
 
   if (card) {
     if (ritualCardType)  ritualCardType.textContent = (card.type || oslTr("sala:table.typeRitual", "Ritual")).toUpperCase();
     if (ritualCardTitle) {
-      ritualCardTitle.style.fontSize = ""; // reset antes de setar novo conteúdo
-      ritualCardTitle.textContent = card.title || oslTr("sala:ritual.fallbackTitle", "Carta revelada");
-      // Ajusta font-size após dois frames (card precisa ter layout calculado)
+      ritualCardTitle.style.fontSize = "";
+      ritualCardTitle.textContent    = card.title || oslTr("sala:ritual.fallbackTitle", "Carta revelada");
       requestAnimationFrame(() => requestAnimationFrame(() => {
         autoFitCardTitle();
         ensureCardTitleObserver();
       }));
     }
-    if (ritualCardText)  ritualCardText.innerHTML = escapeHtml(card.text || "").replace(/\n/g, "<br>");
-    const hasRule = !!card.rule, hasSubrule = !!card.subrule, hasPhrase = !!card.phrase;
-    if (midDetails)    midDetails.style.display    = (hasRule || hasSubrule) ? "" : "none";
-    if (cardRule)      cardRule.innerHTML           = hasRule ? escapeHtml(card.rule).replace(/\n/g, "<br>") : "";
-    if (subruleDivider)subruleDivider.style.display = hasSubrule ? "" : "none";
-    if (cardSubrule)   { cardSubrule.style.display = hasSubrule ? "" : "none"; if (hasSubrule) cardSubrule.innerHTML = escapeHtml(card.subrule).replace(/\n/g, "<br>"); }
-    if (cardDivider)   cardDivider.style.display   = hasPhrase ? "" : "none";
-    if (cardPhrase)    { cardPhrase.style.display  = hasPhrase ? "" : "none"; if (hasPhrase) cardPhrase.innerHTML = escapeHtml(card.phrase).replace(/\n/g, "<br>"); }
+    if (ritualCardText) ritualCardText.innerHTML = escapeHtml(card.text || "").replace(/\n/g, "<br>");
+    const hasRule    = !!card.rule;
+    const hasSubrule = !!card.subrule;
+    const hasPhrase  = !!card.phrase;
+    if (midDetails)     midDetails.style.display     = (hasRule || hasSubrule) ? "" : "none";
+    if (cardRule)       cardRule.innerHTML            = hasRule ? escapeHtml(card.rule).replace(/\n/g, "<br>") : "";
+    if (subruleDivider) subruleDivider.style.display  = hasSubrule ? "" : "none";
+    if (cardSubrule)    { cardSubrule.style.display   = hasSubrule ? "" : "none"; if (hasSubrule) cardSubrule.innerHTML = escapeHtml(card.subrule).replace(/\n/g, "<br>"); }
+    if (cardDivider)    cardDivider.style.display     = hasPhrase ? "" : "none";
+    if (cardPhrase)     { cardPhrase.style.display    = hasPhrase ? "" : "none"; if (hasPhrase) cardPhrase.innerHTML = escapeHtml(card.phrase).replace(/\n/g, "<br>"); }
   } else {
     if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
     if (ritualCardTitle) ritualCardTitle.textContent = oslTr("sala:table.ritualWaitingTitle", "Aguardando revelação");
@@ -270,163 +189,136 @@ export function applyCardContent(card) {
     if (cardDivider) cardDivider.style.display = "none";
     if (cardPhrase)  cardPhrase.style.display  = "none";
   }
+
+  const { phase, deck } = getState();
   if (deckInfo) {
-    if (S.ritualDeck.length > 0) {
-      const hint = S.isHost
-        ? oslTr("sala:ritual.deckRemainingHost", "{{count}} carta(s) restante(s) · Quando o grupo responder, revele a próxima.", { count: S.ritualDeck.length })
-        : oslTr("sala:ritual.deckRemainingPlayer", "{{count}} carta(s) restante(s) · Responda via vídeo ou no chat — o anfitrião revela a próxima.", { count: S.ritualDeck.length });
-      deckInfo.innerHTML = hint;
+    if (deck.length > 0) {
+      deckInfo.innerHTML = S.isHost
+        ? oslTr("sala:ritual.deckRemainingHost",   "{{count}} carta(s) restante(s) · Quando o grupo responder, revele a próxima.",                          { count: deck.length })
+        : oslTr("sala:ritual.deckRemainingPlayer", "{{count}} carta(s) restante(s) · Responda via vídeo ou no chat — o anfitrião revela a próxima.", { count: deck.length });
     } else {
       deckInfo.innerHTML = oslTr("sala:ritual.deckEnded", "O deck chegou ao fim.<br>Reinicie o ritual para embaralhar novamente.");
     }
   }
-  updateRitualButtons();
+
+  updateRitualButtons(getState());
 }
 
-// ── Reveal da próxima carta (host) ────────────────────────────────────────────
-export async function revealNextRitualCard() {
-  if (!S.ritualStarted || !S.isHost || !S.ritualDeck.length) return;
+// ── UI de lobby ───────────────────────────────────────────────────────────────
 
-  // Backend avança a carta, escolhe alvos de efeito com crypto.randomBytes
-  // e escreve no Firestore via Admin SDK. O onSnapshot vai atualizar o UI.
-  const result = await ritualNextCard(S.currentPlayers.map(p => ({ id: p.id, name: p.name })));
-  if (!result?.ok) {
-    console.error("Erro ao revelar carta no servidor:", result?.error);
-    return;
-  }
-
-  const nextCard = result.card;
-  logEvent("CARD_REVEALED", { title: nextCard?.title || null, type: nextCard?.type || null, count: result.cardsRevealedCount }).catch(() => {});
-  updateSessionGameState({ cardsRevealedCount: result.cardsRevealedCount, currentCardTitle: nextCard?.title || null, phase: "playing" }).catch(() => {});
-  S.ritualCardsRevealedCount = result.cardsRevealedCount;
-
-  if (S.ritualCardsRevealedCount === 2 && !S.missionsAssigned) {
-    S.missionsAssigned = true;
-    await assignSecretMissions(S.currentPlayers);
-  }
-
-  await OSL_XP.award(S.userRef, "CARD_REVEALED");
-  if (["Segredo","Casais"].includes(nextCard?.type)) await OSL_XP.award(S.userRef, "DEEP_CARD");
-
-  OSL_TENSION.heat(12);
-  OSL_ACHIEVEMENTS.onCardRevealed((await getDocs(S.ritualHistoryRef)).size, nextCard?.type);
-  resetPressureBtn();
-  updateRitualButtons();
+function _setLobbyUI() {
+  document.getElementById("revealPanel")?.style.setProperty("display", "none");
+  showLobbyView();
+  const ritualCardType  = document.getElementById("ritualCardType");
+  const ritualCardTitle = document.getElementById("ritualCardTitle");
+  const ritualCardText  = document.getElementById("ritualCardText");
+  const deckInfo        = document.getElementById("deckInfo");
+  const historyList     = document.getElementById("historyList");
+  if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
+  if (ritualCardTitle) ritualCardTitle.textContent = oslTr("sala:table.ritualWaitingTitle", "Aguardando revelação");
+  if (ritualCardText)  ritualCardText.innerHTML    = oslTr("sala:ritual.noNextCardYet", "O anfitrião ainda não revelou a próxima carta.");
+  ["ritualMidDetails","ritualCardDivider","ritualCardPhrase"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });
+  if (deckInfo) deckInfo.innerHTML = oslTr("sala:table.deckWaitingFull", "Aguardando o anfitrião iniciar.<br>Depois disso, a mesa se transforma.");
+  if (historyList) historyList.innerHTML = `<div class="historyItem"><div class="historyType">${oslTr("sala:history.waiting","Aguardando")}</div><div class="historyText">${oslTr("sala:history.none","Nenhuma carta revelada ainda.")}</div></div>`;
+  document.getElementById("reactionBar")?.classList.remove("reactionBar--visible");
 }
 
-// ── Iniciar deck ──────────────────────────────────────────────────────────────
+// ── Subscriber do engine ──────────────────────────────────────────────────────
+
+let _prevPhase        = null;
+let _prevCardKey      = null;
+let _prevVoteResultTs = 0;
+
+subscribe(snap => {
+  const { phase, currentCard, deck, activeEffect, voteResult } = snap;
+  const gameStatusEl = document.getElementById("gameStatus");
+
+  if (phase !== _prevPhase) {
+    if (phase === PHASE.RITUAL_ACTIVE) {
+      if (gameStatusEl) gameStatusEl.textContent = oslTr("sala:topbar.status.playing", "Jogando");
+      hideLobbyView();
+      document.getElementById("revealPanel")?.style.setProperty("display", "");
+      document.getElementById("reactionBar")?.classList.add("reactionBar--visible");
+
+      // Auto-recording (host, uma vez por sessão)
+      if (S.isHost && !S.autoRecordingStarted) {
+        S.autoRecordingStarted = true;
+        const base = window.PANEL_SERVER_BASE || "https://osl-video-server-production.up.railway.app";
+        fetch(`${base}/recording/auto-start`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId: S.roomCode }),
+        }).catch(() => {});
+      }
+
+      // Toast de reconexão — dispara apenas no primeiro snapshot ativo
+      if (S._isReconnecting && _prevCardKey === null) {
+        S._isReconnecting = false;
+        window.showOslToast?.(oslTr("sala:reconnect.welcome", "Bem-vindo de volta! Sua partida continua."));
+      }
+    } else if (phase === PHASE.LOBBY) {
+      if (gameStatusEl) gameStatusEl.textContent = oslTr("sala:topbar.status.waiting", "Espera");
+      _setLobbyUI();
+      _prevCardKey = null;
+    }
+    _prevPhase = phase;
+  }
+
+  // Atualiza carta quando fase é ativa
+  if (phase === PHASE.RITUAL_ACTIVE) {
+    const newKey    = currentCard ? (currentCard.title || "__card__") : "__waiting__";
+    const isFirst   = _prevCardKey === null;
+    const changed   = !isFirst && newKey !== _prevCardKey;
+    _prevCardKey    = newKey;
+
+    if (changed) {
+      fireRevealAnimation(currentCard, applyCardContent);
+    } else {
+      applyCardContent(currentCard);
+    }
+  }
+
+  // Vote result overlay
+  if (voteResult?.winner && voteResult.resolvedAt !== _prevVoteResultTs) {
+    _prevVoteResultTs = voteResult.resolvedAt;
+    showVoteResultOverlay(voteResult.winner, voteResult.resolvedAt);
+  }
+
+  updateRitualButtons(snap);
+});
+
+// ── Comandos públicos (chamados por init.js / mobile / UI) ───────────────────
+
 export async function startRitualDeck() {
-  S.ritualStarted = true;
-  hideLobbyView();
-  document.getElementById("revealPanel")?.style.setProperty("display","");
-
-  // Backend constrói o deck com compras/prestige verificados via Firebase Admin SDK
-  const players = S.currentPlayers.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
-  const result = await ritualStart(players);
-  if (!result?.ok) {
-    console.error("Erro ao iniciar ritual no servidor:", result?.error);
-    return;
-  }
-
-  await createGameSession();
-  S.ritualCardsRevealedCount = 0;
-  S.missionsAssigned = false;
-  await OSL_XP.award(S.userRef, "SESSION_JOIN");
-  OSL_TENSION.startDecay();
-  resetPressureBtn();
-  initPressureBtn();
-  bindSocialPressure();
-  updateRitualButtons();
+  await dispatch({ type: CMD.START_RITUAL, payload: { players: S.currentPlayers } });
 }
 
-// ── Reiniciar deck ────────────────────────────────────────────────────────────
 export async function resetRitualDeck() {
   if (!S.isHost) return;
-  S.ritualStarted = true;
-  hideLobbyView();
-  document.getElementById("revealPanel")?.style.setProperty("display","");
-
-  const players = S.currentPlayers.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
-  const result = await ritualReset(players);
-  if (!result?.ok) {
-    console.error("Erro ao reiniciar ritual no servidor:", result?.error);
-    return;
-  }
-
-  await createGameSession();
-  S.ritualCardsRevealedCount = 0;
-  S.missionsAssigned = false;
-  await panelMarkSessionStart();
-  updateRitualButtons();
+  await dispatch({ type: CMD.RESET_RITUAL, payload: { players: S.currentPlayers } });
 }
 
-// ── Renderiza estado do ritual (recebido do Firestore) ────────────────────────
-export function renderRitualCardFromState(data) {
-  const started = !!data?.started;
-  const card    = data?.currentCard || null;
-
-  S.ritualStarted            = started;
-  S.currentCard              = card;
-  S.ritualDeck               = Array.isArray(data?.remainingDeck) ? data.remainingDeck : [];
-  S.ritualCardsRevealedCount = data?.cardsRevealedCount || 0;
-  if (S.ritualCardsRevealedCount >= 2) S.missionsAssigned = true;
-
-  const gameStatusEl = document.getElementById("gameStatus");
-  if (gameStatusEl) gameStatusEl.textContent = started ? oslTr("sala:topbar.status.playing", "Jogando") : oslTr("sala:topbar.status.waiting", "Espera");
-
-  S.currentActiveEffect = data?.activeEffect || null;
-  renderActiveEffect(S.currentActiveEffect);
-  checkAIDetection(data?.aiDetection);
-  updateRitualButtons();
-  renderReactions(data?.reactions);
-
-  const reactionBar = document.getElementById("reactionBar");
-  if (reactionBar) reactionBar.classList.toggle("reactionBar--visible", started);
-
-  const voteResult = data?.voteResult || null;
-  if (voteResult?.winner) showVoteResultOverlay(voteResult.winner, voteResult.resolvedAt);
-
-  if (!started) { S.lastRevealedCardKey = null; setRitualWaitingState(); return; }
-
-  hideLobbyView();
-  document.getElementById("revealPanel")?.style.setProperty("display","");
-
-  // Auto-start recording quando ritual começa
-  if (S.isHost && !S.autoRecordingStarted) {
-    S.autoRecordingStarted = true;
-    fetch("https://osl-video-server-production.up.railway.app/recording/auto-start", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ roomId: S.roomCode })
-    }).catch(() => {});
-  }
-
-  // Toast de boas-vindas ao reconectar (dispara apenas na primeira snapshot ativa)
-  if (S._isReconnecting && S.lastRevealedCardKey === null) {
-    S._isReconnecting = false;
-    window.showOslToast?.(oslTr("sala:reconnect.welcome", "Bem-vindo de volta! Sua partida continua."));
-  }
-
-  const newKey       = card ? (card.title || "__card__") : "__waiting__";
-  const isFirstRender = S.lastRevealedCardKey === null;
-  const cardChanged  = !isFirstRender && newKey !== S.lastRevealedCardKey;
-  S.lastRevealedCardKey = newKey;
-
-  if (cardChanged) {
-    fireRevealAnimation(card, applyCardContent);
-  } else {
-    applyCardContent(card);
-  }
+export async function revealNextRitualCard() {
+  const { phase, deck, activeEffect } = getState();
+  if (phase !== PHASE.RITUAL_ACTIVE || !S.isHost || deck.length === 0) return;
+  if (activeEffect && !activeEffect.resolved) return;
+  await dispatch({ type: CMD.REVEAL_CARD, payload: { players: S.currentPlayers } });
 }
 
-// ── Listener do ritual (Firestore) ────────────────────────────────────────────
+// ── Listener do ritual (Firestore → engine) ───────────────────────────────────
+
 export function bindRitual(onSnapshotFn, orderByFn, queryFn) {
-  if (S.ritualUnsub) S.ritualUnsub();
+  if (S.ritualUnsub)        S.ritualUnsub();
   if (S.ritualHistoryUnsub) S.ritualHistoryUnsub();
 
   S.ritualUnsub = onSnapshotFn(S.ritualRef, (snap) => {
-    if (!snap.exists()) { setRitualWaitingState(); return; }
-    renderRitualCardFromState(snap.data());
+    dispatch({
+      type:    CMD.SYNC_FROM_FIRESTORE,
+      payload: snap.exists() ? snap.data() : { started: false },
+    });
   });
 
   const historyList = document.getElementById("historyList");
@@ -435,35 +327,32 @@ export function bindRitual(onSnapshotFn, orderByFn, queryFn) {
     if (!historyList) return;
     const docs = snapshot.docs.map(d => d.data());
     if (!docs.length) {
-      historyList.innerHTML = `<div class="historyItem"><div class="historyType">${oslTr("sala:history.waiting", "Aguardando")}</div><div class="historyText">${oslTr("sala:history.none", "Nenhuma carta revelada ainda.")}</div></div>`;
+      historyList.innerHTML = `<div class="historyItem"><div class="historyType">${oslTr("sala:history.waiting","Aguardando")}</div><div class="historyText">${oslTr("sala:history.none","Nenhuma carta revelada ainda.")}</div></div>`;
       return;
     }
-    // Mensagens system gravadas em PT no histórico
     const HIST_TEXT_PT_TO_KEY = {
-      "O ritual foi iniciado.": "sala:table.ritualStarted",
-      "O ritual foi reiniciado.": "sala:table.ritualReset"
+      "O ritual foi iniciado.":    "sala:table.ritualStarted",
+      "O ritual foi reiniciado.":  "sala:table.ritualReset",
     };
     historyList.innerHTML = docs.map(item => {
-      const rawType = item.type || "Ritual";
+      const rawType       = item.type || "Ritual";
       const localizedType = oslTr(`cards:types.${rawType}`, rawType);
-      const rawText = item.text || "";
-      let localizedText = rawText;
-      // Mensagens system conhecidas
-      const sysKey = HIST_TEXT_PT_TO_KEY[rawText];
+      const rawText       = item.text || "";
+      let   localizedText = rawText;
+      const sysKey        = HIST_TEXT_PT_TO_KEY[rawText];
       if (sysKey) {
         localizedText = oslTr(sysKey, rawText);
       } else {
-        // Tenta localizar title de carta pelo slug (busca em basic + todos os packs)
-        const t = window.OSL_I18N && window.OSL_I18N.t;
+        const t       = window.OSL_I18N && window.OSL_I18N.t;
         const slugify = window.OSL_I18N && window.OSL_I18N.slugify;
         if (rawText && t && slugify) {
-          const slug = slugify(rawText);
+          const slug  = slugify(rawText);
           if (slug) {
-            const packs = ["basic", "packs.conexao", "packs.verdades", "packs.conflito", "packs.segredos", "packs.casais"];
+            const packs = ["basic","packs.conexao","packs.verdades","packs.conflito","packs.segredos","packs.casais"];
             for (const ns of packs) {
-              const key = `cards:${ns}.${slug}.title`;
-              const v = t(key);
-              const stub = key.includes(':') ? key.split(':')[1] : key;
+              const key  = `cards:${ns}.${slug}.title`;
+              const v    = t(key);
+              const stub = key.includes(":") ? key.split(":")[1] : key;
               if (typeof v === "string" && v && v !== key && v !== stub) { localizedText = v; break; }
             }
           }

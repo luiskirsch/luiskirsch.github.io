@@ -10,6 +10,8 @@ import { checkDailyReward, updateXpCard, syncCoinsFromFirestore } from "./game/r
 import { sendReaction, castEffectVote, confirmAIDetection, dismissAIDetection } from "./game/effects.js";
 import { startSession, leaveRoom, sendLeaveBeacon } from "./ui/room.js";
 import { revealNextRitualCard, resetRitualDeck } from "./game/cards.js";
+import { dispatch } from "./game/engine.js";
+import { CMD } from "./game/commands.js";
 
 // ── Identidade ────────────────────────────────────────────────────────────────
 S.participantId = getParticipantId();
@@ -195,6 +197,9 @@ window.dismissAIDetection = dismissAIDetection;
     S.userId        = _freshUserId;
     initFirebaseRefs();
   }
+
+  // Engine: transiciona de IDLE → LOBBY. Players chegam via SET_PLAYERS depois.
+  dispatch({ type: CMD.INIT, payload: { players: [] } }).catch(() => {});
 
   bindPlayers();
   bindUserDoc();

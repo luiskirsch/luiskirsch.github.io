@@ -4,6 +4,7 @@ import { setDoc, doc } from "../firebase.js";
 import { escapeHtml, normalize } from "../utils.js";
 import { SECRET_MISSIONS } from "../constants.js";
 import { OSL_XP, OSL_ACHIEVEMENTS } from "./effects.js";
+import { subscribe } from "./engine.js";
 
 // ── Atribuição de missões pelo host ───────────────────────────────────────────
 export async function assignSecretMissions(players) {
@@ -202,6 +203,19 @@ export function showSecretMissionModal(text) {
     setTimeout(() => modal.remove(), 250);
   });
 }
+
+// ── Auto-trigger de missões via engine ────────────────────────────────────────
+// Dispara assignSecretMissions exatamente uma vez quando missionsAssigned
+// transiciona de false → true (na 2ª carta revelada), apenas no host.
+
+let _msnPrevAssigned = false;
+subscribe(snap => {
+  if (snap.missionsAssigned && !_msnPrevAssigned && S.isHost) {
+    const players = snap.players.length ? snap.players : S.currentPlayers;
+    assignSecretMissions(players).catch(() => {});
+  }
+  _msnPrevAssigned = snap.missionsAssigned;
+});
 
 export function updateMissionBadge(text) {
   const badge = document.getElementById("missionBadge");

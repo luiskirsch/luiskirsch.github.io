@@ -5,6 +5,7 @@ import { ritualVote, ritualReact, ritualAiDetect, ritualSocialPressure, ritualRe
 import { escapeHtml } from "../utils.js";
 import { spawnReactionFloat } from "../ui/animations.js";
 import { OSL_XP_EVENTS, OSL_XP_TITLES } from "../constants.js";
+import { subscribe, PHASE } from "./engine.js";
 
 // ── OSL_XP — sistema de experiência ──────────────────────────────────────────
 export const OSL_XP = {
@@ -302,6 +303,49 @@ export function renderReactions(reactions) {
 }
 
 window.sendReaction = sendReaction;
+
+// ── Subscriber do engine ──────────────────────────────────────────────────────
+// Reage a mudanças de estado: fase, cartas reveladas, efeito ativo, reações, AI.
+
+let _efxPrevPhase            = PHASE.IDLE;
+let _efxPrevCardsRevealed    = 0;
+
+subscribe(snap => {
+  const { phase, activeEffect, aiDetection, reactions, cardsRevealedCount, currentCard } = snap;
+
+  // Transição de fase
+  if (phase !== _efxPrevPhase) {
+    if (phase === PHASE.RITUAL_ACTIVE) {
+      OSL_XP.award(S.userRef, "SESSION_JOIN").catch(() => {});
+      OSL_TENSION.startDecay();
+      resetPressureBtn();
+      initPressureBtn();
+      bindSocialPressure();
+    } else if (phase === PHASE.LOBBY && _efxPrevPhase === PHASE.RITUAL_ACTIVE) {
+      OSL_TENSION.stop();
+    }
+    _efxPrevPhase = phase;
+  }
+
+  // Carta revelada
+  if (phase === PHASE.RITUAL_ACTIVE && cardsRevealedCount > _efxPrevCardsRevealed) {
+    OSL_XP.award(S.userRef, "CARD_REVEALED").catch(() => {});
+    if (["Segredo", "Casais"].includes(currentCard?.type)) {
+      OSL_XP.award(S.userRef, "DEEP_CARD").catch(() => {});
+    }
+    OSL_TENSION.heat(12);
+    OSL_ACHIEVEMENTS.onCardRevealed(cardsRevealedCount, currentCard?.type);
+    resetPressureBtn();
+    _efxPrevCardsRevealed = cardsRevealedCount;
+  }
+  // Reset contagem ao voltar para LOBBY
+  if (phase === PHASE.LOBBY) _efxPrevCardsRevealed = 0;
+
+  // Efeito ativo, AI, reações
+  renderActiveEffect(activeEffect);
+  checkAIDetection(aiDetection);
+  renderReactions(reactions);
+});
 
 // ── Renderização de efeito ativo ──────────────────────────────────────────────
 export function renderActiveEffect(effect) {
