@@ -173,6 +173,20 @@ export async function fetchRoomSessions() {
   }
 }
 
+export async function fetchRoomStats() {
+  if (!S.roomCode) return { ok: false, stats: null };
+  try {
+    const idToken = await _getFirebaseIdToken();
+    if (!idToken) return { ok: false, stats: null };
+    const res = await fetch(SERVER_BASE + `/analytics/room/${encodeURIComponent(S.roomCode)}/stats`, {
+      headers: { "Authorization": `Bearer ${idToken}` }
+    });
+    return (await res.json().catch(() => null)) || { ok: false, stats: null };
+  } catch (_) {
+    return { ok: false, stats: null };
+  }
+}
+
 export async function redeemPendingCoins() {
   const idToken = await _getFirebaseIdToken();
   if (!idToken) return { ok: false, coinsAdded: 0 };

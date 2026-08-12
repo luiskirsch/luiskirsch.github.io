@@ -2,7 +2,7 @@
 import { S } from "../state.js";
 import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, doc, collection } from "../firebase.js";
 import { escapeHtml, nowTimeFromDate, initials } from "../utils.js";
-import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, redeemPendingCoins, fetchRoomSessions } from "../api.js";
+import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, redeemPendingCoins, fetchRoomSessions, fetchRoomStats } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
 import { logEvent, joinSessionAsPlayer, setSessionId, setPlayerConnected, clearActiveSession } from "../game/session.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
@@ -348,9 +348,9 @@ export async function leaveRoom(redirect = true) {
 }
 
 // ── Histórico de sessões ──────────────────────────────────────────────────────
-function openSessionHistoryModal(sessions) {
+function openSessionHistoryModal(sessions, stats) {
   document.querySelector(".sessionHistoryOverlay")?.remove();
-  const fmt = (ms) => ms ? new Date(ms).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "—";
+  const fmt = (ms)  => ms  ? new Date(ms).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "—";
   const dur = (sec) => !sec ? "—" : sec >= 60 ? `${Math.round(sec / 60)} min` : "< 1 min";
 
   const rows = sessions.map(s => {
@@ -364,13 +364,36 @@ function openSessionHistoryModal(sessions) {
     </div>`;
   }).join("");
 
+  let statsBanner = "";
+  if (stats) {
+    const totalMin = stats.totalPlayTimeSec >= 60 ? `${Math.round(stats.totalPlayTimeSec / 60)} min` : "< 1 min";
+    const avgMin   = stats.avgDurationSec   >= 60 ? `${Math.round(stats.avgDurationSec   / 60)} min` : "< 1 min";
+    const emojiStr = stats.topEmoji ? ` • ${stats.topEmoji} favorito` : "";
+    statsBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0;text-align:center;">
+      <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:10px 4px;">
+        <div style="font-size:20px;font-weight:700;">${stats.totalSessions}</div>
+        <div style="font-size:10px;opacity:.5;text-transform:uppercase;letter-spacing:.05em;">sessões</div>
+      </div>
+      <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:10px 4px;">
+        <div style="font-size:20px;font-weight:700;">${stats.totalCardsRevealed}</div>
+        <div style="font-size:10px;opacity:.5;text-transform:uppercase;letter-spacing:.05em;">cartas</div>
+      </div>
+      <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:10px 4px;">
+        <div style="font-size:20px;font-weight:700;">${totalMin}</div>
+        <div style="font-size:10px;opacity:.5;text-transform:uppercase;letter-spacing:.05em;">jogados</div>
+      </div>
+    </div>
+    <div style="font-size:11px;opacity:.4;text-align:center;margin-bottom:12px;">média ${avgMin}/sessão • ${stats.avgPlayers} jogadores${emojiStr}</div>`;
+  }
+
   const overlay = document.createElement("div");
   overlay.className = "recapOverlay sessionHistoryOverlay";
   overlay.innerHTML = `
     <div class="recapCard" style="max-height:80vh;overflow-y:auto;">
       <div class="recapCard__eyebrow">Sala ${escapeHtml(S.roomCode || "")}</div>
-      <div class="recapCard__title">Sessões Anteriores</div>
-      <div style="margin:16px 0;">${rows || '<p style="opacity:.4;text-align:center;">Nenhuma sessão encerrada ainda.</p>'}</div>
+      <div class="recapCard__title">Histórico</div>
+      ${statsBanner}
+      <div style="margin:4px 0;">${rows || '<p style="opacity:.4;text-align:center;padding:24px 0;">Nenhuma sessão encerrada ainda.</p>'}</div>
       <div class="recapCard__actions">
         <button class="recapCard__btn recapCard__btn--ghost" id="historyModalCloseBtn">FECHAR</button>
       </div>
@@ -384,9 +407,14 @@ function openSessionHistoryModal(sessions) {
 
 async function loadSessionHistory() {
   try {
-    const result   = await fetchRoomSessions();
-    const sessions = result?.sessions || [];
+    const [sessResult, statsResult] = await Promise.all([
+      fetchRoomSessions(),
+      fetchRoomStats(),
+    ]);
+    const sessions = sessResult?.sessions || [];
     if (!sessions.length) return;
+
+    const stats = statsResult?.stats || null;
 
     if (document.getElementById("historyBtn")) return;
     const btn = document.createElement("button");
@@ -394,7 +422,7 @@ async function loadSessionHistory() {
     btn.className = "btn btn--ghost";
     btn.style.cssText = "margin-top:8px;width:100%;font-size:12px;opacity:.6;";
     btn.textContent = `📜 Histórico (${sessions.length} sessão${sessions.length !== 1 ? "ões" : ""})`;
-    btn.addEventListener("click", () => openSessionHistoryModal(sessions));
+    btn.addEventListener("click", () => openSessionHistoryModal(sessions, stats));
 
     const anchor = document.getElementById("startBtn") || document.getElementById("arenaBtn");
     anchor?.parentElement?.insertAdjacentElement("afterend", btn);
