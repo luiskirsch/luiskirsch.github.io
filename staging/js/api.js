@@ -173,6 +173,42 @@ export async function fetchRoomSessions() {
   }
 }
 
+// ── Social: amizades e leaderboard ───────────────────────────────────────────
+
+export async function sendFriendRequest(targetUid) {
+  const idToken = await _getFirebaseIdToken();
+  if (!idToken) return { ok: false };
+  return _post("/social/friend-request", { targetUid, firebaseIdToken: idToken });
+}
+
+export async function respondFriendRequest(requesterUid, action) {
+  const idToken = await _getFirebaseIdToken();
+  if (!idToken) return { ok: false };
+  return _post("/social/friend-respond", { requesterUid, action, firebaseIdToken: idToken });
+}
+
+export async function fetchFriendsLeaderboard() {
+  try {
+    const idToken = await _getFirebaseIdToken();
+    if (!idToken) return { ok: false, leaderboard: [] };
+    const res = await fetch(SERVER_BASE + "/social/leaderboard", {
+      headers: { "Authorization": `Bearer ${idToken}` }
+    });
+    return (await res.json().catch(() => null)) || { ok: false, leaderboard: [] };
+  } catch (_) { return { ok: false, leaderboard: [] }; }
+}
+
+export async function searchUsers(q) {
+  try {
+    const idToken = await _getFirebaseIdToken();
+    if (!idToken) return { ok: false, results: [] };
+    const res = await fetch(SERVER_BASE + `/social/search?q=${encodeURIComponent(q)}`, {
+      headers: { "Authorization": `Bearer ${idToken}` }
+    });
+    return (await res.json().catch(() => null)) || { ok: false, results: [] };
+  } catch (_) { return { ok: false, results: [] }; }
+}
+
 export async function fetchRoomStats() {
   if (!S.roomCode) return { ok: false, stats: null };
   try {

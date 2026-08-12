@@ -2,13 +2,11 @@
 import { S } from "../state.js";
 import { setDoc, updateDoc, getDoc, getDocs, deleteDoc, doc, query, where, limit, collection, serverTimestamp, onAuthStateChanged } from "../firebase.js";
 import { escapeHtml, initials, normalizeUsername, uniqueArray } from "../utils.js";
-import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, PRESTIGE_PRODUTOS } from "../constants.js";
+import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, PRESTIGE_PRODUTOS, BACKEND_BASE_URL } from "../constants.js";
+import { sendFriendRequest, respondFriendRequest, fetchFriendsLeaderboard, searchUsers } from "../api.js";
 
-const BACKEND_BASE_URL_OSL = "https://osl-video-server-production.up.railway.app";
+const BACKEND_BASE_URL_OSL = BACKEND_BASE_URL; // alias mantido pra não trocar 1000 referências
 
-// window._isPrestige é somente-leitura: getter retorna S._isPrestige; setter é no-op.
-// Impede bypass via DevTools (window._isPrestige = true fica silenciosamente ignorado).
-// IIFEs sem acesso a S (payments.js, recording.js) leem o valor real via window._isPrestige.
 Object.defineProperty(window, "_isPrestige", {
   get: () => S._isPrestige,
   set: () => {},
@@ -23,7 +21,6 @@ function _hasCompra(produto) {
   return _verifiedProdutos !== null ? _verifiedProdutos.has(produto) : false;
 }
 
-// Expõe o Set para cards.js (mesmo módulo ES, sem circular dep)
 export function getVerifiedProdutos() { return _verifiedProdutos; }
 
 // ── Prestige ──────────────────────────────────────────────────────────────────
@@ -57,7 +54,7 @@ export async function syncAccountPurchases() {
     const idToken = await user.getIdToken();
     const res     = await fetch(BACKEND_BASE_URL_OSL + "/minhas-compras", { headers:{"Authorization":"Bearer " + idToken} });
     if (!res.ok) return;
-    const data        = await res.json();
+    const data          = await res.json();
     const serverCompras = Array.isArray(data.compras) ? data.compras : [];
 
     // Fonte da verdade: Set in-memory verificado pelo servidor
@@ -116,14 +113,10 @@ export function updateDesktopProfileBtn(photoUrl, emoji) {
   const btn   = document.getElementById("myProfileBtn");
   if (!btn) return;
   const badge = btn.querySelector(".badge") || btn.querySelector("#desktopProfileBadge");
-  // O label "Perfil" vem do i18n (sala:topbar.actions.profile = "👤 Perfil"/"👤 Profile");
-  // tira o emoji 👤 do início pra usar emoji/foto do usuário.
-  const fullLabel = oslTr("sala:topbar.actions.profile", "👤 Perfil");
-  const labelText = fullLabel.replace(/^[^\s]+\s*/, "");
   if (photoUrl) {
     btn.innerHTML = ""; const img = document.createElement("img"); img.src = photoUrl; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0";
-    btn.appendChild(img); btn.appendChild(document.createTextNode(labelText)); if (badge) btn.appendChild(badge);
-  } else { btn.textContent = (emoji || "👤") + " " + labelText; if (badge) btn.appendChild(badge); }
+    btn.appendChild(img); btn.appendChild(document.createTextNode("Perfil")); if (badge) btn.appendChild(badge);
+  } else { btn.textContent = (emoji || "👤") + " Perfil"; if (badge) btn.appendChild(badge); }
 }
 
 export function setAvatarSelection(emoji) {
@@ -263,24 +256,16 @@ function fillContaTab() {
   const uidEl   = document.getElementById("contaUid");     if (uidEl) uidEl.textContent = uid ? uid.slice(0,12) + "…" : "—";
   const acessoEl = document.getElementById("contaAcesso");
   if (acessoEl) {
-    if (!expires) { acessoEl.innerHTML = `<span class="profBadge profBadge--red">${oslTr("sala:profile.accessNotAuthenticated", "Não autenticado")}</span>`; }
-    else {
-      const expDate = new Date(Number(expires));
-      const expired = Date.now() > Number(expires);
-      const localeTag = (window.OSL_I18N && window.OSL_I18N.locale && window.OSL_I18N.locale()) || "pt-BR";
-      const label = expDate.toLocaleDateString(localeTag, { day:"2-digit", month:"short", year:"numeric" });
-      acessoEl.innerHTML = expired
-        ? `<span class="profBadge profBadge--red">${oslTr("sala:profile.accessExpiredOn", "Expirado em {{date}}", { date: label })}</span>`
-        : `<span class="profBadge profBadge--green">${oslTr("sala:profile.accessActiveUntil", "Ativo até {{date}}", { date: label })}</span>`;
-    }
+    if (!expires) { acessoEl.innerHTML = `<span class="profBadge profBadge--red">Não autenticado</span>`; }
+    else { const expDate = new Date(Number(expires)); const expired = Date.now() > Number(expires); const label = expDate.toLocaleDateString("pt-BR", { day:"2-digit", month:"short", year:"numeric" }); acessoEl.innerHTML = expired ? `<span class="profBadge profBadge--red">Expirado em ${label}</span>` : `<span class="profBadge profBadge--green">Ativo até ${label}</span>`; }
   }
 }
 
 function fillSessaoTab() {
   const salaCode = localStorage.getItem("osl_sala") || S.roomCode || "—";
   const salaNome = localStorage.getItem("osl_nome_sala") || "—";
-  const papel    = S.isHost ? oslTr("sala:players.host", "Anfitrião") : oslTr("sala:players.fallbackName", "Jogador");
-  const videoConn = (typeof window.lkRoom !== "undefined" && window.lkRoom?.state === "connected") ? oslTr("sala:profile.videoConnected", "Conectado") : oslTr("sala:profile.videoDisconnected", "Desconectado");
+  const papel    = S.isHost ? "Anfitrião" : "Jogador";
+  const videoConn = (typeof window.lkRoom !== "undefined" && window.lkRoom?.state === "connected") ? "Conectado" : "Desconectado";
   const salaEl = document.getElementById("sessSala");   if (salaEl) salaEl.textContent = salaCode;
   const nomeEl = document.getElementById("sessNomeSala"); if (nomeEl) nomeEl.textContent = salaNome;
   const papelEl = document.getElementById("sessPapel"); if (papelEl) papelEl.textContent = papel;
@@ -289,46 +274,35 @@ function fillSessaoTab() {
 
 function fillPacksTab() {
   const grid = document.getElementById("profPackGrid"); if (!grid) return;
-  // name/desc/themeName são localizados via sala:profile.packs.items.{id}; price/themeColor mantidos.
   const packs = [
-    { id:"pacote-conexao",  price:"R$ 9,90",  themeColor:"#0e0a02" },
-    { id:"pacote-verdades", price:"R$ 12,90", themeColor:"#05070e" },
-    { id:"pacote-conflito", price:"R$ 14,90", themeColor:"#120600" },
-    { id:"pacote-segredos", price:"R$ 19,90", themeColor:"#07000e" },
-    { id:"pacote-casais",   price:"R$ 19,90", themeColor:"#0e0007" }
+    { id:"pacote-conexao",  name:"Conexão",  price:"R$ 9,90",  desc:"12 cartas · leve e emocional",   theme:"ambar",   themeName:"Âmbar",   themeColor:"#0e0a02" },
+    { id:"pacote-verdades", name:"Verdades", price:"R$ 12,90", desc:"15 cartas · desconforto leve",    theme:"cristal", themeName:"Cristal", themeColor:"#05070e" },
+    { id:"pacote-conflito", name:"Conflito", price:"R$ 14,90", desc:"15 cartas · provocações",         theme:"chama",   themeName:"Chama",   themeColor:"#120600" },
+    { id:"pacote-segredos", name:"Segredos", price:"R$ 19,90", desc:"18 cartas · psicológico intenso", theme:"veu",     themeName:"Véu",     themeColor:"#07000e" },
+    { id:"pacote-casais",   name:"Casais",   price:"R$ 19,90", desc:"18 cartas · nichado",             theme:"vinho",   themeName:"Vinho",   themeColor:"#0e0007" }
   ];
   grid.innerHTML = "";
   const basicCard = document.createElement("div"); basicCard.className = "profPackCard profPackCard--unlocked";
-  basicCard.innerHTML = `<div class="profPackName">${oslTr("sala:profile.packs.basicName", "Deck Básico")}</div><div class="profPackDesc">${oslTr("sala:profile.packs.basicDesc", "8 cartas · sempre incluído")}</div><span class="profPackBadge profPackBadge--ok">${oslTr("sala:profile.packs.included", "✓ Incluído")}</span>`;
+  basicCard.innerHTML = `<div class="profPackName">Deck Básico</div><div class="profPackDesc">8 cartas · sempre incluído</div><span class="profPackBadge profPackBadge--ok">✓ Incluído</span>`;
   grid.appendChild(basicCard);
-  const themeLabel = oslTr("sala:profile.packs.themeLabel", "Tema");
-  const unlockedLabel = oslTr("sala:profile.packs.unlocked", "✓ Desbloqueado");
-  const shopBtnLabel = oslTr("sala:profile.packs.shopBtn", "Ver na loja");
   packs.forEach(pack => {
     const unlocked = _verifiedProdutos !== null
       ? _verifiedProdutos.has(pack.id)
       : JSON.parse(localStorage.getItem("osl_compras") || "[]").some(c => c.produto === pack.id);
-    const name = oslTr(`sala:profile.packs.items.${pack.id}.name`, pack.id);
-    const desc = oslTr(`sala:profile.packs.items.${pack.id}.desc`, "");
-    const themeName = oslTr(`sala:profile.packs.items.${pack.id}.themeName`, "");
     const card = document.createElement("div"); card.className = `profPackCard ${unlocked ? "profPackCard--unlocked" : "profPackCard--locked"}`;
-    card.innerHTML = `<div class="profPackName">${name}</div><div class="profPackDesc">${desc}</div><div class="profPackDesc" style="display:flex;align-items:center;gap:6px;margin-top:4px"><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${pack.themeColor};border:1px solid rgba(255,255,255,.15);flex-shrink:0"></span><span style="color:rgba(243,237,229,.5);font-size:.7rem">${themeLabel} <strong style="color:rgba(215,176,107,.75)">${themeName}</strong></span></div>${unlocked ? `<span class="profPackBadge profPackBadge--ok">${unlockedLabel}</span>` : `<span class="profPackBadge profPackBadge--locked">🔒 ${pack.price}</span><a class="profileActionBtn" href="./vendas.html" style="margin-top:6px;font-size:.75rem;padding:4px 10px">${shopBtnLabel}</a>`}`;
+    card.innerHTML = `<div class="profPackName">${pack.name}</div><div class="profPackDesc">${pack.desc}</div><div class="profPackDesc" style="display:flex;align-items:center;gap:6px;margin-top:4px"><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${pack.themeColor};border:1px solid rgba(255,255,255,.15);flex-shrink:0"></span><span style="color:rgba(243,237,229,.5);font-size:.7rem">Tema <strong style="color:rgba(215,176,107,.75)">${pack.themeName}</strong></span></div>${unlocked ? `<span class="profPackBadge profPackBadge--ok">✓ Desbloqueado</span>` : `<span class="profPackBadge profPackBadge--locked">🔒 ${pack.price}</span><a class="profileActionBtn" href="./vendas.html" style="margin-top:6px;font-size:.75rem;padding:4px 10px">Ver na loja</a>`}`;
     grid.appendChild(card);
   });
 }
 
 async function fillProfileUI(user, isSelfView) {
   const profileAvatarLarge = document.getElementById("profileAvatarLarge");
-  applyAvatarDisplay(profileAvatarLarge, user.avatarPhotoUrl, user.avatarEmoji || initials(user.displayName || oslTr("sala:players.fallbackName", "Jogador")), user.avatarColor);
+  applyAvatarDisplay(profileAvatarLarge, user.avatarPhotoUrl, user.avatarEmoji || initials(user.displayName || "Jogador"), user.avatarColor);
   if (isSelfView && user.bgTheme) { S.selectedBgTheme = user.bgTheme; localStorage.setItem("osl_bg", user.bgTheme); applyBgTheme(user.bgTheme); }
   if (isSelfView) { const fab = document.getElementById("mobileProfileBtn"); if (fab) applyAvatarDisplay(fab, user.avatarPhotoUrl, user.avatarEmoji, user.avatarColor); }
-  document.getElementById("profileName").textContent     = user.displayName || oslTr("sala:players.fallbackName", "Jogador");
+  document.getElementById("profileName").textContent     = user.displayName || "Jogador";
   document.getElementById("profileUsername").textContent = `@${user.username || "jogador"}`;
-  // Auto-traduz bio default em PT que ficou persistida no Firestore antes do i18n
-  const _bio = (user.bio === "Novo participante do ritual.")
-    ? oslTr("sala:newProfile.bio", "Novo participante do ritual.")
-    : (user.bio || oslTr("sala:profile.bioEmpty", "Sem descrição."));
-  document.getElementById("profileBio").textContent      = _bio;
+  document.getElementById("profileBio").textContent      = user.bio || "Sem descrição.";
   const gEl = document.getElementById("profileGames"); if (gEl) gEl.textContent = user.stats?.gamesPlayed || 0;
   const wEl = document.getElementById("profileWins");  if (wEl) wEl.textContent = user.stats?.wins || 0;
   const sEl = document.getElementById("profileSince"); if (sEl) sEl.textContent = formatMemberSince(user.memberSince);
@@ -354,6 +328,7 @@ async function fillProfileUI(user, isSelfView) {
   const profileActions  = document.getElementById("profileActions");
   if (profileEditor) profileEditor.classList.add("hidden");
   if (profileActions) profileActions.classList.remove("hidden");
+  fillFriendsPanel(user, isSelfView).catch(() => {});
 }
 
 export async function openProfile(player) {
@@ -373,7 +348,7 @@ export async function openProfile(player) {
       if (profileAvatarLarge) profileAvatarLarge.textContent = initials(player?.name || S.playerName);
       document.getElementById("profileName").textContent     = player?.name || S.playerName;
       document.getElementById("profileUsername").textContent = "@jogador";
-      document.getElementById("profileBio").textContent      = oslTr("sala:newProfile.notFound", "Perfil não encontrado.");
+      document.getElementById("profileBio").textContent      = "Perfil não encontrado.";
       document.getElementById("editProfileBtn").hidden = true; document.getElementById("addFriendBtn").hidden = true;
       document.getElementById("friendsPanel")?.classList.add("hidden");
       document.getElementById("profileModal").classList.remove("hidden"); return;
@@ -390,7 +365,7 @@ export async function openProfile(player) {
       document.getElementById("profileAvatarLarge").textContent = initials(name);
       document.getElementById("profileName").textContent     = name;
       document.getElementById("profileUsername").textContent = "@jogador";
-      document.getElementById("profileBio").textContent      = oslTr("sala:newProfile.loadError", "Erro ao carregar perfil: ") + (error?.code || error?.message || String(error));
+      document.getElementById("profileBio").textContent      = "Erro ao carregar perfil: " + (error?.code || error?.message || String(error));
       document.getElementById("editProfileBtn").hidden = true; document.getElementById("addFriendBtn").hidden = true;
       document.getElementById("friendsPanel")?.classList.add("hidden");
       document.getElementById("profileModal").classList.remove("hidden");
@@ -410,6 +385,155 @@ export function closeProfile() {
   S.openedProfileUserId = null; S.openedProfileData = null;
   document.getElementById("friendsPanel")?.classList.add("hidden");
   resetProfileTabs();
+}
+
+// ── Painel de amizades ────────────────────────────────────────────────────────
+
+function _friendAvatar(p) {
+  if (p.avatarPhotoUrl) return `<div class="friendAvatar" style="background-image:url('${p.avatarPhotoUrl}');background-size:cover;background-position:center;font-size:0"></div>`;
+  return `<div class="friendAvatar" style="background:${p.avatarColor || "#342718"}">${p.avatarEmoji || "🔮"}</div>`;
+}
+
+function renderFriendItem(p, actions = []) {
+  const div = document.createElement("div");
+  div.className = "friendItem";
+  const btns = actions.map(a =>
+    `<button class="friendBtn ${a.cls || ""}" data-action="${a.action}" data-uid="${p.uid}">${a.label}</button>`
+  ).join("");
+  div.innerHTML = `
+    <div class="friendLeft">
+      ${_friendAvatar(p)}
+      <div class="friendMeta">
+        <div class="friendName">${escapeHtml(p.displayName || "Jogador")}</div>
+        <div class="friendUsername">@${escapeHtml(p.username || "jogador")}</div>
+      </div>
+    </div>
+    <div class="friendActions">${btns}</div>`;
+  return div;
+}
+
+async function loadUserProfileData(uid) {
+  try {
+    const snap = await getDoc(doc(S.db, "users", uid));
+    return snap.exists() ? { uid, ...snap.data() } : null;
+  } catch (_) { return null; }
+}
+
+export async function fillFriendsPanel(user, isSelfView) {
+  const panel         = document.getElementById("friendsPanel");
+  const listEl        = document.getElementById("friendsList");
+  const incomingEl    = document.getElementById("incomingRequestsList");
+  const searchBlock   = document.getElementById("friendSearchBlock");
+  const incomingBlock = document.getElementById("incomingRequestsBlock");
+
+  if (!panel) return;
+  if (!isSelfView) { panel.classList.add("hidden"); return; }
+
+  panel.classList.remove("hidden");
+  if (searchBlock) searchBlock.hidden = false;
+
+  // ── Amigos ────────────────────────────────────────────────────────────────
+  const friendUids = (user.friends || []).slice(0, 20);
+  if (listEl) {
+    listEl.innerHTML = "";
+    if (friendUids.length === 0) {
+      listEl.innerHTML = `<div class="friendEmpty">Nenhum amigo ainda. Busque pelo @usuário acima.</div>`;
+    } else {
+      const profiles = await Promise.all(friendUids.map(loadUserProfileData));
+      profiles.filter(Boolean).forEach(p => {
+        const item = renderFriendItem(p, [{ label: "Ver perfil", action: "view" }]);
+        item.querySelector("[data-action='view']")?.addEventListener("click", () => {
+          closeProfile();
+          openProfile({ userId: p.uid, name: p.displayName }).catch(() => {});
+        });
+        listEl.appendChild(item);
+      });
+    }
+  }
+
+  // ── Pedidos recebidos ─────────────────────────────────────────────────────
+  const incomingUids = (user.incomingRequests || []).slice(0, 10);
+  if (incomingBlock) incomingBlock.hidden = incomingUids.length === 0;
+  if (incomingEl) {
+    incomingEl.innerHTML = "";
+    if (incomingUids.length > 0) {
+      const profiles = await Promise.all(incomingUids.map(loadUserProfileData));
+      profiles.filter(Boolean).forEach(p => {
+        const item = renderFriendItem(p, [
+          { label: "Aceitar",  action: "accept", cls: "friendBtn--accept" },
+          { label: "Recusar",  action: "reject"  },
+        ]);
+        item.querySelectorAll("[data-action]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            btn.disabled = true;
+            const action = btn.dataset.action;
+            try {
+              await respondFriendRequest(p.uid, action);
+              item.remove();
+              if (action === "accept") {
+                const freshSnap = await getDoc(S.userRef);
+                if (freshSnap.exists()) fillFriendsPanel(freshSnap.data(), true);
+              }
+            } catch (_) { btn.disabled = false; }
+          });
+        });
+        incomingEl.appendChild(item);
+      });
+    }
+  }
+
+  // ── Botão de leaderboard ──────────────────────────────────────────────────
+  if (friendUids.length > 0 && !panel.querySelector("#leaderboardBtn")) {
+    const lb = document.createElement("button");
+    lb.id = "leaderboardBtn";
+    lb.className = "profileActionBtn";
+    lb.style.cssText = "width:100%;margin-top:4px;font-size:12px;opacity:.7;";
+    lb.textContent = "🏆 Ranking de amigos";
+    lb.addEventListener("click", () => showLeaderboardModal());
+    panel.appendChild(lb);
+  }
+}
+
+async function showLeaderboardModal() {
+  document.querySelector(".leaderboardOverlay")?.remove();
+  const overlay = document.createElement("div");
+  overlay.className = "recapOverlay leaderboardOverlay";
+  overlay.innerHTML = `<div class="recapCard" style="max-height:80vh;overflow-y:auto;">
+    <div class="recapCard__eyebrow">Amigos</div>
+    <div class="recapCard__title">Ranking de XP</div>
+    <div id="leaderboardRows" style="margin:16px 0;"><div style="opacity:.4;text-align:center;padding:20px 0;">Carregando…</div></div>
+    <div class="recapCard__actions">
+      <button class="recapCard__btn recapCard__btn--ghost" id="lbCloseBtn">FECHAR</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById("lbCloseBtn").addEventListener("click", () => {
+    overlay.classList.add("closing");
+    setTimeout(() => overlay.remove(), 300);
+  });
+
+  const result = await fetchFriendsLeaderboard();
+  const rowsEl = document.getElementById("leaderboardRows");
+  if (!rowsEl) return;
+
+  const board = result?.leaderboard || [];
+  if (!board.length) { rowsEl.innerHTML = `<div style="opacity:.4;text-align:center;padding:20px 0;">Nenhum dado ainda.</div>`; return; }
+
+  rowsEl.innerHTML = board.map((e, i) => {
+    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`;
+    const selfMark = e.isSelf ? ' <span style="opacity:.5;font-size:11px;">(você)</span>' : "";
+    const avatarStyle = e.avatarPhotoUrl
+      ? `style="background-image:url('${e.avatarPhotoUrl}');background-size:cover;background-position:center;font-size:0"`
+      : `style="background:${e.avatarColor || "#342718"}"`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);">
+      <span style="width:28px;text-align:center;font-size:16px;">${medal}</span>
+      <div class="friendAvatar" ${avatarStyle}>${e.avatarPhotoUrl ? "" : (e.avatarEmoji || "🔮")}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;">${escapeHtml(e.displayName)}${selfMark}</div>
+        <div style="font-size:11px;opacity:.5;">Nv. ${e.level} · ${e.xp.toLocaleString("pt-BR")} XP</div>
+      </div>
+    </div>`;
+  }).join("");
 }
 
 // ── Bindings do perfil (inicializados por init.js) ────────────────────────────
@@ -451,6 +575,27 @@ export function bindProfileEvents() {
   cancelEditProfileBtn?.addEventListener("click", () => {
     document.getElementById("profileEditor")?.classList.add("hidden");
     document.getElementById("profileActions")?.classList.remove("hidden");
+  });
+
+  addFriendBtn?.addEventListener("click", async () => {
+    const targetUid = S.openedProfileUserId;
+    if (!targetUid || targetUid === S.userId) return;
+    addFriendBtn.disabled = true;
+    addFriendBtn.textContent = "Enviando…";
+    try {
+      const result = await sendFriendRequest(targetUid);
+      if (result?.status === "auto_accepted" || result?.status === "already_friends") {
+        addFriendBtn.textContent = "✓ Amigos!";
+      } else if (result?.ok) {
+        addFriendBtn.textContent = "✓ Pedido enviado";
+      } else {
+        addFriendBtn.textContent = "Adicionar amigo";
+        addFriendBtn.disabled = false;
+      }
+    } catch (_) {
+      addFriendBtn.textContent = "Adicionar amigo";
+      addFriendBtn.disabled = false;
+    }
   });
 
   profileEditor?.addEventListener("submit", async (e) => {
@@ -510,10 +655,9 @@ export function bindProfileEvents() {
     const sw = e.target.closest(".bgSwatch"); if (!sw) return;
     const bg = sw.dataset.bg;
     if (BG_PACK_THEMES[bg] && !isThemeUnlocked(bg)) {
-      const packId = BG_PACK_THEMES[bg];
-      const packName = packId ? oslTr(`sala:profile.packs.items.${packId}.name`, packId) : oslTr("sala:profile.packs.exclusiveOfPackFallback", "um pacote");
+      const packNames = { "pacote-conexao":"Conexão","pacote-verdades":"Verdades","pacote-conflito":"Conflito","pacote-segredos":"Segredos","pacote-casais":"Casais" };
       const hint = document.getElementById("bgPackHint");
-      if (hint) { hint.textContent = oslTr("sala:profile.packs.exclusiveOfPack", "Exclusivo do Pacote {{name}}", { name: packName }); hint.style.opacity = "1"; clearTimeout(_bgHintTimer); _bgHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
+      if (hint) { hint.textContent = `Exclusivo do Pacote ${packNames[BG_PACK_THEMES[bg]] || "um pacote"}`; hint.style.opacity = "1"; clearTimeout(_bgHintTimer); _bgHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
       return;
     }
     setBgSelection(bg); localStorage.setItem("osl_bg", bg);
@@ -526,7 +670,7 @@ export function bindProfileEvents() {
     const style = sw.dataset.style;
     if (style !== "padrao" && !isCardStyleUnlocked(style)) {
       const hint = document.getElementById("cardStyleHint");
-      if (hint) { hint.textContent = oslTr("sala:profile.packs.exclusiveCardStyle", "Exclusivo do produto Estilo de Carta"); hint.style.opacity = "1"; clearTimeout(_cardHintTimer); _cardHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
+      if (hint) { hint.textContent = "Exclusivo do produto Estilo de Carta"; hint.style.opacity = "1"; clearTimeout(_cardHintTimer); _cardHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
       return;
     }
     setCardStyleSelection(style); localStorage.setItem("osl_card_style", style);
@@ -539,17 +683,65 @@ export function bindProfileEvents() {
     const fx = sw.dataset.fx;
     if (fx !== "none" && !isFxUnlocked()) {
       const hint = document.getElementById("fxHint");
-      if (hint) { hint.textContent = oslTr("sala:profile.packs.exclusiveFx", "Exclusivo do produto Efeitos Visuais"); hint.style.opacity = "1"; clearTimeout(_fxHintTimer); _fxHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
+      if (hint) { hint.textContent = "Exclusivo do produto Efeitos Visuais"; hint.style.opacity = "1"; clearTimeout(_fxHintTimer); _fxHintTimer = setTimeout(() => { hint.style.opacity = "0"; }, 2200); }
       return;
     }
     setFxSelection(fx); localStorage.setItem("osl_fx", fx);
     try { await updateDoc(doc(S.db, "users", S.userId), { visualEffect: fx, lastSeen: serverTimestamp() }); } catch (_) {}
   });
 
+  // ── Busca de jogadores ──────────────────────────────────────────────────────
+  const friendSearchInput = document.getElementById("friendSearchInput");
+  const friendSearchBtn   = document.getElementById("friendSearchBtn");
+  const friendSearchResults = document.getElementById("friendSearchResults");
+
+  async function runFriendSearch() {
+    const q = friendSearchInput?.value.trim();
+    if (!q || q.length < 2 || !friendSearchResults) return;
+    friendSearchBtn.disabled = true;
+    friendSearchResults.innerHTML = `<div style="opacity:.4;font-size:13px;padding:8px 0;">Buscando…</div>`;
+    try {
+      const result = await searchUsers(q);
+      const results = result?.results || [];
+      friendSearchResults.innerHTML = "";
+      if (!results.length) {
+        friendSearchResults.innerHTML = `<div class="friendEmpty">Nenhum jogador encontrado com "@${escapeHtml(q)}".</div>`;
+      } else {
+        const myFriends = new Set((S.openedProfileData?.friends || []));
+        results.forEach(p => {
+          const isFriend = myFriends.has(p.uid);
+          const item = renderFriendItem(p, isFriend
+            ? [{ label: "Já são amigos", action: "noop", cls: "friendBtn--pending" }]
+            : [{ label: "Adicionar", action: "add" }]
+          );
+          const addBtn = item.querySelector("[data-action='add']");
+          if (addBtn) {
+            addBtn.addEventListener("click", async () => {
+              addBtn.disabled = true;
+              addBtn.textContent = "Enviando…";
+              try {
+                const r = await sendFriendRequest(p.uid);
+                addBtn.textContent = (r?.status === "auto_accepted") ? "✓ Amigos!" : "✓ Enviado";
+              } catch (_) { addBtn.disabled = false; addBtn.textContent = "Adicionar"; }
+            });
+          }
+          friendSearchResults.appendChild(item);
+        });
+      }
+    } catch (_) {
+      friendSearchResults.innerHTML = `<div class="friendEmpty">Erro ao buscar.</div>`;
+    } finally {
+      friendSearchBtn.disabled = false;
+    }
+  }
+
+  friendSearchBtn?.addEventListener("click", runFriendSearch);
+  friendSearchInput?.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); runFriendSearch(); } });
+
   document.getElementById("copyRoomCodeBtn")?.addEventListener("click", () => {
     const code = localStorage.getItem("osl_sala") || S.roomCode || "";
     if (!code) return;
-    navigator.clipboard.writeText(code).then(() => { const btn = document.getElementById("copyRoomCodeBtn"); const orig = oslTr("sala:profile.session.copyCode", "Copiar código da sala"); btn.textContent = oslTr("sala:profile.packs.copied", "Copiado!"); setTimeout(() => btn.textContent = orig, 2000); });
+    navigator.clipboard.writeText(code).then(() => { const btn = document.getElementById("copyRoomCodeBtn"); btn.textContent = "Copiado!"; setTimeout(() => btn.textContent = "Copiar código da sala", 2000); });
   });
 
   document.getElementById("profCopyLicBtn")?.addEventListener("click", () => {
@@ -558,12 +750,9 @@ export function bindProfileEvents() {
     navigator.clipboard.writeText(lic).then(() => { const btn = document.getElementById("profCopyLicBtn"); btn.textContent = "✓"; setTimeout(() => btn.textContent = "⎘", 2000); });
   });
 
-  document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+  document.getElementById("logoutBtn")?.addEventListener("click", () => {
     if (!confirm("Sair da conta? Você será redirecionado para a entrada.")) return;
-    try { await S.auth?.signOut(); } catch (_) {}
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.href = "./entrada.html";
+    localStorage.clear(); window.location.href = "./entrada.html";
   });
 
   // Ouve evento de abrir perfil (disparado por room.js)

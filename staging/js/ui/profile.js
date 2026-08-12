@@ -3,6 +3,7 @@ import { S } from "../state.js";
 import { setDoc, updateDoc, getDoc, getDocs, deleteDoc, doc, query, where, limit, collection, serverTimestamp, onAuthStateChanged } from "../firebase.js";
 import { escapeHtml, initials, normalizeUsername, uniqueArray } from "../utils.js";
 import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, PRESTIGE_PRODUTOS, BACKEND_BASE_URL } from "../constants.js";
+import { sendFriendRequest, respondFriendRequest, fetchFriendsLeaderboard, searchUsers } from "../api.js";
 
 const BACKEND_BASE_URL_OSL = BACKEND_BASE_URL; // alias mantido pra não trocar 1000 referências
 
@@ -327,6 +328,7 @@ async function fillProfileUI(user, isSelfView) {
   const profileActions  = document.getElementById("profileActions");
   if (profileEditor) profileEditor.classList.add("hidden");
   if (profileActions) profileActions.classList.remove("hidden");
+  fillFriendsPanel(user, isSelfView).catch(() => {});
 }
 
 export async function openProfile(player) {
@@ -385,6 +387,155 @@ export function closeProfile() {
   resetProfileTabs();
 }
 
+// ── Painel de amizades ────────────────────────────────────────────────────────
+
+function _friendAvatar(p) {
+  if (p.avatarPhotoUrl) return `<div class="friendAvatar" style="background-image:url('${p.avatarPhotoUrl}');background-size:cover;background-position:center;font-size:0"></div>`;
+  return `<div class="friendAvatar" style="background:${p.avatarColor || "#342718"}">${p.avatarEmoji || "🔮"}</div>`;
+}
+
+function renderFriendItem(p, actions = []) {
+  const div = document.createElement("div");
+  div.className = "friendItem";
+  const btns = actions.map(a =>
+    `<button class="friendBtn ${a.cls || ""}" data-action="${a.action}" data-uid="${p.uid}">${a.label}</button>`
+  ).join("");
+  div.innerHTML = `
+    <div class="friendLeft">
+      ${_friendAvatar(p)}
+      <div class="friendMeta">
+        <div class="friendName">${escapeHtml(p.displayName || "Jogador")}</div>
+        <div class="friendUsername">@${escapeHtml(p.username || "jogador")}</div>
+      </div>
+    </div>
+    <div class="friendActions">${btns}</div>`;
+  return div;
+}
+
+async function loadUserProfileData(uid) {
+  try {
+    const snap = await getDoc(doc(S.db, "users", uid));
+    return snap.exists() ? { uid, ...snap.data() } : null;
+  } catch (_) { return null; }
+}
+
+export async function fillFriendsPanel(user, isSelfView) {
+  const panel         = document.getElementById("friendsPanel");
+  const listEl        = document.getElementById("friendsList");
+  const incomingEl    = document.getElementById("incomingRequestsList");
+  const searchBlock   = document.getElementById("friendSearchBlock");
+  const incomingBlock = document.getElementById("incomingRequestsBlock");
+
+  if (!panel) return;
+  if (!isSelfView) { panel.classList.add("hidden"); return; }
+
+  panel.classList.remove("hidden");
+  if (searchBlock) searchBlock.hidden = false;
+
+  // ── Amigos ────────────────────────────────────────────────────────────────
+  const friendUids = (user.friends || []).slice(0, 20);
+  if (listEl) {
+    listEl.innerHTML = "";
+    if (friendUids.length === 0) {
+      listEl.innerHTML = `<div class="friendEmpty">Nenhum amigo ainda. Busque pelo @usuário acima.</div>`;
+    } else {
+      const profiles = await Promise.all(friendUids.map(loadUserProfileData));
+      profiles.filter(Boolean).forEach(p => {
+        const item = renderFriendItem(p, [{ label: "Ver perfil", action: "view" }]);
+        item.querySelector("[data-action='view']")?.addEventListener("click", () => {
+          closeProfile();
+          openProfile({ userId: p.uid, name: p.displayName }).catch(() => {});
+        });
+        listEl.appendChild(item);
+      });
+    }
+  }
+
+  // ── Pedidos recebidos ─────────────────────────────────────────────────────
+  const incomingUids = (user.incomingRequests || []).slice(0, 10);
+  if (incomingBlock) incomingBlock.hidden = incomingUids.length === 0;
+  if (incomingEl) {
+    incomingEl.innerHTML = "";
+    if (incomingUids.length > 0) {
+      const profiles = await Promise.all(incomingUids.map(loadUserProfileData));
+      profiles.filter(Boolean).forEach(p => {
+        const item = renderFriendItem(p, [
+          { label: "Aceitar",  action: "accept", cls: "friendBtn--accept" },
+          { label: "Recusar",  action: "reject"  },
+        ]);
+        item.querySelectorAll("[data-action]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            btn.disabled = true;
+            const action = btn.dataset.action;
+            try {
+              await respondFriendRequest(p.uid, action);
+              item.remove();
+              if (action === "accept") {
+                const freshSnap = await getDoc(S.userRef);
+                if (freshSnap.exists()) fillFriendsPanel(freshSnap.data(), true);
+              }
+            } catch (_) { btn.disabled = false; }
+          });
+        });
+        incomingEl.appendChild(item);
+      });
+    }
+  }
+
+  // ── Botão de leaderboard ──────────────────────────────────────────────────
+  if (friendUids.length > 0 && !panel.querySelector("#leaderboardBtn")) {
+    const lb = document.createElement("button");
+    lb.id = "leaderboardBtn";
+    lb.className = "profileActionBtn";
+    lb.style.cssText = "width:100%;margin-top:4px;font-size:12px;opacity:.7;";
+    lb.textContent = "🏆 Ranking de amigos";
+    lb.addEventListener("click", () => showLeaderboardModal());
+    panel.appendChild(lb);
+  }
+}
+
+async function showLeaderboardModal() {
+  document.querySelector(".leaderboardOverlay")?.remove();
+  const overlay = document.createElement("div");
+  overlay.className = "recapOverlay leaderboardOverlay";
+  overlay.innerHTML = `<div class="recapCard" style="max-height:80vh;overflow-y:auto;">
+    <div class="recapCard__eyebrow">Amigos</div>
+    <div class="recapCard__title">Ranking de XP</div>
+    <div id="leaderboardRows" style="margin:16px 0;"><div style="opacity:.4;text-align:center;padding:20px 0;">Carregando…</div></div>
+    <div class="recapCard__actions">
+      <button class="recapCard__btn recapCard__btn--ghost" id="lbCloseBtn">FECHAR</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById("lbCloseBtn").addEventListener("click", () => {
+    overlay.classList.add("closing");
+    setTimeout(() => overlay.remove(), 300);
+  });
+
+  const result = await fetchFriendsLeaderboard();
+  const rowsEl = document.getElementById("leaderboardRows");
+  if (!rowsEl) return;
+
+  const board = result?.leaderboard || [];
+  if (!board.length) { rowsEl.innerHTML = `<div style="opacity:.4;text-align:center;padding:20px 0;">Nenhum dado ainda.</div>`; return; }
+
+  rowsEl.innerHTML = board.map((e, i) => {
+    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`;
+    const selfMark = e.isSelf ? ' <span style="opacity:.5;font-size:11px;">(você)</span>' : "";
+    const avatarStyle = e.avatarPhotoUrl
+      ? `style="background-image:url('${e.avatarPhotoUrl}');background-size:cover;background-position:center;font-size:0"`
+      : `style="background:${e.avatarColor || "#342718"}"`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);">
+      <span style="width:28px;text-align:center;font-size:16px;">${medal}</span>
+      <div class="friendAvatar" ${avatarStyle}>${e.avatarPhotoUrl ? "" : (e.avatarEmoji || "🔮")}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;">${escapeHtml(e.displayName)}${selfMark}</div>
+        <div style="font-size:11px;opacity:.5;">Nv. ${e.level} · ${e.xp.toLocaleString("pt-BR")} XP</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
 // ── Bindings do perfil (inicializados por init.js) ────────────────────────────
 export function bindProfileEvents() {
   const profileModal     = document.getElementById("profileModal");
@@ -424,6 +575,27 @@ export function bindProfileEvents() {
   cancelEditProfileBtn?.addEventListener("click", () => {
     document.getElementById("profileEditor")?.classList.add("hidden");
     document.getElementById("profileActions")?.classList.remove("hidden");
+  });
+
+  addFriendBtn?.addEventListener("click", async () => {
+    const targetUid = S.openedProfileUserId;
+    if (!targetUid || targetUid === S.userId) return;
+    addFriendBtn.disabled = true;
+    addFriendBtn.textContent = "Enviando…";
+    try {
+      const result = await sendFriendRequest(targetUid);
+      if (result?.status === "auto_accepted" || result?.status === "already_friends") {
+        addFriendBtn.textContent = "✓ Amigos!";
+      } else if (result?.ok) {
+        addFriendBtn.textContent = "✓ Pedido enviado";
+      } else {
+        addFriendBtn.textContent = "Adicionar amigo";
+        addFriendBtn.disabled = false;
+      }
+    } catch (_) {
+      addFriendBtn.textContent = "Adicionar amigo";
+      addFriendBtn.disabled = false;
+    }
   });
 
   profileEditor?.addEventListener("submit", async (e) => {
@@ -517,6 +689,54 @@ export function bindProfileEvents() {
     setFxSelection(fx); localStorage.setItem("osl_fx", fx);
     try { await updateDoc(doc(S.db, "users", S.userId), { visualEffect: fx, lastSeen: serverTimestamp() }); } catch (_) {}
   });
+
+  // ── Busca de jogadores ──────────────────────────────────────────────────────
+  const friendSearchInput = document.getElementById("friendSearchInput");
+  const friendSearchBtn   = document.getElementById("friendSearchBtn");
+  const friendSearchResults = document.getElementById("friendSearchResults");
+
+  async function runFriendSearch() {
+    const q = friendSearchInput?.value.trim();
+    if (!q || q.length < 2 || !friendSearchResults) return;
+    friendSearchBtn.disabled = true;
+    friendSearchResults.innerHTML = `<div style="opacity:.4;font-size:13px;padding:8px 0;">Buscando…</div>`;
+    try {
+      const result = await searchUsers(q);
+      const results = result?.results || [];
+      friendSearchResults.innerHTML = "";
+      if (!results.length) {
+        friendSearchResults.innerHTML = `<div class="friendEmpty">Nenhum jogador encontrado com "@${escapeHtml(q)}".</div>`;
+      } else {
+        const myFriends = new Set((S.openedProfileData?.friends || []));
+        results.forEach(p => {
+          const isFriend = myFriends.has(p.uid);
+          const item = renderFriendItem(p, isFriend
+            ? [{ label: "Já são amigos", action: "noop", cls: "friendBtn--pending" }]
+            : [{ label: "Adicionar", action: "add" }]
+          );
+          const addBtn = item.querySelector("[data-action='add']");
+          if (addBtn) {
+            addBtn.addEventListener("click", async () => {
+              addBtn.disabled = true;
+              addBtn.textContent = "Enviando…";
+              try {
+                const r = await sendFriendRequest(p.uid);
+                addBtn.textContent = (r?.status === "auto_accepted") ? "✓ Amigos!" : "✓ Enviado";
+              } catch (_) { addBtn.disabled = false; addBtn.textContent = "Adicionar"; }
+            });
+          }
+          friendSearchResults.appendChild(item);
+        });
+      }
+    } catch (_) {
+      friendSearchResults.innerHTML = `<div class="friendEmpty">Erro ao buscar.</div>`;
+    } finally {
+      friendSearchBtn.disabled = false;
+    }
+  }
+
+  friendSearchBtn?.addEventListener("click", runFriendSearch);
+  friendSearchInput?.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); runFriendSearch(); } });
 
   document.getElementById("copyRoomCodeBtn")?.addEventListener("click", () => {
     const code = localStorage.getItem("osl_sala") || S.roomCode || "";
