@@ -47,27 +47,15 @@
     btn.title = active.muted ? 'Ativar som ambiente' : 'Silenciar som ambiente';
   }
 
-  // Desbloqueia som no primeiro gesto.
-  // Usa microtask para que um onclick simultâneo (fase bubble) já encontre unlocked=true
-  // e execute o toggle real em vez de brigar com unlock().
-  function unlock() {
-    if (unlocked) return;
-    unlocked = true;
-    Promise.resolve().then(function() {
-      active.muted = false;
-      next.muted   = false;
-      active.play();
-      updateLobbyMuteBtn();
-    });
-  }
-  document.addEventListener('pointerdown', unlock, { once: true, capture: true });
-  document.addEventListener('touchstart',  unlock, { once: true, capture: true });
-  document.addEventListener('keydown',     unlock, { once: true, capture: true });
-
   window._toggleLobbyMute = function() {
     if (!unlocked) {
-      // Primeiro toque direto no botão Ambiente — desbloqueia sem re-mutar
-      unlock();
+      // Primeiro clique: desbloqueia e liga o som. Feito de forma síncrona no
+      // handler de click para evitar race com microtasks de outros listeners.
+      unlocked = true;
+      active.muted = false;
+      next.muted   = false;
+      active.play().catch(function(){});
+      updateLobbyMuteBtn();
       return;
     }
     var m = !active.muted;
