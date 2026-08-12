@@ -223,6 +223,14 @@ export async function fetchRoomStats() {
   }
 }
 
+// ── Cosméticos por moedas ─────────────────────────────────────────────────────
+
+export async function buyWithCoins(cosmeticId) {
+  const idToken = await _getFirebaseIdToken();
+  if (!idToken) return { ok: false };
+  return _post("/cosmetics/buy-with-coins", { cosmeticId, firebaseIdToken: idToken });
+}
+
 export async function redeemPendingCoins() {
   const idToken = await _getFirebaseIdToken();
   if (!idToken) return { ok: false, coinsAdded: 0 };

@@ -2,8 +2,8 @@
 import { S } from "../state.js";
 import { setDoc, updateDoc, getDoc, getDocs, deleteDoc, doc, query, where, limit, collection, serverTimestamp, onAuthStateChanged } from "../firebase.js";
 import { escapeHtml, initials, normalizeUsername, uniqueArray } from "../utils.js";
-import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, PRESTIGE_PRODUTOS, BACKEND_BASE_URL } from "../constants.js";
-import { sendFriendRequest, respondFriendRequest, fetchFriendsLeaderboard, searchUsers } from "../api.js";
+import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, COIN_COSMETICS, PRESTIGE_PRODUTOS, BACKEND_BASE_URL } from "../constants.js";
+import { sendFriendRequest, respondFriendRequest, fetchFriendsLeaderboard, searchUsers, buyWithCoins } from "../api.js";
 
 const BACKEND_BASE_URL_OSL = BACKEND_BASE_URL; // alias mantido pra não trocar 1000 referências
 
@@ -39,6 +39,7 @@ export function applyPrestigeUnlocks() {
   refreshPackSwatches();
   refreshCardStyleSwatches();
   refreshFxSwatches();
+  refreshCoinSwatches();
 }
 
 // Ouve o evento disparado por effects.js quando level 50 é atingido
@@ -93,6 +94,7 @@ export async function syncAccountPurchases() {
     refreshPackSwatches();
     refreshCardStyleSwatches();
     refreshFxSwatches();
+    refreshCoinSwatches();
   } catch (_) {}
 }
 
@@ -158,10 +160,12 @@ export function setAvatarPhoto(dataUrl) {
 
 // ── Temas de fundo ────────────────────────────────────────────────────────────
 export function isThemeUnlocked(theme) {
-  const requiredPack = BG_PACK_THEMES[theme];
-  if (!requiredPack) return true;
   if (S._isPrestige) return true;
-  return _hasCompra(requiredPack);
+  const packId = BG_PACK_THEMES[theme];
+  if (packId) return _hasCompra(packId);           // tema de pacote (dinheiro real)
+  const coinId = "bg-" + theme;
+  if (COIN_COSMETICS[coinId]) return _hasCompra(coinId); // tema de moeda
+  return true;                                       // tema gratuito
 }
 
 export function applyBgTheme(theme) {
@@ -190,7 +194,9 @@ export function refreshPackSwatches() {
 export function isCardStyleUnlocked(style) {
   if (style === "padrao") return true;
   if (S._isPrestige) return true;
-  return _hasCompra("estilo-carta");
+  if (["dourado","obsidiana","pergaminho","neon"].includes(style)) return _hasCompra("estilo-carta");
+  if (COIN_COSMETICS["card-" + style]) return _hasCompra("card-" + style);
+  return false;
 }
 
 export function applyCardStyle(style) {
@@ -215,9 +221,12 @@ export function refreshCardStyleSwatches() {
 }
 
 // ── Efeitos visuais ───────────────────────────────────────────────────────────
-export function isFxUnlocked() {
+// Sem argumento: verifica se os efeitos pagos (dinheiro real) estão liberados — usado em refreshFxSwatches
+export function isFxUnlocked(fx) {
   if (S._isPrestige) return true;
-  return _hasCompra("efeitos-visuais");
+  if (!fx || ["particulas","nevoa","pulsos"].includes(fx)) return _hasCompra("efeitos-visuais");
+  if (COIN_COSMETICS["fx-" + fx]) return _hasCompra("fx-" + fx);
+  return fx === "none";
 }
 
 export function applyVisualEffect(fx) {
@@ -227,7 +236,7 @@ export function applyVisualEffect(fx) {
 }
 
 export function setFxSelection(fx) {
-  if (fx !== "none" && !isFxUnlocked()) return;
+  if (fx !== "none" && !isFxUnlocked(fx)) return;
   S.selectedFx = FX_STYLES.includes(fx) ? fx : "none";
   document.getElementById("fxStyleRow")?.querySelectorAll(".fxSwatch").forEach(sw => sw.classList.toggle("bgSwatch--active", sw.dataset.fx === S.selectedFx));
   applyVisualEffect(S.selectedFx);
@@ -238,6 +247,18 @@ export function refreshFxSwatches() {
   document.getElementById("fxStyleRow")?.querySelectorAll(".fxSwatch--paid").forEach(sw => {
     sw.classList.toggle("bgSwatch--locked", !unlocked);
     const lock = sw.querySelector(".lockIcon"); if (lock) lock.style.display = unlocked ? "none" : "";
+  });
+  refreshCoinSwatches();
+}
+
+export function refreshCoinSwatches() {
+  document.querySelectorAll(".bgSwatch--coin").forEach(sw => {
+    const coinId = sw.dataset.coinId;
+    if (!coinId) return;
+    const unlocked = S._isPrestige || _hasCompra(coinId);
+    sw.classList.toggle("bgSwatch--locked", !unlocked);
+    const lock = sw.querySelector(".lockIcon"); if (lock) lock.style.display = unlocked ? "none" : "";
+    const priceEl = sw.querySelector(".coinPrice"); if (priceEl) priceEl.style.display = unlocked ? "none" : "";
   });
 }
 
@@ -536,6 +557,116 @@ async function showLeaderboardModal() {
   }).join("");
 }
 
+// ── Loja de Moedas ────────────────────────────────────────────────────────────
+
+export function openCoinShop() {
+  document.querySelector(".coinShopOverlay")?.remove();
+
+  const overlay = document.createElement("div");
+  overlay.className = "recapOverlay coinShopOverlay";
+
+  const currentCoins = parseInt(localStorage.getItem("osl_coins") || "0", 10);
+
+  const items = Object.entries(COIN_COSMETICS);
+  const itemsHTML = items.map(([id, c]) => {
+    const owned = S._isPrestige || _hasCompra(id);
+    const previewStyle = _coinItemPreviewStyle(id);
+    return `<div class="coinShopItem${owned ? " coinShopItem--owned" : ""}" data-coin-id="${id}">
+      <div class="coinShopItem__preview" style="${previewStyle}"></div>
+      <div class="coinShopItem__info">
+        <div class="coinShopItem__name">${escapeHtml(c.title)}</div>
+        <div class="coinShopItem__cat">${_coinCatLabel(c.categoria)}</div>
+      </div>
+      <div class="coinShopItem__action">
+        ${owned
+          ? `<span class="coinShopItem__owned">✓ Seu</span>`
+          : `<button class="coinShopItem__buy" data-coin-id="${id}" data-price="${c.coins}" ${currentCoins < c.coins ? "disabled" : ""}>
+               🪙 ${c.coins}
+             </button>`
+        }
+      </div>
+    </div>`;
+  }).join("");
+
+  overlay.innerHTML = `
+    <div class="recapCard" style="max-width:400px;max-height:88vh;overflow-y:auto;">
+      <div class="recapCard__eyebrow">Personalização</div>
+      <div class="recapCard__title">Loja de Moedas</div>
+      <div class="coinShopBalance">🪙 <strong id="coinShopBalanceNum">${currentCoins.toLocaleString("pt-BR")}</strong> moedas disponíveis</div>
+      <div id="coinShopItems" style="margin:16px 0;">${itemsHTML}</div>
+      <div class="recapCard__actions">
+        <button class="recapCard__btn recapCard__btn--ghost" id="coinShopCloseBtn">FECHAR</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById("coinShopCloseBtn").addEventListener("click", () => {
+    overlay.classList.add("closing");
+    setTimeout(() => overlay.remove(), 300);
+  });
+  overlay.addEventListener("click", e => { if (e.target === overlay) { overlay.classList.add("closing"); setTimeout(() => overlay.remove(), 300); } });
+
+  overlay.addEventListener("click", async e => {
+    const btn = e.target.closest(".coinShopItem__buy");
+    if (!btn || btn.disabled) return;
+    const coinId = btn.dataset.coinId;
+    const price  = parseInt(btn.dataset.price, 10);
+    btn.disabled = true;
+    btn.textContent = "Comprando…";
+
+    const result = await buyWithCoins(coinId).catch(() => null);
+
+    if (result?.ok && !result.alreadyOwned) {
+      // Atualiza saldo local + UI
+      const newBalance = result.newCoinBalance ?? 0;
+      try { localStorage.setItem("osl_coins", String(newBalance)); } catch (_) {}
+      const balEl = document.getElementById("coinBalanceNum") || document.getElementById("coinBalance");
+      if (balEl) balEl.textContent = newBalance.toLocaleString("pt-BR");
+      const shopBal = document.getElementById("coinShopBalanceNum");
+      if (shopBal) shopBal.textContent = newBalance.toLocaleString("pt-BR");
+
+      // Marca como comprado no _verifiedProdutos
+      if (_verifiedProdutos !== null) _verifiedProdutos.add(coinId);
+
+      // Atualiza o item no modal
+      const itemEl = overlay.querySelector(`.coinShopItem[data-coin-id="${coinId}"]`);
+      if (itemEl) {
+        itemEl.classList.add("coinShopItem--owned");
+        const actionEl = itemEl.querySelector(".coinShopItem__action");
+        if (actionEl) actionEl.innerHTML = `<span class="coinShopItem__owned">✓ Seu</span>`;
+      }
+
+      // Atualiza swatches no perfil
+      refreshCoinSwatches();
+      refreshPackSwatches();
+    } else if (result?.alreadyOwned) {
+      btn.textContent = "✓ Já seu";
+    } else if (result?.error === "MOEDAS_INSUFICIENTES") {
+      btn.textContent = "Moedas insuf.";
+      setTimeout(() => { btn.disabled = false; btn.textContent = `🪙 ${price}`; }, 2000);
+    } else {
+      btn.disabled = false;
+      btn.textContent = `🪙 ${price}`;
+    }
+  });
+}
+
+function _coinCatLabel(cat) {
+  return cat === "bg" ? "Fundo de sala" : cat === "card" ? "Estilo de carta" : "Efeito visual";
+}
+
+function _coinItemPreviewStyle(coinId) {
+  const previews = {
+    "bg-crepusculo": "background:radial-gradient(ellipse 120% 60% at 50% 95%,rgba(220,80,20,.5) 0%,transparent 60%),linear-gradient(180deg,#06040c 0%,#1a0c10 30%,#240c04 65%,#0e0604 100%);",
+    "bg-pedra":      "background:linear-gradient(160deg,#0c0d14 0%,#141520 50%,#0a0b10 100%);",
+    "bg-espelho":    "background:radial-gradient(ellipse 100% 70% at 50% 50%,rgba(180,195,215,.2) 0%,transparent 65%),linear-gradient(145deg,#0c1018 0%,#1a1e28 45%,#0a0e14 100%);",
+    "card-cinza":    "background:linear-gradient(180deg,#151820 0%,#0c0e14 100%);border-color:rgba(150,165,195,.30);",
+    "fx-centelhas":  "background:radial-gradient(circle,rgba(215,176,107,.7) 2px,transparent 2px),radial-gradient(circle,rgba(255,255,255,.8) 1.5px,transparent 1.5px),#06040a;background-size:20px 20px,14px 14px,auto;background-position:5px 8px,12px 4px,0 0;",
+  };
+  return previews[coinId] || "background:#080608;";
+}
+
 // ── Bindings do perfil (inicializados por init.js) ────────────────────────────
 export function bindProfileEvents() {
   const profileModal     = document.getElementById("profileModal");
@@ -690,6 +821,24 @@ export function bindProfileEvents() {
     try { await updateDoc(doc(S.db, "users", S.userId), { visualEffect: fx, lastSeen: serverTimestamp() }); } catch (_) {}
   });
 
+  // ── Swatches com moedas (bg, card, fx) ───────────────────────────────────────
+  document.querySelectorAll(".bgSwatch--coin,.cardStyleSwatch--coin,.fxSwatch--coin").forEach(sw => {
+    sw.addEventListener("click", async () => {
+      const coinId = sw.dataset.coinId;
+      if (!coinId) return;
+      const unlocked = S._isPrestige || _hasCompra(coinId);
+      if (unlocked) {
+        const item = COIN_COSMETICS[coinId];
+        if (!item) return;
+        if (item.categoria === "bg")   { setBgSelection(item.key); localStorage.setItem("osl_bg", item.key); try { await updateDoc(doc(S.db, "users", S.userId), { bgTheme: item.key }); } catch (_) {} }
+        if (item.categoria === "card") { setCardStyleSelection(item.key); localStorage.setItem("osl_card_style", item.key); try { await updateDoc(doc(S.db, "users", S.userId), { cardStyle: item.key }); } catch (_) {} }
+        if (item.categoria === "fx")   { setFxSelection(item.key); localStorage.setItem("osl_fx", item.key); try { await updateDoc(doc(S.db, "users", S.userId), { visualEffect: item.key }); } catch (_) {} }
+      } else {
+        openCoinShop();
+      }
+    });
+  });
+
   // ── Busca de jogadores ──────────────────────────────────────────────────────
   const friendSearchInput = document.getElementById("friendSearchInput");
   const friendSearchBtn   = document.getElementById("friendSearchBtn");
@@ -757,4 +906,7 @@ export function bindProfileEvents() {
 
   // Ouve evento de abrir perfil (disparado por room.js)
   document.addEventListener("osl:openProfileModal", e => openProfile(e.detail).catch(console.error));
+
+  // Clique no saldo de moedas abre a loja
+  document.getElementById("coinBalanceWrap")?.addEventListener("click", () => openCoinShop());
 }

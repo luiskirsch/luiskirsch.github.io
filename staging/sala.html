@@ -224,6 +224,30 @@
       linear-gradient(180deg, rgba(0,0,0,.70) 0%, rgba(0,0,0,.52) 45%, rgba(0,0,0,.76) 100%),
       url('https://images.unsplash.com/photo-1504700610630-ac6aba3536d3?w=1920&q=80&fit=crop') center/cover no-repeat; }
 
+    /* ── Temas exclusivos de moedas 🪙 ── */
+
+    /* Crepúsculo — horizonte pôr do sol cálido */
+    html.bg-crepusculo{ --bg-1:#0e0604; }
+    html.bg-crepusculo::before{ background:
+      radial-gradient(ellipse 130% 55% at 50% 100%, rgba(220,80,20,.30) 0%, transparent 58%),
+      radial-gradient(ellipse 80% 40% at 50% 88%, rgba(180,40,10,.18) 0%, transparent 60%),
+      linear-gradient(180deg, #06040c 0%, #180c10 28%, #260c04 62%, #0e0604 100%); }
+
+    /* Pedra Fria — granito escuro com veios */
+    html.bg-pedra{ --bg-1:#060608; }
+    html.bg-pedra::before{ background:
+      repeating-linear-gradient(128deg, rgba(255,255,255,.011) 0, rgba(255,255,255,.011) 1px, transparent 1px, transparent 35px),
+      repeating-linear-gradient(42deg,  rgba(255,255,255,.008) 0, rgba(255,255,255,.008) 1px, transparent 1px, transparent 55px),
+      radial-gradient(ellipse 80% 50% at 30% 70%, rgba(70,75,90,.22) 0%, transparent 58%),
+      linear-gradient(180deg, #040406 0%, #0e0f14 45%, #06080e 100%); }
+
+    /* Espelho — prata e cinza metálico suave */
+    html.bg-espelho{ --bg-1:#0a0c10; }
+    html.bg-espelho::before{ background:
+      radial-gradient(ellipse 100% 70% at 50% 50%, rgba(180,195,215,.09) 0%, transparent 62%),
+      radial-gradient(ellipse 60% 40% at 20% 30%, rgba(160,175,200,.06) 0%, transparent 55%),
+      linear-gradient(145deg, #0c1018 0%, #1a1e28 42%, #0a0e14 72%, #0a0c10 100%); }
+
     /* Vinheta — sem mix-blend-mode (muito custoso em GPU) */
     body::before{
       content:"";
@@ -3572,6 +3596,13 @@
       border-color:rgba(200,165,110,.40);
       box-shadow:0 12px 28px rgba(0,0,0,.40);
     }
+    /* Ardósia — exclusivo de moedas */
+    html.card-cinza .cardBack{
+      background:linear-gradient(180deg, #151820 0%, #0c0e14 100%);
+      border-color:rgba(150,165,195,.28);
+      box-shadow:0 12px 28px rgba(0,0,0,.55), inset 0 1px 0 rgba(180,195,215,.07);
+    }
+
     html.card-neon .cardBack{
       background:linear-gradient(180deg, #0a0614 0%, #04020e 100%);
       border-color:rgba(120,70,240,.60);
@@ -3634,6 +3665,91 @@
       background:radial-gradient(circle at 50% 48%, rgba(215,176,107,.18) 0%, transparent 62%);
       animation:fxPulse 5s ease-in-out infinite;
     }
+
+    /* Centelhas — exclusivo de moedas */
+    @keyframes fxSpark{
+      0%{ transform:translateY(0) scale(0.6);  opacity:0; }
+      12%{ opacity:1; }
+      88%{ opacity:.35; }
+      100%{ transform:translateY(-55px) scale(1.4); opacity:0; }
+    }
+    @keyframes fxSpark2{
+      0%{ transform:translateY(0) scale(0.5);  opacity:0; }
+      15%{ opacity:0.9; }
+      85%{ opacity:.2; }
+      100%{ transform:translateY(-40px) scale(1.6); opacity:0; }
+    }
+    html.effect-centelhas #visualFxLayer::before{
+      content:'';
+      position:absolute; inset:0;
+      background-image:
+        radial-gradient(circle, rgba(215,176,107,.85) 1.5px, transparent 1.5px),
+        radial-gradient(circle, rgba(255,255,255,.70) 1px,   transparent 1px),
+        radial-gradient(circle, rgba(215,176,107,.60) 1px,   transparent 1px);
+      background-size: 72px 72px, 54px 54px, 90px 90px;
+      background-position: 8px 20px, 36px 10px, 18px 48px;
+      animation: fxSpark 3.2s ease-in-out infinite;
+      mix-blend-mode: screen;
+    }
+    html.effect-centelhas #visualFxLayer::after{
+      content:'';
+      position:absolute; inset:0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,.80) 1px,   transparent 1px),
+        radial-gradient(circle, rgba(215,176,107,.75) 1.5px, transparent 1.5px);
+      background-size: 88px 88px, 66px 66px;
+      background-position: 52px 6px, 28px 44px;
+      animation: fxSpark2 4.4s ease-in-out infinite .9s;
+      mix-blend-mode: screen;
+    }
+
+    /* ── Swatches de moeda ── */
+    .bgSwatch--coin{
+      border-style:dotted;
+      border-color:rgba(215,176,107,.35);
+    }
+    .bgSwatch--coin:not(.bgSwatch--locked){
+      border-style:solid;
+      border-color:rgba(215,176,107,.45);
+    }
+    .coinPrice{
+      position:absolute; bottom:3px; left:0; right:0;
+      text-align:center;
+      font-size:8px; font-weight:700; letter-spacing:.04em;
+      color:rgba(215,176,107,.85);
+      text-shadow:0 1px 3px rgba(0,0,0,.9);
+      background:none;
+    }
+
+    /* ── Coin shop modal ── */
+    .coinShopBalance{
+      font-size:13px; color:rgba(215,176,107,.85);
+      padding:10px 0 4px; border-bottom:1px solid var(--line,rgba(255,255,255,.08));
+      margin-bottom:4px;
+    }
+    .coinShopItem{
+      display:flex; align-items:center; gap:12px;
+      padding:10px 0; border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .coinShopItem--owned{ opacity:.55; }
+    .coinShopItem__preview{
+      width:44px; height:32px; border-radius:8px; flex-shrink:0;
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .coinShopItem__info{ flex:1; min-width:0; }
+    .coinShopItem__name{ font-size:13px; font-weight:700; }
+    .coinShopItem__cat{ font-size:10px; opacity:.45; text-transform:uppercase; letter-spacing:.06em; }
+    .coinShopItem__action{ flex-shrink:0; }
+    .coinShopItem__buy{
+      appearance:none;
+      background:rgba(215,176,107,.12); border:1px solid rgba(215,176,107,.30);
+      color:rgba(215,176,107,.9); font:700 12px/1 inherit;
+      padding:6px 12px; border-radius:8px; cursor:pointer;
+      transition:background .15s ease;
+    }
+    .coinShopItem__buy:hover:not(:disabled){ background:rgba(215,176,107,.22); }
+    .coinShopItem__buy:disabled{ opacity:.4; cursor:not-allowed; }
+    .coinShopItem__owned{ font-size:11px; color:#54d06d; font-weight:700; }
 
     .profLabelFree{
       display:inline-block;
@@ -6824,7 +6940,7 @@
                 <strong class="topMeta__xpTotal" id="xpCardXp">0 XP</strong>
               </span>
               <span class="topMeta__sep">·</span>
-              <span class="topMeta__coins" id="coinBalanceWrap" title="Moedas acumuladas">🪙 <span id="coinBalance">0</span></span>
+              <span class="topMeta__coins" id="coinBalanceWrap" title="Ver loja de moedas" style="cursor:pointer;user-select:none">🪙 <span id="coinBalance">0</span></span>
             </div>
             <div style="display:flex;flex-direction:column;gap:4px;">
               <p class="eyebrow" style="margin-left:2px;"><span data-i18n="sala:topbar.roomEyebrow">Sala do Ritual</span> · <span id="gameStatus" class="eyebrow__status" data-i18n="sala:topbar.status.waiting">Espera</span></p>
@@ -7301,6 +7417,17 @@
             <button type="button" class="bgSwatch bgSwatch--pack" data-bg="vinho" data-pack="pacote-casais" data-i18n-title="sala:bg.swatch.vinho" title="Vinho — Pacote Casais"
               style="background:linear-gradient(135deg,#0c0004 0%,#440012 55%,#0c0004 100%)">
               <span data-i18n="sala:bg.short.vinho">Vinho</span><span class="lockIcon">🔒</span></button>
+
+            <div class="bgSwatchSection">Exclusivos · Moedas 🪙</div>
+            <button type="button" class="bgSwatch bgSwatch--coin" data-bg="crepusculo" data-coin-id="bg-crepusculo" title="Crepúsculo — 200 moedas"
+              style="background:radial-gradient(ellipse 120% 60% at 50% 95%,rgba(220,80,20,.45) 0%,transparent 60%),linear-gradient(180deg,#06040c 0%,#1a0c10 28%,#260c04 62%,#0e0604 100%)">
+              <span>Crepúsc.</span><span class="lockIcon">🪙</span><span class="coinPrice">200</span></button>
+            <button type="button" class="bgSwatch bgSwatch--coin" data-bg="pedra" data-coin-id="bg-pedra" title="Pedra Fria — 200 moedas"
+              style="background:linear-gradient(160deg,#0c0d14 0%,#141520 50%,#0a0b10 100%)">
+              <span>Pedra</span><span class="lockIcon">🪙</span><span class="coinPrice">200</span></button>
+            <button type="button" class="bgSwatch bgSwatch--coin" data-bg="espelho" data-coin-id="bg-espelho" title="Espelho — 300 moedas"
+              style="background:radial-gradient(ellipse 100% 70% at 50% 50%,rgba(180,195,215,.18) 0%,transparent 65%),linear-gradient(145deg,#0c1018 0%,#1a1e28 45%,#0a0e14 100%)">
+              <span>Espelho</span><span class="lockIcon">🪙</span><span class="coinPrice">300</span></button>
           </div>
           <div id="bgPackHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
         </div>
@@ -7327,6 +7454,11 @@
             <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--paid" data-style="neon" data-i18n-title="sala:cardStyle.swatch.neon" title="Neon"
               style="background:linear-gradient(180deg,#0a0614,#04020e);border-color:rgba(120,70,240,.55)">
               <span data-i18n="sala:cardStyle.swatch.neon">Neon</span><span class="lockIcon">🔒</span></button>
+
+            <div class="bgSwatchSection">Exclusivos · Moedas 🪙</div>
+            <button type="button" class="bgSwatch cardStyleSwatch cardStyleSwatch--coin" data-style="cinza" data-coin-id="card-cinza" title="Ardósia — 300 moedas"
+              style="background:linear-gradient(180deg,#151820,#0c0e14);border-color:rgba(150,165,195,.28)">
+              <span>Ardósia</span><span class="lockIcon">🪙</span><span class="coinPrice">300</span></button>
           </div>
           <div id="cardStyleHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
         </div>
@@ -7350,6 +7482,11 @@
             <button type="button" class="bgSwatch fxSwatch fxSwatch--paid" data-fx="pulsos" data-i18n-title="sala:fx.swatch.pulsos" title="Pulsos"
               style="background:radial-gradient(circle,rgba(215,176,107,.3),#0a0806)">
               <span data-i18n="sala:fx.swatch.pulsos">Pulsos</span><span class="lockIcon">🔒</span></button>
+
+            <div class="bgSwatchSection">Exclusivos · Moedas 🪙</div>
+            <button type="button" class="bgSwatch fxSwatch fxSwatch--coin" data-fx="centelhas" data-coin-id="fx-centelhas" title="Centelhas — 250 moedas"
+              style="background:radial-gradient(circle,rgba(215,176,107,.55) 2px,transparent 2px),radial-gradient(circle,rgba(255,255,255,.6) 1.5px,transparent 1.5px),#06040a;background-size:18px 18px,12px 12px,auto;background-position:4px 7px,10px 3px,0 0">
+              <span>Centelhas</span><span class="lockIcon">🪙</span><span class="coinPrice">250</span></button>
           </div>
           <div id="fxHint" style="font-size:.72rem;color:rgba(215,176,107,.7);margin-top:6px;opacity:0;transition:opacity .3s ease;min-height:1em"></div>
         </div>

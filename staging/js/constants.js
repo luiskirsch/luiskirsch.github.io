@@ -186,17 +186,26 @@ export const EMOJI_LOTTIE = {
 export const LOTTIE_BASE = "https://fonts.gstatic.com/s/e/notoemoji/latest";
 
 // ── Temas de fundo ────────────────────────────────────────────────────────────
-export const BG_THEMES     = ["default","abismo","floresta","oceano","bruma","brasa","ambar","cristal","chama","veu","vinho"];
+export const BG_THEMES     = ["default","abismo","floresta","oceano","bruma","brasa","ambar","cristal","chama","veu","vinho","crepusculo","pedra","espelho"];
 export const BG_PACK_THEMES = {
   ambar: "pacote-conexao", cristal: "pacote-verdades",
   chama: "pacote-conflito", veu: "pacote-segredos", vinho: "pacote-casais"
 };
 
 // ── Estilos de carta ──────────────────────────────────────────────────────────
-export const CARD_STYLES = ["padrao","dourado","obsidiana","pergaminho","neon"];
+export const CARD_STYLES = ["padrao","dourado","obsidiana","pergaminho","neon","cinza"];
 
 // ── Efeitos visuais ───────────────────────────────────────────────────────────
-export const FX_STYLES = ["none","particulas","nevoa","pulsos"];
+export const FX_STYLES = ["none","particulas","nevoa","pulsos","centelhas"];
+
+// ── Cosméticos compráveis com moedas (não dinheiro real) ──────────────────────
+export const COIN_COSMETICS = {
+  "bg-crepusculo": { title: "Crepúsculo",  categoria: "bg",   coins: 200, key: "crepusculo" },
+  "bg-pedra":      { title: "Pedra Fria",  categoria: "bg",   coins: 200, key: "pedra"      },
+  "bg-espelho":    { title: "Espelho",     categoria: "bg",   coins: 300, key: "espelho"    },
+  "card-cinza":    { title: "Ardósia",     categoria: "card", coins: 300, key: "cinza"      },
+  "fx-centelhas":  { title: "Centelhas",   categoria: "fx",   coins: 250, key: "centelhas"  },
+};
 
 // ── Produtos de prestige ──────────────────────────────────────────────────────
 export const PRESTIGE_PRODUTOS = [

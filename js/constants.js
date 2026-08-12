@@ -1,5 +1,11 @@
 // Constantes de dados puras — sem efeitos colaterais
 
+// ── URL do backend (osl-video-server) ────────────────────────────────────────
+// Usa window.PANEL_SERVER_BASE se setado (sala.html define em prod), senão prod.
+export const BACKEND_BASE_URL = (typeof window !== "undefined" && window.PANEL_SERVER_BASE)
+  || "https://osl-video-server-staging.up.railway.app";
+
+
 // ── Efeitos por carta (battlecry / deathrattle) ──────────────────────────────
 export const OSL_CARD_EFFECTS = {
   "Pressão Real":         { battlecry: { type: "force_player", target: "random", label: "deve responder sem fugir" }, deathrattle: { type: "give_xp", amount: 10 } },
@@ -180,17 +186,26 @@ export const EMOJI_LOTTIE = {
 export const LOTTIE_BASE = "https://fonts.gstatic.com/s/e/notoemoji/latest";
 
 // ── Temas de fundo ────────────────────────────────────────────────────────────
-export const BG_THEMES     = ["default","abismo","floresta","oceano","bruma","brasa","ambar","cristal","chama","veu","vinho"];
+export const BG_THEMES     = ["default","abismo","floresta","oceano","bruma","brasa","ambar","cristal","chama","veu","vinho","crepusculo","pedra","espelho"];
 export const BG_PACK_THEMES = {
   ambar: "pacote-conexao", cristal: "pacote-verdades",
   chama: "pacote-conflito", veu: "pacote-segredos", vinho: "pacote-casais"
 };
 
 // ── Estilos de carta ──────────────────────────────────────────────────────────
-export const CARD_STYLES = ["padrao","dourado","obsidiana","pergaminho","neon"];
+export const CARD_STYLES = ["padrao","dourado","obsidiana","pergaminho","neon","cinza"];
 
 // ── Efeitos visuais ───────────────────────────────────────────────────────────
-export const FX_STYLES = ["none","particulas","nevoa","pulsos"];
+export const FX_STYLES = ["none","particulas","nevoa","pulsos","centelhas"];
+
+// ── Cosméticos compráveis com moedas (não dinheiro real) ──────────────────────
+export const COIN_COSMETICS = {
+  "bg-crepusculo": { title: "Crepúsculo",  categoria: "bg",   coins: 200, key: "crepusculo" },
+  "bg-pedra":      { title: "Pedra Fria",  categoria: "bg",   coins: 200, key: "pedra"      },
+  "bg-espelho":    { title: "Espelho",     categoria: "bg",   coins: 300, key: "espelho"    },
+  "card-cinza":    { title: "Ardósia",     categoria: "card", coins: 300, key: "cinza"      },
+  "fx-centelhas":  { title: "Centelhas",   categoria: "fx",   coins: 250, key: "centelhas"  },
+};
 
 // ── Produtos de prestige ──────────────────────────────────────────────────────
 export const PRESTIGE_PRODUTOS = [
@@ -270,7 +285,6 @@ export const OSL_XP_TITLES = [
 export const DAILY_STREAK_XP = [20, 30, 40, 50, 75, 100, 150];
 
 // ── Reações desbloqueadas por nível mínimo ────────────────────────────────────
-// O nível 1 tem as 6 reações base. Cada milestone adiciona mais.
 export const OSL_REACTION_UNLOCKS = [
   { minLevel: 1,  emojis: ["😂","❤️","😮","👏","🔥","💀"] },
   { minLevel: 5,  emojis: ["😤","🤩","🥺","👀"] },
@@ -280,16 +294,15 @@ export const OSL_REACTION_UNLOCKS = [
 ];
 
 // ── Moedas ganhas por nível (índice 0 = nível 1) ─────────────────────────────
-// Milestones (níveis com unlock) dão 3× a mais.
 export const OSL_COINS_PER_LEVEL = [
-  25, 25, 25, 25,100,  //  1– 5  (nível 5 milestone)
-  25, 25, 25, 25,100,  //  6–10
-  30, 30, 30, 30,150,  // 11–15
-  30, 30, 30, 30,150,  // 16–20
-  50, 50, 50, 50,200,  // 21–25
-  50, 50, 50, 50,200,  // 26–30
-  75, 75, 75, 75,300,  // 31–35
-  75, 75, 75, 75,300,  // 36–40
- 100,100,100,100,400,  // 41–45
- 100,100,100,100,500,  // 46–50
+  25, 25, 25, 25,100,
+  25, 25, 25, 25,100,
+  30, 30, 30, 30,150,
+  30, 30, 30, 30,150,
+  50, 50, 50, 50,200,
+  50, 50, 50, 50,200,
+  75, 75, 75, 75,300,
+  75, 75, 75, 75,300,
+ 100,100,100,100,400,
+ 100,100,100,100,500,
 ];
