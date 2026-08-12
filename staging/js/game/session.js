@@ -5,7 +5,7 @@
 
 import { S } from "../state.js";
 import { updateDoc, doc } from "../firebase.js";
-import { sessionPlayerJoin, sessionPlayerHeartbeat, sessionEndGame } from "../api.js";
+import { sessionPlayerJoin, sessionPlayerHeartbeat, sessionEndGame, sessionLogEvent } from "../api.js";
 
 // ── Referência de sessão ──────────────────────────────────────────────────────
 
@@ -17,11 +17,16 @@ export function setSessionId(sessionId) {
   S.sessionEventsRef = null; // cliente não escreve eventos diretamente
 }
 
-// ── No-ops — backend assume escrita ───────────────────────────────────────────
+// ── No-ops — backend assume escrita de eventos authoritative ─────────────────
 
 export async function createGameSession() {}
-export async function logEvent() {}
 export async function updateSessionGameState() {}
+
+// Eventos gerados pelo cliente: allowlist estrita no backend (PLAYER_LEFT, MISSION_COMPLETED)
+export async function logEvent(type, payload = {}) {
+  if (!S.sessionId) return;
+  sessionLogEvent(type, payload).catch(() => {});
+}
 
 // ── Player tracking ───────────────────────────────────────────────────────────
 

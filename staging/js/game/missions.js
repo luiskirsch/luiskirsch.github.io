@@ -5,6 +5,7 @@ import { escapeHtml, normalize } from "../utils.js";
 import { SECRET_MISSIONS } from "../constants.js";
 import { OSL_XP, OSL_ACHIEVEMENTS } from "./effects.js";
 import { subscribe } from "./engine.js";
+import { logEvent } from "./session.js";
 
 // ── Atribuição de missões pelo host ───────────────────────────────────────────
 // Persiste índice + nome do alvo (não o texto) pra que cada cliente renderize na sua língua.
@@ -183,6 +184,7 @@ export function completeMission() {
 
   if (S.userRef) OSL_XP.award(S.userRef, "MISSION_COMPLETE");
   OSL_ACHIEVEMENTS.onMissionComplete();
+  logEvent("MISSION_COMPLETED", { nickname: S.playerName }).catch(() => {});
 }
 
 // ── Modais de missão ──────────────────────────────────────────────────────────

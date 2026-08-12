@@ -82,24 +82,35 @@ export async function ritualReset(players) {
 
 // ── Ações de participante (votos, reações, AI, pressão social) ────────────────
 export async function ritualVote(option) {
-  return _post("/game/ritual/vote", { roomId: S.roomCode, ...(await _participantAuth()), option });
+  return _post("/game/ritual/vote", { roomId: S.roomCode, ...(await _participantAuth()), option, sessionId: S.sessionId });
 }
 
 export async function ritualReact(emoji) {
-  return _post("/game/ritual/react", { roomId: S.roomCode, ...(await _participantAuth()), emoji, playerName: S.playerName });
+  return _post("/game/ritual/react", { roomId: S.roomCode, ...(await _participantAuth()), emoji, playerName: S.playerName, sessionId: S.sessionId });
 }
 
 export async function ritualAiDetect(source, playerName, message) {
-  return _post("/game/ritual/ai-detect", { roomId: S.roomCode, ...(await _participantAuth()), source, playerName, message: message || null });
+  return _post("/game/ritual/ai-detect", { roomId: S.roomCode, ...(await _participantAuth()), source, playerName, message: message || null, sessionId: S.sessionId });
 }
 
 export async function ritualSocialPressure() {
-  return _post("/game/ritual/social-pressure", { roomId: S.roomCode, ...(await _participantAuth()), playerName: S.playerName });
+  return _post("/game/ritual/social-pressure", { roomId: S.roomCode, ...(await _participantAuth()), playerName: S.playerName, sessionId: S.sessionId });
 }
 
 export async function ritualResolveEffect(winner, dismissOnly) {
   const hostToken = sessionStorage.getItem("osl_host_token");
-  return _post("/game/ritual/resolve-effect", { roomId: S.roomCode, hostToken, winner: winner || null, dismissOnly: !!dismissOnly });
+  return _post("/game/ritual/resolve-effect", { roomId: S.roomCode, hostToken, winner: winner || null, dismissOnly: !!dismissOnly, sessionId: S.sessionId });
+}
+
+export async function sessionLogEvent(type, payload = {}) {
+  if (!S.sessionId) return { ok: false };
+  return _post("/game/session/log-event", {
+    roomId:    S.roomCode,
+    sessionId: S.sessionId,
+    ...(await _participantAuth()),
+    type,
+    payload,
+  });
 }
 
 export async function panelMarkSessionStart() {
