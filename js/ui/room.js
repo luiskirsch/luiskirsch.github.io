@@ -27,6 +27,20 @@ function playIncomingMessageSound() {
   } catch (_) {}
 }
 
+// ── Sanitização de campos de avatar (defesa contra XSS via Firestore) ─────────
+function safeAvatarUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  const t = url.trim();
+  if (!/^https:\/\//i.test(t)) return '';
+  return t.replace(/['"()\\ ]/g, '');
+}
+
+function safeAvatarColor(color) {
+  if (!color || typeof color !== 'string') return '#342718';
+  const t = color.trim();
+  return /^#[0-9a-fA-F]{3,8}$/.test(t) ? t : '#342718';
+}
+
 // ── Renderização de jogadores ─────────────────────────────────────────────────
 export function renderPlayers(players) {
   const playerListEl = document.getElementById("playerList");
@@ -39,11 +53,15 @@ export function renderPlayers(players) {
     const div = document.createElement("div");
     div.className = "player";
     div.dataset.pid = player.id;
-    const avatarContent = player.avatarPhotoUrl ? "" : (player.avatarEmoji || initials(player.name));
-    const avatarStyle   = player.avatarPhotoUrl
-      ? `style="background-image:url('${player.avatarPhotoUrl}');background-size:cover;background-position:center;font-size:0"`
-      : (player.avatarEmoji ? `style="font-size:1.3em;background:${player.avatarColor || "#342718"}"` : (player.avatarColor ? `style="background:${player.avatarColor}"` : ""));
-    const photoAttr = player.avatarPhotoUrl ? `data-photo-url="${player.avatarPhotoUrl}"` : "";
+    const safePhoto = safeAvatarUrl(player.avatarPhotoUrl);
+    const safeColor = safeAvatarColor(player.avatarColor);
+    const safeEmoji = escapeHtml(player.avatarEmoji || '');
+    const safeInits = escapeHtml(initials(player.name));
+    const avatarContent = safePhoto ? "" : (safeEmoji || safeInits);
+    const avatarStyle   = safePhoto
+      ? `style="background-image:url('${safePhoto}');background-size:cover;background-position:center;font-size:0"`
+      : (safeEmoji ? `style="font-size:1.3em;background:${safeColor}"` : (player.avatarColor ? `style="background:${safeColor}"` : ""));
+    const photoAttr = safePhoto ? `data-photo-url="${safePhoto}"` : "";
     div.innerHTML = `
       <div class="playerLeft">
         <div class="avatar" ${avatarStyle} ${photoAttr}>${avatarContent}</div>
