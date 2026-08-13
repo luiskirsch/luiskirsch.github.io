@@ -220,15 +220,11 @@ window.dismissAIDetection = dismissAIDetection;
     startMultiPoller();
     syncAccountPurchases();
 
-    // Fragmento pendente: mostra banner de espera se o hub retornar um fragmento ativo
+    // Hub Entre Sessões: fragmento + world state + daily + friends + last session + events + discoveries
     if (!S._isSpectator) {
       fetchHub().then(hub => {
-        if (!hub?.ok || !hub.fragment) return;
-        const banner  = document.getElementById("fragmentBanner");
-        const titleEl = document.getElementById("fragmentBannerTitle");
-        if (!banner) return;
-        if (titleEl) titleEl.textContent = hub.fragment.card?.title || "Fragmento";
-        banner.hidden = false;
+        if (!hub?.ok) return;
+        _renderHub(hub);
       }).catch(() => {});
     }
 
@@ -256,3 +252,133 @@ window.dismissAIDetection = dismissAIDetection;
     }
   }
 })();
+
+// ── Hub renderer ──────────────────────────────────────────────────────────────
+// Popula todos os elementos do #hubPanel a partir da resposta do /hub.
+
+function _el(id) { return document.getElementById(id); }
+
+function _renderHub(hub) {
+  const panel = _el("hubPanel");
+  if (!panel) return;
+
+  let hasAny = false;
+
+  // ── Fragment ────────────────────────────────────────────────────────────────
+  if (hub.fragment) {
+    const banner = _el("fragmentBanner");
+    const title  = _el("fragmentBannerTitle");
+    if (banner) {
+      if (title) title.textContent = hub.fragment.card?.title || "Fragmento";
+      banner.hidden = false;
+    }
+  }
+
+  // ── World State ─────────────────────────────────────────────────────────────
+  const world = hub.world;
+  if (world != null) {
+    hasAny = true;
+    const pct    = Math.round((world.communityProgress || 0) * 100);
+    const fill   = _el("hubProgressFill");
+    const pctEl  = _el("hubProgressPct");
+    const missEl = _el("hubMission");
+    if (fill)  fill.style.width = pct + "%";
+    if (pctEl) pctEl.textContent = pct + "%";
+    if (missEl && world.currentMission) missEl.textContent = world.currentMission;
+  }
+
+  // ── Season ──────────────────────────────────────────────────────────────────
+  if (hub.season?.name) {
+    hasAny = true;
+    const lbl = _el("hubSeasonLabel");
+    if (lbl) lbl.textContent = hub.season.name;
+  }
+
+  // ── Daily Ritual ────────────────────────────────────────────────────────────
+  const daily    = hub.daily;
+  const dailyCol = _el("hubDailyCol");
+  if (daily && dailyCol) {
+    hasAny = true;
+    dailyCol.hidden = false;
+    const titleEl = _el("hubDailyTitle");
+    if (titleEl) titleEl.textContent = daily.title || daily.theme || "Ritual";
+    const doneEl = _el("hubDailyDone");
+    if (doneEl && daily.completedByUser) doneEl.hidden = false;
+  }
+
+  // ── Amigos online ───────────────────────────────────────────────────────────
+  const online     = (hub.friends || []).filter(f => f.online).slice(0, 6);
+  const friendsCol = _el("hubFriendsCol");
+  if (online.length > 0 && friendsCol) {
+    hasAny = true;
+    friendsCol.hidden = false;
+    const row = _el("hubFriendRow");
+    if (row) {
+      row.innerHTML = online.map(f => {
+        const initial = (f.displayName || "?").charAt(0).toUpperCase();
+        const name    = (f.displayName || "Amigo").replace(/"/g, "&quot;");
+        return `<span class="hub-friend-chip" title="${name}">${initial}</span>`;
+      }).join("");
+    }
+  }
+
+  // ── Última sessão ───────────────────────────────────────────────────────────
+  const last      = hub.lastSession;
+  const resumeCol = _el("hubResumeCol");
+  if (last?.roomId && resumeCol) {
+    hasAny = true;
+    resumeCol.hidden = false;
+    const roomEl = _el("hubResumeRoom");
+    const dnaEl  = _el("hubResumeDna");
+    if (roomEl) roomEl.textContent = last.roomName || last.roomId;
+    if (dnaEl && last.dna) {
+      const d = last.dna;
+      const parts = [];
+      if (d.sessionCount) parts.push(`${d.sessionCount} sess.`);
+      if (d.dominantType) parts.push(d.dominantType);
+      dnaEl.textContent = parts.join(" · ");
+    }
+  }
+
+  // ── Eventos ativos ──────────────────────────────────────────────────────────
+  const events = (hub.events || []).slice(0, 3);
+  const evRow  = _el("hubEventsRow");
+  if (events.length > 0 && evRow) {
+    hasAny = true;
+    evRow.hidden = false;
+    evRow.innerHTML = events.map(e => {
+      const name = (e.name        || "Evento").replace(/</g, "&lt;");
+      const desc = (e.description || "")      .replace(/</g, "&lt;");
+      return `<div class="hub-event">
+        <span class="hub-event__name">${name}</span>
+        <span class="hub-event__desc">${desc}</span>
+      </div>`;
+    }).join("");
+  }
+
+  // ── Discoveries / Rumores ───────────────────────────────────────────────────
+  const available = (hub.discoveries?.available || []).slice(0, 2);
+  const teasers   = (hub.discoveries?.teasers   || []).slice(0, Math.max(0, 2 - available.length));
+  const allDisc   = [...available, ...teasers];
+  const discRow   = _el("hubDiscoveriesRow");
+  if (allDisc.length > 0 && discRow) {
+    hasAny = true;
+    discRow.hidden = false;
+    discRow.innerHTML = allDisc.map(d => {
+      const icon  = d.isTeaser ? "🌫️" : "🔮";
+      const title = (d.title || d.hint || "Rumor").replace(/</g, "&lt;");
+      const hint  = d.isTeaser
+        ? "Desbloqueie jogando mais"
+        : (d.description || "").replace(/</g, "&lt;");
+      return `<div class="hub-discovery">
+        <span class="hub-discovery__icon">${icon}</span>
+        <div class="hub-discovery__body">
+          <div class="hub-discovery__title">${title}</div>
+          ${hint ? `<div class="hub-discovery__hint">${hint}</div>` : ""}
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  if (hasAny) panel.hidden = false;
+}

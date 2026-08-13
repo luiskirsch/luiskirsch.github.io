@@ -6797,6 +6797,128 @@
     font-family:sans-serif;font-style:normal;letter-spacing:.02em;
   }
 
+  /* ── Hub Panel — Entre Sessões ──────────────────────────────────────── */
+  #hubPanel{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:10px;
+  }
+  body.ritual-started #hubPanel{ display:none!important; }
+
+  .hub-world{
+    background:rgba(255,255,255,.025);
+    border:1px solid rgba(230,192,123,.12);
+    border-radius:10px;
+    padding:10px 14px 8px;
+  }
+  .hub-world__top{
+    display:flex;justify-content:space-between;
+    align-items:center;margin-bottom:6px;
+  }
+  .hub-season{
+    font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+    color:rgba(230,192,123,.5);font-family:'Georgia',serif;
+  }
+  .hub-pct{
+    font-size:11px;font-variant-numeric:tabular-nums;
+    color:rgba(230,192,123,.6);
+  }
+  .hub-bar{
+    height:4px;background:rgba(255,255,255,.06);
+    border-radius:999px;overflow:hidden;
+  }
+  .hub-bar__fill{
+    height:100%;
+    background:linear-gradient(90deg,rgba(230,192,123,.25),rgba(230,192,123,.65));
+    border-radius:999px;
+    width:0%;
+    transition:width .7s ease;
+  }
+  .hub-mission{
+    font-size:10px;color:rgba(255,255,255,.3);
+    margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+
+  .hub-cols{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+  }
+  @media(max-width:580px){ .hub-cols{ grid-template-columns:1fr 1fr; } }
+  @media(max-width:360px){ .hub-cols{ grid-template-columns:1fr; } }
+
+  .hub-col{
+    background:rgba(255,255,255,.02);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:10px;
+    padding:9px 11px;
+    min-width:0;
+  }
+  .hub-col__label{
+    font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+    color:rgba(200,175,135,.4);margin-bottom:3px;font-family:'Georgia',serif;
+  }
+  .hub-col__value{
+    font-size:12px;font-style:italic;
+    color:rgba(230,192,123,.82);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .hub-col__sub{
+    font-size:10px;color:rgba(255,255,255,.3);
+    margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .hub-done{
+    font-size:10px;color:rgba(155,227,122,.7);
+    margin-top:4px;letter-spacing:.04em;
+  }
+
+  .hub-friend-row{ display:flex;gap:5px;flex-wrap:wrap;margin-top:4px; }
+  .hub-friend-chip{
+    width:24px;height:24px;border-radius:50%;
+    background:rgba(230,192,123,.12);
+    border:1px solid rgba(230,192,123,.22);
+    display:grid;place-items:center;
+    font-size:10px;font-weight:700;
+    color:rgba(230,192,123,.8);
+    cursor:default;
+  }
+
+  .hub-events{ display:flex;flex-direction:column;gap:6px; }
+  .hub-event{
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,.018);
+    border:1px solid rgba(230,192,123,.08);
+    border-radius:8px;padding:7px 12px;
+  }
+  .hub-event__name{
+    font-size:11px;font-weight:600;
+    color:rgba(230,192,123,.7);white-space:nowrap;
+  }
+  .hub-event__desc{
+    font-size:10px;color:rgba(255,255,255,.3);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+
+  .hub-discoveries{ display:flex;flex-direction:column;gap:6px; }
+  .hub-discovery{
+    display:flex;align-items:flex-start;gap:10px;
+    background:rgba(255,255,255,.018);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:8px;padding:8px 12px;
+  }
+  .hub-discovery__icon{ font-size:14px;flex-shrink:0;margin-top:1px; }
+  .hub-discovery__body{ min-width:0; }
+  .hub-discovery__title{
+    font-size:11px;font-weight:600;
+    color:rgba(220,210,190,.75);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .hub-discovery__hint{
+    font-size:10px;color:rgba(255,255,255,.28);
+    margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+
   /* ── LOBBY MODE — AAA full-bleed (ativo via body:not(.ritual-started).lobby-mode) ──────── */
   body:not(.ritual-started).lobby-mode .layout{
     height:calc(100svh - 116px);
@@ -7176,6 +7298,45 @@
                   <div class="lobbyViewer__hint">Arraste para girar</div>
                 </div>
                 <script src="../js/lobby-video.js"></script>
+
+                <!-- ── Hub Panel — Entre Sessões ──────────────────────── -->
+                <div id="hubPanel" hidden>
+
+                  <!-- World State: barra de progresso + missão + temporada -->
+                  <div class="hub-world">
+                    <div class="hub-world__top">
+                      <span class="hub-season" id="hubSeasonLabel"></span>
+                      <span class="hub-pct" id="hubProgressPct"></span>
+                    </div>
+                    <div class="hub-bar"><div class="hub-bar__fill" id="hubProgressFill"></div></div>
+                    <div class="hub-mission" id="hubMission"></div>
+                  </div>
+
+                  <!-- Colunas: ritual do dia · amigos online · última sessão -->
+                  <div class="hub-cols">
+                    <div class="hub-col" id="hubDailyCol" hidden>
+                      <div class="hub-col__label">Ritual do dia</div>
+                      <div class="hub-col__value" id="hubDailyTitle"></div>
+                      <div class="hub-done" id="hubDailyDone" hidden>✓ Completo</div>
+                    </div>
+                    <div class="hub-col" id="hubFriendsCol" hidden>
+                      <div class="hub-col__label">Online agora</div>
+                      <div class="hub-friend-row" id="hubFriendRow"></div>
+                    </div>
+                    <div class="hub-col" id="hubResumeCol" hidden>
+                      <div class="hub-col__label">Última sessão</div>
+                      <div class="hub-col__value" id="hubResumeRoom"></div>
+                      <div class="hub-col__sub" id="hubResumeDna"></div>
+                    </div>
+                  </div>
+
+                  <!-- Eventos ativos -->
+                  <div class="hub-events" id="hubEventsRow" hidden></div>
+
+                  <!-- Discoveries / Rumores -->
+                  <div class="hub-discoveries" id="hubDiscoveriesRow" hidden></div>
+
+                </div>
 
                 <div class="revealPanel" id="revealPanel" style="display:none">
                   <!-- Sombra da carta projetada sobre a mesa -->
