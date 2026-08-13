@@ -6,8 +6,8 @@
     return;
   }
 
-  var h = (location.hostname || '').toLowerCase();
-  if (!h) return; // file:// ou empty — desenvolvimento local sem servidor
+  var h    = (location.hostname || '').toLowerCase();
+  var proto = location.protocol || '';
 
   var ALLOWED = [
     'preludiojogos.com',
@@ -19,7 +19,11 @@
     '127.0.0.1'
   ];
 
-  if (ALLOWED.indexOf(h) === -1) {
+  // Bloqueia file:// (clone baixado e aberto localmente) e qualquer hostname não autorizado.
+  // Para dev: use um servidor HTTP local (npx serve, Live Server, etc.) — não file://.
+  var blocked = (proto === 'file:') || (h && ALLOWED.indexOf(h) === -1);
+
+  if (blocked) {
     document.documentElement.innerHTML =
       '<style>*{margin:0;padding:0}html,body{background:#0a0805;height:100%;display:flex;' +
       'align-items:center;justify-content:center}p{color:#ccc;font:15px/1.7 sans-serif;' +
