@@ -2,8 +2,7 @@ name               = "preludio-waf"
 main               = "waf-worker.js"
 compatibility_date = "2025-01-01"
 
-# Deploy o Worker como "zone worker" — intercepta todo o tráfego do domínio.
-# Exige que preludiojogos.com esteja com nameservers apontando pro Cloudflare.
+# O SextoLugar — jogo
 [[routes]]
 pattern   = "preludiojogos.com/*"
 zone_name = "preludiojogos.com"
@@ -12,7 +11,11 @@ zone_name = "preludiojogos.com"
 pattern   = "www.preludiojogos.com/*"
 zone_name = "preludiojogos.com"
 
-# Se preludiojogos.com.br também estiver no Cloudflare, descomente:
-# [[routes]]
-# pattern   = "preludiojogos.com.br/*"
-# zone_name = "preludiojogos.com.br"
+# Espaço Prelúdio — plataforma de telessaúde
+[[routes]]
+pattern   = "espacopreludio.com.br/*"
+zone_name = "espacopreludio.com.br"
+
+[[routes]]
+pattern   = "www.espacopreludio.com.br/*"
+zone_name = "espacopreludio.com.br"
