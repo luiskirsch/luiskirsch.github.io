@@ -3,7 +3,7 @@ import { S } from "../state.js";
 import { setDoc, updateDoc, getDoc, getDocs, deleteDoc, doc, query, where, limit, collection, serverTimestamp, onAuthStateChanged } from "../firebase.js";
 import { escapeHtml, initials, normalizeUsername, uniqueArray } from "../utils.js";
 import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, COIN_COSMETICS, PRESTIGE_PRODUTOS, BACKEND_BASE_URL } from "../constants.js";
-import { sendFriendRequest, respondFriendRequest, fetchFriendsLeaderboard, searchUsers, buyWithCoins } from "../api.js";
+import { sendFriendRequest, respondFriendRequest, fetchFriendsLeaderboard, searchUsers, buyWithCoins, fetchCompatibility } from "../api.js";
 
 const BACKEND_BASE_URL_OSL = BACKEND_BASE_URL; // alias mantido pra não trocar 1000 referências
 
@@ -415,7 +415,15 @@ function _friendAvatar(p) {
   return `<div class="friendAvatar" style="background:${p.avatarColor || "#342718"}">${p.avatarEmoji || "🔮"}</div>`;
 }
 
-function renderFriendItem(p, actions = []) {
+function _compatBadge(compat) {
+  if (!compat || !compat.hasData || (compat.confidence || 0) < 0.10) return "";
+  return `<div class="friendCompat" title="${escapeHtml(compat.label || "")} · ${Math.round((compat.confidence||0)*100)}% confiança">
+    <span class="friendCompat__score">${compat.overall}%</span>
+    <span class="friendCompat__label">${escapeHtml(compat.label || "")}</span>
+  </div>`;
+}
+
+function renderFriendItem(p, actions = [], compat = null) {
   const div = document.createElement("div");
   div.className = "friendItem";
   const btns = actions.map(a =>
@@ -429,7 +437,7 @@ function renderFriendItem(p, actions = []) {
         <div class="friendUsername">@${escapeHtml(p.username || "jogador")}</div>
       </div>
     </div>
-    <div class="friendActions">${btns}</div>`;
+    <div class="friendActions">${_compatBadge(compat)}${btns}</div>`;
   return div;
 }
 
@@ -461,8 +469,19 @@ export async function fillFriendsPanel(user, isSelfView) {
       listEl.innerHTML = `<div class="friendEmpty">Nenhum amigo ainda. Busque pelo @usuário acima.</div>`;
     } else {
       const profiles = await Promise.all(friendUids.map(loadUserProfileData));
-      profiles.filter(Boolean).forEach(p => {
-        const item = renderFriendItem(p, [{ label: "Ver perfil", action: "view" }]);
+      const validProfiles = profiles.filter(Boolean);
+
+      // Busca compatibility de todos em paralelo (best-effort, não bloqueia render)
+      const compatResults = await Promise.allSettled(
+        validProfiles.map(p => fetchCompatibility(p.uid))
+      );
+      const compatMap = {};
+      validProfiles.forEach((p, i) => {
+        compatMap[p.uid] = compatResults[i].status === "fulfilled" ? compatResults[i].value : null;
+      });
+
+      validProfiles.forEach(p => {
+        const item = renderFriendItem(p, [{ label: "Ver perfil", action: "view" }], compatMap[p.uid] || null);
         item.querySelector("[data-action='view']")?.addEventListener("click", () => {
           closeProfile();
           openProfile({ userId: p.uid, name: p.displayName }).catch(() => {});

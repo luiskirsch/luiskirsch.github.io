@@ -4006,7 +4006,24 @@
 
     .friendUsername{ font-size:12px; color:rgba(214,224,237,.60); }
 
-    .friendActions{ display:flex; gap:8px; flex-wrap:wrap; }
+    .friendActions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+
+    .friendCompat{
+      display:flex;flex-direction:column;align-items:center;
+      min-width:40px;padding:3px 7px;
+      background:rgba(200,150,60,.08);
+      border:1px solid rgba(200,150,60,.18);
+      border-radius:8px;
+      cursor:default;
+    }
+    .friendCompat__score{
+      font-size:12px;font-weight:700;
+      color:rgba(220,175,70,.90);font-variant-numeric:tabular-nums;
+    }
+    .friendCompat__label{
+      font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+      color:rgba(200,150,60,.55);white-space:nowrap;
+    }
 
     .friendBtn{
       appearance:none;
@@ -6746,6 +6763,40 @@
     font-family:'Georgia',serif;z-index:6;
   }
 
+  /* ── Fragment Banner — fragmento pendente do Ritual Diário ── */
+  #fragmentBanner{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:linear-gradient(90deg,rgba(28,19,8,.97) 0%,rgba(20,14,6,.98) 100%);
+    border:1px solid rgba(200,150,60,.28);
+    border-radius:10px;
+    padding:11px 16px;
+    margin-bottom:10px;
+    font-family:'Georgia',serif;
+  }
+  body.ritual-started #fragmentBanner{ display:none!important; }
+  #fragmentBanner .fBanner__gem{
+    font-size:18px;
+    flex-shrink:0;
+    color:rgba(220,175,70,.85);
+    filter:drop-shadow(0 0 6px rgba(220,175,70,.35));
+  }
+  #fragmentBanner .fBanner__body{ flex:1;min-width:0; }
+  #fragmentBanner .fBanner__label{
+    font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+    color:rgba(200,150,60,.55);margin-bottom:2px;
+  }
+  #fragmentBanner .fBanner__title{
+    font-size:13px;font-style:italic;
+    color:rgba(228,185,85,.92);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  #fragmentBanner .fBanner__hint{
+    font-size:10px;color:rgba(200,175,135,.42);margin-top:2px;
+    font-family:sans-serif;font-style:normal;letter-spacing:.02em;
+  }
+
   /* ── LOBBY MODE — AAA full-bleed (ativo via body:not(.ritual-started).lobby-mode) ──────── */
   body:not(.ritual-started).lobby-mode .layout{
     height:calc(100svh - 116px);
@@ -7100,6 +7151,16 @@
                   <span class="aiDetectToast__text" id="aiDetectToastMsg"></span>
                   <button class="aiDetectToast__confirm" onclick="confirmAIDetection()">Confirmar</button>
                   <button class="aiDetectToast__dismiss" onclick="dismissAIDetection()">Ignorar</button>
+                </div>
+
+                <!-- ── Fragmento pendente do Ritual Diário ─────────────── -->
+                <div id="fragmentBanner" hidden>
+                  <span class="fBanner__gem" aria-hidden="true">✦</span>
+                  <div class="fBanner__body">
+                    <div class="fBanner__label">Fragmento pendente</div>
+                    <div class="fBanner__title" id="fragmentBannerTitle"></div>
+                    <div class="fBanner__hint">Será revelado na próxima sessão</div>
+                  </div>
                 </div>
 
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->

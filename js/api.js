@@ -246,6 +246,35 @@ export async function sessionEndGame() {
   });
 }
 
+// ── Hub "Entre Sessões" ───────────────────────────────────────────────────────
+// Retorna: daily, world, friends, fragment, season, events, lastSession, unread
+
+export async function fetchHub() {
+  try {
+    const idToken = await _getFirebaseIdToken();
+    if (!idToken) return { ok: false };
+    const res = await fetch(SERVER_BASE + "/hub", {
+      headers: { "Authorization": `Bearer ${idToken}` }
+    });
+    return (await res.json().catch(() => null)) || { ok: false };
+  } catch (_) { return { ok: false }; }
+}
+
+// ── Compatibilidade pairwise ──────────────────────────────────────────────────
+// Retorna { overall, dimensions, confidence, label, hasData } ou null
+
+export async function fetchCompatibility(targetUid) {
+  try {
+    const idToken = await _getFirebaseIdToken();
+    if (!idToken) return null;
+    const res = await fetch(SERVER_BASE + `/social/compatibility/${encodeURIComponent(targetUid)}`, {
+      headers: { "Authorization": `Bearer ${idToken}` }
+    });
+    const json = await res.json().catch(() => null);
+    return json?.compatibility || null;
+  } catch (_) { return null; }
+}
+
 // Exponha para o video.js (usa window.panelMarkVideo)
 window.panelMarkVideo     = panelMarkVideo;
 window.panelMarkRecording = panelMarkRecording;

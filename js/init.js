@@ -12,6 +12,7 @@ import { startSession, leaveRoom, sendLeaveBeacon } from "./ui/room.js";
 import { revealNextRitualCard, resetRitualDeck } from "./game/cards.js";
 import { dispatch } from "./game/engine.js";
 import { CMD } from "./game/commands.js";
+import { fetchHub } from "./api.js";
 
 // ── Identidade ────────────────────────────────────────────────────────────────
 S.participantId = getParticipantId();
@@ -218,6 +219,18 @@ window.dismissAIDetection = dismissAIDetection;
     checkDailyReward();
     startMultiPoller();
     syncAccountPurchases();
+
+    // Fragmento pendente: mostra banner de espera se o hub retornar um fragmento ativo
+    if (!S._isSpectator) {
+      fetchHub().then(hub => {
+        if (!hub?.ok || !hub.fragment) return;
+        const banner  = document.getElementById("fragmentBanner");
+        const titleEl = document.getElementById("fragmentBannerTitle");
+        if (!banner) return;
+        if (titleEl) titleEl.textContent = hub.fragment.card?.title || "Fragmento";
+        banner.hidden = false;
+      }).catch(() => {});
+    }
 
     if (S.isHost) connectHostSse();
   } catch (error) {
