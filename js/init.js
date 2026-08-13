@@ -356,6 +356,31 @@ function _renderHub(hub) {
     }).join("");
   }
 
+  // ── Meus grupos com agenda recorrente ──────────────────────────────────────
+  const myGroups  = (hub.myGroups || []).slice(0, 5);
+  const groupsRow = _el("hubGroupsRow");
+  if (myGroups.length > 0 && groupsRow) {
+    hasAny = true;
+    groupsRow.hidden = false;
+    groupsRow.innerHTML = myGroups.map(g => {
+      const sched  = (g.scheduleLabel || "").replace(/</g, "&lt;");
+      const roomId = (g.roomId        || "").replace(/</g, "&lt;");
+      return `<div class="hub-group" data-room="${roomId}">
+        <span class="hub-group__icon">📅</span>
+        <span class="hub-group__schedule">${sched}</span>
+        <span class="hub-group__room">${roomId}</span>
+        <span class="hub-group__join">Entrar →</span>
+      </div>`;
+    }).join("");
+    groupsRow.querySelectorAll(".hub-group[data-room]").forEach(el => {
+      el.addEventListener("click", () => {
+        const rid  = el.dataset.room;
+        const nome = localStorage.getItem("osl_nome") || "Jogador";
+        if (rid) window.location.href = `sala.html?sala=${encodeURIComponent(rid)}&nome=${encodeURIComponent(nome)}&nomeSala=${encodeURIComponent(rid)}`;
+      });
+    });
+  }
+
   // ── Discoveries / Rumores ───────────────────────────────────────────────────
   const available = (hub.discoveries?.available || []).slice(0, 2);
   const teasers   = (hub.discoveries?.teasers   || []).slice(0, Math.max(0, 2 - available.length));

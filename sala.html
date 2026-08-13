@@ -6919,6 +6919,29 @@
     margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
 
+  .hub-groups{ display:flex;flex-direction:column;gap:6px; }
+  .hub-group{
+    display:flex;align-items:center;gap:10px;
+    background:rgba(255,255,255,.018);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:8px;padding:7px 12px;
+    cursor:pointer;transition:border-color .15s;
+  }
+  .hub-group:hover{ border-color:rgba(230,192,123,.22); }
+  .hub-group__icon{ font-size:13px;flex-shrink:0; }
+  .hub-group__schedule{
+    font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;
+    color:rgba(230,192,123,.72);white-space:nowrap;
+  }
+  .hub-group__room{
+    font-size:10px;color:rgba(255,255,255,.28);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;
+  }
+  .hub-group__join{
+    font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+    color:rgba(230,192,123,.4);flex-shrink:0;
+  }
+
   /* ── LOBBY MODE — AAA full-bleed (ativo via body:not(.ritual-started).lobby-mode) ──────── */
   body:not(.ritual-started).lobby-mode .layout{
     height:calc(100svh - 116px);
@@ -7332,6 +7355,9 @@
 
                   <!-- Eventos ativos -->
                   <div class="hub-events" id="hubEventsRow" hidden></div>
+
+                  <!-- Meus grupos com agenda recorrente -->
+                  <div class="hub-groups" id="hubGroupsRow" hidden></div>
 
                   <!-- Discoveries / Rumores -->
                   <div class="hub-discoveries" id="hubDiscoveriesRow" hidden></div>
