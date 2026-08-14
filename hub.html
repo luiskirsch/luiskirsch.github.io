@@ -415,22 +415,22 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 0;
   padding:
     calc(var(--nav-h) + 32px)
     max(24px, 5vw)
-    calc(var(--mob-h) + 24px);
+    calc(var(--mob-h) + 32px);
 }
 @keyframes hubIn {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 /* staggered entry */
-.hubGreeting  { animation: hubIn .55s .05s ease both; }
-.hubMundo     { animation: hubIn .55s .20s ease both; }
-.socialBar    { animation: hubIn .55s .30s ease both; }
-.ctxCard      { animation: hubIn .55s .40s ease both, ctxGlow 5s 1s ease-in-out infinite; }
-.ritualBox    { animation: hubIn .55s .55s ease both; }
+.hubGreeting  { animation: hubIn .55s .05s ease both; margin-bottom: 14px; }
+.hubMundo     { animation: hubIn .55s .20s ease both; margin-bottom: 14px; }
+.socialBar    { animation: hubIn .55s .30s ease both; margin-bottom: 20px; }
+.heroSection  { animation: hubIn .55s .38s ease both; margin-bottom: 52px; }
+.ritualBox    { animation: hubIn .55s .55s ease both; margin-bottom: 18px; }
 .seasonBlock  { animation: hubIn .55s .70s ease both; }
 
 /* Greeting */
@@ -474,6 +474,84 @@ body {
   animation: mdPulse 2.4s ease-in-out infinite;
 }
 @keyframes mdPulse { 0%,100%{opacity:.55} 50%{opacity:1} }
+
+/* ── Hero section (palco principal) ── */
+.heroSection {
+  width: min(480px, 100%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.heroTag {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: .30em;
+  text-transform: uppercase;
+  color: var(--gold2);
+  margin-bottom: 20px;
+}
+.heroTitle {
+  font-size: clamp(34px, 5.5vw, 68px);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1.04;
+  margin-bottom: 24px;
+  text-wrap: balance;
+}
+.heroMeta {
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  line-height: 1.8;
+  margin-bottom: 40px;
+  white-space: pre-line;
+}
+.heroCta {
+  width: min(320px, 100%);
+  padding: 18px 32px;
+  background: linear-gradient(135deg, rgba(230,192,123,.13), rgba(201,156,74,.07));
+  border: 1px solid rgba(230,192,123,.28);
+  border-radius: 12px;
+  color: var(--gold);
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  letter-spacing: .30em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .22s, border-color .22s, transform .15s;
+  animation: heroGlow 4.5s 1s ease-in-out infinite;
+}
+@keyframes heroGlow {
+  0%,100% { box-shadow: 0 0 0 rgba(230,192,123,0); }
+  50%      { box-shadow: 0 0 50px rgba(230,192,123,.10); }
+}
+.heroCta:hover {
+  background: linear-gradient(135deg, rgba(230,192,123,.22), rgba(201,156,74,.14));
+  border-color: rgba(230,192,123,.55);
+  transform: translateY(-2px);
+}
+.heroCta:active { transform: translateY(0); }
+.heroSec {
+  margin-top: 12px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.07);
+  color: var(--text3);
+  font-size: 10px;
+  letter-spacing: .22em;
+  padding: 12px 32px;
+  border-radius: 10px;
+  width: min(320px, 100%);
+  cursor: pointer;
+  font-family: "Courier New", monospace;
+  text-transform: uppercase;
+  transition: border-color .18s, color .18s;
+}
+.heroSec:hover { border-color: rgba(255,255,255,.18); color: var(--text2); }
 
 /* ── Social bar ── */
 .socialBar {
@@ -578,89 +656,89 @@ body {
 .ritualBox {
   width: min(440px, 100%);
   text-align: center;
-  padding: 22px 28px 20px;
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 16px;
-  background: rgba(255,255,255,.022);
+  padding: 28px 28px 24px;
+  border: 1px solid rgba(255,255,255,.04);
+  border-top: 1px solid rgba(230,192,123,.12);
+  border-radius: 14px;
+  background: transparent;
+  transition: border-color .3s;
 }
+.ritualBox:hover { border-color: rgba(230,192,123,.18); border-top-color: rgba(230,192,123,.28); }
 .ritualTag {
   display: block;
   font-family: "Courier New", monospace;
-  font-size: 10px;
-  letter-spacing: .26em;
+  font-size: 9px;
+  letter-spacing: .30em;
   text-transform: uppercase;
-  color: var(--text2);
-  margin-bottom: 12px;
+  color: var(--text3);
+  margin-bottom: 18px;
 }
 .ritualQ {
-  font-size: clamp(14px, 1.35vw, 17px);
+  font-size: clamp(15px, 1.5vw, 19px);
   font-style: italic;
-  color: var(--text);
+  color: var(--text2);
   letter-spacing: .02em;
   line-height: 1.65;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 .ritualCta {
   display: inline-block;
-  padding: 9px 26px;
+  padding: 10px 28px;
   background: transparent;
-  border: 1px solid rgba(255,255,255,.13);
+  border: 1px solid rgba(255,255,255,.10);
   border-radius: 999px;
-  color: var(--text2);
+  color: var(--text3);
   font-family: "Courier New", monospace;
-  font-size: 10px;
-  letter-spacing: .20em;
+  font-size: 9px;
+  letter-spacing: .22em;
   text-transform: uppercase;
   cursor: pointer;
   transition: border-color .18s, color .18s;
 }
-.ritualCta:hover { border-color: rgba(255,255,255,.30); color: var(--text); }
+.ritualCta:hover { border-color: rgba(255,255,255,.28); color: var(--text2); }
 
 /* ── Season block ── */
 .seasonBlock {
   width: min(440px, 100%);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 20px;
-  border: 1px solid rgba(255,255,255,.05);
-  border-radius: 12px;
-  background: rgba(255,255,255,.012);
-}
-.seasonLeft {
-  display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 20px;
+  text-align: center;
 }
 .seasonLabel {
   font-family: "Courier New", monospace;
   font-size: 9px;
-  letter-spacing: .24em;
+  letter-spacing: .28em;
   text-transform: uppercase;
   color: var(--text3);
 }
 .seasonName {
   font-family: "Courier New", monospace;
-  font-size: 11px;
-  letter-spacing: .14em;
+  font-size: 12px;
+  letter-spacing: .18em;
   text-transform: uppercase;
   color: var(--text2);
 }
 .seasonRight {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   font-family: "Courier New", monospace;
   font-size: 9px;
-  letter-spacing: .14em;
+  letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--text3);
+  margin-top: 2px;
 }
 .seasonActiveDot {
   width: 5px; height: 5px;
   border-radius: 50%;
-  background: rgba(155,227,122,.70);
+  background: rgba(155,227,122,.75);
+  box-shadow: 0 0 5px rgba(155,227,122,.45);
   flex-shrink: 0;
+  animation: mdPulse 2.4s ease-in-out infinite;
 }
 
 /* ── Mobile bottom nav ── */
@@ -923,9 +1001,9 @@ body {
     <span class="socialNames" id="socialNames"></span>
   </div>
 
-  <div class="ctxCard" id="ctxCard">
-    <div class="cardTag">CARREGANDO</div>
-    <div class="cardTitle">—</div>
+  <div class="heroSection" id="ctxCard">
+    <div class="heroTag">CARREGANDO</div>
+    <div class="heroTitle">—</div>
   </div>
 
   <div class="ritualBox" id="ritualBox">
@@ -936,10 +1014,8 @@ body {
   </div>
 
   <div class="seasonBlock" id="seasonBlock">
-    <div class="seasonLeft">
-      <span class="seasonLabel" id="seasonLabel">Temporada I</span>
-      <span class="seasonName" id="seasonName">O Prelúdio</span>
-    </div>
+    <span class="seasonLabel" id="seasonLabel">Temporada I</span>
+    <span class="seasonName" id="seasonName">O Prelúdio</span>
     <div class="seasonRight">
       <span class="seasonActiveDot"></span>
       <span id="seasonStatus">Mundo ativo</span>
@@ -1184,57 +1260,62 @@ function renderCtxCard(data){
   if(!card) return;
   var html='';
 
+  function cta(label,href){ return '<button class=”heroCta” onclick=”location.href=\''+href+'\'”>'+label+'</button>'; }
+  function sec(label,href){ return '<button class=”heroSec” onclick=”location.href=\''+href+'\'”>'+label+'</button>'; }
+
   // 1. Fragmento pendente
   if(data.fragment){
-    html='<div class="cardTag">MISSÃO PENDENTE</div>'
-        +'<div class="cardTitle">'+esc(data.fragment.card||'Carta especial')+'</div>'
-        +'<div class="cardMeta">Você ainda não completou esta missão.</div>'
-        +'<button class="cardBtn" onclick="location.href=\'./entrada.html\'">CONTINUAR MISSÃO</button>';
+    html='<div class=”heroTag”>MISSÃO PENDENTE</div>'
+        +'<div class=”heroTitle”>'+esc(data.fragment.card||'Carta especial')+'</div>'
+        +'<div class=”heroMeta”>Você ainda não completou esta missão.</div>'
+        +cta('CONTINUAR','./entrada.html');
     card.innerHTML=html; return;
   }
 
   // 2. Amigo online
   var online=(data.friends||[]).find(function(f){return f.online;});
   if(online){
-    var nome=esc(online.displayName||'Alguém');
-    var atividade=esc(tempoRelativo(online.lastSeenMs));
-    html='<div class="cardTag">CONEXÃO ATIVA</div>'
-        +'<div class="cardTitle">'+nome.toUpperCase()+' ESTÁ ONLINE</div>'
-        +'<div class="cardMeta">Disponível'+( atividade?' · '+atividade:'')+'</div>'
-        +'<button class="cardBtn" onclick="location.href=\'./entrada.html\'">CONVIDAR PARA JOGAR</button>'
-        +'<button class="cardBtn sec" onclick="location.href=\'./entrada.html\'">CRIAR UMA SALA</button>';
+    var nome=esc((online.displayName||'Alguém').split(' ')[0]);
+    var outros=(data.friends||[]).filter(function(f){return f.online&&f.uid!==online.uid;}).length;
+    var tag=outros>0?nome.toUpperCase()+' E MAIS '+outros+' ESTÃO ONLINE':nome.toUpperCase()+' ESTÁ ONLINE';
+    html='<div class=”heroTag”>CONEXÃO ATIVA</div>'
+        +'<div class=”heroTitle”>O MUNDO\nESPERA POR VOCÊ</div>'
+        +'<div class=”heroMeta”>'+tag+'</div>'
+        +cta('JOGAR JUNTOS','./entrada.html')
+        +sec('CRIAR SALA','./entrada.html');
     card.innerHTML=html; return;
   }
 
-  // 3. Última sessão recente (< 48h)
+  // 3. Última sessão recente
   if(data.lastSession&&data.lastSession.roomName){
     var ls=data.lastSession;
-    var ageMs=ls.sessionAt?(Date.now()-ls.sessionAt):null;
-    var ageStr=ageMs!==null?tempoRelativo(ls.sessionAt):'';
-    var meta=[ageStr,ls.playerCount?(ls.playerCount+' jogadores'):''].filter(Boolean).join(' · ');
-    html='<div class="cardTag">CONTINUAR</div>'
-        +'<div class="cardTitle">'+esc(ls.roomName)+'</div>'
-        +'<div class="cardMeta">'+esc(meta)+'</div>'
-        +'<button class="cardBtn" onclick="location.href=\'./entrada.html\'">ENTRAR</button>'
-        +'<button class="cardBtn sec" onclick="location.href=\'./entrada.html\'">NOVA SALA</button>';
+    var meta=[];
+    if(ls.playerCount) meta.push(ls.playerCount+' jogadores');
+    if(ls.sessionAt)   meta.push(tempoRelativo(ls.sessionAt));
+    html='<div class=”heroTag”>SUA SESSÃO CONTINUA</div>'
+        +'<div class=”heroTitle”>O MUNDO\nAINDA ESTÁ LÁ.</div>'
+        +'<div class=”heroMeta”>'+esc(meta.join(' · ') || ls.roomName)+'</div>'
+        +cta('VOLTAR','./entrada.html')
+        +sec('NOVA SALA','./entrada.html');
     card.innerHTML=html; return;
   }
 
   // 4. Grupo recorrente
   if(data.myGroups&&data.myGroups.length>0){
     var g=data.myGroups[0];
-    html='<div class="cardTag">SEU GRUPO</div>'
-        +'<div class="cardTitle">'+esc(g.roomName||'Grupo recorrente')+'</div>'
-        +'<div class="cardMeta">Sessão recorrente ativa</div>'
-        +'<button class="cardBtn" onclick="location.href=\'./entrada.html\'">VER GRUPO</button>';
+    var count=(g.playerCount||'')+(g.maxPlayers?'/'+g.maxPlayers:'');
+    html='<div class=”heroTag”>SEU GRUPO</div>'
+        +'<div class=”heroTitle”>O MUNDO\nESPERA POR VOCÊ</div>'
+        +'<div class=”heroMeta”>'+esc(g.roomName||'Grupo recorrente')+(count?' · '+count+' jogadores':'')+'</div>'
+        +cta('ENTRAR','./entrada.html');
     card.innerHTML=html; return;
   }
 
-  // 5. Default — sem contexto social, sem sessão
-  html='<div class=”cardTag”>PRONTO PARA JOGAR</div>'
-      +'<div class=”cardTitle”>O MUNDO ESPERA POR VOCÊ</div>'
-      +'<div class=”cardMeta”>Sem amigos online agora.<br>Comece algo novo.</div>'
-      +'<button class=”cardBtn” onclick=”location.href=\'./entrada.html\'”>JOGAR</button>';
+  // 5. Default
+  html='<div class=”heroTag”>PRONTO PARA JOGAR</div>'
+      +'<div class=”heroTitle”>O MUNDO\nESPERA POR VOCÊ</div>'
+      +'<div class=”heroMeta”>Nenhum amigo online agora.\nComece algo novo.</div>'
+      +cta('JOGAR','./entrada.html');
   card.innerHTML=html;
 }
 
