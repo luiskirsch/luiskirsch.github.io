@@ -1209,7 +1209,7 @@ if (loginForm) {
       const cred = await signInWithEmailAndPassword(auth, email, pass);
       if (cred.user) localStorage.setItem("osl_auth_uid", cred.user.uid);
       setAuthBtn("loginForm", "success", "Acesso autorizado");
-      setTimeout(() => { window.location.href = "./entrada.html"; }, 800);
+      setTimeout(() => { window.location.href = "./hub.html"; }, 800);
     } catch(err) {
       setMsg("loginMsg", mapErr(err.code), "err");
       setAuthBtn("loginForm", "error");
@@ -1248,7 +1248,7 @@ if (registerForm) {
       if (nome) await updateProfile(cred.user, { displayName: nome });
       if (cred.user) localStorage.setItem("osl_auth_uid", cred.user.uid);
       setAuthBtn("registerForm", "success", "Conta criada ✓");
-      setTimeout(() => { window.location.href = "./entrada.html"; }, 800);
+      setTimeout(() => { window.location.href = "./hub.html"; }, 800);
     } catch(err) {
       setMsg("registerMsg", mapErr(err.code), "err");
       setAuthBtn("registerForm", "error");
