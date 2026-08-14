@@ -637,6 +637,7 @@ body.transmissionFocus .soundPanel {
   gap: 7px;
   font-family: "Courier New", monospace;
   font-size: 10px;
+  line-height: 1;
   letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--text3);
@@ -645,13 +646,14 @@ body.transmissionFocus .soundPanel {
 .wbDot {
   width: 6px; height: 6px;
   border-radius: 50%;
+  flex-shrink: 0;
   background: rgba(155,227,122,.78);
   box-shadow: 0 0 6px rgba(155,227,122,.55);
   animation: wbPulse 2.4s ease-in-out infinite;
 }
 @keyframes wbPulse {
-  0%,100% { opacity: .55; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.2); }
+  0%,100% { opacity: .55; }
+  50% { opacity: 1; }
 }
 @media (max-width: 480px) {
   .gatePhrase { font-size: 10px; margin-bottom: 14px; }
