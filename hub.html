@@ -62,6 +62,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .navLink:hover,.navBtn:hover{color:var(--text2);}
 .navLink.on{color:var(--text);}
 .navLink.on::after{transform:scaleX(1);}
+.navLink:active,.navBtn:active{color:var(--gold2)!important;}
 
 .navRight{display:flex;align-items:center;justify-content:flex-end;gap:8px;}
 .navBell,.navCoins{display:flex;align-items:center;gap:5px;padding:0 9px;height:32px;background:rgba(212,175,55,.05);border:1px solid rgba(212,175,55,.12);border-radius:3px;cursor:pointer;color:var(--text3);font-size:11px;font-weight:600;transition:background .16s,color .16s;}
@@ -291,8 +292,29 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .sbIconBtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;}
 
 /* ═══ DROPDOWNS + TOAST ═══ */
-.drop{position:fixed;top:calc(var(--nav-h)+6px);right:18px;z-index:70;min-width:230px;background:rgba(4,8,16,.99);border:1px solid rgba(212,175,55,.16);border-radius:2px;box-shadow:0 24px 70px rgba(0,0,0,.80);padding:8px 0;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .18s,transform .18s;}
+.drop{position:fixed;top:calc(var(--nav-h)+6px);right:18px;z-index:100;min-width:230px;background:rgba(4,8,16,.99);border:1px solid rgba(212,175,55,.16);border-radius:2px;box-shadow:0 24px 70px rgba(0,0,0,.80);padding:8px 0;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .18s,transform .18s;}
 .drop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+
+/* ── Feature modal (Social / Mundo) ── */
+.fmVeil{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.70);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .24s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+.fmVeil.on{opacity:1;pointer-events:auto;}
+.fmSheet{
+  position:relative;background:rgba(4,8,16,.99);
+  border:1px solid rgba(212,175,55,.20);border-radius:3px;
+  padding:40px 36px 32px;text-align:center;min-width:300px;max-width:400px;width:90%;
+  box-shadow:0 40px 100px rgba(0,0,0,.85),0 0 0 1px rgba(212,175,55,.08);
+  transform:translateY(20px);transition:transform .26s;
+}
+.fmVeil.on .fmSheet{transform:translateY(0);}
+.fmEmoji{font-size:36px;margin-bottom:18px;display:block;}
+.fmTitle{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+.fmSub{font-size:10.5px;color:var(--text2);line-height:1.70;letter-spacing:.04em;margin-bottom:28px;max-width:24ch;margin-left:auto;margin-right:auto;}
+.fmClose{padding:10px 32px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.24);border-radius:2px;color:var(--gold2);font-size:8.5px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;cursor:pointer;transition:background .18s,border-color .18s;}
+.fmClose:hover{background:rgba(212,175,55,.12);border-color:rgba(212,175,55,.42);}
+.fmDivider{height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.18),transparent);margin:24px 0 20px;}
+.fmItems{list-style:none;text-align:left;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.fmItem{display:flex;align-items:center;gap:10px;font-size:10px;color:var(--text2);letter-spacing:.06em;}
+.fmItemDot{width:5px;height:5px;border-radius:50%;background:rgba(212,175,55,.40);flex-shrink:0;}
 .dHead{padding:14px 18px 10px;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:4px;}
 .dName{font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:2px;}
 .dSub{font-size:9px;letter-spacing:.06em;color:var(--text3);}
@@ -548,6 +570,18 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 <div class="drop" id="dropNotif" style="right:110px"><div class="dEmpty">Nenhuma notificação</div></div>
 <div class="toast" id="toast"></div>
 
+<!-- Feature modal -->
+<div class="fmVeil" id="featureModal" role="dialog" aria-modal="true">
+  <div class="fmSheet">
+    <span class="fmEmoji" id="fmEmoji">◆</span>
+    <div class="fmTitle" id="fmTitle">—</div>
+    <ul class="fmItems" id="fmItems"></ul>
+    <div class="fmDivider"></div>
+    <p class="fmSub" id="fmSub">—</p>
+    <button class="fmClose" id="fmClose">FECHAR</button>
+  </div>
+</div>
+
 <!-- Onboarding -->
 <div class="obV" id="obVeil" role="dialog" aria-modal="true">
   <div class="obStep vis" id="obStep0">
@@ -664,11 +698,30 @@ function toggleDrop(el){if(!el)return;var was=el.classList.contains('open');clos
 document.addEventListener('click',function(e){if(_open&&!_open.contains(e.target))closeDrops();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrops();});
 
+/* Feature modal */
+var fmData={
+  social:{emoji:'👥',title:'Social',items:['Amigos ativos em tempo real','Ranking de sessões da semana','Feed de descobertas recentes','Convites rápidos para jogar'],sub:'Veja quem está explorando agora e conecte-se.'},
+  mundo:{emoji:'🌐',title:'Mundo',items:['Mapa das histórias em andamento','Eventos coletivos por temporada','Missões compartilhadas','Fragmentos do Prelúdio'],sub:'O mapa psicológico do Sextolugar se expande a cada temporada.'}
+};
+function openFM(key){
+  var d=fmData[key];if(!d)return;
+  var m=document.getElementById('featureModal');if(!m)return;
+  document.getElementById('fmEmoji').textContent=d.emoji;
+  document.getElementById('fmTitle').textContent=d.title;
+  document.getElementById('fmSub').textContent=d.sub;
+  document.getElementById('fmItems').innerHTML=d.items.map(function(t){return'<li class="fmItem"><span class="fmItemDot"></span>'+t+'</li>';}).join('');
+  requestAnimationFrame(function(){m.classList.add('on');});
+}
+function closeFM(){var m=document.getElementById('featureModal');if(m)m.classList.remove('on');}
+document.getElementById('fmClose').addEventListener('click',closeFM);
+document.getElementById('featureModal').addEventListener('click',function(e){if(e.target===this)closeFM();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFM();});
+
 document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropNotif'));});
 document.getElementById('btnCoins').addEventListener('click',function(e){e.stopPropagation();window._toast('Loja de moedas — em breve');});
 document.getElementById('btnPerfil').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropPerfil'));});
-document.getElementById('navSocial').addEventListener('click',function(){closeDrops();window._toast('Social — em construção');});
-document.getElementById('navMundo').addEventListener('click',function(){closeDrops();window._toast('Mundo — em construção');});
+document.getElementById('navSocial').addEventListener('click',function(){closeDrops();openFM('social');});
+document.getElementById('navMundo').addEventListener('click',function(){closeDrops();openFM('mundo');});
 document.getElementById('navRitual').addEventListener('click',function(){location.href='./entrada.html';});
 document.getElementById('dpLogout').addEventListener('click',function(){closeDrops();window._hubLogout&&window._hubLogout();});
 document.getElementById('btnInvite').addEventListener('click',function(){window._toast('Convites — em breve');});
