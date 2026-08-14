@@ -20,7 +20,7 @@
   --goldG:linear-gradient(90deg,#9a6f1a 0%,#D4AF37 30%,#ffe87a 50%,#D4AF37 70%,#9a6f1a 100%);
   --rose:#e0528a;
   --panel:rgba(4,8,14,.97); --card:rgba(8,14,22,.90);
-  --text:#f0ece0; --text2:rgba(240,236,224,.55); --text3:rgba(240,236,224,.28);
+  --text:#f0ece0; --text2:rgba(240,236,224,.67); --text3:rgba(240,236,224,.42);
   --ok:#58e040; --err:#ff4040;
   --nav-h:60px; --season-h:52px; --pw:262px;
   --serif:'Cinzel','Palatino Linotype',Georgia,serif;
@@ -200,7 +200,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .altFormBadge{font-size:6.5px;font-weight:800;letter-spacing:.10em;background:var(--ok);color:#030a03;padding:1px 5px;border-radius:2px;margin-left:2px;}
 
 /* ── RITUAL CARD ── */
-.ritualWrap{flex:1;padding:8px 24px 14px;display:flex;flex-direction:column;overflow:hidden;}
+.ritualWrap{flex:1;padding:8px 24px 14px;display:flex;flex-direction:column;overflow:hidden;margin-bottom:6vh;}
 .ritualDeck{flex:1;display:flex;flex-direction:column;padding:0 12px 0 0;}
 .rFront{
   flex:1;display:flex;flex-direction:column;border-radius:4px;
@@ -231,27 +231,35 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 /* ═══ RIGHT PANEL — PRESENÇA ═══ */
 
 /* Empty presence state */
-.presenceBody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 18px;text-align:center;gap:0;}
+.presenceBody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 18px;text-align:center;gap:0;transition:opacity .30s;}
+.presenceBody.fade{opacity:0;pointer-events:none;}
 .presenceIcon{width:58px;height:58px;border-radius:50%;border:1.5px solid rgba(212,175,55,.16);display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:rgba(212,175,55,.28);}
 .presenceIcon svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.5;}
 .presenceLine{font-size:13px;color:var(--text);line-height:1.55;margin-bottom:8px;letter-spacing:.02em;}
 .presenceSub{font-size:9px;color:var(--text3);letter-spacing:.06em;line-height:1.55;max-width:160px;margin:0 auto;}
 
+/* Friends count header */
+.fCount{padding:14px 18px 6px;font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);}
+
 /* Friends list (visible when friends online) */
-.fList{list-style:none;display:none;flex-direction:column;gap:0;flex:1;overflow-y:auto;}
+.fList{list-style:none;display:none;flex-direction:column;gap:0;flex:1;overflow-y:auto;opacity:0;transition:opacity .30s;}
 .fList.vis{display:flex;}
-.fItem{display:flex;align-items:center;gap:10px;padding:10px 18px;border-left:2px solid transparent;transition:background .14s,border-color .14s;cursor:pointer;}
+.fList.show{opacity:1;}
+.fItem{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-left:2px solid transparent;transition:background .14s,border-left-color .14s;cursor:pointer;}
 .fItem:hover{background:rgba(212,175,55,.04);border-left-color:rgba(212,175,55,.30);}
-.fAv{width:32px;height:32px;border-radius:3px;background:rgba(212,175,55,.10);border:1px solid rgba(212,175,55,.18);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:12px;font-weight:700;color:var(--gold2);flex-shrink:0;position:relative;overflow:hidden;}
+.fAvWrap{position:relative;flex-shrink:0;}
+.fAv{width:34px;height:34px;border-radius:50%;background:rgba(212,175,55,.10);border:1px solid rgba(212,175,55,.18);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;font-weight:700;color:var(--gold2);overflow:hidden;}
 .fAv img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
-.fInfo{flex:1;min-width:0;}
-.fName{font-size:11.5px;font-weight:600;color:var(--text);}
-.fStatus{font-size:8.5px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
-.fOnline{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 7px rgba(88,224,64,.60);flex-shrink:0;}
+.fOnlineDot{position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border-radius:50%;background:var(--ok);border:1.5px solid var(--panel);box-shadow:0 0 7px rgba(88,224,64,.60);}
+.fInfo{flex:1;min-width:0;padding-top:2px;}
+.fName{font-size:12px;font-weight:600;color:var(--text);}
+.fStatus{font-size:8.5px;color:var(--ok);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+.fContext{font-size:9px;color:var(--text3);letter-spacing:.03em;margin-top:5px;line-height:1.4;}
 
 /* Invite / Call button */
-.btnPresence{flex-shrink:0;margin:0 14px 12px;padding:10px 14px;background:rgba(212,175,55,.05);border:1px solid rgba(212,175,55,.22);border-radius:2px;color:var(--gold2);font-size:8.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;text-align:center;width:calc(100% - 28px);transition:background .18s,border-color .18s;}
+.btnPresence{flex-shrink:0;margin:0 14px 12px;padding:10px 14px;background:rgba(212,175,55,.05);border:1px solid rgba(212,175,55,.22);border-radius:2px;color:var(--gold2);font-size:8.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;text-align:center;width:calc(100% - 28px);transition:background .18s,border-color .18s,opacity .25s;}
 .btnPresence:hover{background:rgba(212,175,55,.10);border-color:rgba(212,175,55,.45);}
+.btnPresence.callMode{background:rgba(212,175,55,.10);border-color:rgba(212,175,55,.40);color:var(--gold);}
 
 /* Suggestions section */
 .suggestSect{flex-shrink:0;border-top:1px solid rgba(255,255,255,.04);}
@@ -378,7 +386,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
             <div class="ctxCMeta" id="ctxSessMeta">—</div>
           </div>
         </div>
-        <button class="ctxCBtn" onclick="location.href='./entrada.html'">VER RESUMO</button>
+        <button class="ctxCBtn" id="ctxSessBtn" onclick="location.href='./entrada.html'">VER RESUMO</button>
       </div>
 
       <!-- Ritual Rápido -->
@@ -716,52 +724,84 @@ window.hubSetSeason=function(s){
   if(s.daysLeft!=null){set('sbStatus',s.daysLeft+' dias restantes');set('sbDays',s.daysLeft+' dias');}
 };
 
-window.hubRenderFriends=function(friends){
+window.hubRenderFriends=function(friends,lastSession){
   var ul=document.getElementById('friendsList');
   var pe=document.getElementById('presenceEmpty');
+  var btn=document.getElementById('btnInvite');
   if(!ul)return;
   var on=(friends||[]).filter(function(f){return f.online;});
   if(!on.length){
-    ul.classList.remove('vis');
-    if(pe)pe.style.display='';
+    /* empty → show empty state with fade in */
+    ul.classList.remove('show');
+    setTimeout(function(){
+      ul.classList.remove('vis');
+      if(pe){pe.style.display='';requestAnimationFrame(function(){pe.classList.remove('fade');});}
+    },280);
+    if(btn){btn.textContent='CONVIDAR AMIGOS';btn.classList.remove('callMode');}
     return;
   }
-  if(pe)pe.style.display='none';
-  ul.classList.add('vis');
-  ul.innerHTML=on.slice(0,8).map(function(f){
-    var ini=(f.displayName||'?').trim().charAt(0).toUpperCase();
-    var nm=(f.displayName||'Anônimo').split(' ')[0];
-    return '<li class="fItem"><div class="fAv">'+ini+'</div><div class="fInfo"><div class="fName">'+nm+'</div><div class="fStatus">Disponível agora</div></div><span class="fOnline"></span></li>';
-  }).join('');
-  var btn=document.getElementById('btnInvite');
-  if(btn){btn.textContent='CHAMAR PARA O RITUAL';}
+  /* friends online → fade empty out, fade list in */
+  if(pe){pe.classList.add('fade');}
+  setTimeout(function(){
+    if(pe)pe.style.display='none';
+    /* derive shared-session context per friend */
+    var lastFriendId=lastSession&&lastSession.participantUid;
+    var lastFriendWhen=lastSession&&lastSession.playedAt?_fmtCtx(lastSession.playedAt):null;
+    ul.classList.add('vis');
+    var count=on.length;
+    var countHtml=count>1?'<li class="fCount">'+count+' amigos estão aqui.</li>':'';
+    ul.innerHTML=countHtml+on.slice(0,6).map(function(f){
+      var ini=(f.displayName||'?').trim().charAt(0).toUpperCase();
+      var nm=(f.displayName||'Anônimo').split(' ')[0];
+      var ctx=f.uid&&f.uid===lastFriendId&&lastFriendWhen
+        ?'<div class="fContext">Vocês jogaram juntos '+lastFriendWhen+'.</div>':
+        (count===1?'<div class="fContext">Clique para convidar.</div>':'');
+      return '<li class="fItem"><div class="fAvWrap"><div class="fAv">'+ini+'</div><span class="fOnlineDot"></span></div><div class="fInfo"><div class="fName">'+nm+'</div><div class="fStatus">Disponível agora</div>'+ctx+'</div></li>';
+    }).join('');
+    requestAnimationFrame(function(){ul.classList.add('show');});
+  },280);
+  if(btn){
+    btn.textContent=on.length===1?'CONVIDAR':'CONVIDAR TODOS';
+    btn.classList.add('callMode');
+  }
 };
+
+function _fmtCtx(ts){
+  var d=new Date(ts),now=new Date(),diff=Math.floor((now-d)/86400000);
+  if(diff===0)return'hoje';if(diff===1)return'ontem';if(diff<7)return'essa semana';return diff+'d atrás';
+}
 
 window.hubSetContext=function(data){
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  function showBtn(id,show){var e=document.getElementById(id);if(e)e.style.display=show?'':'none';}
   function fmtDate(ts){var d=new Date(ts),now=new Date();var diff=Math.floor((now-d)/86400000);if(diff===0)return'hoje';if(diff===1)return'ontem';return diff+'d atrás';}
-  /* Última sessão */
+  /* Última sessão — botão só aparece se há sessão real */
   if(data.lastSession&&data.lastSession.roomName){
     set('ctxSessName',data.lastSession.roomName);
     set('ctxSessSub',(data.lastSession.playerCount||'?')+' participantes');
     set('ctxSessMeta',data.lastSession.playedAt?fmtDate(data.lastSession.playedAt):'—');
+    showBtn('ctxSessBtn',true);
   } else {
     set('ctxSessName','Nenhuma sessão ainda');set('ctxSessSub','Crie a sua primeira');set('ctxSessMeta','—');
+    showBtn('ctxSessBtn',false);
   }
-  /* Ritual rápido — pegamos a questão do daily */
+  /* Ritual rápido */
   if(data.daily&&data.daily.question){
     var short=data.daily.question.length>60?data.daily.question.slice(0,57)+'…':data.daily.question;
     set('ctxRitualText',short);
   }
-  /* Próximo passo */
+  /* Próximo passo — botão só aparece se há alguém pra convidar */
   var online=(data.friends||[]).filter(function(f){return f.online;});
   if(online.length){
     var nm=online[0].displayName||'alguém';
     set('ctxNextText',nm.split(' ')[0]+' está online. Convide para jogar!');
-    var nb=document.getElementById('ctxNextBtn');if(nb)nb.textContent='CHAMAR';
+    var nb=document.getElementById('ctxNextBtn');if(nb){nb.textContent='CHAMAR';nb.style.display='';}
   } else if(data.myGroups&&data.myGroups.length){
     set('ctxNextText','Seu grupo está esperando por você.');
-    var nb2=document.getElementById('ctxNextBtn');if(nb2)nb2.textContent='VER GRUPO';
+    var nb2=document.getElementById('ctxNextBtn');if(nb2){nb2.textContent='VER GRUPO';nb2.style.display='';}
+  } else {
+    set('ctxNextText','Convide alguém para uma sessão em duo.');
+    showBtn('ctxNextBtn',false);
   }
 };
 
@@ -806,7 +846,7 @@ onAuthStateChanged(auth,async(user)=>{
   window.hubSetHero&&window.hubSetHero(data);
   window.hubSetRitual&&window.hubSetRitual(data.daily);
   window.hubSetSeason&&window.hubSetSeason(data.season);
-  window.hubRenderFriends&&window.hubRenderFriends(data.friends);
+  window.hubRenderFriends&&window.hubRenderFriends(data.friends,data.lastSession);
   window.hubSetContext&&window.hubSetContext(data);
   if(data.coins!=null)window.hubNavSetCoins&&window.hubNavSetCoins(data.coins);
   window.hubHideVeil&&window.hubHideVeil();
