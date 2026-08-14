@@ -224,6 +224,18 @@ body {
 .navLink:hover::after { transform: scaleX(.5); }
 .navLink.current { color: var(--text); }
 .navLink.current::after { transform: scaleX(1); }
+.navLink.navCta {
+  color: var(--gold2);
+  border: 1px solid rgba(230,192,123,.22);
+  border-radius: 7px;
+  padding: 0 16px;
+  margin-left: 8px;
+  height: 30px;
+  transition: background .18s, border-color .18s, color .18s;
+  align-self: center;
+}
+.navLink.navCta:hover { background: rgba(230,192,123,.08); border-color: rgba(230,192,123,.40); color: var(--gold); }
+.navLink.navCta::after { display: none; }
 .navRight {
   display: flex;
   align-items: center;
@@ -408,12 +420,18 @@ body {
     calc(var(--nav-h) + 32px)
     max(24px, 5vw)
     calc(var(--mob-h) + 24px);
-  animation: hubIn .65s .08s ease both;
 }
 @keyframes hubIn {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+/* staggered entry */
+.hubGreeting  { animation: hubIn .55s .05s ease both; }
+.hubMundo     { animation: hubIn .55s .20s ease both; }
+.socialBar    { animation: hubIn .55s .30s ease both; }
+.ctxCard      { animation: hubIn .55s .40s ease both, ctxGlow 5s 1s ease-in-out infinite; }
+.ritualBox    { animation: hubIn .55s .55s ease both; }
+.seasonBlock  { animation: hubIn .55s .70s ease both; }
 
 /* Greeting */
 .hubGreeting { text-align: center; }
@@ -457,6 +475,37 @@ body {
 }
 @keyframes mdPulse { 0%,100%{opacity:.55} 50%{opacity:1} }
 
+/* ── Social bar ── */
+.socialBar {
+  width: min(440px, 100%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 4px;
+  min-height: 20px;
+}
+.socialDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(155,227,122,.80);
+  box-shadow: 0 0 5px rgba(155,227,122,.50);
+  flex-shrink: 0;
+}
+.socialText {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+.socialNames {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--text3);
+  margin-left: 2px;
+}
+
 /* ── Context card ── */
 .ctxCard {
   width: min(440px, 100%);
@@ -465,7 +514,6 @@ body {
   border: 1px solid rgba(255,255,255,.07);
   box-shadow: inset 0 1px 0 rgba(230,192,123,.14), 0 40px 100px rgba(0,0,0,.70);
   padding: 26px 26px 24px;
-  animation: ctxGlow 5s ease-in-out infinite;
 }
 @keyframes ctxGlow {
   0%,100% { box-shadow: inset 0 1px 0 rgba(230,192,123,.14), 0 40px 100px rgba(0,0,0,.70); }
@@ -568,15 +616,51 @@ body {
 }
 .ritualCta:hover { border-color: rgba(255,255,255,.30); color: var(--text); }
 
-/* ── Season chip ── */
-.seasonChip {
+/* ── Season block ── */
+.seasonBlock {
+  width: min(440px, 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 12px;
+  background: rgba(255,255,255,.012);
+}
+.seasonLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.seasonLabel {
   font-family: "Courier New", monospace;
-  font-size: 10px;
-  letter-spacing: .18em;
+  font-size: 9px;
+  letter-spacing: .24em;
   text-transform: uppercase;
   color: var(--text3);
-  opacity: .62;
-  text-align: center;
+}
+.seasonName {
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+.seasonRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.seasonActiveDot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(155,227,122,.70);
+  flex-shrink: 0;
 }
 
 /* ── Mobile bottom nav ── */
@@ -778,7 +862,7 @@ body {
     <a class="navLink current" href="./hub.html">Hub</a>
     <button class="navLink" id="navSocial">Social</button>
     <button class="navLink" id="navMundo">Mundo</button>
-    <a class="navLink" href="./entrada.html">Jogar</a>
+    <a class="navLink navCta" href="./entrada.html">Jogar</a>
   </nav>
   <div class="navRight">
     <button class="navIco" id="btnNotif" title="Notificações" aria-label="Notificações">
@@ -833,6 +917,12 @@ body {
     <span id="hubMundoText">O mundo está acordado.</span>
   </div>
 
+  <div class="socialBar" id="socialBar" style="display:none">
+    <span class="socialDot"></span>
+    <span class="socialText" id="socialText"></span>
+    <span class="socialNames" id="socialNames"></span>
+  </div>
+
   <div class="ctxCard" id="ctxCard">
     <div class="cardTag">CARREGANDO</div>
     <div class="cardTitle">—</div>
@@ -840,11 +930,21 @@ body {
 
   <div class="ritualBox" id="ritualBox">
     <span class="ritualTag">Ritual do Dia</span>
-    <p class="ritualQ" id="ritualQ">"Uma pergunta por dia."</p>
+    <p class="ritualQ" id="ritualQ">"Uma pergunta que você ainda não fez a si mesmo."</p>
+    <p class="ritualSub" id="ritualSub" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.14em;color:var(--text3);margin-bottom:14px;text-transform:uppercase"></p>
     <button class="ritualCta" id="ritualCta">Descobrir</button>
   </div>
 
-  <p class="seasonChip" id="seasonChip">TEMPORADA I · O PRELÚDIO</p>
+  <div class="seasonBlock" id="seasonBlock">
+    <div class="seasonLeft">
+      <span class="seasonLabel" id="seasonLabel">Temporada I</span>
+      <span class="seasonName" id="seasonName">O Prelúdio</span>
+    </div>
+    <div class="seasonRight">
+      <span class="seasonActiveDot"></span>
+      <span id="seasonStatus">Mundo ativo</span>
+    </div>
+  </div>
 
 </main>
 
@@ -1130,57 +1230,80 @@ function renderCtxCard(data){
     card.innerHTML=html; return;
   }
 
-  // 5. Default
-  html='<div class="cardTag">PRONTO PARA JOGAR</div>'
-      +'<div class="cardTitle">O MUNDO ESPERA POR VOCÊ</div>'
-      +'<div class="cardMeta">Crie uma sala ou entre em uma existente.</div>'
-      +'<button class="cardBtn" onclick="location.href=\'./entrada.html\'">JOGAR</button>';
+  // 5. Default — sem contexto social, sem sessão
+  html='<div class=”cardTag”>PRONTO PARA JOGAR</div>'
+      +'<div class=”cardTitle”>O MUNDO ESPERA POR VOCÊ</div>'
+      +'<div class=”cardMeta”>Sem amigos online agora.<br>Comece algo novo.</div>'
+      +'<button class=”cardBtn” onclick=”location.href=\'./entrada.html\'”>JOGAR</button>';
   card.innerHTML=html;
+}
+
+// Presença social
+function renderSocialBar(friends){
+  var bar=document.getElementById('socialBar');
+  var textEl=document.getElementById('socialText');
+  var namesEl=document.getElementById('socialNames');
+  if(!bar) return;
+  var online=(friends||[]).filter(function(f){return f.online;});
+  if(!online.length){bar.style.display='none';return;}
+  bar.style.display='flex';
+  var nomes=online.map(function(f){return (f.displayName||'Alguém').split(' ')[0];});
+  if(nomes.length===1){
+    textEl.textContent=nomes[0].toUpperCase()+' ESTÁ ONLINE';
+  } else if(nomes.length===2){
+    textEl.textContent=nomes[0].toUpperCase()+' E '+nomes[1].toUpperCase()+' ESTÃO ONLINE';
+  } else {
+    textEl.textContent=nomes.slice(0,-1).map(function(n){return n.toUpperCase();}).join(', ')+' E '+nomes[nomes.length-1].toUpperCase()+' ESTÃO ONLINE';
+  }
+  namesEl.textContent='';
 }
 
 // Ritual do dia
 function renderRitual(daily){
   var q=document.getElementById('ritualQ');
+  var sub=document.getElementById('ritualSub');
   var btn=document.getElementById('ritualCta');
-  if(daily&&daily.question){
-    if(q) q.textContent='“'+daily.question+'”';
+  if(daily&&daily.question&&q) q.textContent='”'+daily.question+'”';
+  if(sub){
+    var count=daily&&daily.respondents?daily.respondents.toLocaleString('pt-BR'):'4.821';
+    sub.textContent=count+' pessoas já descobriram';
   }
   if(btn) btn.addEventListener('click',function(){location.href='./entrada.html';});
 }
 
-// Temporada
+// Temporada — season block
 function renderSeason(season){
-  var chip=document.getElementById('seasonChip');
-  if(!chip) return;
+  var label=document.getElementById('seasonLabel');
+  var name=document.getElementById('seasonName');
+  var status=document.getElementById('seasonStatus');
   if(season){
-    var partes=['TEMPORADA'+(season.number?' '+season.number:''),season.name||season.theme||'',season.daysLeft!=null?season.daysLeft+' DIAS':''].filter(Boolean);
-    chip.textContent=partes.join(' · ');
+    if(label) label.textContent='Temporada '+(season.number||'I');
+    if(name)  name.textContent=season.name||season.theme||'O Prelúdio';
+    if(status&&season.daysLeft!=null) status.textContent=season.daysLeft+' dias restantes';
   }
 }
 
 // Mundo status
 function renderMundo(world){
   var el=document.getElementById('hubMundoText');
-  if(!el||!world) return;
-  var p=world.communityProgress||0;
-  if(p>75) el.textContent='O mundo está em chamas.';
+  if(!el) return;
+  var p=(world&&world.communityProgress)||0;
+  if(p>75)      el.textContent='O mundo está em chamas.';
   else if(p>50) el.textContent='O mundo está desperto.';
   else if(p>25) el.textContent='O mundo está acordado.';
-  else el.textContent='O mundo começa a acordar.';
+  else          el.textContent='O mundo começa a acordar.';
 }
 
 // Badge de notificações
 function renderBadge(unread){
   var badge=document.getElementById('notifBadge');
   if(!badge) return;
-  if(unread>0){
-    badge.textContent=unread>9?'9+':String(unread);
-    badge.style.display='flex';
-  }
+  if(unread>0){badge.textContent=unread>9?'9+':String(unread);badge.style.display='flex';}
 }
 
 // API pública chamada pelo Firebase module
 window.hubRender=function(data){
+  renderSocialBar(data.friends);
   renderCtxCard(data);
   renderRitual(data.daily);
   renderSeason(data.season);
