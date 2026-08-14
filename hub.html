@@ -201,8 +201,30 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .altFormBadge{font-size:6.5px;font-weight:800;letter-spacing:.10em;background:var(--ok);color:#030a03;padding:1px 5px;border-radius:2px;margin-left:2px;}
 
 /* ── RITUAL CARD ── */
-.ritualWrap{flex:1;padding:8px 24px 14px;display:flex;flex-direction:column;overflow:hidden;margin-bottom:6vh;}
-.ritualDeck{flex:1;display:flex;flex-direction:column;padding:0 12px 0 0;}
+.ritualWrap{flex:1;padding:8px 24px 14px;display:flex;flex-direction:column;overflow:visible;margin-bottom:6vh;}
+.ritualDeck{
+  flex:1;display:flex;flex-direction:column;position:relative;
+  padding:0 10px 18px 18px;perspective:1100px;isolation:isolate;
+}
+.ritualDeck::before,.ritualDeck::after{
+  content:'';position:absolute;inset:0 10px 18px 18px;border-radius:4px;
+  pointer-events:none;transform-origin:center;will-change:transform;
+  transition:transform .46s cubic-bezier(.2,.78,.2,1),border-color .46s ease,box-shadow .46s ease;
+}
+.ritualDeck::before{
+  z-index:0;
+  background:linear-gradient(135deg,rgba(7,18,28,.94),rgba(4,12,20,.98));
+  border:1px solid rgba(212,175,55,.12);
+  box-shadow:0 18px 34px rgba(0,0,0,.38);
+  transform:translate3d(-14px,16px,-28px) scale(.998);
+}
+.ritualDeck::after{
+  z-index:1;
+  background:linear-gradient(135deg,rgba(9,22,34,.96),rgba(5,14,23,.98));
+  border:1px solid rgba(212,175,55,.20);
+  box-shadow:0 14px 28px rgba(0,0,0,.32);
+  transform:translate3d(-7px,8px,-14px) scale(.999);
+}
 .rFront{
   flex:1;display:flex;flex-direction:column;border-radius:4px;
   border:2px solid var(--gold);
@@ -211,11 +233,24 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
     repeating-linear-gradient(-45deg,rgba(255,255,255,.010) 0,rgba(255,255,255,.010) 1px,transparent 1px,transparent 5px);
   backdrop-filter:blur(30px) saturate(1.20) brightness(1.16);
   -webkit-backdrop-filter:blur(30px) saturate(1.20) brightness(1.16);
-  box-shadow:-6px 8px 0 -2px #07101a,-6px 8px 0 -1px rgba(212,175,55,.16),-13px 16px 0 -2px #050d14,-13px 16px 0 -1px rgba(212,175,55,.09),0 24px 60px rgba(0,0,0,.70),0 0 40px rgba(212,175,55,.06),inset 0 1px 0 rgba(212,175,55,.18);
-  overflow:hidden;position:relative;
-  transition:transform .30s,box-shadow .30s;
+  box-shadow:0 24px 60px rgba(0,0,0,.70),0 0 40px rgba(212,175,55,.06),inset 0 1px 0 rgba(212,175,55,.18);
+  overflow:hidden;position:relative;z-index:2;transform:translateZ(0);transform-origin:center;
+  will-change:transform;
+  transition:transform .46s cubic-bezier(.2,.78,.2,1),box-shadow .46s ease;
 }
-.rFront:hover{transform:translateY(-3px) translateX(3px);}
+.ritualDeck:hover .rFront,.ritualDeck:focus-within .rFront{
+  transform:translate3d(5px,-6px,36px) rotateX(.35deg) rotateY(-.45deg);
+  box-shadow:0 32px 72px rgba(0,0,0,.76),0 0 52px rgba(212,175,55,.10),inset 0 1px 0 rgba(212,175,55,.22);
+}
+.ritualDeck:hover::after,.ritualDeck:focus-within::after{
+  transform:translate3d(-10px,12px,-18px) scale(.997);
+  border-color:rgba(212,175,55,.25);
+}
+.ritualDeck:hover::before,.ritualDeck:focus-within::before{
+  transform:translate3d(-20px,23px,-40px) scale(.994);
+  border-color:rgba(212,175,55,.16);
+  box-shadow:0 24px 42px rgba(0,0,0,.46);
+}
 .rInner{padding:22px 28px 20px;flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;justify-content:center;}
 .rInner::before,.rInner::after{content:'';position:absolute;width:14px;height:14px;border-color:rgba(212,175,55,.35);border-style:solid;}
 .rInner::before{top:8px;left:8px;border-width:1.5px 0 0 1.5px;}
