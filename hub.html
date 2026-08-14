@@ -61,7 +61,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .navLink::after,.navBtn::after{content:'';position:absolute;bottom:0;left:18px;right:18px;height:2px;background:var(--goldG);transform:scaleX(0);transform-origin:left;transition:transform .24s;}
 .navLink:hover,.navBtn:hover{color:var(--text2);}
 .navLink.on{color:var(--text);}
-.navLink.on::after{transform:scaleX(1);}
+.navLink.on::after,.navLink:hover::after,.navBtn:hover::after{transform:scaleX(1);}
 .navLink:active,.navBtn:active{color:var(--gold2)!important;}
 
 .navRight{display:flex;align-items:center;justify-content:flex-end;gap:8px;}
