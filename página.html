@@ -663,6 +663,38 @@ body.transmissionFocus .soundPanel {
   .gatePhrase { font-size: 10px; margin-bottom: 14px; }
   .worldBarItem { font-size: 9px; }
 }
+
+/* ── Button states ── */
+.authBtn.st-loading { opacity:.65; cursor:not-allowed; }
+.authBtn.st-loading::after {
+  content:'';
+  display:inline-block;
+  width:10px; height:10px;
+  border:1.5px solid rgba(230,192,123,.22);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:btnSpin .65s linear infinite;
+  margin-left:9px;
+  vertical-align:middle;
+}
+@keyframes btnSpin { to { transform:rotate(360deg); } }
+.authBtn.st-success {
+  border-color:rgba(155,227,122,.45);
+  color:rgba(155,227,122,.92);
+  background:linear-gradient(135deg,rgba(155,227,122,.09),rgba(100,200,80,.06));
+  transition:background .25s,border-color .25s,color .25s;
+}
+.authBtn.st-error { animation:btnShake .38s ease both; }
+@keyframes btnShake {
+  0%,100% { transform:translateX(0); }
+  20% { transform:translateX(-5px); }
+  40% { transform:translateX(5px); }
+  60% { transform:translateX(-3px); }
+  80% { transform:translateX(3px); }
+}
+
+/* ── Card glow (ativo) ── */
+.authCard { animation:cardGlow 5s ease-in-out infinite; }
   </style>
   <script>
 (function(){
@@ -1113,6 +1145,30 @@ function setBtn(formId, disabled) {
   if (btn) btn.disabled = disabled;
 }
 
+function setAuthBtn(formId, state, text) {
+  const btn = document.querySelector("#" + formId + " .authBtn[type=submit]");
+  if (!btn) return;
+  if (!btn._orig) btn._orig = btn.textContent;
+  btn.classList.remove("st-loading", "st-success", "st-error");
+  void btn.offsetWidth;
+  if (state === "loading") {
+    btn.classList.add("st-loading");
+    btn.disabled = true;
+    btn.textContent = text || btn._orig;
+  } else if (state === "success") {
+    btn.classList.add("st-success");
+    btn.disabled = true;
+    btn.textContent = text || btn._orig;
+  } else if (state === "error") {
+    btn.disabled = false;
+    btn.textContent = btn._orig;
+    btn.classList.add("st-error");
+  } else {
+    btn.disabled = false;
+    btn.textContent = btn._orig;
+  }
+}
+
 /* Connected state */
 function showConnected(user) {
   const authTabs = document.getElementById("authTabs");
@@ -1147,16 +1203,16 @@ if (loginForm) {
     const pass  = (document.getElementById("loginPass")?.value || "");
     if (!email || !validEmail(email)) { setMsg("loginMsg","Preencha um e-mail válido.","err"); return; }
     if (!pass)                        { setMsg("loginMsg","Preencha a senha.","err"); return; }
-    setBtn("loginForm", true);
-    setMsg("loginMsg","Verificando…");
+    setAuthBtn("loginForm", "loading", "Verificando…");
+    setMsg("loginMsg", "");
     try {
       const cred = await signInWithEmailAndPassword(auth, email, pass);
       if (cred.user) localStorage.setItem("osl_auth_uid", cred.user.uid);
-      setMsg("loginMsg","Acesso autorizado.","ok");
-      setTimeout(() => { window.location.href = "./entrada.html"; }, 600);
+      setAuthBtn("loginForm", "success", "Acesso autorizado");
+      setTimeout(() => { window.location.href = "./entrada.html"; }, 800);
     } catch(err) {
       setMsg("loginMsg", mapErr(err.code), "err");
-      setBtn("loginForm", false);
+      setAuthBtn("loginForm", "error");
     }
   });
 }
@@ -1185,17 +1241,17 @@ if (registerForm) {
     if (!email || !validEmail(email)) { setMsg("registerMsg","Preencha um e-mail válido.","err"); return; }
     if (!pass || pass.length < 6)    { setMsg("registerMsg","Senha deve ter ao menos 6 caracteres.","err"); return; }
     if (pass !== confirm)            { setMsg("registerMsg","As senhas não coincidem.","err"); return; }
-    setBtn("registerForm", true);
-    setMsg("registerMsg","Criando conta…");
+    setAuthBtn("registerForm", "loading", "Criando conta…");
+    setMsg("registerMsg", "");
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       if (nome) await updateProfile(cred.user, { displayName: nome });
       if (cred.user) localStorage.setItem("osl_auth_uid", cred.user.uid);
-      setMsg("registerMsg","Conta criada! Redirecionando…","ok");
+      setAuthBtn("registerForm", "success", "Conta criada ✓");
       setTimeout(() => { window.location.href = "./entrada.html"; }, 800);
     } catch(err) {
       setMsg("registerMsg", mapErr(err.code), "err");
-      setBtn("registerForm", false);
+      setAuthBtn("registerForm", "error");
     }
   });
 }
