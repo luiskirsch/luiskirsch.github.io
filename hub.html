@@ -387,13 +387,14 @@ body{
   padding:0 14px 0 0; /* room for stacking shadow on right */
 }
 
-/* Front — tarot card with CSS stacking illusion via box-shadow */
+/* Front — tarot card com vidro embaçado */
 .rFront{
   flex:1;display:flex;flex-direction:column;
   border-radius:4px;
   border:2px solid var(--gold);
-  background-color:#0a141e;
-  background-image:var(--ct);background-size:22px 22px;
+  background:rgba(8,18,30,.52);
+  backdrop-filter:blur(22px) saturate(1.6) brightness(.90);
+  -webkit-backdrop-filter:blur(22px) saturate(1.6) brightness(.90);
   /* Stacking shadow: simulates 2 cards behind without DOM ghost elements */
   box-shadow:
     -6px 8px 0 -2px #07101a,
@@ -434,10 +435,11 @@ body{
 .rHead::before,.rHead::after{content:'';flex:1;max-width:24px;height:1px;background:rgba(212,175,55,.28);}
 
 .rQ{
-  font-family:var(--fell);font-size:clamp(15px,1.6vw,19px);
-  font-style:italic;font-weight:400;color:var(--text);
-  line-height:1.55;margin-bottom:14px;letter-spacing:.01em;flex:1;
+  font-family:var(--fell);font-size:clamp(22px,2.4vw,32px);
+  font-style:italic;font-weight:400;color:#fff;
+  line-height:1.45;margin-bottom:18px;letter-spacing:.01em;flex:1;
   display:flex;align-items:center;
+  text-shadow:0 2px 16px rgba(0,0,0,.60);
 }
 
 .rMeta{
