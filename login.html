@@ -578,7 +578,7 @@ body {
     if (!user) return;
     try {
       const snap = await getDoc(doc(db, "users", user.uid));
-      if (snap.exists()) window.location.href = "./painel.html";
+      if (snap.exists()) window.location.href = "./entrada.html";
     } catch (_) {}
   });
 
