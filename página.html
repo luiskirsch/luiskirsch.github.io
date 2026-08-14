@@ -632,24 +632,28 @@ body.transmissionFocus .soundPanel {
 }
 .worldBar.wbVisible { opacity: 1; }
 .worldBarItem {
-  display: flex;
-  align-items: center;
-  gap: 7px;
   font-family: "Courier New", monospace;
   font-size: 10px;
-  line-height: 1;
   letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--text3);
-  padding: 8px 0 6px;
+  padding: 10px 0;
+  white-space: nowrap;
 }
 .wbDot {
+  display: inline-block;
+  vertical-align: middle;
   width: 6px; height: 6px;
   border-radius: 50%;
-  flex-shrink: 0;
+  margin-right: 7px;
   background: rgba(155,227,122,.78);
   box-shadow: 0 0 6px rgba(155,227,122,.55);
   animation: wbPulse 2.4s ease-in-out infinite;
+}
+.worldBarItem span {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
 }
 @keyframes wbPulse {
   0%,100% { opacity: .55; }
