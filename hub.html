@@ -100,7 +100,7 @@ requestAnimationFrame(function(t0){function step(prev){requestAnimationFrame(fun
   --text3: rgba(255,255,255,.38);
   --ok: rgba(155,227,122,.92);
   --err: rgba(255,77,77,.92);
-  --nav-h: 58px;
+  --nav-h: 64px;
   --mob-h: 56px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -168,48 +168,67 @@ body {
   inset: 0 0 auto 0;
   z-index: 60;
   height: var(--nav-h);
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left));
-  background: linear-gradient(180deg, rgba(0,0,6,.80) 0%, rgba(0,0,6,0) 100%);
-  border-bottom: 1px solid rgba(255,255,255,.04);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  padding: 0 max(28px, env(safe-area-inset-right)) 0 max(28px, env(safe-area-inset-left));
+  background: rgba(0,0,4,.86);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  backdrop-filter: blur(20px) saturate(.9);
+  -webkit-backdrop-filter: blur(20px) saturate(.9);
 }
 .hubLogo {
   font-family: "Courier New", monospace;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: .24em;
+  letter-spacing: .30em;
   color: var(--gold);
   text-decoration: none;
   user-select: none;
   flex-shrink: 0;
+  transition: opacity .2s;
 }
+.hubLogo:hover { opacity: .75; }
 .navCenter {
   display: flex;
-  gap: 26px;
+  gap: 0;
+  justify-content: center;
 }
 .navLink {
   font-family: "Courier New", monospace;
   font-size: 10px;
-  letter-spacing: .20em;
+  letter-spacing: .22em;
   text-transform: uppercase;
-  color: var(--text2);
+  color: var(--text3);
   text-decoration: none;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
-  transition: color .18s;
+  padding: 0 18px;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  position: relative;
+  transition: color .20s;
 }
-.navLink:hover { color: var(--text2); }
-.navLink.current { color: var(--gold); }
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 18px; right: 18px;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transition: transform .22s ease;
+}
+.navLink:hover { color: var(--text); }
+.navLink:hover::after { transform: scaleX(.5); }
+.navLink.current { color: var(--text); }
+.navLink.current::after { transform: scaleX(1); }
 .navRight {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
+  justify-content: flex-end;
   flex-shrink: 0;
 }
 .navIco {
@@ -217,29 +236,162 @@ body {
   border: none;
   cursor: pointer;
   color: var(--text3);
-  font-size: 15px;
-  padding: 5px;
-  line-height: 1;
-  transition: color .18s;
-  position: relative;
-}
-.navIco:hover { color: var(--text2); }
-.navBadge {
-  position: absolute;
-  top: 0; right: 0;
-  min-width: 14px; height: 14px;
-  padding: 0 3px;
-  border-radius: 7px;
-  background: var(--err);
-  color: #fff;
-  font-family: "Courier New", monospace;
-  font-size: 7.5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid #000006;
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  transition: background .18s, color .18s;
+  position: relative;
+}
+.navIco svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.navIco:hover { background: rgba(255,255,255,.06); color: var(--text2); }
+.navBadge {
+  position: absolute;
+  top: 4px; right: 4px;
+  min-width: 13px; height: 13px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--err);
+  color: #fff;
+  font-family: "Courier New", monospace;
+  font-size: 7px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #000004;
   display: none;
 }
+.navCoins {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 12px;
+  height: 30px;
+  background: rgba(230,192,123,.07);
+  border: 1px solid rgba(230,192,123,.16);
+  border-radius: 8px;
+  color: var(--gold2);
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  cursor: pointer;
+  transition: background .18s, border-color .18s;
+}
+.navCoins:hover { background: rgba(230,192,123,.12); border-color: rgba(230,192,123,.28); }
+.navCoins svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+.navAvatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(230,192,123,.28);
+  background: rgba(230,192,123,.08);
+  color: var(--gold2);
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color .18s, background .18s;
+  margin-left: 4px;
+  text-transform: uppercase;
+}
+.navAvatar:hover { border-color: rgba(230,192,123,.55); background: rgba(230,192,123,.14); }
+
+/* ── Nav dropdowns ── */
+.navPanel {
+  position: fixed;
+  top: calc(var(--nav-h) + 6px);
+  z-index: 55;
+  min-width: 220px;
+  background: rgba(6,6,12,.97);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.70);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 8px 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+}
+.navPanel.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.navPanel.right { right: max(16px, env(safe-area-inset-right)); }
+.panelHead {
+  padding: 12px 18px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 4px;
+}
+.panelHeadName {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--text);
+  display: block;
+  margin-bottom: 2px;
+}
+.panelHeadSub {
+  font-family: "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: .08em;
+  color: var(--text3);
+}
+.panelItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  color: var(--text2);
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+  transition: background .14s, color .14s;
+}
+.panelItem:hover { background: rgba(255,255,255,.04); color: var(--text); }
+.panelItem.danger { color: rgba(255,100,100,.70); }
+.panelItem.danger:hover { background: rgba(255,60,60,.06); color: rgba(255,100,100,.95); }
+.panelDivider { height: 1px; background: rgba(255,255,255,.05); margin: 4px 0; }
+.panelEmpty {
+  padding: 18px 18px;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: .10em;
+  color: var(--text3);
+  text-align: center;
+}
+
+/* ── Toast ── */
+.navToast {
+  position: fixed;
+  top: calc(var(--nav-h) + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  z-index: 55;
+  background: rgba(6,6,12,.97);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  padding: 11px 22px;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s ease, transform .22s ease;
+}
+.navToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ── Hub main ── */
 .hubMain {
@@ -621,7 +773,7 @@ body {
 
 <!-- Top nav -->
 <nav class="hubNav" aria-label="Navegação">
-  <a class="hubLogo" href="./hub.html">SEXTO LUGAR</a>
+  <a class="hubLogo" href="./hub.html">SEXTO&nbsp;LUGAR</a>
   <nav class="navCenter">
     <a class="navLink current" href="./hub.html">Hub</a>
     <button class="navLink" id="navSocial">Social</button>
@@ -629,13 +781,44 @@ body {
     <a class="navLink" href="./entrada.html">Jogar</a>
   </nav>
   <div class="navRight">
-    <button class="navIco" id="btnNotif" title="Notificações">
-      🔔<span class="navBadge" id="notifBadge"></span>
+    <button class="navIco" id="btnNotif" title="Notificações" aria-label="Notificações">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="navBadge" id="notifBadge"></span>
     </button>
-    <button class="navIco" id="btnCoins" title="Suas moedas">🪙</button>
-    <button class="navIco" id="btnPerfil" title="Meu perfil">👤</button>
+    <button class="navCoins" id="btnCoins" title="Suas moedas">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 6v2m0 8v2M9.5 9.5C9.5 8.4 10.6 8 12 8s2.5.4 2.5 1.5S13.4 11 12 11s-2.5.4-2.5 1.5S10.6 16 12 16s2.5-.4 2.5-1.5"/></svg>
+      <span id="coinsVal">—</span>
+    </button>
+    <button class="navAvatar" id="btnPerfil" title="Meu perfil" aria-label="Perfil">
+      <span id="avatarInitials">?</span>
+    </button>
   </div>
 </nav>
+
+<!-- Dropdown: Perfil -->
+<div class="navPanel right" id="dropPerfil">
+  <div class="panelHead">
+    <span class="panelHeadName" id="dpName">—</span>
+    <span class="panelHeadSub" id="dpEmail">—</span>
+  </div>
+  <button class="panelItem" id="dpConfig">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Configurações
+  </button>
+  <div class="panelDivider"></div>
+  <button class="panelItem danger" id="dpLogout">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Sair
+  </button>
+</div>
+
+<!-- Dropdown: Notificações -->
+<div class="navPanel right" id="dropNotif" style="margin-right:38px">
+  <div class="panelEmpty" id="notifEmpty">Nenhuma notificação</div>
+</div>
+
+<!-- Toast global -->
+<div class="navToast" id="navToast"></div>
 
 <!-- Main -->
 <main class="hubMain" id="hubMain">
@@ -775,6 +958,92 @@ document.addEventListener("visibilitychange",function(){if(!document.hidden){upd
 window.addEventListener("load",function(){updateMoonMask();start(true);});
 start(true);
 }catch(e){}
+})();
+</script>
+
+<!-- Nav interactivity -->
+<script>
+(function(){
+var _openPanel=null;
+
+function closeAll(){
+  document.querySelectorAll('.navPanel').forEach(function(p){p.classList.remove('open');});
+  _openPanel=null;
+}
+
+function togglePanel(panel){
+  if(!panel) return;
+  var isOpen=panel.classList.contains('open');
+  closeAll();
+  if(!isOpen) panel.classList.add('open');
+  else _openPanel=null;
+  if(!isOpen) _openPanel=panel;
+}
+
+function showToast(msg, ms){
+  var t=document.getElementById('navToast');
+  if(!t) return;
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(function(){t.classList.remove('show');},ms||2400);
+}
+
+document.getElementById('btnNotif').addEventListener('click',function(e){
+  e.stopPropagation();
+  togglePanel(document.getElementById('dropNotif'));
+});
+document.getElementById('btnCoins').addEventListener('click',function(e){
+  e.stopPropagation();
+  closeAll();
+  showToast('Em breve: loja de moedas',2200);
+});
+document.getElementById('btnPerfil').addEventListener('click',function(e){
+  e.stopPropagation();
+  togglePanel(document.getElementById('dropPerfil'));
+});
+document.getElementById('navSocial').addEventListener('click',function(){
+  closeAll();
+  showToast('Social — em construção',2000);
+});
+document.getElementById('navMundo').addEventListener('click',function(){
+  closeAll();
+  showToast('Mundo — em construção',2000);
+});
+document.getElementById('dpConfig').addEventListener('click',function(){
+  closeAll();
+  showToast('Configurações — em breve',2000);
+});
+document.getElementById('dpLogout').addEventListener('click',function(){
+  closeAll();
+  window._hubLogout && window._hubLogout();
+});
+
+document.addEventListener('click',function(e){
+  if(_openPanel && !_openPanel.contains(e.target)){closeAll();}
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeAll();
+});
+
+window.hubNavSetUser=function(displayName,email,coins){
+  var n=document.getElementById('dpName');
+  var em=document.getElementById('dpEmail');
+  var av=document.getElementById('avatarInitials');
+  var co=document.getElementById('coinsVal');
+  if(n) n.textContent=displayName||'—';
+  if(em) em.textContent=email||'';
+  if(av){
+    var nome=(displayName||email||'?').trim();
+    av.textContent=nome.charAt(0).toUpperCase();
+  }
+  if(co) co.textContent=coins!=null?String(coins):'0';
+};
+
+window.hubNavSetCoins=function(v){
+  var co=document.getElementById('coinsVal');
+  if(co) co.textContent=String(v||0);
+};
 })();
 </script>
 
@@ -980,7 +1249,7 @@ window.hubShowOnboarding=function(){
 <!-- Firebase module: auth check + hub API -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const API = "https://osl-video-server-production.up.railway.app";
 
@@ -996,14 +1265,20 @@ const cfg = {
 const app  = initializeApp(cfg);
 const auth = getAuth(app);
 
+window._hubLogout = async () => {
+  try { await signOut(auth); } catch(_) {}
+  window.location.href = "./página.html";
+};
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "./página.html";
     return;
   }
 
-  // Greeting imediata (não espera API)
+  // Greeting + nav user imediatos (não espera API)
   window.hubSetGreeting && window.hubSetGreeting(user.displayName || user.email || "");
+  window.hubNavSetUser && window.hubNavSetUser(user.displayName, user.email, null);
 
   // Fetch hub context
   let data = {};
@@ -1014,6 +1289,9 @@ onAuthStateChanged(auth, async (user) => {
     });
     if (res.ok) data = await res.json().catch(() => ({}));
   } catch (_) {}
+
+  // Atualiza moedas no nav após API
+  if (data.coins != null) window.hubNavSetCoins && window.hubNavSetCoins(data.coins);
 
   // Renderiza hub
   window.hubRender && window.hubRender(data);
