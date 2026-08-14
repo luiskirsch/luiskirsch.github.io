@@ -705,20 +705,60 @@ var oMat=new THREE.ShaderMaterial({
 });
 scene.add(new THREE.Points(oGeo,oMat));
 
-/* Floating cards */
-var tc=document.createElement('canvas');tc.width=128;tc.height=128;var tc2=tc.getContext('2d');tc2.fillStyle='#0c1a28';tc2.fillRect(0,0,128,128);tc2.strokeStyle='rgba(212,175,55,0.22)';tc2.lineWidth=0.8;
-for(var cy2=0;cy2<128;cy2+=20){for(var cx2=0;cx2<128;cx2+=20){tc2.beginPath();tc2.moveTo(cx2+10,cy2);tc2.lineTo(cx2+20,cy2+10);tc2.lineTo(cx2+10,cy2+20);tc2.lineTo(cx2,cy2+10);tc2.closePath();tc2.stroke();}}
-var cTex=new THREE.CanvasTexture(tc);
-var fcards=[];
-function mkCard(x,y,z,rx,ry,op){var g=new THREE.BoxGeometry(12,18,.25);var mat=new THREE.MeshBasicMaterial({map:cTex,transparent:true,opacity:op,depthWrite:false});var em=new THREE.LineBasicMaterial({color:0xD4AF37,transparent:true,opacity:op*.55,depthWrite:false});var gr=new THREE.Group();gr.add(new THREE.Mesh(g,mat));gr.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),em));gr.position.set(x,y,z);gr.rotation.set(rx,ry,0);gr._bY=y;gr._fp=Math.random()*Math.PI*2;gr._fs=Math.random()*.20+.08;gr._rx=(Math.random()-.5)*.0015;gr._ry=(Math.random()-.5)*.0022;scene.add(gr);fcards.push(gr);}
-mkCard(-90,25,-80,.30,.55,.10);mkCard(80,-15,-90,.10,1.20,.08);mkCard(20,50,-120,.50,.35,.07);mkCard(-50,-35,-75,.22,.80,.09);mkCard(60,35,-65,.15,1.50,.06);
+/* Floating ritual cards — two printed faces plus a visible paper core */
+function cardRound(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
+function cardDiamond(c,x,y,s){c.beginPath();c.moveTo(x,y-s);c.lineTo(x+s,y);c.lineTo(x,y+s);c.lineTo(x-s,y);c.closePath();}
+function cardTexture(kind,isBack){
+  var cn=document.createElement('canvas');cn.width=384;cn.height=576;var c=cn.getContext('2d');
+  c.clearRect(0,0,384,576);c.save();cardRound(c,5,5,374,566,26);c.clip();
+  var base=c.createLinearGradient(0,0,384,576);base.addColorStop(0,isBack?'#102b3e':'#102638');base.addColorStop(.48,isBack?'#081b2a':'#0b1d2b');base.addColorStop(1,'#040c13');c.fillStyle=base;c.fillRect(0,0,384,576);
+  var glow=c.createRadialGradient(192,260,8,192,278,245);glow.addColorStop(0,isBack?'rgba(35,104,137,.32)':'rgba(28,83,111,.27)');glow.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=glow;c.fillRect(0,0,384,576);
+  c.lineWidth=1;c.strokeStyle='rgba(212,175,55,.075)';
+  for(var d=-576;d<720;d+=24){c.beginPath();c.moveTo(d,0);c.lineTo(d+576,576);c.stroke();c.beginPath();c.moveTo(d+576,0);c.lineTo(d,576);c.stroke();}
+  c.restore();
+  cardRound(c,7,7,370,562,25);c.lineWidth=7;c.strokeStyle='rgba(212,175,55,.88)';c.stroke();
+  cardRound(c,22,22,340,532,18);c.lineWidth=2;c.strokeStyle='rgba(244,213,104,.50)';c.stroke();
+  cardRound(c,31,31,322,514,14);c.lineWidth=1;c.strokeStyle='rgba(212,175,55,.20)';c.stroke();
+  c.strokeStyle='rgba(212,175,55,.72)';c.lineWidth=3;
+  [[43,43,1,1],[341,43,-1,1],[43,533,1,-1],[341,533,-1,-1]].forEach(function(q){c.beginPath();c.moveTo(q[0],q[1]+q[3]*28);c.lineTo(q[0],q[1]);c.lineTo(q[0]+q[2]*28,q[1]);c.stroke();});
+  if(isBack){
+    c.save();cardRound(c,42,42,300,492,10);c.clip();c.strokeStyle='rgba(212,175,55,.14)';c.lineWidth=1.5;
+    for(var yy=58;yy<540;yy+=40){for(var xx=52;xx<350;xx+=40){cardDiamond(c,xx+(yy%80?20:0),yy,13);c.stroke();}}
+    c.restore();
+    c.save();c.translate(192,288);c.rotate(Math.PI/4);c.fillStyle='rgba(5,15,24,.94)';c.strokeStyle='rgba(238,201,83,.78)';c.lineWidth=5;c.fillRect(-67,-67,134,134);c.strokeRect(-67,-67,134,134);c.strokeStyle='rgba(212,175,55,.32)';c.lineWidth=2;c.strokeRect(-51,-51,102,102);c.restore();
+    c.beginPath();c.arc(192,288,43,0,Math.PI*2);c.fillStyle='rgba(11,34,49,.96)';c.fill();c.strokeStyle='rgba(244,216,112,.70)';c.lineWidth=4;c.stroke();
+    cardDiamond(c,192,288,21);c.fillStyle='rgba(212,175,55,.82)';c.fill();cardDiamond(c,192,288,10);c.fillStyle='#0a1b28';c.fill();
+  }else{
+    c.beginPath();c.arc(192,288,86,0,Math.PI*2);c.fillStyle='rgba(3,11,18,.52)';c.fill();c.strokeStyle='rgba(212,175,55,.34)';c.lineWidth=3;c.stroke();
+    c.beginPath();c.moveTo(104,288);c.quadraticCurveTo(192,207,280,288);c.quadraticCurveTo(192,369,104,288);c.closePath();c.strokeStyle='rgba(240,211,111,.72)';c.lineWidth=5;c.stroke();
+    c.beginPath();c.arc(192,288,kind===1?31:25,0,Math.PI*2);c.fillStyle=kind===2?'rgba(212,175,55,.78)':'rgba(19,66,88,.96)';c.fill();c.strokeStyle='rgba(255,230,143,.76)';c.lineWidth=4;c.stroke();
+    if(kind===0){c.beginPath();c.arc(192,288,9,0,Math.PI*2);c.fillStyle='#e8cf78';c.fill();}
+    if(kind===1){c.beginPath();c.arc(205,276,29,0,Math.PI*2);c.fillStyle='#091923';c.fill();}
+    if(kind===2){cardDiamond(c,192,288,13);c.fillStyle='#0a1b28';c.fill();}
+    c.fillStyle='rgba(212,175,55,.72)';cardDiamond(c,67,79,8);c.fill();cardDiamond(c,317,497,8);c.fill();
+  }
+  var sheen=c.createLinearGradient(20,20,364,556);sheen.addColorStop(0,'rgba(255,255,255,.12)');sheen.addColorStop(.28,'rgba(255,255,255,0)');sheen.addColorStop(.72,'rgba(255,255,255,.035)');sheen.addColorStop(1,'rgba(255,255,255,0)');cardRound(c,10,10,364,556,23);c.fillStyle=sheen;c.fill();
+  var tex=new THREE.CanvasTexture(cn);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return tex;
+}
+var cardBackTex=cardTexture(0,true),cardFrontTex=[cardTexture(0,false),cardTexture(1,false),cardTexture(2,false)];
+var cardPlane=new THREE.PlaneGeometry(14,21),cardCore=new THREE.BoxGeometry(12.9,19.9,.42),fcards=[];
+function mkCard(x,y,z,rx,ry,op,kind){
+  var gr=new THREE.Group();
+  var coreMat=new THREE.MeshBasicMaterial({color:0x08131d,transparent:true,opacity:Math.min(.42,op*1.55),depthWrite:false});
+  var frontMat=new THREE.MeshBasicMaterial({map:cardFrontTex[kind],transparent:true,opacity:op,depthWrite:false,side:THREE.FrontSide});
+  var backMat=new THREE.MeshBasicMaterial({map:cardBackTex,transparent:true,opacity:op,depthWrite:false,side:THREE.FrontSide});
+  var core=new THREE.Mesh(cardCore,coreMat),front=new THREE.Mesh(cardPlane,frontMat),back=new THREE.Mesh(cardPlane,backMat);
+  front.position.z=.23;back.position.z=-.23;back.rotation.y=Math.PI;gr.add(core,front,back);
+  gr.position.set(x,y,z);gr.rotation.set(rx,ry,(Math.random()-.5)*.22);gr._bX=x;gr._bY=y;gr._bZ=gr.rotation.z;gr._fp=Math.random()*Math.PI*2;gr._fs=Math.random()*.18+.08;gr._rx=(Math.random()-.5)*.0015;gr._ry=(Math.random()-.5)*.0022;scene.add(gr);fcards.push(gr);
+}
+mkCard(-90,25,-80,.30,.55,.22,0);mkCard(80,-15,-90,.10,1.20,.18,1);mkCard(20,50,-120,.50,.35,.14,2);mkCard(-50,-35,-75,.22,.80,.20,1);mkCard(60,35,-65,.15,1.50,.16,2);
 
 var mx=0,my=0,lcx=0,lcy=0;
 window.addEventListener('mousemove',function(e){mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2;},{passive:true});
 window.addEventListener('resize',function(){W=innerWidth;H=innerHeight;camera.aspect=W/H;camera.updateProjectionMatrix();renderer.setSize(W,H);bgMat.uniforms.uSz.value.set(W,H);},{passive:true});
 
 var clock=new THREE.Clock();
-(function loop(){requestAnimationFrame(loop);var t=clock.getElapsedTime();bgMat.uniforms.uT.value=t;pMat.uniforms.uT.value=t;oMat.uniforms.uT.value=t;fcards.forEach(function(c){c.rotation.x+=c._rx;c.rotation.y+=c._ry;c.position.y=c._bY+Math.sin(t*c._fs+c._fp)*6;});lcx+=(mx*10-lcx)*.028;lcy+=(-my*6-lcy)*.028;camera.position.x=lcx;camera.position.y=lcy;camera.lookAt(0,0,0);renderer.render(scene,camera);})();
+(function loop(){requestAnimationFrame(loop);var t=clock.getElapsedTime();bgMat.uniforms.uT.value=t;pMat.uniforms.uT.value=t;oMat.uniforms.uT.value=t;fcards.forEach(function(c){c.rotation.x+=c._rx;c.rotation.y+=c._ry;c.rotation.z=c._bZ+Math.sin(t*c._fs*.55+c._fp)*.045;c.position.x=c._bX+Math.cos(t*c._fs*.72+c._fp)*2.4;c.position.y=c._bY+Math.sin(t*c._fs+c._fp)*6;});lcx+=(mx*10-lcx)*.028;lcy+=(-my*6-lcy)*.028;camera.position.x=lcx;camera.position.y=lcy;camera.lookAt(0,0,0);renderer.render(scene,camera);})();
 })();
 </script>
 
