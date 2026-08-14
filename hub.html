@@ -517,8 +517,9 @@ body{
   pointer-events:none;
 }
 .evLabel{
-  font-size:8px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;
-  color:var(--gold2);display:block;margin-bottom:5px;position:relative;z-index:1;
+  font-size:10px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;
+  color:#e0528a;display:block;margin-bottom:5px;position:relative;z-index:1;
+  text-shadow:0 0 14px rgba(224,82,138,.35);
 }
 .evWhen{
   font-size:8.5px;letter-spacing:.10em;text-transform:uppercase;
@@ -986,13 +987,17 @@ document.getElementById('btnInvite').addEventListener('click',function(){window.
 
 /* Countdown */
 (function(){
-  var el=document.getElementById('evTimer');if(!el)return;
+  var el=document.getElementById('evTimer');
+  var wh=document.getElementById('evWhen');
+  if(!el)return;
+  var meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   function upd(){
     var now=new Date(),next=new Date(now);
     var diff=(4-now.getDay()+7)%7||7;next.setDate(now.getDate()+diff);next.setHours(20,0,0,0);
     var ms=next-now;if(ms<0)ms+=7*86400000;
     var h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
     el.textContent=(h>0?h+'h ':'')+String(m).padStart(2,'0')+'min '+String(s).padStart(2,'0')+'s';
+    if(wh)wh.textContent='Próximo · Quinta-feira · '+next.getDate()+' '+meses[next.getMonth()];
   }
   upd();setInterval(upd,1000);
 })();
