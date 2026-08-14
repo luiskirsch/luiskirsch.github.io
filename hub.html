@@ -498,34 +498,38 @@ body{
 }
 .btnDiscover:hover{background:rgba(212,175,55,.08);border-color:rgba(212,175,55,.60);transform:translateY(-1px);box-shadow:0 4px 20px rgba(212,175,55,.14);}
 
-/* ── EVENT COUNTDOWN — compact, refined ── */
-.evStrip{
+/* ── EVENT CARD — no painel esquerdo, abaixo dos packs ── */
+.evCard{
   flex-shrink:0;
-  display:flex;align-items:center;
+  padding:15px 18px 16px 20px;
   border-top:1px solid rgba(212,175,55,.10);
-  background:rgba(3,7,13,.92);
-  padding:0 22px;
-  height:46px;
-  gap:14px;
-  position:relative;
+  background:rgba(212,175,55,.022);
+  position:relative;overflow:hidden;
 }
-.evStrip::before{
-  content:'';position:absolute;left:0;top:10px;bottom:10px;
-  width:2px;border-radius:1px;
+.evCard::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
   background:var(--goldG);
-  box-shadow:0 0 10px rgba(212,175,55,.40);
+  box-shadow:0 0 12px rgba(212,175,55,.40);
+}
+.evCard::after{
+  content:'';position:absolute;inset:0;
+  background-image:var(--ct);background-size:22px 22px;opacity:.20;
+  pointer-events:none;
 }
 .evLabel{
-  font-size:8px;font-weight:700;letter-spacing:.34em;text-transform:uppercase;
-  color:var(--gold2);flex-shrink:0;white-space:nowrap;
+  font-size:8px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;
+  color:var(--gold2);display:block;margin-bottom:5px;position:relative;z-index:1;
 }
-.evSep{width:1px;height:18px;background:rgba(212,175,55,.14);flex-shrink:0;}
-.evWhen{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);flex-shrink:0;white-space:nowrap;}
+.evWhen{
+  font-size:8.5px;letter-spacing:.10em;text-transform:uppercase;
+  color:var(--text3);display:block;margin-bottom:10px;position:relative;z-index:1;
+}
 .evTimer{
-  font-size:18px;font-weight:700;color:rgba(240,236,224,.90);
-  font-variant-numeric:tabular-nums;letter-spacing:.06em;
-  text-shadow:0 0 16px rgba(212,175,55,.22);
-  margin-left:auto;flex-shrink:0;
+  font-size:22px;font-weight:700;color:rgba(240,236,224,.92);
+  font-variant-numeric:tabular-nums;letter-spacing:.04em;
+  text-shadow:0 0 18px rgba(212,175,55,.25);
+  display:block;position:relative;z-index:1;
+  line-height:1;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -662,6 +666,11 @@ body{
         </div>
       </div>
     </div>
+    <div class="evCard">
+      <span class="evLabel">Encontro Marcado</span>
+      <span class="evWhen" id="evWhen">Próximo · Quinta-feira</span>
+      <div class="evTimer" id="evTimer">—</div>
+    </div>
   </aside>
 
   <!-- CENTER — cinematic stage -->
@@ -703,13 +712,6 @@ body{
       </div>
     </div>
 
-    <!-- Event countdown — full-width strip -->
-    <div class="evStrip">
-      <span class="evLabel">Encontro Marcado</span>
-      <div class="evSep"></div>
-      <span class="evWhen" id="evWhen">Próximo · Quinta-feira</span>
-      <div class="evTimer" id="evTimer">—</div>
-    </div>
 
   </div>
 
