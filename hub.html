@@ -8,773 +8,681 @@
 <title>SextoLugar · Hub</title>
 <link rel="icon" type="image/png" href="./favicon.png">
 <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"/>
-<meta http-equiv="Content-Security-Policy" content="
-  default-src 'self';
-  base-uri 'self';
-  object-src 'none';
-  frame-ancestors 'none';
-  form-action 'self';
-  img-src 'self' data: blob: https://*.googleusercontent.com https://lh3.googleusercontent.com;
-  connect-src 'self'
-    https://identitytoolkit.googleapis.com
-    https://securetoken.googleapis.com
-    https://firestore.googleapis.com
-    https://www.googleapis.com
-    https://firebaseinstallations.googleapis.com
-    https://osl-video-server-production.up.railway.app;
-  font-src 'self' data: https://fonts.gstatic.com;
-  style-src 'self' 'unsafe-inline' https://www.gstatic.com https://fonts.googleapis.com;
-  script-src 'self' 'unsafe-inline' https://www.gstatic.com;
-  upgrade-insecure-requests;
-  block-all-mixed-content;
-">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://*.googleusercontent.com https://lh3.googleusercontent.com; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://osl-video-server-production.up.railway.app; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com; upgrade-insecure-requests; block-all-mixed-content;">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ── Tokens ── */
+/* ════════════════════════════════════════════════════
+   DESIGN TOKENS
+════════════════════════════════════════════════════ */
 :root {
-  --gold:  #D4AF37;
-  --gold2: #C5A059;
-  --gold3: rgba(212,175,55,.22);
-  --gold4: rgba(212,175,55,.10);
-  --glass: rgba(15,22,28,.80);
-  --glass2: rgba(12,18,24,.70);
-  --border: rgba(212,175,55,.18);
-  --border2: rgba(255,255,255,.06);
-  --text:  rgba(255,255,255,.93);
-  --text2: rgba(255,255,255,.62);
-  --text3: rgba(255,255,255,.36);
-  --ok:    rgba(100,220,80,.88);
-  --err:   rgba(255,77,77,.90);
-  --nav-h: 58px;
-  --panel-w: 230px;
-  --serif: 'Cinzel', Georgia, serif;
-  --sans: 'Inter', system-ui, sans-serif;
+  --gold:   #D4AF37;
+  --gold2:  #C5A059;
+  --gold3:  rgba(212,175,55,.24);
+  --gold4:  rgba(212,175,55,.08);
+  --glass:  rgba(10,18,26,.82);
+  --glass2: rgba(8,14,22,.72);
+  --border: rgba(212,175,55,.20);
+  --b2:     rgba(255,255,255,.06);
+  --text:   rgba(255,255,255,.93);
+  --text2:  rgba(255,255,255,.60);
+  --text3:  rgba(255,255,255,.34);
+  --ok:     #64db50;
+  --err:    #ff4d4d;
+  --nav-h:  60px;
+  --pw:     250px;
+  --serif:  'Cinzel', 'Palatino Linotype', Georgia, serif;
+  --fell:   'IM Fell English', Georgia, serif;
+  --sans:   'Inter', system-ui, sans-serif;
+
+  /* SVG card-back diamond lattice (URL-encoded) */
+  --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M11 0L22 11L11 22L0 11Z' stroke='%23D4AF3730' stroke-width='0.7' fill='%23D4AF3706'/%3E%3Cpath d='M11 4L18 11L11 18L4 11Z' stroke='%23D4AF3718' stroke-width='0.5' fill='none'/%3E%3C/svg%3E");
 }
 
-/* ── Reset ── */
+/* ════════════════════════════════════════════════════
+   RESET + BASE
+════════════════════════════════════════════════════ */
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html,body { height:100%; }
-html { overscroll-behavior:none; }
+html { overscroll-behavior:none; height:100%; }
 body {
   font-family: var(--sans);
   color: var(--text);
-  background: radial-gradient(ellipse 80% 60% at 50% 20%, #0d2535 0%, #081318 55%, #030a0e 100%);
+  background: #060d12;
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
-/* ── Particles canvas ── */
-#particles {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: .70;
-}
-
-/* ── Glass card ── */
-.glass {
-  background: var(--glass);
-  backdrop-filter: blur(14px) saturate(.85);
-  -webkit-backdrop-filter: blur(14px) saturate(.85);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-
-/* ── Loading veil ── */
-.loadVeil {
+/* ════════════════════════════════════════════════════
+   CANVAS LAYERS (bg + particles)
+════════════════════════════════════════════════════ */
+#cvBg, #cvDust {
   position: fixed; inset: 0;
-  z-index: 900;
+  pointer-events: none;
+}
+#cvBg   { z-index: 0; }
+#cvDust { z-index: 1; opacity: .65; }
+
+/* ════════════════════════════════════════════════════
+   LOADING VEIL
+════════════════════════════════════════════════════ */
+.veil {
+  position: fixed; inset: 0; z-index: 900;
   background: #060d12;
   display: flex; align-items: center; justify-content: center;
   transition: opacity .55s ease;
 }
-.loadVeil.out { opacity: 0; pointer-events: none; }
-.ldDots { display: flex; gap: 8px; }
-.ldDot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
+.veil.out { opacity: 0; pointer-events: none; }
+.veilDots { display: flex; gap: 9px; }
+.veilDot {
+  width: 7px; height: 7px; border-radius: 50%;
   background: var(--gold);
-  opacity: .2;
-  animation: ldPulse 1.4s ease-in-out infinite;
+  animation: dotPulse 1.5s ease-in-out infinite;
 }
-.ldDot:nth-child(2) { animation-delay: .2s; }
-.ldDot:nth-child(3) { animation-delay: .4s; }
-@keyframes ldPulse { 0%,80%,100%{opacity:.15} 40%{opacity:.90} }
+.veilDot:nth-child(2) { animation-delay:.22s; }
+.veilDot:nth-child(3) { animation-delay:.44s; }
+@keyframes dotPulse { 0%,80%,100%{opacity:.14;transform:scale(.85)} 40%{opacity:.95;transform:scale(1)} }
 
-/* ══════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    NAVBAR
-══════════════════════════════════════════ */
-.navbar {
-  position: fixed;
-  inset: 0 0 auto 0;
-  z-index: 80;
+════════════════════════════════════════════════════ */
+.nav {
+  position: fixed; inset: 0 0 auto 0; z-index: 80;
   height: var(--nav-h);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding: 0 28px;
-  background: rgba(5,12,18,.88);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; padding: 0 24px;
+  background: rgba(4,10,16,.92);
+  border-bottom: 1px solid rgba(212,175,55,.16);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .navLogo {
-  font-family: var(--serif);
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: .16em;
-  color: var(--gold);
-  text-decoration: none;
-  user-select: none;
+  font-family: var(--serif); font-size: 17px; font-weight: 700;
+  letter-spacing: .20em; color: var(--gold);
+  text-decoration: none; user-select: none;
   transition: opacity .2s;
 }
-.navLogo:hover { opacity: .75; }
+.navLogo:hover { opacity: .72; }
 
-.navLinks {
-  display: flex;
-  align-items: stretch;
-}
-.navLinks a,
-.navLinks button {
-  font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--text3);
-  text-decoration: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0 18px;
-  height: var(--nav-h);
-  display: flex; align-items: center;
-  position: relative;
+.navLinks { display: flex; align-items: stretch; }
+.navLink, .navBtn {
+  font-family: var(--sans); font-size: 10.5px; font-weight: 500;
+  letter-spacing: .20em; text-transform: uppercase;
+  color: var(--text3); text-decoration: none;
+  background: none; border: none; cursor: pointer;
+  padding: 0 16px; height: var(--nav-h);
+  display: flex; align-items: center; position: relative;
   transition: color .18s;
 }
-.navLinks a::after,
-.navLinks button::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 18px; right: 18px;
-  height: 2px;
-  background: var(--gold);
-  transform: scaleX(0);
-  transition: transform .22s ease;
+.navLink::after, .navBtn::after {
+  content: ''; position: absolute; bottom: 0; left: 16px; right: 16px;
+  height: 2px; background: var(--gold);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .24s ease;
 }
-.navLinks a:hover,
-.navLinks button:hover { color: var(--text2); }
-.navLinks a.active { color: var(--text); }
-.navLinks a.active::after { transform: scaleX(1); }
+.navLink:hover, .navBtn:hover { color: var(--text2); }
+.navLink.on { color: var(--text); }
+.navLink.on::after { transform: scaleX(1); }
 
-.navRight {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-}
+.navRight { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 
 /* Avatar */
-.navAvatarWrap {
-  position: relative;
-  flex-shrink: 0;
-}
-.navAvatarImg {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 1.5px solid var(--gold2);
-  object-fit: cover;
-  display: block;
-  background: rgba(212,175,55,.12);
-}
-.navAvatarFallback {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 1.5px solid var(--gold2);
+.navAvWrap { position: relative; flex-shrink: 0; cursor: pointer; }
+.navAv {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2px solid var(--gold2);
   background: rgba(212,175,55,.10);
-  color: var(--gold);
-  font-family: var(--serif);
-  font-size: 13px;
-  font-weight: 700;
   display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-size: 13px; font-weight: 700; color: var(--gold);
+  overflow: hidden; position: relative;
 }
-.navOnlineDot {
-  position: absolute;
-  bottom: 0; right: 0;
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: var(--ok);
-  border: 1.5px solid #060d12;
-  box-shadow: 0 0 6px rgba(100,220,80,.60);
+.navAv img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; border-radius:50%; }
+.navOnDot {
+  position: absolute; bottom: 0; right: 0;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--ok); border: 2px solid #060d12;
+  box-shadow: 0 0 8px rgba(100,219,80,.65);
 }
 
-.navUserName {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  letter-spacing: .04em;
-}
+.navName { font-size: 12px; font-weight: 500; color: var(--text); letter-spacing: .04em; }
 
 /* Bell */
 .navBell {
-  position: relative;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text3);
-  padding: 6px 8px;
-  border-radius: 8px;
-  transition: background .16s, color .16s;
+  position: relative; background: none; border: none; cursor: pointer;
+  color: var(--text3); padding: 7px 8px; border-radius: 8px;
   display: flex; align-items: center;
+  transition: background .16s, color .16s;
 }
-.navBell svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.5; }
-.navBell:hover { background: rgba(255,255,255,.05); color: var(--text2); }
+.navBell svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.5; }
+.navBell:hover { background: var(--b2); color: var(--text2); }
 .bellBadge {
-  position: absolute;
-  top: 3px; right: 3px;
-  min-width: 14px; height: 14px;
-  background: var(--err);
-  color: #fff;
-  font-size: 7.5px; font-weight: 700;
-  border-radius: 999px;
-  border: 1.5px solid #060d12;
-  display: flex; align-items: center; justify-content: center;
-  padding: 0 2px;
-  display: none;
+  position: absolute; top: 3px; right: 3px;
+  min-width: 13px; height: 13px;
+  background: var(--err); color: #fff; font-size: 7px; font-weight: 700;
+  border-radius: 999px; border: 1.5px solid #060d12;
+  display: none; align-items: center; justify-content: center; padding: 0 2px;
 }
 
 /* Coins */
 .navCoins {
-  display: flex; align-items: center; gap: 6px;
-  padding: 0 10px;
-  height: 28px;
-  background: rgba(212,175,55,.08);
-  border: 1px solid rgba(212,175,55,.22);
-  border-radius: 7px;
-  color: var(--gold2);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 10px; height: 28px;
+  background: rgba(212,175,55,.07); border: 1px solid rgba(212,175,55,.22); border-radius: 7px;
+  color: var(--gold2); font-size: 12px; font-weight: 600;
+  cursor: pointer; letter-spacing: .03em;
   transition: background .18s;
-  letter-spacing: .04em;
 }
-.navCoins:hover { background: rgba(212,175,55,.14); }
-.navCoins svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+.navCoins:hover { background: rgba(212,175,55,.13); }
+.navCoins svg { width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:1.6; }
 
-/* Rank badge */
+/* Rank pill */
 .navRank {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: rgba(5,10,15,.80);
-  border: 1.5px solid var(--gold2);
-  color: var(--gold);
-  font-family: var(--serif);
-  font-size: 10px;
-  font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  letter-spacing: .04em;
+  height: 28px; padding: 0 9px; border-radius: 7px;
+  background: rgba(5,10,16,.85); border: 1.5px solid var(--gold2);
+  color: var(--gold); font-family: var(--serif); font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; gap: 4px; letter-spacing: .06em;
 }
 
-/* ══════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    DASHBOARD GRID
-══════════════════════════════════════════ */
-.dashboard {
-  position: relative;
-  z-index: 5;
+════════════════════════════════════════════════════ */
+.dash {
+  position: relative; z-index: 5;
   display: grid;
-  grid-template-columns: var(--panel-w) 1fr var(--panel-w);
-  gap: 16px;
-  padding: calc(var(--nav-h) + 18px) 20px 12px;
-  min-height: calc(100vh - 72px);
-  max-height: calc(100vh - 12px);
+  grid-template-columns: var(--pw) 1fr var(--pw);
+  gap: 14px;
+  padding: calc(var(--nav-h) + 16px) 18px 14px;
+  min-height: 100vh;
   align-items: start;
 }
 
-/* ── Panel base ── */
+/* ────────────────────────────────────────────────────
+   GLASS PANEL
+──────────────────────────────────────────────────── */
 .panel {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  height: 100%;
-  padding-bottom: 0;
+  display: flex; flex-direction: column; gap: 12px;
+  height: calc(100vh - var(--nav-h) - 30px);
+  justify-content: space-between;
 }
 
-.panelTitle {
-  font-family: var(--sans);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  color: var(--gold2);
-  margin-bottom: 14px;
+.glassBox {
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(.80);
+  -webkit-backdrop-filter: blur(16px) saturate(.80);
+  border: 1px solid var(--border);
+  border-radius: 14px;
 }
 
-/* ══════════════════════════════════════════
-   STORE PANEL (LEFT)
-══════════════════════════════════════════ */
-.storePanel {
-  padding: 18px 16px 16px;
-  flex: 1;
+.panelLabel {
+  font-family: var(--sans); font-size: 9.5px; font-weight: 600;
+  letter-spacing: .26em; text-transform: uppercase;
+  color: var(--gold2); margin-bottom: 14px;
 }
 
-.packsGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+/* ════════════════════════════════════════════════════
+   STORE PANEL — LEFT
+   Card-pack envelopes with 3D CSS + texture
+════════════════════════════════════════════════════ */
+.storePanel { padding: 18px 16px 16px; flex: 1; }
 
-.packCard {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 11px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border2);
-  background: rgba(255,255,255,.025);
-  cursor: pointer;
-  transition: border-color .18s, background .18s, transform .14s;
-}
-.packCard:hover {
-  border-color: var(--border);
-  background: rgba(212,175,55,.05);
-  transform: translateX(2px);
-}
+.packList { display: flex; flex-direction: column; gap: 14px; }
 
-.packIcon {
-  width: 40px; height: 52px;
-  border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,.10);
+.packRow {
+  display: flex; align-items: center; gap: 13px;
+  padding: 10px 10px 10px 8px;
+  border-radius: 10px; cursor: pointer;
+  transition: background .16s;
+}
+.packRow:hover { background: rgba(212,175,55,.04); }
+
+/* ── 3D envelope scene ── */
+.packScene { perspective: 380px; flex-shrink: 0; }
+
+.packEnv {
+  width: 54px; height: 76px;
   position: relative;
+  transform-style: preserve-3d;
+  transition: transform .50s cubic-bezier(.34,1.30,.64,1), filter .40s ease;
+  filter: drop-shadow(4px 5px 10px rgba(0,0,0,.60));
+}
+.packRow:hover .packEnv {
+  transform: rotateY(-22deg) rotateX(7deg);
+  filter: drop-shadow(14px 10px 26px rgba(0,0,0,.80)) drop-shadow(0 0 16px rgba(212,175,55,.14));
+}
+
+/* Main face */
+.packFace {
+  position: absolute; inset: 0;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1.5px solid rgba(212,175,55,.38);
+  transform-style: preserve-3d;
+}
+
+/* Sealed foil strip */
+.packSeal {
+  position: absolute; top: 0; left: -1px; right: -1px; height: 19px;
+  background: linear-gradient(90deg, #9a6f1a 0%, #D4AF37 25%, #f0d060 50%, #D4AF37 75%, #9a6f1a 100%);
+  display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
-.packIcon.teal  { background: linear-gradient(145deg, #0a3040, #0f4d60); }
-.packIcon.gold  { background: linear-gradient(145deg, #3d2a00, #6b4800); }
-.packIcon.red   { background: linear-gradient(145deg, #3a0a0a, #600f0f); }
+.packSeal::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(255,255,255,.35) 40%, rgba(255,255,255,.55) 50%, rgba(255,255,255,.35) 60%, transparent 100%);
+  background-size: 200% 100%;
+  animation: foilShimmer 2.4s ease-in-out infinite;
+}
+@keyframes foilShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.packSealTxt {
+  font-size: 6.5px; font-weight: 800; letter-spacing: .20em;
+  text-transform: uppercase; color: rgba(20,8,0,.85);
+  position: relative; z-index: 1;
+}
 
+/* Art body */
+.packBody {
+  position: absolute; top: 19px; left: 0; right: 0; bottom: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background-image: var(--card-texture);
+  background-size: 22px 22px;
+}
+.packBody.teal { background-color: #061e2e; }
+.packBody.gold { background-color: #1e0f00; }
+.packBody.red  { background-color: #1e0404; }
+
+.packSymbol {
+  font-size: 26px; line-height: 1;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+.packBody.teal .packSymbol { color: #3dbfdf; }
+.packBody.gold .packSymbol { color: var(--gold); }
+.packBody.red  .packSymbol { color: #df3d3d; }
+
+/* Card edges at bottom */
+.packCardEdges {
+  position: absolute; bottom: 0; left: -1px; right: -1px; height: 14px;
+  border-radius: 0 0 4px 4px;
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(240,235,215,.55) 0px, rgba(240,235,215,.55) 1px,
+      rgba(200,195,180,.25) 1px, rgba(200,195,180,.25) 2px,
+      transparent 2px, transparent 4px
+    ),
+    linear-gradient(0deg, rgba(30,20,10,.70), rgba(210,200,180,.30));
+  border-top: 1px solid rgba(212,175,55,.22);
+}
+
+/* Right-side face (depth illusion) */
+.packEnv::after {
+  content: '';
+  position: absolute; top: 1px; right: -5px; bottom: 1px; width: 5px;
+  background: linear-gradient(90deg, rgba(0,0,0,.55), rgba(0,0,0,.25));
+  border-radius: 0 3px 3px 0;
+  transform: rotateY(90deg);
+  transform-origin: left center;
+}
+
+/* Pack info */
 .packInfo { flex: 1; min-width: 0; }
 .packName {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .10em;
-  text-transform: uppercase;
-  color: var(--text);
-  margin-bottom: 3px;
+  font-size: 11.5px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text); margin-bottom: 3px;
 }
-.packPrice {
-  font-size: 11px;
-  color: var(--gold2);
-  font-weight: 500;
-}
+.packSub { font-size: 9.5px; color: var(--text3); letter-spacing: .08em; margin-bottom: 5px; }
+.packPrice { font-size: 12px; color: var(--gold2); font-weight: 600; }
 
-/* ══════════════════════════════════════════
+/* ════════════════════════════════════════════════════
+   SEASON WIDGET
+════════════════════════════════════════════════════ */
+.seasonBox {
+  padding: 14px 16px;
+  position: relative; overflow: hidden;
+}
+.seasonBox::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: var(--card-texture);
+  background-size: 22px 22px;
+  opacity: .45;
+}
+.seasonKicker {
+  font-size: 8.5px; font-weight: 500; letter-spacing: .24em;
+  text-transform: uppercase; color: var(--text3);
+  position: relative; z-index: 1; margin-bottom: 5px;
+}
+.seasonName {
+  font-family: var(--serif); font-size: 15px; font-weight: 700;
+  letter-spacing: .10em; text-transform: uppercase;
+  color: var(--text); position: relative; z-index: 1; margin-bottom: 6px;
+}
+.seasonPill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 8.5px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--text3); position: relative; z-index: 1;
+}
+.sDot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ok); box-shadow: 0 0 6px rgba(100,219,80,.60);
+  animation: sPulse 2.2s ease-in-out infinite;
+}
+@keyframes sPulse { 0%,100%{opacity:.45} 50%{opacity:1} }
+
+/* ════════════════════════════════════════════════════
    CENTER COLUMN
-══════════════════════════════════════════ */
-.centerCol {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
+════════════════════════════════════════════════════ */
+.center {
+  display: flex; flex-direction: column; gap: 14px;
+  align-items: stretch;
 }
 
 /* ── Hero card ── */
 .heroCard {
-  width: 100%;
-  padding: 24px 28px 22px;
-  text-align: center;
-  animation: fadeUp .5s .05s ease both;
+  padding: 22px 28px 20px; text-align: center;
+  animation: riseIn .55s .04s ease both;
+  position: relative; overflow: hidden;
 }
-.heroGreeting {
-  font-family: var(--sans);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .24em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 10px;
+.heroCard::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: var(--card-texture);
+  background-size: 22px 22px;
+  opacity: .20;
+  pointer-events: none;
+}
+.heroKicker {
+  font-size: 9px; font-weight: 500; letter-spacing: .28em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 10px;
 }
 .heroTitle {
   font-family: var(--serif);
-  font-size: clamp(16px, 1.8vw, 22px);
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--text);
-  line-height: 1.35;
-  margin-bottom: 10px;
+  font-size: clamp(18px, 1.9vw, 24px); font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text); line-height: 1.35; margin-bottom: 8px;
 }
 .heroSub {
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--text2);
-  margin-bottom: 18px;
+  font-size: 10.5px; font-weight: 400; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--text2); margin-bottom: 20px;
 }
-.btnPrimary {
-  display: inline-block;
-  padding: 12px 32px;
-  background: linear-gradient(135deg, #D4AF37, #b8932a);
-  border: none;
-  border-radius: 8px;
-  color: #0a0800;
-  font-family: var(--sans);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .20em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: filter .18s, transform .14s, box-shadow .18s;
-  box-shadow: 0 4px 22px rgba(212,175,55,.22);
-}
-.btnPrimary:hover {
-  filter: brightness(1.12);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 32px rgba(212,175,55,.36);
-}
-.btnPrimary:active { transform: translateY(0); }
 
-/* ── Ritual deck ── */
-.ritualWrap {
+/* Primary CTA — gold foil button */
+.btnPrime {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 36px;
+  background: linear-gradient(135deg, #c9a430 0%, #D4AF37 45%, #e8c855 55%, #b8932a 100%);
+  border: none; border-radius: 8px;
+  color: #0a0800; font-family: var(--sans); font-size: 11px; font-weight: 700;
+  letter-spacing: .22em; text-transform: uppercase;
+  cursor: pointer; position: relative; overflow: hidden;
+  box-shadow: 0 4px 24px rgba(212,175,55,.28), 0 1px 0 rgba(255,255,255,.20) inset;
+  transition: filter .18s, transform .15s, box-shadow .18s;
+}
+.btnPrime::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+  background-size: 200% 100%;
+  animation: foilShimmer 3s ease-in-out infinite;
+}
+.btnPrime:hover { filter: brightness(1.10); transform: translateY(-2px); box-shadow: 0 10px 36px rgba(212,175,55,.42); }
+.btnPrime:active { transform: translateY(0); }
+
+/* ════════════════════════════════════════════════════
+   RITUAL — TAROT CARD 3D STACK
+════════════════════════════════════════════════════ */
+.ritualArea {
   position: relative;
-  width: min(380px, 100%);
-  animation: fadeUp .5s .18s ease both;
+  animation: riseIn .55s .20s ease both;
+  /* Reserve space for the rotated ghost cards */
+  padding: 12px 16px 16px;
 }
-.ritualGhost {
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  border: 1px solid rgba(212,175,55,.22);
-}
-.ritualGhost--back {
-  background: rgba(8,15,22,.65);
-  transform: rotate(-4.5deg) translateY(10px) scale(.96);
-  z-index: 0;
-}
-.ritualGhost--mid {
-  background: rgba(10,18,26,.70);
-  transform: rotate(3.5deg) translateY(7px) scale(.978);
-  z-index: 1;
-}
-.ritualCard {
+
+.ritualDeck {
   position: relative;
-  z-index: 2;
-  padding: 24px 22px 20px;
+  /* Height is set by the front card, ghosts overflow */
+}
+
+/* Ghost cards behind — pure CSS 3D stacking */
+.ritualGhostA,
+.ritualGhostB {
+  position: absolute; inset: 0;
+  border-radius: 14px;
+  border: 1.5px solid rgba(212,175,55,.22);
+  background-image: var(--card-texture);
+  background-size: 22px 22px;
+  background-color: #0a1520;
+}
+.ritualGhostA {
+  transform: rotate(-5deg) translateY(8px) scale(.96);
+  z-index: 0; opacity: .75;
+  box-shadow: 0 8px 28px rgba(0,0,0,.55);
+}
+.ritualGhostB {
+  transform: rotate(4deg) translateY(6px) scale(.975);
+  z-index: 1; opacity: .85;
+  box-shadow: 0 6px 20px rgba(0,0,0,.45);
+}
+
+/* Front card — actual tarot card style */
+.ritualFront {
+  position: relative; z-index: 2;
+  border-radius: 14px;
+  border: 2px solid var(--gold);
+  background-image: var(--card-texture);
+  background-size: 22px 22px;
+  background-color: #0b1824;
+  box-shadow:
+    0 0 0 4px rgba(212,175,55,.07),
+    0 0 0 5px rgba(212,175,55,.04),
+    0 20px 60px rgba(0,0,0,.65),
+    inset 0 1px 0 rgba(212,175,55,.20);
+  padding: 6px;
+  transition: transform .28s ease, box-shadow .28s ease;
+}
+.ritualFront:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 0 0 4px rgba(212,175,55,.12),
+    0 0 0 5px rgba(212,175,55,.06),
+    0 28px 70px rgba(0,0,0,.75),
+    0 0 40px rgba(212,175,55,.10),
+    inset 0 1px 0 rgba(212,175,55,.25);
+}
+
+/* Inner frame (ornate double border) */
+.ritualInner {
+  border: 1px solid rgba(212,175,55,.32);
+  border-radius: 10px;
+  padding: 20px 18px 18px;
+  position: relative;
   text-align: center;
-  border-radius: 16px;
-  border: 1px solid rgba(212,175,55,.30);
-  background: rgba(12,20,28,.88);
-  box-shadow: 0 0 0 1px rgba(212,175,55,.08), inset 0 1px 0 rgba(212,175,55,.12);
-  transition: transform .22s ease, box-shadow .22s ease;
 }
-.ritualCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(212,175,55,.14), inset 0 1px 0 rgba(212,175,55,.18);
+
+/* Corner ornaments */
+.ritualInner::before,
+.ritualInner::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  border-color: rgba(212,175,55,.45);
+  border-style: solid;
 }
+.ritualInner::before {
+  top: 5px; left: 5px;
+  border-width: 1.5px 0 0 1.5px;
+  border-radius: 3px 0 0 0;
+}
+.ritualInner::after {
+  bottom: 5px; right: 5px;
+  border-width: 0 1.5px 1.5px 0;
+  border-radius: 0 0 3px 0;
+}
+
 .ritualHeader {
-  font-family: var(--sans);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: .28em;
-  text-transform: uppercase;
-  color: var(--gold2);
-  margin-bottom: 16px;
+  font-size: 8.5px; font-weight: 700; letter-spacing: .30em;
+  text-transform: uppercase; color: var(--gold2); margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
 }
+.ritualHeader::before,
+.ritualHeader::after {
+  content: ''; flex: 1; max-width: 28px; height: 1px;
+  background: rgba(212,175,55,.28);
+}
+
 .ritualQ {
-  font-family: var(--serif);
-  font-size: clamp(16px, 1.6vw, 20px);
-  font-style: italic;
-  font-weight: 400;
-  color: var(--text);
-  line-height: 1.55;
-  margin-bottom: 16px;
-  letter-spacing: .02em;
+  font-family: var(--fell);
+  font-size: clamp(16px, 1.65vw, 20px);
+  font-style: italic; font-weight: 400;
+  color: var(--text); line-height: 1.55; margin-bottom: 18px;
+  letter-spacing: .01em;
 }
-.ritualStats {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .10em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 18px;
+
+.ritualMeta {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 9px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 18px;
 }
-.ritualStats svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.5; flex-shrink: 0; }
-.btnSecondary {
-  padding: 10px 28px;
+.ritualMeta svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.5; flex-shrink: 0; }
+
+.btnRitual {
+  padding: 10px 30px;
   background: transparent;
-  border: 1px solid rgba(212,175,55,.30);
-  border-radius: 8px;
-  color: var(--gold);
-  font-family: var(--sans);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .20em;
-  text-transform: uppercase;
-  cursor: pointer;
+  border: 1px solid rgba(212,175,55,.32);
+  border-radius: 7px;
+  color: var(--gold); font-family: var(--sans); font-size: 9.5px; font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase; cursor: pointer;
   transition: background .18s, border-color .18s, transform .14s;
 }
-.btnSecondary:hover {
-  background: rgba(212,175,55,.08);
-  border-color: rgba(212,175,55,.55);
-  transform: translateY(-1px);
-}
-.btnSecondary:active { transform: translateY(0); }
+.btnRitual:hover { background: rgba(212,175,55,.08); border-color: rgba(212,175,55,.55); transform: translateY(-1px); }
+.btnRitual:active { transform: translateY(0); }
 
-/* ── Event widget (bottom center) ── */
-.eventWidget {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 16px;
+/* ════════════════════════════════════════════════════
+   EVENT WIDGET
+════════════════════════════════════════════════════ */
+.eventBar {
+  display: flex; align-items: center; gap: 14px;
   padding: 14px 18px;
-  animation: fadeUp .5s .30s ease both;
+  animation: riseIn .55s .36s ease both;
 }
-.eventClock {
-  width: 46px; height: 46px;
-  border-radius: 50%;
+.eventOrb {
+  width: 48px; height: 48px; border-radius: 50%;
   border: 2px solid var(--gold2);
-  background: rgba(212,175,55,.06);
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  animation: rotateSlow 30s linear infinite;
+  background: radial-gradient(circle at 40% 35%, rgba(212,175,55,.18), rgba(212,175,55,.04));
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
 }
-@keyframes rotateSlow { to { transform: rotate(360deg); } }
-.eventInfo { flex: 1; }
+.eventOrb svg { width: 20px; height: 20px; stroke: var(--gold2); fill: none; stroke-width: 1.4; }
+.eventOrb::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(rgba(212,175,55,.18) 0deg, transparent 280deg);
+  animation: orbSpin 8s linear infinite;
+}
+@keyframes orbSpin { to { transform: rotate(360deg); } }
+
+.eventInfo { flex: 1; min-width: 0; }
 .eventTitle {
-  font-family: var(--serif);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 3px;
+  font-family: var(--serif); font-size: 13px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px;
 }
-.eventSub {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 4px;
-}
-.eventCountdown {
-  font-family: var(--sans);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text2);
-  letter-spacing: .06em;
-  font-variant-numeric: tabular-nums;
+.eventWhen { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.eventTimer {
+  font-size: 16px; font-weight: 600; color: var(--text2);
+  font-variant-numeric: tabular-nums; letter-spacing: .05em;
 }
 
-/* ══════════════════════════════════════════
-   FRIENDS PANEL (RIGHT)
-══════════════════════════════════════════ */
-.friendsPanel {
-  padding: 18px 16px 16px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-.friendsList {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  margin-bottom: 14px;
-}
+/* ════════════════════════════════════════════════════
+   FRIENDS PANEL — RIGHT
+════════════════════════════════════════════════════ */
+.friendsPanel { padding: 18px 16px 16px; flex: 1; display: flex; flex-direction: column; }
+.friendsList { list-style: none; display: flex; flex-direction: column; gap: 3px; flex: 1; margin-bottom: 12px; }
 .friendItem {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 8px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 8px; border-radius: 8px; cursor: pointer;
   transition: background .14s;
-  cursor: pointer;
 }
 .friendItem:hover { background: rgba(255,255,255,.04); }
-.friendAvatar {
-  width: 30px; height: 30px;
-  border-radius: 50%;
+.fAvatar {
+  width: 32px; height: 32px; border-radius: 50%;
   background: rgba(212,175,55,.10);
-  border: 1.5px solid rgba(212,175,55,.22);
+  border: 1.5px solid rgba(212,175,55,.24);
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--serif);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--gold2);
-  flex-shrink: 0;
-  position: relative;
+  font-family: var(--serif); font-size: 12px; font-weight: 700; color: var(--gold2);
+  flex-shrink: 0; position: relative; overflow: hidden;
 }
-.friendAvatar img {
-  width: 100%; height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  position: absolute; inset: 0;
-}
-.friendName {
-  flex: 1;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text);
-  letter-spacing: .02em;
-}
-.friendOnlineDot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 5px rgba(100,220,80,.55);
-  flex-shrink: 0;
-}
+.fAvatar img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; border-radius:50%; }
+.fName { flex: 1; font-size: 13px; font-weight: 400; color: var(--text); letter-spacing: .02em; }
+.fOnline { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 6px rgba(100,219,80,.55); flex-shrink: 0; }
+
 .btnGhost {
-  padding: 9px 14px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--gold2);
-  font-family: var(--sans);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  cursor: pointer;
+  width: 100%; padding: 9px 12px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 8px; color: var(--gold2);
+  font-size: 9.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+  cursor: pointer; text-align: center;
   transition: background .18s, border-color .18s;
-  text-align: center;
-  width: 100%;
 }
 .btnGhost:hover { background: var(--gold4); border-color: rgba(212,175,55,.40); }
 
-/* ══════════════════════════════════════════
-   SEASON WIDGETS
-══════════════════════════════════════════ */
-.seasonWidget {
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.seasonLabel {
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  color: var(--text3);
-}
-.seasonName {
-  font-family: var(--serif);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: .10em;
-  text-transform: uppercase;
-  color: var(--text);
-}
-.seasonActive {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-top: 2px;
-}
-.seasonDot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 5px rgba(100,220,80,.50);
-  flex-shrink: 0;
-  animation: seasonPulse 2.4s ease-in-out infinite;
-}
-@keyframes seasonPulse { 0%,100%{opacity:.5} 50%{opacity:1} }
-
-/* ══════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    NAV DROPDOWNS + TOAST
-══════════════════════════════════════════ */
-.navPanel {
-  position: fixed;
-  top: calc(var(--nav-h) + 6px);
-  right: 20px;
-  z-index: 70;
-  min-width: 220px;
-  background: rgba(6,12,18,.97);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.70);
-  backdrop-filter: blur(20px);
-  padding: 8px 0;
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-  transition: opacity .18s ease, transform .18s ease;
+════════════════════════════════════════════════════ */
+.navDrop {
+  position: fixed; top: calc(var(--nav-h) + 6px); right: 18px;
+  z-index: 70; min-width: 220px;
+  background: rgba(5,11,18,.97);
+  border: 1px solid var(--border); border-radius: 13px;
+  box-shadow: 0 22px 65px rgba(0,0,0,.72);
+  backdrop-filter: blur(22px); padding: 8px 0;
+  opacity: 0; transform: translateY(-8px); pointer-events: none;
+  transition: opacity .18s, transform .18s;
 }
-.navPanel.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.navDrop.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-.panelHead {
-  padding: 12px 18px 10px;
-  border-bottom: 1px solid rgba(255,255,255,.06);
-  margin-bottom: 4px;
-}
-.panelHeadName { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
-.panelHeadSub  { font-size: 10px; letter-spacing: .06em; color: var(--text3); }
+.dropHead { padding: 13px 18px 10px; border-bottom: 1px solid var(--b2); margin-bottom: 4px; }
+.dropName { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
+.dropSub  { font-size: 9.5px; letter-spacing: .06em; color: var(--text3); }
 
-.panelItem {
+.dropItem {
   display: flex; align-items: center; gap: 10px;
-  padding: 9px 18px;
-  color: var(--text2);
-  font-size: 11px; font-weight: 500;
+  padding: 9px 18px; color: var(--text2); font-size: 10.5px; font-weight: 500;
   letter-spacing: .10em; text-transform: uppercase;
-  background: none; border: none; cursor: pointer;
-  width: 100%; text-align: left;
+  background: none; border: none; cursor: pointer; width: 100%; text-align: left;
   transition: background .14s, color .14s;
 }
-.panelItem:hover { background: rgba(255,255,255,.04); color: var(--text); }
-.panelItem.danger { color: rgba(255,90,90,.75); }
-.panelItem.danger:hover { background: rgba(255,60,60,.06); color: rgba(255,90,90,.95); }
-.panelDivider { height: 1px; background: rgba(255,255,255,.06); margin: 4px 0; }
-.panelEmpty { padding: 18px; font-size: 11px; color: var(--text3); text-align: center; letter-spacing: .08em; }
+.dropItem:hover { background: var(--b2); color: var(--text); }
+.dropItem.danger { color: rgba(255,90,90,.75); }
+.dropItem.danger:hover { background: rgba(255,40,40,.06); color: rgba(255,90,90,.96); }
+.dropDiv { height: 1px; background: var(--b2); margin: 4px 0; }
+.dropEmpty { padding: 18px; font-size: 10.5px; color: var(--text3); text-align: center; letter-spacing: .08em; }
 
-.navToast {
-  position: fixed;
-  top: calc(var(--nav-h) + 10px);
-  left: 50%; transform: translateX(-50%) translateY(-6px);
-  z-index: 70;
-  background: rgba(6,12,18,.97);
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 10px 22px;
-  font-size: 10px; font-weight: 500;
-  letter-spacing: .14em; text-transform: uppercase;
-  color: var(--text2);
+.toast {
+  position: fixed; top: calc(var(--nav-h) + 10px);
+  left: 50%; transform: translateX(-50%) translateY(-8px);
+  z-index: 70; background: rgba(5,11,18,.97);
+  border: 1px solid var(--border); border-radius: 9px;
+  padding: 10px 22px; font-size: 10px; font-weight: 500;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--text2);
   opacity: 0; pointer-events: none;
-  transition: opacity .22s ease, transform .22s ease;
+  transition: opacity .22s, transform .22s;
   white-space: nowrap;
 }
-.navToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ══════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    ONBOARDING
-══════════════════════════════════════════ */
+════════════════════════════════════════════════════ */
 .obVeil {
-  position: fixed; inset: 0;
-  z-index: 200;
+  position: fixed; inset: 0; z-index: 200;
   background: rgba(3,8,14,.97);
-  backdrop-filter: blur(20px) saturate(.4);
-  -webkit-backdrop-filter: blur(20px) saturate(.4);
+  backdrop-filter: blur(22px) saturate(.35);
+  -webkit-backdrop-filter: blur(22px) saturate(.35);
   display: flex; align-items: center; justify-content: center;
   padding: 32px 24px;
   opacity: 0; pointer-events: none;
@@ -782,257 +690,303 @@ body {
 }
 .obVeil.on { opacity: 1; pointer-events: auto; }
 .obStep { display: none; flex-direction: column; align-items: center; text-align: center; width: 100%; max-width: 400px; }
-.obStep.vis { display: flex; animation: fadeUp .45s ease both; }
-.obKicker { font-size: 12px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--text2); margin-bottom: 22px; }
-.obHeadline { font-family: var(--serif); font-size: clamp(30px, 5vw, 48px); font-weight: 700; letter-spacing: .06em; color: var(--text); margin-bottom: 14px; line-height: 1.1; }
-.obBody { font-size: clamp(14px, 1.5vw, 17px); color: var(--text2); line-height: 1.65; margin-bottom: 36px; max-width: 28ch; }
-.obQ { font-size: 11px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--gold2); margin-bottom: 22px; }
+.obStep.vis { display: flex; animation: riseIn .45s ease both; }
+.obKick  { font-size: 11px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: var(--text2); margin-bottom: 22px; }
+.obHead  { font-family: var(--serif); font-size: clamp(28px,5vw,48px); font-weight: 700; letter-spacing: .06em; color: var(--text); margin-bottom: 14px; line-height: 1.1; }
+.obBody  { font-size: clamp(14px,1.5vw,17px); color: var(--text2); line-height: 1.65; margin-bottom: 36px; max-width: 28ch; }
+.obQ     { font-size: 10.5px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--gold2); margin-bottom: 22px; }
 .obChoices { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 .obChoice {
   display: flex; align-items: center; gap: 14px;
-  padding: 14px 18px;
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 10px;
-  color: var(--text2);
-  font-size: clamp(14px, 1.4vw, 16px);
+  padding: 14px 18px; background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07); border-radius: 10px;
+  color: var(--text2); font-size: clamp(14px,1.4vw,16px);
   cursor: pointer; text-align: left;
   transition: background .16s, border-color .16s, color .16s;
 }
-.obChoice:hover { background: rgba(212,175,55,.05); border-color: rgba(212,175,55,.20); color: var(--text); }
-.obChoice.sel { background: rgba(212,175,55,.09); border-color: rgba(212,175,55,.38); color: var(--gold); }
+.obChoice:hover { background: rgba(212,175,55,.05); border-color: rgba(212,175,55,.22); color: var(--text); }
+.obChoice.sel  { background: rgba(212,175,55,.09); border-color: rgba(212,175,55,.40); color: var(--gold); }
 .obRadio { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; flex-shrink: 0; transition: background .16s; }
 .obChoice.sel .obRadio { background: currentColor; }
 .obCta {
-  margin-top: 26px; padding: 13px 32px;
+  margin-top: 26px; padding: 13px 34px;
   background: linear-gradient(135deg, rgba(212,175,55,.14), rgba(181,144,59,.09));
-  border: 1px solid rgba(212,175,55,.26);
-  border-radius: 10px;
-  color: var(--gold);
-  font-size: 10px; font-weight: 600;
-  letter-spacing: .24em; text-transform: uppercase;
-  cursor: pointer;
+  border: 1px solid rgba(212,175,55,.28); border-radius: 10px;
+  color: var(--gold); font-size: 10px; font-weight: 600;
+  letter-spacing: .26em; text-transform: uppercase; cursor: pointer;
   opacity: 0; pointer-events: none;
-  transition: opacity .3s ease, background .18s, transform .12s;
+  transition: opacity .3s, background .18s, transform .12s;
 }
 .obCta.rdy { opacity: 1; pointer-events: auto; }
 .obCta:hover { background: linear-gradient(135deg, rgba(212,175,55,.22), rgba(181,144,59,.15)); transform: translateY(-1px); }
 
-/* ══════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    ANIMATIONS
-══════════════════════════════════════════ */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+════════════════════════════════════════════════════ */
+@keyframes riseIn {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
 }
 
 /* ── Responsive ── */
 @media (max-width: 960px) {
-  .dashboard {
-    grid-template-columns: 1fr;
-    padding-bottom: 80px;
-  }
-  .panel-left, .panel-right { display: none; }
-  .centerCol { width: 100%; }
-}
-@media (min-width: 961px) {
-  .dashboard {
-    min-height: calc(100vh - var(--nav-h) - 20px);
-    align-items: stretch;
-  }
-  .panel { justify-content: space-between; }
+  .dash { grid-template-columns: 1fr; padding-bottom: 80px; }
+  .panel { display: none; }
+  .center { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-  #particles { display: none; }
+  *, *::before, *::after { animation: none!important; transition: none!important; }
+  #cvBg, #cvDust { display: none; }
 }
 </style>
 </head>
 <body>
 
-<!-- Particles -->
-<canvas id="particles" aria-hidden="true"></canvas>
+<!-- BG canvas -->
+<canvas id="cvBg"   aria-hidden="true"></canvas>
+<canvas id="cvDust" aria-hidden="true"></canvas>
 
 <!-- Loading veil -->
-<div class="loadVeil" id="loadVeil" aria-hidden="true">
-  <div class="ldDots">
-    <div class="ldDot"></div>
-    <div class="ldDot"></div>
-    <div class="ldDot"></div>
+<div class="veil" id="veil">
+  <div class="veilDots">
+    <div class="veilDot"></div>
+    <div class="veilDot"></div>
+    <div class="veilDot"></div>
   </div>
 </div>
 
-<!-- ══ NAVBAR ══ -->
-<nav class="navbar" aria-label="Navegação">
+<!-- ══════════════════ NAVBAR ══════════════════ -->
+<nav class="nav" aria-label="Navegação">
+
   <a class="navLogo" href="./hub.html">SEXTOLUGAR</a>
 
   <nav class="navLinks">
-    <a class="active" href="./hub.html">Hub</a>
-    <button id="navSocial">Social</button>
-    <button id="navMundo">Mundo</button>
-    <button id="navRitual">Ritual</button>
+    <a class="navLink on" href="./hub.html">Hub</a>
+    <button class="navBtn" id="navSocial">Social</button>
+    <button class="navBtn" id="navMundo">Mundo</button>
+    <button class="navBtn" id="navRitual">Ritual</button>
   </nav>
 
   <div class="navRight">
-    <div class="navAvatarWrap" id="avatarWrap">
-      <div class="navAvatarFallback" id="avatarFallback">L</div>
-      <span class="navOnlineDot"></span>
+    <!-- Avatar -->
+    <div class="navAvWrap" id="btnPerfil">
+      <div class="navAv" id="navAv"><span id="navAvIni">L</span></div>
+      <span class="navOnDot"></span>
     </div>
-    <span class="navUserName" id="navUserName">—</span>
+    <span class="navName" id="navName">—</span>
 
+    <!-- Bell -->
     <button class="navBell" id="btnNotif" aria-label="Notificações">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span class="bellBadge" id="notifBadge">0</span>
+      <span class="bellBadge" id="notifBadge"></span>
     </button>
 
+    <!-- Coins -->
     <button class="navCoins" id="btnCoins" aria-label="Moedas">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 6v2m0 8v2M9.5 9.5C9.5 8.4 10.6 8 12 8s2.5.4 2.5 1.5S13.4 11 12 11s-2.5.4-2.5 1.5S10.6 16 12 16s2.5-.4 2.5-1.5"/></svg>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9.5 9.5C9.5 8.4 10.6 8 12 8s2.5.4 2.5 1.5S13.4 11 12 11s-2.5.4-2.5 1.5S10.6 16 12 16s2.5-.4 2.5-1.5"/></svg>
       <span id="coinsVal">0</span>
     </button>
 
-    <div class="navRank" id="navRank">L1</div>
-    <button style="background:none;border:none;cursor:pointer" id="btnPerfil" aria-label="Perfil">
-      <div class="navRank" style="width:32px;height:32px;font-size:13px;border-color:var(--gold)" id="avatarBtn">L</div>
-    </button>
+    <!-- Rank -->
+    <div class="navRank" id="navRank">N1</div>
   </div>
 </nav>
 
-<!-- ══ DASHBOARD ══ -->
-<div class="dashboard">
+<!-- ══════════════════ DASHBOARD ══════════════════ -->
+<div class="dash">
 
-  <!-- LEFT PANEL -->
-  <aside class="panel panel-left">
-    <div class="storePanel glass">
-      <h3 class="panelTitle">Destaques da Loja</h3>
-      <div class="packsGrid">
-        <div class="packCard">
-          <div class="packIcon teal">👁</div>
+  <!-- LEFT: STORE + SEASON -->
+  <aside class="panel" id="pLeft">
+
+    <!-- Store packs -->
+    <div class="glassBox storePanel">
+      <h3 class="panelLabel">Destaques da Loja</h3>
+      <div class="packList">
+
+        <!-- Pack: Conexão -->
+        <div class="packRow">
+          <div class="packScene">
+            <div class="packEnv">
+              <div class="packFace">
+                <div class="packSeal"><span class="packSealTxt">Prelúdio</span></div>
+                <div class="packBody teal">
+                  <span class="packSymbol">👁</span>
+                </div>
+                <div class="packCardEdges"></div>
+              </div>
+            </div>
+          </div>
           <div class="packInfo">
             <div class="packName">Conexão</div>
+            <div class="packSub">12 cartas · Vínculo</div>
             <div class="packPrice">R$ 3,00</div>
           </div>
         </div>
-        <div class="packCard">
-          <div class="packIcon gold">△</div>
+
+        <!-- Pack: Verdades -->
+        <div class="packRow">
+          <div class="packScene">
+            <div class="packEnv">
+              <div class="packFace">
+                <div class="packSeal"><span class="packSealTxt">Prelúdio</span></div>
+                <div class="packBody gold">
+                  <span class="packSymbol">△</span>
+                </div>
+                <div class="packCardEdges"></div>
+              </div>
+            </div>
+          </div>
           <div class="packInfo">
             <div class="packName">Verdades</div>
+            <div class="packSub">12 cartas · Revelação</div>
             <div class="packPrice">R$ 3,00</div>
           </div>
         </div>
-        <div class="packCard">
-          <div class="packIcon red">✕</div>
+
+        <!-- Pack: Conflito -->
+        <div class="packRow">
+          <div class="packScene">
+            <div class="packEnv">
+              <div class="packFace">
+                <div class="packSeal"><span class="packSealTxt">Prelúdio</span></div>
+                <div class="packBody red">
+                  <span class="packSymbol">⚔</span>
+                </div>
+                <div class="packCardEdges"></div>
+              </div>
+            </div>
+          </div>
           <div class="packInfo">
             <div class="packName">Conflito</div>
+            <div class="packSub">12 cartas · Tensão</div>
             <div class="packPrice">R$ 3,00</div>
           </div>
         </div>
+
       </div>
     </div>
-    <div class="seasonWidget glass" id="seasonLeft">
-      <span class="seasonLabel" id="slLabel">Temporada I</span>
-      <span class="seasonName" id="slName">O Prelúdio</span>
-      <div class="seasonActive">
-        <span class="seasonDot"></span>
-        <span id="slStatus">Mundo ativo</span>
+
+    <!-- Season widget -->
+    <div class="glassBox seasonBox" id="seasonL">
+      <div class="seasonKicker" id="slKick">Temporada I</div>
+      <div class="seasonName" id="slName">O Prelúdio</div>
+      <div class="seasonPill">
+        <span class="sDot"></span>
+        <span id="slStatus">Mundo Ativo</span>
       </div>
     </div>
+
   </aside>
 
-  <!-- CENTER COLUMN -->
-  <div class="centerCol">
+  <!-- CENTER: HERO + RITUAL + EVENT -->
+  <div class="center">
 
     <!-- Hero card -->
-    <div class="heroCard glass" id="heroCard">
-      <div class="heroGreeting" id="heroGreeting">Bem-vindo</div>
+    <div class="glassBox heroCard" id="heroCard">
+      <div class="heroKicker" id="heroKick">Bem-vindo de volta</div>
       <h2 class="heroTitle" id="heroTitle">O MUNDO PSICOLÓGICO<br>ESPERA POR VOCÊ.</h2>
       <p class="heroSub" id="heroSub">PRONTO PARA A PRÓXIMA SESSÃO?</p>
-      <button class="btnPrimary" id="heroCta" onclick="location.href='./entrada.html'">CRIAR SALA / JOGAR</button>
+      <button class="btnPrime" id="heroCta" onclick="location.href='./entrada.html'">
+        CRIAR SALA / JOGAR
+      </button>
     </div>
 
-    <!-- Ritual deck -->
-    <div class="ritualWrap" id="ritualWrap">
-      <div class="ritualGhost ritualGhost--back"></div>
-      <div class="ritualGhost ritualGhost--mid"></div>
-      <div class="ritualCard" id="ritualCard">
-        <div class="ritualHeader">Ritual do Dia</div>
-        <blockquote class="ritualQ" id="ritualQ">"Uma pergunta que você ainda não fez a si mesmo."</blockquote>
-        <div class="ritualStats">
-          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          <span id="ritualCount">4.821</span> pessoas já descobriram
+    <!-- Ritual card stack -->
+    <div class="glassBox ritualArea">
+      <div class="ritualDeck">
+        <div class="ritualGhostA"></div>
+        <div class="ritualGhostB"></div>
+        <div class="ritualFront">
+          <div class="ritualInner">
+            <div class="ritualHeader">Ritual do Dia</div>
+            <blockquote class="ritualQ" id="ritualQ">
+              "Uma pergunta que você ainda não fez a si mesmo."
+            </blockquote>
+            <div class="ritualMeta">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span id="ritualCount">4.821</span>&nbsp;pessoas já descobriram
+            </div>
+            <button class="btnRitual" onclick="location.href='./entrada.html'">Descobrir</button>
+          </div>
         </div>
-        <button class="btnSecondary" onclick="location.href='./entrada.html'">Descobrir</button>
       </div>
     </div>
 
     <!-- Event widget -->
-    <div class="eventWidget glass" id="eventWidget">
-      <div class="eventClock" aria-hidden="true">⊙</div>
+    <div class="glassBox eventBar">
+      <div class="eventOrb" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+      </div>
       <div class="eventInfo">
         <div class="eventTitle">Encontro Marcado</div>
-        <div class="eventSub" id="eventSub">Próximo evento: Quinta-feira</div>
-        <div class="eventCountdown" id="eventCountdown">—</div>
+        <div class="eventWhen" id="eventWhen">Próximo evento: Quinta-feira</div>
+        <div class="eventTimer" id="eventTimer">—</div>
       </div>
     </div>
 
   </div>
 
-  <!-- RIGHT PANEL -->
-  <aside class="panel panel-right">
-    <div class="friendsPanel glass" id="friendsPanel">
-      <h3 class="panelTitle">Amigos Online</h3>
+  <!-- RIGHT: FRIENDS + SEASON -->
+  <aside class="panel" id="pRight">
+
+    <!-- Friends -->
+    <div class="glassBox friendsPanel">
+      <h3 class="panelLabel">Amigos Online</h3>
       <ul class="friendsList" id="friendsList">
-        <li style="padding:12px 0;font-size:11px;color:var(--text3);letter-spacing:.08em;text-align:center">Carregando…</li>
+        <li style="padding:14px 0;font-size:10.5px;color:var(--text3);text-align:center;letter-spacing:.08em">
+          Carregando…
+        </li>
       </ul>
       <button class="btnGhost" id="btnInvite">Convidar Amigos</button>
     </div>
-    <div class="seasonWidget glass" id="seasonRight">
-      <span class="seasonLabel">Temporada I</span>
-      <span class="seasonName">O Prelúdio</span>
-      <div class="seasonActive">
-        <span class="seasonDot"></span>
-        <span>Mundo ativo</span>
-      </div>
+
+    <!-- Season (right) -->
+    <div class="glassBox seasonBox">
+      <div class="seasonKicker">Temporada I</div>
+      <div class="seasonName">O Prelúdio</div>
+      <div class="seasonPill"><span class="sDot"></span><span>Mundo Ativo</span></div>
     </div>
+
   </aside>
 
 </div>
 
 <!-- Dropdown: Perfil -->
-<div class="navPanel" id="dropPerfil">
-  <div class="panelHead">
-    <span class="panelHeadName" id="dpName">—</span>
-    <span class="panelHeadSub" id="dpEmail">—</span>
+<div class="navDrop" id="dropPerfil">
+  <div class="dropHead">
+    <span class="dropName" id="dpName">—</span>
+    <span class="dropSub"  id="dpEmail">—</span>
   </div>
-  <button class="panelItem" id="dpConfig">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  <button class="dropItem" onclick="window._toast('Configurações — em breve')">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     Configurações
   </button>
-  <div class="panelDivider"></div>
-  <button class="panelItem danger" id="dpLogout">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-    Sair
+  <div class="dropDiv"></div>
+  <button class="dropItem danger" id="dpLogout">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Sair da conta
   </button>
 </div>
 
 <!-- Dropdown: Notificações -->
-<div class="navPanel" id="dropNotif" style="right:110px">
-  <div class="panelEmpty">Nenhuma notificação</div>
+<div class="navDrop" id="dropNotif" style="right:110px">
+  <div class="dropEmpty">Nenhuma notificação</div>
 </div>
 
 <!-- Toast -->
-<div class="navToast" id="navToast"></div>
+<div class="toast" id="toast"></div>
 
 <!-- Onboarding overlay -->
-<div class="obVeil" id="obVeil" role="dialog" aria-modal="true" aria-label="Bem-vindo">
+<div class="obVeil" id="obVeil" role="dialog" aria-modal="true">
   <div class="obStep vis" id="obStep0">
-    <span class="obKicker">Seu lugar foi reservado</span>
-    <h2 class="obHeadline">BEM&#8209;VINDO.</h2>
+    <span class="obKick">Seu lugar foi reservado</span>
+    <h2 class="obHead">BEM&#8209;VINDO.</h2>
     <p class="obBody">O SextoLugar já esperava por você.</p>
     <button class="obCta rdy" id="ob0btn">CONTINUAR</button>
   </div>
   <div class="obStep" id="obStep1">
     <p class="obQ">COMO VOCÊ QUER COMEÇAR?</p>
-    <div class="obChoices" id="ob1choices">
+    <div class="obChoices">
       <button class="obChoice" data-v="leve"><span class="obRadio"></span>Algo leve</button>
       <button class="obChoice" data-v="intenso"><span class="obRadio"></span>Algo intenso</button>
       <button class="obChoice" data-v="descobrir"><span class="obRadio"></span>Quero descobrir</button>
@@ -1041,7 +995,7 @@ body {
   </div>
   <div class="obStep" id="obStep2">
     <p class="obQ">COM QUEM VOCÊ PRETENDE JOGAR?</p>
-    <div class="obChoices" id="ob2choices">
+    <div class="obChoices">
       <button class="obChoice" data-v="amigos"><span class="obRadio"></span>Amigos</button>
       <button class="obChoice" data-v="novos"><span class="obRadio"></span>Pessoas novas</button>
       <button class="obChoice" data-v="indefinido"><span class="obRadio"></span>Ainda não sei</button>
@@ -1050,241 +1004,273 @@ body {
   </div>
 </div>
 
-<!-- ── Particles ── -->
+<!-- ══════════════════ CANVAS SCRIPTS ══════════════════ -->
 <script>
 (function(){
-  try {
-    var c=document.getElementById('particles');
-    if(!c) return;
-    var ctx=c.getContext('2d');
-    var pts=[];
-    function resize(){ c.width=innerWidth; c.height=innerHeight; }
-    function make(){
-      return {
-        x:Math.random()*c.width, y:Math.random()*c.height,
-        r:Math.random()*1.2+.2,
-        a:Math.random()*.35+.05,
-        vx:(Math.random()-.5)*.12,
-        vy:-Math.random()*.18-.04
-      };
+  /* ── Background: teal radial gradient on canvas ── */
+  var bg = document.getElementById('cvBg');
+  var bc = bg.getContext('2d');
+  function drawBg(){
+    bg.width = innerWidth; bg.height = innerHeight;
+    var g = bc.createRadialGradient(
+      innerWidth*.50, innerHeight*.25, 0,
+      innerWidth*.50, innerHeight*.50, Math.max(innerWidth,innerHeight)*.80
+    );
+    g.addColorStop(0,   '#0d2535');
+    g.addColorStop(.40, '#081318');
+    g.addColorStop(.75, '#050e14');
+    g.addColorStop(1,   '#030a0e');
+    bc.fillStyle = g;
+    bc.fillRect(0,0,innerWidth,innerHeight);
+
+    /* Ambient center glow */
+    var a = bc.createRadialGradient(innerWidth*.50,innerHeight*.22,0,innerWidth*.50,innerHeight*.22,innerWidth*.36);
+    a.addColorStop(0,   'rgba(13,120,170,.08)');
+    a.addColorStop(.60, 'rgba(13,120,170,.03)');
+    a.addColorStop(1,   'transparent');
+    bc.fillStyle = a;
+    bc.fillRect(0,0,innerWidth,innerHeight);
+  }
+  drawBg();
+
+  /* ── Dust particles: gold specks ── */
+  var dc = document.getElementById('cvDust');
+  var dx = dc.getContext('2d');
+  var pts = [];
+
+  function mkPt(){
+    return {
+      x: Math.random() * dc.width,
+      y: Math.random() * dc.height,
+      r: Math.random() * 1.4 + .20,
+      a: Math.random() * .38 + .05,
+      vx: (Math.random()-.50) * .14,
+      vy: -Math.random() * .22 - .05,
+      flicker: Math.random() * Math.PI * 2
+    };
+  }
+
+  function initDust(){
+    dc.width = innerWidth; dc.height = innerHeight;
+    pts = [];
+    for(var i=0;i<100;i++) pts.push(mkPt());
+  }
+
+  var frame = 0;
+  function tick(){
+    frame++;
+    dx.clearRect(0,0,dc.width,dc.height);
+    for(var i=0;i<pts.length;i++){
+      var p=pts[i];
+      p.x += p.vx; p.y += p.vy;
+      p.flicker += .022;
+      var alpha = p.a * (.70 + .30 * Math.sin(p.flicker));
+      if(p.y < -4){ p.y = dc.height+4; p.x = Math.random()*dc.width; }
+      if(p.x < -4) p.x = dc.width+4;
+      if(p.x > dc.width+4) p.x = -4;
+      dx.beginPath();
+      dx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      dx.fillStyle = 'rgba(212,175,55,'+alpha.toFixed(3)+')';
+      dx.fill();
     }
-    resize();
-    for(var i=0;i<90;i++) pts.push(make());
-    window.addEventListener('resize',resize,{passive:true});
-    function tick(){
-      ctx.clearRect(0,0,c.width,c.height);
-      for(var i=0;i<pts.length;i++){
-        var p=pts[i];
-        p.x+=p.vx; p.y+=p.vy;
-        if(p.y<-4){ p.y=c.height+4; p.x=Math.random()*c.width; }
-        if(p.x<-4) p.x=c.width+4;
-        if(p.x>c.width+4) p.x=-4;
-        ctx.fillStyle='rgba(212,175,55,'+p.a+')';
-        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-      }
-      requestAnimationFrame(tick);
-    }
-    tick();
-  } catch(e){}
+    requestAnimationFrame(tick);
+  }
+
+  initDust();
+  window.addEventListener('resize',function(){
+    drawBg(); initDust();
+  },{passive:true});
+  tick();
 })();
 </script>
 
-<!-- ── Nav + Hub interactivity ── -->
+<!-- ══════════════════ HUB JS ══════════════════ -->
 <script>
 (function(){
-var _open=null;
-function closeAll(){ document.querySelectorAll('.navPanel').forEach(function(p){p.classList.remove('open');}); _open=null; }
-function togglePanel(p){ if(!p) return; var was=p.classList.contains('open'); closeAll(); if(!was){p.classList.add('open'); _open=p;} }
-function toast(msg,ms){ var t=document.getElementById('navToast'); if(!t) return; t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},ms||2200); }
+'use strict';
 
-document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();togglePanel(document.getElementById('dropNotif'));});
-document.getElementById('btnCoins').addEventListener('click',function(e){e.stopPropagation();closeAll();toast('Loja de moedas — em breve',2000);});
-document.getElementById('btnPerfil').addEventListener('click',function(e){e.stopPropagation();togglePanel(document.getElementById('dropPerfil'));});
-document.getElementById('navSocial').addEventListener('click',function(){closeAll();toast('Social — em construção',2000);});
-document.getElementById('navMundo').addEventListener('click',function(){closeAll();toast('Mundo — em construção',2000);});
-document.getElementById('navRitual').addEventListener('click',function(){location.href='./entrada.html';});
-document.getElementById('dpConfig').addEventListener('click',function(){closeAll();toast('Configurações — em breve',2000);});
-document.getElementById('dpLogout').addEventListener('click',function(){closeAll(); window._hubLogout&&window._hubLogout();});
-document.getElementById('btnInvite').addEventListener('click',function(){toast('Convite — em breve',2000);});
-document.addEventListener('click',function(e){if(_open&&!_open.contains(e.target))closeAll();});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAll();});
+/* ── Toast ── */
+window._toast = function(msg, ms){
+  var t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(function(){ t.classList.remove('on'); }, ms||2200);
+};
 
-// Countdown to next Thursday 20:00
-(function countdown(){
-  var el=document.getElementById('eventCountdown');
+/* ── Dropdown logic ── */
+var _open = null;
+function closeDrops(){ document.querySelectorAll('.navDrop').forEach(function(d){d.classList.remove('open');}); _open=null; }
+function toggleDrop(el){ if(!el) return; var was=el.classList.contains('open'); closeDrops(); if(!was){el.classList.add('open');_open=el;} }
+document.addEventListener('click',function(e){ if(_open&&!_open.contains(e.target)) closeDrops(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrops(); });
+
+document.getElementById('btnNotif').addEventListener('click',function(e){ e.stopPropagation(); toggleDrop(document.getElementById('dropNotif')); });
+document.getElementById('btnCoins').addEventListener('click',function(e){ e.stopPropagation(); closeDrops(); window._toast('Loja de moedas — em breve'); });
+document.getElementById('btnPerfil').addEventListener('click',function(e){ e.stopPropagation(); toggleDrop(document.getElementById('dropPerfil')); });
+document.getElementById('navSocial').addEventListener('click',function(){ closeDrops(); window._toast('Social — em construção'); });
+document.getElementById('navMundo').addEventListener('click',function(){ closeDrops(); window._toast('Mundo — em construção'); });
+document.getElementById('navRitual').addEventListener('click',function(){ location.href='./entrada.html'; });
+document.getElementById('dpLogout').addEventListener('click',function(){ closeDrops(); window._hubLogout&&window._hubLogout(); });
+document.getElementById('btnInvite').addEventListener('click',function(){ window._toast('Convites — em breve'); });
+
+/* ── Countdown to next Thursday 20:00 ── */
+(function(){
+  var el = document.getElementById('eventTimer');
   if(!el) return;
-  function update(){
-    var now=new Date();
-    var next=new Date(now);
-    var day=now.getDay(); // 0=Sun,4=Thu
-    var diff=(4-day+7)%7||7;
+  function upd(){
+    var now = new Date();
+    var next = new Date(now);
+    var diff = (4 - now.getDay() + 7) % 7 || 7;
     next.setDate(now.getDate()+diff);
     next.setHours(20,0,0,0);
-    var ms=next-now;
-    if(ms<0) ms+=7*86400000;
-    var h=Math.floor(ms/3600000);
-    var m=Math.floor((ms%3600000)/60000);
-    var s=Math.floor((ms%60000)/1000);
-    el.textContent=(h>0?h+'h ':'')+String(m).padStart(2,'0')+'min '+String(s).padStart(2,'0')+'s';
+    var ms = next - now;
+    if(ms < 0) ms += 7*86400000;
+    var h = Math.floor(ms/3600000);
+    var m = Math.floor((ms%3600000)/60000);
+    var s = Math.floor((ms%60000)/1000);
+    el.textContent = (h>0?h+'h ':'')+String(m).padStart(2,'0')+'min '+String(s).padStart(2,'0')+'s';
   }
-  update(); setInterval(update,1000);
+  upd(); setInterval(upd,1000);
 })();
 
-// Populate friends list
-window.hubRenderFriends=function(friends){
-  var ul=document.getElementById('friendsList');
-  if(!ul) return;
-  var online=(friends||[]).filter(function(f){return f.online;});
+/* ══════════════ Public API (called by Firebase module) ══════════════ */
+
+window.hubHideVeil = function(){
+  var v = document.getElementById('veil'); if(!v) return;
+  v.classList.add('out');
+  setTimeout(function(){ if(v.parentNode) v.parentNode.removeChild(v); }, 650);
+};
+
+window.hubNavSetUser = function(displayName, email, coins){
+  var ini = (displayName||email||'?').charAt(0).toUpperCase();
+  var firstName = (displayName||'').split(' ')[0] || '—';
+  var el;
+  if((el=document.getElementById('navAvIni')))  el.textContent = ini;
+  if((el=document.getElementById('navName')))   el.textContent = firstName;
+  if((el=document.getElementById('dpName')))    el.textContent = displayName||'—';
+  if((el=document.getElementById('dpEmail')))   el.textContent = email||'';
+  if(coins!=null&&(el=document.getElementById('coinsVal'))) el.textContent = String(coins);
+};
+
+window.hubNavSetCoins = function(v){
+  var el = document.getElementById('coinsVal'); if(el) el.textContent = String(v||0);
+};
+
+window.hubSetHero = function(data){
+  var h = new Date().getHours();
+  var saud = h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+  var nome = (data._userName||'').split(' ')[0];
+  var kick = document.getElementById('heroKick');
+  var title = document.getElementById('heroTitle');
+  var sub   = document.getElementById('heroSub');
+  var cta   = document.getElementById('heroCta');
+  if(kick) kick.textContent = (nome ? saud+', '+nome+'.' : saud+'.').toUpperCase();
+  var online = (data.friends||[]).find(function(f){ return f.online; });
+  if(data.fragment){
+    if(title) title.innerHTML='MISSÃO PENDENTE.<br>COMPLETE ANTES DE PROSSEGUIR.';
+    if(sub)   sub.textContent='SUA CARTA AGUARDA.';
+    if(cta)   cta.textContent='CONTINUAR MISSÃO';
+  } else if(online){
+    var nm = (online.displayName||'Alguém').split(' ')[0].toUpperCase();
+    if(title) title.innerHTML=nm+' ESTÁ ONLINE.<br>O MUNDO ESPERA POR VOCÊS.';
+    if(sub)   sub.textContent='PRONTO PARA JOGAR JUNTOS?';
+    if(cta)   cta.textContent='CONVIDAR E JOGAR';
+  } else if(data.lastSession&&data.lastSession.roomName){
+    if(title) title.innerHTML='SUA SESSÃO ANTERIOR<br>AINDA ECOA.';
+    if(sub)   sub.textContent=data.lastSession.roomName.toUpperCase();
+    if(cta)   cta.textContent='VOLTAR E JOGAR';
+  }
+};
+
+window.hubSetRitual = function(daily){
+  var q   = document.getElementById('ritualQ');
+  var cnt = document.getElementById('ritualCount');
+  if(daily&&daily.question&&q)   q.textContent = '"'+daily.question+'"';
+  if(cnt&&daily&&daily.respondents) cnt.textContent = daily.respondents.toLocaleString('pt-BR');
+};
+
+window.hubSetSeason = function(season){
+  if(!season) return;
+  var k=document.getElementById('slKick'); if(k) k.textContent='Temporada '+(season.number||'I');
+  var n=document.getElementById('slName'); if(n) n.textContent=season.name||season.theme||'O Prelúdio';
+  var s=document.getElementById('slStatus'); if(s&&season.daysLeft!=null) s.textContent=season.daysLeft+' dias restantes';
+};
+
+window.hubRenderFriends = function(friends){
+  var ul = document.getElementById('friendsList'); if(!ul) return;
+  var online = (friends||[]).filter(function(f){ return f.online; });
   if(!online.length){
-    ul.innerHTML='<li style="padding:14px 0;font-size:11px;color:var(--text3);letter-spacing:.08em;text-align:center">Nenhum amigo online</li>';
+    ul.innerHTML='<li style="padding:14px 0;font-size:10.5px;color:var(--text3);text-align:center;letter-spacing:.08em">Nenhum amigo online</li>';
     return;
   }
-  ul.innerHTML=online.slice(0,5).map(function(f){
-    var ini=(f.displayName||'?').trim().charAt(0).toUpperCase();
+  ul.innerHTML = online.slice(0,5).map(function(f){
+    var ini = (f.displayName||'?').trim().charAt(0).toUpperCase();
+    var nm  = (f.displayName||'Anônimo').split(' ')[0];
     return '<li class="friendItem">'
-      +'<div class="friendAvatar">'+ini+'</div>'
-      +'<span class="friendName">'+(f.displayName||'Anônimo').split(' ')[0]+'</span>'
-      +'<span class="friendOnlineDot"></span>'
+      +'<div class="fAvatar">'+ini+'</div>'
+      +'<span class="fName">'+nm+'</span>'
+      +'<span class="fOnline"></span>'
       +'</li>';
   }).join('');
 };
 
-// Populate nav user
-window.hubNavSetUser=function(displayName,email,coins){
-  var n=document.getElementById('navUserName');
-  var ab=document.getElementById('avatarBtn');
-  var af=document.getElementById('avatarFallback');
-  var co=document.getElementById('coinsVal');
-  var dn=document.getElementById('dpName');
-  var de=document.getElementById('dpEmail');
-  var ini=(displayName||email||'?').charAt(0).toUpperCase();
-  if(n) n.textContent=(displayName||'').split(' ')[0]||'—';
-  if(ab) ab.textContent=ini;
-  if(af) af.textContent=ini;
-  if(co) co.textContent=coins!=null?String(coins):'0';
-  if(dn) dn.textContent=displayName||'—';
-  if(de) de.textContent=email||'';
-};
-
-// Populate hero card
-window.hubSetHero=function(data){
-  var title=document.getElementById('heroTitle');
-  var sub=document.getElementById('heroSub');
-  var cta=document.getElementById('heroCta');
-  var greeting=document.getElementById('heroGreeting');
-  // Greeting
-  var h=new Date().getHours();
-  var saud=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
-  var nome=(data._userName||'').split(' ')[0];
-  if(greeting) greeting.textContent=(nome?saud+', '+nome+'.':saud+'.').toUpperCase();
-
-  // Context
-  var online=(data.friends||[]).find(function(f){return f.online;});
-  if(data.fragment){
-    if(title) title.innerHTML='MISSÃO PENDENTE.<br>COMPLETE ANTES DE PROSSEGUIR.';
-    if(sub) sub.textContent='SUA CARTA AGUARDA.';
-    if(cta) cta.textContent='CONTINUAR MISSÃO';
-  } else if(online){
-    var nm=(online.displayName||'Alguém').split(' ')[0].toUpperCase();
-    if(title) title.innerHTML=nm+' ESTÁ ONLINE.<br>O MUNDO ESPERA POR VOCÊS.';
-    if(sub) sub.textContent='PRONTO PARA JOGAR JUNTOS?';
-    if(cta) cta.textContent='CONVIDAR E JOGAR';
-  } else if(data.lastSession&&data.lastSession.roomName){
-    if(title) title.innerHTML='SUA SESSÃO ANTERIOR<br>AINDA ECOA.';
-    if(sub) sub.textContent=data.lastSession.roomName.toUpperCase();
-    if(cta) cta.textContent='VOLTAR E JOGAR';
-  } else {
-    if(title) title.innerHTML='O MUNDO PSICOLÓGICO<br>ESPERA POR VOCÊ.';
-    if(sub) sub.textContent='PRONTO PARA A PRÓXIMA SESSÃO?';
-    if(cta) cta.textContent='CRIAR SALA / JOGAR';
-  }
-};
-
-// Populate ritual
-window.hubSetRitual=function(daily){
-  var q=document.getElementById('ritualQ');
-  var cnt=document.getElementById('ritualCount');
-  if(daily&&daily.question&&q) q.textContent='"'+daily.question+'"';
-  if(cnt&&daily&&daily.respondents) cnt.textContent=daily.respondents.toLocaleString('pt-BR');
-};
-
-// Populate season
-window.hubSetSeason=function(season){
-  var fn=function(prefix){
-    var lb=document.getElementById(prefix+'Label');
-    var nm=document.getElementById(prefix+'Name');
-    var st=document.getElementById(prefix+'Status');
-    if(season){
-      if(lb) lb.textContent='Temporada '+(season.number||'I');
-      if(nm) nm.textContent=season.name||season.theme||'O Prelúdio';
-      if(st&&season.daysLeft!=null) st.textContent=season.daysLeft+' dias restantes';
-    }
-  };
-  fn('sl'); // only left has IDs — right is static
-};
-
-window.hubHideVeil=function(){
-  var v=document.getElementById('loadVeil');
-  if(!v) return;
-  v.classList.add('out');
-  setTimeout(function(){if(v.parentNode)v.parentNode.removeChild(v);},650);
-};
-
-window.hubNavSetCoins=function(v){ var co=document.getElementById('coinsVal'); if(co)co.textContent=String(v||0); };
-
-// Onboarding
-var obData={};
-function obShowStep(n){
-  document.querySelectorAll('.obStep').forEach(function(s){s.classList.remove('vis');});
-  var s=document.getElementById('obStep'+n); if(s) s.classList.add('vis');
+/* ── Onboarding ── */
+var _obData = {};
+function obShow(n){
+  document.querySelectorAll('.obStep').forEach(function(s){ s.classList.remove('vis'); });
+  var s = document.getElementById('obStep'+n); if(s) s.classList.add('vis');
 }
-function setupChoices(sid,bid){
+function setupOb(sid, bid){
   document.querySelectorAll('#'+sid+' .obChoice').forEach(function(btn){
     btn.addEventListener('click',function(){
-      document.querySelectorAll('#'+sid+' .obChoice').forEach(function(b){b.classList.remove('sel');});
+      document.querySelectorAll('#'+sid+' .obChoice').forEach(function(b){ b.classList.remove('sel'); });
       btn.classList.add('sel');
       var nb=document.getElementById(bid); if(nb) nb.classList.add('rdy');
     });
   });
 }
-var ob0=document.getElementById('ob0btn'); if(ob0) ob0.addEventListener('click',function(){obShowStep(1);});
-setupChoices('obStep1','ob1btn');
-var ob1=document.getElementById('ob1btn'); if(ob1) ob1.addEventListener('click',function(){
-  var s=document.querySelector('#obStep1 .obChoice.sel'); if(!s) return;
-  obData.vibe=s.dataset.v; obShowStep(2);
-});
-setupChoices('obStep2','ob2btn');
-var ob2=document.getElementById('ob2btn'); if(ob2) ob2.addEventListener('click',function(){
-  var s=document.querySelector('#obStep2 .obChoice.sel'); if(!s) return;
-  obData.social=s.dataset.v;
-  try{localStorage.setItem('osl_onboarding_done','1');}catch(_){}
-  try{localStorage.setItem('osl_player_vibe',obData.vibe||'');}catch(_){}
-  try{localStorage.setItem('osl_player_social',obData.social||'');}catch(_){}
-  var v=document.getElementById('obVeil'); if(v){v.classList.remove('on');setTimeout(function(){v.style.display='none';},520);}
-});
+(function(){
+  var b0=document.getElementById('ob0btn'); if(b0) b0.addEventListener('click',function(){ obShow(1); });
+  setupOb('obStep1','ob1btn');
+  var b1=document.getElementById('ob1btn'); if(b1) b1.addEventListener('click',function(){
+    var s=document.querySelector('#obStep1 .obChoice.sel'); if(!s) return;
+    _obData.vibe=s.dataset.v; obShow(2);
+  });
+  setupOb('obStep2','ob2btn');
+  var b2=document.getElementById('ob2btn'); if(b2) b2.addEventListener('click',function(){
+    var s=document.querySelector('#obStep2 .obChoice.sel'); if(!s) return;
+    _obData.social=s.dataset.v;
+    try{ localStorage.setItem('osl_onboarding_done','1'); }catch(_){}
+    try{ localStorage.setItem('osl_player_vibe',_obData.vibe||''); }catch(_){}
+    try{ localStorage.setItem('osl_player_social',_obData.social||''); }catch(_){}
+    var v=document.getElementById('obVeil');
+    if(v){ v.classList.remove('on'); setTimeout(function(){ v.style.display='none'; },520); }
+  });
+})();
 
-window.hubShowOnboarding=function(){
+window.hubShowOnboarding = function(){
   var v=document.getElementById('obVeil'); if(!v) return;
-  v.style.display='';
-  setTimeout(function(){v.classList.add('on');},10);
-  obShowStep(0);
+  v.style.display=''; setTimeout(function(){ v.classList.add('on'); },10); obShow(0);
 };
+
 })();
 </script>
 
-<!-- ── Firebase module ── -->
+<!-- ══════════════════ FIREBASE MODULE ══════════════════ -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { initializeApp }                  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const API = "https://osl-video-server-production.up.railway.app";
 const cfg = {
-  apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
-  authDomain: "osextolugar-game.firebaseapp.com",
-  projectId: "osextolugar-game",
-  storageBucket: "osextolugar-game.firebasestorage.app",
+  apiKey:            "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+  authDomain:        "osextolugar-game.firebaseapp.com",
+  projectId:         "osextolugar-game",
+  storageBucket:     "osextolugar-game.firebasestorage.app",
   messagingSenderId: "947922328721",
-  appId: "1:947922328721:web:989522c99e16ab449f3330"
+  appId:             "1:947922328721:web:989522c99e16ab449f3330"
 };
 
 const app  = initializeApp(cfg);
@@ -1303,27 +1289,27 @@ onAuthStateChanged(auth, async (user) => {
   let data = {};
   try {
     const token = await user.getIdToken();
-    const res   = await fetch(API + "/hub", { headers: { "Authorization": "Bearer " + token } });
+    const res   = await fetch(API + "/hub", { headers: { Authorization: "Bearer "+token } });
     if (res.ok) data = await res.json().catch(() => ({}));
   } catch(_) {}
 
   data._userName = user.displayName || user.email || "";
 
-  window.hubNavSetUser   && window.hubNavSetUser(user.displayName, user.email, data.coins);
-  window.hubSetHero      && window.hubSetHero(data);
-  window.hubSetRitual    && window.hubSetRitual(data.daily);
-  window.hubSetSeason    && window.hubSetSeason(data.season);
-  window.hubRenderFriends&& window.hubRenderFriends(data.friends);
-  if (data.coins != null) window.hubNavSetCoins && window.hubNavSetCoins(data.coins);
+  window.hubNavSetUser    && window.hubNavSetUser(user.displayName, user.email, data.coins);
+  window.hubSetHero       && window.hubSetHero(data);
+  window.hubSetRitual     && window.hubSetRitual(data.daily);
+  window.hubSetSeason     && window.hubSetSeason(data.season);
+  window.hubRenderFriends && window.hubRenderFriends(data.friends);
+  if (data.coins != null)  window.hubNavSetCoins && window.hubNavSetCoins(data.coins);
 
   window.hubHideVeil && window.hubHideVeil();
 
   const done = (() => { try { return localStorage.getItem('osl_onboarding_done'); } catch(_){return null;} })();
   if (!done) setTimeout(() => { window.hubShowOnboarding && window.hubShowOnboarding(); }, 700);
 
-  user.getIdToken().then(t =>
-    fetch(API + "/hub/touch", { method:"POST", headers:{"Authorization":"Bearer "+t} })
-  ).catch(() => {});
+  user.getIdToken()
+    .then(t => fetch(API+"/hub/touch", { method:"POST", headers:{ Authorization:"Bearer "+t } }))
+    .catch(() => {});
 });
 </script>
 
