@@ -30,6 +30,7 @@
   --ok:     #58e040;
   --err:    #ff4040;
   --nav-h:  62px;
+  --season-h: 52px;
   --pw:     255px;
   --serif:  'Cinzel','Palatino Linotype',Georgia,serif;
   --fell:   'IM Fell English',Georgia,serif;
@@ -185,8 +186,8 @@ body{
   display:grid;grid-template-columns:var(--pw) 1fr var(--pw);
   gap:0;
   padding-top:var(--nav-h);
-  height:100vh;
-  max-height:100vh;
+  height:calc(100vh - var(--season-h));
+  max-height:calc(100vh - var(--season-h));
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -292,19 +293,25 @@ body{
 /* ── HERO STAGE — text floats over the WebGL scene ── */
 .heroStage{
   flex-shrink:0;
-  padding:40px 40px 32px;
+  padding:40px 40px 28px;
   text-align:center;
   position:relative;
-  /* No background, no border, no box */
-  border-bottom:1px solid rgba(212,175,55,.10);
 }
 
-/* Subtle inner glow behind text */
+/* Inner glow behind text */
 .heroStage::before{
   content:'';
   position:absolute;inset:0;
   background:radial-gradient(ellipse 70% 100% at 50% 60%, rgba(13,60,90,.40) 0%, transparent 70%);
   pointer-events:none;
+}
+/* Gradient fade at bottom — seamless connection to ritual */
+.heroStage::after{
+  content:'';
+  position:absolute;bottom:0;left:0;right:0;height:40px;
+  background:linear-gradient(0deg,rgba(5,10,15,.80) 0%,transparent 100%);
+  pointer-events:none;
+  z-index:2;
 }
 
 .heroKick{
@@ -371,43 +378,44 @@ body{
 
 /* ── RITUAL CARD — with artwork zone ── */
 .ritualWrap{
-  flex:1;padding:20px 24px 20px;display:flex;flex-direction:column;
+  flex:1;padding:10px 28px 16px;display:flex;flex-direction:column;
   overflow:hidden;
 }
 
 .ritualDeck{
-  position:relative;flex:1;display:flex;flex-direction:column;
+  flex:1;display:flex;flex-direction:column;
+  padding:0 14px 0 0; /* room for stacking shadow on right */
 }
 
-/* Ghost cards */
-.rGhostA,.rGhostB{
-  position:absolute;inset:0;
-  border-radius:4px;
-  border:1.5px solid rgba(212,175,55,.18);
-  background-image:var(--ct);background-size:22px 22px;background-color:#080f1a;
-}
-.rGhostA{transform:rotate(-4.5deg) translateY(7px) scale(.965);z-index:0;opacity:.70;box-shadow:0 10px 35px rgba(0,0,0,.65);}
-.rGhostB{transform:rotate(3.5deg) translateY(5px) scale(.978);z-index:1;opacity:.82;box-shadow:0 7px 22px rgba(0,0,0,.50);}
-
-/* Front — the real tarot card */
+/* Front — tarot card with CSS stacking illusion via box-shadow */
 .rFront{
-  position:relative;z-index:2;flex:1;display:flex;flex-direction:column;
+  flex:1;display:flex;flex-direction:column;
   border-radius:4px;
   border:2px solid var(--gold);
   background-color:#0a141e;
   background-image:var(--ct);background-size:22px 22px;
+  /* Stacking shadow: simulates 2 cards behind without DOM ghost elements */
   box-shadow:
-    0 0 0 4px rgba(212,175,55,.06),
-    0 0 0 6px rgba(212,175,55,.03),
-    0 24px 70px rgba(0,0,0,.70),
-    0 0 50px rgba(212,175,55,.06),
+    -6px 8px 0 -2px #07101a,
+    -6px 8px 0 -1px rgba(212,175,55,.16),
+    -13px 16px 0 -2px #050d14,
+    -13px 16px 0 -1px rgba(212,175,55,.09),
+    0 24px 60px rgba(0,0,0,.70),
+    0 0 40px rgba(212,175,55,.06),
     inset 0 1px 0 rgba(212,175,55,.18);
   overflow:hidden;
   transition:transform .30s ease,box-shadow .30s ease;
 }
 .rFront:hover{
-  transform:translateY(-4px);
-  box-shadow:0 0 0 4px rgba(212,175,55,.10),0 0 0 6px rgba(212,175,55,.05),0 32px 80px rgba(0,0,0,.80),0 0 60px rgba(212,175,55,.12),inset 0 1px 0 rgba(212,175,55,.22);
+  transform:translateY(-3px) translateX(3px);
+  box-shadow:
+    -9px 11px 0 -2px #07101a,
+    -9px 11px 0 -1px rgba(212,175,55,.26),
+    -17px 20px 0 -2px #050d14,
+    -17px 20px 0 -1px rgba(212,175,55,.14),
+    0 30px 75px rgba(0,0,0,.80),
+    0 0 55px rgba(212,175,55,.10),
+    inset 0 1px 0 rgba(212,175,55,.22);
 }
 
 /* Card artwork zone — abstract illustration */
@@ -490,33 +498,33 @@ body{
 }
 .btnDiscover:hover{background:rgba(212,175,55,.08);border-color:rgba(212,175,55,.60);transform:translateY(-1px);box-shadow:0 4px 20px rgba(212,175,55,.14);}
 
-/* ── EVENT COUNTDOWN — full width, dramatic ── */
+/* ── EVENT COUNTDOWN — compact, refined ── */
 .evStrip{
   flex-shrink:0;
   display:flex;align-items:center;
-  border-top:1px solid rgba(212,175,55,.12);
-  background:rgba(3,8,14,.85);
-  padding:0 28px;
-  height:68px;
-  gap:20px;
-  position:relative;overflow:hidden;
+  border-top:1px solid rgba(212,175,55,.10);
+  background:rgba(3,7,13,.92);
+  padding:0 22px;
+  height:46px;
+  gap:14px;
+  position:relative;
 }
 .evStrip::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;
-  width:3px;
+  content:'';position:absolute;left:0;top:10px;bottom:10px;
+  width:2px;border-radius:1px;
   background:var(--goldG);
-  box-shadow:0 0 14px rgba(212,175,55,.55);
+  box-shadow:0 0 10px rgba(212,175,55,.40);
 }
 .evLabel{
-  font-size:8.5px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;
+  font-size:8px;font-weight:700;letter-spacing:.34em;text-transform:uppercase;
   color:var(--gold2);flex-shrink:0;white-space:nowrap;
 }
-.evSep{width:1px;height:28px;background:rgba(212,175,55,.15);flex-shrink:0;}
-.evWhen{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);flex-shrink:0;white-space:nowrap;}
+.evSep{width:1px;height:18px;background:rgba(212,175,55,.14);flex-shrink:0;}
+.evWhen{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);flex-shrink:0;white-space:nowrap;}
 .evTimer{
-  font-size:28px;font-weight:700;color:#fff;
-  font-variant-numeric:tabular-nums;letter-spacing:.04em;
-  text-shadow:0 0 24px rgba(212,175,55,.30);
+  font-size:18px;font-weight:700;color:rgba(240,236,224,.90);
+  font-variant-numeric:tabular-nums;letter-spacing:.06em;
+  text-shadow:0 0 16px rgba(212,175,55,.22);
   margin-left:auto;flex-shrink:0;
 }
 
@@ -559,8 +567,23 @@ body{
 
 @keyframes ri{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 
+/* ── Season bar — single, centered, full-width footer ── */
+.seasonBar{
+  position:fixed;bottom:0;left:0;right:0;z-index:80;
+  height:var(--season-h);
+  background:rgba(3,7,12,.97);
+  border-top:1px solid rgba(212,175,55,.12);
+  display:flex;align-items:center;justify-content:center;
+  gap:22px;
+}
+.sbDiv{width:1px;height:14px;background:rgba(212,175,55,.16);flex-shrink:0;}
+.sbKick{font-size:8px;font-weight:700;letter-spacing:.34em;text-transform:uppercase;color:var(--text3);}
+.sbName{font-family:var(--serif);font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text);}
+.sbPill{display:flex;align-items:center;gap:7px;font-size:8px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);}
+.sbDays{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--text3);}
+
 /* ── responsive ── */
-@media(max-width:960px){.dash{grid-template-columns:1fr;}.panel{display:none;}.evTimer{font-size:20px;}}
+@media(max-width:960px){.dash{grid-template-columns:1fr;}.panel{display:none;}.evTimer{font-size:16px;}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}#cvGL,canvas{display:none!important;}}
 </style>
 </head>
@@ -639,11 +662,6 @@ body{
         </div>
       </div>
     </div>
-    <div class="seasonWgt" id="seasonL">
-      <div class="swKick" id="slKick">Temporada I</div>
-      <div class="swName" id="slName">O Prelúdio</div>
-      <div class="swPill"><span class="swDot"></span><span id="slStatus">Mundo Ativo</span></div>
-    </div>
   </aside>
 
   <!-- CENTER — cinematic stage -->
@@ -660,8 +678,6 @@ body{
     <!-- Ritual: artwork + tarot stack -->
     <div class="ritualWrap">
       <div class="ritualDeck">
-        <div class="rGhostA"></div>
-        <div class="rGhostB"></div>
         <div class="rFront">
           <div class="rArt">
             <div class="rArtGlow"></div>
@@ -706,13 +722,19 @@ body{
       <li class="fEmpty">Carregando…</li>
     </ul>
     <button class="btnInviteBar" id="btnInvite">Convidar Amigos</button>
-    <div class="seasonWgt">
-      <div class="swKick">Temporada I</div>
-      <div class="swName">O Prelúdio</div>
-      <div class="swPill"><span class="swDot"></span><span>Mundo Ativo</span></div>
-    </div>
   </aside>
 
+</div>
+
+<!-- Season bar — única, centralizada no rodapé -->
+<div class="seasonBar" id="seasonBar">
+  <span class="sbKick" id="sbKick">Temporada I</span>
+  <div class="sbDiv"></div>
+  <span class="sbName" id="sbName">O Prelúdio</span>
+  <div class="sbDiv"></div>
+  <span class="sbPill"><span class="swDot"></span><span id="sbStatus">Mundo Ativo</span></span>
+  <div class="sbDiv"></div>
+  <span class="sbDays" id="sbDays">42 dias restantes</span>
 </div>
 
 <!-- Dropdown Perfil -->
@@ -1004,8 +1026,10 @@ window.hubSetRitual=function(d){
 window.hubSetSeason=function(s){
   if(!s)return;
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
-  set('slKick','Temporada '+(s.number||'I'));set('slName',s.name||s.theme||'O Prelúdio');
-  if(s.daysLeft!=null)set('slStatus',s.daysLeft+' dias restantes');
+  var num='Temporada '+(s.number||'I');
+  var nm=s.name||s.theme||'O Prelúdio';
+  set('sbKick',num);set('sbName',nm);
+  if(s.daysLeft!=null){set('sbStatus',s.daysLeft+' dias restantes');set('sbDays',s.daysLeft+' dias');}
 };
 window.hubRenderFriends=function(friends){
   var ul=document.getElementById('friendsList');if(!ul)return;
