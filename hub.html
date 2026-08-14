@@ -418,50 +418,8 @@ body{
     inset 0 1px 0 rgba(212,175,55,.22);
 }
 
-/* Card artwork zone — abstract illustration */
-.rArt{
-  height:130px;flex-shrink:0;position:relative;overflow:hidden;
-  background:linear-gradient(180deg,#06121e 0%,#0a1a2e 60%,#081420 100%);
-}
-/* Concentric circle ornament */
-.rArt::before,.rArt::after{
-  content:'';position:absolute;
-  border-radius:50%;
-  top:50%;left:50%;transform:translate(-50%,-50%);
-  border:1px solid rgba(212,175,55,.18);
-}
-.rArt::before{width:180px;height:180px;}
-.rArt::after{width:110px;height:110px;border-color:rgba(212,175,55,.12);}
-
-/* Ambient glow in artwork */
-.rArtGlow{
-  position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse 60% 80% at 50% 50%, rgba(212,175,55,.10) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 50% at 30% 40%, rgba(13,80,140,.25) 0%, transparent 60%),
-    radial-gradient(ellipse 30% 40% at 70% 60%, rgba(13,80,140,.20) 0%, transparent 60%);
-}
-
-/* Eye SVG in center of artwork */
-.rArtEye{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  display:flex;align-items:center;justify-content:center;
-  width:52px;height:52px;
-  background:radial-gradient(circle, rgba(212,175,55,.14), transparent 70%);
-  border-radius:50%;
-}
-.rArtEye svg{width:32px;height:32px;stroke:rgba(212,175,55,.60);fill:none;stroke-width:1;
-  filter:drop-shadow(0 0 6px rgba(212,175,55,.50));}
-
-/* Gold line dividing art from text */
-.rArtLine{
-  position:absolute;bottom:0;left:0;right:0;
-  height:1px;
-  background:linear-gradient(90deg,transparent,rgba(212,175,55,.45) 30%,rgba(212,175,55,.45) 70%,transparent);
-}
-
-/* Inner content */
-.rInner{padding:16px 18px 16px;flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;}
+/* Inner content — ocupa o card inteiro */
+.rInner{padding:28px 28px 22px;flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;justify-content:center;}
 
 /* Inner frame top corners */
 .rInner::before,.rInner::after{content:'';position:absolute;width:16px;height:16px;border-color:rgba(212,175,55,.38);border-style:solid;}
@@ -689,17 +647,6 @@ body{
     <div class="ritualWrap">
       <div class="ritualDeck">
         <div class="rFront">
-          <div class="rArt">
-            <div class="rArtGlow"></div>
-            <div class="rArtEye">
-              <svg viewBox="0 0 24 24">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="4"/>
-                <circle cx="12" cy="12" r="1.5" fill="rgba(212,175,55,.45)" stroke="none"/>
-              </svg>
-            </div>
-            <div class="rArtLine"></div>
-          </div>
           <div class="rInner">
             <div class="rHead">Ritual do Dia</div>
             <blockquote class="rQ" id="ritualQ">"Uma pergunta que você ainda não fez a si mesmo."</blockquote>
