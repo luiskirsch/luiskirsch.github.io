@@ -618,9 +618,8 @@ body.transmissionFocus .soundPanel {
 
 /* ── World state bar ── */
 .worldBar {
-  position: fixed;
+  position: absolute;
   bottom: 0; left: 0; right: 0;
-  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -846,6 +845,13 @@ requestAnimationFrame(function(t0){function step(prev){requestAnimationFrame(fun
   <footer class="gateFooter">
     © 2026 <span class="brand">PRELÚDIO JOGOS™</span> · <span class="brand">SextoLugar™</span>
   </footer>
+
+  <div class="worldBar" id="worldBar" aria-hidden="true">
+    <div class="worldBarItem">
+      <div class="wbDot"></div>
+      <span>O mundo está acordado</span>
+    </div>
+  </div>
 
 </main>
 
@@ -1204,13 +1210,6 @@ onAuthStateChanged(auth, (user) => {
 </script>
 
 <script>if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
-
-<div class="worldBar" id="worldBar" aria-hidden="true">
-  <div class="worldBarItem">
-    <div class="wbDot"></div>
-    <span>O mundo está acordado</span>
-  </div>
-</div>
 
 </body>
 </html>
