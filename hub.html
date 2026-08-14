@@ -738,7 +738,7 @@ function cardTexture(kind,isBack){
     c.fillStyle='rgba(212,175,55,.72)';cardDiamond(c,67,79,8);c.fill();cardDiamond(c,317,497,8);c.fill();
   }
   var sheen=c.createLinearGradient(20,20,364,556);sheen.addColorStop(0,'rgba(255,255,255,.12)');sheen.addColorStop(.28,'rgba(255,255,255,0)');sheen.addColorStop(.72,'rgba(255,255,255,.035)');sheen.addColorStop(1,'rgba(255,255,255,0)');cardRound(c,10,10,364,556,23);c.fillStyle=sheen;c.fill();
-  var tex=new THREE.CanvasTexture(cn);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return tex;
+  var tex=new THREE.CanvasTexture(cn);tex.colorSpace=THREE.SRGBColorSpace;tex.minFilter=THREE.LinearMipmapLinearFilter;tex.magFilter=THREE.LinearFilter;tex.generateMipmaps=true;tex.anisotropy=renderer.capabilities.getMaxAnisotropy();return tex;
 }
 var cardBackTex=cardTexture(0,true),cardFrontTex=[cardTexture(0,false),cardTexture(1,false),cardTexture(2,false)];
 var cardLogoImg=new Image();
@@ -747,12 +747,14 @@ cardLogoImg.addEventListener('load',function(){
 });
 cardLogoImg.src='./logo_oficial_fundo_transparente.png';
 var cardPlane=new THREE.PlaneGeometry(14,21),cardCore=new THREE.BoxGeometry(12.9,19.9,.42),fcards=[];
+var cardCoreSideMat=new THREE.MeshBasicMaterial({color:0x08131d,transparent:false,depthWrite:true});
+var cardCoreHiddenMat=new THREE.MeshBasicMaterial({visible:false,depthWrite:false,colorWrite:false});
+var cardCoreMaterials=[cardCoreSideMat,cardCoreSideMat,cardCoreSideMat,cardCoreSideMat,cardCoreHiddenMat,cardCoreHiddenMat];
 function mkCard(x,y,z,rx,ry,kind){
   var gr=new THREE.Group();
-  var coreMat=new THREE.MeshBasicMaterial({color:0x08131d,transparent:false,depthWrite:true});
   var frontMat=new THREE.MeshBasicMaterial({map:cardFrontTex[kind],transparent:false,alphaTest:.35,depthWrite:true,side:THREE.FrontSide});
   var backMat=new THREE.MeshBasicMaterial({map:cardBackTex,transparent:false,alphaTest:.35,depthWrite:true,side:THREE.FrontSide});
-  var core=new THREE.Mesh(cardCore,coreMat),front=new THREE.Mesh(cardPlane,frontMat),back=new THREE.Mesh(cardPlane,backMat);
+  var core=new THREE.Mesh(cardCore,cardCoreMaterials),front=new THREE.Mesh(cardPlane,frontMat),back=new THREE.Mesh(cardPlane,backMat);
   front.position.z=.23;back.position.z=-.23;back.rotation.y=Math.PI;gr.add(core,front,back);
   gr.position.set(x,y,z);gr.rotation.set(rx,ry,(Math.random()-.5)*.22);gr._bX=x;gr._bY=y;gr._bZ=gr.rotation.z;gr._fp=Math.random()*Math.PI*2;gr._fs=Math.random()*.18+.08;gr._rx=(Math.random()-.5)*.0015;gr._ry=(Math.random()-.5)*.0022;scene.add(gr);fcards.push(gr);
 }
