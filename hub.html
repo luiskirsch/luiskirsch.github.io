@@ -292,7 +292,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .sbIconBtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;}
 
 /* ═══ DROPDOWNS + TOAST ═══ */
-.drop{position:fixed;top:calc(var(--nav-h)+6px);right:18px;z-index:100;min-width:230px;background:rgba(4,8,16,.99);border:1px solid rgba(212,175,55,.16);border-radius:2px;box-shadow:0 24px 70px rgba(0,0,0,.80);padding:8px 0;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .18s,transform .18s;}
+.drop{position:fixed;top:0;right:0;z-index:100;min-width:230px;background:rgba(4,8,16,.99);border:1px solid rgba(212,175,55,.16);border-radius:2px;box-shadow:0 24px 70px rgba(0,0,0,.80);padding:8px 0;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .18s;}
 .drop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
 
 /* ── Feature modal (Social / Mundo) ── */
@@ -567,7 +567,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
     Sair da conta
   </button>
 </div>
-<div class="drop" id="dropNotif" style="right:110px"><div class="dEmpty">Nenhuma notificação</div></div>
+<div class="drop" id="dropNotif"><div class="dEmpty">Nenhuma notificação</div></div>
 <div class="toast" id="toast"></div>
 
 <!-- Feature modal -->
@@ -694,9 +694,28 @@ window._toast=function(msg,ms){var t=document.getElementById('toast');if(!t)retu
 
 var _open=null;
 function closeDrops(){document.querySelectorAll('.drop').forEach(function(d){d.classList.remove('open');});_open=null;}
-function toggleDrop(el){if(!el)return;var was=el.classList.contains('open');closeDrops();if(!was){el.classList.add('open');_open=el;}}
+function toggleDrop(el,trigger){
+  if(!el)return;
+  var was=el.classList.contains('open');
+  closeDrops();
+  if(!was){
+    /* Posição dinâmica relativa ao botão clicado */
+    if(trigger){
+      var r=trigger.getBoundingClientRect();
+      var dropW=Math.max(el.offsetWidth||240,240);
+      var fromRight=Math.max(4,window.innerWidth-r.right);
+      /* garante que não sai da borda esquerda */
+      if(window.innerWidth-fromRight-dropW<4)fromRight=window.innerWidth-dropW-4;
+      el.style.top=(r.bottom+4)+'px';
+      el.style.right=fromRight+'px';
+      el.style.left='auto';
+    }
+    el.classList.add('open');
+    _open=el;
+  }
+}
 document.addEventListener('click',function(e){if(_open&&!_open.contains(e.target))closeDrops();});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrops();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeDrops();closeFM();}});
 
 /* Feature modal */
 var fmData={
@@ -717,9 +736,9 @@ document.getElementById('fmClose').addEventListener('click',closeFM);
 document.getElementById('featureModal').addEventListener('click',function(e){if(e.target===this)closeFM();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFM();});
 
-document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropNotif'));});
+document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropNotif'),this);});
 document.getElementById('btnCoins').addEventListener('click',function(e){e.stopPropagation();window._toast('Loja de moedas — em breve');});
-document.getElementById('btnPerfil').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropPerfil'));});
+document.getElementById('btnPerfil').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropPerfil'),this);});
 document.getElementById('navSocial').addEventListener('click',function(){closeDrops();openFM('social');});
 document.getElementById('navMundo').addEventListener('click',function(){closeDrops();openFM('mundo');});
 document.getElementById('navRitual').addEventListener('click',function(){location.href='./entrada.html';});
