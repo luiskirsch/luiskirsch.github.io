@@ -1,270 +1,834 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-i18n-ns="login">
 <head>
-<script>(function(){if(window.top!==window.self){try{window.top.location.replace(location.href);}catch(_){document.documentElement.innerHTML="";}return;}var h=(location.hostname||"").toLowerCase(),p=location.protocol||"";var A=["preludiojogos.com","www.preludiojogos.com","preludiojogos.com.br","www.preludiojogos.com.br","luiskirsch.github.io","localhost","127.0.0.1"];if(p==="file:"||h&&A.indexOf(h)===-1){document.documentElement.innerHTML="<style>*{margin:0;padding:0}html,body{background:#0a0805;height:100%;display:flex;align-items:center;justify-content:center}p{color:#ccc;font:15px/1.7 sans-serif;text-align:center;max-width:320px}a{color:#e06e30;text-decoration:none}</style><p>Este conte\u00fado s\u00f3 est\u00e1 dispon\u00edvel no site oficial.<br><a href=\"https://preludiojogos.com.br\">preludiojogos.com.br<\/a><\/p>";setTimeout(function(){location.replace("https://preludiojogos.com.br");},2500);}else{document.documentElement.classList.add("guard-ok");}})();</script><style>html:not(.guard-ok) body{visibility:hidden!important;background:#0a0805!important}</style>
+<script>(function(){if(window.top!==window.self){try{window.top.location.replace(location.href);}catch(_){document.documentElement.innerHTML="";}return;}var h=(location.hostname||"").toLowerCase(),p=location.protocol||"";var A=["preludiojogos.com","www.preludiojogos.com","preludiojogos.com.br","www.preludiojogos.com.br","luiskirsch.github.io","localhost","127.0.0.1"];if(p==="file:"||h&&A.indexOf(h)===-1){document.documentElement.innerHTML="<style>*{margin:0;padding:0}html,body{background:#0a0805;height:100%;display:flex;align-items:center;justify-content:center}p{color:#ccc;font:15px/1.7 sans-serif;text-align:center;max-width:320px}a{color:#e06e30;text-decoration:none}</style><p>Este conteúdo só está disponível no site oficial.<br><a href=\"https://preludiojogos.com.br\">preludiojogos.com.br<\/a><\/p>";setTimeout(function(){location.replace("https://preludiojogos.com.br");},2500);}else{document.documentElement.classList.add("guard-ok");}})();</script><style>html:not(.guard-ok) body{visibility:hidden!important;background:#050507!important}</style>
 <script src="./i18n/init.js" defer></script>
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title data-i18n="login:title">Entrar | SEXTOLUGAR</title>
-  <link rel="icon" href="./favicon.png" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title data-i18n="login:title">Entrar | SEXTOLUGAR</title>
+<link rel="icon" href="./favicon.png" />
 
-  <style>
-    :root{
-      --bg:#050507;
-      --panel:rgba(255,255,255,.05);
-      --line:rgba(255,255,255,.08);
-      --gold:#e6c07b;
-      --text:#f4f4f6;
-      --muted:rgba(255,255,255,.66);
-      --danger:#ff6b6b;
-      --ok:#82d996;
-    }
+<style>
+:root {
+  --bg:           #050507;
+  --gold:         #e6c07b;
+  --gold-mid:     rgba(230,192,123,.65);
+  --gold-faint:   rgba(230,192,123,.12);
+  --gold-border:  rgba(230,192,123,.13);
+  --gold-focus:   rgba(230,192,123,.32);
+  --text:         #f4f4f6;
+  --muted:        rgba(244,244,246,.55);
+  --dim:          rgba(244,244,246,.30);
+  --glass:        rgba(255,255,255,.038);
+  --glass-hi:     rgba(255,255,255,.05);
+  --danger:       #ff6b6b;
+  --ok:           #82d996;
+}
 
-    *{ box-sizing:border-box; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-text-size-adjust: 100%; }
 
-    body{
-      margin:0;
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      background:
-        radial-gradient(900px 420px at 50% 10%, rgba(230,192,123,.08), transparent 58%),
-        linear-gradient(180deg, #09090d 0%, #050507 100%);
-      color:var(--text);
-      font-family:"Segoe UI",system-ui;
-      padding:20px;
-    }
+body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
 
-    .card{
-      width:100%;
-      max-width:420px;
-      padding:26px;
-      border-radius:24px;
-      background:var(--panel);
-      border:1px solid var(--line);
-      box-shadow:0 30px 90px rgba(0,0,0,.5);
-    }
+/* ── Canvas ── */
+#cosmos {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
 
-    h1{
-      margin:0 0 6px;
-      font-size:28px;
-    }
+/* ── Sound control ── */
+.sound-ctrl {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,0,0,.52);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 100px;
+  padding: 6px 14px 6px 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
 
-    p{
-      margin:0 0 20px;
-      color:var(--muted);
-      font-size:14px;
-    }
+.sound-toggle {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color .2s;
+  white-space: nowrap;
+}
+.sound-toggle:hover { color: var(--gold); }
+.sound-toggle .state-on { color: var(--gold); }
 
-    .field{
-      display:grid;
-      gap:6px;
-      margin-bottom:14px;
-    }
+.sound-sep { color: rgba(255,255,255,.15); font-size: 11px; }
+.sound-vol-lbl {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--muted);
+}
 
-    .field label{
-      font-size:11px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color:var(--gold);
-    }
+.vol-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 68px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,.15);
+  outline: none;
+  cursor: pointer;
+}
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+}
+.vol-slider::-moz-range-thumb {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: none;
+  cursor: pointer;
+}
 
-    .field input{
-      min-height:50px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(0,0,0,.25);
-      color:#fff;
-      padding:12px;
-      font-size:15px;
-      outline:none;
-    }
+/* ── Context banner (invite / reconnect) ── */
+.ctx-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 90;
+  background: rgba(230,192,123,.07);
+  border-bottom: 1px solid rgba(230,192,123,.18);
+  padding: 14px 20px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.ctx-who {
+  font-size: 10.5px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.ctx-detail { font-size: 13px; color: var(--muted); }
 
-    .field input::placeholder{
-      color:rgba(255,255,255,.34);
-    }
+/* ── Main scene ── */
+.scene {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 56px 20px 90px;
+  gap: 28px;
+}
 
-    button{
-      width:100%;
-      height:52px;
-      border-radius:14px;
-      border:none;
-      font-weight:700;
-      background:linear-gradient(135deg,#e6c07b,#c99c4a);
-      color:#000;
-      cursor:pointer;
-      margin-top:6px;
-      font-size:15px;
-    }
+/* ── Moon ── */
+.moon-wrap { text-align: center; }
+.moon {
+  display: inline-block;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 33% 33%, #f5ecd8, #c8ae84 55%, #6e5c3e);
+  box-shadow:
+    0 0 18px rgba(230,192,123,.22),
+    0 0 60px rgba(230,192,123,.07);
+  animation: moonBreathe 7s ease-in-out infinite;
+}
+@keyframes moonBreathe {
+  0%,100% { box-shadow: 0 0 18px rgba(230,192,123,.22), 0 0 60px rgba(230,192,123,.07); }
+  50%      { box-shadow: 0 0 28px rgba(230,192,123,.34), 0 0 90px rgba(230,192,123,.12); }
+}
 
-    button:disabled{
-      opacity:.6;
-      cursor:not-allowed;
-    }
+/* ── Identity ── */
+.identity { text-align: center; }
 
-    .status{
-      margin-top:10px;
-      font-size:13px;
-      text-align:center;
-      min-height:18px;
-      color:rgba(255,255,255,.72);
-    }
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--gold-mid);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
 
-    .status.err{ color:var(--danger); }
-    .status.ok{ color:var(--ok); }
+.brand {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-size: clamp(46px, 9.5vw, 86px);
+  font-weight: 700;
+  letter-spacing: .06em;
+  line-height: 1;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, #c8943c 0%, #f0d08a 38%, #c08838 62%, #e8c070 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-    .links{
-      margin-top:16px;
-      text-align:center;
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.7;
-    }
+.tagline {
+  font-size: 15px;
+  color: var(--muted);
+  letter-spacing: .02em;
+  margin-bottom: 5px;
+}
 
-    .links a{
-      color:var(--gold);
-      text-decoration:none;
-      font-weight:600;
-    }
-  </style>
+.tagline-sub {
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 0;
+}
+
+.phrase-wrap { min-height: 20px; margin-top: 10px; }
+.phrase {
+  font-size: 12px;
+  font-style: italic;
+  color: rgba(244,244,246,.28);
+  letter-spacing: .02em;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.phrase.visible { opacity: 1; transform: translateY(0); }
+
+/* ── Portal card ── */
+.portal {
+  width: 100%;
+  max-width: 400px;
+  background: var(--glass);
+  border: 1px solid var(--gold-border);
+  border-radius: 22px;
+  padding: 30px 28px 26px;
+  box-shadow:
+    0 40px 100px rgba(0,0,0,.55),
+    0 0 0 1px rgba(255,255,255,.03),
+    inset 0 1px 0 var(--glass-hi);
+  transition: border-color .4s ease;
+}
+.portal:focus-within { border-color: rgba(230,192,123,.24); }
+
+.portal-heading {
+  font-size: 10.5px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.portal-sub {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -.01em;
+  margin-bottom: 26px;
+  transition: opacity .4s;
+}
+
+/* Field */
+.field { margin-bottom: 16px; }
+.field-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--gold-mid);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.field-input {
+  width: 100%;
+  height: 52px;
+  background: rgba(0,0,0,.38);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  padding: 0 16px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color .25s, box-shadow .25s;
+}
+.field-input::placeholder { color: rgba(255,255,255,.22); }
+.field-input:focus {
+  border-color: var(--gold-focus);
+  box-shadow: 0 0 0 3px rgba(230,192,123,.07);
+}
+
+/* Enter button */
+.enter-btn {
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #e6c07b 0%, #c49040 100%);
+  color: #0d0b06;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 4px;
+  position: relative;
+  overflow: hidden;
+  transition: background .3s, opacity .2s, transform .12s;
+}
+.enter-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background .2s;
+}
+.enter-btn:hover:not(:disabled)::after { background: rgba(255,255,255,.07); }
+.enter-btn:active:not(:disabled) { transform: scale(.985); }
+.enter-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-arrow {
+  font-size: 15px;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity .22s, transform .22s;
+}
+.enter-btn:hover:not(:disabled) .btn-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.enter-btn[data-state="loading"] {
+  background: linear-gradient(135deg, #a07828 0%, #7a5a1a 100%);
+  color: rgba(255,240,200,.85);
+}
+.enter-btn[data-state="success"] {
+  background: linear-gradient(135deg, #3a7a50 0%, #265c38 100%);
+  color: rgba(200,255,220,.9);
+}
+.enter-btn[data-state="error"] {
+  background: linear-gradient(135deg, #7a2828 0%, #5c1a1a 100%);
+  color: rgba(255,200,200,.9);
+}
+
+/* Status */
+.status {
+  margin-top: 11px;
+  font-size: 12.5px;
+  text-align: center;
+  min-height: 18px;
+  color: var(--muted);
+  line-height: 1.5;
+  transition: color .2s;
+}
+.status.err { color: var(--danger); }
+.status.ok  { color: var(--ok); }
+
+/* Links */
+.link-small {
+  display: block;
+  text-align: center;
+  font-size: 12px;
+  color: var(--dim);
+  text-decoration: none;
+  margin-top: 13px;
+  letter-spacing: .01em;
+  transition: color .2s;
+}
+.link-small:hover { color: var(--gold); }
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+.or-divider::before,
+.or-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,.07);
+}
+.or-divider span {
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: rgba(255,255,255,.2);
+}
+
+.link-create {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+  letter-spacing: .03em;
+  transition: color .2s;
+}
+.link-create:hover { color: var(--gold); }
+
+/* ── World state footer ── */
+.world-state {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.16);
+  background: linear-gradient(to top, rgba(5,5,7,.85) 0%, transparent 100%);
+  pointer-events: none;
+  user-select: none;
+}
+.ws-dot {
+  color: var(--gold);
+  animation: wsPulse 3s ease-in-out infinite;
+}
+@keyframes wsPulse {
+  0%,100% { opacity: .35; }
+  50%      { opacity: .75; }
+}
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  .scene { padding: 52px 16px 80px; gap: 22px; }
+  .portal { padding: 26px 20px 22px; border-radius: 18px; }
+  .sound-ctrl { top: 14px; right: 14px; padding: 5px 10px 5px 8px; gap: 6px; }
+  .vol-slider { width: 48px; }
+  .brand { letter-spacing: .04em; }
+}
+</style>
 <link rel="prefetch" href="/painel.html"><link rel="prefetch" href="/entrada.html">
 </head>
 <body>
 
-  <div class="card">
-    <h1 data-i18n="login:heading">Entrar</h1>
-    <p>Digite seu e-mail e enviaremos um link de acesso direto — sem senha.</p>
+<canvas id="cosmos"></canvas>
 
-    <div class="field">
-      <label for="email" data-i18n="login:labels.email">Email</label>
-      <input id="email" type="email" placeholder="Seu e-mail" data-i18n-placeholder="login:placeholders.email" autocomplete="email">
-    </div>
+<!-- Sound control -->
+<div class="sound-ctrl" role="group" aria-label="Controle de som">
+  <button class="sound-toggle" id="soundToggle" aria-label="Ativar/desativar som">
+    SOM: <span id="soundState">OFF</span>
+  </button>
+  <span class="sound-sep" aria-hidden="true">|</span>
+  <span class="sound-vol-lbl" aria-hidden="true">VOL</span>
+  <input class="vol-slider" id="volSlider" type="range" min="0" max="100" value="40"
+         aria-label="Volume" aria-valuemin="0" aria-valuemax="100">
+</div>
 
-    <button id="loginBtn">Enviar link de acesso</button>
+<!-- Context banner: invite / reconnect (hidden by default) -->
+<div class="ctx-banner" id="ctxBanner" hidden role="banner">
+  <div class="ctx-who" id="ctxWho"></div>
+  <div class="ctx-detail" id="ctxDetail"></div>
+</div>
 
-    <div class="status" id="status"></div>
+<main class="scene">
 
-    <div class="links">
-      <span data-i18n="login:links.noAccount">Não tem conta?</span> <a href="./cadastro.html" data-i18n="login:links.createAccount">Criar conta</a>
-    </div>
+  <!-- Moon -->
+  <div class="moon-wrap" aria-hidden="true">
+    <div class="moon"></div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import {
-      getAuth,
-      sendSignInLinkToEmail,
-      isSignInWithEmailLink,
-      signInWithEmailLink,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import {
-      getFirestore, doc, getDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  <!-- Identity -->
+  <section class="identity" aria-label="Identidade">
+    <p class="eyebrow" aria-hidden="true">PRELÚDIO JOGOS · UMA EXPERIÊNCIA</p>
+    <h1 class="brand">SEXTOLUGAR</h1>
+    <p class="tagline">Não é um jogo. É um encontro.</p>
+    <p class="tagline-sub" aria-hidden="true">QUEM ENTRA, ENTENDE.</p>
+    <div class="phrase-wrap" aria-hidden="true">
+      <p class="phrase" id="phrase"></p>
+    </div>
+  </section>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
-      authDomain: "osextolugar-game.firebaseapp.com",
-      projectId: "osextolugar-game",
-      storageBucket: "osextolugar-game.firebasestorage.app",
-      messagingSenderId: "947922328721",
-      appId: "1:947922328721:web:989522c99e16ab449f3330",
-      measurementId: "G-D6HG779ZFR"
-    };
+  <!-- Portal -->
+  <section class="portal" id="portal" aria-label="Área de acesso">
 
-    const app  = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getFirestore(app);
+    <p class="portal-heading">CONTINUAR</p>
+    <p class="portal-sub" id="portalSub">Entre no SextoLugar</p>
 
-    const ACTION_URL = "https://preludiojogos.com/login.html";
-    const EMAIL_KEY  = "osl_signin_email";
+    <div class="field">
+      <label class="field-label" for="email">E-MAIL</label>
+      <input class="field-input" id="email" type="email"
+             placeholder="seu@email.com"
+             autocomplete="email"
+             inputmode="email"
+             data-i18n-placeholder="login:placeholders.email" />
+    </div>
 
-    const emailEl  = document.getElementById("email");
-    const loginBtn = document.getElementById("loginBtn");
-    const statusEl = document.getElementById("status");
+    <button class="enter-btn" id="loginBtn" data-state="idle" type="button">
+      <span class="btn-label" id="btnLabel">ENVIAR LINK</span>
+      <span class="btn-arrow" aria-hidden="true">→</span>
+    </button>
 
-    function setStatus(text, type = "") {
-      statusEl.textContent = text;
-      statusEl.className = "status" + (type ? " " + type : "");
-    }
+    <div class="status" id="status" role="status" aria-live="polite"></div>
 
-    // Pré-preenche e-mail salvo (checkout ou sessão anterior)
-    const savedEmail =
-      localStorage.getItem("osl_checkout_email") ||
-      localStorage.getItem("osl_license_email") || "";
-    if (savedEmail) emailEl.value = savedEmail;
+    <a href="#" class="link-small" id="recoverLink">recuperar acesso</a>
 
-    // ── Sessão já ativa → vai direto pro painel ────────────────────────────────
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      try {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        if (snap.exists()) window.location.href = "./painel.html";
-      } catch (_) {}
-    });
+    <div class="or-divider" aria-hidden="true"><span>ou</span></div>
 
-    // ── Retorno do link de e-mail ──────────────────────────────────────────────
-    if (isSignInWithEmailLink(auth, window.location.href)) {
-      let email = localStorage.getItem(EMAIL_KEY);
-      if (!email) email = window.prompt("Confirme seu e-mail para concluir o acesso:");
-      if (email) {
-        setStatus("Verificando link…");
-        loginBtn.disabled = true;
-        signInWithEmailLink(auth, email.trim().toLowerCase(), window.location.href)
-          .then(async (cred) => {
-            localStorage.removeItem(EMAIL_KEY);
-            localStorage.setItem("osl_auth_uid", cred.user.uid);
-            localStorage.setItem("osl_license_email", email);
-            try {
-              const snap = await getDoc(doc(db, "users", cred.user.uid));
-              if (snap.exists()) {
-                const d = snap.data();
-                localStorage.setItem("osl_nome",         d.displayName || "");
-                localStorage.setItem("osl_username",     d.username    || "");
-                localStorage.setItem("osl_license_code", d.licenseCode || "");
-              }
-            } catch (_) {}
-            setStatus("Acesso liberado.", "ok");
-            setTimeout(() => { window.location.href = "./painel.html"; }, 500);
-          })
-          .catch(() => {
-            setStatus("Link inválido ou expirado. Solicite um novo.", "err");
-            loginBtn.disabled = false;
-          });
-      }
-    }
+    <a href="./cadastro.html" class="link-create">criar uma conta</a>
 
-    // ── Envio do magic link ────────────────────────────────────────────────────
-    loginBtn.addEventListener("click", async () => {
-      const email = emailEl.value.trim().toLowerCase();
-      if (!email) { setStatus("Digite seu e-mail.", "err"); return; }
+  </section>
 
-      loginBtn.disabled = true;
-      setStatus("Enviando link…");
+</main>
 
-      try {
-        await sendSignInLinkToEmail(auth, email, {
-          url:             ACTION_URL,
-          handleCodeInApp: true,
+<!-- World state -->
+<footer class="world-state" aria-hidden="true">
+  <span class="ws-dot">▰</span>
+  <span id="wsText">SESSÕES ATIVAS</span>
+</footer>
+
+<!-- Firebase auth -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import {
+    getAuth,
+    sendSignInLinkToEmail,
+    isSignInWithEmailLink,
+    signInWithEmailLink,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
+    authDomain:        "osextolugar-game.firebaseapp.com",
+    projectId:         "osextolugar-game",
+    storageBucket:     "osextolugar-game.firebasestorage.app",
+    messagingSenderId: "947922328721",
+    appId:             "1:947922328721:web:989522c99e16ab449f3330",
+    measurementId:     "G-D6HG779ZFR"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  const ACTION_URL = "https://preludiojogos.com/login.html";
+  const EMAIL_KEY  = "osl_signin_email";
+
+  const emailEl   = document.getElementById("email");
+  const loginBtn  = document.getElementById("loginBtn");
+  const btnLabel  = document.getElementById("btnLabel");
+  const statusEl  = document.getElementById("status");
+  const portalSub = document.getElementById("portalSub");
+
+  function setStatus(text, type = "") {
+    statusEl.textContent = text;
+    statusEl.className = "status" + (type ? " " + type : "");
+  }
+
+  function setBtnState(state, label) {
+    loginBtn.setAttribute("data-state", state);
+    btnLabel.textContent = label;
+    loginBtn.disabled = (state === "loading");
+  }
+
+  // Pre-fill saved email
+  const savedEmail =
+    localStorage.getItem("osl_checkout_email") ||
+    localStorage.getItem("osl_license_email") || "";
+  if (savedEmail) {
+    emailEl.value = savedEmail;
+    portalSub.textContent = "Bem-vindo de volta.";
+  }
+
+  // Session already active → redirect
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (snap.exists()) window.location.href = "./painel.html";
+    } catch (_) {}
+  });
+
+  // Return from email link
+  if (isSignInWithEmailLink(auth, window.location.href)) {
+    let email = localStorage.getItem(EMAIL_KEY);
+    if (!email) email = window.prompt("Confirme seu e-mail para concluir o acesso:");
+    if (email) {
+      setStatus("Verificando link…");
+      setBtnState("loading", "VERIFICANDO...");
+      signInWithEmailLink(auth, email.trim().toLowerCase(), window.location.href)
+        .then(async (cred) => {
+          localStorage.removeItem(EMAIL_KEY);
+          localStorage.setItem("osl_auth_uid",     cred.user.uid);
+          localStorage.setItem("osl_license_email", email);
+          try {
+            const snap = await getDoc(doc(db, "users", cred.user.uid));
+            if (snap.exists()) {
+              const d = snap.data();
+              localStorage.setItem("osl_nome",         d.displayName || "");
+              localStorage.setItem("osl_username",     d.username    || "");
+              localStorage.setItem("osl_license_code", d.licenseCode || "");
+            }
+          } catch (_) {}
+          setBtnState("success", "BEM-VINDO DE VOLTA →");
+          setStatus("Acesso liberado.", "ok");
+          setTimeout(() => { window.location.href = "./painel.html"; }, 600);
+        })
+        .catch(() => {
+          setBtnState("error", "LINK INVÁLIDO");
+          setStatus("Link inválido ou expirado. Solicite um novo.", "err");
+          loginBtn.disabled = false;
         });
-        localStorage.setItem(EMAIL_KEY, email);
-        setStatus("Link enviado! Verifique seu e-mail e clique no link.", "ok");
-      } catch (err) {
-        let msg = "Erro ao enviar link.";
-        if (err.code === "auth/invalid-email")        msg = "E-mail inválido.";
-        if (err.code === "auth/unauthorized-domain")  msg = "Domínio não autorizado no Firebase.";
-        if (err.code === "auth/too-many-requests")    msg = "Muitas tentativas. Aguarde e tente de novo.";
-        if (err.code === "auth/network-request-failed") msg = "Erro de conexão.";
-        setStatus(msg, "err");
-        loginBtn.disabled = false;
+    }
+  }
+
+  // Send magic link
+  loginBtn.addEventListener("click", async () => {
+    if (loginBtn.disabled) return;
+    const email = emailEl.value.trim().toLowerCase();
+    if (!email) {
+      setStatus("Digite seu e-mail.", "err");
+      emailEl.focus();
+      return;
+    }
+
+    setBtnState("loading", "ENVIANDO...");
+    setStatus("");
+
+    try {
+      await sendSignInLinkToEmail(auth, email, {
+        url:             ACTION_URL,
+        handleCodeInApp: true,
+      });
+      localStorage.setItem(EMAIL_KEY, email);
+      setBtnState("success", "LINK ENVIADO →");
+      setStatus("Verifique seu e-mail e clique no link.", "ok");
+    } catch (err) {
+      let msg = "Erro ao enviar link.";
+      if (err.code === "auth/invalid-email")           msg = "E-mail inválido.";
+      if (err.code === "auth/unauthorized-domain")     msg = "Domínio não autorizado no Firebase.";
+      if (err.code === "auth/too-many-requests")       msg = "Muitas tentativas. Aguarde um momento.";
+      if (err.code === "auth/network-request-failed")  msg = "Erro de conexão. Tente novamente.";
+      setBtnState("error", "TENTE NOVAMENTE");
+      setStatus(msg, "err");
+      loginBtn.disabled = false;
+    }
+  });
+
+  emailEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") loginBtn.click();
+  });
+</script>
+
+<!-- Canvas cosmos + phrases + sound + parallax + context -->
+<script>
+(function () {
+
+  // ── COSMOS CANVAS ──────────────────────────────────────────────────────
+  const canvas = document.getElementById('cosmos');
+  const ctx = canvas.getContext('2d');
+
+  const LAYERS = [
+    { count: 220, minR: .25, maxR: .65, speed: .28, minO: .25, maxO: .55 },
+    { count:  90, minR: .55, maxR: 1.1, speed: .58, minO: .45, maxO: .78 },
+    { count:  28, minR:  .9, maxR: 1.7, speed:  1., minO: .60, maxO: .90 },
+  ];
+
+  let stars = [];
+  let W = 0, H = 0;
+  let ox = 0, oy = 0;   // smoothed offset
+  let tx = 0, ty = 0;   // target offset
+
+  function r(a, b) { return a + Math.random() * (b - a); }
+
+  function init() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    stars = [];
+    LAYERS.forEach((L, li) => {
+      for (let i = 0; i < L.count; i++) {
+        stars.push({
+          x: r(0, W), y: r(0, H),
+          rad: r(L.minR, L.maxR),
+          base: r(L.minO, L.maxO),
+          phase: r(0, Math.PI * 2),
+          speed: L.speed,
+          layer: li,
+        });
       }
     });
-  </script>
+  }
 
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+  window.addEventListener('mousemove', (e) => {
+    tx = (e.clientX / W - .5) * 30;
+    ty = (e.clientY / H - .5) * 20;
+  }, { passive: true });
+
+  if ('DeviceOrientationEvent' in window) {
+    window.addEventListener('deviceorientation', (e) => {
+      if (e.gamma != null) {
+        tx = Math.max(-15, Math.min(15, e.gamma * .42));
+        ty = Math.max(-10, Math.min(10, (e.beta - 30) * .28));
+      }
+    }, { passive: true });
+  }
+
+  function frame(t) {
+    ox += (tx - ox) * .036;
+    oy += (ty - oy) * .036;
+
+    ctx.clearRect(0, 0, W, H);
+
+    stars.forEach((s) => {
+      const px = ((s.x + ox * s.speed) % W + W) % W;
+      const py = ((s.y + oy * s.speed) % H + H) % H;
+      const tw = .72 + .28 * Math.sin(s.phase + t * .00075 + s.layer * .6);
+      ctx.beginPath();
+      ctx.arc(px, py, s.rad, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,250,230,${s.base * tw})`;
+      ctx.fill();
+    });
+
+    // Nebula — gold haze breathing around center-top
+    const na = .036 + .014 * Math.sin(t * .00032);
+    const g = ctx.createRadialGradient(W * .5, H * .36, 0, W * .5, H * .36, W * .44);
+    g.addColorStop(0,   `rgba(230,192,123,${na})`);
+    g.addColorStop(.45, `rgba(180,128,72,${na * .35})`);
+    g.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    requestAnimationFrame(frame);
+  }
+
+  init();
+  requestAnimationFrame(frame);
+  window.addEventListener('resize', init, { passive: true });
+
+  // ── ROTATING PHRASES ───────────────────────────────────────────────────
+  const PHRASES = [
+    '"Algumas pessoas você conhece. Outras você descobre."',
+    '"O que acontece na sala, fica na sala."',
+    '"Você está pronto para ser honesto?"',
+    '"Seis lugares. Seis verdades. Uma noite."',
+    '"A câmera não mente."',
+    '"Não é sobre ganhar. É sobre revelar."',
+    '"Existe algo sobre você que ninguém sabe."',
+  ];
+
+  const phraseEl = document.getElementById('phrase');
+  let pi = 0;
+
+  function showPhrase(text) {
+    phraseEl.classList.remove('visible');
+    phraseEl.style.transform = 'translateY(6px)';
+    setTimeout(() => {
+      phraseEl.textContent = text;
+      phraseEl.style.transform = '';
+      phraseEl.classList.add('visible');
+    }, 550);
+  }
+
+  showPhrase(PHRASES[0]);
+  setInterval(() => { pi = (pi + 1) % PHRASES.length; showPhrase(PHRASES[pi]); }, 6200);
+
+  // ── SOUND CONTROL ──────────────────────────────────────────────────────
+  const soundToggle = document.getElementById('soundToggle');
+  const soundState  = document.getElementById('soundState');
+  const volSlider   = document.getElementById('volSlider');
+
+  let soundOn = localStorage.getItem('osl_sound') === 'on';
+
+  function syncSoundUI() {
+    if (soundOn) {
+      soundState.textContent = 'ON';
+      soundState.className = 'state-on';
+    } else {
+      soundState.textContent = 'OFF';
+      soundState.className = '';
+    }
+  }
+
+  soundToggle.addEventListener('click', () => {
+    soundOn = !soundOn;
+    localStorage.setItem('osl_sound', soundOn ? 'on' : 'off');
+    syncSoundUI();
+  });
+
+  const savedVol = localStorage.getItem('osl_volume');
+  if (savedVol) volSlider.value = savedVol;
+  volSlider.addEventListener('input', () => localStorage.setItem('osl_volume', volSlider.value));
+
+  syncSoundUI();
+
+  // ── CONTEXT BANNER ─────────────────────────────────────────────────────
+  const params    = new URLSearchParams(location.search);
+  const invite    = params.get('invite');
+  const reconnect = params.get('reconnect');
+  const fromWho   = params.get('from');
+
+  const banner    = document.getElementById('ctxBanner');
+  const ctxWho    = document.getElementById('ctxWho');
+  const ctxDetail = document.getElementById('ctxDetail');
+
+  if (invite) {
+    banner.hidden = false;
+    ctxWho.textContent    = fromWho
+      ? fromWho.toUpperCase() + ' ESPERA POR VOCÊ'
+      : 'ALGUÉM ESPERA POR VOCÊ';
+    ctxDetail.textContent = 'Sala: ' + invite.toUpperCase();
+    const sub = document.getElementById('portalSub');
+    if (sub) sub.textContent = 'Sua sessão espera por você.';
+  } else if (reconnect) {
+    banner.hidden = false;
+    ctxWho.textContent    = 'VOCÊ SAIU DE UMA SESSÃO';
+    ctxDetail.textContent = 'Sua sala ainda pode estar ativa';
+  }
+
+  // ── WORLD STATE ────────────────────────────────────────────────────────
+  // Defaults — will be enhanced by Firestore worldState doc in future
+  const WS_STATES = [
+    'SESSÕES ATIVAS',
+    'TEMPORADA I · O INÍCIO',
+  ];
+  document.getElementById('wsText').textContent = WS_STATES[0];
+
+})();
+</script>
+
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>
