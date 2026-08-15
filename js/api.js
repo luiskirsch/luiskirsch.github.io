@@ -170,10 +170,14 @@ export const PanelBridge = {
       ...(firebaseIdToken ? { firebaseIdToken } : {}),
     });
   },
-  playerLeave: (roomId, playerId, hostToken) => _hostPost("/game/player/leave", {
-    roomId: _normalizeRoomId(roomId),
-    playerId: String(playerId || "").trim(),
-  }, { tokenOptional: true, suppliedToken: hostToken }),
+  async playerLeave(roomId, playerId, hostToken) {
+    const firebaseIdToken = await _getFirebaseIdToken();
+    return _hostPost("/game/player/leave", {
+      roomId: _normalizeRoomId(roomId),
+      playerId: String(playerId || "").trim(),
+      ...(firebaseIdToken ? { firebaseIdToken } : {}),
+    }, { tokenOptional: true, suppliedToken: hostToken });
+  },
   sessionStart: (roomId, hostToken) => _hostPost("/game/session/start", {
     roomId: _normalizeRoomId(roomId),
   }, { suppliedToken: hostToken }),

@@ -55,23 +55,6 @@ function obterNomeSala() {
   return nomeSalaEl.value.trim().slice(0, 40);
 }
 
-async function registrarNoPainel({ nomeJogador, codigoSala, nomeSala }) {
-  // Prefere o Firebase UID para que request.auth.uid == playerId nas regras Firestore
-  const authUid = localStorage.getItem("osl_auth_uid");
-  let playerId = authUid || localStorage.getItem("osl_player_id");
-
-  if (!playerId) {
-    playerId = gerarPlayerId();
-    localStorage.setItem("osl_player_id", playerId);
-  }
-
-  localStorage.setItem("osl_panel_room_id", codigoSala);
-  localStorage.setItem("osl_panel_player_name", nomeJogador);
-
-  await PanelBridge.roomCreate(codigoSala, nomeSala, nomeJogador);
-  await PanelBridge.playerJoin(codigoSala, playerId, nomeJogador);
-}
-
 async function entrarNaSala({ nomeJogador, codigoSala, nomeSala }) {
   localStorage.setItem("osl_nome", nomeJogador);
   localStorage.setItem("osl_sala", codigoSala);
@@ -87,11 +70,9 @@ async function entrarNaSala({ nomeJogador, codigoSala, nomeSala }) {
     sessionStorage.setItem("osl_player_id", playerId);
   }
 
-  try {
-    await registrarNoPainel({ nomeJogador, codigoSala, nomeSala });
-  } catch (error) {
-    console.error("Falha ao registrar entrada no painel:", error);
-  }
+  // A sala cria/valida o membership somente depois que o Firebase restaurou a
+  // identidade. O bridge antigo tentava registrar antes disso e podia gerar
+  // uma segunda identidade ou falar com o servidor obsoleto.
 
   const url = new URL("./sala.html", window.location.href);
   url.searchParams.set("nome", nomeJogador);

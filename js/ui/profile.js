@@ -114,6 +114,18 @@ function safeProfileImageUrl(value) {
   }
 }
 
+function safeAvatarColor(value, fallback = "#342718") {
+  return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value.trim())
+    ? value.trim()
+    : fallback;
+}
+
+function safeAvatarEmoji(value, fallback = "🔮") {
+  if (typeof value !== "string") return fallback;
+  const compact = value.trim().slice(0, 16);
+  return compact || fallback;
+}
+
 function resolveProfileAvatar(profile = {}) {
   const nested = profile.avatar && typeof profile.avatar === "object" ? profile.avatar : {};
   const hasNestedUrl = Object.prototype.hasOwnProperty.call(nested, "url")
@@ -121,18 +133,18 @@ function resolveProfileAvatar(profile = {}) {
     || Object.prototype.hasOwnProperty.call(nested, "photoUrl");
   const nestedUrl = nested.url ?? nested.photoURL ?? nested.photoUrl ?? null;
   const legacyUrl = profile.avatarPhotoUrl ?? profile.avatarPhotoURL ?? profile.photoURL ?? profile.photoUrl ?? null;
-  const url = hasNestedUrl ? nestedUrl : legacyUrl;
+  const requestedKind = nested.kind || "";
+  const url = requestedKind === "emoji" ? null : (hasNestedUrl ? nestedUrl : legacyUrl);
   const emoji = nested.emoji ?? profile.avatarEmoji ?? "";
   const color = nested.color ?? profile.avatarColor ?? "";
-  const requestedKind = nested.kind || "";
   const kind = ["image", "emoji", "generated"].includes(requestedKind)
     ? requestedKind
     : (url ? "image" : "emoji");
   return {
     kind,
     url: safeProfileImageUrl(url),
-    emoji: typeof emoji === "string" ? emoji : "",
-    color: typeof color === "string" ? color : ""
+    emoji: safeAvatarEmoji(emoji),
+    color: safeAvatarColor(color)
   };
 }
 
@@ -163,13 +175,14 @@ function isHttpAvatarUrl(value) {
 
 export function applyAvatarDisplay(el, photoUrl, emoji, color) {
   if (!el) return;
-  if (photoUrl) {
-    el.style.background = "none"; el.style.backgroundImage = `url('${photoUrl}')`; el.style.backgroundSize = "cover"; el.style.backgroundPosition = "center"; el.style.fontSize = "0";
+  const safePhotoUrl = safeProfileImageUrl(photoUrl);
+  if (safePhotoUrl) {
+    el.style.background = "none"; el.style.backgroundImage = `url('${safePhotoUrl}')`; el.style.backgroundSize = "cover"; el.style.backgroundPosition = "center"; el.style.fontSize = "0";
     el.classList.add("has-photo"); el.textContent = "";
   } else {
     el.style.backgroundImage = ""; el.style.backgroundSize = ""; el.style.backgroundPosition = ""; el.style.fontSize = "";
-    el.classList.remove("has-photo"); el.textContent = emoji || "🔮";
-    if (color) el.style.background = color;
+    el.classList.remove("has-photo"); el.textContent = safeAvatarEmoji(emoji);
+    el.style.background = safeAvatarColor(color);
   }
 }
 
@@ -177,10 +190,11 @@ export function updateDesktopProfileBtn(photoUrl, emoji) {
   const btn   = document.getElementById("myProfileBtn");
   if (!btn) return;
   const badge = btn.querySelector(".badge") || btn.querySelector("#desktopProfileBadge");
-  if (photoUrl) {
-    btn.innerHTML = ""; const img = document.createElement("img"); img.src = photoUrl; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0";
+  const safePhotoUrl = safeProfileImageUrl(photoUrl);
+  if (safePhotoUrl) {
+    btn.innerHTML = ""; const img = document.createElement("img"); img.src = safePhotoUrl; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0";
     btn.appendChild(img); btn.appendChild(document.createTextNode("Perfil")); if (badge) btn.appendChild(badge);
-  } else { btn.textContent = (emoji || "👤") + " Perfil"; if (badge) btn.appendChild(badge); }
+  } else { btn.textContent = safeAvatarEmoji(emoji, "👤") + " Perfil"; if (badge) btn.appendChild(badge); }
 }
 
 export function setAvatarSelection(emoji) {
@@ -196,7 +210,7 @@ export function setAvatarSelection(emoji) {
 }
 
 export function setColorSelection(color) {
-  S.selectedAvatarColor = color || "#342718";
+  S.selectedAvatarColor = safeAvatarColor(color);
   document.getElementById("colorSwatchRow")?.querySelectorAll(".colorSwatch").forEach(sw => sw.classList.toggle("colorSwatch--active", sw.dataset.color === S.selectedAvatarColor));
 }
 
@@ -476,7 +490,7 @@ export function closeProfile() {
 function _friendAvatar(p) {
   const avatar = resolveProfileAvatar(p);
   if (avatar.url) return `<div class="friendAvatar" style="background-image:url('${avatar.url}');background-size:cover;background-position:center;font-size:0"></div>`;
-  return `<div class="friendAvatar" style="background:${avatar.color || "#342718"}">${avatar.emoji || "🔮"}</div>`;
+  return `<div class="friendAvatar" style="background:${safeAvatarColor(avatar.color)}">${escapeHtml(safeAvatarEmoji(avatar.emoji))}</div>`;
 }
 
 function _compatBadge(compat) {
@@ -629,10 +643,10 @@ async function showLeaderboardModal() {
     const avatar = resolveProfileAvatar(e);
     const avatarStyle = avatar.url
       ? `style="background-image:url('${avatar.url}');background-size:cover;background-position:center;font-size:0"`
-      : `style="background:${avatar.color || "#342718"}"`;
+      : `style="background:${safeAvatarColor(avatar.color)}"`;
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);">
       <span style="width:28px;text-align:center;font-size:16px;">${medal}</span>
-      <div class="friendAvatar" ${avatarStyle}>${avatar.url ? "" : (avatar.emoji || "🔮")}</div>
+      <div class="friendAvatar" ${avatarStyle}>${avatar.url ? "" : escapeHtml(safeAvatarEmoji(avatar.emoji))}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:14px;font-weight:700;">${escapeHtml(e.displayName)}${selfMark}</div>
         <div style="font-size:11px;opacity:.5;">Nv. ${e.level} · ${e.xp.toLocaleString("pt-BR")} XP</div>
@@ -822,8 +836,8 @@ export function bindProfileEvents() {
     const username        = normalizeUsername(editUsername.value) || "jogador";
     const bio             = editBio.value.trim().slice(0,180);
     const avatarUrl       = safeProfileImageUrl(S.selectedAvatarPhoto);
-    const avatarEmoji     = S.selectedAvatarEmoji || "🔮";
-    const avatarColor     = S.selectedAvatarColor || "#342718";
+    const avatarEmoji     = safeAvatarEmoji(S.selectedAvatarEmoji);
+    const avatarColor     = safeAvatarColor(S.selectedAvatarColor);
     const avatar          = {
       kind: avatarUrl ? "image" : "emoji",
       url: avatarUrl,
@@ -857,7 +871,7 @@ export function bindProfileEvents() {
         const authProfile = { displayName };
         // Firestore é a fonte canônica. A sincronização visual do Firebase Auth
         // é complementar e nunca pode impedir que o perfil do jogo seja salvo.
-        if (isHttpAvatarUrl(avatarUrl)) authProfile.photoURL = avatarUrl;
+        authProfile.photoURL = isHttpAvatarUrl(avatarUrl) ? avatarUrl : null;
         await updateProfile(firebaseUser, authProfile).catch(error => {
           console.warn("Não foi possível sincronizar o perfil no Firebase Auth:", error);
         });
