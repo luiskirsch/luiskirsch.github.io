@@ -13,6 +13,7 @@ import { revealNextRitualCard, resetRitualDeck } from "./game/cards.js";
 import { dispatch } from "./game/engine.js";
 import { CMD } from "./game/commands.js";
 import { fetchHub } from "./api.js";
+import { initStreamMode } from "./ui/stream-mode.js";
 
 // ── Identidade ────────────────────────────────────────────────────────────────
 S.participantId = getParticipantId();
@@ -189,6 +190,7 @@ window.dismissAIDetection = dismissAIDetection;
   // Registra event listeners de sala e perfil
   bindRoomEvents();
   bindProfileEvents();
+  initStreamMode();
 
   // Renderiza do cache local antes de qualquer round-trip Firestore
   const _cachedXp = parseInt(localStorage.getItem("osl_xp_cache") || "0", 10);
