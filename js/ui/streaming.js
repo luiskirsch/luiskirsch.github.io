@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  const STREAM_BASE = window.PANEL_SERVER_BASE || "https://osl-video-server-staging.up.railway.app";
+  const STREAM_BASE = window.PANEL_SERVER_BASE || "https://osl-video-server-production.up.railway.app";
   const roomCode = (new URLSearchParams(window.location.search)).get("sala") || localStorage.getItem("osl_sala") || "SL-0001";
 
   // Catálogo de plataformas suportadas. Ordem aqui = ordem na UI.
