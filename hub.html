@@ -323,9 +323,12 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .swDot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 7px rgba(88,224,64,.65);animation:sdp 2.2s ease-in-out infinite;}
 @keyframes sdp{0%,100%{opacity:.40}50%{opacity:1}}
 .sbDays{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--text3);}
-.sbRight{position:absolute;right:22px;display:flex;align-items:center;gap:16px;}
-.sbIconBtn{background:none;border:none;cursor:pointer;color:var(--text3);display:flex;align-items:center;transition:color .16s;}
-.sbIconBtn:hover{color:var(--gold2);}
+.sbRight{position:absolute;right:18px;display:flex;align-items:center;gap:8px;}
+.sbIconBtn{position:relative;width:32px;height:32px;background:none;border:1px solid transparent;border-radius:3px;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:color .16s,background .16s,border-color .16s,transform .12s;}
+.sbIconBtn:hover,.sbIconBtn:focus-visible{color:var(--gold2);background:rgba(212,175,55,.07);border-color:rgba(212,175,55,.16);outline:none;}
+.sbIconBtn:active{transform:scale(.92);}
+.sbIconBtn::after{content:attr(data-label);position:absolute;right:0;bottom:calc(100% + 8px);padding:7px 10px;border:1px solid rgba(212,175,55,.16);border-radius:2px;background:rgba(4,8,16,.99);box-shadow:0 10px 30px rgba(0,0,0,.48);color:var(--text2);font-size:8px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .16s,transform .16s;}
+.sbIconBtn:hover::after,.sbIconBtn:focus-visible::after{opacity:1;transform:translateY(0);}
 .sbIconBtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;}
 
 /* ═══ DROPDOWNS + TOAST ═══ */
@@ -360,8 +363,9 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .dItem.danger{color:rgba(255,80,80,.75);}.dItem.danger:hover{background:rgba(255,30,30,.06);color:rgba(255,80,80,.96);}
 .dDiv{height:1px;background:rgba(255,255,255,.05);margin:4px 0;}
 .dEmpty{padding:18px;font-size:10px;color:var(--text3);text-align:center;letter-spacing:.10em;}
-.toast{position:fixed;top:calc(var(--nav-h)+10px);left:50%;transform:translateX(-50%) translateY(-8px);z-index:70;background:rgba(4,8,16,.99);border:1px solid rgba(212,175,55,.18);border-radius:2px;padding:10px 24px;font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text2);opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;white-space:nowrap;}
-.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast{position:fixed;right:18px;bottom:calc(var(--season-h) + 12px);z-index:300;min-width:210px;background:rgba(4,8,16,.99);border:1px solid rgba(212,175,55,.28);border-left:3px solid var(--gold);border-radius:3px;padding:12px 18px 12px 34px;box-shadow:0 18px 48px rgba(0,0,0,.68),0 0 24px rgba(212,175,55,.06);font-size:9px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--text);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .22s,transform .22s;white-space:nowrap;}
+.toast::before{content:'✦';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:9px;}
+.toast.on{opacity:1;transform:translateY(0);}
 
 /* ═══ ONBOARDING ═══ */
 .obV{position:fixed;inset:0;z-index:200;background:rgba(3,6,10,.98);backdrop-filter:blur(22px) saturate(.30);-webkit-backdrop-filter:blur(22px) saturate(.30);display:flex;align-items:center;justify-content:center;padding:32px 24px;opacity:0;pointer-events:none;transition:opacity .5s;}
@@ -478,7 +482,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
       </div>
       <div class="ctxCEventSub" id="evWhen">Próximo · Quinta-feira</div>
       <div class="ctxCTimer" id="evTimer">—</div>
-      <button class="ctxCBtn" onclick="window._toast('Detalhes do encontro — em breve')">VER DETALHES</button>
+      <button class="ctxCBtn" type="button" data-toast="Detalhes do encontro — em breve">VER DETALHES</button>
     </div>
   </aside>
 
@@ -569,7 +573,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
           <div class="suggestPlus">+</div>
         </div>
       </div>
-      <button class="suggestMore" onclick="window._toast('Ver todos — em breve')">VER TODOS OS AMIGOS →</button>
+      <button class="suggestMore" type="button" data-toast="Ver todos — em breve">VER TODOS OS AMIGOS →</button>
     </div>
   </aside>
 
@@ -585,16 +589,16 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
   <div class="sbDiv"></div>
   <span class="sbDays" id="sbDays">42 dias restantes</span>
   <div class="sbRight">
-    <button class="sbIconBtn" onclick="window._toast('Diário — em breve')"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></button>
-    <button class="sbIconBtn" onclick="window._toast('Ranking — em breve')"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></button>
-    <button class="sbIconBtn" onclick="window._toast('Configurações — em breve')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    <button class="sbIconBtn" type="button" data-label="Diário" data-toast="Diário — em breve" aria-label="Diário — em breve"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></button>
+    <button class="sbIconBtn" type="button" data-label="Ranking" data-toast="Ranking — em breve" aria-label="Ranking — em breve"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></button>
+    <button class="sbIconBtn" type="button" data-label="Configurações" data-toast="Configurações — em breve" aria-label="Configurações — em breve"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
 </div>
 
 <!-- Dropdown Perfil -->
 <div class="drop" id="dropPerfil">
   <div class="dHead"><span class="dName" id="dpName">—</span><span class="dSub" id="dpEmail">—</span></div>
-  <button class="dItem" onclick="window._toast('Configurações — em breve')">
+  <button class="dItem" type="button" data-toast="Configurações — em breve">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     Configurações
   </button>
@@ -605,7 +609,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
   </button>
 </div>
 <div class="drop" id="dropNotif"><div class="dEmpty">Nenhuma notificação</div></div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- Feature modal -->
 <div class="fmVeil" id="featureModal" role="dialog" aria-modal="true">
@@ -775,6 +779,10 @@ var clock=new THREE.Clock();
 'use strict';
 
 window._toast=function(msg,ms){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('on');},ms||2200);};
+
+document.querySelectorAll('[data-toast]').forEach(function(trigger){
+  trigger.addEventListener('click',function(){window._toast(trigger.getAttribute('data-toast'));});
+});
 
 var _open=null;
 function closeDrops(){document.querySelectorAll('.drop').forEach(function(d){d.classList.remove('open');});_open=null;}
