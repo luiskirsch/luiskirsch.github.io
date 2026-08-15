@@ -12,7 +12,7 @@ import { startSession, leaveRoom, sendLeaveBeacon } from "./ui/room.js";
 import { revealNextRitualCard, resetRitualDeck } from "./game/cards.js";
 import { dispatch } from "./game/engine.js";
 import { CMD } from "./game/commands.js";
-import { fetchHub } from "./api.js";
+import { fetchHub, checkEncontroTicket } from "./api.js";
 import { initStreamMode } from "./ui/stream-mode.js";
 
 // ── Identidade ────────────────────────────────────────────────────────────────
@@ -252,9 +252,14 @@ window.dismissAIDetection = dismissAIDetection;
 
     // Hub Entre Sessões: fragmento + world state + daily + friends + last session + events + discoveries
     if (!S._isSpectator) {
-      fetchHub().then(hub => {
+      fetchHub().then(async hub => {
         if (!hub?.ok) return;
         _renderHub(hub);
+        const ticket = await checkEncontroTicket().catch(() => null);
+        if (ticket?.hasTicket) {
+          const btn = document.getElementById("evTicketBtn");
+          if (btn) btn.textContent = "VER DETALHES";
+        }
       }).catch(() => {});
     }
 

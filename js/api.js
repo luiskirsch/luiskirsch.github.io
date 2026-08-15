@@ -448,6 +448,26 @@ export async function fetchHub() {
   } catch (_) { return { ok: false }; }
 }
 
+export async function checkEncontroTicket() {
+  try {
+    const evRes  = await fetch(SERVER_BASE + "/encontro/eventos");
+    const evJson = await evRes.json().catch(() => null);
+    const events = evJson?.events || [];
+    const now    = Date.now();
+    const next   = events
+      .filter(e => e.scheduledAt > now && e.status !== "ended")
+      .sort((a, b) => a.scheduledAt - b.scheduledAt)[0];
+    if (!next) return { hasTicket: false, eventId: null };
+    const idToken = await _getFirebaseIdToken();
+    if (!idToken) return { hasTicket: false, eventId: next.eventId };
+    const res  = await fetch(SERVER_BASE + `/encontro/meu-ingresso?eventId=${encodeURIComponent(next.eventId)}`, {
+      headers: { "Authorization": `Bearer ${idToken}` },
+    });
+    const json = await res.json().catch(() => null);
+    return { hasTicket: json?.hasTicket || false, eventId: next.eventId };
+  } catch (_) { return { hasTicket: false, eventId: null }; }
+}
+
 // ── Compatibilidade pairwise ──────────────────────────────────────────────────
 // Retorna { overall, dimensions, confidence, label, hasData } ou null
 
