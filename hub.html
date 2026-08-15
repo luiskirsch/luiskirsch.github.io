@@ -962,7 +962,16 @@ window.startDailyRitual=function(){
     ov.style.transition='left 680ms cubic-bezier(.4,0,.2,1),top 680ms cubic-bezier(.4,0,.2,1),width 680ms cubic-bezier(.4,0,.2,1),height 680ms cubic-bezier(.4,0,.2,1),border-radius 680ms cubic-bezier(.4,0,.2,1)';
     ov.style.left='0px';ov.style.top='0px';ov.style.width='100vw';ov.style.height='100vh';ov.style.borderRadius='0px';
   });});
-  setTimeout(_showP1,860);
+  var hasQ=_dailyData&&(_dailyData.question||_dailyData.cardText);
+  if(hasQ){setTimeout(_showP1,860);}
+  else{
+    var api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+    var token=window._hubToken;
+    var hdrs=token?{'Authorization':'Bearer '+token}:{};
+    fetch(api+'/live/daily',{headers:hdrs}).then(function(r){return r.ok?r.json():null;})
+    .then(function(d){if(d&&(d.cardText||d.question))_dailyData=d;setTimeout(_showP1,860);})
+    .catch(function(){setTimeout(_showP1,860);});
+  }
 }
 
 function _animEls(phase,delay){
@@ -1010,7 +1019,7 @@ function _startTimer(){
   _timerInterval=setInterval(function(){
     seconds--;
     if(timerEl)timerEl.textContent=fmt(Math.max(0,seconds));
-    if(seconds===40&&btn){btn.style.transition='opacity 1.4s ease';btn.style.opacity='0.55';}
+    if(seconds===20&&btn){btn.style.transition='opacity 1.4s ease';btn.style.opacity='0.55';}
     if(seconds<=0){
       clearInterval(_timerInterval);_timerInterval=null;
       if(timerEl){timerEl.style.transition='opacity 1.8s ease';timerEl.style.opacity='0.2';}
@@ -1035,11 +1044,13 @@ window.concludeRitual=function(){
     var cnt=(_dailyData&&(_dailyData.respondents!=null?_dailyData.respondents:_dailyData.completionCount)||0)+1;
     var xpEl=document.getElementById('rConXP'),cntEl=document.getElementById('rConCount');
     if(xpEl)xpEl.textContent='+'+xp+' XP';
-    if(cntEl)cntEl.textContent=cnt.toLocaleString('pt-BR')+' pessoas chegaram até aqui hoje.';
+    if(cntEl)cntEl.textContent=_fmtCount(cnt);
     _animEls(p4,100);
     _callComplete();
   },420);
 }
+
+function _fmtCount(n){return n===1?'1 pessoa chegou até aqui hoje.':(n||0).toLocaleString('pt-BR')+' pessoas chegaram até aqui hoje.';}
 
 function _callComplete(){
   var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
@@ -1050,7 +1061,7 @@ function _callComplete(){
     var xp=result.xp||35,cnt=result.completionCount||0;
     var xpEl=document.getElementById('rConXP'),cntEl=document.getElementById('rConCount');
     if(xpEl)xpEl.textContent='+'+xp+' XP';
-    if(cntEl)cntEl.textContent=cnt.toLocaleString('pt-BR')+' pessoas chegaram até aqui hoje.';
+    if(cntEl)cntEl.textContent=_fmtCount(cnt);
     var hubCnt=document.getElementById('ritualCount');if(hubCnt)hubCnt.textContent=cnt.toLocaleString('pt-BR');
     var now=new Date(),hh=now.getHours(),mm=now.getMinutes();
     var ts=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
