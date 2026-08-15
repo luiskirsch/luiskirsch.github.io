@@ -265,6 +265,60 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .rMeta svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.5;}
 .btnDiscover{padding:10px 32px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.28);border-radius:2px;color:var(--gold);font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;cursor:pointer;transition:background .18s,border-color .18s,transform .14s;}
 .btnDiscover:hover{background:rgba(212,175,55,.12);border-color:rgba(212,175,55,.55);transform:translateY(-1px);}
+.btnDiscover.btnDone{border-color:rgba(212,175,55,.18);color:rgba(212,175,55,.45);background:rgba(212,175,55,.02);cursor:default;pointer-events:none;}
+
+/* ── RITUAL OVERLAY ── */
+#ritualDim{position:fixed;inset:0;z-index:500;background:rgba(4,8,14,.82);opacity:0;pointer-events:none;transition:opacity .55s ease;}
+body.ritual-open #ritualDim{opacity:1;}
+#ritualOverlay{position:fixed;z-index:1000;display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,rgba(5,10,18,1) 0%,rgba(4,8,15,1) 100%);overflow:hidden;}
+#ritualOverlay::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 55% at 50% 48%,rgba(212,175,55,.05) 0%,transparent 68%);}
+.ritualPhase{display:none;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:40px 28px;width:100%;max-width:580px;position:absolute;inset:0;margin:auto;height:100%;}
+/* Phase 1 */
+.rOvHead{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;
+  color:var(--gold2);margin-bottom:22px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.rOvHead::before,.rOvHead::after{content:'';flex:1;max-width:40px;height:1px;background:rgba(212,175,55,.22);}
+.rOvDia{font-size:8px;color:rgba(212,175,55,.42);}
+.rOvDate{font-family:var(--serif);font-size:10px;font-weight:600;letter-spacing:.38em;
+  color:rgba(240,236,224,.38);text-transform:uppercase;margin-bottom:18px;}
+.rOvIntro{font-family:var(--fell);font-size:16px;font-style:italic;color:rgba(240,236,224,.50);
+  margin-bottom:36px;letter-spacing:.01em;}
+.rOvDivider{width:80px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(212,175,55,.32),transparent);margin:0 auto 36px;}
+.rOvContent{font-family:var(--fell);font-size:clamp(22px,2.8vw,33px);font-style:italic;color:#fff;
+  line-height:1.58;margin-bottom:48px;letter-spacing:.012em;text-shadow:0 2px 22px rgba(0,0,0,.55);}
+.rOvLead{font-size:.62em;color:rgba(240,236,224,.52);display:block;margin-bottom:14px;
+  letter-spacing:.04em;font-style:normal;}
+.rOvQMain{display:block;}
+/* Shared button */
+.rOvBtn{padding:11px 38px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.28);
+  border-radius:2px;color:var(--gold);font-family:var(--sans);font-size:9px;font-weight:700;
+  letter-spacing:.28em;text-transform:uppercase;cursor:pointer;
+  transition:background .18s,border-color .18s,transform .14s;}
+.rOvBtn:hover{background:rgba(212,175,55,.14);border-color:rgba(212,175,55,.60);transform:translateY(-1px);}
+/* Phase 2 — Timer */
+.rExpLabel{font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.28em;
+  color:rgba(240,236,224,.28);text-transform:uppercase;margin-bottom:28px;transition:opacity 1.2s ease;}
+.rTimer{font-family:var(--serif);font-size:clamp(56px,7vw,82px);font-weight:400;
+  color:rgba(212,175,55,.65);letter-spacing:.06em;margin-bottom:36px;transition:opacity 1.8s ease;}
+#rExpQ{font-family:var(--fell);font-size:clamp(19px,2.4vw,29px);font-style:italic;color:#fff;
+  line-height:1.62;margin-bottom:52px;letter-spacing:.012em;text-shadow:0 2px 20px rgba(0,0,0,.55);max-width:480px;}
+#rBtnAnswer{opacity:0;}
+/* Phase 3 — Reflection */
+.rReflectLine{font-family:var(--fell);font-size:clamp(18px,2.2vw,26px);font-style:italic;color:#f0ece0;line-height:1.55;}
+.rReflectSub{color:rgba(240,236,224,.52);margin-top:10px;margin-bottom:48px;}
+/* Phase 4 — Conclusion */
+.rConCheck{font-size:34px;color:var(--gold);margin-bottom:14px;}
+.rConTitle{font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.36em;
+  color:var(--gold2);text-transform:uppercase;margin-bottom:30px;}
+.rConCount{font-family:var(--fell);font-size:17px;font-style:italic;
+  color:rgba(240,236,224,.60);margin-bottom:22px;}
+.rConXP{font-family:var(--serif);font-size:clamp(34px,4.5vw,48px);font-weight:600;
+  color:var(--gold);letter-spacing:.08em;margin-bottom:10px;}
+.rConContrib{font-family:var(--sans);font-size:8px;font-weight:600;letter-spacing:.20em;
+  color:rgba(212,175,55,.42);text-transform:uppercase;margin-bottom:48px;}
 
 /* ═══ RIGHT PANEL — PRESENÇA ═══ */
 
@@ -524,7 +578,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
               <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               <span id="ritualCount">4.821</span>&nbsp;pessoas descobriram hoje
             </div>
-            <button class="btnDiscover" onclick="location.href='./entrada.html'">DESCOBRIR</button>
+            <button class="btnDiscover" id="btnDiscover" onclick="startDailyRitual()">DESCOBRIR</button>
           </div>
         </div>
       </div>
@@ -876,10 +930,151 @@ window.hubSetHero=function(data){
   else if(data.lastSession&&data.lastSession.roomName){setH('heroTitle','O MUNDO<br>TE ESPERA.');}
 };
 
+/* ── Daily Ritual Flow ─────────────────────────────────────── */
+var _dailyData=null,_ritualActive=false,_timerInterval=null;
+
 window.hubSetRitual=function(d){
-  if(d&&d.question){var e=document.getElementById('ritualQ');if(e)e.textContent='"'+d.question+'"';}
-  if(d&&d.respondents){var c=document.getElementById('ritualCount');if(c)c.textContent=d.respondents.toLocaleString('pt-BR');}
+  _dailyData=d;
+  var q=d&&(d.question||d.cardText);
+  if(q){var e=document.getElementById('ritualQ');if(e)e.textContent='"'+q+'"';}
+  var cnt=d&&(d.respondents!=null?d.respondents:d.completionCount);
+  if(cnt!=null){var c=document.getElementById('ritualCount');if(c)c.textContent=cnt.toLocaleString('pt-BR');}
+  try{var st=JSON.parse(localStorage.getItem('osl_daily_done')||'null');
+    if(st&&st.date===(d&&d.date))_showCardDone(st);}catch(_){}
 };
+
+function _showCardDone(st){
+  var btn=document.getElementById('btnDiscover');
+  if(btn){btn.textContent='✓ DESCOBERTO';btn.classList.add('btnDone');}
+  var meta=document.querySelector('.rMeta');
+  if(meta&&st&&st.completedAt)meta.innerHTML='<span style="font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(212,175,55,.48)">✓ Descoberto hoje às '+st.completedAt+'</span>';
+}
+
+function startDailyRitual(){
+  if(_ritualActive)return;
+  _ritualActive=true;
+  var card=document.querySelector('.ritualDeck');
+  var rect=card.getBoundingClientRect();
+  var ov=document.getElementById('ritualOverlay');
+  ov.style.cssText='display:flex;position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;height:'+rect.height+'px;border-radius:4px;z-index:1000;overflow:hidden;flex-direction:column;align-items:center;justify-content:center;';
+  document.body.classList.add('ritual-open');
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    ov.style.transition='left 680ms cubic-bezier(.4,0,.2,1),top 680ms cubic-bezier(.4,0,.2,1),width 680ms cubic-bezier(.4,0,.2,1),height 680ms cubic-bezier(.4,0,.2,1),border-radius 680ms cubic-bezier(.4,0,.2,1)';
+    ov.style.left='0px';ov.style.top='0px';ov.style.width='100vw';ov.style.height='100vh';ov.style.borderRadius='0px';
+  });});
+  setTimeout(_showP1,860);
+}
+
+function _animEls(phase,delay){
+  var els=phase.querySelectorAll('[data-anim]');
+  els.forEach(function(el,i){
+    el.style.opacity='0';el.style.transform='translateY(13px)';
+    setTimeout(function(){el.style.transition='opacity .75s ease,transform .75s ease';el.style.opacity='1';el.style.transform='translateY(0)';},delay+i*400);
+  });
+}
+
+function _esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function _showP1(){
+  var months=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+  var d=new Date();
+  var dateEl=document.getElementById('rOvDate');
+  if(dateEl)dateEl.textContent=d.getDate()+' DE '+months[d.getMonth()];
+  var q=(_dailyData&&(_dailyData.question||_dailyData.cardText))||'';
+  var title=_dailyData&&_dailyData.cardTitle&&_dailyData.cardTitle!==q?_dailyData.cardTitle:null;
+  var contentEl=document.getElementById('rOvContent');
+  if(contentEl)contentEl.innerHTML=title?'<span class="rOvLead">'+_esc(title)+'</span><span class="rOvQMain">'+_esc(q)+'</span>':'<span class="rOvQMain">'+_esc(q)+'</span>';
+  var p1=document.getElementById('rP1');p1.style.display='flex';
+  _animEls(p1,180);
+}
+
+function startExperience(){
+  var p1=document.getElementById('rP1'),p2=document.getElementById('rP2');
+  p1.style.transition='opacity .4s ease';p1.style.opacity='0';
+  setTimeout(function(){
+    p1.style.display='none';p1.style.opacity='1';
+    p2.style.display='flex';
+    var q=(_dailyData&&(_dailyData.question||_dailyData.cardText))||'';
+    var expQ=document.getElementById('rExpQ');if(expQ)expQ.textContent=q;
+    _startTimer();
+    setTimeout(function(){var l=document.getElementById('rExpLabel');if(l){l.style.transition='opacity 1.2s ease';l.style.opacity='0';}},2200);
+  },420);
+}
+
+function _startTimer(){
+  clearInterval(_timerInterval);
+  var seconds=60,timerEl=document.getElementById('rTimer'),btn=document.getElementById('rBtnAnswer');
+  if(btn){btn.style.opacity='0';btn.style.transition='';}
+  function fmt(s){var m=Math.floor(s/60),sc=s%60;return m+':'+(sc<10?'0':'')+sc;}
+  if(timerEl)timerEl.textContent=fmt(seconds);
+  _timerInterval=setInterval(function(){
+    seconds--;
+    if(timerEl)timerEl.textContent=fmt(Math.max(0,seconds));
+    if(seconds===40&&btn){btn.style.transition='opacity 1.4s ease';btn.style.opacity='0.55';}
+    if(seconds<=0){
+      clearInterval(_timerInterval);_timerInterval=null;
+      if(timerEl){timerEl.style.transition='opacity 1.8s ease';timerEl.style.opacity='0.2';}
+      if(btn){btn.style.transition='opacity 1s ease';btn.style.opacity='1';}
+    }
+  },1000);
+}
+
+function showReflect(){
+  clearInterval(_timerInterval);_timerInterval=null;
+  var p2=document.getElementById('rP2'),p3=document.getElementById('rP3');
+  p2.style.transition='opacity .4s ease';p2.style.opacity='0';
+  setTimeout(function(){p2.style.display='none';p2.style.opacity='1';p3.style.display='flex';_animEls(p3,100);},420);
+}
+
+function concludeRitual(){
+  var p3=document.getElementById('rP3'),p4=document.getElementById('rP4');
+  p3.style.transition='opacity .4s ease';p3.style.opacity='0';
+  setTimeout(function(){
+    p3.style.display='none';p3.style.opacity='1';p4.style.display='flex';
+    var xp=(_dailyData&&_dailyData.bonusXp)||35;
+    var cnt=(_dailyData&&(_dailyData.respondents!=null?_dailyData.respondents:_dailyData.completionCount)||0)+1;
+    var xpEl=document.getElementById('rConXP'),cntEl=document.getElementById('rConCount');
+    if(xpEl)xpEl.textContent='+'+xp+' XP';
+    if(cntEl)cntEl.textContent=cnt.toLocaleString('pt-BR')+' pessoas chegaram até aqui hoje.';
+    _animEls(p4,100);
+    _callComplete();
+  },420);
+}
+
+function _callComplete(){
+  var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+  if(!token)return;
+  fetch(api+'/daily/complete',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}})
+  .then(function(r){return r.ok?r.json():null;}).then(function(result){
+    if(!result)return;
+    var xp=result.xp||35,cnt=result.completionCount||0;
+    var xpEl=document.getElementById('rConXP'),cntEl=document.getElementById('rConCount');
+    if(xpEl)xpEl.textContent='+'+xp+' XP';
+    if(cntEl)cntEl.textContent=cnt.toLocaleString('pt-BR')+' pessoas chegaram até aqui hoje.';
+    var hubCnt=document.getElementById('ritualCount');if(hubCnt)hubCnt.textContent=cnt.toLocaleString('pt-BR');
+    var now=new Date(),hh=now.getHours(),mm=now.getMinutes();
+    var ts=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
+    try{localStorage.setItem('osl_daily_done',JSON.stringify({date:_dailyData&&_dailyData.date,completedAt:ts,count:cnt}));}catch(_){}
+  }).catch(function(){});
+}
+
+function closeRitual(){
+  var ov=document.getElementById('ritualOverlay'),card=document.querySelector('.ritualDeck');
+  var rect=card.getBoundingClientRect();
+  document.querySelectorAll('.ritualPhase').forEach(function(p){p.style.transition='opacity .28s ease';p.style.opacity='0';});
+  setTimeout(function(){
+    ov.style.transition='left 520ms cubic-bezier(.4,0,.2,1),top 520ms cubic-bezier(.4,0,.2,1),width 520ms cubic-bezier(.4,0,.2,1),height 520ms cubic-bezier(.4,0,.2,1),border-radius 520ms cubic-bezier(.4,0,.2,1)';
+    ov.style.left=rect.left+'px';ov.style.top=rect.top+'px';ov.style.width=rect.width+'px';ov.style.height=rect.height+'px';ov.style.borderRadius='4px';
+    document.body.classList.remove('ritual-open');
+    setTimeout(function(){
+      ov.style.display='none';ov.style.transition='';
+      document.querySelectorAll('.ritualPhase').forEach(function(p){p.style.display='none';p.style.opacity='';});
+      _ritualActive=false;
+      try{var st=JSON.parse(localStorage.getItem('osl_daily_done')||'null');
+        if(st&&st.date===(_dailyData&&_dailyData.date))_showCardDone(st);}catch(_){}
+    },560);
+  },300);
+}
 
 window.hubSetSeason=function(s){
   if(!s)return;
@@ -1004,7 +1199,7 @@ onAuthStateChanged(auth,async(user)=>{
   if(!user){window.location.href="./página.html";return;}
   window.hubNavSetUser&&window.hubNavSetUser(user.displayName,user.email,null);
   let data={};
-  try{const t=await user.getIdToken();const r=await fetch(API+"/hub",{headers:{Authorization:"Bearer "+t}});if(r.ok)data=await r.json().catch(()=>({}));}catch(_){}
+  try{const t=await user.getIdToken();window._hubAPI=API;window._hubToken=t;const r=await fetch(API+"/hub",{headers:{Authorization:"Bearer "+t}});if(r.ok)data=await r.json().catch(()=>({}));}catch(_){}
   data._userName=user.displayName||user.email||"";
   window.hubNavSetUser&&window.hubNavSetUser(user.displayName,user.email,data.coins);
   window.hubSetHero&&window.hubSetHero(data);
@@ -1019,5 +1214,46 @@ onAuthStateChanged(auth,async(user)=>{
   user.getIdToken().then(t=>fetch(API+"/hub/touch",{method:"POST",headers:{Authorization:"Bearer "+t}})).catch(()=>{});
 });
 </script>
+
+<!-- ── RITUAL OVERLAY ── -->
+<div id="ritualDim"></div>
+<div id="ritualOverlay">
+
+  <!-- FASE 1: REVELAÇÃO -->
+  <div class="ritualPhase" id="rP1">
+    <div class="rOvHead" data-anim><span class="rOvDia">◆</span> RITUAL DO DIA <span class="rOvDia">◆</span></div>
+    <div class="rOvDate" id="rOvDate" data-anim>14 DE AGOSTO</div>
+    <div class="rOvIntro" data-anim>Hoje existe apenas uma pergunta.</div>
+    <div class="rOvDivider" data-anim></div>
+    <div class="rOvContent" id="rOvContent" data-anim></div>
+    <button class="rOvBtn" onclick="startExperience()" data-anim>COMEÇAR</button>
+  </div>
+
+  <!-- FASE 2: EXPERIÊNCIA -->
+  <div class="ritualPhase" id="rP2">
+    <div class="rExpLabel" id="rExpLabel">O RITUAL COMEÇOU</div>
+    <div class="rTimer" id="rTimer">1:00</div>
+    <div id="rExpQ"></div>
+    <button class="rOvBtn" id="rBtnAnswer" onclick="showReflect()">EU SEI A RESPOSTA</button>
+  </div>
+
+  <!-- FASE 3: REFLEXÃO -->
+  <div class="ritualPhase" id="rP3">
+    <div class="rReflectLine" data-anim>Então guarde-a.</div>
+    <div class="rReflectLine rReflectSub" data-anim>Ou diga a essa pessoa hoje.</div>
+    <button class="rOvBtn" onclick="concludeRitual()" data-anim>CONCLUIR RITUAL</button>
+  </div>
+
+  <!-- FASE 4: CONCLUSÃO -->
+  <div class="ritualPhase" id="rP4">
+    <div class="rConCheck" data-anim>✓</div>
+    <div class="rConTitle" data-anim>VOCÊ DESCOBRIU.</div>
+    <div class="rConCount" id="rConCount" data-anim></div>
+    <div class="rConXP" id="rConXP" data-anim>+35 XP</div>
+    <div class="rConContrib" data-anim>◆ contribuição registrada</div>
+    <button class="rOvBtn" onclick="closeRitual()" data-anim>VOLTAR</button>
+  </div>
+
+</div>
 </body>
 </html>
