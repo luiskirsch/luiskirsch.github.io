@@ -138,38 +138,36 @@ const _handlers = {
   },
 
   async [CMD.START_RITUAL]({ players = [] } = {}) {
-    // Optimista: transiciona para arena imediatamente; lobby some sem aguardar backend
-    _patch({ phase: PHASE.RITUAL_ACTIVE, players, currentCard: null, deck: [], cardsRevealedCount: 0, missionsAssigned: false, activeEffect: null, pendingDeathrattle: null });
-
     const apiPlayers = players.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
     const result = await ritualStart(apiPlayers);
 
     if (!result?.ok) {
       console.error('[engine] START_RITUAL falhou:', result?.error);
-      _patch({ phase: PHASE.LOBBY }); // rollback
       return result || { ok: false, error: "Não foi possível iniciar o ritual." };
     }
 
-    if (result.sessionId) setSessionId(result.sessionId);
-    joinSessionAsPlayer().catch(() => {});
+    // O snapshot do Firestore é a confirmação autoritativa da transição.
+    // Se ele ainda não chegou, registramos a sessão uma única vez aqui.
+    if (result.sessionId && result.sessionId !== S.sessionId) {
+      setSessionId(result.sessionId);
+      joinSessionAsPlayer().catch(() => {});
+    }
     return result;
   },
 
   async [CMD.RESET_RITUAL]({ players = [] } = {}) {
-    const previous = { ..._state, deck: [..._state.deck], players: [..._state.players] };
-    _patch({ phase: PHASE.RITUAL_ACTIVE, players, currentCard: null, deck: [], cardsRevealedCount: 0, missionsAssigned: false, activeEffect: null, pendingDeathrattle: null });
-
     const apiPlayers = players.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
     const result = await ritualReset(apiPlayers);
 
     if (!result?.ok) {
       console.error('[engine] RESET_RITUAL falhou:', result?.error);
-      _patch(previous);
       return result || { ok: false, error: "Não foi possível reiniciar o ritual." };
     }
 
-    if (result.sessionId) setSessionId(result.sessionId);
-    joinSessionAsPlayer().catch(() => {});
+    if (result.sessionId && result.sessionId !== S.sessionId) {
+      setSessionId(result.sessionId);
+      joinSessionAsPlayer().catch(() => {});
+    }
     await panelMarkSessionStart();
     return result;
   },
