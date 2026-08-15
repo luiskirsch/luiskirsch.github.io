@@ -41,17 +41,35 @@
     if (recBtn) { recBtn.classList.remove("is-recording"); recBtn.textContent = "🔴 Gravar"; recBtn.title = "Gravar sessão"; }
   }
 
-  window.recSelectPlan = function (planId, valor, el) {
+  function recSelectPlan(planId, valor, el) {
     recPlan = { id: planId, valor };
-    document.querySelectorAll(".recPlan").forEach(function (p) { p.classList.remove("selected"); });
-    el.classList.add("selected"); recFields.classList.add("show"); recStep1Acts.style.display = "flex";
+    document.querySelectorAll(".recPlan").forEach(function (p) {
+      p.classList.remove("selected");
+      p.setAttribute("aria-pressed", "false");
+    });
+    el.classList.add("selected"); el.setAttribute("aria-pressed", "true"); recFields.classList.add("show"); recStep1Acts.style.display = "flex";
     var savedNome  = localStorage.getItem("osl_checkout_nome")  || localStorage.getItem("osl_nome") || "";
     var savedEmail = localStorage.getItem("osl_checkout_email") || "";
     var nEl = document.getElementById("recNome"); var eEl = document.getElementById("recEmail");
     if (nEl && savedNome  && !nEl.value) nEl.value = savedNome;
     if (eEl && savedEmail && !eEl.value) eEl.value = savedEmail;
     setPayStatus("");
-  };
+  }
+  window.recSelectPlan = recSelectPlan;
+
+  const recPlanGrid = document.getElementById("recPlanGrid");
+  function activatePlan(event) {
+    const item = event.target.closest(".recPlan");
+    if (!item || !recPlanGrid.contains(item)) return;
+    if (event.type === "keydown") {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.repeat) return;
+      event.preventDefault();
+    }
+    recSelectPlan(item.dataset.planId, item.dataset.price, item);
+  }
+  recPlanGrid?.addEventListener("click", activatePlan);
+  recPlanGrid?.addEventListener("keydown", activatePlan);
 
   if (recPayBtn) {
     recPayBtn.addEventListener("click", async function () {
@@ -134,7 +152,10 @@
     recBtn.addEventListener("click", async function () {
       if (recActive) { if (confirm("Parar a gravação agora?")) stopRecording(); return; }
       recPlan = null; recRef = null;
-      document.querySelectorAll(".recPlan").forEach(function (p) { p.classList.remove("selected"); });
+      document.querySelectorAll(".recPlan").forEach(function (p) {
+        p.classList.remove("selected");
+        p.setAttribute("aria-pressed", "false");
+      });
       recFields.classList.remove("show"); recStep1Acts.style.display = "none";
       recStep1.style.display = "block"; recStep2.style.display = "none"; recDownloadBox.classList.remove("show");
       if (recPayBtn) { recPayBtn.disabled = false; recPayBtn.textContent = "Confirmar e pagar"; delete recPayBtn.dataset.passEmail; }

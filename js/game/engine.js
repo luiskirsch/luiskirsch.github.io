@@ -51,6 +51,14 @@ const _subs = new Set();
 
 function _patch(fields) {
   _state = { ..._state, ...fields };
+  // Mantém os campos legados sincronizados enquanto os consumidores antigos
+  // (Arena, mobile, reações e paywall) migram para o engine.
+  S.ritualStarted            = _state.phase === PHASE.RITUAL_ACTIVE;
+  S.ritualDeck               = Array.isArray(_state.deck) ? _state.deck : [];
+  S.ritualCardsRevealedCount = _state.cardsRevealedCount || 0;
+  S.missionsAssigned         = !!_state.missionsAssigned;
+  S.currentCard              = _state.currentCard || null;
+  S.currentActiveEffect      = _state.activeEffect || null;
   const snap = Object.freeze({ ..._state });
   _subs.forEach(fn => {
     try { fn(snap); } catch (e) { console.error('[engine] subscriber threw:', e); }
@@ -76,9 +84,9 @@ export function subscribe(fn) {
 export async function dispatch({ type, payload = {} }) {
   if (!ALLOWED[_state.phase]?.has(type)) {
     console.warn(`[engine] transição bloqueada: ${_state.phase} + ${type}`);
-    return;
+    return { ok: false, code: "TRANSICAO_INVALIDA", phase: _state.phase, command: type };
   }
-  await _handlers[type](payload);
+  return _handlers[type](payload);
 }
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
@@ -139,14 +147,16 @@ const _handlers = {
     if (!result?.ok) {
       console.error('[engine] START_RITUAL falhou:', result?.error);
       _patch({ phase: PHASE.LOBBY }); // rollback
-      return;
+      return result || { ok: false, error: "Não foi possível iniciar o ritual." };
     }
 
     if (result.sessionId) setSessionId(result.sessionId);
     joinSessionAsPlayer().catch(() => {});
+    return result;
   },
 
   async [CMD.RESET_RITUAL]({ players = [] } = {}) {
+    const previous = { ..._state, deck: [..._state.deck], players: [..._state.players] };
     _patch({ phase: PHASE.RITUAL_ACTIVE, players, currentCard: null, deck: [], cardsRevealedCount: 0, missionsAssigned: false, activeEffect: null, pendingDeathrattle: null });
 
     const apiPlayers = players.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
@@ -154,12 +164,14 @@ const _handlers = {
 
     if (!result?.ok) {
       console.error('[engine] RESET_RITUAL falhou:', result?.error);
-      return;
+      _patch(previous);
+      return result || { ok: false, error: "Não foi possível reiniciar o ritual." };
     }
 
     if (result.sessionId) setSessionId(result.sessionId);
     joinSessionAsPlayer().catch(() => {});
     await panelMarkSessionStart();
+    return result;
   },
 
   async [CMD.REVEAL_CARD]({ players = [] } = {}) {
@@ -167,7 +179,7 @@ const _handlers = {
 
     if (!result?.ok) {
       console.error('[engine] REVEAL_CARD falhou:', result?.error);
-      return;
+      return result || { ok: false, error: "Não foi possível revelar a carta." };
     }
 
     const newCount = result.cardsRevealedCount ?? (_state.cardsRevealedCount + 1);
@@ -175,6 +187,7 @@ const _handlers = {
     // Backend já loga CARD_REVEALED e atualiza gameState na sessão
     // Atualização parcial local — SYNC_FROM_FIRESTORE vai completar
     _patch({ cardsRevealedCount: newCount, missionsAssigned: newCount >= 2 });
+    return result;
   },
 
   async [CMD.END_GAME]() {

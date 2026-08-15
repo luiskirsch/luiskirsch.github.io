@@ -226,6 +226,15 @@ function _setLobbyUI() {
   document.getElementById("reactionBar")?.classList.remove("reactionBar--visible");
 }
 
+// Compatibilidade para o snapshot da sala, que pode chegar antes do documento
+// de ritual. O engine continuará sendo a fonte de verdade assim que bindRitual
+// receber o primeiro snapshot.
+export function setRitualWaitingState() {
+  S.ritualStarted = false;
+  _setLobbyUI();
+  updateRitualButtons(getState());
+}
+
 // ── Subscriber do engine ──────────────────────────────────────────────────────
 
 let _prevPhase        = null;
@@ -293,19 +302,21 @@ subscribe(snap => {
 // ── Comandos públicos (chamados por init.js / mobile / UI) ───────────────────
 
 export async function startRitualDeck() {
-  await dispatch({ type: CMD.START_RITUAL, payload: { players: S.currentPlayers } });
+  return dispatch({ type: CMD.START_RITUAL, payload: { players: S.currentPlayers } });
 }
 
 export async function resetRitualDeck() {
-  if (!S.isHost) return;
-  await dispatch({ type: CMD.RESET_RITUAL, payload: { players: S.currentPlayers } });
+  if (!S.isHost) return { ok: false, code: "HOST_REQUIRED" };
+  return dispatch({ type: CMD.RESET_RITUAL, payload: { players: S.currentPlayers } });
 }
 
 export async function revealNextRitualCard() {
   const { phase, deck, activeEffect } = getState();
-  if (phase !== PHASE.RITUAL_ACTIVE || !S.isHost || deck.length === 0) return;
-  if (activeEffect && !activeEffect.resolved) return;
-  await dispatch({ type: CMD.REVEAL_CARD, payload: { players: S.currentPlayers } });
+  if (phase !== PHASE.RITUAL_ACTIVE || !S.isHost || deck.length === 0) {
+    return { ok: false, code: "REVEAL_UNAVAILABLE" };
+  }
+  if (activeEffect && !activeEffect.resolved) return { ok: false, code: "EFFECT_PENDING" };
+  return dispatch({ type: CMD.REVEAL_CARD, payload: { players: S.currentPlayers } });
 }
 
 // ── Listener do ritual (Firestore → engine) ───────────────────────────────────

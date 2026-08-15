@@ -161,7 +161,8 @@ let _pressureVotedThisCard = false;
 
 export function initPressureBtn() {
   const btn = document.getElementById("pressureBtn");
-  if (!btn) return;
+  if (!btn || btn.dataset.pressureHandlerBound === "1") return;
+  btn.dataset.pressureHandlerBound = "1";
   btn.addEventListener("click", async () => {
     if (_pressureVotedThisCard) return;
     _pressureVotedThisCard = true;
@@ -279,6 +280,12 @@ export async function dismissAIDetection() {
 
 window.confirmAIDetection = confirmAIDetection;
 window.dismissAIDetection = dismissAIDetection;
+document.getElementById("aiDetectConfirmBtn")?.addEventListener("click", () => {
+  confirmAIDetection().catch(() => {});
+});
+document.getElementById("aiDetectDismissBtn")?.addEventListener("click", () => {
+  dismissAIDetection().catch(() => {});
+});
 
 // ── Reações ───────────────────────────────────────────────────────────────────
 export async function sendReaction(emoji, sourceEl) {
@@ -452,11 +459,14 @@ export function renderActiveEffect(effect) {
       if (bodyEl) bodyEl.innerHTML = `
         <div class="effectPanel__question">${escapeHtml(question)}</div>
         <div class="effectPanel__voteOptions">
-          ${localizedOpts.map(o => `<button class="effectPanel__voteBtn${myVote === o.value ? " effectPanel__voteBtn--active" : ""}" onclick="castEffectVote('${o.value.replace(/'/g,"\\'")}')">
+          ${localizedOpts.map(o => `<button type="button" class="effectPanel__voteBtn${myVote === o.value ? " effectPanel__voteBtn--active" : ""}" data-vote-value="${escapeHtml(o.value)}">
             ${escapeHtml(o.label)}${voteCounts[o.value] ? ` <span class="effectPanel__voteCount">${voteCounts[o.value]}</span>` : ""}
           </button>`).join("")}
         </div>
         <div class="effectPanel__voteProgress">${escapeHtml(progress)}</div>`;
+      bodyEl?.querySelectorAll(".effectPanel__voteBtn").forEach(btn => {
+        btn.addEventListener("click", () => castEffectVote(btn.dataset.voteValue).catch(() => {}));
+      });
       if (S.isHost && totalVoted >= totalPlayers) setTimeout(() => resolveActiveEffect(getVoteWinner(votes)), 600);
       break;
     }
@@ -487,7 +497,7 @@ export function renderActiveEffect(effect) {
     const btn = document.createElement("button");
     btn.className = "effectPanel__confirm";
     btn.textContent = _tx('achievements:effects.doneButton', "Concluído ✓");
-    btn.onclick = resolveActiveEffect;
+    btn.addEventListener("click", resolveActiveEffect);
     panel.appendChild(btn);
   }
 }

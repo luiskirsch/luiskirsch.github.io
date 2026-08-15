@@ -89,9 +89,23 @@ window.addEventListener("keydown",     enableAudio, { once: true });
 
 // ── Expõe funções para código não-módulo (mobile script) ─────────────────────
 window._osl = window._osl || {};
-window._osl.startGame   = () => startSession().catch(console.error);
-window._osl.revealCard  = () => revealNextRitualCard().catch(console.error);
-window._osl.resetDeck   = () => resetRitualDeck().catch(console.error);
+async function runExposedAction(action, failureMessage) {
+  try {
+    const result = await action();
+    if (result?.ok === false && !["CANCELLED", "ACTION_IN_PROGRESS"].includes(result.code)) {
+      showOslToast(failureMessage, "error");
+    }
+    return result;
+  } catch (error) {
+    console.error(failureMessage, error);
+    showOslToast(failureMessage, "error");
+    return { ok: false, error: error?.message || String(error) };
+  }
+}
+
+window._osl.startGame   = () => startSession();
+window._osl.revealCard  = () => runExposedAction(revealNextRitualCard, "Não foi possível revelar a carta.");
+window._osl.resetDeck   = () => runExposedAction(resetRitualDeck, "Não foi possível reiniciar o ritual.");
 window._osl.getIsHost        = () => S.isHost;
 window._osl.isStarted        = () => S.ritualStarted;
 window._osl.getParticipantId = () => S.participantId;
@@ -108,15 +122,26 @@ window.oslOpenProfile        = window._osl.openSelfProfile; // atalho para scrip
 document.addEventListener("osl:openSelfProfile", () => window._osl.openSelfProfile());
 
 window._osl.toggleArena = async () => {
-  if (!S.isHost) return;
-  const { getDoc, updateDoc } = await import("./firebase.js");
-  const snap = await getDoc(S.roomRef); if (!snap.exists()) return;
-  const currentlyActive = snap.data().arenaActive;
-  if (!currentlyActive && !S.ritualStarted) {
-    showOslToast(oslTr("sala:topbar.actions.arenaRequiresStarted", "⚔️ Inicie o ritual primeiro para ativar o Modo Arena."), "warn");
-    return;
+  if (!S.isHost) {
+    showOslToast("Apenas o anfitrião pode controlar a Arena.", "warn");
+    return { ok: false, code: "HOST_REQUIRED" };
   }
-  await updateDoc(S.roomRef, { arenaActive: !currentlyActive });
+  try {
+    const { getDoc, updateDoc } = await import("./firebase.js");
+    const snap = await getDoc(S.roomRef);
+    if (!snap.exists()) throw new Error("ROOM_NOT_FOUND");
+    const currentlyActive = snap.data().arenaActive;
+    if (!currentlyActive && !S.ritualStarted) {
+      showOslToast(oslTr("sala:topbar.actions.arenaRequiresStarted", "⚔️ Inicie o ritual primeiro para ativar o Modo Arena."), "warn");
+      return { ok: false, code: "RITUAL_NOT_STARTED" };
+    }
+    await updateDoc(S.roomRef, { arenaActive: !currentlyActive });
+    return { ok: true, active: !currentlyActive };
+  } catch (error) {
+    console.error("Erro ao alternar Arena:", error);
+    showOslToast("Não foi possível alterar o Modo Arena.", "error");
+    return { ok: false, error: error?.message || String(error) };
+  }
 };
 
 window._osl.deactivateArenaForAll = async () => {
@@ -198,6 +223,9 @@ window.dismissAIDetection = dismissAIDetection;
     S.userId        = _freshUserId;
     initFirebaseRefs();
   }
+  window.dispatchEvent(new CustomEvent("osl:identity-ready", {
+    detail: { participantId: S.participantId, userId: S.userId },
+  }));
 
   // Engine: transiciona de IDLE → LOBBY. Players chegam via SET_PLAYERS depois.
   dispatch({ type: CMD.INIT, payload: { players: [] } }).catch(() => {});

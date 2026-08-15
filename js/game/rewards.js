@@ -3,19 +3,27 @@ import { S } from "../state.js";
 import { setDoc, getDoc, getDocFromServer, getDocs, query, orderBy } from "../firebase.js";
 import { escapeHtml } from "../utils.js";
 import { OSL_XP_TITLES, OSL_XP_EVENTS, DAILY_STREAK_XP, OSL_REACTION_UNLOCKS, OSL_COINS_PER_LEVEL } from "../constants.js";
-import { OSL_XP, OSL_ACHIEVEMENTS } from "./effects.js";
+import { OSL_XP, OSL_ACHIEVEMENTS, sendReaction } from "./effects.js";
 
 // ── Barra de reações ──────────────────────────────────────────────────────────
 export function updateReactionBar(level) {
   const bar = document.getElementById("reactionBar");
   if (!bar) return;
+  if (bar.dataset.reactionHandlerBound !== "1") {
+    bar.dataset.reactionHandlerBound = "1";
+    bar.addEventListener("click", event => {
+      const btn = event.target.closest(".reactionBar__btn");
+      if (!btn || !bar.contains(btn)) return;
+      sendReaction(btn.dataset.reaction, btn).catch(() => {});
+    });
+  }
   if (bar.dataset.level === String(level)) return;
   bar.dataset.level = String(level);
   const emojis = OSL_REACTION_UNLOCKS
     .filter(r => r.minLevel <= level)
     .flatMap(r => r.emojis);
   bar.innerHTML = emojis.map(e =>
-    `<button class="reactionBar__btn" onclick="sendReaction('${e}',this)" title="${e}">${e}</button>`
+    `<button type="button" class="reactionBar__btn" data-reaction="${escapeHtml(e)}" title="${escapeHtml(e)}" aria-label="Reagir com ${escapeHtml(e)}">${escapeHtml(e)}</button>`
   ).join("");
 }
 

@@ -1,12 +1,12 @@
 // UI da sala: listeners Firebase, sessão, chat, jogadores, multiplayer
 import { S } from "../state.js";
 import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, doc, collection } from "../firebase.js";
-import { escapeHtml, nowTimeFromDate, initials } from "../utils.js";
+import { escapeHtml, nowTimeFromDate, initials, showOslToast } from "../utils.js";
 import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, redeemPendingCoins, fetchRoomSessions, fetchRoomStats } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
 import { logEvent, joinSessionAsPlayer, setSessionId, setPlayerConnected, clearActiveSession } from "../game/session.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
-import { checkDailyReward, showSessionRecap, updateXpCard, showLevelPanel, showCoinModal } from "../game/rewards.js";
+import { checkDailyReward, showSessionRecap, updateXpCard, showLevelPanel } from "../game/rewards.js";
 import { OSL_ACHIEVEMENTS } from "../game/effects.js";
 import { BACKEND_BASE_URL } from "../constants.js";
 
@@ -325,21 +325,55 @@ export async function sendMessage(text) {
 
 // ── Sessão ────────────────────────────────────────────────────────────────────
 export async function startSession() {
-  if (!S.isHost) return;
-  const snap = await getDoc(S.roomRef);
-  if (!snap.exists()) return;
-  const data = snap.data();
-  if (data.status === "started") {
-    const ok = confirm("O ritual já está em andamento. Deseja reiniciá-lo com um novo deck embaralhado?");
-    if (ok) await resetRitualDeck();
-    return;
+  const startBtn = document.getElementById("startBtn");
+  if (!S.isHost) {
+    showOslToast("Apenas o anfitrião pode iniciar o ritual.", "warn");
+    return { ok: false, code: "HOST_REQUIRED" };
+  }
+  if (startBtn?.dataset.busy === "1") return { ok: false, code: "ACTION_IN_PROGRESS" };
+  if (startBtn) {
+    startBtn.dataset.busy = "1";
+    startBtn.disabled = true;
+    startBtn.textContent = "Iniciando...";
   }
   const deckInfo = document.getElementById("deckInfo");
-  if (deckInfo) deckInfo.textContent = "Iniciando o ritual...";
-  await updateDoc(S.roomRef, { status:"started", startedAt: serverTimestamp(), updatedAt: serverTimestamp() });
-  await addDoc(S.messagesRef, { type:"system", text:"O anfitrião iniciou o ritual. A próxima etapa pode começar.", createdAt: serverTimestamp() });
-  await startRitualDeck();
-  await panelMarkSessionStart();
+  try {
+    const snap = await getDoc(S.roomRef);
+    if (!snap.exists()) {
+      showOslToast("A sala não foi encontrada. Recarregue a página e tente novamente.", "error");
+      return { ok: false, code: "ROOM_NOT_FOUND" };
+    }
+    const data = snap.data();
+    if (data.status === "started") {
+      const ok = confirm("O ritual já está em andamento. Deseja reiniciá-lo com um novo deck embaralhado?");
+      return ok ? resetRitualDeck() : { ok: false, code: "CANCELLED" };
+    }
+    if (deckInfo) deckInfo.textContent = "Iniciando o ritual...";
+
+    // O backend valida host/token e cria a sessão primeiro. Só então publicamos
+    // o estado visual da sala, evitando uma sala marcada como iniciada após erro.
+    const result = await startRitualDeck();
+    if (!result?.ok) {
+      showOslToast("Não foi possível iniciar o ritual. Tente novamente.", "error");
+      return result || { ok: false };
+    }
+
+    await updateDoc(S.roomRef, { status:"started", startedAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    addDoc(S.messagesRef, { type:"system", text:"O anfitrião iniciou o ritual. A próxima etapa pode começar.", createdAt: serverTimestamp() }).catch(() => {});
+    await panelMarkSessionStart();
+    showOslToast("Ritual iniciado.", "success");
+    return result;
+  } catch (error) {
+    console.error("Erro ao iniciar ritual:", error);
+    showOslToast("Não foi possível iniciar o ritual. Verifique a conexão e tente novamente.", "error");
+    return { ok: false, error: error?.message || String(error) };
+  } finally {
+    if (startBtn) {
+      delete startBtn.dataset.busy;
+      startBtn.disabled = !S.isHost || S.ritualStarted || S._isSpectator;
+      startBtn.textContent = S.ritualStarted ? "Ritual iniciado" : "Iniciar Ritual";
+    }
+  }
 }
 
 export async function leaveRoom(redirect = true) {
@@ -358,6 +392,13 @@ export async function leaveRoom(redirect = true) {
     logEvent("PLAYER_LEFT", { nickname: S.playerName, isHost: S.isHost }).catch(() => {});
     setPlayerConnected(false).catch(() => {});
     clearActiveSession().catch(() => {});
+    if (S.isHost) {
+      await updateDoc(S.roomRef, {
+        status: "closed",
+        arenaActive: false,
+        updatedAt: serverTimestamp(),
+      }).catch(() => {});
+    }
     await panelMarkSessionEnd();
     await PanelBridge.playerLeave(S.roomCode, S.participantId);
     await deleteDoc(S.playerRef);
@@ -450,9 +491,10 @@ async function loadSessionHistory() {
 // ── Beacon de saída (pagehide / beforeunload) ─────────────────────────────────
 export function sendLeaveBeacon() {
   try {
+    const hostToken = S.isHost ? (sessionStorage.getItem("osl_host_token") || null) : null;
     navigator.sendBeacon?.(
       PanelBridge.baseUrl + "/game/player/leave",
-      new Blob([JSON.stringify({ roomId: S.roomCode, playerId: S.participantId, isHost: S.isHost })], { type:"application/json" })
+      new Blob([JSON.stringify({ roomId: S.roomCode, playerId: S.participantId, ...(hostToken ? { hostToken } : {}) })], { type:"application/json" })
     );
     // Marca jogador como desconectado na sessão (best-effort; usa token cacheado do heartbeat)
     if (S.sessionId && S._cachedIdToken) {
@@ -563,15 +605,15 @@ export function renderLiveRooms(rooms) {
       ${badge}<button class="multiSpectateBtn" title="Assistir em stand-by">👁</button></div>`;
   }).join("");
 
-  body.querySelectorAll(".multiSpectateBtn").forEach(btn => {
-    btn.addEventListener("click", e => { e.stopPropagation(); const row = btn.closest(".multiRoom"); document.dispatchEvent(new CustomEvent("osl:openSpectator", { detail:{ roomId: row.dataset.code, name: row.dataset.name, host: row.dataset.host } })); });
-  });
   body.querySelectorAll(".multiRoom:not(.multiRoom--full)").forEach(el => {
     el.addEventListener("click", e => {
       if (e.target.classList.contains("multiSpectateBtn")) return;
-      el.style.opacity = ".45"; el.style.pointerEvents = "none";
-      showJoinLoadingOverlay(el.dataset.name);
-      setTimeout(() => { window.location.href = `sala.html?sala=${encodeURIComponent(el.dataset.code)}&nome=${encodeURIComponent(S.playerName)}&nomeSala=${encodeURIComponent(el.dataset.name)}`; }, 600);
+      openJoinModal({
+        roomId: el.dataset.code,
+        name: el.dataset.name,
+        host: el.dataset.host,
+        playerCount: Number(el.dataset.count || 0),
+      });
     });
   });
 }
@@ -639,13 +681,16 @@ function pollJoinApproval(targetRoomId, targetRoomName, joinName) {
     attempts++;
     if (attempts > 20) { clearInterval(S._joinPollTimer); document.getElementById("joinStatus").textContent = "Tempo esgotado. Tente novamente."; document.getElementById("joinSendBtn").disabled = false; document.getElementById("joinSendBtn").textContent = "Reenviar"; return; }
     try {
-      const r = await fetch(MULTI_SERVER + `/game/room/${encodeURIComponent(targetRoomId)}`);
-      const d = await r.json();
-      if (!d.ok || !d.room) return;
-      if ((d.room.players || []).some(p => p.playerId === S.participantId)) {
+      const result = await PanelBridge.joinStatus(targetRoomId, S.participantId);
+      if (result?.status === "approved") {
         clearInterval(S._joinPollTimer);
         document.getElementById("joinStatus").textContent = "✅ Aprovado! Entrando na sala…";
         setTimeout(() => { closeJoinModal(); window.location.href = `sala.html?sala=${encodeURIComponent(targetRoomId)}&nome=${encodeURIComponent(joinName)}&nomeSala=${encodeURIComponent(targetRoomName)}`; }, 800);
+      } else if (result?.status === "denied") {
+        clearInterval(S._joinPollTimer);
+        document.getElementById("joinStatus").textContent = "O anfitrião recusou o pedido.";
+        document.getElementById("joinSendBtn").disabled = false;
+        document.getElementById("joinSendBtn").textContent = "Enviar novamente";
       }
     } catch (_) {}
   }, 3000);
@@ -674,16 +719,182 @@ export function showHostJoinAlert(playerId, name) {
 
 export async function respondJoin(approved) {
   const alertEl = document.getElementById("hostJoinAlert");
-  if (alertEl) alertEl.style.display = "none";
   if (!S._pendingJoinId) return;
-  const endpoint = approved ? "/game/room/approve-join" : "/game/room/deny-join";
   try {
-    await fetch(MULTI_SERVER + endpoint, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ roomId: S.roomCode, playerId: S._pendingJoinId }) });
-  } catch (_) {}
-  S._pendingJoinId = null;
+    const result = approved
+      ? await PanelBridge.approveJoin(S.roomCode, S._pendingJoinId)
+      : await PanelBridge.denyJoin(S.roomCode, S._pendingJoinId);
+    if (!result?.ok) {
+      showOslToast("Não foi possível responder ao pedido. Tente novamente.", "error");
+      return;
+    }
+    if (alertEl) alertEl.style.display = "none";
+    S._pendingJoinId = null;
+    showOslToast(approved ? "Entrada aprovada." : "Pedido recusado.", approved ? "success" : "info");
+  } catch (error) {
+    console.error("Erro ao responder pedido de entrada:", error);
+    showOslToast("Não foi possível responder ao pedido. Tente novamente.", "error");
+  }
+}
+
+// ── Painel espectador ────────────────────────────────────────────────────────
+let _specLkRoom = null;
+
+export async function closeSpectatorRoom() {
+  if (!_specLkRoom) return;
+  try { await _specLkRoom.disconnect(); } catch (_) {}
+  _specLkRoom = null;
+}
+
+export async function spectateRoom(roomId, name) {
+  await closeSpectatorRoom();
+
+  const specOverlay = document.getElementById("specOverlay");
+  if (!specOverlay || !roomId) return;
+
+  const titleEl   = document.getElementById("specTitle");
+  const statusEl  = document.getElementById("specStatusText");
+  const dotEl     = document.getElementById("specStatusDot");
+  const playersEl = document.getElementById("specPlayers");
+  const cardWrap  = document.getElementById("specCardWrap");
+  const noticeEl  = document.getElementById("specObservingNotice");
+  const liveBadge = document.getElementById("specLiveBadge");
+
+  if (titleEl) titleEl.textContent = name || roomId;
+  if (statusEl) statusEl.textContent = "Carregando...";
+  if (dotEl) dotEl.className = "specStatusDot";
+  if (liveBadge) liveBadge.style.display = "none";
+  if (playersEl) playersEl.innerHTML = '<div class="specEmpty" style="padding:32px 0">⏳</div>';
+  if (cardWrap) cardWrap.innerHTML = "";
+  if (noticeEl) noticeEl.style.display = "flex";
+  specOverlay.style.display = "flex";
+
+  try {
+    const [panelRes, playersSnap, ritualSnap] = await Promise.all([
+      fetch(MULTI_SERVER + "/game/rooms")
+        .then(r => r.json())
+        .then(data => ({ room: Array.isArray(data.rooms) ? data.rooms.find(item => item.roomId === roomId) : null }))
+        .catch(() => null),
+      getDocs(collection(S.db, "salas", roomId, "players")).catch(() => null),
+      getDoc(doc(S.db, "salas", roomId, "ritual", "state")).catch(() => null),
+    ]);
+
+    const room = panelRes?.room;
+    const isLive = !!room?.sessionActive;
+    const hasVideo = isLive && !!room?.videoActive;
+    if (dotEl) dotEl.className = "specStatusDot" + (isLive ? " specStatusDot--live" : "");
+    if (statusEl) statusEl.textContent = isLive ? "Ritual em andamento" : "Aguardando início";
+    if (liveBadge) liveBadge.style.display = isLive ? "" : "none";
+
+    let players = [];
+    if (playersSnap && !playersSnap.empty) {
+      playersSnap.forEach(d => {
+        const player = d.data();
+        if (player.name) players.push({ ...player, _fsId: d.id });
+      });
+      players.sort((a, b) => {
+        if (a.isHost !== b.isHost) return a.isHost ? -1 : 1;
+        return (a.joinedAt?.toMillis?.() || 0) - (b.joinedAt?.toMillis?.() || 0);
+      });
+    } else if (room?.players?.length) {
+      players = room.players.map(p => ({ name: p.playerName, isHost: p.playerName === room.host, _fsId: p.playerId || "" }));
+    }
+
+    if (playersEl) {
+      playersEl.innerHTML = players.length ? players.map(player => {
+        const isHost = !!player.isHost;
+        const safeName = escapeHtml(player.name || "Jogador");
+        const participantId = escapeHtml(player._fsId || player.id || "");
+        const livePip = hasVideo
+          ? '<div class="specPlayerTileLive">📹 AO VIVO</div>'
+          : (isLive ? '<div class="specPlayerTileLive">AO VIVO</div>' : "");
+        const avatar = player.avatarPhotoUrl
+          ? `<img class="specPlayerTileAvatarImg" src="${escapeHtml(player.avatarPhotoUrl)}" alt="">`
+          : (player.avatarEmoji
+            ? `<span style="font-size:2.2em">${escapeHtml(player.avatarEmoji)}</span>`
+            : `<span style="font-size:1.6em;font-weight:800">${escapeHtml((player.name || "?").charAt(0).toUpperCase())}</span>`);
+        return `<div class="specPlayerTile${isHost ? " specPlayerTile--host" : ""}" data-participant-id="${participantId}">
+          <div class="specPlayerTileAvatar">${avatar}</div>${livePip}
+          <div class="${isHost ? "specPlayerTileName--host" : "specPlayerTileName"}">${isHost ? "👑 " : ""}${safeName}</div>
+        </div>`;
+      }).join("") : '<div class="specEmpty">Nenhum jogador ativo</div>';
+    }
+
+    const ritual = ritualSnap?.exists?.() ? ritualSnap.data() : null;
+    const card = ritual?.currentCard;
+    if (cardWrap) {
+      cardWrap.innerHTML = card && ritual?.started
+        ? `<div class="specCard"><div class="specCardType">${escapeHtml((card.type || "Ritual").toUpperCase())}</div><div class="specCardTitle">${escapeHtml(card.title || "")}</div><div class="specCardText">${escapeHtml(card.text || "").replace(/\n/g, "<br>")}</div></div>`
+        : '<div class="specEmpty">Ritual ainda não iniciado</div>';
+    }
+
+    if (hasVideo) {
+      try {
+        const [tokenRes, livekit] = await Promise.all([
+          fetch(`${MULTI_SERVER}/spectate-token?room=${encodeURIComponent(roomId)}&user=${encodeURIComponent(S.participantId)}`).then(r => r.json()),
+          import("https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs"),
+        ]);
+        if (tokenRes?.ok && tokenRes?.token && specOverlay.style.display !== "none") {
+          const lkRoom = new livekit.Room({ adaptiveStream: false, dynacast: false });
+          _specLkRoom = lkRoom;
+          lkRoom.on(livekit.RoomEvent.TrackSubscribed, (track, _publication, participant) => {
+            if (track.kind !== "video") return;
+            const avatarEl = playersEl?.querySelector(`[data-participant-id="${CSS.escape(participant.identity)}"] .specPlayerTileAvatar`);
+            if (!avatarEl) return;
+            const videoEl = track.attach();
+            videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
+            avatarEl.replaceChildren(videoEl);
+          });
+          lkRoom.on(livekit.RoomEvent.TrackUnsubscribed, track => track.detach());
+          await lkRoom.connect(tokenRes.url || "wss://osextolugar-eqa7q1iz.livekit.cloud", tokenRes.token, { autoSubscribe: true });
+        }
+      } catch (_) { /* O painel continua útil sem vídeo ao vivo. */ }
+    }
+  } catch (error) {
+    console.error("Erro ao abrir modo espectador:", error);
+    if (statusEl) statusEl.textContent = "Erro ao carregar dados da sala";
+  }
 }
 
 // ── Event listeners (inicializados por init.js) ───────────────────────────────
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const input = document.createElement("textarea");
+  input.value = text;
+  input.setAttribute("readonly", "");
+  input.style.cssText = "position:fixed;left:-9999px;top:-9999px";
+  document.body.appendChild(input);
+  input.select();
+  const copied = document.execCommand?.("copy");
+  input.remove();
+  if (!copied) throw new Error("CLIPBOARD_UNAVAILABLE");
+}
+
+async function runRitualButtonAction(button, action, fallbackMessage) {
+  if (button?.dataset.busy === "1") return { ok: false, code: "ACTION_IN_PROGRESS" };
+  if (button) { button.dataset.busy = "1"; button.disabled = true; }
+  try {
+    const result = await action();
+    if (result?.ok === false && !["CANCELLED", "ACTION_IN_PROGRESS"].includes(result.code)) {
+      const message = result.code === "EFFECT_PENDING"
+        ? "Conclua o efeito atual antes de revelar outra carta."
+        : fallbackMessage;
+      showOslToast(message, result.code === "EFFECT_PENDING" ? "warn" : "error");
+    }
+    return result;
+  } catch (error) {
+    console.error(fallbackMessage, error);
+    showOslToast(fallbackMessage, "error");
+    return { ok: false, error: error?.message || String(error) };
+  } finally {
+    if (button) delete button.dataset.busy;
+    document.dispatchEvent(new CustomEvent("osl:updateRitualButtons"));
+  }
+}
+
 export function bindRoomEvents() {
   const copyCodeBtn  = document.getElementById("copyCodeBtn");
   const sendBtn      = document.getElementById("sendBtn");
@@ -694,23 +905,47 @@ export function bindRoomEvents() {
   const leaveBtn      = document.getElementById("leaveBtn");
 
   copyCodeBtn?.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(S.roomCode); await addDoc(S.messagesRef, { type:"system", text:"O código da sala foi copiado.", createdAt: serverTimestamp() }); } catch (_) {}
+    const originalText = copyCodeBtn.textContent;
+    try {
+      await copyText(S.roomCode);
+      copyCodeBtn.textContent = "Código copiado!";
+      showOslToast(`Código ${S.roomCode} copiado.`, "success");
+      addDoc(S.messagesRef, { type:"system", text:"O código da sala foi copiado.", createdAt: serverTimestamp() }).catch(() => {});
+    } catch (error) {
+      console.error("Erro ao copiar código da sala:", error);
+      showOslToast(`Código da sala: ${S.roomCode}`, "warn");
+    } finally {
+      setTimeout(() => { copyCodeBtn.textContent = originalText; }, 1800);
+    }
   });
-  sendBtn?.addEventListener("click", () => {
+
+  const submitMessage = async () => {
     const text = messageInput?.value.trim();
-    if (text) { messageInput.value = ""; sendMessage(text).catch(console.error); }
-  });
+    if (!text || sendBtn?.dataset.busy === "1") return;
+    if (sendBtn) { sendBtn.dataset.busy = "1"; sendBtn.disabled = true; }
+    try {
+      await sendMessage(text);
+      messageInput.value = "";
+    } catch (error) {
+      console.error("Erro ao enviar mensagem:", error);
+      showOslToast("Não foi possível enviar a mensagem.", "error");
+    } finally {
+      if (sendBtn) { delete sendBtn.dataset.busy; sendBtn.disabled = false; }
+    }
+  };
+  sendBtn?.addEventListener("click", submitMessage);
   messageInput?.addEventListener("input", () => {
     if (messageInput.value.trim()) { setTyping(true); scheduleTypingStop(); }
     else { clearTimeout(S.typingTimer); setTyping(false); }
   });
   messageInput?.addEventListener("blur", () => { clearTimeout(S.typingTimer); setTyping(false); });
-  messageInput?.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); const text = messageInput.value.trim(); if (text) { messageInput.value = ""; sendMessage(text).catch(console.error); } } });
-  startBtn?.addEventListener("click", () => startSession().catch(console.error));
-  revealCardBtn?.addEventListener("click", () => revealNextRitualCard().catch(console.error));
+  messageInput?.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); submitMessage(); } });
+  startBtn?.addEventListener("click", startSession);
+  revealCardBtn?.addEventListener("click", () => runRitualButtonAction(revealCardBtn, revealNextRitualCard, "Não foi possível revelar a carta."));
   resetRitualBtn?.addEventListener("click", () => {
-    if (S.ritualStarted) showSessionRecap(() => resetRitualDeck().catch(console.error)).catch(console.error);
-    else if (confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?")) resetRitualDeck().catch(console.error);
+    const reset = () => runRitualButtonAction(resetRitualBtn, resetRitualDeck, "Não foi possível reiniciar o ritual.");
+    if (S.ritualStarted) showSessionRecap(reset).catch(error => { console.error(error); showOslToast("Não foi possível abrir o resumo da sessão.", "error"); });
+    else if (confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?")) reset();
   });
   leaveBtn?.addEventListener("click", () => {
     if (S.ritualStarted) showSessionRecap(() => leaveRoom(true), "SAIR DA SALA").catch(console.error);
@@ -721,9 +956,19 @@ export function bindRoomEvents() {
   document.getElementById("joinOverlay")?.addEventListener("click", e => { if (e.target === document.getElementById("joinOverlay")) closeJoinModal(); });
   document.getElementById("hostApproveBtn")?.addEventListener("click", () => respondJoin(true));
   document.getElementById("hostDenyBtn")?.addEventListener("click",    () => respondJoin(false));
-  document.getElementById("xpCardLevel")?.addEventListener("click",    () => showLevelPanel(S._currentXp));
-  document.getElementById("coinBalanceWrap")?.addEventListener("click", () => showCoinModal(S._currentXp));
-  document.getElementById("deckModalBtn")?.addEventListener("click",    () => import("../game/deckModal.js").then(m => m.showDeckModal()));
+  const xpCardLevel = document.getElementById("xpCardLevel");
+  if (xpCardLevel) {
+    xpCardLevel.setAttribute("role", "button");
+    xpCardLevel.tabIndex = 0;
+    xpCardLevel.addEventListener("click", () => showLevelPanel(S._currentXp));
+    xpCardLevel.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); showLevelPanel(S._currentXp); } });
+  }
+  document.getElementById("deckModalBtn")?.addEventListener("click", () => {
+    import("../game/deckModal.js").then(module => module.showDeckModal()).catch(error => {
+      console.error("Erro ao abrir deck:", error);
+      showOslToast("Não foi possível abrir o deck.", "error");
+    });
+  });
 
   window.addEventListener("pagehide",     sendLeaveBeacon);
   window.addEventListener("beforeunload", sendLeaveBeacon);

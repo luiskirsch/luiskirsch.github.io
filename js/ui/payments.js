@@ -139,15 +139,34 @@
       || localStorage.getItem("osl_sala") || "SL-0001";
   }
 
-  window.oslSelecionarGravacao = function (prodId, valor, el) {
+  function oslSelecionarGravacao(prodId, valor, el) {
     oslSaveProduto = { id: prodId, valor };
-    document.querySelectorAll(".osl-rec-item").forEach(function (i) { i.classList.remove("osl-selected"); });
+    document.querySelectorAll(".osl-rec-item").forEach(function (i) {
+      i.classList.remove("osl-selected");
+      i.setAttribute("aria-pressed", "false");
+    });
     el.classList.add("osl-selected");
+    el.setAttribute("aria-pressed", "true");
     oslShowFields("oslSaveFields"); oslPrefill("oslSaveNome", "oslSaveEmail");
     document.getElementById("oslSaveStatus").textContent = "";
     document.getElementById("oslSaveDownload").style.display = "none";
     var btn = document.getElementById("oslSaveSubmit"); btn.disabled = false; btn.textContent = oslTr("sala:paywall.save.submit", "Confirmar e pagar");
-  };
+  }
+  window.oslSelecionarGravacao = oslSelecionarGravacao;
+
+  var oslRecGrid = document.getElementById("oslRecGrid");
+  function activateRecordingChoice(event) {
+    var item = event.target.closest(".osl-rec-item");
+    if (!item || !oslRecGrid.contains(item)) return;
+    if (event.type === "keydown") {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.repeat) return;
+      event.preventDefault();
+    }
+    oslSelecionarGravacao(item.dataset.productId, item.dataset.price, item);
+  }
+  oslRecGrid?.addEventListener("click", activateRecordingChoice);
+  oslRecGrid?.addEventListener("keydown", activateRecordingChoice);
 
   document.getElementById("oslSaveSubmit").addEventListener("click", async function () {
     if (!oslSaveProduto) return;
@@ -237,7 +256,10 @@
       e.stopImmediatePropagation();
       oslSaveProduto = null; oslHideFields("oslSaveFields");
       document.getElementById("oslSaveStatus").textContent = "";
-      document.querySelectorAll(".osl-rec-item").forEach(function (i) { i.classList.remove("osl-selected"); });
+      document.querySelectorAll(".osl-rec-item").forEach(function (i) {
+        i.classList.remove("osl-selected");
+        i.setAttribute("aria-pressed", "false");
+      });
       oslOpenModal("oslModalSave");
     }, true);
   }

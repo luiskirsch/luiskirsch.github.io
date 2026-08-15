@@ -62,6 +62,17 @@ if (!participantId) {
   localStorage.setItem("osl_player_id", participantId);
 }
 
+// O Firebase pode restaurar/criar a identidade autenticada depois que este
+// módulo começa a avaliar. Mantém o LiveKit alinhado ao mesmo participante da sala.
+window.addEventListener("osl:identity-ready", event => {
+  const authenticatedId = String(event.detail?.participantId || "").trim();
+  if (!authenticatedId || lkRoom) return;
+  participantId = authenticatedId;
+  sessionStorage.setItem("osl_participant_id", participantId);
+  sessionStorage.setItem("osl_player_id", participantId);
+  localStorage.setItem("osl_player_id", participantId);
+});
+
 let lkRoom = null;
 let localAudioTrack = null;
 let localVideoTrack = null;
@@ -84,7 +95,8 @@ const PanelBridge = window.PanelBridge || {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roomId: String(roomId || "").trim(),
-          active: !!active
+          active: !!active,
+          ...(sessionStorage.getItem("osl_host_token") ? { hostToken: sessionStorage.getItem("osl_host_token") } : {})
         })
       });
       return await res.json().catch(() => ({ ok: res.ok }));
@@ -101,7 +113,8 @@ const PanelBridge = window.PanelBridge || {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roomId: String(roomId || "").trim(),
-          playerId: String(playerId || "").trim()
+          playerId: String(playerId || "").trim(),
+          ...(sessionStorage.getItem("osl_host_token") ? { hostToken: sessionStorage.getItem("osl_host_token") } : {})
         })
       });
       return await res.json().catch(() => ({ ok: res.ok }));
@@ -136,7 +149,8 @@ function sendBeaconVideoOff() {
     const url = (PanelBridge.baseUrl || "http://localhost:3000") + "/game/video";
     const payload = JSON.stringify({
       roomId: roomCode,
-      active: false
+      active: false,
+      ...(sessionStorage.getItem("osl_host_token") ? { hostToken: sessionStorage.getItem("osl_host_token") } : {})
     });
 
     if (navigator.sendBeacon) {

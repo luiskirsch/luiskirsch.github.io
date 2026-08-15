@@ -2,7 +2,8 @@
 <html lang="pt-BR" data-i18n-ns="sala,cards,achievements,missions,xptitles,effects">
 <head>
 <script>(function(){if(window.top!==window.self){try{window.top.location.replace(location.href);}catch(_){document.documentElement.innerHTML="";}return;}var h=(location.hostname||"").toLowerCase(),p=location.protocol||"";var A=["preludiojogos.com","www.preludiojogos.com","preludiojogos.com.br","www.preludiojogos.com.br","luiskirsch.github.io","localhost","127.0.0.1"];if(p==="file:"||h&&A.indexOf(h)===-1){document.documentElement.innerHTML="<style>*{margin:0;padding:0}html,body{background:#0a0805;height:100%;display:flex;align-items:center;justify-content:center}p{color:#ccc;font:15px/1.7 sans-serif;text-align:center;max-width:320px}a{color:#e06e30;text-decoration:none}</style><p>Este conte\u00fado s\u00f3 est\u00e1 dispon\u00edvel no site oficial.<br><a href=\"https://preludiojogos.com.br\">preludiojogos.com.br<\/a><\/p>";setTimeout(function(){location.replace("https://preludiojogos.com.br");},2500);}else{document.documentElement.classList.add("guard-ok");}})();</script><style>html:not(.guard-ok) body{visibility:hidden!important;background:#0a0805!important}</style>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' https://osl-video-server-production.up.railway.app https://osl-video-server-staging.up.railway.app https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com wss://osextolugar-eqa7q1iz.livekit.cloud; font-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'none'; worker-src 'self' blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-0nm7jqdKysuyWtEOo1dszFhseqMQqYrchIG7ak7PhJg=' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' https://osl-video-server-production.up.railway.app https://osl-video-server-staging.up.railway.app https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com wss://osextolugar-eqa7q1iz.livekit.cloud; font-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'none'; worker-src 'self' blob:;">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"}}</script>
 <script src="./i18n/init.js" defer></script>
 <script src="../js/theme-bootstrap.js"></script>
 <script src="js/theme-loader.js"></script>
@@ -7194,7 +7195,7 @@
               </div>
 
               <div class="sidebarActions">
-                <button class="btn btnPrimary" id="startBtn" data-i18n="sala:sidebar.startRitual">Iniciar Ritual</button>
+                <button class="btn btnPrimary" id="startBtn" disabled data-i18n="sala:sidebar.startRitual">Iniciar Ritual</button>
               </div>
             </div>
           </section>
@@ -7295,8 +7296,8 @@
                 <div class="aiDetectToast" id="aiDetectToast">
                   <span class="aiDetectToast__icon">🤖</span>
                   <span class="aiDetectToast__text" id="aiDetectToastMsg"></span>
-                  <button class="aiDetectToast__confirm" onclick="confirmAIDetection()">Confirmar</button>
-                  <button class="aiDetectToast__dismiss" onclick="dismissAIDetection()">Ignorar</button>
+                  <button type="button" class="aiDetectToast__confirm" id="aiDetectConfirmBtn">Confirmar</button>
+                  <button type="button" class="aiDetectToast__dismiss" id="aiDetectDismissBtn">Ignorar</button>
                 </div>
 
                 <!-- ── Fragmento pendente do Ritual Diário ─────────────── -->
@@ -8125,14 +8126,14 @@
       <div class="osl-modal-title" data-i18n="sala:paywall.save.title">Sua sessão foi gravada!</div>
       <div class="osl-modal-desc" data-i18n="sala:paywall.save.desc">Este momento foi capturado. Salve agora para acessar o vídeo depois.</div>
       <div class="osl-rec-grid" id="oslRecGrid">
-        <div class="osl-rec-item" id="oslRec1" onclick="oslSelecionarGravacao('gravacao-download','6.90',this)">
+        <div class="osl-rec-item" id="oslRec1" role="button" tabindex="0" aria-pressed="false" data-product-id="gravacao-download" data-price="6.90">
           <div class="osl-rec-info">
             <div class="osl-rec-name" data-i18n="sala:paywall.save.downloadName">📥 Download MP4</div>
             <div class="osl-rec-feat" data-i18n="sala:paywall.save.downloadFeat">Arquivo completo para guardar</div>
           </div>
           <div class="osl-rec-price">R$ 6,90</div>
         </div>
-        <div class="osl-rec-item" id="oslRec2" onclick="oslSelecionarGravacao('gravacao-mensal','14.90',this)">
+        <div class="osl-rec-item" id="oslRec2" role="button" tabindex="0" aria-pressed="false" data-product-id="gravacao-mensal" data-price="14.90">
           <div class="osl-rec-info">
             <div class="osl-rec-name" data-i18n="sala:paywall.save.monthlyName">♾️ Plano Mensal</div>
             <div class="osl-rec-feat" data-i18n="sala:paywall.save.monthlyFeat">Gravações ilimitadas por 30 dias</div>
@@ -8175,14 +8176,14 @@
         <div id="recPassBadge" style="display:none; margin-top:4px; padding:10px 14px; border-radius:10px; background:rgba(120,220,120,.08); border:1px solid rgba(120,220,120,.22); color:rgba(160,240,160,.9); font-size:13px; font-weight:600;"></div>
 
         <div class="recPlanGrid" id="recPlanGrid" style="margin-top:4px">
-          <div class="recPlan" id="recPlan1" onclick="recSelectPlan('gravacao-download','6.90',this)">
+          <div class="recPlan" id="recPlan1" role="button" tabindex="0" aria-pressed="false" data-plan-id="gravacao-download" data-price="6.90">
             <div class="recPlan-info">
               <div class="recPlan-name" data-i18n="sala:rec.step1.planDownloadName">📥 Gravação + Download</div>
               <div class="recPlan-feat" data-i18n="sala:rec.step1.planDownloadFeat">Arquivo MP4 desta sessão para guardar para sempre</div>
             </div>
             <div class="recPlan-price">R$ 6,90</div>
           </div>
-          <div class="recPlan" id="recPlan2" onclick="recSelectPlan('gravacao-mensal','14.90',this)">
+          <div class="recPlan" id="recPlan2" role="button" tabindex="0" aria-pressed="false" data-plan-id="gravacao-mensal" data-price="14.90">
             <div class="recPlan-info">
               <div class="recPlan-name" data-i18n="sala:rec.step1.planMonthlyName">♾️ Gravação Livre Mensal</div>
               <div class="recPlan-feat" data-i18n="sala:rec.step1.planMonthlyFeat">Sessões ilimitadas por 30 dias · Renovação manual</div>
@@ -8349,7 +8350,8 @@
 <!-- ── Lobby 3D Viewer ────────────────────────────────────────────────────── -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js" integrity="sha384-Qvl1RLjZOCDFOOH2bKcGnaDHMM8MVv3zVtMvhy3juQdiIOs6RgQ/7zYdM1FbpHzI" crossorigin="anonymous">
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js" integrity="sha384-pK8zo1cGi3nIm4Yh/hrezBkXvN2riHD+7kg4agEXeMxDNqiAKGO2Ds20+xjzcYgZ" crossorigin="anonymous">
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js" integrity="sha384-BZPDnhvqQ9HQ5XsmqEusjwpN9TIaiGbsJ5XWilDEuRu9Psbw4ZyYk67DUO0nbP3z" crossorigin="anonymous"><script type="module" src="../js/lobby-3d.js"></script>
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js" integrity="sha384-BZPDnhvqQ9HQ5XsmqEusjwpN9TIaiGbsJ5XWilDEuRu9Psbw4ZyYk67DUO0nbP3z" crossorigin="anonymous">
+  <script type="module" src="../js/lobby-3d.js"></script>
 
   <!-- ── Partidas Rolando: refresh + painel espectador ─────────────────────── -->
   <script src="../js/lobby-init.js"></script>

@@ -2,6 +2,54 @@ import { S } from "./state.js";
 import { BACKEND_BASE_URL } from "./constants.js";
 
 const SERVER_BASE = BACKEND_BASE_URL;
+const HOST_TOKEN_KEY      = "osl_host_token";
+const HOST_TOKEN_ROOM_KEY = "osl_host_token_room";
+
+function _normalizeRoomId(roomId) {
+  return String(roomId || "").trim();
+}
+
+function _resultCode(result) {
+  if (!result || typeof result !== "object") return null;
+  if (typeof result.code === "string") return result.code;
+  if (typeof result.error === "string") return result.error;
+  if (result.error && typeof result.error === "object") {
+    if (typeof result.error.code === "string") return result.error.code;
+    if (typeof result.error.error === "string") return result.error.error;
+  }
+  return null;
+}
+
+function _readHostToken(roomId) {
+  const normalizedRoomId = _normalizeRoomId(roomId);
+  try {
+    const token     = sessionStorage.getItem(HOST_TOKEN_KEY) || null;
+    const tokenRoom = sessionStorage.getItem(HOST_TOKEN_ROOM_KEY) || "";
+    if (!token) return null;
+    if (tokenRoom && normalizedRoomId && tokenRoom !== normalizedRoomId) return null;
+    return token;
+  } catch (_) {
+    return null;
+  }
+}
+
+function _storeHostToken(roomId, token) {
+  if (!token) return;
+  try {
+    sessionStorage.setItem(HOST_TOKEN_KEY, String(token));
+    sessionStorage.setItem(HOST_TOKEN_ROOM_KEY, _normalizeRoomId(roomId));
+  } catch (_) {}
+}
+
+function _clearHostToken(roomId) {
+  try {
+    const tokenRoom = sessionStorage.getItem(HOST_TOKEN_ROOM_KEY) || "";
+    const normalizedRoomId = _normalizeRoomId(roomId);
+    if (tokenRoom && normalizedRoomId && tokenRoom !== normalizedRoomId) return;
+    sessionStorage.removeItem(HOST_TOKEN_KEY);
+    sessionStorage.removeItem(HOST_TOKEN_ROOM_KEY);
+  } catch (_) {}
+}
 
 async function _post(path, data = {}) {
   try {
@@ -19,38 +67,174 @@ async function _post(path, data = {}) {
   }
 }
 
+async function _get(path) {
+  try {
+    const res  = await fetch(SERVER_BASE + path, { cache: "no-store" });
+    const json = await res.json().catch(() => null);
+    if (!res.ok) {
+      console.error("PanelBridge erro:", path, json || res.status);
+      return { ok: false, error: json || res.status };
+    }
+    return json || { ok: true };
+  } catch (error) {
+    console.error("PanelBridge falha:", path, error);
+    return { ok: false, error: error.message || String(error) };
+  }
+}
+
+let _hostTokenRequest = null;
+
+export async function ensureHostToken(roomId = S.roomCode, forceRefresh = false) {
+  const normalizedRoomId = _normalizeRoomId(roomId || S.roomCode);
+  if (!normalizedRoomId) return null;
+
+  if (!forceRefresh) {
+    const cached = _readHostToken(normalizedRoomId);
+    if (cached) return cached;
+  } else {
+    _clearHostToken(normalizedRoomId);
+  }
+
+  if (_hostTokenRequest?.roomId === normalizedRoomId) {
+    const pendingToken = await _hostTokenRequest.promise;
+    if (pendingToken || !forceRefresh) return pendingToken;
+  }
+
+  const promise = (async () => {
+    const firebaseIdToken = await _getFirebaseIdToken();
+    if (!firebaseIdToken) return null;
+    const result = await _post("/game/room/host-token", {
+      roomId: normalizedRoomId,
+      firebaseIdToken,
+    });
+    if (!result?.ok || !result.hostToken) return null;
+    _storeHostToken(normalizedRoomId, result.hostToken);
+    return result.hostToken;
+  })();
+
+  _hostTokenRequest = { roomId: normalizedRoomId, promise };
+  try {
+    return await promise;
+  } finally {
+    if (_hostTokenRequest?.promise === promise) _hostTokenRequest = null;
+  }
+}
+
+function _isHostTokenError(result) {
+  const code = _resultCode(result);
+  return code === "HOST_TOKEN_INVALIDO" || code === "HOST_TOKEN_OBRIGATORIO";
+}
+
+async function _hostPost(path, data, { tokenOptional = false, suppliedToken = null } = {}) {
+  const roomId = _normalizeRoomId(data?.roomId || S.roomCode);
+  let hostToken = suppliedToken || _readHostToken(roomId);
+  const shouldRecover = !tokenOptional || !!hostToken || (roomId === _normalizeRoomId(S.roomCode) && S.isHost);
+
+  if (!hostToken && shouldRecover) hostToken = await ensureHostToken(roomId);
+
+  const payload = { ...data, ...(hostToken ? { hostToken } : {}) };
+  let result = await _post(path, payload);
+
+  if (_isHostTokenError(result) && shouldRecover) {
+    const refreshedToken = await ensureHostToken(roomId, true);
+    if (refreshedToken) {
+      result = await _post(path, { ...data, hostToken: refreshedToken });
+    }
+  }
+
+  return result;
+}
+
 export const PanelBridge = {
   baseUrl: SERVER_BASE,
 
-  roomCreate:   (roomId, name, host)           => _post("/game/room/create",   { roomId: String(roomId||"").trim(), name: String(name||"").trim(), host: String(host||"").trim() }),
-  playerJoin:   (roomId, playerId, playerName, hostToken) => _post("/game/player/join",   { roomId: String(roomId||"").trim(), playerId: String(playerId||"").trim(), playerName: String(playerName||"").trim(), ...(hostToken ? { hostToken: String(hostToken) } : {}) }),
-  playerLeave:  (roomId, playerId)             => _post("/game/player/leave",  { roomId: String(roomId||"").trim(), playerId: String(playerId||"").trim() }),
-  sessionStart: (roomId)                        => _post("/game/session/start", { roomId: String(roomId||"").trim() }),
-  sessionEnd:   (roomId)                        => _post("/game/session/end",   { roomId: String(roomId||"").trim() }),
-  video:        (roomId, active)                => _post("/game/video",         { roomId: String(roomId||"").trim(), active: !!active }),
-  recording:    (roomId, active)                => _post("/game/recording",     { roomId: String(roomId||"").trim(), active: !!active }),
-  roomHeartbeat:(roomId)                        => _post("/game/room/heartbeat",{ roomId: String(roomId||"").trim() })
+  async roomCreate(roomId, name, host) {
+    const normalizedRoomId = _normalizeRoomId(roomId);
+    const result = await _post("/game/room/create", {
+      roomId: normalizedRoomId,
+      name: String(name || "").trim(),
+      host: String(host || "").trim(),
+    });
+    if (result?.ok && result.hostToken) _storeHostToken(normalizedRoomId, result.hostToken);
+    return result;
+  },
+  playerJoin: (roomId, playerId, playerName, hostToken) => _post("/game/player/join", {
+    roomId: _normalizeRoomId(roomId),
+    playerId: String(playerId || "").trim(),
+    playerName: String(playerName || "").trim(),
+    ...(hostToken ? { hostToken: String(hostToken) } : {}),
+  }),
+  playerLeave: (roomId, playerId, hostToken) => _hostPost("/game/player/leave", {
+    roomId: _normalizeRoomId(roomId),
+    playerId: String(playerId || "").trim(),
+  }, { tokenOptional: true, suppliedToken: hostToken }),
+  sessionStart: (roomId, hostToken) => _hostPost("/game/session/start", {
+    roomId: _normalizeRoomId(roomId),
+  }, { suppliedToken: hostToken }),
+  sessionEnd: (roomId, hostToken) => _hostPost("/game/session/end", {
+    roomId: _normalizeRoomId(roomId),
+  }, { suppliedToken: hostToken }),
+  video: (roomId, active, hostToken) => _hostPost("/game/video", {
+    roomId: _normalizeRoomId(roomId), active: !!active,
+  }, { suppliedToken: hostToken }),
+  recording: (roomId, active, hostToken) => _hostPost("/game/recording", {
+    roomId: _normalizeRoomId(roomId), active: !!active,
+  }, { suppliedToken: hostToken }),
+  approveJoin: (roomId, playerId, hostToken) => _hostPost("/game/room/approve-join", {
+    roomId: _normalizeRoomId(roomId), playerId: String(playerId || "").trim(),
+  }, { suppliedToken: hostToken }),
+  denyJoin: (roomId, playerId, hostToken) => _hostPost("/game/room/deny-join", {
+    roomId: _normalizeRoomId(roomId), playerId: String(playerId || "").trim(),
+  }, { suppliedToken: hostToken }),
+  joinStatus: (roomId, playerId) => _get(`/game/room/${encodeURIComponent(_normalizeRoomId(roomId))}/join-status?playerId=${encodeURIComponent(String(playerId || "").trim())}`),
+  roomHeartbeat: (roomId) => _post("/game/room/heartbeat", { roomId: _normalizeRoomId(roomId) }),
 };
 
 // Exponha para scripts não-módulo (mobile.js, recording modal, etc.)
 window.PanelBridge = PanelBridge;
 
+let _panelBootRequest = null;
+
 // ── Funções de ponte com o painel backend ─────────────────────────────────────
 
 export async function panelBootRoom() {
-  if (S.panelRoomBooted) return;
-  S.panelRoomBooted = true;
-  try {
-    let hostToken = null;
-    try { hostToken = sessionStorage.getItem("osl_host_token") || null; } catch (_) {}
-    const result = await PanelBridge.roomCreate(S.roomCode, S.roomName, S.playerName);
-    if (result?.ok && result?.hostToken) {
-      hostToken = result.hostToken;
-      try { sessionStorage.setItem("osl_host_token", hostToken); } catch (_) {}
+  if (S.panelRoomBooted) return { ok: true, alreadyBooted: true };
+  if (_panelBootRequest) return _panelBootRequest;
+
+  const request = (async () => {
+    let hostToken = _readHostToken(S.roomCode);
+    const createResult = await PanelBridge.roomCreate(S.roomCode, S.roomName, S.playerName);
+    const createCode   = _resultCode(createResult);
+
+    if (createResult?.ok && createResult.hostToken) {
+      hostToken = createResult.hostToken;
+    } else if (createCode === "SALA_JA_EXISTE") {
+      // Recarregar a página não deve inutilizar uma sala ainda ativa no painel.
+      if (S.isHost) hostToken = (await ensureHostToken(S.roomCode, true)) || hostToken;
+    } else {
+      return createResult || { ok: false, error: "ERRO_GAME_ROOM_CREATE" };
     }
-    await PanelBridge.playerJoin(S.roomCode, S.participantId, S.playerName, hostToken);
-  } catch (error) {
+
+    const joinResult = await PanelBridge.playerJoin(
+      S.roomCode,
+      S.participantId,
+      S.playerName,
+      hostToken,
+    );
+    if (!joinResult?.ok) return joinResult;
+
+    S.panelRoomBooted = true;
+    return joinResult;
+  })().catch((error) => {
     console.error("Erro ao registrar sala no painel:", error);
+    return { ok: false, error: error?.message || String(error) };
+  });
+
+  _panelBootRequest = request;
+  try {
+    return await request;
+  } finally {
+    if (_panelBootRequest === request) _panelBootRequest = null;
   }
 }
 
@@ -64,20 +248,17 @@ async function _participantAuth() {
 
 // ── Ritual: ações de host (backend constrói deck e avança cartas) ─────────────
 export async function ritualStart(players) {
-  const hostToken = sessionStorage.getItem("osl_host_token");
   const firebaseIdToken = await _getFirebaseIdToken();
-  return _post("/game/ritual/start", { roomId: S.roomCode, hostToken, firebaseIdToken, players });
+  return _hostPost("/game/ritual/start", { roomId: S.roomCode, firebaseIdToken, players });
 }
 
 export async function ritualNextCard(players) {
-  const hostToken = sessionStorage.getItem("osl_host_token");
-  return _post("/game/ritual/next-card", { roomId: S.roomCode, hostToken, players });
+  return _hostPost("/game/ritual/next-card", { roomId: S.roomCode, players });
 }
 
 export async function ritualReset(players) {
-  const hostToken = sessionStorage.getItem("osl_host_token");
   const firebaseIdToken = await _getFirebaseIdToken();
-  return _post("/game/ritual/reset", { roomId: S.roomCode, hostToken, firebaseIdToken, players });
+  return _hostPost("/game/ritual/reset", { roomId: S.roomCode, firebaseIdToken, players });
 }
 
 // ── Ações de participante (votos, reações, AI, pressão social) ────────────────
@@ -98,8 +279,7 @@ export async function ritualSocialPressure() {
 }
 
 export async function ritualResolveEffect(winner, dismissOnly) {
-  const hostToken = sessionStorage.getItem("osl_host_token");
-  return _post("/game/ritual/resolve-effect", { roomId: S.roomCode, hostToken, winner: winner || null, dismissOnly: !!dismissOnly, sessionId: S.sessionId });
+  return _hostPost("/game/ritual/resolve-effect", { roomId: S.roomCode, winner: winner || null, dismissOnly: !!dismissOnly, sessionId: S.sessionId });
 }
 
 export async function sessionLogEvent(type, payload = {}) {
@@ -115,26 +295,36 @@ export async function sessionLogEvent(type, payload = {}) {
 
 export async function panelMarkSessionStart() {
   if (S.panelSessionActive) return;
-  S.panelSessionActive = true;
-  try { await PanelBridge.sessionStart(S.roomCode); }
-  catch (error) { console.error("Erro ao iniciar sessão no painel:", error); }
+  try {
+    const result = await PanelBridge.sessionStart(S.roomCode);
+    if (result?.ok) S.panelSessionActive = true;
+    return result;
+  } catch (error) {
+    console.error("Erro ao iniciar sessão no painel:", error);
+    return { ok: false, error: error?.message || String(error) };
+  }
 }
 
 export async function panelMarkSessionEnd() {
   if (!S.panelSessionActive) return;
-  S.panelSessionActive = false;
-  try { await PanelBridge.sessionEnd(S.roomCode); }
-  catch (error) { console.error("Erro ao encerrar sessão no painel:", error); }
+  try {
+    const result = await PanelBridge.sessionEnd(S.roomCode);
+    if (result?.ok) S.panelSessionActive = false;
+    return result;
+  } catch (error) {
+    console.error("Erro ao encerrar sessão no painel:", error);
+    return { ok: false, error: error?.message || String(error) };
+  }
 }
 
 export async function panelMarkVideo(active) {
-  try { await PanelBridge.video(S.roomCode, !!active); }
-  catch (error) { console.error("Erro ao atualizar vídeo no painel:", error); }
+  try { return await PanelBridge.video(S.roomCode, !!active); }
+  catch (error) { console.error("Erro ao atualizar vídeo no painel:", error); return { ok: false, error: error?.message || String(error) }; }
 }
 
 export async function panelMarkRecording(active) {
-  try { await PanelBridge.recording(S.roomCode, !!active); }
-  catch (error) { console.error("Erro ao atualizar gravação no painel:", error); }
+  try { return await PanelBridge.recording(S.roomCode, !!active); }
+  catch (error) { console.error("Erro ao atualizar gravação no painel:", error); return { ok: false, error: error?.message || String(error) }; }
 }
 
 // ── Sessão de jogo: presença e ciclo de vida (escritas via backend/Admin SDK) ──
@@ -238,11 +428,9 @@ export async function redeemPendingCoins() {
 }
 
 export async function sessionEndGame() {
-  const hostToken = sessionStorage.getItem("osl_host_token");
-  return _post("/game/session/end-game", {
+  return _hostPost("/game/session/end-game", {
     roomId:     S.roomCode,
     sessionId:  S.sessionId,
-    hostToken,
   });
 }
 

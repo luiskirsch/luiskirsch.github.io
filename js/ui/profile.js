@@ -842,7 +842,9 @@ export function bindProfileEvents() {
 
   // ── Swatches com moedas (bg, card, fx) ───────────────────────────────────────
   document.querySelectorAll(".bgSwatch--coin,.cardStyleSwatch--coin,.fxSwatch--coin").forEach(sw => {
-    sw.addEventListener("click", async () => {
+    sw.addEventListener("click", async event => {
+      // Impede que o listener do grupo aplique o cosmético bloqueado antes da compra.
+      event.stopPropagation();
       const coinId = sw.dataset.coinId;
       if (!coinId) return;
       const unlocked = S._isPrestige || _hasCompra(coinId);
