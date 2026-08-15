@@ -950,7 +950,7 @@ function _showCardDone(st){
   if(meta&&st&&st.completedAt)meta.innerHTML='<span style="font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(212,175,55,.48)">✓ Descoberto hoje às '+st.completedAt+'</span>';
 }
 
-function startDailyRitual(){
+window.startDailyRitual=function(){
   if(_ritualActive)return;
   _ritualActive=true;
   var card=document.querySelector('.ritualDeck');
@@ -988,7 +988,7 @@ function _showP1(){
   _animEls(p1,180);
 }
 
-function startExperience(){
+window.startExperience=function(){
   var p1=document.getElementById('rP1'),p2=document.getElementById('rP2');
   p1.style.transition='opacity .4s ease';p1.style.opacity='0';
   setTimeout(function(){
@@ -1019,14 +1019,14 @@ function _startTimer(){
   },1000);
 }
 
-function showReflect(){
+window.showReflect=function(){
   clearInterval(_timerInterval);_timerInterval=null;
   var p2=document.getElementById('rP2'),p3=document.getElementById('rP3');
   p2.style.transition='opacity .4s ease';p2.style.opacity='0';
   setTimeout(function(){p2.style.display='none';p2.style.opacity='1';p3.style.display='flex';_animEls(p3,100);},420);
 }
 
-function concludeRitual(){
+window.concludeRitual=function(){
   var p3=document.getElementById('rP3'),p4=document.getElementById('rP4');
   p3.style.transition='opacity .4s ease';p3.style.opacity='0';
   setTimeout(function(){
@@ -1058,7 +1058,7 @@ function _callComplete(){
   }).catch(function(){});
 }
 
-function closeRitual(){
+window.closeRitual=function(){
   var ov=document.getElementById('ritualOverlay'),card=document.querySelector('.ritualDeck');
   var rect=card.getBoundingClientRect();
   document.querySelectorAll('.ritualPhase').forEach(function(p){p.style.transition='opacity .28s ease';p.style.opacity='0';});
