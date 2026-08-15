@@ -54,20 +54,25 @@ export async function clearActiveSession() {
 // ── Ciclo de vida ─────────────────────────────────────────────────────────────
 
 export async function endGameSession() {
-  if (!S.sessionId) return;
+  if (!S.sessionId) return { ok: true, skipped: "no-session" };
   try {
+    let result = { ok: true };
     if (S.isHost) {
-      const result = await sessionEndGame();
+      result = await sessionEndGame();
+      if (!result?.ok) throw new Error(result?.error || result?.code || "SESSION_END_FAILED");
       // Persiste summary para o showSessionRecap que virá a seguir
       if (result?.summary) S._lastSessionSummary = result.summary;
     } else {
-      await sessionPlayerHeartbeat(false);
+      result = await sessionPlayerHeartbeat(false);
     }
     await clearActiveSession();
-  } catch (_) {} finally {
     S.sessionId        = null;
     S.sessionRef       = null;
     S.sessionEventsRef = null;
     S.sessionPlayerRef = null;
+    return result || { ok: true };
+  } catch (error) {
+    console.warn("[session] não foi possível encerrar a sessão:", error);
+    return { ok: false, error: error?.message || String(error) };
   }
 }

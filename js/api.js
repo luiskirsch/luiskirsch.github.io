@@ -150,20 +150,26 @@ export const PanelBridge = {
 
   async roomCreate(roomId, name, host) {
     const normalizedRoomId = _normalizeRoomId(roomId);
+    const firebaseIdToken = await _getFirebaseIdToken();
     const result = await _post("/game/room/create", {
       roomId: normalizedRoomId,
       name: String(name || "").trim(),
       host: String(host || "").trim(),
+      ...(firebaseIdToken ? { firebaseIdToken } : {}),
     });
     if (result?.ok && result.hostToken) _storeHostToken(normalizedRoomId, result.hostToken);
     return result;
   },
-  playerJoin: (roomId, playerId, playerName, hostToken) => _post("/game/player/join", {
-    roomId: _normalizeRoomId(roomId),
-    playerId: String(playerId || "").trim(),
-    playerName: String(playerName || "").trim(),
-    ...(hostToken ? { hostToken: String(hostToken) } : {}),
-  }),
+  async playerJoin(roomId, playerId, playerName, hostToken) {
+    const firebaseIdToken = await _getFirebaseIdToken();
+    return _post("/game/player/join", {
+      roomId: _normalizeRoomId(roomId),
+      playerId: String(playerId || "").trim(),
+      playerName: String(playerName || "").trim(),
+      ...(hostToken ? { hostToken: String(hostToken) } : {}),
+      ...(firebaseIdToken ? { firebaseIdToken } : {}),
+    });
+  },
   playerLeave: (roomId, playerId, hostToken) => _hostPost("/game/player/leave", {
     roomId: _normalizeRoomId(roomId),
     playerId: String(playerId || "").trim(),
@@ -203,18 +209,22 @@ export async function panelBootRoom() {
 
   const request = (async () => {
     let hostToken = _readHostToken(S.roomCode);
-    const createResult = await PanelBridge.roomCreate(S.roomCode, S.roomName, S.playerName);
-    const createCode   = _resultCode(createResult);
+    if (S.isHost) {
+      const createResult = await PanelBridge.roomCreate(S.roomCode, S.roomName, S.playerName);
+      const createCode   = _resultCode(createResult);
 
-    if (createResult?.ok && createResult.hostToken) {
-      hostToken = createResult.hostToken;
-    } else if (createCode === "SALA_JA_EXISTE") {
-      // Recarregar a página não deve inutilizar uma sala ainda ativa no painel.
-      if (S.isHost) hostToken = (await ensureHostToken(S.roomCode, true)) || hostToken;
-    } else {
-      return createResult || { ok: false, error: "ERRO_GAME_ROOM_CREATE" };
+      if (createResult?.ok && createResult.hostToken) {
+        hostToken = createResult.hostToken;
+      } else if (createCode === "SALA_JA_EXISTE") {
+        // Recarregar a página não deve inutilizar uma sala ainda ativa no painel.
+        hostToken = (await ensureHostToken(S.roomCode, true)) || hostToken;
+      } else {
+        return createResult || { ok: false, error: "ERRO_GAME_ROOM_CREATE" };
+      }
     }
 
+    // Convidados nunca tentam criar/tomar posse da sala. Após a aprovação do
+    // anfitrião, entram diretamente com sua própria identidade Firebase.
     const joinResult = await PanelBridge.playerJoin(
       S.roomCode,
       S.participantId,
@@ -252,8 +262,13 @@ export async function ritualStart(players) {
   return _hostPost("/game/ritual/start", { roomId: S.roomCode, firebaseIdToken, players });
 }
 
-export async function ritualNextCard(players) {
-  return _hostPost("/game/ritual/next-card", { roomId: S.roomCode, players });
+export async function ritualNextCard(players, { commandId, expectedCardsRevealedCount } = {}) {
+  return _hostPost("/game/ritual/next-card", {
+    roomId: S.roomCode,
+    players,
+    commandId,
+    expectedCardsRevealedCount,
+  });
 }
 
 export async function ritualReset(players) {

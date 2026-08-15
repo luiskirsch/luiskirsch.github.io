@@ -2,9 +2,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/fireba
 import {
   getFirestore, doc, getDoc, getDocFromServer, getDocs, setDoc, updateDoc, deleteDoc,
   collection, addDoc, onSnapshot, query, where, limit, orderBy,
-  serverTimestamp, increment
+  serverTimestamp, increment, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { S } from "./state.js";
 
 const firebaseConfig = {
@@ -71,5 +71,5 @@ export {
   // Firestore functions re-exportadas para que os módulos não precisem importar CDN diretamente
   doc, getDoc, getDocFromServer, getDocs, setDoc, updateDoc, deleteDoc,
   collection, addDoc, onSnapshot, query, where, limit, orderBy,
-  serverTimestamp, increment, onAuthStateChanged
+  serverTimestamp, increment, runTransaction, onAuthStateChanged, updateProfile, signOut
 };

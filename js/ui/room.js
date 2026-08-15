@@ -2,9 +2,9 @@
 import { S } from "../state.js";
 import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, doc, collection } from "../firebase.js";
 import { escapeHtml, nowTimeFromDate, initials, showOslToast } from "../utils.js";
-import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, redeemPendingCoins, fetchRoomSessions, fetchRoomStats } from "../api.js";
+import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, ensureHostToken, redeemPendingCoins, fetchRoomSessions, fetchRoomStats } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
-import { logEvent, joinSessionAsPlayer, setSessionId, setPlayerConnected, clearActiveSession } from "../game/session.js";
+import { logEvent, joinSessionAsPlayer, setSessionId, setPlayerConnected, clearActiveSession, endGameSession } from "../game/session.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
 import { checkDailyReward, showSessionRecap, updateXpCard, showLevelPanel } from "../game/rewards.js";
 import { OSL_ACHIEVEMENTS } from "../game/effects.js";
@@ -383,6 +383,10 @@ export async function leaveRoom(redirect = true) {
     clearInterval(S.heartbeatTimer);
     clearTimeout(S.typingTimer);
     await setTyping(false);
+    if (S.isHost && S.sessionId) {
+      const ended = await endGameSession();
+      if (!ended?.ok) console.warn("A sessão foi fechada sem confirmação do settlement:", ended?.error);
+    }
     if (S.roomUnsub)          S.roomUnsub();
     if (S.playersUnsub)       S.playersUnsub();
     if (S.messagesUnsub)      S.messagesUnsub();
@@ -390,8 +394,10 @@ export async function leaveRoom(redirect = true) {
     if (S.ritualUnsub)        S.ritualUnsub();
     if (S.ritualHistoryUnsub) S.ritualHistoryUnsub();
     logEvent("PLAYER_LEFT", { nickname: S.playerName, isHost: S.isHost }).catch(() => {});
-    setPlayerConnected(false).catch(() => {});
-    clearActiveSession().catch(() => {});
+    if (!S.isHost) {
+      setPlayerConnected(false).catch(() => {});
+      clearActiveSession().catch(() => {});
+    }
     if (S.isHost) {
       await updateDoc(S.roomRef, {
         status: "closed",
@@ -494,7 +500,12 @@ export function sendLeaveBeacon() {
     const hostToken = S.isHost ? (sessionStorage.getItem("osl_host_token") || null) : null;
     navigator.sendBeacon?.(
       PanelBridge.baseUrl + "/game/player/leave",
-      new Blob([JSON.stringify({ roomId: S.roomCode, playerId: S.participantId, ...(hostToken ? { hostToken } : {}) })], { type:"application/json" })
+      new Blob([JSON.stringify({
+        roomId: S.roomCode,
+        playerId: S.participantId,
+        ...(hostToken ? { hostToken } : {}),
+        ...(!hostToken && S._cachedIdToken ? { firebaseIdToken: S._cachedIdToken } : {}),
+      })], { type:"application/json" })
     );
     // Marca jogador como desconectado na sessão (best-effort; usa token cacheado do heartbeat)
     if (S.sessionId && S._cachedIdToken) {
@@ -554,15 +565,44 @@ export async function ensureUserProfile() {
   }
   if (!snap.exists()) {
     const usernameBase = (S.playerName || "jogador").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"").slice(0,20) || "jogador";
-    await setDoc(S.userRef, { userId: S.userId, displayName: S.playerName, username: usernameBase, bio:"Novo participante do ritual.", avatarEmoji:"🔮", avatarColor:"#1f86d9", memberSince: new Date(), lastSeen: serverTimestamp(), friends:[], incomingRequests:[], outgoingRequests:[], stats:{ gamesPlayed:0, wins:0 } });
+    await setDoc(S.userRef, {
+      schemaVersion: 1,
+      uid: S.userId,
+      userId: S.userId,
+      displayName: S.playerName,
+      username: usernameBase,
+      bio:"Novo participante do ritual.",
+      avatarEmoji:"🔮",
+      avatarColor:"#1f86d9",
+      xp: 0,
+      coins: 0,
+      memberSince: new Date(),
+      lastSeen: serverTimestamp(),
+      lastSeenAt: serverTimestamp(),
+      friends:[],
+      incomingRequests:[],
+      outgoingRequests:[],
+      achievements:{},
+      stats:{ gamesPlayed:0, wins:0 }
+    });
     S.selectedAvatarEmoji = "🔮"; S.selectedAvatarColor = "#1f86d9";
     const fab = document.getElementById("mobileProfileBtn"); if (fab) fab.textContent = "🔮";
     const myBtn = document.getElementById("myProfileBtn"); if (myBtn) myBtn.textContent = "🔮 Perfil";
+    localStorage.setItem("osl_cache_uid", S.userId);
     localStorage.setItem("osl_avatar", "🔮");
   } else {
-    await updateDoc(S.userRef, { lastSeen: serverTimestamp() });
+    await updateDoc(S.userRef, { lastSeen: serverTimestamp(), lastSeenAt: serverTimestamp() });
     const data = snap.data();
-    const emoji = data.avatarEmoji, color = data.avatarColor, photoUrl = data.avatarPhotoUrl || null;
+    const canonicalName = String(data.displayName || data.username || S.playerName || "Jogador").trim().slice(0, 40);
+    if (canonicalName) {
+      S.playerName = canonicalName;
+      localStorage.setItem("osl_nome", canonicalName);
+    }
+    localStorage.setItem("osl_cache_uid", S.userId);
+    const avatar = data.avatar && typeof data.avatar === "object" ? data.avatar : {};
+    const emoji = avatar.emoji || data.avatarEmoji;
+    const color = avatar.color || data.avatarColor;
+    const photoUrl = avatar.url || data.avatarPhotoUrl || data.photoURL || null;
     S.selectedAvatarPhoto = photoUrl;
     if (photoUrl) { localStorage.setItem("osl_avatar_photo", photoUrl); localStorage.removeItem("osl_avatar"); }
     else { localStorage.removeItem("osl_avatar_photo"); if (emoji) { S.selectedAvatarEmoji = emoji; localStorage.setItem("osl_avatar", emoji); } }
@@ -661,7 +701,18 @@ export async function sendJoinRequest() {
   btn.disabled = true; btn.textContent = "Enviando…";
   document.getElementById("joinStatus").textContent = "";
   try {
-    const res = await fetch(MULTI_SERVER + "/game/room/request-join", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ roomId: S._joinTarget.roomId, roomName: S._joinTarget.name, playerId: S.participantId, playerName: name }) });
+    const firebaseIdToken = await S.auth?.currentUser?.getIdToken().catch(() => null);
+    const res = await fetch(MULTI_SERVER + "/game/room/request-join", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        roomId: S._joinTarget.roomId,
+        roomName: S._joinTarget.name,
+        playerId: S.participantId,
+        playerName: name,
+        ...(firebaseIdToken ? { firebaseIdToken } : {}),
+      })
+    });
     const d   = await res.json();
     if (!d.ok) {
       const msgs = { SALA_CHEIA:"Sala lotada.", NOME_JA_EM_USO:`Nome em uso. Tente: ${d.suggestion||"outro nome"}`, SALA_NAO_ENCONTRADA:"Sala não encontrada." };
@@ -697,9 +748,12 @@ function pollJoinApproval(targetRoomId, targetRoomName, joinName) {
 }
 
 // ── Host SSE ──────────────────────────────────────────────────────────────────
-export function connectHostSse() {
+export async function connectHostSse() {
   if (S._hostSseSource) return;
-  S._hostSseSource = new EventSource(MULTI_SERVER + `/game/room/${encodeURIComponent(S.roomCode)}/host-sse`);
+  const hostToken = await ensureHostToken(S.roomCode);
+  if (!hostToken || !S.isHost || S._hostSseSource) return;
+  const url = MULTI_SERVER + `/game/room/${encodeURIComponent(S.roomCode)}/host-sse?hostToken=${encodeURIComponent(hostToken)}`;
+  S._hostSseSource = new EventSource(url);
   S._hostSseSource.addEventListener("join_request", e => {
     try { const d = JSON.parse(e.data); showHostJoinAlert(d.playerId, d.playerName); } catch (_) {}
   });

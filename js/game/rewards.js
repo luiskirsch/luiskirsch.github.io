@@ -5,6 +5,26 @@ import { escapeHtml } from "../utils.js";
 import { OSL_XP_TITLES, OSL_XP_EVENTS, DAILY_STREAK_XP, OSL_REACTION_UNLOCKS, OSL_COINS_PER_LEVEL } from "../constants.js";
 import { OSL_XP, OSL_ACHIEVEMENTS, sendReaction } from "./effects.js";
 
+function markAccountCacheOwner() {
+  try {
+    if (!S.userId) return;
+    const previousUid = localStorage.getItem("osl_cache_uid") || "";
+    if (previousUid !== S.userId) {
+      ["osl_xp_cache", "osl_coins", "osl_avatar", "osl_avatar_photo"]
+        .forEach(key => localStorage.removeItem(key));
+    }
+    localStorage.setItem("osl_cache_uid", S.userId);
+  } catch (_) {}
+}
+
+function accountCacheIsCurrent() {
+  try {
+    return !!S.userId && localStorage.getItem("osl_cache_uid") === S.userId;
+  } catch (_) {
+    return false;
+  }
+}
+
 // ── Barra de reações ──────────────────────────────────────────────────────────
 export function updateReactionBar(level) {
   const bar = document.getElementById("reactionBar");
@@ -29,12 +49,13 @@ export function updateReactionBar(level) {
 
 // ── Moedas ────────────────────────────────────────────────────────────────────
 export function getCoinDisplay() {
+  if (!accountCacheIsCurrent()) return 0;
   try { return parseInt(localStorage.getItem("osl_coins") || "0", 10); } catch(_) { return 0; }
 }
 
 async function awardCoins(level) {
   const amount = OSL_COINS_PER_LEVEL[level - 1] ?? 25;
-  try { localStorage.setItem("osl_coins", String(getCoinDisplay() + amount)); } catch(_) {}
+  try { markAccountCacheOwner(); localStorage.setItem("osl_coins", String(getCoinDisplay() + amount)); } catch(_) {}
   if (S.userRef) {
     try {
       const { updateDoc, increment } = await import("../firebase.js");
@@ -53,7 +74,7 @@ export function updateCoinDisplay() {
 // ── Atualização do card de XP na topbar ───────────────────────────────────────
 export function updateXpCard(xp) {
   S._currentXp = xp;
-  try { localStorage.setItem("osl_xp_cache", String(xp)); } catch (_) {}
+  try { markAccountCacheOwner(); localStorage.setItem("osl_xp_cache", String(xp)); } catch (_) {}
 
   const lv   = OSL_XP.levelFromXP(xp);
   const info = OSL_XP.titleForLevel(lv);
@@ -85,12 +106,12 @@ export async function syncCoinsFromFirestore() {
   try {
     const snap = await getDocFromServer(S.userRef);
     const coins = snap.data()?.coins ?? 0;
-    try { localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
+    try { markAccountCacheOwner(); localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
     updateCoinDisplay();
   } catch(_) {
     getDoc(S.userRef).then(snap => {
       const coins = snap.data()?.coins ?? 0;
-      try { localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
+      try { markAccountCacheOwner(); localStorage.setItem("osl_coins", String(coins)); } catch(_) {}
       updateCoinDisplay();
     }).catch(() => {});
   }
@@ -198,20 +219,26 @@ export async function checkDailyReward() {
     if (!snap.exists()) return;
     const data = snap.data();
     const today     = todayLocal();
-    const alreadyClaimed = (data.lastDailyReward || "") === today;
-    const pendingXp = data.pendingDailyXp || 0;
+    // O bônus de retorno e o Ritual do Dia são progressões diferentes. Antes
+    // ambos usavam `lastDailyReward`, fazendo um fluxo bloquear o outro.
+    const alreadyClaimed = (data.lastLoginRewardDate || "") === today;
+    const pendingXp = data.pendingLoginXp || 0;
     if (alreadyClaimed && pendingXp === 0) return;
     let streak, xp;
     if (alreadyClaimed && pendingXp > 0) {
-      streak = data.dailyStreak || 1; xp = pendingXp;
+      streak = data.loginRewardStreak || 1; xp = pendingXp;
     } else {
-      streak = (data.lastDailyReward === yesterdayLocal()) ? (data.dailyStreak || 0) + 1 : 1;
+      streak = (data.lastLoginRewardDate === yesterdayLocal()) ? (data.loginRewardStreak || 0) + 1 : 1;
       xp = DAILY_STREAK_XP[Math.min(streak - 1, DAILY_STREAK_XP.length - 1)];
-      await setDoc(S.userRef, { lastDailyReward: today, dailyStreak: streak, pendingDailyXp: xp }, { merge: true });
+      await setDoc(S.userRef, {
+        lastLoginRewardDate: today,
+        loginRewardStreak: streak,
+        pendingLoginXp: xp,
+      }, { merge: true });
     }
     showDailyRewardModal(streak, xp, async () => {
       await OSL_XP.award(S.userRef, null, xp);
-      await setDoc(S.userRef, { pendingDailyXp: 0 }, { merge: true });
+      await setDoc(S.userRef, { pendingLoginXp: 0 }, { merge: true });
     });
   } catch (_) {}
 }

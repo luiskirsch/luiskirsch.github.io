@@ -14,6 +14,17 @@ import { dispatch } from "./game/engine.js";
 import { CMD } from "./game/commands.js";
 import { fetchHub, checkEncontroTicket } from "./api.js";
 import { initStreamMode } from "./ui/stream-mode.js";
+import { bootstrapAccount } from "./account-store.js";
+
+function localAccountCacheMatchesAuthHint() {
+  try {
+    const authUid  = localStorage.getItem("osl_auth_uid") || "";
+    const cacheUid = localStorage.getItem("osl_cache_uid") || "";
+    return !!authUid && authUid === cacheUid;
+  } catch (_) {
+    return false;
+  }
+}
 
 // ── Identidade ────────────────────────────────────────────────────────────────
 S.participantId = getParticipantId();
@@ -60,8 +71,9 @@ window.addEventListener("keydown",     enableAudio, { once: true });
   applyVisualEffect(S.selectedFx);
 
   // Aplica avatar do cache local imediatamente, sem esperar o Firestore
-  const savedPhoto  = localStorage.getItem("osl_avatar_photo") || "";
-  const savedEmoji  = localStorage.getItem("osl_avatar") || "🔮";
+  const canUseAccountCache = localAccountCacheMatchesAuthHint();
+  const savedPhoto  = canUseAccountCache ? (localStorage.getItem("osl_avatar_photo") || "") : "";
+  const savedEmoji  = canUseAccountCache ? (localStorage.getItem("osl_avatar") || "🔮") : "🔮";
   const mobileBtn   = document.getElementById("mobileProfileBtn");
   const desktopBtn  = document.getElementById("myProfileBtn");
 
@@ -70,8 +82,9 @@ window.addEventListener("keydown",     enableAudio, { once: true });
   function applyDesktopProfileBtn() {
     if (!desktopBtn) return;
     const profileLabel = oslTr("sala:topbar.actions.profile", "👤 Perfil").replace(/^[^\s]+\s*/, "");
-    const photo = localStorage.getItem("osl_avatar_photo") || "";
-    const emoji = localStorage.getItem("osl_avatar") || "🔮";
+    const cacheMatches = localAccountCacheMatchesAuthHint();
+    const photo = cacheMatches ? (localStorage.getItem("osl_avatar_photo") || "") : "";
+    const emoji = cacheMatches ? (localStorage.getItem("osl_avatar") || "🔮") : "🔮";
     if (photo) {
       const badge = desktopBtn.querySelector(".badge"); desktopBtn.innerHTML = "";
       const img = document.createElement("img"); img.src = photo; img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;flex-shrink:0";
@@ -193,7 +206,9 @@ window.dismissAIDetection = dismissAIDetection;
   initStreamMode();
 
   // Renderiza do cache local antes de qualquer round-trip Firestore
-  const _cachedXp = parseInt(localStorage.getItem("osl_xp_cache") || "0", 10);
+  const _cachedXp = localAccountCacheMatchesAuthHint()
+    ? parseInt(localStorage.getItem("osl_xp_cache") || "0", 10)
+    : 0;
   if (_cachedXp > 0) updateXpCard(_cachedXp);
   try {
     const _cachedPlayers = JSON.parse(localStorage.getItem("osl_players_cache") || "[]");
@@ -239,9 +254,24 @@ window.dismissAIDetection = dismissAIDetection;
   bindRitual(onSnapshot, orderBy, query);
   bindMyMission(onSnapshot);
 
-  // Operações paralelas de inicialização
+  // Inicialização autenticada e ordenada
   try {
-    await Promise.all([ensureUserProfile(), ensureRoom()]);
+    // Perfil primeiro: o nome/avatar canônicos precisam estar resolvidos antes
+    // de criar a membership da sala. O bootstrap do backend consolida a mesma
+    // conta usada pelo HUB e deixa o cache explicitamente vinculado ao UID.
+    await ensureUserProfile();
+    const account = await bootstrapAccount().catch(error => {
+      console.warn("AccountSnapshot indisponível; usando listener Firestore:", error);
+      return null;
+    });
+    if (account) {
+      updateXpCard(account.progression?.xp || 0);
+      updateDesktopProfileBtn(
+        account.profile?.avatar?.url || null,
+        account.profile?.avatar?.emoji || null,
+      );
+    }
+    await ensureRoom();
     syncCoinsFromFirestore();
     if (!S._isSpectator) await upsertSelf();
     if (!S._isSpectator) startHeartbeat();

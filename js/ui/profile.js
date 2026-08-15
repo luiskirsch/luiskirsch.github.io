@@ -1,6 +1,6 @@
 // Perfil, avatar, temas, estilos de carta, efeitos visuais, amizades
 import { S } from "../state.js";
-import { setDoc, updateDoc, getDoc, getDocs, deleteDoc, doc, query, where, limit, collection, serverTimestamp, onAuthStateChanged } from "../firebase.js";
+import { setDoc, updateDoc, getDoc, getDocs, deleteDoc, doc, query, where, limit, collection, serverTimestamp, onAuthStateChanged, updateProfile, signOut } from "../firebase.js";
 import { escapeHtml, initials, normalizeUsername, uniqueArray } from "../utils.js";
 import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, COIN_COSMETICS, PRESTIGE_PRODUTOS, BACKEND_BASE_URL } from "../constants.js";
 import { sendFriendRequest, respondFriendRequest, fetchFriendsLeaderboard, searchUsers, buyWithCoins, fetchCompatibility } from "../api.js";
@@ -99,6 +99,68 @@ export async function syncAccountPurchases() {
 }
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
+function safeProfileImageUrl(value) {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const raw = value.trim();
+  if (/^data:image\/(?:png|jpe?g|webp|gif|avif);base64,[a-z0-9+/=\s]+$/i.test(raw)) return raw;
+  try {
+    const parsed = new URL(raw, window.location.href);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    // Também torna o valor seguro para os renderers legados que o colocam em
+    // uma declaração CSS dentro de um atributo HTML.
+    return parsed.href.replace(/["'\\()]/g, char => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+  } catch (_) {
+    return null;
+  }
+}
+
+function resolveProfileAvatar(profile = {}) {
+  const nested = profile.avatar && typeof profile.avatar === "object" ? profile.avatar : {};
+  const hasNestedUrl = Object.prototype.hasOwnProperty.call(nested, "url")
+    || Object.prototype.hasOwnProperty.call(nested, "photoURL")
+    || Object.prototype.hasOwnProperty.call(nested, "photoUrl");
+  const nestedUrl = nested.url ?? nested.photoURL ?? nested.photoUrl ?? null;
+  const legacyUrl = profile.avatarPhotoUrl ?? profile.avatarPhotoURL ?? profile.photoURL ?? profile.photoUrl ?? null;
+  const url = hasNestedUrl ? nestedUrl : legacyUrl;
+  const emoji = nested.emoji ?? profile.avatarEmoji ?? "";
+  const color = nested.color ?? profile.avatarColor ?? "";
+  const requestedKind = nested.kind || "";
+  const kind = ["image", "emoji", "generated"].includes(requestedKind)
+    ? requestedKind
+    : (url ? "image" : "emoji");
+  return {
+    kind,
+    url: safeProfileImageUrl(url),
+    emoji: typeof emoji === "string" ? emoji : "",
+    color: typeof color === "string" ? color : ""
+  };
+}
+
+function normalizeProfileData(profile = {}, fallbackUid = null) {
+  const avatar = resolveProfileAvatar(profile);
+  const uid = profile.uid || profile.userId || fallbackUid || null;
+  return {
+    ...profile,
+    uid,
+    userId: profile.userId || uid,
+    avatar,
+    // Campos derivados mantêm os componentes visuais antigos funcionando.
+    avatarPhotoUrl: avatar.url,
+    avatarEmoji: avatar.emoji || null,
+    avatarColor: avatar.color || null
+  };
+}
+
+function isHttpAvatarUrl(value) {
+  if (typeof value !== "string" || !value.trim()) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (_) {
+    return false;
+  }
+}
+
 export function applyAvatarDisplay(el, photoUrl, emoji, color) {
   if (!el) return;
   if (photoUrl) {
@@ -317,6 +379,7 @@ function fillPacksTab() {
 }
 
 async function fillProfileUI(user, isSelfView) {
+  user = normalizeProfileData(user, isSelfView ? S.userId : null);
   const profileAvatarLarge = document.getElementById("profileAvatarLarge");
   applyAvatarDisplay(profileAvatarLarge, user.avatarPhotoUrl, user.avatarEmoji || initials(user.displayName || "Jogador"), user.avatarColor);
   if (isSelfView && user.bgTheme) { S.selectedBgTheme = user.bgTheme; localStorage.setItem("osl_bg", user.bgTheme); applyBgTheme(user.bgTheme); }
@@ -374,7 +437,7 @@ export async function openProfile(player) {
       document.getElementById("friendsPanel")?.classList.add("hidden");
       document.getElementById("profileModal").classList.remove("hidden"); return;
     }
-    const user = snap.data();
+    const user = normalizeProfileData(snap.data(), targetUserId);
     S.openedProfileData = user;
     await fillProfileUI(user, isSelfView);
     resetProfileTabs();
@@ -411,8 +474,9 @@ export function closeProfile() {
 // ── Painel de amizades ────────────────────────────────────────────────────────
 
 function _friendAvatar(p) {
-  if (p.avatarPhotoUrl) return `<div class="friendAvatar" style="background-image:url('${p.avatarPhotoUrl}');background-size:cover;background-position:center;font-size:0"></div>`;
-  return `<div class="friendAvatar" style="background:${p.avatarColor || "#342718"}">${p.avatarEmoji || "🔮"}</div>`;
+  const avatar = resolveProfileAvatar(p);
+  if (avatar.url) return `<div class="friendAvatar" style="background-image:url('${avatar.url}');background-size:cover;background-position:center;font-size:0"></div>`;
+  return `<div class="friendAvatar" style="background:${avatar.color || "#342718"}">${avatar.emoji || "🔮"}</div>`;
 }
 
 function _compatBadge(compat) {
@@ -444,7 +508,7 @@ function renderFriendItem(p, actions = [], compat = null) {
 async function loadUserProfileData(uid) {
   try {
     const snap = await getDoc(doc(S.db, "users", uid));
-    return snap.exists() ? { uid, ...snap.data() } : null;
+    return snap.exists() ? normalizeProfileData(snap.data(), uid) : null;
   } catch (_) { return null; }
 }
 
@@ -512,7 +576,7 @@ export async function fillFriendsPanel(user, isSelfView) {
               item.remove();
               if (action === "accept") {
                 const freshSnap = await getDoc(S.userRef);
-                if (freshSnap.exists()) fillFriendsPanel(freshSnap.data(), true);
+                if (freshSnap.exists()) fillFriendsPanel(normalizeProfileData(freshSnap.data(), S.userId), true);
               }
             } catch (_) { btn.disabled = false; }
           });
@@ -562,12 +626,13 @@ async function showLeaderboardModal() {
   rowsEl.innerHTML = board.map((e, i) => {
     const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`;
     const selfMark = e.isSelf ? ' <span style="opacity:.5;font-size:11px;">(você)</span>' : "";
-    const avatarStyle = e.avatarPhotoUrl
-      ? `style="background-image:url('${e.avatarPhotoUrl}');background-size:cover;background-position:center;font-size:0"`
-      : `style="background:${e.avatarColor || "#342718"}"`;
+    const avatar = resolveProfileAvatar(e);
+    const avatarStyle = avatar.url
+      ? `style="background-image:url('${avatar.url}');background-size:cover;background-position:center;font-size:0"`
+      : `style="background:${avatar.color || "#342718"}"`;
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);">
       <span style="width:28px;text-align:center;font-size:16px;">${medal}</span>
-      <div class="friendAvatar" ${avatarStyle}>${e.avatarPhotoUrl ? "" : (e.avatarEmoji || "🔮")}</div>
+      <div class="friendAvatar" ${avatarStyle}>${avatar.url ? "" : (avatar.emoji || "🔮")}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:14px;font-weight:700;">${escapeHtml(e.displayName)}${selfMark}</div>
         <div style="font-size:11px;opacity:.5;">Nv. ${e.level} · ${e.xp.toLocaleString("pt-BR")} XP</div>
@@ -756,17 +821,56 @@ export function bindProfileEvents() {
     const displayName     = editDisplayName.value.trim().slice(0,40) || "Jogador";
     const username        = normalizeUsername(editUsername.value) || "jogador";
     const bio             = editBio.value.trim().slice(0,180);
-    const avatarUpdate    = S.selectedAvatarPhoto ? { avatarPhotoUrl: S.selectedAvatarPhoto, avatarEmoji: null } : { avatarEmoji: S.selectedAvatarEmoji, avatarPhotoUrl: null };
+    const avatarUrl       = safeProfileImageUrl(S.selectedAvatarPhoto);
+    const avatarEmoji     = S.selectedAvatarEmoji || "🔮";
+    const avatarColor     = S.selectedAvatarColor || "#342718";
+    const avatar          = {
+      kind: avatarUrl ? "image" : "emoji",
+      url: avatarUrl,
+      emoji: avatarEmoji,
+      color: avatarColor
+    };
+    S.selectedAvatarPhoto = avatarUrl;
+    const avatarUpdate    = avatarUrl
+      ? { avatarPhotoUrl: avatarUrl, avatarEmoji: null }
+      : { avatarEmoji, avatarPhotoUrl: null };
+    const firebaseUser    = S.auth?.currentUser || null;
+    const canonicalUid    = S.userId || firebaseUser?.uid || null;
     try {
-      await updateDoc(S.userRef, { displayName, username, bio, ...avatarUpdate, avatarColor: S.selectedAvatarColor, bgTheme: S.selectedBgTheme, cardStyle: S.selectedCardStyle, visualEffect: S.selectedFx, lastSeen: serverTimestamp() });
+      await updateDoc(S.userRef, {
+        schemaVersion: 1,
+        uid: canonicalUid,
+        userId: canonicalUid,
+        displayName,
+        username,
+        bio,
+        avatar,
+        ...avatarUpdate,
+        avatarColor,
+        bgTheme: S.selectedBgTheme,
+        cardStyle: S.selectedCardStyle,
+        visualEffect: S.selectedFx,
+        updatedAt: serverTimestamp(),
+        lastSeen: serverTimestamp()
+      });
+      if (firebaseUser) {
+        const authProfile = { displayName };
+        // Firestore é a fonte canônica. A sincronização visual do Firebase Auth
+        // é complementar e nunca pode impedir que o perfil do jogo seja salvo.
+        if (isHttpAvatarUrl(avatarUrl)) authProfile.photoURL = avatarUrl;
+        await updateProfile(firebaseUser, authProfile).catch(error => {
+          console.warn("Não foi possível sincronizar o perfil no Firebase Auth:", error);
+        });
+      }
+      if (canonicalUid) localStorage.setItem("osl_cache_uid", canonicalUid);
       localStorage.setItem("osl_bg", S.selectedBgTheme); localStorage.setItem("osl_card_style", S.selectedCardStyle); localStorage.setItem("osl_fx", S.selectedFx);
       applyBgTheme(S.selectedBgTheme); applyCardStyle(S.selectedCardStyle); applyVisualEffect(S.selectedFx);
       if (S.openedProfileUserId === S.userId) { S.playerName = displayName; localStorage.setItem("osl_nome", displayName); }
-      const snap = await getDoc(S.userRef); S.openedProfileData = snap.data(); await fillProfileUI(S.openedProfileData, true);
-      if (S.selectedAvatarPhoto) { localStorage.setItem("osl_avatar_photo", S.selectedAvatarPhoto); localStorage.removeItem("osl_avatar"); }
-      else { localStorage.removeItem("osl_avatar_photo"); }
+      const snap = await getDoc(S.userRef); S.openedProfileData = normalizeProfileData(snap.data(), canonicalUid); await fillProfileUI(S.openedProfileData, true);
+      if (avatarUrl) { localStorage.setItem("osl_avatar_photo", avatarUrl); localStorage.removeItem("osl_avatar"); }
+      else { localStorage.removeItem("osl_avatar_photo"); localStorage.setItem("osl_avatar", avatarEmoji); }
       updateDesktopProfileBtn(S.selectedAvatarPhoto, S.selectedAvatarEmoji);
-      await setDoc(S.playerRef, { name: displayName, avatarEmoji: S.selectedAvatarPhoto ? null : (S.selectedAvatarEmoji || "🔮"), avatarPhotoUrl: S.selectedAvatarPhoto || null, avatarColor: S.selectedAvatarColor }, { merge: true });
+      await setDoc(S.playerRef, { name: displayName, avatarEmoji: avatarUrl ? null : avatarEmoji, avatarPhotoUrl: avatarUrl, avatarColor }, { merge: true });
     } catch (error) { console.error(error); alert("Não foi possível salvar o perfil."); }
   });
 
@@ -920,9 +1024,12 @@ export function bindProfileEvents() {
     navigator.clipboard.writeText(lic).then(() => { const btn = document.getElementById("profCopyLicBtn"); btn.textContent = "✓"; setTimeout(() => btn.textContent = "⎘", 2000); });
   });
 
-  document.getElementById("logoutBtn")?.addEventListener("click", () => {
+  document.getElementById("logoutBtn")?.addEventListener("click", async () => {
     if (!confirm("Sair da conta? Você será redirecionado para a entrada.")) return;
-    localStorage.clear(); window.location.href = "./entrada.html";
+    try { await signOut(S.auth); } catch (error) { console.warn("Falha ao encerrar sessão Firebase:", error); }
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.replace("./entrada.html");
   });
 
   // Ouve evento de abrir perfil (disparado por room.js)

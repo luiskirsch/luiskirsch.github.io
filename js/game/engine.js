@@ -48,6 +48,13 @@ function makeInitialState() {
 
 let _state = makeInitialState();
 const _subs = new Set();
+let _pendingRevealCommand = null;
+
+function createCommandId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  const entropy = `${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`.padEnd(24, "0");
+  return `next_${Date.now().toString(36)}_${entropy}`.slice(0, 128);
+}
 
 function _patch(fields) {
   _state = { ..._state, ...fields };
@@ -156,6 +163,12 @@ const _handlers = {
   },
 
   async [CMD.RESET_RITUAL]({ players = [] } = {}) {
+    if (S.sessionId) {
+      const ended = await endGameSession();
+      if (!ended?.ok) {
+        return { ok: false, code: "SESSION_END_FAILED", error: "Não foi possível consolidar a sessão atual." };
+      }
+    }
     const apiPlayers = players.map(p => ({ id: p.id, name: p.name, userId: p.userId || null, activeDeckId: p.activeDeckId || null }));
     const result = await ritualReset(apiPlayers);
 
@@ -173,14 +186,40 @@ const _handlers = {
   },
 
   async [CMD.REVEAL_CARD]({ players = [] } = {}) {
-    const result = await ritualNextCard(players.map(p => ({ id: p.id, name: p.name })));
+    const expectedCardsRevealedCount = Number.isInteger(_state.cardsRevealedCount)
+      ? Math.max(0, _state.cardsRevealedCount)
+      : 0;
+    const sessionId = S.sessionId || null;
+    if (
+      !_pendingRevealCommand
+      || _pendingRevealCommand.expectedCardsRevealedCount !== expectedCardsRevealedCount
+      || _pendingRevealCommand.sessionId !== sessionId
+    ) {
+      _pendingRevealCommand = {
+        commandId: createCommandId(),
+        expectedCardsRevealedCount,
+        sessionId,
+      };
+    }
+    const command = _pendingRevealCommand;
+    const result = await ritualNextCard(
+      players.map(p => ({ id: p.id, name: p.name })),
+      command,
+    );
 
     if (!result?.ok) {
       console.error('[engine] REVEAL_CARD falhou:', result?.error);
       return result || { ok: false, error: "Não foi possível revelar a carta." };
     }
 
-    const newCount = result.cardsRevealedCount ?? (_state.cardsRevealedCount + 1);
+    if (_pendingRevealCommand?.commandId === command.commandId) {
+      _pendingRevealCommand = null;
+    }
+
+    const returnedCount = Number(result.cardsRevealedCount);
+    const newCount = Number.isInteger(returnedCount) && returnedCount >= 0
+      ? Math.max(_state.cardsRevealedCount, returnedCount)
+      : Math.max(_state.cardsRevealedCount, expectedCardsRevealedCount + 1);
 
     // Backend já loga CARD_REVEALED e atualiza gameState na sessão
     // Atualização parcial local — SYNC_FROM_FIRESTORE vai completar

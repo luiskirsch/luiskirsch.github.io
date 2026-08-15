@@ -8,7 +8,7 @@
 <title>SextoLugar · Hub</title>
 <link rel="icon" type="image/png" href="./favicon.png">
 <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://*.googleusercontent.com https://lh3.googleusercontent.com; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://osl-video-server-production.up.railway.app; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; upgrade-insecure-requests; block-all-mixed-content;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://*.googleusercontent.com https://lh3.googleusercontent.com https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://osl-video-server-production.up.railway.app; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; upgrade-insecure-requests; block-all-mixed-content;">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
@@ -75,6 +75,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .navProfile:hover{border-color:rgba(212,175,55,.38);background:rgba(14,22,34,.90);}
 .navAvRing{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--gold2);position:relative;flex-shrink:0;}
 .navAv{width:100%;height:100%;border-radius:50%;background:rgba(212,175,55,.14);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:10px;font-weight:700;color:var(--gold);overflow:hidden;}
+.navAv img,.dAvatar img,.suggestAv img{width:100%;height:100%;object-fit:cover;display:block;}
 .navOnDot{position:absolute;bottom:-1px;right:-1px;width:7px;height:7px;border-radius:50%;background:var(--ok);border:1.5px solid #04080d;box-shadow:0 0 6px rgba(88,224,64,.70);}
 .navPInfo{display:flex;flex-direction:column;line-height:1.1;gap:3px;}
 .navPName{font-size:11px;font-weight:700;color:var(--text);letter-spacing:.04em;}
@@ -367,6 +368,7 @@ body.ritual-open #ritualDim{opacity:1;}
 .suggestPlus:hover{background:rgba(212,175,55,.10);}
 .suggestMore{display:block;width:100%;text-align:right;padding:10px 18px 14px;background:none;border:none;color:var(--gold2);font-size:8px;font-weight:700;letter-spacing:.20em;text-transform:uppercase;cursor:pointer;transition:color .16s;}
 .suggestMore:hover{color:var(--gold);}
+.suggestEmpty{padding:10px 16px 16px;color:var(--text3);font-size:9px;line-height:1.55;letter-spacing:.06em;text-align:center;}
 
 /* ═══ SEASON BAR ═══ */
 .seasonBar{position:fixed;bottom:0;left:0;right:0;z-index:80;height:var(--season-h);background:rgba(3,6,12,.98);border-top:1px solid rgba(212,175,55,.11);display:flex;align-items:center;justify-content:center;gap:20px;}
@@ -409,14 +411,26 @@ body.ritual-open #ritualDim{opacity:1;}
 .fmItems{list-style:none;text-align:left;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
 .fmItem{display:flex;align-items:center;gap:10px;font-size:10px;color:var(--text2);letter-spacing:.06em;}
 .fmItemDot{width:5px;height:5px;border-radius:50%;background:rgba(212,175,55,.40);flex-shrink:0;}
-.dHead{padding:14px 18px 10px;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:4px;}
+.dHead{padding:14px 18px 10px;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:4px;display:flex;align-items:center;gap:10px;}
+.dAvatar{width:34px;height:34px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.24);color:var(--gold2);font-family:var(--serif);font-size:12px;font-weight:700;}
+.dIdentity{min-width:0;}
 .dName{font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:2px;}
-.dSub{font-size:9px;letter-spacing:.06em;color:var(--text3);}
+.dSub{display:block;font-size:9px;letter-spacing:.06em;color:var(--text3);}
+.dProgress{display:block;margin-top:4px;color:rgba(212,175,55,.62);font-family:var(--serif);font-size:8px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;}
 .dItem{display:flex;align-items:center;gap:10px;padding:10px 18px;color:var(--text2);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:none;border:none;cursor:pointer;width:100%;text-align:left;transition:background .14s,color .14s;}
 .dItem:hover{background:rgba(255,255,255,.04);color:var(--text);}
 .dItem.danger{color:rgba(255,80,80,.75);}.dItem.danger:hover{background:rgba(255,30,30,.06);color:rgba(255,80,80,.96);}
 .dDiv{height:1px;background:rgba(255,255,255,.05);margin:4px 0;}
 .dEmpty{padding:18px;font-size:10px;color:var(--text3);text-align:center;letter-spacing:.10em;}
+.notifDrop{width:min(340px,calc(100vw - 8px));max-height:min(430px,70vh);overflow-y:auto;}
+.notifItem{display:flex;gap:10px;padding:12px 15px;border-bottom:1px solid rgba(255,255,255,.045);}
+.notifItem:last-child{border-bottom:0;}
+.notifItem.unread{background:rgba(212,175,55,.035);}
+.notifIcon{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.14);font-size:12px;}
+.notifBody{min-width:0;flex:1;}
+.notifTitle{font-size:10.5px;font-weight:650;color:var(--text);line-height:1.35;}
+.notifText{font-size:9px;color:var(--text3);line-height:1.5;margin-top:3px;overflow-wrap:anywhere;}
+.notifTime{font-size:7.5px;color:rgba(212,175,55,.46);letter-spacing:.08em;text-transform:uppercase;margin-top:5px;}
 .toast{position:fixed;right:18px;bottom:calc(var(--season-h) + 12px);z-index:300;min-width:210px;background:rgba(4,8,16,.99);border:1px solid rgba(212,175,55,.28);border-left:3px solid var(--gold);border-radius:3px;padding:12px 18px 12px 34px;box-shadow:0 18px 48px rgba(0,0,0,.68),0 0 24px rgba(212,175,55,.06);font-size:9px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--text);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .22s,transform .22s;white-space:nowrap;}
 .toast::before{content:'✦';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:9px;}
 .toast.on{opacity:1;transform:translateY(0);}
@@ -472,7 +486,7 @@ body.ritual-open #ritualDim{opacity:1;}
     </button>
     <div class="navProfile" id="btnPerfil" role="button" tabindex="0">
       <div class="navAvRing"><div class="navAv" id="navAv"><span id="navAvI">L</span></div><span class="navOnDot"></span></div>
-      <div class="navPInfo"><span class="navPName" id="navName">—</span><span class="navRankTag" id="navRank">NÍVEL 1</span></div>
+      <div class="navPInfo"><span class="navPName" id="navName">—</span><span class="navRankTag" id="navRank">NÍVEL —</span></div>
     </div>
   </div>
 </nav>
@@ -613,20 +627,9 @@ body.ritual-open #ritualDim{opacity:1;}
     <div class="suggestSect">
       <div class="suggestHdr">
         <span class="phDia">◆</span>
-        <span class="suggestHdrTitle">Sugestões</span>
+        <span class="suggestHdrTitle">Conexões</span>
       </div>
-      <div id="suggestList">
-        <div class="suggestItem">
-          <div class="suggestAv">🕸</div>
-          <div class="suggestInfo"><div class="suggestName">Marina</div><div class="suggestStatus">Offline</div></div>
-          <div class="suggestPlus">+</div>
-        </div>
-        <div class="suggestItem">
-          <div class="suggestAv">🕸</div>
-          <div class="suggestInfo"><div class="suggestName">Rafael</div><div class="suggestStatus">Offline</div></div>
-          <div class="suggestPlus">+</div>
-        </div>
-      </div>
+      <div id="suggestList"><div class="suggestEmpty">Nenhuma conexão offline no momento.</div></div>
       <button class="suggestMore" type="button" data-toast="Ver todos — em breve">VER TODOS OS AMIGOS →</button>
     </div>
   </aside>
@@ -651,7 +654,10 @@ body.ritual-open #ritualDim{opacity:1;}
 
 <!-- Dropdown Perfil -->
 <div class="drop" id="dropPerfil">
-  <div class="dHead"><span class="dName" id="dpName">—</span><span class="dSub" id="dpEmail">—</span></div>
+  <div class="dHead">
+    <div class="dAvatar" id="dpAvatar"><span>?</span></div>
+    <div class="dIdentity"><span class="dName" id="dpName">—</span><span class="dSub" id="dpEmail">—</span><span class="dProgress" id="dpProgress">Nível —</span></div>
+  </div>
   <button class="dItem" type="button" data-toast="Configurações — em breve">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     Configurações
@@ -662,7 +668,7 @@ body.ritual-open #ritualDim{opacity:1;}
     Sair da conta
   </button>
 </div>
-<div class="drop" id="dropNotif"><div class="dEmpty">Nenhuma notificação</div></div>
+<div class="drop notifDrop" id="dropNotif"><div class="dEmpty">Nenhuma notificação</div></div>
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- Feature modal -->
@@ -834,6 +840,52 @@ var clock=new THREE.Clock();
 
 window._toast=function(msg,ms){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('on');},ms||2200);};
 
+var _hubState={account:null,data:null,notificationsUnread:0,markingNotifications:false,visibleUnreadNotificationIds:[]};
+
+function _hubNumber(value,fallback){var n=Number(value);return Number.isFinite(n)?n:(fallback||0);}
+function _hubDate(value){
+  if(value==null)return null;
+  if(value instanceof Date)return isNaN(value.getTime())?null:value;
+  if(typeof value==='object'){
+    var seconds=value.seconds!=null?value.seconds:value._seconds;
+    if(seconds!=null)value=Number(seconds)*1000;
+  }
+  if(typeof value==='number'&&value>0&&value<100000000000)value*=1000;
+  var d=new Date(value);return isNaN(d.getTime())?null:d;
+}
+function _safeImageUrl(value){
+  var raw=String(value||'').trim();if(!raw)return'';
+  if(/^data:image\/(?:png|jpe?g|webp|gif|avif);base64,[a-z0-9+/=\s]+$/i.test(raw))return raw;
+  try{var u=new URL(raw,location.href);return(u.protocol==='http:'||u.protocol==='https:')?u.href:'';}catch(_){return'';}
+}
+function _safeAvatarColor(value){
+  var raw=String(value||'').trim();
+  return /^(?:#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\)|hsla?\([\d\s.,%]+\))$/i.test(raw)?raw:'';
+}
+function _avatarData(source){
+  var profile=source||{},avatar=profile.avatar||{};
+  return{
+    url:_safeImageUrl(avatar.url||avatar.photoURL||avatar.photoUrl||profile.avatarPhotoUrl||profile.avatarPhotoURL||profile.photoURL),
+    emoji:String(avatar.emoji||profile.avatarEmoji||'').slice(0,12),
+    color:_safeAvatarColor(avatar.color||profile.avatarColor)
+  };
+}
+function _renderAvatar(el,source,name){
+  if(!el)return;
+  var avatar=_avatarData(source),fallback=(String(name||'?').trim().charAt(0)||'?').toUpperCase();
+  el.replaceChildren();el.style.backgroundImage='';el.style.backgroundColor=avatar.color||'rgba(212,175,55,.14)';
+  if(avatar.url){var img=document.createElement('img');img.src=avatar.url;img.alt='';img.referrerPolicy='no-referrer';el.appendChild(img);}
+  else{var span=document.createElement('span');span.textContent=avatar.emoji||fallback;el.appendChild(span);}
+}
+function _mergeAccount(previous,next){
+  var prev=previous||{},incoming=next||{};
+  return Object.assign({},prev,incoming,{
+    profile:Object.assign({},prev.profile||{},incoming.profile||{}),
+    progression:Object.assign({},prev.progression||{},incoming.progression||{}),
+    wallet:Object.assign({},prev.wallet||{},incoming.wallet||{})
+  });
+}
+
 document.querySelectorAll('[data-toast]').forEach(function(trigger){
   trigger.addEventListener('click',function(){window._toast(trigger.getAttribute('data-toast'));});
 });
@@ -841,7 +893,7 @@ document.querySelectorAll('[data-toast]').forEach(function(trigger){
 var _open=null;
 function closeDrops(){document.querySelectorAll('.drop').forEach(function(d){d.classList.remove('open');});_open=null;}
 function toggleDrop(el,trigger){
-  if(!el)return;
+  if(!el)return false;
   var was=el.classList.contains('open');
   closeDrops();
   if(!was){
@@ -859,6 +911,7 @@ function toggleDrop(el,trigger){
     el.classList.add('open');
     _open=el;
   }
+  return !was;
 }
 document.addEventListener('click',function(e){if(_open&&!_open.contains(e.target))closeDrops();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeDrops();closeFM();}});
@@ -882,14 +935,22 @@ document.getElementById('fmClose').addEventListener('click',closeFM);
 document.getElementById('featureModal').addEventListener('click',function(e){if(e.target===this)closeFM();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFM();});
 
-document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropNotif'),this);});
+document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();var opened=toggleDrop(document.getElementById('dropNotif'),this);if(opened&&window.hubMarkNotificationsRead)window.hubMarkNotificationsRead();});
 document.getElementById('btnCoins').addEventListener('click',function(e){e.stopPropagation();window._toast('Loja de moedas — em breve');});
 document.getElementById('btnPerfil').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropPerfil'),this);});
 document.getElementById('navSocial').addEventListener('click',function(){closeDrops();openFM('social');});
 document.getElementById('navMundo').addEventListener('click',function(){closeDrops();openFM('mundo');});
 document.getElementById('navRitual').addEventListener('click',function(){location.href='./entrada.html';});
 document.getElementById('dpLogout').addEventListener('click',function(){closeDrops();window._hubLogout&&window._hubLogout();});
-document.getElementById('btnInvite').addEventListener('click',function(){window._toast('Convites — em breve');});
+document.getElementById('btnInvite').addEventListener('click',async function(){
+  var url=new URL('hub.html',window.location.href).href;
+  var share={title:'SEXTO LUGAR',text:'Venha explorar o SEXTO LUGAR comigo.',url:url};
+  try{
+    if(navigator.share){await navigator.share(share);window._toast('Convite aberto para compartilhar.');return;}
+    await navigator.clipboard.writeText(share.text+' '+url);
+    window._toast('Convite copiado.');
+  }catch(err){if(err&&err.name!=='AbortError')window._toast('Não foi possível compartilhar o convite.');}
+});
 
 /* Countdown */
 (function(){
@@ -908,46 +969,136 @@ document.getElementById('btnInvite').addEventListener('click',function(){window.
 
 /* Public API */
 window.hubHideVeil=function(){var v=document.getElementById('veil');if(!v)return;v.classList.add('out');setTimeout(function(){v.parentNode&&v.parentNode.removeChild(v);},650);};
-window.hubNavSetUser=function(dn,email,coins){
-  var ini=(dn||email||'?').charAt(0).toUpperCase();
-  var fn=(dn||'').split(' ')[0]||'—';
-  var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
-  s('navAvI',ini);s('navName',fn);s('dpName',dn||'—');s('dpEmail',email||'');
-  if(coins!=null)s('coinsVal',String(coins));
+window.hubApplyAccount=function(account,fallbackUser){
+  var merged=_mergeAccount(_hubState.account,account);
+  _hubState.account=merged;
+  var profile=merged.profile||{},progression=merged.progression||{},wallet=merged.wallet||{};
+  var fallback=fallbackUser||{};
+  var displayName=String(profile.displayName||profile.name||merged.displayName||fallback.displayName||fallback.email||'Jogador').trim().slice(0,80)||'Jogador';
+  var email=String(profile.email||merged.email||fallback.email||'').trim().slice(0,160);
+  var hasProgression=progression.xp!=null||progression.totalXp!=null||progression.level!=null||merged.xp!=null||merged.level!=null;
+  var xp=Math.max(0,Math.floor(_hubNumber(progression.xp!=null?progression.xp:progression.totalXp,merged.xp)));
+  var calculatedLevel=Math.floor(Math.sqrt(xp/50))+1;
+  var level=Math.max(1,Math.floor(_hubNumber(progression.level,calculatedLevel)));
+  var coins=Math.max(0,Math.floor(_hubNumber(wallet.coins!=null?wallet.coins:wallet.balance,merged.coins)));
+  var firstName=displayName.split(/\s+/)[0]||displayName;
+  var set=function(id,value){var el=document.getElementById(id);if(el)el.textContent=value;};
+  set('navName',firstName);set('navRank',hasProgression?'NÍVEL '+level+' · '+xp.toLocaleString('pt-BR')+' XP':'NÍVEL —');
+  set('dpName',displayName);set('dpEmail',email);set('dpProgress',hasProgression?'Nível '+level+' · '+xp.toLocaleString('pt-BR')+' XP total':'Nível —');
+  set('coinsVal',coins.toLocaleString('pt-BR'));
+  var avatarSource=Object.assign({},profile,{avatar:profile.avatar||merged.avatar||{},photoURL:profile.photoURL||fallback.photoURL||''});
+  _renderAvatar(document.getElementById('navAv'),avatarSource,displayName);
+  _renderAvatar(document.getElementById('dpAvatar'),avatarSource,displayName);
+  return{displayName:displayName,email:email,xp:xp,level:level,coins:coins};
 };
-window.hubNavSetCoins=function(v){var e=document.getElementById('coinsVal');if(e)e.textContent=String(v||0);};
+window.hubNavSetUser=function(dn,email,coins){return window.hubApplyAccount({profile:{displayName:dn,email:email},wallet:coins==null?{}:{coins:coins}},{displayName:dn,email:email});};
+window.hubNavSetCoins=function(v){var e=document.getElementById('coinsVal');if(e)e.textContent=Math.max(0,Math.floor(_hubNumber(v,0))).toLocaleString('pt-BR');};
+
+window.hubSetUnread=function(value){
+  var unread=Math.max(0,Math.floor(_hubNumber(value,0))),badge=document.getElementById('notifBadge');
+  _hubState.notificationsUnread=unread;
+  if(!badge)return;
+  badge.textContent=unread>99?'99+':String(unread);
+  badge.style.display=unread>0?'flex':'none';
+  badge.setAttribute('aria-label',unread+' notificação'+(unread===1?'':'ões')+' não lida'+(unread===1?'':'s'));
+};
+
+window.hubRenderNotifications=function(items,unread){
+  var drop=document.getElementById('dropNotif');if(!drop)return;
+  var source=Array.isArray(items)?items:(items&&Array.isArray(items.items)?items.items:[]);
+  var notifications=source.slice(0,30);
+  _hubState.visibleUnreadNotificationIds=[];
+  drop.replaceChildren();
+  if(!notifications.length){var empty=document.createElement('div');empty.className='dEmpty';empty.textContent='Nenhuma notificação';drop.appendChild(empty);}
+  notifications.forEach(function(notification){
+    var row=document.createElement('div');row.className='notifItem'+(notification&&notification.read===false?' unread':'');
+    var notificationId=String(notification&&notification.id||'').trim();
+    if(notificationId)row.dataset.notificationId=notificationId;
+    if(notificationId&&notification&&notification.read===false)_hubState.visibleUnreadNotificationIds.push(notificationId);
+    var icon=document.createElement('div');icon.className='notifIcon';
+    var icons={achievement_unlocked:'✦',friend_accepted:'◇',session_invite:'↗',daily:'☾'};
+    icon.textContent=icons[notification&&notification.type]||'•';
+    var body=document.createElement('div');body.className='notifBody';
+    var title=document.createElement('div');title.className='notifTitle';title.textContent=String(notification&&notification.title||'Atualização').slice(0,200);
+    body.appendChild(title);
+    if(notification&&notification.body){var textEl=document.createElement('div');textEl.className='notifText';textEl.textContent=String(notification.body).slice(0,1000);body.appendChild(textEl);}
+    var date=_hubDate(notification&&notification.createdAt);
+    if(date){var time=document.createElement('div');time.className='notifTime';time.textContent=_fmtCtx(date);body.appendChild(time);}
+    row.appendChild(icon);row.appendChild(body);drop.appendChild(row);
+  });
+  var unreadCount=unread!=null?unread:notifications.filter(function(item){return item&&item.read===false;}).length;
+  window.hubSetUnread(unreadCount);
+};
+
+window.hubMarkNotificationsRead=function(){
+  if(_hubState.notificationsUnread<1||_hubState.markingNotifications)return;
+  var ids=Array.from(new Set(_hubState.visibleUnreadNotificationIds||[])).filter(Boolean);
+  if(!ids.length)return;
+  var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+  if(!token)return;
+  _hubState.markingNotifications=true;
+  Promise.allSettled(ids.map(function(id){
+    return fetch(api+'/notifications/'+encodeURIComponent(id)+'/read',{method:'POST',headers:{Authorization:'Bearer '+token}})
+      .then(function(response){if(!response.ok)throw new Error('NOTIFICATION_READ_'+response.status);return id;});
+  })).then(function(results){
+    var marked=results.filter(function(result){return result.status==='fulfilled';}).map(function(result){return result.value;});
+    if(!marked.length){window._toast&&window._toast('Não foi possível marcar as notificações como lidas.');return;}
+    var markedSet=new Set(marked);
+    document.querySelectorAll('#dropNotif .notifItem.unread').forEach(function(el){
+      if(markedSet.has(el.dataset.notificationId||''))el.classList.remove('unread');
+    });
+    _hubState.visibleUnreadNotificationIds=ids.filter(function(id){return !markedSet.has(id);});
+    window.hubSetUnread(Math.max(0,_hubState.notificationsUnread-marked.length));
+  }).finally(function(){_hubState.markingNotifications=false;});
+};
 
 window.hubSetHero=function(data){
   var h=new Date().getHours();
   var s=h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE';
   var nm=(data._userName||'').split(' ')[0].toUpperCase();
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
-  var setH=function(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;};
+  var setTitle=function(lines){var e=document.getElementById('heroTitle');if(!e)return;e.replaceChildren();lines.forEach(function(line,index){if(index)e.appendChild(document.createElement('br'));e.appendChild(document.createTextNode(line));});};
   set('heroKick',nm?s+', '+nm+'.':s+'.');
   var online=(data.friends||[]).find(function(f){return f.online;});
-  if(data.fragment){setH('heroTitle','MISSÃO PENDENTE.');set('heroCta','CONTINUAR');}
-  else if(online){var n=(online.displayName||'Alguém').split(' ')[0].toUpperCase();setH('heroTitle',n+'<br>ESTÁ ONLINE.');set('heroCta','CHAMAR');}
-  else if(data.lastSession&&data.lastSession.roomName){setH('heroTitle','O MUNDO<br>TE ESPERA.');}
+  if(data.fragment){setTitle(['MISSÃO PENDENTE.']);set('heroCta','CONTINUAR');}
+  else if(online){var n=_friendData(online).name.split(' ')[0].toUpperCase();setTitle([n,'ESTÁ ONLINE.']);set('heroCta','CHAMAR');}
+  else if(data.lastSession&&data.lastSession.roomName){setTitle(['O MUNDO','TE ESPERA.']);}
 };
 
 /* ── Daily Ritual Flow ─────────────────────────────────────── */
-var _dailyData=null,_ritualActive=false,_timerInterval=null;
+var _dailyData=null,_ritualActive=false,_timerInterval=null,_dailyCompleting=false;
+var _dailyMetaMarkup=(document.querySelector('.rMeta')||{}).innerHTML||'';
+
+function _dailyCache(){try{return JSON.parse(localStorage.getItem('osl_daily_done')||'null');}catch(_){return null;}}
+function _dailyCompletedState(d){
+  if(d&&typeof d.completedByUser==='boolean')return d.completedByUser?{date:d.date,completedAt:d.completedAt,count:d.respondents!=null?d.respondents:d.completionCount}:null;
+  var cached=_dailyCache();return cached&&cached.date===(d&&d.date)?cached:null;
+}
+function _dailyTime(value){
+  if(typeof value==='string'&&/^\d{2}:\d{2}$/.test(value))return value;
+  var date=_hubDate(value);return date?date.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
+}
+function _showCardReady(){
+  var btn=document.getElementById('btnDiscover');if(btn){btn.textContent='DESCOBRIR';btn.classList.remove('btnDone');}
+  var meta=document.querySelector('.rMeta');if(meta&&_dailyMetaMarkup)meta.innerHTML=_dailyMetaMarkup;
+}
 
 window.hubSetRitual=function(d){
-  _dailyData=d;
+  _dailyData=d||null;
   var q=d&&(d.question||d.cardText);
   if(q){var e=document.getElementById('ritualQ');if(e)e.textContent='"'+q+'"';}
   var cnt=d&&(d.respondents!=null?d.respondents:d.completionCount);
-  if(cnt!=null){var c=document.getElementById('ritualCount');if(c)c.textContent=cnt.toLocaleString('pt-BR');}
-  try{var st=JSON.parse(localStorage.getItem('osl_daily_done')||'null');
-    if(st&&st.date===(d&&d.date))_showCardDone(st);}catch(_){}
+  var completed=_dailyCompletedState(d);
+  if(completed)_showCardDone(completed);
+  else{_showCardReady();if(cnt!=null){var c=document.getElementById('ritualCount');if(c)c.textContent=_hubNumber(cnt,0).toLocaleString('pt-BR');}}
 };
 
 function _showCardDone(st){
   var btn=document.getElementById('btnDiscover');
   if(btn){btn.textContent='✓ DESCOBERTO';btn.classList.add('btnDone');}
   var meta=document.querySelector('.rMeta');
-  if(meta&&st&&st.completedAt)meta.innerHTML='<span style="font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(212,175,55,.48)">✓ Descoberto hoje às '+st.completedAt+'</span>';
+  var time=_dailyTime(st&&st.completedAt);
+  if(meta){meta.replaceChildren();var label=document.createElement('span');label.style.cssText='font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(212,175,55,.48)';label.textContent='✓ Descoberto hoje'+(time?' às '+time:'');meta.appendChild(label);}
 }
 
 window.startDailyRitual=function(){
@@ -1035,38 +1186,63 @@ window.showReflect=function(){
   setTimeout(function(){p2.style.display='none';p2.style.opacity='1';p3.style.display='flex';_animEls(p3,100);},420);
 }
 
+function _setDailyConcludeBusy(busy){
+  var btn=document.getElementById('rBtnConclude');if(!btn)return;
+  btn.disabled=!!busy;btn.textContent=busy?'REGISTRANDO...':'CONCLUIR RITUAL';
+}
+
+function _showDailyCompletionError(error){
+  var p3=document.getElementById('rP3'),btn=document.getElementById('rBtnConclude');if(!p3)return;
+  var el=document.getElementById('rCompleteError');
+  if(!el){el=document.createElement('div');el.id='rCompleteError';el.setAttribute('role','alert');el.style.cssText='max-width:440px;margin:14px 0 2px;color:#f0a8a0;font:600 11px/1.5 Arial,sans-serif;letter-spacing:.04em;text-align:center;';p3.insertBefore(el,btn||null);}
+  var message=error&&error.message==='DAILY_AUTH_REQUIRED'?'Sua sessão expirou. Entre novamente para concluir o ritual.':error&&error.message==='DAILY_COMPLETE_TIMEOUT'?'O servidor demorou para responder. Tente novamente.':'Não foi possível registrar o ritual. Tente novamente.';
+  el.textContent=message;window._toast&&window._toast(message,3200);
+}
+
+function _clearDailyCompletionError(){var el=document.getElementById('rCompleteError');if(el)el.remove();}
+
 window.concludeRitual=function(){
-  var p3=document.getElementById('rP3'),p4=document.getElementById('rP4');
-  p3.style.transition='opacity .4s ease';p3.style.opacity='0';
-  setTimeout(function(){
-    p3.style.display='none';p3.style.opacity='1';p4.style.display='flex';
-    var xp=(_dailyData&&_dailyData.bonusXp)||35;
-    var cnt=(_dailyData&&(_dailyData.respondents!=null?_dailyData.respondents:_dailyData.completionCount)||0)+1;
-    var xpEl=document.getElementById('rConXP'),cntEl=document.getElementById('rConCount');
-    if(xpEl)xpEl.textContent='+'+xp+' XP';
-    if(cntEl)cntEl.textContent=_fmtCount(cnt);
-    _animEls(p4,100);
-    _callComplete();
-  },420);
+  if(_dailyCompleting)return;
+  _dailyCompleting=true;_clearDailyCompletionError();_setDailyConcludeBusy(true);
+  _callComplete().then(function(completion){
+    var p3=document.getElementById('rP3'),p4=document.getElementById('rP4');
+    p3.style.transition='opacity .4s ease';p3.style.opacity='0';
+    setTimeout(function(){
+      p3.style.display='none';p3.style.opacity='1';p4.style.display='flex';
+      var xpEl=document.getElementById('rConXP'),cntEl=document.getElementById('rConCount');
+      if(xpEl)xpEl.textContent=completion.alreadyCompleted?'RITUAL JÁ CONCLUÍDO':'+'+completion.xp+' XP';
+      if(cntEl)cntEl.textContent=_fmtCount(completion.count);
+      _animEls(p4,100);
+      _dailyCompleting=false;_setDailyConcludeBusy(false);
+    },420);
+  }).catch(function(error){
+    _dailyCompleting=false;_setDailyConcludeBusy(false);_showDailyCompletionError(error);
+  });
 }
 
 function _fmtCount(n){return n===1?'1 pessoa chegou até aqui hoje.':(n||0).toLocaleString('pt-BR')+' pessoas chegaram até aqui hoje.';}
 
 function _callComplete(){
   var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
-  if(!token)return;
-  fetch(api+'/daily/complete',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}})
-  .then(function(r){return r.ok?r.json():null;}).then(function(result){
-    if(!result)return;
-    var xp=result.xp||35,cnt=result.completionCount||0;
-    var xpEl=document.getElementById('rConXP'),cntEl=document.getElementById('rConCount');
-    if(xpEl)xpEl.textContent='+'+xp+' XP';
-    if(cntEl)cntEl.textContent=_fmtCount(cnt);
+  if(!token)return Promise.reject(new Error('DAILY_AUTH_REQUIRED'));
+  var controller=typeof AbortController!=='undefined'?new AbortController():null;
+  var timeoutId=setTimeout(function(){if(controller)controller.abort();},12000);
+  return fetch(api+'/daily/complete',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},signal:controller?controller.signal:undefined})
+  .then(function(response){return response.json().catch(function(){return null;}).then(function(result){if(!response.ok||!result||result.ok!==true)throw new Error('DAILY_COMPLETE_'+response.status);return result;});})
+  .then(function(result){
+    var alreadyCompleted=result.alreadyCompleted===true;
+    var xp=Math.max(0,Math.floor(_hubNumber(result.xpAwarded,result.xp||0)));
+    var cnt=Math.max(0,Math.floor(_hubNumber(result.completionCount,_dailyData&&(_dailyData.respondents!=null?_dailyData.respondents:_dailyData.completionCount))));
     var hubCnt=document.getElementById('ritualCount');if(hubCnt)hubCnt.textContent=cnt.toLocaleString('pt-BR');
     var now=new Date(),hh=now.getHours(),mm=now.getMinutes();
     var ts=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
+    if(_dailyData){_dailyData.completedByUser=true;_dailyData.completedAt=result.completedAt||ts;_dailyData.completionCount=cnt;_dailyData.respondents=cnt;}
+    if(result.account&&window.hubApplyAccount){if(window._hubData)window._hubData.account=result.account;window.hubApplyAccount(result.account,window._hubFallbackUser||{});}
     try{localStorage.setItem('osl_daily_done',JSON.stringify({date:_dailyData&&_dailyData.date,completedAt:ts,count:cnt}));}catch(_){}
-  }).catch(function(){});
+    _showCardDone({completedAt:result.completedAt||ts,count:cnt});
+    return{alreadyCompleted:alreadyCompleted,xp:xp,count:cnt,completedAt:result.completedAt||ts};
+  }).catch(function(error){if(error&&error.name==='AbortError')throw new Error('DAILY_COMPLETE_TIMEOUT');throw error;})
+  .finally(function(){clearTimeout(timeoutId);});
 }
 
 window.closeRitual=function(){
@@ -1081,8 +1257,7 @@ window.closeRitual=function(){
       ov.style.display='none';ov.style.transition='';
       document.querySelectorAll('.ritualPhase').forEach(function(p){p.style.display='none';p.style.opacity='';});
       _ritualActive=false;
-      try{var st=JSON.parse(localStorage.getItem('osl_daily_done')||'null');
-        if(st&&st.date===(_dailyData&&_dailyData.date))_showCardDone(st);}catch(_){}
+      var st=_dailyCompletedState(_dailyData);if(st)_showCardDone(st);
     },560);
   },300);
 }
@@ -1094,62 +1269,87 @@ window.hubSetSeason=function(s){
   if(s.daysLeft!=null){set('sbStatus',s.daysLeft+' dias restantes');set('sbDays',s.daysLeft+' dias');}
 };
 
+function _friendData(friend){
+  var f=friend||{},profile=f.profile||{};
+  return{
+    raw:f,
+    uid:String(f.uid||profile.uid||''),
+    name:String(profile.displayName||f.displayName||'Conexão').trim().slice(0,80)||'Conexão',
+    avatar:Object.assign({},f,profile,{avatar:profile.avatar||f.avatar||{}})
+  };
+}
+
+function _renderOfflineConnections(friends){
+  var list=document.getElementById('suggestList');if(!list)return;
+  var offline=(friends||[]).filter(function(f){return f&&f.online!==true;}).slice(0,4);
+  list.replaceChildren();
+  if(!offline.length){var empty=document.createElement('div');empty.className='suggestEmpty';empty.textContent='Nenhuma conexão offline no momento.';list.appendChild(empty);return;}
+  offline.forEach(function(friend){
+    var data=_friendData(friend),item=document.createElement('div');item.className='suggestItem';
+    var avatar=document.createElement('div');avatar.className='suggestAv';_renderAvatar(avatar,data.avatar,data.name);
+    var info=document.createElement('div');info.className='suggestInfo';
+    var name=document.createElement('div');name.className='suggestName';name.textContent=data.name;
+    var status=document.createElement('div');status.className='suggestStatus';
+    var seen=_hubDate(friend.lastSeenMs||friend.lastSeen||friend.lastPlayedAt);
+    status.textContent=seen?'Offline · visto '+_fmtCtx(seen):'Offline';
+    var action=document.createElement('button');action.type='button';action.className='suggestPlus';action.textContent='↗';action.title='Ver conexão';
+    action.addEventListener('click',function(){window._toast(data.name.split(/\s+/)[0]+' está offline agora.');});
+    info.appendChild(name);info.appendChild(status);item.appendChild(avatar);item.appendChild(info);item.appendChild(action);list.appendChild(item);
+  });
+}
+
 window.hubRenderFriends=function(friends,lastSession){
-  var ul=document.getElementById('friendsList');
-  var pe=document.getElementById('presenceEmpty');
-  var btn=document.getElementById('btnInvite');
+  var all=Array.isArray(friends)?friends:[];
+  var ul=document.getElementById('friendsList'),pe=document.getElementById('presenceEmpty'),btn=document.getElementById('btnInvite');
   if(!ul)return;
-  var on=(friends||[]).filter(function(f){return f.online;});
+  _renderOfflineConnections(all);
+  var on=all.filter(function(f){return f&&f.online===true;});
   if(!on.length){
-    /* empty → show empty state with fade in */
     ul.classList.remove('show');
-    setTimeout(function(){
-      ul.classList.remove('vis');
-      if(pe){pe.style.display='';requestAnimationFrame(function(){pe.classList.remove('fade');});}
-    },280);
+    setTimeout(function(){ul.replaceChildren();ul.classList.remove('vis');if(pe){pe.style.display='';requestAnimationFrame(function(){pe.classList.remove('fade');});}},280);
     if(btn){btn.textContent='CONVIDAR AMIGOS';btn.classList.remove('callMode');}
     return;
   }
-  /* friends online → fade empty out, fade list in */
-  if(pe){pe.classList.add('fade');}
+  if(pe)pe.classList.add('fade');
   setTimeout(function(){
     if(pe)pe.style.display='none';
-    /* derive shared-session context per friend */
     var lastFriendId=lastSession&&lastSession.participantUid;
-    var lastFriendWhen=lastSession&&lastSession.playedAt?_fmtCtx(lastSession.playedAt):null;
-    ul.classList.add('vis');
-    var count=on.length;
-    var countHtml=count>1?'<li class="fCount">'+count+' amigos estão aqui.</li>':'';
-    ul.innerHTML=countHtml+on.slice(0,6).map(function(f){
-      var ini=(f.displayName||'?').trim().charAt(0).toUpperCase();
-      var nm=(f.displayName||'Anônimo').split(' ')[0];
-      var ctx=f.uid&&f.uid===lastFriendId&&lastFriendWhen
-        ?'<div class="fContext">Vocês jogaram juntos '+lastFriendWhen+'.</div>':
-        (count===1?'<div class="fContext">Clique para convidar.</div>':'');
-      return '<li class="fItem"><div class="fAvWrap"><div class="fAv">'+ini+'</div><span class="fOnlineDot"></span></div><div class="fInfo"><div class="fName">'+nm+'</div><div class="fStatus">Disponível agora</div>'+ctx+'</div></li>';
-    }).join('');
+    var lastFriendAt=lastSession&&(lastSession.playedAt||lastSession.sessionAt);
+    var lastFriendWhen=lastFriendAt?_fmtCtx(lastFriendAt):null;
+    var count=on.length;ul.replaceChildren();ul.classList.add('vis');
+    if(count>1){var countEl=document.createElement('li');countEl.className='fCount';countEl.textContent=count+' amigos estão aqui.';ul.appendChild(countEl);}
+    on.slice(0,6).forEach(function(friend){
+      var data=_friendData(friend),item=document.createElement('li');item.className='fItem';if(data.uid)item.dataset.uid=data.uid;
+      var avatarWrap=document.createElement('div');avatarWrap.className='fAvWrap';
+      var avatar=document.createElement('div');avatar.className='fAv';_renderAvatar(avatar,data.avatar,data.name);
+      var dot=document.createElement('span');dot.className='fOnlineDot';avatarWrap.appendChild(avatar);avatarWrap.appendChild(dot);
+      var info=document.createElement('div');info.className='fInfo';
+      var name=document.createElement('div');name.className='fName';name.textContent=data.name.split(/\s+/)[0];
+      var status=document.createElement('div');status.className='fStatus';status.textContent='Disponível agora';info.appendChild(name);info.appendChild(status);
+      if(data.uid&&data.uid===lastFriendId&&lastFriendWhen){var context=document.createElement('div');context.className='fContext';context.textContent='Vocês jogaram juntos '+lastFriendWhen+'.';info.appendChild(context);}
+      else if(count===1){var invite=document.createElement('div');invite.className='fContext';invite.textContent='Clique para convidar.';info.appendChild(invite);}
+      item.appendChild(avatarWrap);item.appendChild(info);ul.appendChild(item);
+    });
     requestAnimationFrame(function(){ul.classList.add('show');});
   },280);
-  if(btn){
-    btn.textContent=on.length===1?'CONVIDAR':'CONVIDAR TODOS';
-    btn.classList.add('callMode');
-  }
+  if(btn){btn.textContent=on.length===1?'CONVIDAR':'CONVIDAR TODOS';btn.classList.add('callMode');}
 };
 
 function _fmtCtx(ts){
-  var d=new Date(ts),now=new Date(),diff=Math.floor((now-d)/86400000);
+  var d=_hubDate(ts);if(!d)return'há algum tempo';var now=new Date(),diff=Math.max(0,Math.floor((now-d)/86400000));
   if(diff===0)return'hoje';if(diff===1)return'ontem';if(diff<7)return'essa semana';return diff+'d atrás';
 }
 
 window.hubSetContext=function(data){
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   function showBtn(id,show){var e=document.getElementById(id);if(e)e.style.display=show?'':'none';}
-  function fmtDate(ts){var d=new Date(ts),now=new Date();var diff=Math.floor((now-d)/86400000);if(diff===0)return'hoje';if(diff===1)return'ontem';return diff+'d atrás';}
+  function fmtDate(ts){var d=_hubDate(ts);if(!d)return'—';var now=new Date();var diff=Math.max(0,Math.floor((now-d)/86400000));if(diff===0)return'hoje';if(diff===1)return'ontem';return diff+'d atrás';}
   /* Última sessão — botão só aparece se há sessão real */
   if(data.lastSession&&data.lastSession.roomName){
     set('ctxSessName',data.lastSession.roomName);
     set('ctxSessSub',(data.lastSession.playerCount||'?')+' participantes');
-    set('ctxSessMeta',data.lastSession.playedAt?fmtDate(data.lastSession.playedAt):'—');
+    var sessionAt=data.lastSession.playedAt||data.lastSession.sessionAt;
+    set('ctxSessMeta',sessionAt?fmtDate(sessionAt):'—');
     showBtn('ctxSessBtn',true);
   } else {
     set('ctxSessName','Nenhuma sessão ainda');set('ctxSessSub','Crie a sua primeira');set('ctxSessMeta','—');
@@ -1205,20 +1405,45 @@ import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasej
 const API="https://osl-video-server-production.up.railway.app";
 const cfg={apiKey:"AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",authDomain:"osextolugar-game.firebaseapp.com",projectId:"osextolugar-game",storageBucket:"osextolugar-game.firebasestorage.app",messagingSenderId:"947922328721",appId:"1:947922328721:web:989522c99e16ab449f3330"};
 const app=initializeApp(cfg);const auth=getAuth(app);
-window._hubLogout=async()=>{try{await signOut(auth);}catch(_){}window.location.href="./página.html";};
+const ACCOUNT_LOCAL_KEYS=[
+  "osl_auth_uid","osl_cache_uid","osl_user_id","osl_player_id","osl_nome","osl_username","osl_avatar","osl_avatar_photo",
+  "osl_xp_cache","osl_coins","osl_compras","osl_daily_done","osl_bg","osl_card_style","osl_fx",
+  "osl_checkout_nome","osl_checkout_email","osl_license_token","osl_license_code","osl_license_email",
+  "osl_panel_room_id","osl_panel_player_name","osl_players_cache","osl_sala","osl_nome_sala","osl_reconnect_flag"
+];
+const ACCOUNT_SESSION_KEYS=[
+  "osl_access_token","osl_access_expires_at","osl_host_token","osl_host_token_room","osl_participant_id",
+  "osl_player_id","osl_player_name","osl_room_id","osl_rev"
+];
+window._hubClearAccountCaches=()=>{
+  try{ACCOUNT_LOCAL_KEYS.forEach(k=>localStorage.removeItem(k));Object.keys(localStorage).filter(k=>k.startsWith("osl:user:")||k.startsWith("osl:account:")).forEach(k=>localStorage.removeItem(k));}catch(_){}
+  try{ACCOUNT_SESSION_KEYS.forEach(k=>sessionStorage.removeItem(k));}catch(_){}
+};
+window._hubLogout=async()=>{window._hubClearAccountCaches();window._hubToken=null;try{await signOut(auth);}catch(_){}window.location.href="./página.html";};
 onAuthStateChanged(auth,async(user)=>{
-  if(!user){window.location.href="./página.html";return;}
-  window.hubNavSetUser&&window.hubNavSetUser(user.displayName,user.email,null);
+  if(!user){window._hubClearAccountCaches();window.location.href="./página.html";return;}
+  try{localStorage.setItem("osl_auth_uid",user.uid);}catch(_){}
+  window._hubFallbackUser={displayName:user.displayName||"",email:user.email||"",photoURL:user.photoURL||""};
+  window.hubApplyAccount&&window.hubApplyAccount({profile:{}},window._hubFallbackUser);
   let data={};
   try{const t=await user.getIdToken();window._hubAPI=API;window._hubToken=t;const r=await fetch(API+"/hub",{headers:{Authorization:"Bearer "+t}});if(r.ok)data=await r.json().catch(()=>({}));}catch(_){}
-  data._userName=user.displayName||user.email||"";
-  window.hubNavSetUser&&window.hubNavSetUser(user.displayName,user.email,data.coins);
+  window._hubData=data;
+  const account=data.account||{
+    profile:{displayName:user.displayName||"",email:user.email||"",photoURL:user.photoURL||""},
+    progression:{xp:data.xp,level:data.level},
+    wallet:{coins:data.coins}
+  };
+  const rendered=window.hubApplyAccount?window.hubApplyAccount(account,window._hubFallbackUser):{displayName:user.displayName||user.email||""};
+  data._userName=rendered.displayName||user.displayName||user.email||"";
+  data.friends=Array.isArray(data.friends)?data.friends:(Array.isArray(data.connections)?data.connections:((data.account&&data.account.social&&data.account.social.friends)||[]));
+  data.lastSession=data.lastSession||((data.account&&data.account.activity&&data.account.activity.lastSession)||null);
+  data.daily=data.daily||((data.account&&data.account.tasks&&data.account.tasks.daily)||null);
   window.hubSetHero&&window.hubSetHero(data);
   window.hubSetRitual&&window.hubSetRitual(data.daily);
   window.hubSetSeason&&window.hubSetSeason(data.season);
   window.hubRenderFriends&&window.hubRenderFriends(data.friends,data.lastSession);
   window.hubSetContext&&window.hubSetContext(data);
-  if(data.coins!=null)window.hubNavSetCoins&&window.hubNavSetCoins(data.coins);
+  window.hubRenderNotifications&&window.hubRenderNotifications(data.notifications,data.unread);
   window.hubHideVeil&&window.hubHideVeil();
   const done=(()=>{try{return localStorage.getItem('osl_onboarding_done');}catch(_){return null;}})();
   if(!done)setTimeout(()=>{window.hubShowOnboarding&&window.hubShowOnboarding();},700);
@@ -1252,7 +1477,7 @@ onAuthStateChanged(auth,async(user)=>{
   <div class="ritualPhase" id="rP3">
     <div class="rReflectLine" data-anim>Então guarde-a.</div>
     <div class="rReflectLine rReflectSub" data-anim>Ou diga a essa pessoa hoje.</div>
-    <button class="rOvBtn" onclick="concludeRitual()" data-anim>CONCLUIR RITUAL</button>
+    <button class="rOvBtn" id="rBtnConclude" onclick="concludeRitual()" data-anim>CONCLUIR RITUAL</button>
   </div>
 
   <!-- FASE 4: CONCLUSÃO -->
