@@ -1117,6 +1117,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+// Distingue uma sessão restaurada ao abrir a página de um login/cadastro
+// iniciado nela. Só a sessão restaurada deve exibir o painel conectado.
+let directHubNavigation = false;
 
 function validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
@@ -1205,12 +1208,13 @@ if (loginForm) {
     if (!pass)                        { setMsg("loginMsg","Preencha a senha.","err"); return; }
     setAuthBtn("loginForm", "loading", "Verificando…");
     setMsg("loginMsg", "");
+    directHubNavigation = true;
     try {
       const cred = await signInWithEmailAndPassword(auth, email, pass);
       if (cred.user) localStorage.setItem("osl_auth_uid", cred.user.uid);
-      setAuthBtn("loginForm", "success", "Acesso autorizado");
-      setTimeout(() => { window.location.href = "./hub.html"; }, 800);
+      window.location.replace("./hub.html");
     } catch(err) {
+      directHubNavigation = false;
       setMsg("loginMsg", mapErr(err.code), "err");
       setAuthBtn("loginForm", "error");
     }
@@ -1243,13 +1247,14 @@ if (registerForm) {
     if (pass !== confirm)            { setMsg("registerMsg","As senhas não coincidem.","err"); return; }
     setAuthBtn("registerForm", "loading", "Criando conta…");
     setMsg("registerMsg", "");
+    directHubNavigation = true;
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       if (nome) await updateProfile(cred.user, { displayName: nome });
       if (cred.user) localStorage.setItem("osl_auth_uid", cred.user.uid);
-      setAuthBtn("registerForm", "success", "Conta criada ✓");
-      setTimeout(() => { window.location.href = "./hub.html"; }, 800);
+      window.location.replace("./hub.html");
     } catch(err) {
+      directHubNavigation = false;
       setMsg("registerMsg", mapErr(err.code), "err");
       setAuthBtn("registerForm", "error");
     }
@@ -1264,7 +1269,7 @@ document.getElementById("btnLogout")?.addEventListener("click", async () => { tr
 onAuthStateChanged(auth, (user) => {
   if (user && !user.isAnonymous) {
     localStorage.setItem("osl_auth_uid", user.uid);
-    showConnected(user);
+    if (!directHubNavigation) showConnected(user);
   } else {
     showAuth();
   }
