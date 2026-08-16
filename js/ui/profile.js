@@ -1,6 +1,6 @@
 // Perfil, avatar, temas, estilos de carta, efeitos visuais, amizades
 import { S } from "../state.js";
-import { setDoc, updateDoc, getDoc, getDocs, deleteDoc, doc, query, where, limit, collection, serverTimestamp, onAuthStateChanged, updateProfile, signOut } from "../firebase.js";
+import { setDoc, updateDoc, getDoc, getDocs, deleteDoc, doc, query, where, limit, collection, serverTimestamp, onAuthStateChanged, updateProfile, signOut, deleteField } from "../firebase.js";
 import { escapeHtml, initials, normalizeUsername, uniqueArray } from "../utils.js";
 import { BG_THEMES, BG_PACK_THEMES, CARD_STYLES, FX_STYLES, COIN_COSMETICS, PRESTIGE_PRODUTOS, BACKEND_BASE_URL } from "../constants.js";
 import { sendFriendRequest, respondFriendRequest, fetchFriendsLeaderboard, searchUsers, buyWithCoins, fetchCompatibility } from "../api.js";
@@ -846,8 +846,8 @@ export function bindProfileEvents() {
     };
     S.selectedAvatarPhoto = avatarUrl;
     const avatarUpdate    = avatarUrl
-      ? { avatarPhotoUrl: avatarUrl, avatarEmoji: null }
-      : { avatarEmoji, avatarPhotoUrl: null };
+      ? { avatarPhotoUrl: avatarUrl, avatarEmoji: deleteField() }
+      : { avatarEmoji, avatarPhotoUrl: deleteField() };
     const firebaseUser    = S.auth?.currentUser || null;
     const canonicalUid    = S.userId || firebaseUser?.uid || null;
     try {
@@ -884,7 +884,7 @@ export function bindProfileEvents() {
       if (avatarUrl) { localStorage.setItem("osl_avatar_photo", avatarUrl); localStorage.removeItem("osl_avatar"); }
       else { localStorage.removeItem("osl_avatar_photo"); localStorage.setItem("osl_avatar", avatarEmoji); }
       updateDesktopProfileBtn(S.selectedAvatarPhoto, S.selectedAvatarEmoji);
-      await setDoc(S.playerRef, { name: displayName, avatarEmoji: avatarUrl ? null : avatarEmoji, avatarPhotoUrl: avatarUrl, avatarColor }, { merge: true });
+      await setDoc(S.playerRef, { name: displayName, avatarEmoji: avatarUrl ? deleteField() : avatarEmoji, avatarPhotoUrl: avatarUrl || deleteField(), avatarColor }, { merge: true });
     } catch (error) { console.error(error); alert("Não foi possível salvar o perfil."); }
   });
 
