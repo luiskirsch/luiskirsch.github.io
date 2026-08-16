@@ -1,4 +1,4 @@
-const CACHE = 'osl-v12-reward-chest-framing';
+const CACHE = 'osl-v13-reward-chest-orientation';
 
 const PRECACHE = [
   '/favicon.png',

@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js";
 
-const MODEL_URL = new URL("../assets/models/reward-chest.glb?v=2", import.meta.url).href;
+const MODEL_URL = new URL("../assets/models/reward-chest.glb?v=3", import.meta.url).href;
 const LID_NODE_NAME = "tripo_part_11";
+const DISPLAY_ROTATION_Y = Math.PI - .48;
 const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
 
 const queue = [];
@@ -15,7 +16,7 @@ let displayRoot = null;
 let displayScale = 1;
 let lidPivot = null;
 let lidAxis = "z";
-let lidOpenAngle = Math.PI * .56;
+let lidOpenAngle = Math.PI * .46;
 let modelPromise = null;
 let modelReady = false;
 let modelFailed = false;
@@ -202,9 +203,10 @@ function installModel(gltf) {
   const lid = findLid(model);
   if (!lid) throw new Error("Tampa do baú não encontrada");
   const lidBox = new THREE.Box3().setFromObject(lid);
-  lid.visible = false;
-  const baseBox = new THREE.Box3().setFromObject(model);
-  lid.visible = true;
+  const baseBox = new THREE.Box3();
+  model.traverse(object => {
+    if (object.isMesh && object !== lid) baseBox.expandByObject(object, true);
+  });
   const size = lidBox.getSize(new THREE.Vector3());
   const center = lidBox.getCenter(new THREE.Vector3());
   const hingeWorld = center.clone();
@@ -212,11 +214,11 @@ function installModel(gltf) {
   if (size.z >= size.x) {
     lidAxis = "z";
     hingeWorld.x = lidBox.min.x;
-    lidOpenAngle = Math.PI * .56;
+    lidOpenAngle = Math.PI * .46;
   } else {
     lidAxis = "x";
     hingeWorld.z = lidBox.min.z;
-    lidOpenAngle = -Math.PI * .56;
+    lidOpenAngle = -Math.PI * .46;
   }
   lidPivot = new THREE.Group();
   lidPivot.name = "reward_chest_lid_hinge";
@@ -243,7 +245,7 @@ function installModel(gltf) {
   displayRoot = new THREE.Group();
   displayScale = 2.35 / Math.max(wholeSize.x, wholeSize.z, wholeSize.y * 1.15);
   displayRoot.scale.setScalar(displayScale);
-  displayRoot.rotation.y = -.48;
+  displayRoot.rotation.y = DISPLAY_ROTATION_Y;
   displayRoot.add(model);
   scene.add(displayRoot);
   modelReady = true;
@@ -282,7 +284,7 @@ function startRenderLoop() {
     if (!ui || ui.overlay.hidden) return;
     if (displayRoot) {
       const elapsed = now * .001;
-      displayRoot.rotation.y = -.48 + Math.sin(elapsed * .7) * .025;
+      displayRoot.rotation.y = DISPLAY_ROTATION_Y + Math.sin(elapsed * .7) * .025;
       displayRoot.position.y = Math.sin(elapsed * 1.25) * .018;
       if (openedAt) {
         const raw = prefersReducedMotion ? 1 : Math.min(1, (now - openedAt) / 980);
