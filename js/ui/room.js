@@ -1,6 +1,6 @@
 // UI da sala: listeners Firebase, sessão, chat, jogadores, multiplayer
 import { S } from "../state.js";
-import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, doc, collection } from "../firebase.js";
+import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, doc, collection, deleteField } from "../firebase.js";
 import { escapeHtml, nowTimeFromDate, initials, showOslToast } from "../utils.js";
 import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, ensureHostToken, redeemPendingCoins, fetchRoomSessions, fetchRoomStats } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
@@ -274,17 +274,17 @@ export function bindRoom() {
 }
 
 export function bindPlayers() {
-  const q = query(S.playersCollectionRef, orderBy("joinedAt", "asc"));
-  S.playersUnsub = onSnapshot(q, (snapshot) => {
+  S.playersUnsub = onSnapshot(S.playersCollectionRef, (snapshot) => {
     const players = snapshot.docs.map(docSnap => {
       const data = docSnap.data();
       return { id: docSnap.id, userId: data.userId || null, name: data.name || "Jogador", isHost: !!data.isHost, activeDeckId: data.activeDeckId || null, avatarEmoji: data.avatarEmoji || null, avatarPhotoUrl: data.avatarPhotoUrl || null, avatarColor: data.avatarColor || null, joinedAt: data.joinedAt || null, lastSeen: data.lastSeen || null };
-    }).filter(isPlayerActive);
+    }).filter(isPlayerActive)
+      .sort((a, b) => (a.joinedAt?.toMillis?.() || 0) - (b.joinedAt?.toMillis?.() || 0));
     S.currentPlayers = players;
     renderPlayers(players);
     setTimeout(() => applyVideoTileAvatars(), 800);
     try { localStorage.setItem("osl_players_cache", JSON.stringify(players.map(p => ({ id:p.id, name:p.name, isHost:p.isHost, avatarEmoji:p.avatarEmoji, avatarPhotoUrl:p.avatarPhotoUrl, avatarColor:p.avatarColor })))); } catch (_) {}
-  });
+  }, (err) => { console.error("bindPlayers onSnapshot error:", err); });
 }
 
 export function bindTyping() {
@@ -616,7 +616,7 @@ export async function upsertSelf() {
   const activePlayers  = playersSnap.docs.map(d => ({ id: d.id, ...d.data() })).filter(isPlayerActive);
   const selfAlreadyActive = activePlayers.some(p => p.id === S.participantId);
   if (!selfAlreadyActive && activePlayers.length >= 5) throw new Error("ROOM_FULL");
-  await setDoc(S.playerRef, { id: S.participantId, userId: S.userId, name: S.playerName, isHost: S.isHost, avatarEmoji: S.selectedAvatarPhoto ? null : (S.selectedAvatarEmoji || "🔮"), avatarPhotoUrl: S.selectedAvatarPhoto || null, avatarColor: S.selectedAvatarColor || "#342718", joinedAt: serverTimestamp(), lastSeen: serverTimestamp() }, { merge: true });
+  await setDoc(S.playerRef, { id: S.participantId, userId: S.userId, name: S.playerName, isHost: S.isHost, avatarEmoji: S.selectedAvatarPhoto ? deleteField() : (S.selectedAvatarEmoji || "🔮"), avatarPhotoUrl: S.selectedAvatarPhoto || deleteField(), avatarColor: S.selectedAvatarColor || "#342718", joinedAt: serverTimestamp(), lastSeen: serverTimestamp() }, { merge: true });
   await panelBootRoom();
 }
 
