@@ -25,6 +25,11 @@ function accountCacheIsCurrent() {
   }
 }
 
+function presentReward(detail) {
+  if (!window.OSLRewardChest?.show) return null;
+  return window.OSLRewardChest.show(detail);
+}
+
 // ── Barra de reações ──────────────────────────────────────────────────────────
 export function updateReactionBar(level) {
   const bar = document.getElementById("reactionBar");
@@ -115,6 +120,16 @@ export async function syncCoinsFromFirestore() {
 }
 
 export function showLevelUpModal(lv, info, coinsEarned) {
+  const chest = presentReward({
+    id: `level:${S.userId || "player"}:${lv}`,
+    once: true,
+    type: "level",
+    icon: info.icon,
+    title: `Nível ${lv} · ${info.title}`,
+    value: coinsEarned ? `+${coinsEarned} moedas` : `${lv}º nível alcançado`,
+    description: info.unlock ? `Desbloqueado: ${info.unlock}` : "Sua jornada ganhou uma nova marca.",
+  });
+  if (chest) return chest;
   const overlay = document.createElement("div");
   overlay.className = "levelUpOverlay";
   const unlockBlock = info.unlock ? `<div class="levelUpCard__unlock"><strong>Desbloqueado</strong>${escapeHtml(info.unlock)}</div>` : "";
@@ -241,6 +256,17 @@ export async function checkDailyReward() {
 }
 
 function showDailyRewardModal(streak, xp, onCollect) {
+  const chest = presentReward({
+    id: `daily-login:${S.userId || "player"}:${todayLocal()}`,
+    type: "daily",
+    icon: streak >= 7 ? "🔥" : streak >= 3 ? "⚡" : "✦",
+    title: `Presença · Dia ${streak}`,
+    value: `+${xp} XP`,
+    description: `Você voltou por ${streak} ${streak === 1 ? "dia" : "dias"}. Abra o baú para coletar sua recompensa diária.`,
+    actionLabel: "Coletar",
+    onOpen: () => Promise.resolve(onCollect()).catch(error => console.warn("Daily reward collect error:", error)),
+  });
+  if (chest) return chest;
   const icon = streak >= 7 ? "🔥" : streak >= 3 ? "⚡" : "✨";
   const dots  = Array.from({ length: 7 }, (_, i) => `<div class="dailyRewardCard__dot${i < streak ? " dailyRewardCard__dot--on" : ""}"></div>`).join("");
   const overlay = document.createElement("div");

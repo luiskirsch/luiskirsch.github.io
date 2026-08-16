@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"}}</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <style>
 /* ═══ TOKENS ═══ */
@@ -1212,6 +1213,21 @@ window.hubRenderNotifications=function(items,unread){
   });
   var unreadCount=unread!=null?unread:notifications.filter(function(item){return item&&item.read===false;}).length;
   window.hubSetUnread(unreadCount);
+  var rewardTypes={achievement_unlocked:'achievement',card_unlocked:'card',fragment_unlocked:'fragment',gift_received:'gift',reward_granted:'gift',coins_awarded:'coins'};
+  notifications.filter(function(notification){return notification&&notification.read===false&&rewardTypes[notification.type];}).forEach(function(notification){
+    if(!window.OSLRewardChest?.show)return;
+    var data=notification.data&&typeof notification.data==='object'?notification.data:{};
+    var rewardId='notification:'+String(notification.id||notification.type+':'+notification.createdAt);
+    if(notification.type==='achievement_unlocked'&&data.achievementId){var rewardUid='player';try{rewardUid=localStorage.getItem('osl_auth_uid')||rewardUid;}catch(_){}rewardId='achievement:'+rewardUid+':'+data.achievementId;}
+    window.OSLRewardChest.show({
+      id:rewardId,
+      once:true,
+      type:rewardTypes[notification.type],
+      title:String(data.cardTitle||data.title||notification.body||notification.title||'Nova recompensa'),
+      value:String(data.value||data.amount||''),
+      description:String(notification.title&&notification.body?notification.title+': '+notification.body:notification.body||'Uma nova recompensa foi adicionada à sua conta.')
+    });
+  });
 };
 
 window.hubMarkNotificationsRead=function(){
@@ -1284,13 +1300,25 @@ window.hubRenderFragment=function(fragment){
   if(seen===fingerprint)return;
   try{sessionStorage.setItem('osl_fragment_arrival',fingerprint);}catch(_){}
   trigger.classList.add('is-new');
-  clearTimeout(_fragmentArrivalTimer);
-  _fragmentArrivalTimer=setTimeout(function(){
-    if(!arrival||trigger.hidden)return;
-    arrival.hidden=false;
-    requestAnimationFrame(function(){arrival.classList.add('on');});
-    _fragmentArrivalTimer=setTimeout(function(){hideFragmentArrival();trigger.classList.remove('is-new');},7200);
-  },650);
+  var showArrival=function(){
+    clearTimeout(_fragmentArrivalTimer);
+    _fragmentArrivalTimer=setTimeout(function(){
+      if(!arrival||trigger.hidden)return;
+      arrival.hidden=false;
+      requestAnimationFrame(function(){arrival.classList.add('on');});
+      _fragmentArrivalTimer=setTimeout(function(){hideFragmentArrival();trigger.classList.remove('is-new');},7200);
+    },650);
+  };
+  var chest=window.OSLRewardChest&&window.OSLRewardChest.show?window.OSLRewardChest.show({
+    id:'fragment:'+fingerprint,
+    once:true,
+    type:'fragment',
+    title:title,
+    value:_fragmentExpiryLabel(fragment.expiresAt),
+    description:text,
+    actionLabel:'Guardar fragmento'
+  }):null;
+  if(chest&&typeof chest.finally==='function')chest.finally(showArrival);else showArrival();
 };
 
 function _refreshHubFragment(){
@@ -1671,6 +1699,8 @@ window.hubShowOnboarding=function(){var v=document.getElementById('obVeil');if(!
 })();
 </script>
 
+<script type="module" src="./js/reward-chest.js?v=1"></script>
+
 <!-- ══ FIREBASE ══ -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -1765,6 +1795,6 @@ onAuthStateChanged(auth,async(user)=>{
   </div>
 
 </div>
-<script src="./js/sw-register.js?v=10"></script>
+<script src="./js/sw-register.js?v=11"></script>
 </body>
 </html>

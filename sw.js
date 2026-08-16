@@ -1,4 +1,4 @@
-const CACHE = 'osl-v10-ritual-interaction-plane';
+const CACHE = 'osl-v11-reward-chest';
 
 const PRECACHE = [
   '/favicon.png',
