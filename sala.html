@@ -4784,6 +4784,17 @@
       justify-content:space-evenly;
     }
 
+    /* lobby-mode rule tem especificidade (0,3,1) e position:absolute!important.
+       Para sobrepor, usamos html.arenaMode body.lobby-mode = (0,3,2) > (0,3,1). */
+    html.arenaMode body.lobby-mode .videoColLeft,
+    html.arenaMode body.lobby-mode .videoColRight{
+      position:static !important;
+      top:auto !important;
+      transform:none !important;
+      width:auto !important;
+      z-index:1 !important;
+    }
+
     html.arenaMode .videoColLeft .videoTile,
     html.arenaMode .videoColRight .videoTile{
       flex:0 0 auto;
@@ -4795,6 +4806,23 @@
     html.arenaMode body .videoColPlaceholder{ display:block !important; }
     html.arenaMode body .videoColLeft:has(.videoTile) .videoColPlaceholder,
     html.arenaMode body .videoColRight:has(.videoTile) .videoColPlaceholder{ display:none !important; }
+
+    /* Placeholders em arena: mais sutis (dourado em vez de branco pulsante). */
+    html.arenaMode .videoColPlaceholder{
+      background:rgba(4,2,10,.55) !important;
+      border-color:rgba(212,168,75,.12) !important;
+      box-shadow:none !important;
+      animation:none !important;
+    }
+    html.arenaMode .videoColPlaceholder::before{
+      opacity:.28 !important;
+      filter:none !important;
+      animation:none !important;
+    }
+    html.arenaMode .videoColPlaceholder::after{
+      color:rgba(212,168,75,.35) !important;
+      animation:none !important;
+    }
 
     html.arenaMode .cardCenter{
       min-height:0;
