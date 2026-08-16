@@ -366,7 +366,9 @@ subscribe(snap => {
 export function renderActiveEffect(effect) {
   const panel = document.getElementById("effectPanel");
   if (!panel) return;
-  const cardCenter = panel.closest(".cardCenter");
+  const cardCenter = panel.closest(".cardCenter") || document.querySelector(".cardCenter");
+
+  const revealPanel = document.getElementById("revealPanel");
 
   if (!effect || effect.resolved) {
     if (panel.style.display !== "none") {
@@ -376,6 +378,11 @@ export function renderActiveEffect(effect) {
       S.effectPanelCloseTimer = setTimeout(() => {
         panel.style.display = "none";
         panel.classList.remove("effectPanel--closing");
+        // Devolve ao cardCenter para não interferir no sizing da revealPanel
+        if (cardCenter && panel.parentElement !== cardCenter) {
+          const anchor = cardCenter.querySelector(".aiDetectToast") || revealPanel;
+          cardCenter.insertBefore(panel, anchor);
+        }
         S.effectPanelCloseTimer = null;
       }, 220);
     }
@@ -385,6 +392,12 @@ export function renderActiveEffect(effect) {
   }
 
   if (S.effectPanelCloseTimer) { clearTimeout(S.effectPanelCloseTimer); S.effectPanelCloseTimer = null; panel.classList.remove("effectPanel--closing"); }
+
+  // Move o panel para dentro da revealPanel (já tem tamanho fixo neste ponto)
+  if (revealPanel && panel.parentElement !== revealPanel) {
+    revealPanel.appendChild(panel);
+  }
+
   panel.style.display = "flex";
   if (cardCenter) cardCenter.classList.add("cardCenter--effect-open");
 
