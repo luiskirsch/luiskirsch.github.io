@@ -31,6 +31,7 @@ function playIncomingMessageSound() {
 function safeAvatarUrl(url) {
   if (!url || typeof url !== 'string') return '';
   const t = url.trim();
+  if (/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(t)) return t;
   if (!/^https:\/\//i.test(t)) return '';
   return t.replace(/['"()\\ ]/g, '');
 }
