@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js";
 
-const MODEL_URL = new URL("../assets/models/reward-chest.glb?v=4", import.meta.url).href;
+const MODEL_URL = new URL("../assets/models/reward-chest.glb?v=5", import.meta.url).href;
 const LID_NODE_NAME = "tripo_part_11";
 const DISPLAY_ROTATION_Y = Math.PI - .48;
 const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
@@ -213,8 +213,10 @@ function installModel(gltf) {
   hingeWorld.y = Math.min(baseBox.max.y, lidBox.max.y - size.y * .18);
   if (size.z >= size.x) {
     lidAxis = "z";
-    hingeWorld.x = lidBox.min.x;
-    lidOpenAngle = Math.PI * .46;
+    // Neste modelo a largura maior está em Z e a frente aponta para -X.
+    // A dobradiça correta fica em +X e abre expondo o interior à câmera.
+    hingeWorld.x = lidBox.max.x;
+    lidOpenAngle = -Math.PI * .46;
   } else {
     lidAxis = "x";
     // A frente deste modelo aponta para -Z. A dobradiça fica na borda
