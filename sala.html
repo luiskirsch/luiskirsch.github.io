@@ -5492,14 +5492,16 @@
     .ritualVisualCard { width: 100% !important; height: 100% !important; }
 
     /*
-      effectPanel no fundo da carta — absolute no bottom do cardCenter,
-      cai visualmente sobre a mesa sem tirar o card do fluxo.
+      effectPanel no topo da mesa — absolute no top do cardCenter.
+      Como tudo acima da revealPanel fica hidden no arenaMode,
+      top:10px = 10px dentro do topo da revealPanel (mesa).
+      Carta não encolhe pois o effectPanel sai do fluxo flex.
     */
     .cardCenter { position: relative; }
     .effectPanel {
       position: absolute !important;
-      bottom: 14px !important;
-      top: auto !important;
+      top: 10px !important;
+      bottom: auto !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
       z-index: 25 !important;
@@ -5508,7 +5510,7 @@
       animation: effectPanelInTable .35s ease !important;
     }
     @keyframes effectPanelInTable {
-      from { opacity:0; transform: translateX(-50%) translateY(8px) scale(.97); }
+      from { opacity:0; transform: translateX(-50%) translateY(-8px) scale(.97); }
       to   { opacity:1; transform: translateX(-50%) translateY(0) scale(1); }
     }
     .effectPanel--closing {
@@ -5516,7 +5518,7 @@
     }
     @keyframes effectPanelOutTable {
       from { opacity:1; transform: translateX(-50%) translateY(0) scale(1); }
-      to   { opacity:0; transform: translateX(-50%) translateY(6px) scale(.97); }
+      to   { opacity:0; transform: translateX(-50%) translateY(-6px) scale(.97); }
     }
 
     /* Sem hover 3D no touch — mantém !important aqui para bloquear a regra hover do desktop */
