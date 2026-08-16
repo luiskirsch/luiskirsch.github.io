@@ -1,4 +1,4 @@
-const CACHE = 'osl-v18-arena-video-slots';
+const CACHE = 'osl-v19-arena-slot-alignment';
 
 const PRECACHE = [
   '/favicon.png',
