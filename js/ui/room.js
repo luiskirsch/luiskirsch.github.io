@@ -72,7 +72,6 @@ export function renderPlayers(players) {
       </div>
       <div class="playerRight">
         <span class="playerStatus">Online</span>
-        ${player.isHost ? '<span class="playerHost">Host</span>' : ""}
       </div>`;
     div.addEventListener("click", () => document.dispatchEvent(new CustomEvent("osl:openProfile", { detail: player })));
     playerListEl.appendChild(div);
@@ -206,7 +205,18 @@ export function bindUserDoc() {
       S._xpPrevLevel = Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1;
       // Resgata moedas pendentes de compras feitas antes do perfil existir
       redeemPendingCoins().then(r => {
-        if ((r?.coinsAdded || 0) > 0) window.showOslToast?.(`+${r.coinsAdded} moedas resgatadas!`);
+        if ((r?.coinsAdded || 0) > 0) {
+          if (window.OSLRewardChest?.show) {
+            window.OSLRewardChest.show({
+              id: `coins-redeemed:${S.userId}:${r.coinsAdded}`,
+              once: true,
+              type: "coins",
+              title: "Moedas resgatadas",
+              value: `+${r.coinsAdded} moedas`,
+              description: "Seu saldo pendente foi incorporado à sua conta.",
+            });
+          } else window.showOslToast?.(`+${r.coinsAdded} moedas resgatadas!`);
+        }
       }).catch(() => {});
     }
     const xp = data.xp || 0;
@@ -602,7 +612,7 @@ export async function ensureUserProfile() {
     const avatar = data.avatar && typeof data.avatar === "object" ? data.avatar : {};
     const emoji = avatar.emoji || data.avatarEmoji;
     const color = avatar.color || data.avatarColor;
-    const photoUrl = avatar.url || data.avatarPhotoUrl || data.photoURL || null;
+    const photoUrl = avatar.url || data.avatarPhotoUrl || data.photoURL || S.auth?.currentUser?.photoURL || null;
     S.selectedAvatarPhoto = photoUrl;
     if (photoUrl) { localStorage.setItem("osl_avatar_photo", photoUrl); localStorage.removeItem("osl_avatar"); }
     else { localStorage.removeItem("osl_avatar_photo"); if (emoji) { S.selectedAvatarEmoji = emoji; localStorage.setItem("osl_avatar", emoji); } }
@@ -616,7 +626,8 @@ export async function upsertSelf() {
   const activePlayers  = playersSnap.docs.map(d => ({ id: d.id, ...d.data() })).filter(isPlayerActive);
   const selfAlreadyActive = activePlayers.some(p => p.id === S.participantId);
   if (!selfAlreadyActive && activePlayers.length >= 5) throw new Error("ROOM_FULL");
-  await setDoc(S.playerRef, { id: S.participantId, userId: S.userId, name: S.playerName, isHost: S.isHost, avatarEmoji: S.selectedAvatarPhoto ? deleteField() : (S.selectedAvatarEmoji || "🔮"), avatarPhotoUrl: S.selectedAvatarPhoto || deleteField(), avatarColor: S.selectedAvatarColor || "#342718", joinedAt: serverTimestamp(), lastSeen: serverTimestamp() }, { merge: true });
+  const _photo = S.selectedAvatarPhoto || localStorage.getItem("osl_avatar_photo") || S.auth?.currentUser?.photoURL || null;
+  await setDoc(S.playerRef, { id: S.participantId, userId: S.userId, name: S.playerName, isHost: S.isHost, avatarEmoji: _photo ? deleteField() : (S.selectedAvatarEmoji || "🔮"), avatarPhotoUrl: _photo || deleteField(), avatarColor: S.selectedAvatarColor || "#342718", joinedAt: serverTimestamp(), lastSeen: serverTimestamp() }, { merge: true });
   await panelBootRoom();
 }
 
