@@ -55,13 +55,10 @@ export function getCoinDisplay() {
 
 async function awardCoins(level) {
   const amount = OSL_COINS_PER_LEVEL[level - 1] ?? 25;
+  // Atualiza localStorage imediatamente para feedback na sessão atual.
+  // A persistência no Firestore é feita pelo backend na próxima chamada /game/me
+  // (Firestore rules bloqueiam escrita de coins pelo cliente).
   try { markAccountCacheOwner(); localStorage.setItem("osl_coins", String(getCoinDisplay() + amount)); } catch(_) {}
-  if (S.userRef) {
-    try {
-      const { updateDoc, increment } = await import("../firebase.js");
-      await updateDoc(S.userRef, { coins: increment(amount) });
-    } catch(_) {}
-  }
   updateCoinDisplay();
   return amount;
 }
