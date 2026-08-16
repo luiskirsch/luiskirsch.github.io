@@ -4789,6 +4789,12 @@
       flex:0 0 auto;
     }
 
+    /* Placeholders visíveis em arena mesmo com ritual iniciado;
+       somem só quando há tile real na coluna */
+    html.arenaMode .videoColPlaceholder{ display:block !important; }
+    html.arenaMode .videoColLeft:has(.videoTile) .videoColPlaceholder,
+    html.arenaMode .videoColRight:has(.videoTile) .videoColPlaceholder{ display:none !important; }
+
     html.arenaMode .cardCenter{
       min-height:0;
       overflow:hidden;
