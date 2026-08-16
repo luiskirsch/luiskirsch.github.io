@@ -4807,20 +4807,22 @@
     html.arenaMode body .videoColLeft:has(.videoTile) .videoColPlaceholder,
     html.arenaMode body .videoColRight:has(.videoTile) .videoColPlaceholder{ display:none !important; }
 
-    /* Placeholders em arena: mais sutis (dourado em vez de branco pulsante). */
+    /* Placeholders em arena: mesmo estilo do lobby (glassmorphism, ícone/texto brancos). */
     html.arenaMode .videoColPlaceholder{
-      background:rgba(4,2,10,.55) !important;
-      border-color:rgba(212,168,75,.12) !important;
+      background:rgba(4,2,10,.32) !important;
+      backdrop-filter:blur(8px) !important;
+      -webkit-backdrop-filter:blur(8px) !important;
+      border-color:rgba(212,168,75,.07) !important;
       box-shadow:none !important;
       animation:none !important;
     }
     html.arenaMode .videoColPlaceholder::before{
-      opacity:.28 !important;
-      filter:none !important;
+      opacity:.55 !important;
+      filter:drop-shadow(0 0 6px rgba(255,255,255,.35)) !important;
       animation:none !important;
     }
     html.arenaMode .videoColPlaceholder::after{
-      color:rgba(212,168,75,.35) !important;
+      color:rgba(255,255,255,.55) !important;
       animation:none !important;
     }
 
