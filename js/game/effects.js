@@ -4,7 +4,7 @@ import { setDoc, increment, onSnapshot } from "../firebase.js";
 import { ritualVote, ritualReact, ritualAiDetect, ritualSocialPressure, ritualResolveEffect } from "../api.js";
 import { escapeHtml } from "../utils.js";
 import { spawnReactionFloat } from "../ui/animations.js";
-import { OSL_XP_EVENTS, OSL_XP_TITLES } from "../constants.js";
+import { OSL_XP_EVENTS, OSL_XP_TITLES, BACKEND_BASE_URL } from "../constants.js";
 import { subscribe, PHASE } from "./engine.js";
 
 // ── OSL_XP — sistema de experiência ──────────────────────────────────────────
@@ -161,7 +161,13 @@ export const OSL_ACHIEVEMENTS = (() => {
         if (!S._isPrestige) {
           S._isPrestige = true;
           document.dispatchEvent(new CustomEvent("osl:applyPrestige"));
-          setDoc(S.userRef, { prestige: true }, { merge: true }).catch(err => console.warn("Prestige save failed:", err));
+          // Firestore rules bloqueiam client-side; backend usa Admin SDK para gravar
+          S.auth?.currentUser?.getIdToken().then(token =>
+            fetch(BACKEND_BASE_URL + "/game/grant-prestige", {
+              method: "POST",
+              headers: { "Authorization": "Bearer " + token },
+            })
+          ).catch(() => {});
         }
       }
     },
