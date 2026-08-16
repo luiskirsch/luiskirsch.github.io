@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js";
 
-const MODEL_URL = new URL("../assets/models/reward-chest.glb?v=1", import.meta.url).href;
+const MODEL_URL = new URL("../assets/models/reward-chest.glb?v=2", import.meta.url).href;
 const LID_NODE_NAME = "tripo_part_11";
 const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
 
@@ -12,6 +12,7 @@ let renderer = null;
 let scene = null;
 let camera = null;
 let displayRoot = null;
+let displayScale = 1;
 let lidPivot = null;
 let lidAxis = "z";
 let lidOpenAngle = Math.PI * .56;
@@ -60,7 +61,7 @@ function injectStyles() {
     .rewardChestFallback__lock{position:absolute;z-index:2;left:50%;top:56px;width:34px;height:40px;transform:translateX(-50%);border:2px solid #e3b956;border-radius:4px 4px 9px 9px;background:#241307;box-shadow:0 0 18px rgba(227,185,86,.28)}
     .rewardChestOverlay.is-open .rewardChestFallback__lid{transform:perspective(300px) rotateX(-112deg)}
     .rewardChestAura{position:absolute;left:50%;top:59%;width:55%;height:34%;transform:translate(-50%,-50%) scale(.4);border-radius:50%;opacity:0;background:radial-gradient(ellipse,color-mix(in srgb,var(--reward-accent) 55%,white),color-mix(in srgb,var(--reward-accent) 18%,transparent) 35%,transparent 70%);filter:blur(12px);transition:opacity .45s ease,transform .7s ease;pointer-events:none}
-    .rewardChestOverlay.is-open .rewardChestAura{opacity:.72;transform:translate(-50%,-50%) scale(1.25)}
+    .rewardChestOverlay.is-open .rewardChestAura{opacity:0;transform:translate(-50%,-50%) scale(1.25)}
     .rewardChestStatus{position:absolute;left:0;right:0;bottom:12px;text-align:center;color:rgba(255,255,255,.42);font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase}
     .rewardChestReveal{position:relative;z-index:5;width:min(560px,calc(100% - 44px));min-height:118px;margin:-32px auto 0;padding:16px 20px 18px;text-align:center;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .42s ease .25s,transform .52s cubic-bezier(.2,.8,.2,1) .25s}
     .rewardChestOverlay.is-open .rewardChestReveal{opacity:1;transform:none}
@@ -166,7 +167,6 @@ function setupRenderer() {
   const key = new THREE.SpotLight(0xffc45d, 16, 12, Math.PI * .28, .58, 1.35);
   key.position.set(2.2, 4.8, 2.4); key.castShadow = true; key.shadow.mapSize.set(1024, 1024); scene.add(key);
   const rim = new THREE.DirectionalLight(0x3e76b8, 4.6); rim.position.set(-3, 2.5, -3); scene.add(rim);
-  const fill = new THREE.PointLight(0xd79438, 7, 5); fill.position.set(-1.7, .7, 2.3); scene.add(fill);
   const floor = new THREE.Mesh(new THREE.CircleGeometry(2.2, 64), new THREE.ShadowMaterial({ color: 0x000000, opacity: .55 }));
   floor.rotation.x = -Math.PI / 2; floor.position.y = -.02; floor.receiveShadow = true; scene.add(floor);
   resizeRenderer();
@@ -241,8 +241,8 @@ function installModel(gltf) {
   const wholeCenter = wholeBox.getCenter(new THREE.Vector3());
   model.position.set(-wholeCenter.x, -wholeBox.min.y, -wholeCenter.z);
   displayRoot = new THREE.Group();
-  const scale = 2.35 / Math.max(wholeSize.x, wholeSize.z, wholeSize.y * 1.15);
-  displayRoot.scale.setScalar(scale);
+  displayScale = 2.35 / Math.max(wholeSize.x, wholeSize.z, wholeSize.y * 1.15);
+  displayRoot.scale.setScalar(displayScale);
   displayRoot.rotation.y = -.48;
   displayRoot.add(model);
   scene.add(displayRoot);
@@ -289,6 +289,10 @@ function startRenderLoop() {
         const eased = 1 - Math.pow(1 - raw, 4);
         openProgress = eased;
         if (lidPivot) lidPivot.rotation[lidAxis] = lidOpenAngle * eased;
+        // A tampa aumenta bastante a altura visual. Recuar o conjunto durante a
+        // abertura mantém base e tampa inteiras dentro do palco.
+        displayRoot.scale.setScalar(displayScale * (1 - eased * .22));
+        displayRoot.position.y = Math.sin(elapsed * 1.25) * .018 - eased * .08;
         displayRoot.rotation.x = Math.sin(raw * Math.PI) * -.035;
         if (raw >= 1) completeOpen();
       }
@@ -401,7 +405,11 @@ function pumpQueue() {
   previousFocus = document.activeElement;
   openedAt = 0; openProgress = 0;
   if (lidPivot) lidPivot.rotation[lidAxis] = 0;
-  if (displayRoot) { displayRoot.rotation.x = 0; displayRoot.position.y = 0; }
+  if (displayRoot) {
+    displayRoot.rotation.x = 0;
+    displayRoot.position.y = 0;
+    displayRoot.scale.setScalar(displayScale);
+  }
   renderDetail(active.detail);
   ui.overlay.classList.remove("is-open");
   ui.overlay.hidden = false;
