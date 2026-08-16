@@ -4773,6 +4773,7 @@
 
     /* --- GameTableGrid: preenche o resto do tableCard --- */
     html.arenaMode .gameTableGrid{
+      position:relative;
       height:100%;
       min-height:0;
       padding:8px 14px 10px;
@@ -4781,23 +4782,32 @@
 
     html.arenaMode .videoColLeft,
     html.arenaMode .videoColRight{
-      justify-content:space-evenly;
+      position:absolute!important;
+      top:50%!important;
+      transform:translateY(-50%)!important;
+      z-index:20!important;
+      display:flex!important;
+      flex-direction:column!important;
+      justify-content:center!important;
+      gap:14px!important;
+      width:clamp(72px,9vw,105px)!important;
+      pointer-events:auto!important;
+      align-self:auto!important;
     }
-
-    /* lobby-mode rule tem especificidade (0,3,1) e position:absolute!important.
-       Para sobrepor, usamos html.arenaMode body.lobby-mode = (0,3,2) > (0,3,1). */
-    html.arenaMode body.lobby-mode .videoColLeft,
-    html.arenaMode body.lobby-mode .videoColRight{
-      position:static !important;
-      top:auto !important;
-      transform:none !important;
-      width:auto !important;
-      z-index:1 !important;
-    }
+    html.arenaMode .videoColLeft{left:18px!important}
+    html.arenaMode .videoColRight{right:18px!important}
 
     html.arenaMode .videoColLeft .videoTile,
     html.arenaMode .videoColRight .videoTile{
       flex:0 0 auto;
+      background:rgba(4,2,10,.68)!important;
+      backdrop-filter:blur(14px)!important;
+      -webkit-backdrop-filter:blur(14px)!important;
+      border:1px solid rgba(212,168,75,.14)!important;
+      border-left:2px solid rgba(212,168,75,.48)!important;
+      box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 20px rgba(212,168,75,.04) inset!important;
+      border-radius:10px!important;
+      overflow:hidden!important;
     }
 
     /* Placeholders visíveis em arena mesmo com ritual iniciado;
@@ -4818,6 +4828,7 @@
     }
 
     html.arenaMode .cardCenter{
+      grid-column:1 / -1;
       min-height:0;
       overflow:hidden;
       justify-content:flex-start;

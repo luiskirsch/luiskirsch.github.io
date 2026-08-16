@@ -1,4 +1,4 @@
-const CACHE = 'osl-v17-reward-chest-scope';
+const CACHE = 'osl-v18-arena-video-slots';
 
 const PRECACHE = [
   '/favicon.png',
