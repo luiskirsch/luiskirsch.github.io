@@ -4807,23 +4807,14 @@
     html.arenaMode body .videoColLeft:has(.videoTile) .videoColPlaceholder,
     html.arenaMode body .videoColRight:has(.videoTile) .videoColPlaceholder{ display:none !important; }
 
-    /* Placeholders em arena: mesmo estilo do lobby (glassmorphism, ícone/texto brancos). */
-    html.arenaMode .videoColPlaceholder{
-      background:rgba(4,2,10,.32) !important;
-      backdrop-filter:blur(8px) !important;
-      -webkit-backdrop-filter:blur(8px) !important;
-      border-color:rgba(212,168,75,.07) !important;
-      box-shadow:none !important;
-      animation:none !important;
-    }
-    html.arenaMode .videoColPlaceholder::before{
-      opacity:.55 !important;
-      filter:drop-shadow(0 0 6px rgba(255,255,255,.35)) !important;
-      animation:none !important;
-    }
-    html.arenaMode .videoColPlaceholder::after{
-      color:rgba(255,255,255,.55) !important;
-      animation:none !important;
+    /* Placeholders em arena: cópia exata do estilo do lobby. */
+    html.arenaMode body .videoColPlaceholder{
+      background:rgba(4,2,10,.32)!important;
+      backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;
+      border:1px solid rgba(212,168,75,.07)!important;
+      border-radius:10px!important;min-height:72px!important;width:100%!important;
+      box-shadow:none!important;
+      animation:none!important;
     }
 
     html.arenaMode .cardCenter{
