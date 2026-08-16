@@ -1011,8 +1011,17 @@ export function bindRoomEvents() {
     else if (confirm("Deseja reiniciar o ritual e embaralhar o deck novamente?")) reset();
   });
   leaveBtn?.addEventListener("click", () => {
-    if (S.ritualStarted) showSessionRecap(() => leaveRoom(true), "SAIR DA SALA").catch(console.error);
-    else if (confirm("Deseja sair da sala?")) leaveRoom(true);
+    const isArena = document.documentElement.classList.contains("arenaMode");
+    if (S.ritualStarted && isArena) {
+      const exitArena = S.isHost
+        ? () => window._osl.deactivateArenaForAll?.().catch(() => {})
+        : () => window.deactivateArenaMode?.();
+      showSessionRecap(exitArena, "SAIR DA ARENA").catch(console.error);
+    } else if (S.ritualStarted) {
+      showSessionRecap(() => leaveRoom(true), "SAIR DA SALA").catch(console.error);
+    } else if (confirm("Deseja sair da sala?")) {
+      leaveRoom(true);
+    }
   });
   document.getElementById("joinCancelBtn")?.addEventListener("click", closeJoinModal);
   document.getElementById("joinSendBtn")?.addEventListener("click", sendJoinRequest);
