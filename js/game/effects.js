@@ -497,7 +497,7 @@ export function renderActiveEffect(effect) {
     const btn = document.createElement("button");
     btn.className = "effectPanel__confirm";
     btn.textContent = _tx('achievements:effects.doneButton', "Concluído ✓");
-    btn.addEventListener("click", resolveActiveEffect);
+    btn.addEventListener("click", () => resolveActiveEffect());
     panel.appendChild(btn);
   }
 }
