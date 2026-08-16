@@ -428,7 +428,7 @@ export function renderActiveEffect(effect) {
       if (effect.label && window.OSL_I18N?.slugify) {
         const slug = window.OSL_I18N.slugify(effect.label);
         const localized = _tx(`effects:labels.${slug}`, '');
-        if (localized) labelText = localized;
+        if (localized && localized !== `labels.${slug}`) labelText = localized;
       }
       if (bodyEl) bodyEl.innerHTML = `<span class="effectPanel__highlight">${escapeHtml(names)}</span><br>${escapeHtml(labelText)}`;
       startAIVAD(effect);
@@ -461,14 +461,14 @@ export function renderActiveEffect(effect) {
       if (effect.params.question && window.OSL_I18N?.slugify) {
         const slug = window.OSL_I18N.slugify(effect.params.question);
         const localized = _tx(`effects:questions.${slug}`, '');
-        if (localized) question = localized;
+        if (localized && localized !== `questions.${slug}`) question = localized;
       }
       // Localizar options
       const localizedOpts = opts.map(opt => {
         if (window.OSL_I18N?.slugify) {
           const slug = window.OSL_I18N.slugify(opt);
           const v = _tx(`effects:options.${slug}`, '');
-          if (v) return { value: opt, label: v };
+          if (v && v !== `options.${slug}`) return { value: opt, label: v };
         }
         return { value: opt, label: opt };
       });
