@@ -1689,9 +1689,11 @@ window.hubShowOnboarding=function(){var v=document.getElementById('obVeil');if(!
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import{getFirestore,doc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 const API="https://osl-video-server-production.up.railway.app";
 const cfg={apiKey:"AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",authDomain:"osextolugar-game.firebaseapp.com",projectId:"osextolugar-game",storageBucket:"osextolugar-game.firebasestorage.app",messagingSenderId:"947922328721",appId:"1:947922328721:web:989522c99e16ab449f3330"};
-const app=initializeApp(cfg);const auth=getAuth(app);
+const app=initializeApp(cfg);const auth=getAuth(app);const db=getFirestore(app);
+let hubAccountUnsub=null;
 const ACCOUNT_LOCAL_KEYS=[
   "osl_auth_uid","osl_cache_uid","osl_user_id","osl_player_id","osl_nome","osl_username","osl_avatar","osl_avatar_photo",
   "osl_xp_cache","osl_coins","osl_compras","osl_daily_done","osl_bg","osl_card_style","osl_fx",
@@ -1708,6 +1710,7 @@ window._hubClearAccountCaches=()=>{
 };
 window._hubLogout=async()=>{window._hubClearAccountCaches();window._hubToken=null;try{await signOut(auth);}catch(_){}window.location.href="./página.html";};
 onAuthStateChanged(auth,async(user)=>{
+  if(hubAccountUnsub){hubAccountUnsub();hubAccountUnsub=null;}
   if(!user){window._hubClearAccountCaches();window.location.href="./página.html";return;}
   try{localStorage.setItem("osl_auth_uid",user.uid);}catch(_){}
   window._hubFallbackUser={displayName:user.displayName||"",email:user.email||"",photoURL:user.photoURL||""};
@@ -1733,6 +1736,19 @@ onAuthStateChanged(auth,async(user)=>{
   window.hubSetContext&&window.hubSetContext(data);
   window.hubRenderNotifications&&window.hubRenderNotifications(data.notifications,data.unread);
   window.hubHideVeil&&window.hubHideVeil();
+  hubAccountUnsub=onSnapshot(doc(db,"users",user.uid),{includeMetadataChanges:true},snapshot=>{
+    if(!snapshot.exists()||snapshot.metadata.fromCache)return;
+    const live=snapshot.data()||{};
+    const progression={};const wallet={};
+    if(live.xp!=null)progression.xp=live.xp;
+    if(live.level!=null)progression.level=live.level;
+    if(live.coins!=null)wallet.coins=live.coins;
+    if(!Object.keys(progression).length&&!Object.keys(wallet).length)return;
+    const current=window.hubApplyAccount&&window.hubApplyAccount({progression,wallet},window._hubFallbackUser);
+    if(current){
+      try{localStorage.setItem("osl_xp_cache",String(current.xp));localStorage.setItem("osl_coins",String(current.coins));}catch(_){}
+    }
+  },error=>console.warn("[hub] Atualização da conta em tempo real indisponível:",error));
   const done=(()=>{try{return localStorage.getItem('osl_onboarding_done');}catch(_){return null;}})();
   if(!done)setTimeout(()=>{window.hubShowOnboarding&&window.hubShowOnboarding();},700);
   user.getIdToken().then(t=>fetch(API+"/hub/touch",{method:"POST",headers:{Authorization:"Bearer "+t}})).catch(()=>{});

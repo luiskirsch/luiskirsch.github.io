@@ -1,4 +1,4 @@
-const CACHE = 'osl-v19-arena-slot-alignment';
+const CACHE = 'osl-v20-hub-realtime-account';
 
 const PRECACHE = [
   '/favicon.png',
