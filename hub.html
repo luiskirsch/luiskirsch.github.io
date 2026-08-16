@@ -69,6 +69,20 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .navBell:hover,.navCoins:hover{background:rgba(212,175,55,.10);color:var(--text2);}
 .navBell svg,.navCoins svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5;}
 .bellBadge{min-width:13px;height:13px;background:var(--err);color:#fff;font-size:7px;font-weight:700;border-radius:999px;display:none;align-items:center;justify-content:center;padding:0 2px;}
+.navFragment{
+  display:flex;align-items:center;gap:7px;height:32px;padding:0 9px;
+  background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.26);border-radius:3px;
+  color:var(--gold2);cursor:pointer;position:relative;
+  transition:background .16s,border-color .16s,color .16s,transform .14s;
+}
+.navFragment[hidden]{display:none;}
+.navFragment:hover,.navFragment:focus-visible{background:rgba(212,175,55,.14);border-color:rgba(212,175,55,.48);color:var(--gold);outline:none;}
+.navFragment:active{transform:scale(.95);}
+.fragmentCards{width:12px;height:17px;border:1px solid currentColor;border-radius:1px;transform:rotate(5deg);box-shadow:-4px 3px 0 -1px #07111b,-4px 3px 0 0 rgba(212,175,55,.58);}
+.navFragmentLabel{font-size:7px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;}
+.fragmentBadge{position:absolute;top:-5px;right:-5px;min-width:14px;height:14px;padding:0 3px;border-radius:999px;background:var(--gold);color:#05070a;font-size:7px;font-weight:900;line-height:14px;text-align:center;box-shadow:0 0 12px rgba(212,175,55,.48);}
+.navFragment.is-new .fragmentCards{animation:fragmentPulse 1.8s ease-in-out 2;}
+@keyframes fragmentPulse{0%,100%{filter:none;transform:rotate(5deg) scale(1)}50%{filter:drop-shadow(0 0 7px rgba(255,232,122,.85));transform:rotate(2deg) scale(1.08)}}
 
 /* Avatar pill */
 .navProfile{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;height:36px;border:1px solid rgba(212,175,55,.18);border-radius:36px;background:rgba(10,18,28,.80);cursor:pointer;transition:border-color .18s,background .18s;}
@@ -165,16 +179,6 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
   margin-bottom:18px;position:relative;z-index:1;
   text-shadow:0 0 80px rgba(212,175,55,.32),0 0 160px rgba(12,80,120,.45),0 2px 6px rgba(0,0,0,.90);
 }
-.heroContext{
-  max-width:560px;margin:-7px auto 18px;padding:10px 16px;
-  border:1px solid rgba(212,175,55,.20);border-radius:2px;
-  background:rgba(4,12,19,.46);position:relative;z-index:1;
-  box-shadow:inset 0 0 28px rgba(12,80,120,.10);
-}
-.heroContext[hidden]{display:none;}
-.heroContext__label{display:block;margin-bottom:5px;color:var(--gold2);font-size:7.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;}
-.heroContext__title{display:block;color:rgba(255,255,255,.92);font-family:var(--serif);font-size:15px;line-height:1.25;}
-.heroContext__text{display:block;margin-top:3px;color:var(--text2);font-size:10px;line-height:1.45;}
 .heroDivider{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;position:relative;z-index:1;}
 .heroDivider::before,.heroDivider::after{content:'';flex:1;max-width:90px;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.40));}
 .heroDivider::after{background:linear-gradient(90deg,rgba(212,175,55,.40),transparent);}
@@ -398,8 +402,51 @@ body.ritual-open #ritualDim{opacity:1;}
 .sbIconBtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;}
 
 /* ═══ DROPDOWNS + TOAST ═══ */
-.drop{position:fixed;top:0;right:0;z-index:100;min-width:230px;background:rgba(4,8,16,.99);border:1px solid rgba(212,175,55,.16);border-radius:2px;box-shadow:0 24px 70px rgba(0,0,0,.80);padding:8px 0;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .18s;}
-.drop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+.drop{position:fixed;top:0;right:0;z-index:100;min-width:230px;background:rgba(4,8,16,.99);border:1px solid rgba(212,175,55,.16);border-radius:2px;box-shadow:0 24px 70px rgba(0,0,0,.80);padding:8px 0;opacity:0;visibility:hidden;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .18s,visibility 0s linear .18s;}
+.drop.open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;transition-delay:0s;}
+
+/* Fragmento — recompensa de HUD, sem ocupar o fluxo do hero */
+.fragmentArrival{
+  position:fixed;z-index:160;top:calc(var(--nav-h) + 14px);right:calc(var(--pw) + 18px);
+  width:min(320px,calc(100vw - 24px));opacity:0;transform:translateX(28px);
+  pointer-events:none;transition:opacity .28s ease,transform .34s cubic-bezier(.2,.8,.2,1);
+}
+.fragmentArrival[hidden]{display:none;}
+.fragmentArrival.on{opacity:1;transform:translateX(0);pointer-events:auto;}
+.fragmentArrival__button{
+  width:100%;display:grid;grid-template-columns:40px minmax(0,1fr) 14px;align-items:center;gap:11px;
+  padding:10px 12px;text-align:left;color:var(--text);cursor:pointer;
+  border:1px solid rgba(212,175,55,.34);border-left:3px solid var(--gold);border-radius:3px;
+  background:linear-gradient(110deg,rgba(8,17,27,.985),rgba(4,9,16,.99));
+  box-shadow:0 18px 48px rgba(0,0,0,.70),inset 0 1px 0 rgba(255,232,122,.07);
+}
+.fragmentArrival__button:hover,.fragmentArrival__button:focus-visible{border-color:rgba(212,175,55,.58);outline:none;}
+.fragmentArrival__card{width:31px;height:44px;object-fit:cover;border:1px solid rgba(212,175,55,.42);border-radius:2px;box-shadow:0 6px 15px rgba(0,0,0,.60);transform:rotate(-4deg);}
+.fragmentArrival__label{display:block;margin-bottom:3px;color:var(--gold2);font-size:7px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;}
+.fragmentArrival__title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--serif);font-size:12px;color:#fff;}
+.fragmentArrival__hint{display:block;margin-top:3px;color:var(--text3);font-size:8px;letter-spacing:.04em;}
+.fragmentArrival__arrow{color:var(--gold2);font-size:15px;}
+
+.fragmentPanel{width:min(390px,calc(100vw - 8px));padding:0;overflow:hidden;border-color:rgba(212,175,55,.30);border-left:3px solid var(--gold);}
+.fragmentPanel__head{display:flex;align-items:center;gap:8px;padding:13px 15px 11px;border-bottom:1px solid rgba(255,255,255,.055);}
+.fragmentPanel__eyebrow{flex:1;color:var(--gold2);font-size:7.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;}
+.fragmentPanel__close{width:25px;height:25px;border:1px solid rgba(255,255,255,.08);border-radius:2px;background:none;color:var(--text3);cursor:pointer;font-size:15px;line-height:1;}
+.fragmentPanel__close:hover,.fragmentPanel__close:focus-visible{color:#fff;border-color:rgba(212,175,55,.30);outline:none;}
+.fragmentPanel__content{display:grid;grid-template-columns:86px minmax(0,1fr);gap:15px;padding:16px;}
+.fragmentPanel__visual{position:relative;align-self:start;}
+.fragmentPanel__visual::before{content:'';position:absolute;inset:6px -4px -5px 5px;border:1px solid rgba(212,175,55,.18);border-radius:3px;transform:rotate(5deg);}
+.fragmentPanel__card{position:relative;display:block;width:80px;height:118px;object-fit:cover;border:1px solid rgba(212,175,55,.42);border-radius:3px;box-shadow:0 13px 28px rgba(0,0,0,.62);}
+.fragmentPanel__title{font-family:var(--serif);font-size:18px;line-height:1.22;color:#fff;margin:1px 0 7px;}
+.fragmentPanel__text{color:var(--text2);font-family:var(--fell);font-size:12px;font-style:italic;line-height:1.55;}
+.fragmentPanel__rule{grid-column:1/-1;padding:11px 12px;border:1px solid rgba(212,175,55,.14);background:rgba(212,175,55,.045);color:var(--text2);font-size:9px;line-height:1.55;}
+.fragmentPanel__rule strong{color:var(--gold2);font-weight:700;}
+.fragmentPanel__expiry{grid-column:1/-1;color:var(--text3);font-size:7.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;}
+.fragmentPanel__actions{display:grid;grid-template-columns:1fr auto;gap:8px;padding:0 16px 16px;}
+.fragmentPanel__primary,.fragmentPanel__secondary{min-height:38px;border-radius:2px;cursor:pointer;font-size:7.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;}
+.fragmentPanel__primary{padding:0 14px;border:1px solid rgba(212,175,55,.48);background:linear-gradient(90deg,rgba(154,111,26,.85),rgba(212,175,55,.92));color:#08060a;}
+.fragmentPanel__secondary{padding:0 12px;border:1px solid rgba(255,255,255,.09);background:transparent;color:var(--text3);}
+.fragmentPanel__primary:hover,.fragmentPanel__primary:focus-visible{filter:brightness(1.1);outline:none;}
+.fragmentPanel__secondary:hover,.fragmentPanel__secondary:focus-visible{border-color:rgba(212,175,55,.24);color:var(--text2);outline:none;}
 
 /* ── Feature modal (Social / Mundo) ── */
 .fmVeil{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.70);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .24s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
@@ -465,7 +512,45 @@ body.ritual-open #ritualDim{opacity:1;}
 .obCta:hover{filter:brightness(1.12);transform:translateY(-1px);}
 @keyframes ri{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 
-@media(max-width:960px){.dash{grid-template-columns:1fr;}.panel{display:none;}}
+@media(max-height:820px) and (min-width:961px){
+  .heroStage{padding:20px 30px 14px;}
+  .heroKick{margin-bottom:8px;}
+  .heroTitle{font-size:clamp(34px,3.4vw,46px);margin-bottom:12px;}
+  .heroDivider{margin-bottom:12px;}
+  .btnJogar{padding:13px 36px;}
+  .altFormsLabel{margin:10px 0 6px;}
+  .altFormBtn{padding:8px 6px;}
+  .ritualWrap{padding-top:4px;margin-bottom:10px;}
+}
+@media(max-width:1200px){.navFragmentLabel{display:none;}}
+@media(max-width:960px){
+  .dash{grid-template-columns:1fr;height:calc(100dvh - var(--season-h));max-height:calc(100dvh - var(--season-h));}.panel{display:none;}
+  .center{min-width:0;overflow-x:hidden;overflow-y:auto;}
+  .heroStage{padding:24px 16px 16px;}
+  .heroTitle{font-size:clamp(30px,10vw,42px);letter-spacing:.025em;margin-bottom:14px;}
+  .heroDivider{margin-bottom:14px;}
+  .btnJogar{padding:14px 18px;font-size:14px;}
+  .altFormsRow{gap:5px;}
+  .altFormBtn{padding:9px 4px;font-size:7px;letter-spacing:.09em;}
+  .ritualWrap{flex:0 0 auto;min-height:360px;padding:8px 10px 16px;margin-bottom:12px;}
+  .ritualDeck{min-height:336px;padding-left:12px;}
+  .rInner{padding:20px 18px 18px;}
+  .rQ{font-size:clamp(17px,5vw,22px);}
+  .fragmentArrival{right:12px;}
+}
+@media(max-width:560px){
+  .nav{grid-template-columns:auto 1fr;padding:0 10px;gap:8px;}
+  .navLogo{font-size:14px;letter-spacing:.16em;}
+  .navLinks{display:none;}
+  .navRight{gap:5px;min-width:0;}
+  .navBell,.navCoins,.navFragment{height:32px;padding-left:7px;padding-right:7px;}
+  .navPInfo{display:none;}
+  .navProfile{width:36px;padding:4px;}
+  .fragmentPanel.drop{left:4px!important;right:4px!important;top:calc(var(--nav-h) + 4px)!important;width:auto;max-height:calc(100dvh - var(--nav-h) - var(--season-h) - 8px);overflow-y:auto;}
+  .fragmentPanel__content{grid-template-columns:68px minmax(0,1fr);gap:12px;padding:14px;}
+  .fragmentPanel__card{width:62px;height:92px;}
+  .fragmentPanel__actions{grid-template-columns:1fr;}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}#cvGL{display:none!important;}}
 </style>
 </head>
@@ -493,6 +578,11 @@ body.ritual-open #ritualDim{opacity:1;}
     <button class="navCoins" id="btnCoins">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9.5 9.5C9.5 8.4 10.6 8 12 8s2.5.4 2.5 1.5S13.4 11 12 11s-2.5.4-2.5 1.5S10.6 16 12 16s2.5-.4 2.5-1.5"/></svg>
       <span id="coinsVal">0</span>
+    </button>
+    <button class="navFragment" id="btnFragment" type="button" hidden aria-haspopup="dialog" aria-controls="dropFragment" aria-expanded="false">
+      <span class="fragmentCards" aria-hidden="true"></span>
+      <span class="navFragmentLabel">Fragmento</span>
+      <span class="fragmentBadge" aria-hidden="true">1</span>
     </button>
     <div class="navProfile" id="btnPerfil" role="button" tabindex="0">
       <div class="navAvRing"><div class="navAv" id="navAv"><span id="navAvI">L</span></div><span class="navOnDot"></span></div>
@@ -570,11 +660,6 @@ body.ritual-open #ritualDim{opacity:1;}
     <div class="heroStage" id="heroCard">
       <div class="heroKick" id="heroKick">BOA TARDE</div>
       <h1 class="heroTitle" id="heroTitle">O MUNDO<br>ESPERA POR VOCÊ.</h1>
-      <div class="heroContext" id="heroContext" hidden>
-        <span class="heroContext__label">Fragmento do Ritual do Dia</span>
-        <strong class="heroContext__title" id="heroFragmentTitle"></strong>
-        <span class="heroContext__text" id="heroFragmentText"></span>
-      </div>
       <div class="heroDivider"><span>◆ ✦ ◆</span></div>
       <button class="btnJogar" id="heroCta" onclick="location.href='./entrada.html'">
         <span class="jDia">◆</span>JOGAR<span class="jDia">◆</span>
@@ -684,7 +769,38 @@ body.ritual-open #ritualDim{opacity:1;}
   </button>
 </div>
 <div class="drop notifDrop" id="dropNotif"><div class="dEmpty">Nenhuma notificação</div></div>
+<section class="drop fragmentPanel" id="dropFragment" role="dialog" aria-labelledby="fragmentPanelTitle" aria-describedby="fragmentPanelText">
+  <div class="fragmentPanel__head">
+    <span class="fragmentPanel__eyebrow">Fragmento guardado · 1</span>
+    <button class="fragmentPanel__close" id="fragmentClose" type="button" aria-label="Fechar detalhes do fragmento">×</button>
+  </div>
+  <div class="fragmentPanel__content">
+    <div class="fragmentPanel__visual" aria-hidden="true"><img class="fragmentPanel__card" src="./verso-carta-cropped.jpg" alt=""></div>
+    <div>
+      <h2 class="fragmentPanel__title" id="fragmentPanelTitle">Fragmento</h2>
+      <p class="fragmentPanel__text" id="fragmentPanelText"></p>
+    </div>
+    <p class="fragmentPanel__rule"><strong>Como funciona:</strong> será inserido automaticamente no baralho quando você iniciar um ritual como anfitrião. Entrar na sala de outra pessoa não usa este fragmento.</p>
+    <time class="fragmentPanel__expiry" id="fragmentExpiry"></time>
+  </div>
+  <div class="fragmentPanel__actions">
+    <button class="fragmentPanel__primary" id="fragmentCreate" type="button">Criar sala e usar</button>
+    <button class="fragmentPanel__secondary" id="fragmentLater" type="button">Guardar</button>
+  </div>
+</section>
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<div class="fragmentArrival" id="fragmentArrival" role="status" aria-live="polite" aria-atomic="true" hidden>
+  <button class="fragmentArrival__button" id="fragmentArrivalButton" type="button" aria-haspopup="dialog" aria-controls="dropFragment">
+    <img class="fragmentArrival__card" src="./verso-carta-cropped.jpg" alt="">
+    <span>
+      <span class="fragmentArrival__label">Fragmento obtido</span>
+      <strong class="fragmentArrival__title" id="fragmentArrivalTitle">Fragmento</strong>
+      <span class="fragmentArrival__hint">Guardado para uma sala que você criar</span>
+    </span>
+    <span class="fragmentArrival__arrow" aria-hidden="true">›</span>
+  </button>
+</div>
 
 <!-- Feature modal -->
 <div class="fmVeil" id="featureModal" role="dialog" aria-modal="true">
@@ -905,8 +1021,14 @@ document.querySelectorAll('[data-toast]').forEach(function(trigger){
   trigger.addEventListener('click',function(){window._toast(trigger.getAttribute('data-toast'));});
 });
 
-var _open=null;
-function closeDrops(){document.querySelectorAll('.drop').forEach(function(d){d.classList.remove('open');});_open=null;}
+var _open=null,_openTrigger=null;
+function closeDrops(restoreFocus){
+  var previousTrigger=_openTrigger;
+  document.querySelectorAll('.drop').forEach(function(d){d.classList.remove('open');});
+  var fragmentTrigger=document.getElementById('btnFragment');if(fragmentTrigger)fragmentTrigger.setAttribute('aria-expanded','false');
+  _open=null;_openTrigger=null;
+  if(restoreFocus&&previousTrigger&&!previousTrigger.hidden)setTimeout(function(){previousTrigger.focus();},0);
+}
 function toggleDrop(el,trigger){
   if(!el)return false;
   var was=el.classList.contains('open');
@@ -924,12 +1046,29 @@ function toggleDrop(el,trigger){
       el.style.left='auto';
     }
     el.classList.add('open');
-    _open=el;
+    _open=el;_openTrigger=trigger||null;
   }
   return !was;
 }
+var _fragmentArrivalTimer=null;
+var _fragmentExpiryInterval=null;
+function hideFragmentArrival(){
+  clearTimeout(_fragmentArrivalTimer);
+  var arrival=document.getElementById('fragmentArrival');if(!arrival)return;
+  arrival.classList.remove('on');
+  setTimeout(function(){if(!arrival.classList.contains('on'))arrival.hidden=true;},360);
+}
+function openFragmentPanel(){
+  hideFragmentArrival();
+  var trigger=document.getElementById('btnFragment');
+  var panel=document.getElementById('dropFragment');
+  if(!trigger||trigger.hidden||!panel)return;
+  var opened=toggleDrop(panel,trigger);
+  trigger.setAttribute('aria-expanded',opened?'true':'false');
+  if(opened)setTimeout(function(){var close=document.getElementById('fragmentClose');if(close)close.focus();},0);
+}
 document.addEventListener('click',function(e){if(_open&&!_open.contains(e.target))closeDrops();});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeDrops();closeFM();}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeDrops(true);closeFM();}});
 
 /* Feature modal */
 var fmData={
@@ -952,6 +1091,11 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFM();})
 
 document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();var opened=toggleDrop(document.getElementById('dropNotif'),this);if(opened&&window.hubMarkNotificationsRead)window.hubMarkNotificationsRead();});
 document.getElementById('btnCoins').addEventListener('click',function(e){e.stopPropagation();window._toast('Loja de moedas — em breve');});
+document.getElementById('btnFragment').addEventListener('click',function(e){e.stopPropagation();openFragmentPanel();});
+document.getElementById('fragmentArrivalButton').addEventListener('click',function(e){e.stopPropagation();openFragmentPanel();});
+document.getElementById('fragmentClose').addEventListener('click',function(){closeDrops();var trigger=document.getElementById('btnFragment');if(trigger)trigger.focus();});
+document.getElementById('fragmentLater').addEventListener('click',function(){closeDrops();var trigger=document.getElementById('btnFragment');if(trigger)trigger.focus();});
+document.getElementById('fragmentCreate').addEventListener('click',function(){location.href='./entrada.html?modo=criar&fragmento=1';});
 document.getElementById('btnPerfil').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropPerfil'),this);});
 document.getElementById('navSocial').addEventListener('click',function(){closeDrops();openFM('social');});
 document.getElementById('navMundo').addEventListener('click',function(){closeDrops();openFM('mundo');});
@@ -1067,6 +1211,78 @@ window.hubMarkNotificationsRead=function(){
   }).finally(function(){_hubState.markingNotifications=false;});
 };
 
+function _fragmentExpiryLabel(value){
+  var expires=_hubDate(value);if(!expires)return'Validade não informada';
+  var diff=Math.max(0,expires.getTime()-Date.now());
+  var totalHours=Math.ceil(diff/3600000);
+  if(totalHours<1)return'Expira em menos de uma hora';
+  if(totalHours<24)return'Expira em '+totalHours+'h';
+  var days=Math.floor(totalHours/24),hours=totalHours%24;
+  return'Expira em '+days+'d'+(hours?' '+hours+'h':'');
+}
+
+window.hubRenderFragment=function(fragment){
+  var trigger=document.getElementById('btnFragment');
+  var arrival=document.getElementById('fragmentArrival');
+  var card=fragment&&fragment.card&&typeof fragment.card==='object'?fragment.card:null;
+  var expiryDate=_hubDate(fragment&&fragment.expiresAt);
+  clearInterval(_fragmentExpiryInterval);_fragmentExpiryInterval=null;
+  if(expiryDate&&expiryDate.getTime()<=Date.now())card=null;
+  if(!trigger||!card){
+    if(trigger)trigger.hidden=true;
+    hideFragmentArrival();
+    if(document.getElementById('dropFragment')?.classList.contains('open'))closeDrops();
+    return;
+  }
+  var title=String(card.title||'Carta bônus reservada').trim().slice(0,160);
+  var text=String(card.text||'Uma carta especial foi reservada para seu próximo ritual.').trim().slice(0,1200);
+  var set=function(id,value){var el=document.getElementById(id);if(el)el.textContent=value;};
+  set('fragmentPanelTitle',title);
+  set('fragmentPanelText',text);
+  set('fragmentArrivalTitle',title);
+  var expiry=document.getElementById('fragmentExpiry');
+  if(expiry){
+    expiry.textContent=_fragmentExpiryLabel(fragment.expiresAt)+' · reservado para você';
+    if(expiryDate)expiry.dateTime=expiryDate.toISOString();else expiry.removeAttribute('datetime');
+  }
+  trigger.hidden=false;
+  trigger.setAttribute('aria-label','1 fragmento disponível: '+title+'. Abrir detalhes.');
+  if(expiryDate){
+    _fragmentExpiryInterval=setInterval(function(){
+      if(expiryDate.getTime()<=Date.now()){window.hubRenderFragment(null);return;}
+      if(expiry)expiry.textContent=_fragmentExpiryLabel(expiryDate)+' · reservado para você';
+    },60000);
+  }
+
+  var fingerprint=String(fragment.expiresAt||'sem-validade')+':'+title;
+  var seen='';try{seen=sessionStorage.getItem('osl_fragment_arrival')||'';}catch(_){}
+  if(seen===fingerprint)return;
+  try{sessionStorage.setItem('osl_fragment_arrival',fingerprint);}catch(_){}
+  trigger.classList.add('is-new');
+  clearTimeout(_fragmentArrivalTimer);
+  _fragmentArrivalTimer=setTimeout(function(){
+    if(!arrival||trigger.hidden)return;
+    arrival.hidden=false;
+    requestAnimationFrame(function(){arrival.classList.add('on');});
+    _fragmentArrivalTimer=setTimeout(function(){hideFragmentArrival();trigger.classList.remove('is-new');},7200);
+  },650);
+};
+
+function _refreshHubFragment(){
+  var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+  if(!token)return Promise.resolve(null);
+  var controller=typeof AbortController!=='undefined'?new AbortController():null;
+  var timeoutId=setTimeout(function(){if(controller)controller.abort();},8000);
+  return fetch(api+'/hub',{headers:{'Authorization':'Bearer '+token},signal:controller?controller.signal:undefined})
+    .then(function(response){return response.ok?response.json():null;})
+    .then(function(data){
+      if(!data)return null;
+      if(window._hubData)window._hubData.fragment=data.fragment||null;
+      window.hubRenderFragment(data.fragment||null);
+      return data.fragment||null;
+    }).catch(function(){return null;}).finally(function(){clearTimeout(timeoutId);});
+}
+
 window.hubSetHero=function(data){
   var h=new Date().getHours();
   var s=h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE';
@@ -1075,16 +1291,8 @@ window.hubSetHero=function(data){
   var setTitle=function(lines){var e=document.getElementById('heroTitle');if(!e)return;e.replaceChildren();lines.forEach(function(line,index){if(index)e.appendChild(document.createElement('br'));e.appendChild(document.createTextNode(line));});};
   set('heroKick',nm?s+', '+nm+'.':s+'.');
   setTitle(['O MUNDO','ESPERA POR VOCÊ.']);set('heroCta','JOGAR');
-  var context=document.getElementById('heroContext');if(context)context.hidden=true;
   var online=(data.friends||[]).find(function(f){return f.online;});
-  if(data.fragment){
-    var card=data.fragment.card||{};
-    setTitle(['UM FRAGMENTO','TE ESPERA.']);set('heroCta','ABRIR PRÓXIMO RITUAL');
-    set('heroFragmentTitle',card.title||'Carta bônus reservada');
-    set('heroFragmentText',card.text||'Este fragmento será incluído quando você iniciar seu próximo ritual.');
-    if(context)context.hidden=false;
-  }
-  else if(online){var n=_friendData(online).name.split(' ')[0].toUpperCase();setTitle([n,'ESTÁ ONLINE.']);set('heroCta','CHAMAR');}
+  if(online){var n=_friendData(online).name.split(' ')[0].toUpperCase();setTitle([n,'ESTÁ ONLINE.']);set('heroCta','CHAMAR');}
   else if(data.lastSession&&data.lastSession.roomName){setTitle(['O MUNDO','TE ESPERA.']);}
 };
 
@@ -1263,6 +1471,7 @@ function _callComplete(){
     if(result.account&&window.hubApplyAccount){if(window._hubData)window._hubData.account=result.account;window.hubApplyAccount(result.account,window._hubFallbackUser||{});}
     try{localStorage.setItem('osl_daily_done',JSON.stringify({date:_dailyData&&_dailyData.date,completedAt:ts,count:cnt}));}catch(_){}
     _showCardDone({completedAt:result.completedAt||ts,count:cnt});
+    _refreshHubFragment();
     return{alreadyCompleted:alreadyCompleted,xp:xp,count:cnt,completedAt:result.completedAt||ts};
   }).catch(function(error){if(error&&error.name==='AbortError')throw new Error('DAILY_COMPLETE_TIMEOUT');throw error;})
   .finally(function(){clearTimeout(timeoutId);});
@@ -1462,6 +1671,7 @@ onAuthStateChanged(auth,async(user)=>{
   data.lastSession=data.lastSession||((data.account&&data.account.activity&&data.account.activity.lastSession)||null);
   data.daily=data.daily||((data.account&&data.account.tasks&&data.account.tasks.daily)||null);
   window.hubSetHero&&window.hubSetHero(data);
+  window.hubRenderFragment&&window.hubRenderFragment(data.fragment||null);
   window.hubSetRitual&&window.hubSetRitual(data.daily);
   window.hubSetSeason&&window.hubSetSeason(data.season);
   window.hubRenderFriends&&window.hubRenderFriends(data.friends,data.lastSession);

@@ -11,6 +11,53 @@ const codigoSalaEl  = document.getElementById("codigoSala");
 const btnCriarSala  = document.getElementById("btnCriarSala");
 const btnEntrarSala = document.getElementById("btnEntrarSala");
 
+const entryParams      = new URLSearchParams(window.location.search);
+const entryMode        = entryParams.get("modo");
+const fragmentPrepared = entryParams.get("fragmento") === "1";
+let fragmentCheckSettled = !fragmentPrepared;
+
+if (fragmentPrepared) {
+  btnCriarSala.disabled = true;
+  btnCriarSala.textContent = "Verificando fragmento…";
+  statusEl.textContent = "✦ Confirmando seu fragmento com o servidor…";
+
+  const finishFragmentCheck = (state, message) => {
+    if (fragmentCheckSettled) return;
+    fragmentCheckSettled = true;
+    btnCriarSala.disabled = false;
+    btnCriarSala.removeAttribute("data-i18n");
+    statusEl.classList.remove("ok", "err");
+    if (state === "confirmed") {
+      btnCriarSala.textContent = "Criar sala com fragmento";
+      statusEl.textContent = "✦ Fragmento confirmado · ele entrará no baralho quando você iniciar o ritual como anfitrião.";
+      statusEl.classList.add("ok");
+      return;
+    }
+    btnCriarSala.textContent = "Criar sala";
+    statusEl.textContent = message;
+    if (state === "missing") statusEl.classList.add("err");
+  };
+
+  const verifyFragment = async () => {
+    if (fragmentCheckSettled || typeof window.verificarFragmentoPendente !== "function") return;
+    try {
+      const result = await window.verificarFragmentoPendente();
+      if (result?.fragment) finishFragmentCheck("confirmed", "");
+      else finishFragmentCheck("missing", "Este fragmento não está mais disponível. Você ainda pode criar uma sala normal.");
+    } catch (_) {
+      finishFragmentCheck("unknown", "Não foi possível confirmar o fragmento agora. O servidor verificará novamente quando o ritual iniciar.");
+    }
+  };
+
+  window.addEventListener("entrada:firebase-ready", verifyFragment, { once: true });
+  window.setTimeout(verifyFragment, 0);
+  window.setTimeout(() => finishFragmentCheck("unknown", "Não foi possível confirmar o fragmento agora. O servidor verificará novamente quando o ritual iniciar."), 8000);
+}
+
+if (entryMode === "criar") {
+  window.setTimeout(() => nomeJogadorEl.focus(), 0);
+}
+
 btnRitual.addEventListener("click", () => {
   modalBack.style.display = "flex";
 });

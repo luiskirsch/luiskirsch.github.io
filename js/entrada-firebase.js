@@ -36,6 +36,28 @@ async function ensureAuth() {
   await _authReady;
 }
 
+window.verificarFragmentoPendente = async function () {
+  const user = await _authReady;
+  if (!user || user.isAnonymous) return { fragment: null };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  try {
+    const token = await user.getIdToken();
+    const response = await fetch("https://osl-video-server-production.up.railway.app/hub", {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`HUB_FRAGMENT_${response.status}`);
+    const data = await response.json();
+    return { fragment: data?.fragment || null };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
+window.dispatchEvent(new Event("entrada:firebase-ready"));
+
 window.verificarCodigoDisponivel = async function (codigoSala) {
   await ensureAuth();
   const snap = await getDoc(doc(db, "salas", codigoSala));
