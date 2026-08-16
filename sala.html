@@ -4790,10 +4790,11 @@
     }
 
     /* Placeholders visíveis em arena mesmo com ritual iniciado;
-       somem só quando há tile real na coluna */
-    html.arenaMode .videoColPlaceholder{ display:block !important; }
-    html.arenaMode .videoColLeft:has(.videoTile) .videoColPlaceholder,
-    html.arenaMode .videoColRight:has(.videoTile) .videoColPlaceholder{ display:none !important; }
+       somem só quando há tile real na coluna.
+       Usa html+body para especificidade (0,2,2) > body.ritual-started (0,2,1). */
+    html.arenaMode body .videoColPlaceholder{ display:block !important; }
+    html.arenaMode body .videoColLeft:has(.videoTile) .videoColPlaceholder,
+    html.arenaMode body .videoColRight:has(.videoTile) .videoColPlaceholder{ display:none !important; }
 
     html.arenaMode .cardCenter{
       min-height:0;
