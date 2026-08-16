@@ -1,4 +1,4 @@
-const CACHE = 'osl-v7-account-unification';
+const CACHE = 'osl-v8-fresh-navigation';
 
 const PRECACHE = [
   '/favicon.png',
@@ -69,8 +69,16 @@ self.addEventListener('fetch', e => {
 
   // HTML — network-first (sempre atualizado)
   if (request.destination === 'document') {
+    const freshRequest = new Request(request, { cache: 'no-store' });
     e.respondWith(
-      fetch(request).catch(() => caches.match(request))
+      fetch(freshRequest)
+        .then(res => {
+          if (res && res.ok) {
+            caches.open(CACHE).then(c => c.put(request, res.clone())).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }

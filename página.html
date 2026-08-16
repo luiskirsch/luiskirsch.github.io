@@ -1120,6 +1120,7 @@ const auth = getAuth(app);
 // Distingue uma sessão restaurada ao abrir a página de um login/cadastro
 // iniciado nela. Só a sessão restaurada deve exibir o painel conectado.
 let directHubNavigation = false;
+const HUB_URL = "./hub.html?v=20260816-8";
 
 function validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
@@ -1212,7 +1213,7 @@ if (loginForm) {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, pass);
       if (cred.user) localStorage.setItem("osl_auth_uid", cred.user.uid);
-      window.location.replace("./hub.html");
+      window.location.replace(HUB_URL);
     } catch(err) {
       directHubNavigation = false;
       setMsg("loginMsg", mapErr(err.code), "err");
@@ -1252,7 +1253,7 @@ if (registerForm) {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       if (nome) await updateProfile(cred.user, { displayName: nome });
       if (cred.user) localStorage.setItem("osl_auth_uid", cred.user.uid);
-      window.location.replace("./hub.html");
+      window.location.replace(HUB_URL);
     } catch(err) {
       directHubNavigation = false;
       setMsg("registerMsg", mapErr(err.code), "err");
@@ -1262,7 +1263,7 @@ if (registerForm) {
 }
 
 /* Connected panel */
-document.getElementById("btnHub")?.addEventListener("click", () => { window.location.href = "./hub.html"; });
+document.getElementById("btnHub")?.addEventListener("click", () => { window.location.href = HUB_URL; });
 document.getElementById("btnLogout")?.addEventListener("click", async () => { try { await signOut(auth); } catch(e) {} localStorage.removeItem("osl_auth_uid"); });
 
 /* Auth state */
@@ -1276,7 +1277,7 @@ onAuthStateChanged(auth, (user) => {
 });
 </script>
 
-<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
+<script src="./js/sw-register.js?v=8"></script>
 
 </body>
 </html>
