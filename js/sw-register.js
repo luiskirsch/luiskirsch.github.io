@@ -1,5 +1,5 @@
 if ("serviceWorker" in navigator) {
-  const reloadKey = "osl_sw_controller_reload_v9";
+  const reloadKey = "osl_sw_controller_reload_v10";
   let alreadyReloaded = false;
   try {
     alreadyReloaded = sessionStorage.getItem(reloadKey) === "1";
