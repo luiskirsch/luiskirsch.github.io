@@ -79,7 +79,7 @@ export function renderPlayers(players) {
   });
 
   if (playerCountEl)  playerCountEl.textContent   = String(players.length);
-  if (playersEmptyEl) playersEmptyEl.style.display = players.length > 1 ? "none" : "block";
+  if (playersEmptyEl) playersEmptyEl.style.display = players.length === 0 ? "block" : "none";
   applyVideoTileAvatars();
 }
 
@@ -624,8 +624,14 @@ export async function upsertSelf() {
 const MULTI_SERVER = BACKEND_BASE_URL;
 
 export async function fetchLiveRooms() {
-  try { const r = await fetch(MULTI_SERVER + "/game/rooms"); const d = await r.json(); return Array.isArray(d.rooms) ? d.rooms : []; }
-  catch (_) { return []; }
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), 6000);
+  try {
+    const r = await fetch(MULTI_SERVER + "/game/rooms", { signal: ctrl.signal });
+    const d = await r.json();
+    return Array.isArray(d.rooms) ? d.rooms : [];
+  } catch (_) { return []; }
+  finally { clearTimeout(tid); }
 }
 
 export function renderLiveRooms(rooms) {

@@ -274,11 +274,11 @@ window.dismissAIDetection = dismissAIDetection;
     }
     await ensureRoom();
     syncCoinsFromFirestore();
+    startMultiPoller();
     if (!S._isSpectator) await upsertSelf();
     if (!S._isSpectator) startHeartbeat();
 
     checkDailyReward();
-    startMultiPoller();
     syncAccountPurchases();
 
     // Hub Entre Sessões: fragmento + world state + daily + friends + last session + events + discoveries
