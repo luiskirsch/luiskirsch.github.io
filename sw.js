@@ -1,4 +1,4 @@
-const CACHE = 'osl-v8-fresh-navigation';
+const CACHE = 'osl-v9-ritual-hit-test';
 
 const PRECACHE = [
   '/favicon.png',

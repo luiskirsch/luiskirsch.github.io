@@ -221,7 +221,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .ritualWrap{flex:0 0 auto;min-height:0;padding:clamp(16px,1.8vh,24px) 24px 10px;display:flex;flex-direction:column;overflow:visible;margin-bottom:clamp(10px,2vh,22px);position:relative;z-index:1;cursor:default;user-select:none;-webkit-user-select:none;}
 .ritualDeck{
   flex:0 0 auto;min-height:0;display:flex;flex-direction:column;position:relative;
-  padding:0 10px 18px 18px;perspective:1100px;isolation:isolate;cursor:default;pointer-events:none;
+  padding:0 10px 18px 18px;perspective:1100px;isolation:isolate;cursor:default;pointer-events:auto;
   user-select:none;-webkit-user-select:none;
 }
 .ritualDeck::before,.ritualDeck::after{
@@ -252,19 +252,18 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
   backdrop-filter:blur(30px) saturate(1.20) brightness(1.16);
   -webkit-backdrop-filter:blur(30px) saturate(1.20) brightness(1.16);
   box-shadow:0 24px 60px rgba(0,0,0,.70),0 0 40px rgba(212,175,55,.06),inset 0 1px 0 rgba(212,175,55,.18);
-  overflow:hidden;position:relative;z-index:2;transform:translateZ(0);transform-origin:center;pointer-events:none;
-  will-change:transform;
+  overflow:hidden;position:relative;z-index:2;transform-origin:center;pointer-events:auto;
   transition:transform .46s cubic-bezier(.2,.78,.2,1),box-shadow .46s ease;
 }
-.ritualWrap:hover .rFront,.ritualDeck:focus-within .rFront{
+.ritualWrap:hover .rFront{
   transform:translate3d(5px,-6px,36px) rotateX(.35deg) rotateY(-.45deg);
   box-shadow:0 32px 72px rgba(0,0,0,.76),0 0 52px rgba(212,175,55,.10),inset 0 1px 0 rgba(212,175,55,.22);
 }
-.ritualWrap:hover .ritualDeck::after,.ritualDeck:focus-within::after{
+.ritualWrap:hover .ritualDeck::after{
   transform:translate3d(-10px,12px,-18px) scale(.997);
   border-color:rgba(212,175,55,.25);
 }
-.ritualWrap:hover .ritualDeck::before,.ritualDeck:focus-within::before{
+.ritualWrap:hover .ritualDeck::before{
   transform:translate3d(-20px,23px,-40px) scale(.994);
   border-color:rgba(212,175,55,.16);
   box-shadow:0 24px 42px rgba(0,0,0,.46);
@@ -273,17 +272,19 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .rInner::before,.rInner::after{content:'';position:absolute;width:14px;height:14px;border-color:rgba(212,175,55,.35);border-style:solid;}
 .rInner::before{top:8px;left:8px;border-width:1.5px 0 0 1.5px;}
 .rInner::after{bottom:8px;right:8px;border-width:0 1.5px 1.5px 0;}
+.ritualShield{position:absolute;inset:0;z-index:3;pointer-events:auto;cursor:default!important;background:transparent;}
 .rHead{font-size:11px;font-weight:700;letter-spacing:.30em;text-transform:uppercase;color:var(--gold2);margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px;}
 .rHead::before,.rHead::after{content:'';flex:1;max-width:32px;height:1px;background:rgba(212,175,55,.28);}
 .rHeadDia{font-size:8px;color:rgba(212,175,55,.50);}
 .rQ{font-family:var(--fell);font-size:clamp(18px,2vw,27px);font-style:italic;font-weight:400;color:#fff;line-height:1.45;margin-bottom:10px;letter-spacing:.015em;flex:0 0 auto;text-shadow:0 2px 16px rgba(0,0,0,.60);}
 .rMeta{display:flex;align-items:center;justify-content:center;gap:6px;font-size:8.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
 .rMeta svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.5;}
-.btnDiscover{padding:10px 32px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.28);border-radius:2px;color:var(--gold);font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;cursor:pointer;pointer-events:auto;transition:background .18s,border-color .18s,transform .14s;}
-.ritualDeck,.ritualDeck *{cursor:default!important;}
-.ritualDeck .btnDiscover,.ritualDeck .btnDiscover *{cursor:pointer!important;}
+.btnDiscover{position:relative;z-index:4;padding:10px 32px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.28);border-radius:2px;color:var(--gold);font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;cursor:pointer;pointer-events:auto;transition:background .18s,border-color .18s,transform .14s;}
+.ritualWrap,.ritualWrap *{cursor:default!important;}
+.ritualWrap .btnDiscover:not(:disabled),.ritualWrap .btnDiscover:not(:disabled) *{cursor:pointer!important;}
 .btnDiscover:hover{background:rgba(212,175,55,.12);border-color:rgba(212,175,55,.55);transform:translateY(-1px);}
-.btnDiscover.btnDone{border-color:rgba(212,175,55,.18);color:rgba(212,175,55,.45);background:rgba(212,175,55,.02);cursor:default!important;pointer-events:none;}
+.btnDiscover:focus-visible{outline:2px solid rgba(255,232,122,.78);outline-offset:3px;}
+.btnDiscover.btnDone{border-color:rgba(212,175,55,.18);color:rgba(212,175,55,.45);background:rgba(212,175,55,.02);cursor:default!important;pointer-events:auto;transform:none;}
 .btnDiscover.btnDone *{cursor:default!important;}
 
 /* ── RITUAL OVERLAY ── */
@@ -700,13 +701,14 @@ body.ritual-open #ritualDim{opacity:1;}
       <div class="ritualDeck">
         <div class="rFront">
           <div class="rInner">
+            <div class="ritualShield" aria-hidden="true"></div>
             <div class="rHead"><span class="rHeadDia">◆</span> Ritual do Dia <span class="rHeadDia">◆</span></div>
             <blockquote class="rQ" id="ritualQ">"Uma pergunta que você ainda não fez a si mesmo."</blockquote>
             <div class="rMeta">
               <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               <span id="ritualCount">4.821</span>&nbsp;pessoas descobriram hoje
             </div>
-            <button class="btnDiscover" id="btnDiscover" onclick="startDailyRitual()">DESCOBRIR</button>
+            <button class="btnDiscover" id="btnDiscover" type="button">DESCOBRIR</button>
           </div>
         </div>
       </div>
@@ -1313,6 +1315,30 @@ window.hubSetHero=function(data){
 /* ── Daily Ritual Flow ─────────────────────────────────────── */
 var _dailyData=null,_ritualActive=false,_timerInterval=null,_dailyCompleting=false;
 var _dailyMetaMarkup=(document.querySelector('.rMeta')||{}).innerHTML||'';
+var _dailySurface=document.querySelector('.ritualWrap');
+var _dailyActionButton=document.getElementById('btnDiscover');
+
+function _isDailyButtonTarget(target){return !!(target&&target.closest&&target.closest('#btnDiscover'));}
+if(_dailySurface){
+  ['pointerdown','click'].forEach(function(type){
+    _dailySurface.addEventListener(type,function(event){
+      if(_isDailyButtonTarget(event.target))return;
+      event.preventDefault();
+      event.stopPropagation();
+    },true);
+  });
+}
+if(_dailyActionButton){
+  _dailyActionButton.addEventListener('click',function(event){
+    if(_dailyActionButton.disabled)return;
+    if(event.detail>0){
+      var rect=_dailyActionButton.getBoundingClientRect();
+      var inside=event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom;
+      if(!inside){event.preventDefault();event.stopImmediatePropagation();return;}
+    }
+    window.startDailyRitual();
+  });
+}
 
 function _dailyCache(){try{return JSON.parse(localStorage.getItem('osl_daily_done')||'null');}catch(_){return null;}}
 function _dailyCompletedState(d){
@@ -1324,7 +1350,7 @@ function _dailyTime(value){
   var date=_hubDate(value);return date?date.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
 }
 function _showCardReady(){
-  var btn=document.getElementById('btnDiscover');if(btn){btn.textContent='DESCOBRIR';btn.classList.remove('btnDone');}
+  var btn=document.getElementById('btnDiscover');if(btn){btn.textContent='DESCOBRIR';btn.classList.remove('btnDone');btn.disabled=false;btn.removeAttribute('aria-disabled');}
   var meta=document.querySelector('.rMeta');if(meta&&_dailyMetaMarkup)meta.innerHTML=_dailyMetaMarkup;
 }
 
@@ -1340,7 +1366,7 @@ window.hubSetRitual=function(d){
 
 function _showCardDone(st){
   var btn=document.getElementById('btnDiscover');
-  if(btn){btn.textContent='✓ DESCOBERTO';btn.classList.add('btnDone');}
+  if(btn){btn.textContent='✓ DESCOBERTO';btn.classList.add('btnDone');btn.disabled=true;btn.setAttribute('aria-disabled','true');}
   var meta=document.querySelector('.rMeta');
   var time=_dailyTime(st&&st.completedAt);
   if(meta){meta.replaceChildren();var label=document.createElement('span');label.style.cssText='font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(212,175,55,.48)';label.textContent='✓ Descoberto hoje'+(time?' às '+time:'');meta.appendChild(label);}
@@ -1738,6 +1764,6 @@ onAuthStateChanged(auth,async(user)=>{
   </div>
 
 </div>
-<script src="./js/sw-register.js?v=8"></script>
+<script src="./js/sw-register.js?v=9"></script>
 </body>
 </html>
