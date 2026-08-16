@@ -2,7 +2,7 @@
 import { S } from "../state.js";
 import { setDoc, getDoc, doc, runTransaction } from "../firebase.js";
 import { escapeHtml, normalize } from "../utils.js";
-import { SECRET_MISSIONS, OSL_XP_EVENTS } from "../constants.js";
+import { SECRET_MISSIONS } from "../constants.js";
 import { OSL_XP, OSL_ACHIEVEMENTS } from "./effects.js";
 import { subscribe } from "./engine.js";
 import { logEvent } from "./session.js";
@@ -368,17 +368,6 @@ function renderMissionCompleted(text = S.currentSecretMission) {
 
 function showMissionCompletedToast() {
   const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
-  if (window.OSLRewardChest?.show) {
-    window.OSLRewardChest.show({
-      id: `mission:${S.roomCode || "room"}:${_activeMissionDoc?.missionId || _activeMissionKey || Date.now()}`,
-      once: true,
-      type: "mission",
-      title: _t('missions:ui.completed', "Missão cumprida!"),
-      value: `+${OSL_XP_EVENTS.MISSION_COMPLETE || 0} XP`,
-      description: S.currentSecretMission || "Seu objetivo secreto foi concluído.",
-    });
-    return;
-  }
   const toast = document.createElement("div");
   toast.style.cssText = "position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);z-index:9999;background:rgba(20,50,20,.95);border:1px solid rgba(80,200,80,.45);border-radius:10px;padding:10px 18px;color:#80d080;font-size:13px;font-weight:700;letter-spacing:.04em;white-space:nowrap;opacity:0;transition:opacity .25s ease,transform .25s ease;";
   toast.textContent = _t('missions:ui.toastDone', "✅ Missão secreta cumprida!");

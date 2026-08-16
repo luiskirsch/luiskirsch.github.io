@@ -207,16 +207,7 @@ export function bindUserDoc() {
       // Resgata moedas pendentes de compras feitas antes do perfil existir
       redeemPendingCoins().then(r => {
         if ((r?.coinsAdded || 0) > 0) {
-          if (window.OSLRewardChest?.show) {
-            window.OSLRewardChest.show({
-              id: `coins-redeemed:${S.userId}:${r.coinsAdded}`,
-              once: true,
-              type: "coins",
-              title: "Moedas resgatadas",
-              value: `+${r.coinsAdded} moedas`,
-              description: "Seu saldo pendente foi incorporado à sua conta.",
-            });
-          } else window.showOslToast?.(`+${r.coinsAdded} moedas resgatadas!`);
+          window.showOslToast?.(`+${r.coinsAdded} moedas resgatadas!`);
         }
       }).catch(() => {});
     }

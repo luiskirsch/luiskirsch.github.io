@@ -1213,21 +1213,6 @@ window.hubRenderNotifications=function(items,unread){
   });
   var unreadCount=unread!=null?unread:notifications.filter(function(item){return item&&item.read===false;}).length;
   window.hubSetUnread(unreadCount);
-  var rewardTypes={achievement_unlocked:'achievement',card_unlocked:'card',fragment_unlocked:'fragment',gift_received:'gift',reward_granted:'gift',coins_awarded:'coins'};
-  notifications.filter(function(notification){return notification&&notification.read===false&&rewardTypes[notification.type];}).forEach(function(notification){
-    if(!window.OSLRewardChest?.show)return;
-    var data=notification.data&&typeof notification.data==='object'?notification.data:{};
-    var rewardId='notification:'+String(notification.id||notification.type+':'+notification.createdAt);
-    if(notification.type==='achievement_unlocked'&&data.achievementId){var rewardUid='player';try{rewardUid=localStorage.getItem('osl_auth_uid')||rewardUid;}catch(_){}rewardId='achievement:'+rewardUid+':'+data.achievementId;}
-    window.OSLRewardChest.show({
-      id:rewardId,
-      once:true,
-      type:rewardTypes[notification.type],
-      title:String(data.cardTitle||data.title||notification.body||notification.title||'Nova recompensa'),
-      value:String(data.value||data.amount||''),
-      description:String(notification.title&&notification.body?notification.title+': '+notification.body:notification.body||'Uma nova recompensa foi adicionada à sua conta.')
-    });
-  });
 };
 
 window.hubMarkNotificationsRead=function(){

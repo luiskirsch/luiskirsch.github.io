@@ -90,19 +90,6 @@ export const OSL_ACHIEVEMENTS = (() => {
   let _toastQueue = [], _toastShowing = false;
 
   function showToast(badge) {
-    if (window.OSLRewardChest?.show) {
-      const localizedName = (window.OSL_I18N?.t(`achievements:badges.${badge.id}`)) || badge.name;
-      window.OSLRewardChest.show({
-        id: `achievement:${S.userId || "player"}:${badge.id}`,
-        once: true,
-        type: "achievement",
-        icon: badge.icon,
-        title: localizedName,
-        value: `+${badge.xp} XP`,
-        description: "Uma nova conquista foi incorporada ao seu perfil.",
-      });
-      return;
-    }
     _toastQueue.push(badge);
     if (!_toastShowing) drainQueue();
   }

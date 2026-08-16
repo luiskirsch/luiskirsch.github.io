@@ -256,17 +256,6 @@ export async function checkDailyReward() {
 }
 
 function showDailyRewardModal(streak, xp, onCollect) {
-  const chest = presentReward({
-    id: `daily-login:${S.userId || "player"}:${todayLocal()}`,
-    type: "daily",
-    icon: streak >= 7 ? "🔥" : streak >= 3 ? "⚡" : "✦",
-    title: `Presença · Dia ${streak}`,
-    value: `+${xp} XP`,
-    description: `Você voltou por ${streak} ${streak === 1 ? "dia" : "dias"}. Abra o baú para coletar sua recompensa diária.`,
-    actionLabel: "Coletar",
-    onOpen: () => Promise.resolve(onCollect()).catch(error => console.warn("Daily reward collect error:", error)),
-  });
-  if (chest) return chest;
   const icon = streak >= 7 ? "🔥" : streak >= 3 ? "⚡" : "✨";
   const dots  = Array.from({ length: 7 }, (_, i) => `<div class="dailyRewardCard__dot${i < streak ? " dailyRewardCard__dot--on" : ""}"></div>`).join("");
   const overlay = document.createElement("div");
