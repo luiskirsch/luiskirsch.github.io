@@ -354,9 +354,23 @@ export async function startSession() {
 
     // O backend valida host/token e cria a sessão primeiro. Só então publicamos
     // o estado visual da sala, evitando uma sala marcada como iniciada após erro.
-    const result = await startRitualDeck();
+    let result = await startRitualDeck();
+
+    // TRANSICAO_INVALIDA ocorre quando o listener da sala (status→waiting) chegou
+    // antes do listener de ritual/state (started→false) — corrida entre os dois.
+    // Retry único após 700 ms para o engine sincronizar com o Firestore.
+    if (!result?.ok && result?.code === "TRANSICAO_INVALIDA" && result?.phase === "RITUAL_ACTIVE") {
+      await new Promise(r => setTimeout(r, 700));
+      result = await startRitualDeck();
+    }
+
     if (!result?.ok) {
-      showOslToast("Não foi possível iniciar o ritual. Tente novamente.", "error");
+      const errCode = result?.code
+        || result?.error?.error
+        || (typeof result?.error === 'string' ? result.error : null)
+        || "?";
+      console.error('[startSession] falhou:', errCode, result);
+      showOslToast(`Não foi possível iniciar o ritual. [${errCode}]`, "error");
       return result || { ok: false };
     }
 
