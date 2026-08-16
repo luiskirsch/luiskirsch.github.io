@@ -874,7 +874,7 @@ requestAnimationFrame(function(t0){function step(prev){requestAnimationFrame(fun
       </div>
       <div class="connectedName" id="connectedName">—</div>
       <div class="connectedSub">Conta conectada</div>
-      <button class="authBtn" type="button" id="btnPainel">Ir para o painel</button>
+      <button class="authBtn" type="button" id="btnHub">Ir para o Hub</button>
       <button class="authBtn secondary" type="button" id="btnLogout">Sair da conta</button>
     </div>
 
@@ -1257,7 +1257,7 @@ if (registerForm) {
 }
 
 /* Connected panel */
-document.getElementById("btnPainel")?.addEventListener("click", () => { window.location.href = "./entrada.html"; });
+document.getElementById("btnHub")?.addEventListener("click", () => { window.location.href = "./hub.html"; });
 document.getElementById("btnLogout")?.addEventListener("click", async () => { try { await signOut(auth); } catch(e) {} localStorage.removeItem("osl_auth_uid"); });
 
 /* Auth state */
