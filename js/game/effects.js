@@ -374,7 +374,6 @@ export function renderActiveEffect(effect) {
     if (panel.style.display !== "none") {
       if (S.effectPanelCloseTimer) clearTimeout(S.effectPanelCloseTimer);
       panel.classList.add("effectPanel--closing");
-      if (cardCenter) cardCenter.classList.remove("cardCenter--effect-open");
       S.effectPanelCloseTimer = setTimeout(() => {
         panel.style.display = "none";
         panel.classList.remove("effectPanel--closing");
@@ -399,7 +398,6 @@ export function renderActiveEffect(effect) {
   }
 
   panel.style.display = "flex";
-  if (cardCenter) cardCenter.classList.add("cardCenter--effect-open");
 
   const titleEl   = panel.querySelector(".effectPanel__title");
   const bodyEl    = panel.querySelector(".effectPanel__body");
