@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js";
 
-const MODEL_URL = new URL("../assets/models/reward-chest.glb?v=5", import.meta.url).href;
+const MODEL_URL = new URL("../assets/models/reward-chest.glb?v=6", import.meta.url).href;
 const LID_NODE_NAME = "tripo_part_11";
 const DISPLAY_ROTATION_Y = Math.PI - .48;
 const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
@@ -210,7 +210,7 @@ function installModel(gltf) {
   const size = lidBox.getSize(new THREE.Vector3());
   const center = lidBox.getCenter(new THREE.Vector3());
   const hingeWorld = center.clone();
-  hingeWorld.y = Math.min(baseBox.max.y, lidBox.max.y - size.y * .18);
+  hingeWorld.y = Math.min(baseBox.max.y, lidBox.max.y - size.y * .18) - size.y * .07;
   if (size.z >= size.x) {
     lidAxis = "z";
     // Neste modelo a largura maior está em Z e a frente aponta para -X.

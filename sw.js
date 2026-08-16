@@ -1,4 +1,4 @@
-const CACHE = 'osl-v15-reward-chest-lid-axis';
+const CACHE = 'osl-v16-reward-chest-lid-spacing';
 
 const PRECACHE = [
   '/favicon.png',
