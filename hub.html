@@ -868,10 +868,10 @@ body.ritual-open #ritualDim{opacity:1;}
 </div>
 
 <!-- ══ THREE.JS ══ -->
-<script>
+<script type="module">
+import * as THREE from "three";
 (function(){
 'use strict';
-if(typeof THREE==='undefined')return;
 var W=innerWidth,H=innerHeight;
 var cv=document.getElementById('cvGL');
 var renderer=new THREE.WebGLRenderer({canvas:cv,antialias:false,alpha:false,powerPreference:'high-performance'});

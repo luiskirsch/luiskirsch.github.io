@@ -1,4 +1,4 @@
-const CACHE = 'osl-v20-hub-realtime-account';
+const CACHE = 'osl-v21-hub-background-effects';
 
 const PRECACHE = [
   '/favicon.png',
