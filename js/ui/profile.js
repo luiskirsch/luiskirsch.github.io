@@ -884,7 +884,8 @@ export function bindProfileEvents() {
       if (avatarUrl) { localStorage.setItem("osl_avatar_photo", avatarUrl); localStorage.removeItem("osl_avatar"); }
       else { localStorage.removeItem("osl_avatar_photo"); localStorage.setItem("osl_avatar", avatarEmoji); }
       updateDesktopProfileBtn(S.selectedAvatarPhoto, S.selectedAvatarEmoji);
-      await setDoc(S.playerRef, { name: displayName, avatarEmoji: avatarUrl ? deleteField() : avatarEmoji, avatarPhotoUrl: avatarUrl || deleteField(), avatarColor }, { merge: true });
+      const _httpsPhoto = (avatarUrl && avatarUrl.startsWith("https://")) ? avatarUrl : null;
+      await setDoc(S.playerRef, { name: displayName, avatarEmoji: _httpsPhoto ? deleteField() : avatarEmoji, avatarPhotoUrl: _httpsPhoto || deleteField(), avatarColor }, { merge: true });
     } catch (error) { console.error(error); alert("Não foi possível salvar o perfil."); }
   });
 
