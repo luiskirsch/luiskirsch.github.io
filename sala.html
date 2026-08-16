@@ -1742,12 +1742,9 @@
     }
 
     /* Quando o effectPanel está visível, o card encolhe para caber na tela */
-    .cardCenter--effect-open .ritualCardWrap{
-      height:min(38vh, calc(100svh - 420px));
-    }
-    html.arenaMode .cardCenter--effect-open .ritualCardWrap{
-      height:min(38vh, calc(100svh - 380px));
-    }
+    /* effectPanel usa position:absolute na mesa — carta não encolhe */
+    .cardCenter--effect-open .ritualCardWrap,
+    html.arenaMode .cardCenter--effect-open .ritualCardWrap{ height:unset; }
 
     .deckInfoBar{
       font-size:12px;
@@ -1758,7 +1755,16 @@
     }
 
     /* ── Effect Panel ────────────────────────────────────────────────── */
+    /* absoluto dentro da revealPanel — fica no rodapé da mesa */
     .effectPanel{
+      position:absolute;
+      bottom:20px;
+      top:auto;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:25;
+      width:min(80%, 380px);
+      margin:0;
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -1767,17 +1773,16 @@
       border:1px solid rgba(200,150,60,.45);
       border-radius:12px;
       padding:14px 18px;
-      margin:10px 0;
       backdrop-filter:blur(8px);
       animation:effectPanelIn .35s ease;
     }
     @keyframes effectPanelIn{
-      from{opacity:0;transform:translateY(-8px) scale(.97)}
-      to{opacity:1;transform:translateY(0) scale(1)}
+      from{opacity:0;transform:translateX(-50%) translateY(8px) scale(.97)}
+      to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
     }
     @keyframes effectPanelOut{
-      from{opacity:1;transform:translateY(0) scale(1)}
-      to{opacity:0;transform:translateY(-6px) scale(.97)}
+      from{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+      to{opacity:0;transform:translateX(-50%) translateY(6px) scale(.97)}
     }
     .effectPanel--closing{
       animation:effectPanelOut .22s ease forwards;
@@ -5492,27 +5497,30 @@
     .ritualVisualCard { width: 100% !important; height: 100% !important; }
 
     /*
-      effectPanel como overlay flutuante acima da carta.
-      Não participa do flex flow → o card mantém sua altura total mesmo
-      quando battlecry/timer está visível.
+      effectPanel na mesa — absoluto dentro da revealPanel, no rodapé da mesa.
+      Não participa do flex flow → o card mantém sua altura total.
     */
-    .cardCenter { position: relative; }
     .effectPanel {
       position: absolute !important;
-      top: 8px !important;
+      bottom: 14px !important;
+      top: auto !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
       z-index: 25 !important;
-      width: min(88%, 380px) !important;
+      width: min(88%, 360px) !important;
       margin: 0 !important;
+      animation: effectPanelInTable .35s ease !important;
     }
-    /* Animação de saída precisa preservar o translateX do absolute */
+    @keyframes effectPanelInTable {
+      from { opacity:0; transform: translateX(-50%) translateY(8px) scale(.97); }
+      to   { opacity:1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
     .effectPanel--closing {
-      animation: effectPanelOutMobile .22s ease forwards !important;
+      animation: effectPanelOutTable .22s ease forwards !important;
     }
-    @keyframes effectPanelOutMobile {
+    @keyframes effectPanelOutTable {
       from { opacity:1; transform: translateX(-50%) translateY(0) scale(1); }
-      to   { opacity:0; transform: translateX(-50%) translateY(-6px) scale(.97); }
+      to   { opacity:0; transform: translateX(-50%) translateY(6px) scale(.97); }
     }
 
     /* Sem hover 3D no touch — mantém !important aqui para bloquear a regra hover do desktop */
@@ -7313,11 +7321,6 @@
                   Aguardando o anfitrião iniciar.
                 </div>
 
-                <!-- ── Effect Panel ─────────────────────────────────── -->
-                <div class="effectPanel" id="effectPanel" style="display:none">
-                  <div class="effectPanel__title">⚡ BATTLECRY</div>
-                  <div class="effectPanel__body"></div>
-                </div>
                 <!-- ── AI Detection Toast (visível apenas ao host) ──── -->
                 <div class="aiDetectToast" id="aiDetectToast">
                   <span class="aiDetectToast__icon">🤖</span>
@@ -7452,6 +7455,12 @@
                     <div class="ritualCardBack" aria-hidden="true"></div>
 
                     </div>
+                  </div>
+
+                  <!-- ── Effect Panel (battlecry / deathrattle sobre a mesa) ── -->
+                  <div class="effectPanel" id="effectPanel" style="display:none">
+                    <div class="effectPanel__title">⚡ BATTLECRY</div>
+                    <div class="effectPanel__body"></div>
                   </div>
                 </div>
 
