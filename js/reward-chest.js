@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js";
 
 const MODEL_URL = new URL("../assets/models/reward-chest.glb?v=6", import.meta.url).href;
+const LOGO_URL = new URL("../logo_oficial_fundo_transparente.png", import.meta.url).href;
 const LID_NODE_NAME = "tripo_part_11";
 const DISPLAY_ROTATION_Y = Math.PI - .48;
 const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
@@ -272,16 +273,16 @@ function installRewardCoin(wholeSize, wholeBox, baseBox) {
   const radius = Math.max(wholeSize.x, wholeSize.z) * .105;
   const depth = radius * .18;
   const gold = new THREE.MeshStandardMaterial({
-    color: 0xf2bd32,
-    metalness: .86,
-    roughness: .22,
-    emissive: 0x5a2d00,
-    emissiveIntensity: .22,
+    color: 0xffc928,
+    metalness: .72,
+    roughness: .2,
+    emissive: 0x8a4300,
+    emissiveIntensity: .34,
     transparent: true,
     opacity: 0,
   });
   const rimGold = gold.clone();
-  rimGold.color.setHex(0xffdc68);
+  rimGold.color.setHex(0xffea72);
   coinMaterials = [gold, rimGold];
 
   coinRoot = new THREE.Group();
@@ -292,14 +293,73 @@ function installRewardCoin(wholeSize, wholeBox, baseBox) {
   const rim = new THREE.Mesh(new THREE.TorusGeometry(radius * .79, radius * .055, 10, 48), rimGold);
   rim.position.z = depth * .54;
   coinRoot.add(body, rim);
+  installCoinLogo(radius, depth);
 
   const baseTop = baseBox.max.y - wholeBox.min.y;
   coinStartY = baseTop - radius * .45;
-  coinEndY = baseTop + radius * 1.65;
+  coinEndY = baseTop + radius * 1.22;
   coinRoot.position.set(0, coinStartY, 0);
   coinRoot.scale.setScalar(.25);
   coinRoot.visible = false;
   displayRoot.add(coinRoot);
+}
+
+function installCoinLogo(radius, depth) {
+  new THREE.TextureLoader().load(LOGO_URL, texture => {
+    const image = texture.image;
+    const source = document.createElement("canvas");
+    source.width = image.naturalWidth || image.width;
+    source.height = image.naturalHeight || image.height;
+    const sourceContext = source.getContext("2d", { willReadFrequently: true });
+    sourceContext.drawImage(image, 0, 0);
+    const pixels = sourceContext.getImageData(0, 0, source.width, source.height);
+
+    let minX = source.width, minY = source.height, maxX = 0, maxY = 0;
+    for (let y = 0; y < source.height; y++) {
+      for (let x = 0; x < source.width; x++) {
+        const alpha = pixels.data[(y * source.width + x) * 4 + 3];
+        if (alpha > 12) {
+          minX = Math.min(minX, x); minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+        }
+      }
+    }
+    if (maxX <= minX || maxY <= minY || !coinRoot) return;
+
+    const size = Math.max(maxX - minX, maxY - minY);
+    const cropX = (minX + maxX - size) / 2;
+    const cropY = (minY + maxY - size) / 2;
+    const logoCanvas = document.createElement("canvas");
+    logoCanvas.width = logoCanvas.height = 512;
+    const context = logoCanvas.getContext("2d", { willReadFrequently: true });
+    context.drawImage(source, cropX, cropY, size, size, 0, 0, 512, 512);
+    const logoPixels = context.getImageData(0, 0, 512, 512);
+    for (let i = 0; i < logoPixels.data.length; i += 4) {
+      const luminance = Math.max(logoPixels.data[i], logoPixels.data[i + 1], logoPixels.data[i + 2]);
+      const originalAlpha = logoPixels.data[i + 3];
+      logoPixels.data[i] = 74;
+      logoPixels.data[i + 1] = 35;
+      logoPixels.data[i + 2] = 0;
+      logoPixels.data[i + 3] = Math.round(originalAlpha * luminance / 255);
+    }
+    context.putImageData(logoPixels, 0, 0);
+
+    const logoTexture = new THREE.CanvasTexture(logoCanvas);
+    logoTexture.colorSpace = THREE.SRGBColorSpace;
+    const logoMaterial = new THREE.MeshBasicMaterial({
+      map: logoTexture,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.FrontSide,
+    });
+    const geometry = new THREE.PlaneGeometry(radius * 1.42, radius * 1.42);
+    const front = new THREE.Mesh(geometry, logoMaterial);
+    front.position.z = depth * .58;
+    const back = new THREE.Mesh(geometry, logoMaterial);
+    back.position.z = -depth * .58;
+    back.rotation.y = Math.PI;
+    coinRoot.add(front, back);
+  }, undefined, error => console.warn("[reward-chest] Logo da moeda indisponível:", error));
 }
 
 function ensureModel() {
