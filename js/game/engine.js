@@ -228,7 +228,8 @@ const _handlers = {
   },
 
   async [CMD.END_GAME]() {
-    await endGameSession().catch(() => {});
+    const ended = await endGameSession().catch(error => ({ ok: false, error: error?.message || String(error) }));
+    if (!ended?.ok) return ended;
     _patch({
       phase:              PHASE.LOBBY,
       currentCard:        null,
@@ -241,5 +242,6 @@ const _handlers = {
       reactions:          null,
       voteResult:         null,
     });
+    return ended;
   },
 };

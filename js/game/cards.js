@@ -22,8 +22,24 @@ function hideLobbyView() {
 }
 
 function showLobbyView() {
+  const lv = document.getElementById("lobbyViewer");
+  if (lv) lv.style.removeProperty("display");
   document.body.classList.remove("ritual-started");
+  document.body.classList.add("lobby-mode");
   window._lobby3d?.show();
+}
+
+// A presença na partida e a tela exibida são estados diferentes: um jogador
+// pode aguardar no lobby enquanto os demais continuam o ritual.
+export function showLocalLobbyView() {
+  _setLobbyUI();
+}
+
+export function showActiveRitualView() {
+  hideLobbyView();
+  document.getElementById("revealPanel")?.style.setProperty("display", "");
+  document.getElementById("reactionBar")?.classList.add("reactionBar--visible");
+  applyCardContent(getState().currentCard);
 }
 
 // ── Deck building ─────────────────────────────────────────────────────────────

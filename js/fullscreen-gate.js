@@ -253,6 +253,7 @@
   }
 
   function activateArenaMode() {
+    sessionStorage.removeItem("osl_arena_optout");
     html.classList.add("arenaMode");
     sessionStorage.setItem("osl_arena", "1");
 
@@ -299,15 +300,18 @@
   // Botão do topbar — só visível/funcional para o host (hidden definido em bindRoom)
   document.getElementById("arenaBtn")
     ?.addEventListener("click", () => {
+      if (!html.classList.contains("arenaMode") && sessionStorage.getItem("osl_arena_optout") === "1") {
+        activateArenaMode();
+        window._osl?.reenterArenaView?.();
+        return;
+      }
       window._osl?.toggleArena?.().catch?.(() => {});
     });
 
   // Botão de saída flutuante — só o host sai e sincroniza para todos
   document.getElementById("exitArenaBtn")
     ?.addEventListener("click", () => {
-      if (window._osl?.getIsHost?.()) {
-        window._osl.deactivateArenaForAll?.().catch?.(() => {});
-      }
+      window._osl?.deactivateArenaForAll?.().catch?.(() => {});
     });
 
   // ESC — só o host sai e sincroniza para todos
@@ -316,9 +320,7 @@
     if (!html.classList.contains("arenaMode")) return;
     const profileModal = document.getElementById("profileModal");
     if (profileModal && !profileModal.classList.contains("hidden")) return;
-    if (window._osl?.getIsHost?.()) {
-      window._osl.deactivateArenaForAll?.().catch?.(() => {});
-    }
+    window._osl?.deactivateArenaForAll?.().catch?.(() => {});
   });
 
   const isMobileDevice = window.matchMedia("(max-width: 960px)").matches;

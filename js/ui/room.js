@@ -249,7 +249,9 @@ export function bindRoom() {
     if (streamModeBtn) streamModeBtn.hidden = !S.isHost;
     const liveBtn = document.getElementById("liveBtn");
     if (liveBtn) liveBtn.hidden = !S.isHost;
-    if (data.arenaActive) { if (typeof window.activateArenaMode === "function") window.activateArenaMode(); }
+    if (data.arenaActive) {
+      if (sessionStorage.getItem("osl_arena_optout") !== "1" && typeof window.activateArenaMode === "function") window.activateArenaMode();
+    }
     else { if (typeof window.deactivateArenaMode === "function") window.deactivateArenaMode(); if (!started && !S.ritualStarted) setRitualWaitingState(); }
     await setDoc(S.playerRef, { isHost: S.isHost }, { merge: true });
     // Toast quando outro jogador reconecta (campo observável na sessão)

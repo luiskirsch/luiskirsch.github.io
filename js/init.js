@@ -9,7 +9,7 @@ import { bindRitual } from "./game/cards.js";
 import { checkDailyReward, updateXpCard, updateCoinDisplay, syncCoinsFromFirestore } from "./game/rewards.js";
 import { sendReaction, castEffectVote, confirmAIDetection, dismissAIDetection } from "./game/effects.js";
 import { startSession, leaveRoom, sendLeaveBeacon } from "./ui/room.js";
-import { revealNextRitualCard, resetRitualDeck } from "./game/cards.js";
+import { revealNextRitualCard, resetRitualDeck, showLocalLobbyView, showActiveRitualView } from "./game/cards.js";
 import { dispatch } from "./game/engine.js";
 import { CMD } from "./game/commands.js";
 import { fetchHub, checkEncontroTicket } from "./api.js";
@@ -145,12 +145,15 @@ window._osl.toggleArena = async () => {
     const snap = await getDoc(S.roomRef);
     if (!snap.exists()) throw new Error("ROOM_NOT_FOUND");
     const currentlyActive = snap.data().arenaActive;
+    if (currentlyActive) {
+      return await window._osl.deactivateArenaForAll();
+    }
     if (!currentlyActive && !S.ritualStarted) {
       showOslToast(oslTr("sala:topbar.actions.arenaRequiresStarted", "⚔️ Inicie o ritual primeiro para ativar o Modo Arena."), "warn");
       return { ok: false, code: "RITUAL_NOT_STARTED" };
     }
-    await updateDoc(S.roomRef, { arenaActive: !currentlyActive });
-    return { ok: true, active: !currentlyActive };
+    await updateDoc(S.roomRef, { arenaActive: true });
+    return { ok: true, active: true };
   } catch (error) {
     console.error("Erro ao alternar Arena:", error);
     showOslToast("Não foi possível alterar o Modo Arena.", "error");
@@ -159,10 +162,29 @@ window._osl.toggleArena = async () => {
 };
 
 window._osl.deactivateArenaForAll = async () => {
-  if (!S.isHost) return;
-  const { updateDoc } = await import("./firebase.js");
-  await updateDoc(S.roomRef, { arenaActive: false });
+  // Quando o anfitrião é o único jogador, sair da Arena encerra a sessão e
+  // devolve a sala ao lobby. Apenas esconder arenaMode deixava o ritual ativo
+  // e fazia a carta continuar renderizada sobre o vídeo do lobby.
+  if (S.currentPlayers.length <= 1 && S.ritualStarted && S.isHost) {
+    const result = await dispatch({ type: CMD.END_GAME });
+    if (!result?.ok) {
+      showOslToast("Não foi possível encerrar a sessão.", "error");
+      return result;
+    }
+    window.deactivateArenaMode?.();
+    return result;
+  }
+
+  // Com outras pessoas na partida, a saída é individual. O estado remoto da
+  // arena permanece ativo para que o jogo continue para os demais jogadores.
+  sessionStorage.setItem("osl_arena_optout", "1");
+  window.deactivateArenaMode?.();
+  showLocalLobbyView();
+  const arenaBtn = document.getElementById("arenaBtn");
+  if (arenaBtn) arenaBtn.hidden = false;
+  return { ok: true, localOnly: true };
 };
+window._osl.reenterArenaView = () => showActiveRitualView();
 
 // Expõe para uso inline no HTML (onclick="sendReaction(...)", etc.)
 window.showOslToast       = showOslToast;

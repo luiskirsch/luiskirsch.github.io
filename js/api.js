@@ -95,9 +95,12 @@ export async function ensureHostToken(roomId = S.roomCode, forceRefresh = false)
     _clearHostToken(normalizedRoomId);
   }
 
-  if (_hostTokenRequest?.roomId === normalizedRoomId) {
+  // Uma renovação forçada nunca pode reaproveitar uma emissão anterior: ela
+  // normalmente acontece justamente porque o token retornado por ela expirou
+  // ou foi assinado com uma chave antiga.
+  if (!forceRefresh && _hostTokenRequest?.roomId === normalizedRoomId) {
     const pendingToken = await _hostTokenRequest.promise;
-    if (pendingToken || !forceRefresh) return pendingToken;
+    return pendingToken;
   }
 
   const promise = (async () => {
