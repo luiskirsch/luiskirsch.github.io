@@ -489,8 +489,9 @@ body.ritual-open #ritualDim{opacity:1;}
 .dItem.danger{color:rgba(255,80,80,.75);}.dItem.danger:hover{background:rgba(255,30,30,.06);color:rgba(255,80,80,.96);}
 .dDiv{height:1px;background:rgba(255,255,255,.05);margin:4px 0;}
 .dEmpty{padding:18px;font-size:10px;color:var(--text3);text-align:center;letter-spacing:.10em;}
-.notifDrop{width:min(340px,calc(100vw - 8px));max-height:min(430px,70vh);overflow-y:auto;}
-.notifItem{display:flex;gap:10px;padding:12px 15px;border-bottom:1px solid rgba(255,255,255,.045);}
+.notifDrop{width:min(340px,calc(100vw - 8px));overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(212,175,55,.18) transparent;}
+.notifDrop::-webkit-scrollbar{width:4px;}.notifDrop::-webkit-scrollbar-thumb{background:rgba(212,175,55,.20);border-radius:4px;}
+.notifItem{display:flex;gap:10px;padding:12px 15px;border-bottom:1px solid rgba(255,255,255,.045);align-items:flex-start;}
 .notifItem:last-child{border-bottom:0;}
 .notifItem.unread{background:rgba(212,175,55,.035);}
 .notifIcon{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.14);font-size:12px;}
@@ -498,6 +499,8 @@ body.ritual-open #ritualDim{opacity:1;}
 .notifTitle{font-size:10.5px;font-weight:650;color:var(--text);line-height:1.35;}
 .notifText{font-size:9px;color:var(--text3);line-height:1.5;margin-top:3px;overflow-wrap:anywhere;}
 .notifTime{font-size:7.5px;color:rgba(212,175,55,.46);letter-spacing:.08em;text-transform:uppercase;margin-top:5px;}
+.notifDel{background:transparent;border:0;color:rgba(255,255,255,.18);font-size:15px;line-height:1;cursor:pointer;padding:0 0 0 6px;flex-shrink:0;transition:color .15s;}
+.notifDel:hover{color:rgba(255,70,70,.70);}
 .toast{position:fixed;right:18px;bottom:calc(var(--season-h) + 12px);z-index:300;min-width:210px;background:rgba(4,8,16,.99);border:1px solid rgba(212,175,55,.28);border-left:3px solid var(--gold);border-radius:3px;padding:12px 18px 12px 34px;box-shadow:0 18px 48px rgba(0,0,0,.68),0 0 24px rgba(212,175,55,.06);font-size:9px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--text);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .22s,transform .22s;white-space:nowrap;}
 .toast::before{content:'✦';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:9px;}
 .toast.on{opacity:1;transform:translateY(0);}
@@ -1069,6 +1072,7 @@ function toggleDrop(el,trigger){
       el.style.top=(r.bottom+4)+'px';
       el.style.right=fromRight+'px';
       el.style.left='auto';
+      el.style.maxHeight=Math.min(500,Math.max(120,window.innerHeight-(r.bottom+4)-8))+'px';
     }
     el.classList.add('open');
     _open=el;_openTrigger=trigger||null;
@@ -1114,7 +1118,7 @@ document.getElementById('fmClose').addEventListener('click',closeFM);
 document.getElementById('featureModal').addEventListener('click',function(e){if(e.target===this)closeFM();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFM();});
 
-document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();var opened=toggleDrop(document.getElementById('dropNotif'),this);if(opened&&window.hubMarkNotificationsRead)window.hubMarkNotificationsRead();});
+document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();var opened=toggleDrop(document.getElementById('dropNotif'),this);if(opened){window.hubSetUnread(0);if(window.hubMarkNotificationsRead)window.hubMarkNotificationsRead();}});
 document.getElementById('btnCoins').addEventListener('click',function(e){e.stopPropagation();window._toast('Loja de moedas — em breve');});
 document.getElementById('btnFragment').addEventListener('click',function(e){e.stopPropagation();openFragmentPanel();});
 document.getElementById('fragmentArrivalButton').addEventListener('click',function(e){e.stopPropagation();openFragmentPanel();});
@@ -1208,10 +1212,23 @@ window.hubRenderNotifications=function(items,unread){
     if(notification&&notification.body){var textEl=document.createElement('div');textEl.className='notifText';textEl.textContent=String(notification.body).slice(0,1000);body.appendChild(textEl);}
     var date=_hubDate(notification&&notification.createdAt);
     if(date){var time=document.createElement('div');time.className='notifTime';time.textContent=_fmtCtx(date);body.appendChild(time);}
-    row.appendChild(icon);row.appendChild(body);drop.appendChild(row);
+    var del=document.createElement('button');del.className='notifDel';del.textContent='×';del.title='Excluir';del.setAttribute('aria-label','Excluir notificação');
+    (function(nId,r,wasUnread){del.addEventListener('click',function(e){e.stopPropagation();window.hubDeleteNotification(nId,r,wasUnread);});})(notificationId,row,notification&&notification.read===false);
+    row.appendChild(icon);row.appendChild(body);row.appendChild(del);drop.appendChild(row);
   });
   var unreadCount=unread!=null?unread:notifications.filter(function(item){return item&&item.read===false;}).length;
   window.hubSetUnread(unreadCount);
+};
+
+window.hubDeleteNotification=function(id,rowEl,wasUnread){
+  if(rowEl)rowEl.remove();
+  var drop=document.getElementById('dropNotif');
+  if(drop&&!drop.querySelector('.notifItem')){var empty=document.createElement('div');empty.className='dEmpty';empty.textContent='Nenhuma notificação';drop.appendChild(empty);}
+  if(wasUnread&&_hubState.notificationsUnread>0)window.hubSetUnread(Math.max(0,_hubState.notificationsUnread-1));
+  if(!id)return;
+  var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+  if(!token)return;
+  fetch(api+'/notifications/'+encodeURIComponent(id),{method:'DELETE',headers:{Authorization:'Bearer '+token}}).catch(function(){});
 };
 
 window.hubMarkNotificationsRead=function(){
