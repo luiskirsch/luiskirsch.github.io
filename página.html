@@ -1196,18 +1196,42 @@ async function showConnected(user) {
     try {
       const snap = await getDoc(doc(db, "users", user.uid));
       if (snap.exists()) {
-        const d = snap.data();
-        const emoji = d.avatar?.emoji || d.avatarEmoji || null;
-        const color = d.avatar?.color || d.avatarColor || null;
-        if (emoji) {
-          avatarEl.innerHTML = `<span style="font-size:26px;line-height:1;user-select:none">${emoji}</span>`;
-          if (color) {
-            avatarEl.style.background = color;
-            avatarEl.style.borderColor = color + "88";
+        const d     = snap.data();
+        const av    = d.avatar || {};
+        // photo tem prioridade; av.emoji é sempre preenchido pelo editor de perfil
+        // mesmo quando o tipo é "image", por isso verificamos kind/url primeiro.
+        const photoUrl = av.kind === "image" ? (av.url || d.avatarPhotoUrl || null)
+                                              : (d.avatarPhotoUrl || null);
+        const emoji    = av.emoji || d.avatarEmoji || null;
+        const color    = av.color || d.avatarColor || null;
+
+        if (photoUrl) {
+          // fetch→blob para contornar CSP (img-src proíbe URLs externas)
+          const resp = await fetch(photoUrl).catch(() => null);
+          if (resp?.ok) {
+            const blobUrl = URL.createObjectURL(await resp.blob());
+            const img = document.createElement("img");
+            img.src = blobUrl;
+            img.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:50%";
+            avatarEl.innerHTML = "";
+            avatarEl.style.background = "transparent";
+            avatarEl.appendChild(img);
+          } else if (emoji) {
+            _applyEmojiAvatar(avatarEl, emoji, color);
           }
+        } else if (emoji) {
+          _applyEmojiAvatar(avatarEl, emoji, color);
         }
       }
     } catch (_) {}
+  }
+}
+
+function _applyEmojiAvatar(el, emoji, color) {
+  el.innerHTML = `<span style="font-size:26px;line-height:1;user-select:none">${emoji}</span>`;
+  if (color) {
+    el.style.background   = color;
+    el.style.borderColor  = color + "88";
   }
 }
 
