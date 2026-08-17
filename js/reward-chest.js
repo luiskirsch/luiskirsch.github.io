@@ -14,6 +14,10 @@ let scene = null;
 let camera = null;
 let displayRoot = null;
 let displayScale = 1;
+let coinRoot = null;
+let coinMaterials = [];
+let coinStartY = 0;
+let coinEndY = 0;
 let lidPivot = null;
 let lidAxis = "z";
 let lidOpenAngle = Math.PI * .46;
@@ -255,12 +259,47 @@ function installModel(gltf) {
   displayRoot.scale.setScalar(displayScale);
   displayRoot.rotation.y = DISPLAY_ROTATION_Y;
   displayRoot.add(model);
+  installRewardCoin(wholeSize, wholeBox, baseBox);
   scene.add(displayRoot);
   modelReady = true;
   if (openProgress >= 1 && lidPivot) lidPivot.rotation[lidAxis] = lidOpenAngle;
   ui.overlay.classList.add("model-ready");
   ui.status.textContent = openProgress >= 1 ? "" : "Toque para abrir";
   resizeRenderer();
+}
+
+function installRewardCoin(wholeSize, wholeBox, baseBox) {
+  const radius = Math.max(wholeSize.x, wholeSize.z) * .105;
+  const depth = radius * .18;
+  const gold = new THREE.MeshStandardMaterial({
+    color: 0xf2bd32,
+    metalness: .86,
+    roughness: .22,
+    emissive: 0x5a2d00,
+    emissiveIntensity: .22,
+    transparent: true,
+    opacity: 0,
+  });
+  const rimGold = gold.clone();
+  rimGold.color.setHex(0xffdc68);
+  coinMaterials = [gold, rimGold];
+
+  coinRoot = new THREE.Group();
+  coinRoot.name = "reward_coin";
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, depth, 64, 1, false), gold);
+  body.rotation.x = Math.PI / 2;
+  body.castShadow = true;
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(radius * .79, radius * .055, 10, 48), rimGold);
+  rim.position.z = depth * .54;
+  coinRoot.add(body, rim);
+
+  const baseTop = baseBox.max.y - wholeBox.min.y;
+  coinStartY = baseTop - radius * .45;
+  coinEndY = baseTop + radius * 1.65;
+  coinRoot.position.set(0, coinStartY, 0);
+  coinRoot.scale.setScalar(.25);
+  coinRoot.visible = false;
+  displayRoot.add(coinRoot);
 }
 
 function ensureModel() {
@@ -305,7 +344,18 @@ function startRenderLoop() {
         displayRoot.scale.setScalar(displayScale * (1 - eased * .22));
         displayRoot.position.y = Math.sin(elapsed * 1.25) * .018 - eased * .08;
         displayRoot.rotation.x = Math.sin(raw * Math.PI) * -.035;
+        if (coinRoot) {
+          const reveal = Math.max(0, Math.min(1, (raw - .28) / .62));
+          const easedReveal = 1 - Math.pow(1 - reveal, 3);
+          coinRoot.visible = reveal > 0;
+          coinRoot.position.y = THREE.MathUtils.lerp(coinStartY, coinEndY, easedReveal);
+          coinRoot.scale.setScalar(THREE.MathUtils.lerp(.25, 1, easedReveal));
+          coinRoot.rotation.y = prefersReducedMotion ? 0 : elapsed * .85;
+          coinMaterials.forEach(material => { material.opacity = easedReveal; });
+        }
         if (raw >= 1) completeOpen();
+      } else if (coinRoot?.visible && openProgress >= 1) {
+        coinRoot.rotation.y = prefersReducedMotion ? 0 : now * .00085;
       }
     } else if (openedAt && openProgress < 1) {
       openProgress = prefersReducedMotion ? 1 : Math.min(1, (now - openedAt) / 850);
@@ -445,6 +495,13 @@ async function pumpQueue() {
     displayRoot.rotation.x = 0;
     displayRoot.position.y = 0;
     displayRoot.scale.setScalar(displayScale);
+  }
+  if (coinRoot) {
+    coinRoot.visible = false;
+    coinRoot.position.y = coinStartY;
+    coinRoot.scale.setScalar(.25);
+    coinRoot.rotation.y = 0;
+    coinMaterials.forEach(material => { material.opacity = 0; });
   }
   renderDetail(active.detail);
   ui.overlay.classList.remove("is-open");
