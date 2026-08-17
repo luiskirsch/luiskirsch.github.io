@@ -1118,7 +1118,8 @@ document.getElementById('fmClose').addEventListener('click',closeFM);
 document.getElementById('featureModal').addEventListener('click',function(e){if(e.target===this)closeFM();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFM();});
 
-document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();var opened=toggleDrop(document.getElementById('dropNotif'),this);if(opened){window.hubSetUnread(0);if(window.hubMarkNotificationsRead)window.hubMarkNotificationsRead();}});
+function _applyNotifScroll(drop){var items=drop.querySelectorAll('.notifItem');if(items.length<=5){drop.style.overflowY='hidden';drop.style.maxHeight='none';}else{var h=0;for(var i=0;i<5;i++)h+=items[i].offsetHeight;drop.style.overflowY='auto';drop.style.maxHeight=h+'px';}}
+document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();var drop=document.getElementById('dropNotif');var opened=toggleDrop(drop,this);if(opened){window.hubSetUnread(0);if(window.hubMarkNotificationsRead)window.hubMarkNotificationsRead();_applyNotifScroll(drop);}});
 document.getElementById('btnCoins').addEventListener('click',function(e){e.stopPropagation();window._toast('Loja de moedas — em breve');});
 document.getElementById('btnFragment').addEventListener('click',function(e){e.stopPropagation();openFragmentPanel();});
 document.getElementById('fragmentArrivalButton').addEventListener('click',function(e){e.stopPropagation();openFragmentPanel();});
@@ -1224,6 +1225,7 @@ window.hubDeleteNotification=function(id,rowEl,wasUnread){
   if(rowEl)rowEl.remove();
   var drop=document.getElementById('dropNotif');
   if(drop&&!drop.querySelector('.notifItem')){var empty=document.createElement('div');empty.className='dEmpty';empty.textContent='Nenhuma notificação';drop.appendChild(empty);}
+  if(drop&&drop.classList.contains('open'))_applyNotifScroll(drop);
   if(wasUnread&&_hubState.notificationsUnread>0)window.hubSetUnread(Math.max(0,_hubState.notificationsUnread-1));
   if(!id)return;
   var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
