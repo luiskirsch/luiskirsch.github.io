@@ -1104,6 +1104,7 @@ import {
   updateProfile,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
@@ -1115,8 +1116,9 @@ const firebaseConfig = {
   measurementId: "G-D6HG779ZFR"
 };
 
-const app = initializeApp(firebaseConfig);
+const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db   = getFirestore(app);
 // Distingue uma sessão restaurada ao abrir a página de um login/cadastro
 // iniciado nela. Só a sessão restaurada deve exibir o painel conectado.
 let directHubNavigation = false;
@@ -1174,7 +1176,7 @@ function setAuthBtn(formId, state, text) {
 }
 
 /* Connected state */
-function showConnected(user) {
+async function showConnected(user) {
   const authTabs = document.getElementById("authTabs");
   const panelLogin = document.getElementById("panelLogin");
   const panelRegister = document.getElementById("panelRegister");
@@ -1186,6 +1188,26 @@ function showConnected(user) {
   if (panelConnected) { panelConnected.style.display = ""; panelConnected.classList.add("active"); }
   if (connectedName) {
     connectedName.textContent = (user.displayName || "").trim() || user.email || "Minha conta";
+  }
+
+  // Busca avatar do perfil Firestore e substitui o ícone genérico
+  const avatarEl = document.querySelector(".connectedAvatar");
+  if (avatarEl && user.uid) {
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (snap.exists()) {
+        const d = snap.data();
+        const emoji = d.avatar?.emoji || d.avatarEmoji || null;
+        const color = d.avatar?.color || d.avatarColor || null;
+        if (emoji) {
+          avatarEl.innerHTML = `<span style="font-size:26px;line-height:1;user-select:none">${emoji}</span>`;
+          if (color) {
+            avatarEl.style.background = color;
+            avatarEl.style.borderColor = color + "88";
+          }
+        }
+      }
+    } catch (_) {}
   }
 }
 
