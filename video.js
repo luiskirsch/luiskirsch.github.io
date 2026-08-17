@@ -623,8 +623,7 @@ async function requestToken() {
       console.error("Erro ao obter token:", data);
 
       if (response.status === 401) {
-        lastErr = new Error("TOKEN_UNAUTHORIZED");
-        continue;
+        throw new Error("TOKEN_UNAUTHORIZED"); // auth ausente — retry não ajuda
       }
 
       lastErr = new Error("TOKEN_REQUEST_FAILED");
