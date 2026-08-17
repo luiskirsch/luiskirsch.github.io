@@ -1,4 +1,4 @@
-const CACHE = 'osl-v24-lobby-without-host-model';
+const CACHE = 'osl-v25-lobby-module-cache-bust';
 
 const PRECACHE = [
   '/favicon.png',
