@@ -1,4 +1,4 @@
-const CACHE = 'osl-v21-hub-background-effects';
+const CACHE = 'osl-v22-arena-lobby-session-fix';
 
 const PRECACHE = [
   '/favicon.png',
