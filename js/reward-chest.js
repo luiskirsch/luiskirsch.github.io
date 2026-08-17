@@ -278,10 +278,11 @@ function installRewardCoin(wholeSize, wholeBox, baseBox) {
     roughness: .2,
     clearcoat: .38,
     clearcoatRoughness: .18,
-    emissive: 0x6b4200,
-    emissiveIntensity: .48,
+    emissive: 0xf5c542,
+    emissiveIntensity: .42,
     transparent: true,
     opacity: 0,
+    toneMapped: false,
   });
   const rimGold = new THREE.MeshStandardMaterial({
     color: 0x9a6826,
