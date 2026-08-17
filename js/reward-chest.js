@@ -272,14 +272,11 @@ function installModel(gltf) {
 function installRewardCoin(wholeSize, wholeBox, baseBox) {
   const radius = Math.max(wholeSize.x, wholeSize.z) * .105;
   const depth = radius * .18;
-  const gold = new THREE.MeshStandardMaterial({
+  const gold = new THREE.MeshBasicMaterial({
     color: 0xf5c542,
-    metalness: .72,
-    roughness: .2,
-    emissive: 0x8a4300,
-    emissiveIntensity: .34,
     transparent: true,
     opacity: 0,
+    toneMapped: false,
   });
   const rimGold = gold.clone();
   rimGold.color.setHex(0xffea72);
