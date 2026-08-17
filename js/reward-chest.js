@@ -300,9 +300,13 @@ function installRewardCoin(wholeSize, wholeBox, baseBox) {
   const body = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, depth, 64, 1, false), gold);
   body.rotation.x = Math.PI / 2;
   body.castShadow = true;
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(radius * .79, radius * .055, 10, 48), rimGold);
-  rim.position.z = depth * .54;
-  coinRoot.add(body, rim);
+  const rimGeometry = new THREE.TorusGeometry(radius * .79, radius * .055, 10, 48);
+  const frontRim = new THREE.Mesh(rimGeometry, rimGold);
+  frontRim.position.z = depth * .54;
+  const backRim = new THREE.Mesh(rimGeometry, rimGold);
+  backRim.position.z = -depth * .54;
+  backRim.rotation.y = Math.PI;
+  coinRoot.add(body, frontRim, backRim);
   installCoinLogo(radius, depth);
 
   const baseTop = baseBox.max.y - wholeBox.min.y;
@@ -362,10 +366,17 @@ function installCoinLogo(radius, depth) {
       depthWrite: false,
       side: THREE.FrontSide,
     });
+    const backLogoTexture = logoTexture.clone();
+    backLogoTexture.wrapS = THREE.RepeatWrapping;
+    backLogoTexture.repeat.x = -1;
+    backLogoTexture.offset.x = 1;
+    backLogoTexture.needsUpdate = true;
+    const backLogoMaterial = logoMaterial.clone();
+    backLogoMaterial.map = backLogoTexture;
     const geometry = new THREE.PlaneGeometry(radius * 1.42, radius * 1.42);
     const front = new THREE.Mesh(geometry, logoMaterial);
     front.position.z = depth * .58;
-    const back = new THREE.Mesh(geometry, logoMaterial);
+    const back = new THREE.Mesh(geometry, backLogoMaterial);
     back.position.z = -depth * .58;
     back.rotation.y = Math.PI;
     coinRoot.add(front, back);
