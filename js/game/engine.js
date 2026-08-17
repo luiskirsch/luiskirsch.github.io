@@ -228,8 +228,12 @@ const _handlers = {
   },
 
   async [CMD.END_GAME]() {
+    const endingSessionId = S.sessionId;
     const ended = await endGameSession().catch(error => ({ ok: false, error: error?.message || String(error) }));
     if (!ended?.ok) return ended;
+    if (endingSessionId && S.sessionId && S.sessionId !== endingSessionId) {
+      return { ...ended, supersededByNewSession: true };
+    }
     _patch({
       phase:              PHASE.LOBBY,
       currentCard:        null,

@@ -321,7 +321,34 @@ function _renderRecapModal({ cardsRevealed, durationStr, topReactorName, topChat
   const closeRecap = () => { overlay.classList.add("closing"); setTimeout(() => overlay.remove(), 300); };
   document.getElementById("recapCloseBtn").addEventListener("click", closeRecap);
   document.getElementById("recapShareBtn").addEventListener("click", () => shareSessionCard({ cards: cardsRevealed, duration: durationStr, topEmoji, playerCount }));
-  if (onNewSession) document.getElementById("recapNewBtn").addEventListener("click", () => { closeRecap(); onNewSession(); });
+  if (onNewSession) document.getElementById("recapNewBtn").addEventListener("click", async () => {
+    const button = document.getElementById("recapNewBtn");
+    if (button?.dataset.busy === "1") return;
+    if (button) {
+      button.dataset.busy = "1";
+      button.dataset.label = button.textContent;
+      button.textContent = "SAINDO...";
+      button.disabled = true;
+    }
+    try {
+      const result = await onNewSession();
+      if (result?.ok === false) {
+        window.showOslToast?.("Não foi possível sair da arena. Tente novamente.", "error");
+        return;
+      }
+      closeRecap();
+    } catch (error) {
+      console.error("Erro ao executar ação do recap:", error);
+      window.showOslToast?.("Não foi possível sair da arena. Tente novamente.", "error");
+    } finally {
+      if (button?.isConnected) {
+        delete button.dataset.busy;
+        button.textContent = button.dataset.label || primaryLabel;
+        delete button.dataset.label;
+        button.disabled = false;
+      }
+    }
+  });
 }
 
 export async function showSessionRecap(onNewSession, primaryLabel = "NOVA SESSÃO") {

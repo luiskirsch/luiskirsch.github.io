@@ -1029,9 +1029,10 @@ export function bindRoomEvents() {
   leaveBtn?.addEventListener("click", () => {
     const isArena = document.documentElement.classList.contains("arenaMode");
     if (S.ritualStarted && isArena) {
-      const exitArena = S.isHost
-        ? () => window._osl.deactivateArenaForAll?.().catch(() => {})
-        : () => window.deactivateArenaMode?.();
+      // Sair da Arena sempre passa pelo controlador que separa a visualização
+      // local do estado compartilhado. Chamar só deactivateArenaMode removia o
+      // fullscreen, mas deixava carta/mesa ocupando o lugar do lobby.
+      const exitArena = () => window._osl.deactivateArenaForAll?.();
       showSessionRecap(exitArena, "SAIR DA ARENA").catch(console.error);
     } else if (S.ritualStarted) {
       showSessionRecap(() => leaveRoom(true), "SAIR DA SALA").catch(console.error);

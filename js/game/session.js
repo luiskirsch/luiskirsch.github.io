@@ -4,7 +4,7 @@
 //            salas/{roomCode}/sessions/{sessionId}/players/{participantId}
 
 import { S } from "../state.js";
-import { updateDoc, doc } from "../firebase.js";
+import { updateDoc, getDoc, doc } from "../firebase.js";
 import { sessionPlayerJoin, sessionPlayerHeartbeat, sessionEndGame, sessionLogEvent } from "../api.js";
 
 // ── Referência de sessão ──────────────────────────────────────────────────────
@@ -53,12 +53,35 @@ export async function clearActiveSession() {
 
 // ── Ciclo de vida ─────────────────────────────────────────────────────────────
 
+let _endGameRequest = null;
+
 export async function endGameSession() {
-  if (!S.sessionId) return { ok: true, skipped: "no-session" };
+  let sessionId = S.sessionId;
+  if (!sessionId && S.isHost && S.ritualStarted && S.roomRef) {
+    const [roomSnap, ritualSnap] = await Promise.all([
+      getDoc(S.roomRef).catch(() => null),
+      S.ritualRef ? getDoc(S.ritualRef).catch(() => null) : Promise.resolve(null),
+    ]);
+    sessionId = roomSnap?.data?.()?.currentSessionId
+      || ritualSnap?.data?.()?.sessionId
+      || null;
+    if (sessionId) setSessionId(sessionId);
+  }
+  if (!sessionId) {
+    return S.ritualStarted
+      ? { ok: false, code: "SESSION_ID_INDISPONIVEL" }
+      : { ok: true, skipped: "no-session" };
+  }
+
+  const roomId = S.roomCode;
+  const requestKey = `${roomId}:${sessionId}`;
+  if (_endGameRequest?.key === requestKey) return _endGameRequest.promise;
+
+  const promise = (async () => {
   try {
     let result = { ok: true };
     if (S.isHost) {
-      result = await sessionEndGame();
+      result = await sessionEndGame(roomId, sessionId);
       if (!result?.ok) throw new Error(result?.error || result?.code || "SESSION_END_FAILED");
       // Persiste summary para o showSessionRecap que virá a seguir
       if (result?.summary) S._lastSessionSummary = result.summary;
@@ -66,13 +89,25 @@ export async function endGameSession() {
       result = await sessionPlayerHeartbeat(false);
     }
     await clearActiveSession();
-    S.sessionId        = null;
-    S.sessionRef       = null;
-    S.sessionEventsRef = null;
-    S.sessionPlayerRef = null;
+    // Uma sincronização pode ter publicado outra sessão enquanto a requisição
+    // estava em voo. Nunca limpe referências de uma sessão mais nova.
+    if (S.sessionId === sessionId) {
+      S.sessionId        = null;
+      S.sessionRef       = null;
+      S.sessionEventsRef = null;
+      S.sessionPlayerRef = null;
+    }
     return result || { ok: true };
   } catch (error) {
     console.warn("[session] não foi possível encerrar a sessão:", error);
     return { ok: false, error: error?.message || String(error) };
+  }
+  })();
+
+  _endGameRequest = { key: requestKey, promise };
+  try {
+    return await promise;
+  } finally {
+    if (_endGameRequest?.promise === promise) _endGameRequest = null;
   }
 }

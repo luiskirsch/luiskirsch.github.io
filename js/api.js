@@ -449,10 +449,12 @@ export async function redeemPendingCoins() {
   return _post("/game/redeem-pending-coins", { firebaseIdToken: idToken });
 }
 
-export async function sessionEndGame() {
+export async function sessionEndGame(roomId = S.roomCode, sessionId = S.sessionId) {
+  const firebaseIdToken = await _getFirebaseIdToken();
   return _hostPost("/game/session/end-game", {
-    roomId:     S.roomCode,
-    sessionId:  S.sessionId,
+    roomId,
+    sessionId,
+    firebaseIdToken,
   });
 }
 
