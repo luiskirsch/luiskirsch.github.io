@@ -1,4 +1,4 @@
-const CACHE = 'osl-v23-arena-exit-recap-fix';
+const CACHE = 'osl-v24-lobby-without-host-model';
 
 const PRECACHE = [
   '/favicon.png',

@@ -1,5 +1,4 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
-import { GLTFLoader }    from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js";
 
 const viewer  = document.getElementById("lobbyViewer");
@@ -118,25 +117,6 @@ controls.update();
 let arTimer = null;
 renderer.domElement.addEventListener("pointerdown", () => { controls.autoRotate=false; clearTimeout(arTimer); });
 renderer.domElement.addEventListener("pointerup",   () => { arTimer=setTimeout(()=>{ controls.autoRotate=true; }, 4000); });
-
-// ── GLB loader ─────────────────────────────────────────────────────
-new GLTFLoader().load(
-  "/assets/characters/host.glb",
-  (gltf) => {
-    const model = gltf.scene;
-    model.traverse(n => { if (n.isMesh) { n.castShadow=true; n.receiveShadow=true; } });
-    const box = new THREE.Box3().setFromObject(model);
-    const c   = box.getCenter(new THREE.Vector3());
-    model.position.x -= c.x;
-    model.position.z -= c.z;
-    model.position.y -= box.min.y;
-    const h = box.max.y - box.min.y;
-    if (h > 0) model.scale.setScalar(1.88 / h);
-    scene.add(model);
-  },
-  () => {},
-  (err) => { console.error("lobby GLB:", err); }
-);
 
 // ── Resize ─────────────────────────────────────────────────────────
 function resize() {
