@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js";
 
-// As texturas usam data URIs para evitar os object URLs temporários que o
-// GLTFLoader cria para imagens embutidas em bufferViews.
-const MODEL_URL = new URL("../assets/models/reward-chest-inline.glb?v=1", import.meta.url).href;
+// As texturas são arquivos do mesmo domínio: isso evita object URLs blob/data
+// e mantém o carregamento compatível com a CSP restrita do jogo.
+const MODEL_URL = new URL("../assets/models/reward-chest-external.glb?v=1", import.meta.url).href;
 const LOGO_URL = new URL("../logo_oficial_fundo_transparente.png", import.meta.url).href;
 const LID_NODE_NAME = "tripo_part_11";
 const DISPLAY_ROTATION_Y = Math.PI - .48;
