@@ -55,8 +55,8 @@ function injectStyles() {
     .rewardChestStage:focus-visible{box-shadow:inset 0 0 0 1px var(--reward-accent)}
     .rewardChestCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .35s ease}
     .rewardChestOverlay.model-ready .rewardChestCanvas{opacity:1}
-    .rewardChestFallback{position:absolute;left:50%;top:54%;width:210px;height:118px;transform:translate(-50%,-50%);transition:opacity .3s ease,transform .8s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 24px 25px rgba(0,0,0,.7))}
-    .rewardChestOverlay.model-ready .rewardChestFallback{opacity:0}
+    .rewardChestFallback{position:absolute;left:50%;top:54%;width:210px;height:118px;opacity:0;visibility:hidden;transform:translate(-50%,-50%);transition:opacity .3s ease,transform .8s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 24px 25px rgba(0,0,0,.7))}
+    .rewardChestOverlay.model-failed .rewardChestFallback{opacity:1;visibility:visible}
     .rewardChestFallback__base{position:absolute;inset:38px 8px 0;border:2px solid #ad7d2e;border-radius:6px 6px 18px 18px;background:linear-gradient(110deg,#281305,#7a4213 40%,#351b08 70%,#160b04);box-shadow:inset 0 0 0 7px #2a1608,inset 0 0 0 9px #9c702e}
     .rewardChestFallback__lid{position:absolute;left:4px;right:4px;top:0;height:62px;border:2px solid #b98835;border-radius:80px 80px 8px 8px;background:linear-gradient(110deg,#2b1608,#89501a 42%,#351b08 74%,#170b04);transform-origin:50% 100%;transition:transform .9s cubic-bezier(.18,.8,.2,1)}
     .rewardChestFallback__lock{position:absolute;z-index:2;left:50%;top:56px;width:34px;height:40px;transform:translateX(-50%);border:2px solid #e3b956;border-radius:4px 4px 9px 9px;background:#241307;box-shadow:0 0 18px rgba(227,185,86,.28)}
@@ -268,6 +268,7 @@ function ensureModel() {
   try { setupRenderer(); }
   catch (error) {
     modelFailed = true;
+    ui?.overlay.classList.add("model-failed");
     modelPromise = Promise.reject(error);
     modelPromise.catch(() => {});
     return modelPromise;
@@ -275,12 +276,12 @@ function ensureModel() {
   modelPromise = new Promise((resolve, reject) => {
     new GLTFLoader().load(MODEL_URL, gltf => {
       try { installModel(gltf); resolve(gltf); }
-      catch (error) { modelFailed = true; reject(error); }
+      catch (error) { modelFailed = true; ui?.overlay.classList.add("model-failed"); reject(error); }
     }, progress => {
       if (!ui || !active || !progress.total) return;
       const pct = Math.min(99, Math.round(progress.loaded / progress.total * 100));
       ui.status.textContent = `Preparando o baú · ${pct}%`;
-    }, error => { modelFailed = true; reject(error); });
+    }, error => { modelFailed = true; ui?.overlay.classList.add("model-failed"); reject(error); });
   });
   modelPromise.catch(error => console.warn("[reward-chest] Modelo 3D indisponível; usando fallback:", error));
   return modelPromise;
@@ -415,7 +416,7 @@ function renderDetail(detail) {
   ui.stage.setAttribute("aria-label", "Abrir baú");
 }
 
-function pumpQueue() {
+async function pumpQueue() {
   if (active || !queue.length) return;
   buildUi();
   active = queue.shift();
@@ -430,13 +431,17 @@ function pumpQueue() {
   renderDetail(active.detail);
   ui.overlay.classList.remove("is-open");
   ui.overlay.hidden = false;
+  // O overlay continua invisível até o modelo real estar pronto. Assim o
+  // fallback nunca aparece como uma etapa intermediária do carregamento.
+  try { await ensureModel(); } catch (_) {}
+  if (!active) return;
   requestAnimationFrame(() => {
     ui.overlay.classList.add("is-visible");
     ui.action.focus({ preventScroll: true });
     resizeRenderer();
   });
   startRenderLoop();
-  ensureModel().catch(() => { if (active) ui.status.textContent = "Toque para abrir"; });
+  ui.status.textContent = "Toque para abrir";
 }
 
 function finishActive(opened) {
