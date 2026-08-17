@@ -67,8 +67,8 @@ function injectStyles() {
     .rewardChestStatus:empty{display:none}
     .rewardChestReveal{position:relative;z-index:5;width:min(560px,calc(100% - 44px));min-height:118px;margin:-32px auto 0;padding:16px 20px 20px;text-align:center;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .42s ease .25s,transform .52s cubic-bezier(.2,.8,.2,1) .25s}
     .rewardChestOverlay.is-open .rewardChestReveal{opacity:1;transform:none}
-    .rewardChestClassification{color:rgba(255,255,255,.5);font-size:9px;font-weight:800;letter-spacing:.25em;text-transform:uppercase}
-    .rewardChestOrigin{margin-top:9px;color:rgba(255,255,255,.7);font-size:10px;font-weight:700;letter-spacing:.17em;text-transform:uppercase}
+    .rewardChestClassification{color:var(--reward-accent);font-size:9px;font-weight:800;letter-spacing:.28em;text-transform:uppercase}
+    .rewardChestOrigin{margin-top:10px;color:#f6f1e5;font:700 clamp(17px,2.8vw,22px)/1.2 Cinzel,Georgia,serif;letter-spacing:.08em;text-transform:uppercase}
     .rewardChestValue{margin-top:10px;color:var(--reward-accent);font:700 clamp(24px,4vw,32px)/1.15 Cinzel,Georgia,serif;letter-spacing:.08em;text-shadow:0 0 28px color-mix(in srgb,var(--reward-accent) 20%,transparent)}
     .rewardChestDescription{max-width:470px;margin:9px auto 0;color:rgba(255,255,255,.6);font-size:12px;line-height:1.55}
     .rewardChestBalance{margin-top:6px;color:rgba(255,255,255,.4);font-size:10px;letter-spacing:.1em}
@@ -108,9 +108,9 @@ function buildUi() {
         <div class="rewardChestStatus" aria-live="polite">Preparando o baú…</div>
       </div>
       <div class="rewardChestReveal" aria-live="polite">
-        <div class="rewardChestClassification" id="rewardChestTitle">Recompensa • Rara</div>
+        <div class="rewardChestClassification">Rara</div>
         <div class="rewardChestOrigin"></div>
-        <div class="rewardChestValue"></div>
+        <div class="rewardChestValue" id="rewardChestTitle"></div>
         <p class="rewardChestDescription"></p>
         <div class="rewardChestBalance"></div>
       </div>
@@ -393,20 +393,38 @@ function normalizeDetail(input = {}) {
   };
 }
 
+function currentCoinBalance() {
+  const displayed = document.getElementById("coinBalance")?.textContent?.trim();
+  if (displayed) {
+    const parsed = Number(displayed.replace(/\./g, "").replace(/[^\d-]/g, ""));
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  try {
+    const stored = Number(localStorage.getItem("osl_coins"));
+    return Number.isFinite(stored) ? stored : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 function renderDetail(detail) {
   const meta = TYPE_META[detail.type] || TYPE_META.gift;
   ui.overlay.style.setProperty("--reward-accent", detail.accent || meta.accent);
   ui.eyebrow.textContent = detail.eyebrow;
   ui.mystery.textContent = detail.impact;
-  ui.classification.textContent = `Recompensa • ${detail.rarity}`;
+  ui.classification.textContent = detail.rarity;
   ui.origin.textContent = detail.origin;
   ui.origin.hidden = !detail.origin;
   ui.value.textContent = detail.value;
   ui.value.hidden = !detail.value;
   ui.description.textContent = detail.description;
   ui.description.hidden = !detail.description;
-  ui.balance.textContent = detail.balance;
-  ui.balance.hidden = !detail.balance;
+  const coinBalance = detail.type === "coins" ? currentCoinBalance() : null;
+  const balance = coinBalance === null
+    ? detail.balance
+    : `Saldo atual: ${coinBalance.toLocaleString("pt-BR")} moedas`;
+  ui.balance.textContent = balance;
+  ui.balance.hidden = !balance;
   ui.action.textContent = "Abrir baú";
   ui.action.disabled = false;
   delete ui.action.dataset.opened;
