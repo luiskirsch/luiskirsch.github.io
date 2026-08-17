@@ -1314,9 +1314,11 @@ window.hubRenderFragment=function(fragment){
     id:'fragment:'+fingerprint,
     once:true,
     type:'fragment',
-    title:title,
+    origin:'Fragmento encontrado',
+    rarity:'ÉPICA',
+    impact:'Algo oculto escolheu se revelar.',
     value:_fragmentExpiryLabel(fragment.expiresAt),
-    description:text,
+    description:title,
     actionLabel:'Guardar fragmento'
   }):null;
   if(chest&&typeof chest.finally==='function')chest.finally(showArrival);else showArrival();
@@ -1700,7 +1702,7 @@ window.hubShowOnboarding=function(){var v=document.getElementById('obVeil');if(!
 })();
 </script>
 
-<script type="module" src="./js/reward-chest.js?v=6"></script>
+<script type="module" src="./js/reward-chest.js?v=9"></script>
 
 <!-- ══ FIREBASE ══ -->
 <script type="module">

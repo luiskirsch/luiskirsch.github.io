@@ -26,14 +26,14 @@ let openProgress = 0;
 let previousFocus = null;
 
 const TYPE_META = {
-  fragment:    { eyebrow: "Fragmento desbloqueado", icon: "✦", accent: "#e9c34d" },
-  card:        { eyebrow: "Nova carta",             icon: "◇", accent: "#f3d879" },
-  achievement: { eyebrow: "Conquista desbloqueada", icon: "◆", accent: "#d99a45" },
-  mission:     { eyebrow: "Missão concluída",        icon: "◎", accent: "#79d29a" },
-  level:       { eyebrow: "Novo nível",              icon: "▲", accent: "#e2b75c" },
-  daily:       { eyebrow: "Presente diário",         icon: "☾", accent: "#8bb7e8" },
-  coins:       { eyebrow: "Recompensa recebida",     icon: "◉", accent: "#f1c84b" },
-  gift:        { eyebrow: "Presente recebido",       icon: "✧", accent: "#d4af37" },
+  fragment:    { rarity: "ÉPICA",   icon: "✦", accent: "#e9c34d" },
+  card:        { rarity: "RARA",    icon: "◇", accent: "#f3d879" },
+  achievement: { rarity: "ÉPICA",   icon: "◆", accent: "#d99a45" },
+  mission:     { rarity: "RARA",    icon: "◎", accent: "#79d29a" },
+  level:       { rarity: "ÉPICA",   icon: "▲", accent: "#e2b75c" },
+  daily:       { rarity: "COMUM",   icon: "☾", accent: "#8bb7e8" },
+  coins:       { rarity: "RARA",    icon: "◉", accent: "#f1c84b" },
+  gift:        { rarity: "RARA",    icon: "✧", accent: "#d4af37" },
 };
 
 function injectStyles() {
@@ -64,19 +64,21 @@ function injectStyles() {
     .rewardChestAura{position:absolute;left:50%;top:59%;width:55%;height:34%;transform:translate(-50%,-50%) scale(.4);border-radius:50%;opacity:0;background:radial-gradient(ellipse,color-mix(in srgb,var(--reward-accent) 55%,white),color-mix(in srgb,var(--reward-accent) 18%,transparent) 35%,transparent 70%);filter:blur(12px);transition:opacity .45s ease,transform .7s ease;pointer-events:none}
     .rewardChestOverlay.is-open .rewardChestAura{opacity:0;transform:translate(-50%,-50%) scale(1.25)}
     .rewardChestStatus{position:absolute;left:0;right:0;bottom:12px;text-align:center;color:rgba(255,255,255,.42);font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase}
-    .rewardChestReveal{position:relative;z-index:5;width:min(560px,calc(100% - 44px));min-height:118px;margin:-32px auto 0;padding:16px 20px 18px;text-align:center;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .42s ease .25s,transform .52s cubic-bezier(.2,.8,.2,1) .25s}
+    .rewardChestStatus:empty{display:none}
+    .rewardChestReveal{position:relative;z-index:5;width:min(560px,calc(100% - 44px));min-height:118px;margin:-32px auto 0;padding:16px 20px 20px;text-align:center;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .42s ease .25s,transform .52s cubic-bezier(.2,.8,.2,1) .25s}
     .rewardChestOverlay.is-open .rewardChestReveal{opacity:1;transform:none}
-    .rewardChestIcon{width:42px;height:42px;margin:0 auto 8px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--reward-accent) 55%,transparent);border-radius:50%;color:var(--reward-accent);background:rgba(2,5,9,.78);font:700 20px/1 Cinzel,serif;box-shadow:0 0 28px color-mix(in srgb,var(--reward-accent) 18%,transparent)}
-    .rewardChestTitle{color:#fff;font:700 clamp(21px,4vw,31px)/1.16 Cinzel,Georgia,serif}
-    .rewardChestValue{margin-top:5px;color:var(--reward-accent);font-size:14px;font-weight:800;letter-spacing:.12em}
-    .rewardChestDescription{max-width:470px;margin:7px auto 0;color:rgba(255,255,255,.58);font-size:12px;line-height:1.55}
+    .rewardChestClassification{color:rgba(255,255,255,.5);font-size:9px;font-weight:800;letter-spacing:.25em;text-transform:uppercase}
+    .rewardChestOrigin{margin-top:9px;color:rgba(255,255,255,.7);font-size:10px;font-weight:700;letter-spacing:.17em;text-transform:uppercase}
+    .rewardChestValue{margin-top:10px;color:var(--reward-accent);font:700 clamp(24px,4vw,32px)/1.15 Cinzel,Georgia,serif;letter-spacing:.08em;text-shadow:0 0 28px color-mix(in srgb,var(--reward-accent) 20%,transparent)}
+    .rewardChestDescription{max-width:470px;margin:9px auto 0;color:rgba(255,255,255,.6);font-size:12px;line-height:1.55}
+    .rewardChestBalance{margin-top:6px;color:rgba(255,255,255,.4);font-size:10px;letter-spacing:.1em}
     .rewardChestAction{position:relative;z-index:6;min-width:230px;min-height:50px;margin:7px auto 28px;padding:0 30px;border:1px solid color-mix(in srgb,var(--reward-accent) 65%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--reward-accent) 68%,#5b3812),color-mix(in srgb,var(--reward-accent) 90%,#fff2a1),color-mix(in srgb,var(--reward-accent) 68%,#5b3812));color:#090704;font-size:11px;font-weight:900;letter-spacing:.24em;text-transform:uppercase;cursor:pointer;box-shadow:0 12px 42px color-mix(in srgb,var(--reward-accent) 18%,transparent)}
     .rewardChestAction:hover,.rewardChestAction:focus-visible{filter:brightness(1.09);outline:1px solid color-mix(in srgb,var(--reward-accent) 50%,transparent);outline-offset:3px}
     .rewardChestAction:disabled{cursor:wait;filter:saturate(.35);opacity:.68}
     .rewardChestSpark{position:absolute;z-index:3;left:50%;top:55%;width:4px;height:4px;border-radius:50%;background:var(--reward-accent);box-shadow:0 0 9px var(--reward-accent);pointer-events:none;animation:rewardSpark 1.15s cubic-bezier(.15,.7,.2,1) forwards}
     @keyframes rewardSpark{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}20%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--sx)),calc(-50% + var(--sy))) scale(1.6)}}
     @media(max-width:600px){.rewardChestOverlay{padding:8px}.rewardChestPanel{width:100%;min-height:min(620px,calc(100dvh - 16px))}.rewardChestHeader{padding-top:24px}.rewardChestStage{height:300px}.rewardChestReveal{margin-top:-28px}.rewardChestAction{margin-bottom:20px}.rewardChestDescription{font-size:11px}}
-    @media(max-height:650px){.rewardChestPanel{min-height:calc(100dvh - 12px)}.rewardChestHeader{min-height:64px;padding-top:16px}.rewardChestStage{height:260px}.rewardChestReveal{min-height:94px;margin-top:-28px;padding-top:8px}.rewardChestIcon{width:34px;height:34px}.rewardChestAction{min-height:42px;margin-bottom:12px}}
+    @media(max-height:650px){.rewardChestPanel{min-height:calc(100dvh - 12px)}.rewardChestHeader{min-height:64px;padding-top:16px}.rewardChestStage{height:260px}.rewardChestReveal{min-height:94px;margin-top:-28px;padding-top:8px}.rewardChestAction{min-height:42px;margin-bottom:12px}}
     @media(prefers-reduced-motion:reduce){.rewardChestOverlay,.rewardChestCanvas,.rewardChestReveal,.rewardChestAura,.rewardChestFallback__lid{transition:none!important}.rewardChestSpark{display:none!important}}
   `;
   document.head.appendChild(style);
@@ -96,8 +98,8 @@ function buildUi() {
     <section class="rewardChestPanel">
       <button class="rewardChestClose" type="button" aria-label="Fechar recompensa">×</button>
       <header class="rewardChestHeader">
-        <div class="rewardChestEyebrow">Uma recompensa espera</div>
-        <div class="rewardChestMystery">O baú reconheceu você.</div>
+        <div class="rewardChestEyebrow">Recompensa desbloqueada</div>
+        <div class="rewardChestMystery">O baú escolheu você.</div>
       </header>
       <div class="rewardChestStage" role="button" tabindex="0" aria-label="Abrir baú">
         <canvas class="rewardChestCanvas" aria-hidden="true"></canvas>
@@ -106,10 +108,11 @@ function buildUi() {
         <div class="rewardChestStatus" aria-live="polite">Preparando o baú…</div>
       </div>
       <div class="rewardChestReveal" aria-live="polite">
-        <div class="rewardChestIcon" aria-hidden="true">✧</div>
-        <h2 class="rewardChestTitle" id="rewardChestTitle">Presente recebido</h2>
+        <div class="rewardChestClassification" id="rewardChestTitle">Recompensa • Rara</div>
+        <div class="rewardChestOrigin"></div>
         <div class="rewardChestValue"></div>
         <p class="rewardChestDescription"></p>
+        <div class="rewardChestBalance"></div>
       </div>
       <button class="rewardChestAction" type="button">Abrir baú</button>
     </section>`;
@@ -124,10 +127,11 @@ function buildUi() {
     eyebrow: overlay.querySelector(".rewardChestEyebrow"),
     mystery: overlay.querySelector(".rewardChestMystery"),
     status: overlay.querySelector(".rewardChestStatus"),
-    icon: overlay.querySelector(".rewardChestIcon"),
-    title: overlay.querySelector(".rewardChestTitle"),
+    classification: overlay.querySelector(".rewardChestClassification"),
+    origin: overlay.querySelector(".rewardChestOrigin"),
     value: overlay.querySelector(".rewardChestValue"),
     description: overlay.querySelector(".rewardChestDescription"),
+    balance: overlay.querySelector(".rewardChestBalance"),
   };
   action.addEventListener("click", () => openProgress >= 1 ? finishActive(true) : openChest());
   stage.addEventListener("click", () => { if (openProgress < 1) openChest(); });
@@ -255,7 +259,7 @@ function installModel(gltf) {
   modelReady = true;
   if (openProgress >= 1 && lidPivot) lidPivot.rotation[lidAxis] = lidOpenAngle;
   ui.overlay.classList.add("model-ready");
-  ui.status.textContent = openProgress >= 1 ? "Recompensa revelada" : "Toque para abrir";
+  ui.status.textContent = openProgress >= 1 ? "" : "Toque para abrir";
   resizeRenderer();
 }
 
@@ -343,7 +347,7 @@ async function openChest() {
   if (!active || openedAt) return;
   openedAt = performance.now();
   ui.overlay.classList.add("is-open");
-  ui.status.textContent = "O selo foi rompido";
+  ui.status.textContent = "";
   spawnSparks();
   if (prefersReducedMotion) { openProgress = 1; if (lidPivot) lidPivot.rotation[lidAxis] = lidOpenAngle; completeOpen(); }
 }
@@ -357,7 +361,7 @@ function completeOpen() {
   ui.stage.removeAttribute("role");
   ui.stage.removeAttribute("tabindex");
   ui.stage.setAttribute("aria-label", "Baú aberto");
-  ui.status.textContent = "Recompensa revelada";
+  ui.status.textContent = "";
   if (active.detail.id) {
     try { sessionStorage.setItem(`osl_reward_chest:${active.detail.id}`, "1"); } catch (_) {}
   }
@@ -372,12 +376,15 @@ function normalizeDetail(input = {}) {
   return {
     id: input.id ? String(input.id).slice(0, 180) : "",
     type,
-    eyebrow: String(input.eyebrow || meta.eyebrow).slice(0, 80),
+    eyebrow: String(input.eyebrow || "Recompensa desbloqueada").slice(0, 80),
+    impact: String(input.impact || "O baú escolheu você.").slice(0, 120),
+    rarity: String(input.rarity || meta.rarity).slice(0, 24),
     icon: String(input.icon || meta.icon).slice(0, 4),
     accent: String(input.accent || meta.accent),
-    title: String(input.title || "Presente recebido").slice(0, 120),
+    origin: String(input.origin || input.title || "").slice(0, 120),
     value: String(input.value || "").slice(0, 80),
-    description: String(input.description || "Uma nova parte da sua jornada foi desbloqueada.").slice(0, 280),
+    description: String(input.description || "").slice(0, 280),
+    balance: String(input.balance || "").slice(0, 80),
     actionLabel: String(input.actionLabel || "Continuar").slice(0, 30),
     once: input.once === true,
     onOpen: typeof input.onOpen === "function" ? input.onOpen : null,
@@ -389,12 +396,16 @@ function renderDetail(detail) {
   const meta = TYPE_META[detail.type] || TYPE_META.gift;
   ui.overlay.style.setProperty("--reward-accent", detail.accent || meta.accent);
   ui.eyebrow.textContent = detail.eyebrow;
-  ui.mystery.textContent = "O baú reconheceu você.";
-  ui.icon.textContent = detail.icon;
-  ui.title.textContent = detail.title;
+  ui.mystery.textContent = detail.impact;
+  ui.classification.textContent = `Recompensa • ${detail.rarity}`;
+  ui.origin.textContent = detail.origin;
+  ui.origin.hidden = !detail.origin;
   ui.value.textContent = detail.value;
   ui.value.hidden = !detail.value;
   ui.description.textContent = detail.description;
+  ui.description.hidden = !detail.description;
+  ui.balance.textContent = detail.balance;
+  ui.balance.hidden = !detail.balance;
   ui.action.textContent = "Abrir baú";
   ui.action.disabled = false;
   delete ui.action.dataset.opened;
@@ -426,7 +437,6 @@ function pumpQueue() {
   });
   startRenderLoop();
   ensureModel().catch(() => { if (active) ui.status.textContent = "Toque para abrir"; });
-  active.autoTimer = window.setTimeout(openChest, prefersReducedMotion ? 250 : 1450);
 }
 
 function finishActive(opened) {

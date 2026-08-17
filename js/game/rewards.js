@@ -125,9 +125,12 @@ export function showLevelUpModal(lv, info, coinsEarned) {
     once: true,
     type: "level",
     icon: info.icon,
-    title: `Nível ${lv} · ${info.title}`,
+    origin: `Novo nível · ${info.title}`,
+    rarity: "ÉPICA",
+    impact: "Sua jornada alcançou outro patamar.",
     value: coinsEarned ? `+${coinsEarned} moedas` : `${lv}º nível alcançado`,
-    description: info.unlock ? `Desbloqueado: ${info.unlock}` : "Sua jornada ganhou uma nova marca.",
+    description: info.unlock ? info.unlock : "",
+    balance: coinsEarned ? `Saldo atualizado: ${getCoinDisplay().toLocaleString("pt-BR")} moedas` : "",
   });
   if (chest) return chest;
   const overlay = document.createElement("div");
