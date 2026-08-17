@@ -62,7 +62,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(request, res.clone())).catch(() => {});
         }
         return res;
-      }).catch(() => caches.match(request))
+      }).catch(() => caches.match(request).then(r => r || new Response('', { status: 503 })))
     );
     return;
   }
@@ -78,7 +78,7 @@ self.addEventListener('fetch', e => {
           }
           return res;
         })
-        .catch(() => caches.match(request))
+        .catch(() => caches.match(request).then(r => r || new Response('', { status: 503 })))
     );
     return;
   }
@@ -93,7 +93,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(request, clone));
         }
         return res;
-      }).catch(() => cached);
+      }).catch(() => cached || new Response('', { status: 503 }));
     })
   );
 });
