@@ -1228,9 +1228,14 @@ window.hubDeleteNotification=function(id,rowEl,wasUnread){
   if(drop&&drop.classList.contains('open'))_applyNotifScroll(drop);
   if(wasUnread&&_hubState.notificationsUnread>0)window.hubSetUnread(Math.max(0,_hubState.notificationsUnread-1));
   if(!id)return;
-  var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
-  if(!token)return;
-  fetch(api+'/notifications/'+encodeURIComponent(id),{method:'DELETE',headers:{Authorization:'Bearer '+token}}).catch(function(){});
+  var api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+  var fbUser=window._hubFirebaseUser;
+  if(!fbUser)return;
+  fbUser.getIdToken().then(function(token){
+    return fetch(api+'/notifications/'+encodeURIComponent(id),{method:'DELETE',headers:{Authorization:'Bearer '+token}});
+  }).then(function(r){
+    if(!r.ok)window._toast&&window._toast('Erro ao excluir notificação ('+r.status+').');
+  }).catch(function(){window._toast&&window._toast('Erro ao excluir notificação.');});
 };
 
 window.hubMarkNotificationsRead=function(){
@@ -1737,7 +1742,7 @@ onAuthStateChanged(auth,async(user)=>{
   window._hubFallbackUser={displayName:user.displayName||"",email:user.email||"",photoURL:user.photoURL||""};
   window.hubApplyAccount&&window.hubApplyAccount({profile:{}},window._hubFallbackUser);
   let data={};
-  try{const t=await user.getIdToken();window._hubAPI=API;window._hubToken=t;const r=await fetch(API+"/hub",{headers:{Authorization:"Bearer "+t}});if(r.ok)data=await r.json().catch(()=>({}));}catch(_){}
+  try{const t=await user.getIdToken();window._hubAPI=API;window._hubToken=t;window._hubFirebaseUser=user;const r=await fetch(API+"/hub",{headers:{Authorization:"Bearer "+t}});if(r.ok)data=await r.json().catch(()=>({}));}catch(_){}
   window._hubData=data;
   const account=data.account||{
     profile:{displayName:user.displayName||"",email:user.email||"",photoURL:user.photoURL||""},
