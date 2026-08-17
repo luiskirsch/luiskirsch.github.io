@@ -278,8 +278,15 @@ function installRewardCoin(wholeSize, wholeBox, baseBox) {
     opacity: 0,
     toneMapped: false,
   });
-  const rimGold = gold.clone();
-  rimGold.color.setHex(0xffea72);
+  const rimGold = new THREE.MeshStandardMaterial({
+    color: 0x9a6826,
+    metalness: .9,
+    roughness: .38,
+    emissive: 0x241000,
+    emissiveIntensity: .12,
+    transparent: true,
+    opacity: 0,
+  });
   coinMaterials = [gold, rimGold];
 
   coinRoot = new THREE.Group();
