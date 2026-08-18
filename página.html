@@ -696,6 +696,28 @@ body.transmissionFocus .msgNotif {
 
 /* ── Card glow (ativo) ── */
 .authCard { animation:cardGlow 5s ease-in-out infinite; }
+
+/* First-visit game presentation */
+.introModal{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:clamp(18px,4vw,56px);overflow:hidden;background:radial-gradient(circle at 50% 42%,rgba(132,95,39,.16),transparent 34%),radial-gradient(circle at 15% 10%,rgba(230,192,123,.07),transparent 30%),linear-gradient(145deg,rgba(2,2,6,.98),rgba(0,0,0,.995));opacity:0;visibility:hidden;pointer-events:none;transition:opacity .8s ease,visibility .8s}
+.introModal.isOpen{opacity:1;visibility:visible;pointer-events:auto}.introModal.isLeaving{opacity:0;transform:scale(1.015)}
+.introModal::before{content:"";position:absolute;inset:-35%;background:conic-gradient(from 210deg at 50% 50%,transparent 0 35%,rgba(230,192,123,.055) 43%,transparent 51% 82%,rgba(230,192,123,.035) 90%,transparent);animation:introOrbit 30s linear infinite}
+.introModal::after{content:"";position:absolute;inset:0;opacity:.2;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E")}
+@keyframes introOrbit{to{transform:rotate(360deg)}}
+.introStars{position:absolute;inset:0;overflow:hidden;pointer-events:none}.introStars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;left:var(--x);top:var(--y);opacity:var(--o);box-shadow:0 0 8px rgba(255,255,255,.8);animation:introTwinkle var(--d) ease-in-out infinite alternate}@keyframes introTwinkle{to{opacity:.12;transform:scale(.6)}}
+.introShell{position:relative;z-index:2;width:min(1120px,100%);height:min(720px,calc(100dvh - clamp(36px,8vw,112px)));min-height:520px;display:grid;grid-template-rows:auto 1fr auto;border:1px solid rgba(230,192,123,.22);border-radius:28px;overflow:hidden;background:linear-gradient(145deg,rgba(16,15,21,.94),rgba(5,5,9,.96));box-shadow:0 45px 120px rgba(0,0,0,.75),inset 0 1px rgba(255,255,255,.04),0 0 80px rgba(181,130,50,.07)}
+.introShell::before{content:"";position:absolute;inset:10px;border:1px solid rgba(230,192,123,.07);border-radius:20px;pointer-events:none}.introTop,.introBottom{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:24px 30px}
+.introMonogram{display:flex;align-items:center;gap:12px;color:var(--gold);font:600 11px/1 "Courier New",monospace;letter-spacing:.26em;text-transform:uppercase}.introSigil{width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(230,192,123,.42);transform:rotate(45deg)}.introSigil span{transform:rotate(-45deg);font-size:11px}
+.introSkip{border:0;background:transparent;color:rgba(255,255,255,.48);font:10px/1 "Courier New",monospace;letter-spacing:.19em;text-transform:uppercase;cursor:pointer;padding:10px;transition:color .25s}.introSkip:hover,.introSkip:focus-visible{color:var(--gold);outline:none}
+.introStage{position:relative;min-height:0}.introSlide{position:absolute;inset:0;display:grid;grid-template-columns:1.08fr .92fr;align-items:center;gap:clamp(30px,6vw,90px);padding:20px clamp(38px,7vw,92px);opacity:0;visibility:hidden;transform:translateX(34px);transition:opacity .55s ease,transform .65s cubic-bezier(.22,.8,.2,1),visibility .55s}.introSlide.isActive{opacity:1;visibility:visible;transform:none}
+.introCopy{max-width:560px}.introIndex{display:block;margin-bottom:22px;color:rgba(230,192,123,.62);font:10px/1 "Courier New",monospace;letter-spacing:.28em;text-transform:uppercase}.introTitle{margin:0;color:#f4ead7;font-size:clamp(42px,6vw,78px);font-weight:500;line-height:.96;letter-spacing:-.045em;text-wrap:balance}.introTitle em{display:block;color:var(--gold);font-style:italic;font-weight:400}.introText{max-width:520px;margin-top:25px;color:rgba(255,255,255,.58);font:400 clamp(15px,1.6vw,18px)/1.75 ui-serif,Georgia,serif}
+.introVisual{position:relative;display:grid;place-items:center;min-height:320px}.introHalo{position:absolute;width:min(29vw,330px);aspect-ratio:1;border:1px solid rgba(230,192,123,.2);border-radius:50%;box-shadow:inset 0 0 60px rgba(230,192,123,.035),0 0 70px rgba(230,192,123,.04)}.introHalo::before,.introHalo::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(230,192,123,.1)}.introHalo::before{inset:12%}.introHalo::after{inset:27%}
+.introCard{position:relative;width:min(220px,58%);aspect-ratio:.66;border-radius:18px;border:1px solid rgba(230,192,123,.38);background:linear-gradient(155deg,#18151a,#08080d 64%);box-shadow:0 26px 60px rgba(0,0,0,.6),inset 0 0 0 7px rgba(230,192,123,.035);display:grid;place-items:center;transform:rotate(4deg)}.introCard::before{content:"";position:absolute;inset:13px;border:1px solid rgba(230,192,123,.14);border-radius:12px}.introCardMark{color:var(--gold);font-size:clamp(56px,7vw,86px);font-weight:400;text-shadow:0 0 35px rgba(230,192,123,.23)}
+.introConstellation{width:min(320px,85%);height:250px;position:relative}.introConstellation::before{content:"";position:absolute;inset:10%;background:linear-gradient(27deg,transparent 48%,rgba(230,192,123,.18) 49%,rgba(230,192,123,.18) 50%,transparent 51%),linear-gradient(145deg,transparent 49%,rgba(230,192,123,.12) 50%,transparent 51%)}.introPerson{position:absolute;width:72px;height:72px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(230,192,123,.36);background:#111016;color:#ead8b6;font-size:22px;box-shadow:0 0 34px rgba(230,192,123,.07)}.introPerson:nth-child(1){left:5%;top:12%}.introPerson:nth-child(2){right:4%;top:30%}.introPerson:nth-child(3){left:35%;bottom:3%}
+.introRitual{width:min(330px,90%);padding:30px;border:1px solid rgba(230,192,123,.2);border-radius:50%;aspect-ratio:1;display:grid;place-items:center;position:relative}.introRitual::before{content:"";position:absolute;inset:16%;border:1px dashed rgba(230,192,123,.25);border-radius:50%;animation:introOrbit 20s linear infinite reverse}.introRitualCore{width:45%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;color:var(--gold);background:radial-gradient(circle,rgba(230,192,123,.15),rgba(230,192,123,.02) 65%);border:1px solid rgba(230,192,123,.42);font-size:42px;box-shadow:0 0 50px rgba(230,192,123,.1)}
+.introBottom{border-top:1px solid rgba(255,255,255,.055)}.introProgress{display:flex;align-items:center;gap:8px}.introDot{width:26px;height:2px;border:0;padding:0;background:rgba(255,255,255,.13);cursor:pointer;transition:width .35s,background .35s}.introDot.isActive{width:54px;background:var(--gold)}.introNext{min-width:190px;min-height:52px;border:1px solid rgba(230,192,123,.38);border-radius:999px;background:linear-gradient(135deg,rgba(230,192,123,.13),rgba(230,192,123,.045));color:#ead09a;font:600 11px/1 "Courier New",monospace;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;transition:transform .25s,background .25s,border-color .25s}.introNext:hover{transform:translateY(-2px);background:rgba(230,192,123,.17);border-color:rgba(230,192,123,.65)}.introNext:focus-visible{outline:2px solid var(--gold);outline-offset:3px}.introCount{color:rgba(255,255,255,.33);font:10px/1 "Courier New",monospace;letter-spacing:.2em}body.introLocked>:not(.introModal){filter:saturate(.45)}
+@media(max-width:760px){.introModal{padding:0}.introShell{width:100%;height:100dvh;min-height:0;border:0;border-radius:0}.introTop,.introBottom{padding:18px 20px}.introSlide{grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:10px;padding:12px 25px 8px;text-align:center}.introCopy{margin:auto}.introIndex{margin-bottom:14px}.introTitle{font-size:clamp(38px,12vw,58px)}.introText{margin-top:16px;font-size:14px;line-height:1.55}.introVisual{min-height:180px}.introHalo{width:210px}.introCard{width:118px;border-radius:12px}.introConstellation{height:180px;max-width:270px}.introPerson{width:54px;height:54px;font-size:17px}.introRitual{width:190px;padding:18px}.introNext{min-width:155px;min-height:48px}.introCount{display:none}}
+@media(max-height:620px) and (orientation:landscape){.introShell{min-height:0;height:calc(100dvh - 24px)}.introTop,.introBottom{padding:13px 22px}.introSlide{padding:8px 55px}.introVisual{min-height:210px}.introText{margin-top:12px;line-height:1.45}}
+@media(prefers-reduced-motion:reduce){.introModal::before,.introStars i,.introRitual::before{animation:none!important}.introModal,.introSlide{transition-duration:.01ms!important}}
   </style>
   <script>
 (function(){
@@ -764,6 +786,51 @@ requestAnimationFrame(function(t0){function step(prev){requestAnimationFrame(fun
 <body>
 
 <canvas id="stars" aria-hidden="true"></canvas>
+
+<section class="introModal" id="gameIntro" role="dialog" aria-modal="true" aria-labelledby="introTitle1" aria-describedby="introText1" hidden>
+  <div class="introStars" aria-hidden="true"></div>
+  <div class="introShell">
+    <header class="introTop">
+      <div class="introMonogram"><span class="introSigil"><span>VI</span></span> Prelúdio Jogos</div>
+      <button class="introSkip" id="introSkip" type="button">Pular apresentação</button>
+    </header>
+    <div class="introStage">
+      <article class="introSlide isActive" data-intro-slide="0" aria-hidden="false">
+        <div class="introCopy">
+          <span class="introIndex">A experiência começa aqui</span>
+          <h2 class="introTitle" id="introTitle1">Não é só um jogo. <em>É um encontro.</em></h2>
+          <p class="introText" id="introText1">SextoLugar é uma experiência social guiada por cartas, escolhas e conversas que escapam do óbvio.</p>
+        </div>
+        <div class="introVisual" aria-hidden="true"><div class="introHalo"></div><div class="introCard"><span class="introCardMark">VI</span></div></div>
+      </article>
+      <article class="introSlide" data-intro-slide="1" aria-hidden="true">
+        <div class="introCopy">
+          <span class="introIndex">Conexões reais</span>
+          <h2 class="introTitle">O desconhecido vira <em>cumplicidade.</em></h2>
+          <p class="introText">Entre em uma sala, encontre outras pessoas e deixe cada rodada revelar histórias, afinidades e novas perspectivas.</p>
+        </div>
+        <div class="introVisual" aria-hidden="true"><div class="introConstellation"><span class="introPerson">◇</span><span class="introPerson">○</span><span class="introPerson">△</span></div></div>
+      </article>
+      <article class="introSlide" data-intro-slide="2" aria-hidden="true">
+        <div class="introCopy">
+          <span class="introIndex">Seu ritual, suas escolhas</span>
+          <h2 class="introTitle">Cada presença muda <em>a história.</em></h2>
+          <p class="introText">Não existem respostas certas. Esteja presente, escolha com intenção e descubra até onde uma boa pergunta pode levar.</p>
+        </div>
+        <div class="introVisual" aria-hidden="true"><div class="introRitual"><span class="introRitualCore">✦</span></div></div>
+      </article>
+    </div>
+    <footer class="introBottom">
+      <div class="introProgress" role="tablist" aria-label="Etapas da apresentação">
+        <button class="introDot isActive" type="button" data-intro-dot="0" aria-label="Etapa 1" aria-selected="true"></button>
+        <button class="introDot" type="button" data-intro-dot="1" aria-label="Etapa 2" aria-selected="false"></button>
+        <button class="introDot" type="button" data-intro-dot="2" aria-label="Etapa 3" aria-selected="false"></button>
+      </div>
+      <span class="introCount" id="introCount" aria-live="polite">01 / 03</span>
+      <button class="introNext" id="introNext" type="button">Continuar &nbsp;→</button>
+    </footer>
+  </div>
+</section>
 
 <div class="ctxBanner" id="ctxBanner" aria-live="polite"></div>
 
@@ -1321,6 +1388,53 @@ onAuthStateChanged(auth, (user) => {
 </script>
 
 <script src="./js/sw-register.js?v=10"></script>
+
+<script>
+(function(){
+  var STORAGE_KEY="osl_game_intro_v2";
+  var modal=document.getElementById("gameIntro");
+  if(!modal)return;
+  var slides=Array.prototype.slice.call(modal.querySelectorAll("[data-intro-slide]"));
+  var dots=Array.prototype.slice.call(modal.querySelectorAll("[data-intro-dot]"));
+  var next=document.getElementById("introNext"),skip=document.getElementById("introSkip"),count=document.getElementById("introCount"),stars=modal.querySelector(".introStars");
+  var current=0,previousFocus=null,isOpen=false;
+  function isForced(){try{return new URLSearchParams(window.location.search).get("intro")==="1"}catch(_){return false}}
+  function wasSeen(){if(isForced())return false;try{return localStorage.getItem(STORAGE_KEY)==="seen"}catch(_){return false}}
+  function remember(){try{localStorage.setItem(STORAGE_KEY,"seen")}catch(_){}}
+  function render(index){
+    current=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach(function(slide,i){var active=i===current;slide.classList.toggle("isActive",active);slide.setAttribute("aria-hidden",active?"false":"true")});
+    dots.forEach(function(dot,i){var active=i===current;dot.classList.toggle("isActive",active);dot.setAttribute("aria-selected",active?"true":"false")});
+    count.textContent=String(current+1).padStart(2,"0")+" / "+String(slides.length).padStart(2,"0");
+    next.innerHTML=current===slides.length-1?'Entrar no SextoLugar &nbsp;✦':'Continuar &nbsp;→';
+  }
+  function closeIntro(){
+    if(!isOpen)return;remember();isOpen=false;modal.classList.add("isLeaving");document.body.classList.remove("introLocked");
+    setTimeout(function(){modal.classList.remove("isOpen","isLeaving");modal.hidden=true;if(previousFocus&&previousFocus.focus)previousFocus.focus()},760);
+  }
+  function openIntro(){
+    previousFocus=document.activeElement;modal.hidden=false;document.body.classList.add("introLocked");
+    requestAnimationFrame(function(){modal.classList.add("isOpen");isOpen=true;render(0);setTimeout(function(){next.focus({preventScroll:true})},450)});
+  }
+  function keydown(e){
+    if(!isOpen)return;
+    if(e.key==="ArrowRight"){e.preventDefault();current<slides.length-1?render(current+1):closeIntro()}
+    else if(e.key==="ArrowLeft"){e.preventDefault();render(current-1)}
+    else if(e.key==="Escape"){e.preventDefault();closeIntro()}
+    else if(e.key==="Tab"){
+      var focusable=Array.prototype.slice.call(modal.querySelectorAll("button:not([disabled])"));if(!focusable.length)return;
+      var first=focusable[0],last=focusable[focusable.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+    }
+  }
+  for(var i=0;i<34;i++){var star=document.createElement("i");star.style.setProperty("--x",(Math.random()*100).toFixed(2)+"%");star.style.setProperty("--y",(Math.random()*100).toFixed(2)+"%");star.style.setProperty("--o",(.2+Math.random()*.65).toFixed(2));star.style.setProperty("--d",(2+Math.random()*4).toFixed(2)+"s");stars.appendChild(star)}
+  next.addEventListener("click",function(){current<slides.length-1?render(current+1):closeIntro()});skip.addEventListener("click",closeIntro);
+  dots.forEach(function(dot){dot.addEventListener("click",function(){render(Number(dot.getAttribute("data-intro-dot")))})});
+  document.addEventListener("keydown",keydown);
+  window.openGameIntro=openIntro;
+  if(!wasSeen())openIntro();
+})();
+</script>
 
 </body>
 </html>
