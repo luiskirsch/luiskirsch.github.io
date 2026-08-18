@@ -251,6 +251,15 @@ body {
   0%,100% { transform: scale(.80); opacity: .50; }
   50%      { transform: scale(1);   opacity: 1; }
 }
+@keyframes notifSpin {
+  0%   { transform: rotate(0deg) scale(1); }
+  18%  { transform: rotate(-8deg) scale(1.06); }
+  36%  { transform: rotate(8deg) scale(1.06); }
+  54%  { transform: rotate(-5deg) scale(1.03); }
+  72%  { transform: rotate(5deg) scale(1.03); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+.msgNotif--midnight { animation: notifSpin .65s ease both; }
 .msgNotifText {
   font-family: "Courier New", monospace;
   font-size: 11px;
@@ -1009,6 +1018,7 @@ var notifBox=document.getElementById('msgNotif');
 var notifText=document.getElementById('msgNotifText');
 function updateNotif(){var n=getUnread();if(!notifBox||!notifText) return;if(n===0){notifBox.classList.remove('has-msgs');notifText.textContent='Sem novas mensagens';}else if(n===1){notifBox.classList.add('has-msgs');notifText.textContent='Uma nova mensagem';}else{notifBox.classList.add('has-msgs');notifText.textContent='Você tem '+n+' novas mensagens';}}
 updateNotif();
+(function scheduleMidnightRefresh(){var now=new Date();var ms=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,0,0)-now;setTimeout(function(){updateNotif();if(notifBox&&getUnread()>0){notifBox.classList.remove('msgNotif--midnight');void notifBox.offsetWidth;notifBox.classList.add('msgNotif--midnight');setTimeout(function(){notifBox.classList.remove('msgNotif--midnight');},700);}scheduleMidnightRefresh();},ms);})();
 function ramp(param,value,time){var now=audioCtx.currentTime;try{param.cancelScheduledValues(now);param.setValueAtTime(param.value,now);param.linearRampToValueAtTime(value,now+time);}catch(e){}}
 function createBrownNoise(ctx){var bufferSize=2*ctx.sampleRate;var noiseBuffer=ctx.createBuffer(1,bufferSize,ctx.sampleRate);var output=noiseBuffer.getChannelData(0);var lastOut=0.0;for(var i=0;i<bufferSize;i++){var white=Math.random()*2-1;lastOut=(lastOut+(0.02*white))/1.02;output[i]=lastOut*0.32;}var src=ctx.createBufferSource();src.buffer=noiseBuffer;src.loop=true;return src;}
 function applyVolume(){if(!master||!audioCtx) return;var gain=Math.pow(0.55,1.25);try{master.gain.setValueAtTime(Math.max(0.00001,gain),audioCtx.currentTime);}catch(e){}}
