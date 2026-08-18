@@ -88,9 +88,9 @@ self.addEventListener('fetch', e => {
     caches.match(request).then(cached => {
       if (cached) return cached;
       return fetch(request).then(res => {
-        if (res && res.ok) {
+        if (res && res.ok && res.status !== 206) {
           const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(request, clone));
+          caches.open(CACHE).then(c => c.put(request, clone)).catch(() => {});
         }
         return res;
       }).catch(() => cached || new Response('', { status: 503 }));
