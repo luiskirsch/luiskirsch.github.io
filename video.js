@@ -1039,5 +1039,10 @@ window.oslVideoControls = {
   isInCall:   () => !!lkRoom,
 };
 
-// Conecta silenciosamente ao entrar na sala — permite ver quem já está em vídeo
-startPreview().catch(() => {});
+// Aguarda sala ser registrada no painel antes de tentar preview (evita 403 SALA_NAO_REGISTRADA)
+(function () {
+  var done = false;
+  function tryPreview() { if (done) return; done = true; startPreview().catch(() => {}); }
+  window.addEventListener('osl:room-booted', tryPreview, { once: true });
+  setTimeout(tryPreview, 8000); // fallback: tenta mesmo sem confirmação após 8s
+})();

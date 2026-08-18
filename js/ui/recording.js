@@ -180,10 +180,14 @@
   document.getElementById("recStep2CancelBtn")?.addEventListener("click", closeModal);
   recOverlay?.addEventListener("click", function (e) { if (e.target === recOverlay) closeModal(); });
 
-  // Verifica se já tem gravação ativa ao carregar a página
+  // Verifica se já tem gravação ativa ao carregar a página (só anfitrião tem panel token)
   (async function () {
     try {
-      var r = await fetch(REC_BASE + "/recording/status/" + encodeURIComponent(roomCode));
+      var tok = sessionStorage.getItem("osl_host_token");
+      if (!tok) return;
+      var r = await fetch(REC_BASE + "/recording/status/" + encodeURIComponent(roomCode), {
+        headers: { Authorization: "Bearer " + tok }
+      });
       var d = await r.json();
       if (d.active) { showRecordingActive(); startStatusPoll(); }
     } catch (_) {}

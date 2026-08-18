@@ -59,7 +59,7 @@ async function _post(path, data = {}) {
       body: JSON.stringify(data)
     });
     const json = await res.json().catch(() => null);
-    if (!res.ok) { console.error("PanelBridge erro:", path, json || res.status); return { ok: false, error: json || res.status }; }
+    if (!res.ok) { if (res.status !== 409) console.error("PanelBridge erro:", path, json || res.status); return { ok: false, error: json || res.status }; }
     return json || { ok: true };
   } catch (error) {
     console.error("PanelBridge falha:", path, error);
@@ -241,6 +241,7 @@ export async function panelBootRoom() {
     if (!joinResult?.ok) return joinResult;
 
     S.panelRoomBooted = true;
+    window.dispatchEvent(new CustomEvent('osl:room-booted'));
     return joinResult;
   })().catch((error) => {
     console.error("Erro ao registrar sala no painel:", error);
