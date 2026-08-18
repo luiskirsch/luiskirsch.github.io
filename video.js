@@ -620,12 +620,9 @@ async function requestToken() {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      console.error("Erro ao obter token:", data);
-
-      if (response.status === 401) {
-        throw new Error("TOKEN_UNAUTHORIZED"); // auth ausente — retry não ajuda
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(data.error || "TOKEN_FORBIDDEN"); // não adianta retentar
       }
-
       lastErr = new Error("TOKEN_REQUEST_FAILED");
       continue;
     }
