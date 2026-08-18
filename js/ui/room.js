@@ -114,32 +114,55 @@ export function applyVideoTileAvatars() {
 })();
 
 // ── Renderização de mensagens ─────────────────────────────────────────────────
+function _buildMessageEl(item) {
+  const div = document.createElement("div");
+  div.dataset.msgId = item.id;
+  if (item.type === "system") {
+    div.className = "message system"; div.textContent = item.text;
+  } else {
+    const own = item.authorId === S.participantId;
+    div.className = "message " + (own ? "me" : "other");
+    let timeLabel = "--:--";
+    if (item.createdAt && typeof item.createdAt.toDate === "function") timeLabel = nowTimeFromDate(item.createdAt.toDate());
+    div.innerHTML = own
+      ? `<span class="msgTime">${timeLabel}</span>${escapeHtml(item.text)}`
+      : `<span class="meta">${escapeHtml(item.authorName || "Jogador")}</span><span class="msgTime">${timeLabel}</span>${escapeHtml(item.text)}`;
+  }
+  return div;
+}
+
 function renderMessages(docs) {
   const messagesEl  = document.getElementById("messages");
   const chatEmptyEl = document.getElementById("chatEmpty");
   if (!messagesEl) return;
-  messagesEl.innerHTML = "";
+
   if (!docs.length) {
+    messagesEl.innerHTML = "";
     if (chatEmptyEl) { chatEmptyEl.style.display = "block"; chatEmptyEl.innerHTML = "A sala foi criada.<br>Quando houver mensagens ou eventos do sistema, eles aparecerão aqui."; }
     return;
   }
   if (chatEmptyEl) chatEmptyEl.style.display = "none";
+
+  // Identifica IDs já renderizados no DOM
+  const rendered = new Set();
+  messagesEl.querySelectorAll("[data-msg-id]").forEach(el => rendered.add(el.dataset.msgId));
+
+  // Se alguma mensagem desapareceu (clearRoomData), reconstrói do zero
+  const docIds = new Set(docs.map(d => d.id));
+  if (rendered.size > 0 && [...rendered].some(id => !docIds.has(id))) {
+    messagesEl.innerHTML = "";
+    rendered.clear();
+  }
+
+  // Só adiciona mensagens novas — nenhuma remoção/recriação de DOM existente
+  let appended = false;
   docs.forEach((item) => {
-    const div = document.createElement("div");
-    if (item.type === "system") {
-      div.className = "message system"; div.textContent = item.text;
-    } else {
-      const own = item.authorId === S.participantId;
-      div.className = "message " + (own ? "me" : "other");
-      let timeLabel = "--:--";
-      if (item.createdAt && typeof item.createdAt.toDate === "function") timeLabel = nowTimeFromDate(item.createdAt.toDate());
-      div.innerHTML = own
-        ? `<span class="msgTime">${timeLabel}</span>${escapeHtml(item.text)}`
-        : `<span class="meta">${escapeHtml(item.authorName || "Jogador")}</span><span class="msgTime">${timeLabel}</span>${escapeHtml(item.text)}`;
-    }
-    messagesEl.appendChild(div);
+    if (rendered.has(item.id)) return;
+    messagesEl.appendChild(_buildMessageEl(item));
+    appended = true;
   });
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  if (appended || rendered.size === 0) messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 const DOTS_HTML = `<span class="typingDots"><span></span><span></span><span></span></span>`;
@@ -286,7 +309,6 @@ export function bindPlayers() {
       .sort((a, b) => (a.joinedAt?.toMillis?.() || 0) - (b.joinedAt?.toMillis?.() || 0));
     S.currentPlayers = players;
     renderPlayers(players);
-    setTimeout(() => applyVideoTileAvatars(), 800);
     try { localStorage.setItem("osl_players_cache", JSON.stringify(players.map(p => ({ id:p.id, name:p.name, isHost:p.isHost, avatarEmoji:p.avatarEmoji, avatarPhotoUrl:p.avatarPhotoUrl, avatarColor:p.avatarColor })))); } catch (_) {}
   }, (err) => { console.error("bindPlayers onSnapshot error:", err); });
 }

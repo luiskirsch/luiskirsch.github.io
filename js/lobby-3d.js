@@ -129,10 +129,12 @@ function resize() {
 new ResizeObserver(resize).observe(viewer);
 resize();
 
-// ── Render loop ────────────────────────────────────────────────────
+// ── Render loop (pausável) ─────────────────────────────────────────
 const clock = new THREE.Clock();
-(function animate() {
-  requestAnimationFrame(animate);
+let _animId = null;
+
+function animate() {
+  _animId = requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
 
   // poeira fina flutua (muito devagar, ondulação sutil)
@@ -170,13 +172,30 @@ const clock = new THREE.Clock();
 
   controls.update();
   renderer.render(scene, camera);
-})();
+}
+
+function _startLoop() {
+  if (_animId) return;
+  clock.start();
+  _animId = requestAnimationFrame(animate);
+}
+
+function _stopLoop() {
+  if (_animId) { cancelAnimationFrame(_animId); _animId = null; }
+}
+
+// Pausa quando a aba fica oculta; retoma quando volta ao foco.
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) _stopLoop();
+  else if (viewer.style.display !== "none") _startLoop();
+});
 
 // ── Bridge ─────────────────────────────────────────────────────────
 // Só ativa lobby-mode se o ritual ainda não iniciou (evita race condition
 // onde este módulo carrega do CDN depois que hideLobbyView() já removeu a classe)
 if (!document.body.classList.contains("ritual-started")) {
   document.body.classList.add("lobby-mode");
+  _startLoop();
 } else {
   viewer.style.display = "none";
 }
@@ -186,6 +205,11 @@ window._lobby3d = {
     viewer.style.display = "flex";
     document.body.classList.add("lobby-mode");
     resize();
+    _startLoop();
   },
-  hide() { viewer.style.display = "none"; document.body.classList.remove("lobby-mode"); }
+  hide() {
+    viewer.style.display = "none";
+    document.body.classList.remove("lobby-mode");
+    _stopLoop();
+  }
 };

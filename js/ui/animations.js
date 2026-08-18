@@ -4,10 +4,11 @@ import { EMOJI_LOTTIE, LOTTIE_BASE } from "../constants.js";
 
 // ── Som de carta sendo virada (Web Audio API) ─────────────────────────────────
 export function playCardFlip() {
+  const ctx = S.audioCtx;
+  if (!ctx || !S.audioReady) return;
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const sr  = ctx.sampleRate;
-    const t0  = ctx.currentTime;
+    const sr = ctx.sampleRate;
+    const t0 = ctx.currentTime;
 
     function noiseBuf(dur, shapeFn) {
       const buf = ctx.createBuffer(1, sr * dur | 0, sr);
@@ -38,8 +39,6 @@ export function playCardFlip() {
     const ldG = ctx.createGain(); ldG.gain.setValueAtTime(0.14, t0 + 0.05); ldG.gain.exponentialRampToValueAtTime(0.001, t0 + 0.12);
     osc.connect(ldG); ldG.connect(ctx.destination);
     osc.start(t0 + 0.05); osc.stop(t0 + 0.13);
-
-    setTimeout(() => ctx.close(), 500);
   } catch (_) {}
 }
 
