@@ -24,6 +24,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>SextoLugar — Entrar</title>
   <link rel="icon" type="image/png" href="./favicon.png">
+  <link rel="preload" as="image" href="./logo_oficial_fundo_transparente.png" type="image/png" fetchpriority="high">
   <link rel="preload" as="image" href="./verso-carta.webp?v=1" type="image/webp" fetchpriority="high">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -707,7 +708,7 @@ body.transmissionFocus .msgNotif {
 .introStars{position:absolute;inset:0;overflow:hidden;pointer-events:none}.introStars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;left:var(--x);top:var(--y);opacity:var(--o);box-shadow:0 0 8px rgba(255,255,255,.8);animation:introTwinkle var(--d) ease-in-out infinite alternate}@keyframes introTwinkle{to{opacity:.12;transform:scale(.6)}}
 .introShell{position:relative;z-index:2;width:min(1120px,100%);height:min(720px,calc(100dvh - clamp(36px,8vw,112px)));min-height:520px;display:grid;grid-template-rows:auto 1fr auto;border:1px solid rgba(230,192,123,.22);border-radius:28px;overflow:hidden;background:linear-gradient(145deg,rgba(16,15,21,.94),rgba(5,5,9,.96));box-shadow:0 45px 120px rgba(0,0,0,.75),inset 0 1px rgba(255,255,255,.04),0 0 80px rgba(181,130,50,.07)}
 .introShell::before{content:"";position:absolute;inset:10px;border:1px solid rgba(230,192,123,.07);border-radius:20px;pointer-events:none}.introTop,.introBottom{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:24px 30px}
-.introMonogram{display:flex;align-items:center;gap:12px;color:var(--gold);font:600 11px/1 "Courier New",monospace;letter-spacing:.26em;text-transform:uppercase}.introSigil{width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(230,192,123,.42);transform:rotate(45deg)}.introSigil span{transform:rotate(-45deg);font-size:11px}
+.introMonogram{display:flex;align-items:center;gap:11px;color:var(--gold);font:600 11px/1 "Courier New",monospace;letter-spacing:.26em;text-transform:uppercase}.introSigil{position:relative;width:38px;height:38px;flex:0 0 38px;overflow:hidden;border-radius:50%;filter:drop-shadow(0 0 9px rgba(255,255,255,.14)) drop-shadow(0 0 14px rgba(230,192,123,.08))}.introSigil img{position:absolute;left:50%;top:50%;display:block;width:58px;max-width:none;height:auto;transform:translate(-50%,-50%)}
 .introSkip{border:0;background:transparent;color:rgba(255,255,255,.48);font:10px/1 "Courier New",monospace;letter-spacing:.19em;text-transform:uppercase;cursor:pointer;padding:10px;transition:color .25s}.introSkip:hover,.introSkip:focus-visible{color:var(--gold);outline:none}
 .introStage{position:relative;min-height:0;isolation:isolate}.introStageSweep{position:absolute;z-index:5;inset:4% -30%;pointer-events:none;opacity:0;background:linear-gradient(105deg,transparent 40%,rgba(230,192,123,.055) 49%,rgba(255,248,225,.12) 50%,rgba(230,192,123,.04) 52%,transparent 61%);transform:translateX(-45%)}
 .introSlide{position:absolute;z-index:1;inset:0;display:grid;grid-template-columns:1.08fr .92fr;align-items:center;gap:clamp(30px,6vw,90px);padding:20px clamp(38px,7vw,92px);opacity:0;visibility:hidden;filter:blur(9px);transform:translate3d(58px,0,0) scale(.982);transition:opacity .62s cubic-bezier(.22,.8,.2,1),transform .9s cubic-bezier(.16,1,.3,1),filter .72s ease,visibility 0s linear .9s}.introSlide.isBefore{transform:translate3d(-58px,0,0) scale(.982)}.introSlide.isAfter{transform:translate3d(58px,0,0) scale(.982)}.introSlide.isActive{z-index:2;opacity:1;visibility:visible;filter:none;transform:translate3d(0,0,0) scale(1);transition:opacity .72s cubic-bezier(.22,.8,.2,1),transform .95s cubic-bezier(.16,1,.3,1),filter .82s ease,visibility 0s linear 0s}
@@ -840,7 +841,7 @@ requestAnimationFrame(function(t0){function step(prev){requestAnimationFrame(fun
   <div class="introStars" aria-hidden="true"></div>
   <div class="introShell">
     <header class="introTop">
-      <div class="introMonogram"><span class="introSigil"><span>VI</span></span> Prelúdio Jogos</div>
+      <div class="introMonogram"><span class="introSigil" aria-hidden="true"><img src="./logo_oficial_fundo_transparente.png" alt="" decoding="sync" fetchpriority="high"></span> Prelúdio Jogos</div>
       <button class="introSkip" id="introSkip" type="button">Pular apresentação</button>
     </header>
     <div class="introStage">
