@@ -40,10 +40,12 @@
   vA.addEventListener('timeupdate', watchLoop);
   vB.addEventListener('timeupdate', watchLoop);
 
-  // Marca body como pronto quando o primeiro frame do vídeo renderiza
-  vA.addEventListener('timeupdate', function() {
-    document.body.classList.add('lobby-video-ready');
-  }, { once: true });
+  // Marca body como pronto quando o vídeo puder ser reproduzido
+  function _markReady() { document.body.classList.add('lobby-video-ready'); }
+  vA.addEventListener('canplay', _markReady, { once: true });
+  vA.addEventListener('timeupdate', _markReady, { once: true });
+  // Fallback: exibe o centro mesmo se o vídeo não iniciar em 2s
+  setTimeout(_markReady, 2000);
 
   function updateLobbyMuteBtn() {
     var btn = document.getElementById('toggleLobbyAudioBtn');
