@@ -30,6 +30,7 @@ const placeholders = {
   L2: document.getElementById("videoPlaceholderL2"),
   R1: document.getElementById("videoPlaceholderR1"),
   R2: document.getElementById("videoPlaceholderR2"),
+  R3: document.getElementById("videoPlaceholderR3"),
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -157,32 +158,29 @@ function updateFocusBar() {
 
 /**
  * Distribui tiles de amigos entre coluna esquerda e direita.
- * Slots 1-2 → esquerda, slots 3-4 → direita.
- * Atualiza a visibilidade dos placeholders.
+ * Left: slots 1-2 (self ocupa slot 0 fixo via #videoSelfSlot)
+ * Right: slots 3-5 (3 slots → inclui sextolugar)
  */
 function assignSlots() {
   const nonSelfTiles = Array.from(
     videoGridEl.querySelectorAll(".videoTile:not(.videoTile--self)")
   );
 
-  // Move tiles sem remover do DOM primeiro — remover <video> do DOM
-  // causa o browser pausar/resetar o stream, gerando tela preta.
   nonSelfTiles.slice(0, 2).forEach((t) => {
     if (t.parentElement !== videoColLeftEl) videoColLeftEl.appendChild(t);
   });
-  nonSelfTiles.slice(2, 4).forEach((t) => {
+  nonSelfTiles.slice(2, 5).forEach((t) => {
     if (t.parentElement !== videoColRightEl) videoColRightEl.appendChild(t);
   });
-  // Slots além do 4º ficam ocultos (limite de layout)
-  nonSelfTiles.slice(4).forEach((t) => t.remove());
+  nonSelfTiles.slice(5).forEach((t) => t.remove());
 
-  // Mostra/esconde placeholders conforme quantidade de tiles em cada coluna
-  const lc = videoColLeftEl.querySelectorAll(".videoTile").length;
+  const lc = videoColLeftEl.querySelectorAll(".videoTile:not(.videoTile--self)").length;
   const rc = videoColRightEl.querySelectorAll(".videoTile").length;
   if (placeholders.L1) placeholders.L1.style.display = lc >= 1 ? "none" : "";
   if (placeholders.L2) placeholders.L2.style.display = lc >= 2 ? "none" : "";
   if (placeholders.R1) placeholders.R1.style.display = rc >= 1 ? "none" : "";
   if (placeholders.R2) placeholders.R2.style.display = rc >= 2 ? "none" : "";
+  if (placeholders.R3) placeholders.R3.style.display = rc >= 3 ? "none" : "";
 }
 
 function updateVideoGridLayout() {

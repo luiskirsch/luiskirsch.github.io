@@ -2509,11 +2509,36 @@
       }
     }
 
-    /* Self video slot below the card */
+    /* Self video slot — first slot in left column */
     .videoSelfSlot{
+      position:relative;
       width:100%;
-      display:flex;
-      justify-content:center;
+      aspect-ratio:1/1;
+      border:1px solid rgba(215,176,107,.40);
+      border-radius:12px;
+      background:rgba(4,2,10,.55);
+      overflow:hidden;
+      flex-shrink:0;
+    }
+    /* Placeholder icon when self not in call */
+    .videoSelfSlot:not(:has(.videoTile))::before{
+      content:'';
+      display:block;
+      width:36%;
+      aspect-ratio:1/1;
+      position:absolute;
+      top:50%;left:50%;
+      transform:translate(-50%,-60%);
+      background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,.30)' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/%3E%3C/svg%3E") center/contain no-repeat;
+    }
+    .videoSelfSlot:not(:has(.videoTile))::after{
+      content:'VOCÊ';
+      position:absolute;
+      bottom:14%;left:0;right:0;
+      text-align:center;
+      font-size:7.5px;
+      letter-spacing:.22em;
+      color:rgba(255,255,255,.35);
     }
 
     .videoMedia{
@@ -2559,23 +2584,24 @@
         inset 0 1px 0 rgba(255,255,255,.06);
     }
 
-    /* Self tile: in the selfSlot, slightly wider / rectangular, gold border */
+    /* Self tile inside the column — square like others, gold border to identificar */
     .videoSelfSlot .videoTile{
       position:relative !important;
-      width:min(260px,100%) !important;
-      aspect-ratio:4/3 !important;
+      width:100% !important;
+      aspect-ratio:1/1 !important;
       left:auto !important; right:auto !important;
       top:auto !important; bottom:auto !important;
       transform:none !important;
-      border:2px solid var(--gold) !important;
+      border:1px solid rgba(215,176,107,.60) !important;
       box-shadow:
-        0 0 24px rgba(215,176,107,.32),
-        0 8px 28px rgba(0,0,0,.55),
+        0 0 14px rgba(215,176,107,.18),
+        0 6px 20px rgba(0,0,0,.50),
         inset 0 1px 0 rgba(255,255,255,.06) !important;
     }
 
     .videoSelfSlot .videoTile:hover{
       transform:translateY(-2px) !important;
+      border-color:rgba(215,176,107,.85) !important;
     }
 
     .videoTile video,
@@ -4908,18 +4934,7 @@
 
     /* ritualCardWrap já controla tamanho no arenaMode acima */
 
-    html.arenaMode .videoSelfSlot{
-      width:100%;
-      margin-top:auto;
-      display:flex;
-      justify-content:center;
-      align-items:flex-end;
-      padding-top:6px;
-    }
-
-    html.arenaMode .videoSelfSlot .videoTile{
-      width:min(200px,100%) !important;
-    }
+    /* arena mode: self slot segue o column tile CSS — sem override extra */
 
     /* --- Coluna de histórico compacta --- */
     html.arenaMode .rightColumn{
@@ -7071,7 +7086,6 @@
   }
   body:not(.ritual-started).lobby-mode .effectPanel{ z-index:20!important;pointer-events:auto!important; }
   body:not(.ritual-started).lobby-mode .aiDetectToast{ z-index:20!important;pointer-events:auto!important; }
-  body:not(.ritual-started).lobby-mode .videoSelfSlot{ display:none!important; }
   body:not(.ritual-started).lobby-mode .arenaControls{ z-index:20!important;pointer-events:auto!important; }
   body:not(.ritual-started).lobby-mode .videoColLeft,
   body:not(.ritual-started).lobby-mode .videoColRight{
@@ -7371,8 +7385,9 @@
             <!-- ===== GAME TABLE: 3-column grid (left videos | card + self | right videos) ===== -->
             <div class="gameTableGrid" id="videoGrid">
 
-              <!-- Left column: friend tiles 1 & 2 -->
+              <!-- Left column: self (sempre 1º) + friend tiles 1 & 2 -->
               <div class="videoColLeft" id="videoColLeft">
+                <div class="videoSelfSlot" id="videoSelfSlot"></div>
                 <div class="videoColPlaceholder" id="videoPlaceholderL1"></div>
                 <div class="videoColPlaceholder" id="videoPlaceholderL2"></div>
               </div>
@@ -7526,9 +7541,6 @@
 
                 </div>
 
-                <!-- Self video: centralizado abaixo da carta -->
-                <div class="videoSelfSlot" id="videoSelfSlot"></div>
-
                 <!-- ── Reaction Bar ────────────────────────────────── -->
                 <!-- arenaControls: transparent wrapper in normal mode,
                      fixed centered flex row in arena mode -->
@@ -7546,10 +7558,11 @@
                 </div>
               </div>
 
-              <!-- Right column: friend tiles 3 & 4 -->
+              <!-- Right column: friend tiles 3, 4 & 5 (sextolugar) -->
               <div class="videoColRight" id="videoColRight">
                 <div class="videoColPlaceholder" id="videoPlaceholderR1"></div>
                 <div class="videoColPlaceholder" id="videoPlaceholderR2"></div>
+                <div class="videoColPlaceholder" id="videoPlaceholderR3"></div>
               </div>
 
             </div>
