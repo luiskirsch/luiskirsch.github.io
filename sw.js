@@ -1,9 +1,9 @@
-const CACHE = 'osl-v25-lobby-module-cache-bust';
+const CACHE = 'osl-v26-card-webp';
 
 const PRECACHE = [
   '/favicon.png',
   '/frente-carta.png',
-  '/verso-carta.png',
+  '/verso-carta.webp?v=1',
   '/digital.png',
   '/logo_oficial_fundo_transparente.png',
   '/lua_site_transparente.png',
