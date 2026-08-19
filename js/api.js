@@ -200,7 +200,7 @@ export const PanelBridge = {
     roomId: _normalizeRoomId(roomId), playerId: String(playerId || "").trim(),
   }, { suppliedToken: hostToken }),
   joinStatus: (roomId, playerId) => _get(`/game/room/${encodeURIComponent(_normalizeRoomId(roomId))}/join-status?playerId=${encodeURIComponent(String(playerId || "").trim())}`),
-  roomHeartbeat: (roomId) => _post("/game/room/heartbeat", { roomId: _normalizeRoomId(roomId) }),
+  roomHeartbeat: (roomId, playerId) => _post("/game/room/heartbeat", { roomId: _normalizeRoomId(roomId), playerId: String(playerId || "").trim() }),
 };
 
 // Exponha para scripts não-módulo (mobile.js, recording modal, etc.)

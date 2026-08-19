@@ -202,7 +202,7 @@ export function startHeartbeat() {
   S.heartbeatTimer = setInterval(async () => {
     try { await updateDoc(S.playerRef, { lastSeen: serverTimestamp() }); } catch (_) {}
     setPlayerConnected(true).catch(() => {});
-    PanelBridge.roomHeartbeat(S.roomCode).catch(() => {});
+    PanelBridge.roomHeartbeat(S.roomCode, S.participantId).catch(() => {});
     // Cacheia token para uso síncrono no sendLeaveBeacon (beforeunload não permite await)
     try { S._cachedIdToken = (await S.auth?.currentUser?.getIdToken()) || null; } catch (_) { S._cachedIdToken = null; }
   }, 15000);
