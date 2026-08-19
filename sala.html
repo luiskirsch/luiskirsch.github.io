@@ -1647,6 +1647,11 @@
       display:none;
     }
 
+    /* No lobby: esconde título, subtítulo e botões de ação da tableHead */
+    body:not(.ritual-started) .tableHeadLeft,
+    body:not(.ritual-started) #revealCardBtn,
+    body:not(.ritual-started) #resetRitualBtn{ display:none!important; }
+
     /* ===== Action buttons in tableHead (Revelar / Reiniciar) ===== */
     .videoBtn{
       appearance:none;
