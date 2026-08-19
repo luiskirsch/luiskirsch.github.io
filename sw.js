@@ -1,4 +1,4 @@
-const CACHE = 'osl-v26-card-webp';
+const CACHE = 'osl-v27-lobby-clean';
 
 const PRECACHE = [
   '/favicon.png',
