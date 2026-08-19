@@ -266,12 +266,14 @@ export function bindRoom() {
     if (footerStatusEl)  footerStatusEl.textContent  = started ? "Ritual iniciado" : "Aguardando início";
     S.isHost = data.hostId === S.participantId;
     if (startBtn) { startBtn.disabled = !S.isHost || S._isSpectator; startBtn.textContent = S.isHost ? (started ? "Ritual iniciado" : "Iniciar Ritual") : "Aguardando anfitrião"; }
+    const _arenaActive = !!data.arenaActive;
+    const _optedOut = sessionStorage.getItem("osl_arena_optout") === "1";
     const arenaBtn = document.getElementById("arenaBtn");
-    if (arenaBtn) arenaBtn.hidden = !S.isHost;
+    if (arenaBtn) arenaBtn.hidden = !(S.isHost && (_arenaActive || _optedOut));
     const streamModeBtn = document.getElementById("streamModeBtn");
-    if (streamModeBtn) streamModeBtn.hidden = !S.isHost;
+    if (streamModeBtn) streamModeBtn.hidden = !(S.isHost && _arenaActive && !_optedOut);
     const liveBtn = document.getElementById("liveBtn");
-    if (liveBtn) liveBtn.hidden = !S.isHost;
+    if (liveBtn) liveBtn.hidden = !(S.isHost && _arenaActive && !_optedOut);
     if (data.arenaActive) {
       if (sessionStorage.getItem("osl_arena_optout") !== "1" && typeof window.activateArenaMode === "function") window.activateArenaMode();
     }

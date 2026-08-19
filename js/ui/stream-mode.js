@@ -49,7 +49,9 @@ function toggleFullscreen() {
 export function updateStreamBtnVisibility() {
   const btn = document.getElementById("streamModeBtn");
   if (!btn) return;
-  btn.hidden = !S.isHost;
+  const inArena = document.documentElement.classList.contains("arenaMode");
+  const optedOut = sessionStorage.getItem("osl_arena_optout") === "1";
+  btn.hidden = !(S.isHost && inArena && !optedOut);
 }
 
 export function initStreamMode() {
