@@ -1368,22 +1368,11 @@ var _dailyData=null,_ritualActive=false,_timerInterval=null,_dailyCompleting=fal
 var _dailyMetaMarkup=(document.querySelector('.rMeta')||{}).innerHTML||'';
 var _dailyActionButton=document.getElementById('btnDiscover');
 
-/* Clique no card: só ativa ritual se coordenadas batem com o botão */
-(function(){
-  var wrap=document.querySelector('.ritualWrap');
-  if(!wrap)return;
-  function _overBtn(cx,cy){
-    var b=document.getElementById('btnDiscover');
-    if(!b||b.disabled||b.hidden||b.classList.contains('btnDone'))return false;
-    var r=b.getBoundingClientRect();
-    return cx>=r.left&&cx<=r.right&&cy>=r.top&&cy<=r.bottom;
-  }
-  wrap.addEventListener('click',function(e){
-    if(_overBtn(e.clientX,e.clientY)){window.startDailyRitual&&window.startDailyRitual();}
-    e.stopImmediatePropagation();
-    e.preventDefault();
-  },true);
-})();
+if(_dailyActionButton){
+  _dailyActionButton.addEventListener('click',function(){
+    window.startDailyRitual&&window.startDailyRitual();
+  });
+}
 
 function _dailyCache(){try{return JSON.parse(localStorage.getItem('osl_daily_done')||'null');}catch(_){return null;}}
 function _dailyCompletedState(d){
