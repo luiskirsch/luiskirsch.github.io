@@ -263,7 +263,6 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
   transition:transform .46s cubic-bezier(.2,.78,.2,1),box-shadow .46s ease;
 }
 .ritualWrap:hover .rFront{
-  transform:translate3d(0,-9px,28px);
   box-shadow:0 36px 80px rgba(0,0,0,.82),0 0 64px rgba(212,175,55,.16),inset 0 1px 0 rgba(212,175,55,.28);
 }
 .ritualWrap:hover .ritualVisual::after{
@@ -276,7 +275,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
   border-color:rgba(212,175,55,.15);
   box-shadow:0 22px 48px rgba(0,0,0,.52);
 }
-.rInner{padding:14px 26px 10px;flex:0 0 auto;min-height:0;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;justify-content:flex-start;pointer-events:none;}
+.rInner{padding:14px 26px 58px;flex:0 0 auto;min-height:0;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;justify-content:flex-start;pointer-events:none;}
 .rInner::before,.rInner::after{content:'';position:absolute;width:14px;height:14px;border-color:rgba(212,175,55,.35);border-style:solid;}
 .rInner::before{top:8px;left:8px;border-width:1.5px 0 0 1.5px;}
 .rInner::after{bottom:8px;right:8px;border-width:0 1.5px 1.5px 0;}
@@ -286,7 +285,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .rQ{font-family:var(--fell);font-size:clamp(18px,2vw,27px);font-style:italic;font-weight:400;color:#fff;line-height:1.45;margin-bottom:10px;letter-spacing:.015em;flex:0 0 auto;text-shadow:0 2px 16px rgba(0,0,0,.60);}
 .rMeta{display:flex;align-items:center;justify-content:center;gap:6px;font-size:8.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:0;}
 .rMeta svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.5;}
-.ritualAction{display:flex;align-items:center;justify-content:center;padding:14px 0 16px;pointer-events:none;cursor:default;}
+.ritualAction{position:absolute;bottom:34px;left:18px;right:10px;display:flex;justify-content:center;align-items:center;pointer-events:none;cursor:default;z-index:10;}
 .btnDiscover{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:10px 32px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.28);border-radius:2px;color:var(--gold);font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;cursor:default;pointer-events:none;transition:background .18s,border-color .18s,transform .14s;}
 .btnDiscover[hidden]{display:none!important;}
 .ritualWrap,.ritualWrap *{cursor:default!important;}
@@ -721,11 +720,11 @@ body.ritual-open #ritualDim{opacity:1;}
                 <span id="ritualCount">4.821</span>&nbsp;pessoas descobriram hoje
               </div>
             </div>
-            <div class="ritualAction">
-              <button class="btnDiscover" id="btnDiscover" type="button" disabled aria-disabled="true" hidden>DESCOBRIR</button>
-              <span class="btnDiscover btnDone" id="ritualDone" role="status" aria-live="polite" hidden>✓ DESCOBERTO</span>
-            </div>
           </div>
+        </div>
+        <div class="ritualAction">
+          <button class="btnDiscover" id="btnDiscover" type="button" disabled aria-disabled="true" hidden>DESCOBRIR</button>
+          <span class="btnDiscover btnDone" id="ritualDone" role="status" aria-live="polite" hidden>✓ DESCOBERTO</span>
         </div>
       </div>
     </div>
