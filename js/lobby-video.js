@@ -40,6 +40,11 @@
   vA.addEventListener('timeupdate', watchLoop);
   vB.addEventListener('timeupdate', watchLoop);
 
+  // Marca body como pronto quando o primeiro frame do vídeo renderiza
+  vA.addEventListener('timeupdate', function() {
+    document.body.classList.add('lobby-video-ready');
+  }, { once: true });
+
   function updateLobbyMuteBtn() {
     var btn = document.getElementById('toggleLobbyAudioBtn');
     if (!btn) return;
