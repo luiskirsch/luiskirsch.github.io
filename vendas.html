@@ -10,7 +10,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title data-i18n="vendas:title">SEXTOLUGAR — Loja</title>
 <link rel="icon" href="./favicon.png">
-<link rel="preload" href="./img/luis.png" as="image" fetchpriority="high">
 <style>
 :root{
   --bg:#040303;
@@ -34,61 +33,6 @@ body{
   font-family:ui-serif,Georgia,"Times New Roman",serif;
   overflow-x:hidden;
   min-height:100vh;
-}
-
-/* ---- BINARY PORTRAIT BANNER ---- */
-.binary-banner{
-  position:relative;
-  width:100%;
-  height:130px;
-  overflow:hidden;
-  background:
-    linear-gradient(to right,
-      rgba(175,128,35,.52)  0%,
-      rgba(155,112,30,.44)  10%,
-      rgba(130,94,24,.34)   22%,
-      rgba(100,72,18,.22)   40%,
-      rgba(60,44,10,.10)    60%,
-      rgba(20,14,3,.03)     76%,
-      transparent           86%,
-      #040303               100%
-    );
-  border-bottom:1px solid rgba(230,192,123,.10);
-}
-#binaryScatter{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  display:block;
-  z-index:1;
-  /* Atrás do retrato: chars fracos e pequenos; depois: pleno; some no fim */
-  mask-image:linear-gradient(to right,
-    rgba(0,0,0,.45) 0%,
-    rgba(0,0,0,.55) 8%,
-    rgba(0,0,0,.80) 16%,
-    black           24%,
-    black           78%,
-    transparent     94%
-  );
-  -webkit-mask-image:linear-gradient(to right,
-    rgba(0,0,0,.45) 0%,
-    rgba(0,0,0,.55) 8%,
-    rgba(0,0,0,.80) 16%,
-    black           24%,
-    black           78%,
-    transparent     94%
-  );
-}
-.binary-banner__label{
-  position:absolute;
-  right:28px; bottom:12px;
-  font-family:ui-serif,Georgia,serif;
-  font-size:9px;
-  letter-spacing:.28em;
-  text-transform:uppercase;
-  color:rgba(230,192,123,.70);
-  pointer-events:none;
 }
 
 /* ---- NAV ---- */
@@ -676,7 +620,6 @@ body{
   .packs-grid{grid-template-columns:repeat(2,1fr);}
   .hero{padding:56px 16px 48px;}
   .section{padding:52px 16px;}
-  .binary-banner__label{color:rgba(255,255,255,.75);}
 }
 @media(max-width:500px){
   .packs-grid{grid-template-columns:1fr;}
@@ -688,13 +631,6 @@ body{
 <link rel="prefetch" href="/cadastro.html"><link rel="prefetch" href="/login.html">
 </head>
 <body>
-
-<!-- BINARY PORTRAIT BANNER -->
-<div class="binary-banner">
-  <canvas id="binaryScatter"></canvas>
-  <img src="./img/luis.png" alt="" fetchpriority="high" decoding="sync" style="height:100%;width:auto;display:block;position:relative;z-index:2;opacity:0.82;filter:sepia(0.25) brightness(0.90);">
-  <span class="binary-banner__label" data-i18n="vendas:banner.label">Luis Kirsch · Criador</span>
-</div>
 
 <nav class="nav">
   <div class="nav-logo" data-i18n="vendas:nav.logo">SEXTOLUGAR</div>
@@ -1203,82 +1139,5 @@ body{
   }
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
-<script type="module">
-  (function() {
-    const canvas = document.getElementById('binaryScatter');
-    if (!canvas) return;
-    const W = canvas.parentElement.offsetWidth;
-    const H = canvas.parentElement.offsetHeight;
-    canvas.width  = W;
-    canvas.height = H;
-    const ctx = canvas.getContext('2d');
-
-    // Largura da imagem no banner (aprox)
-    const imgW = H; // imagem é quadrada
-
-    const tokens = [
-      '0','1','01','10','00','11','010','101','001','110','100',
-      '1010','0101','1100','0011','1001','0110','10','01','1','0',
-      '11001','01010','10110','00101'
-    ];
-
-    // Scatter aleatório simples — como o thefacebook
-    const chars = [];
-    // Jittered grid — células menores perto do retrato (mais denso), maiores longe
-    const cellH = 18;
-    const cols  = Math.ceil(W * 0.83 / 28);
-    const rows  = Math.ceil(H / cellH);
-
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < cols; col++) {
-        // Espaçamento cresce com x — mais denso perto do retrato
-        const cw = 20 + (col / cols) * 18; // 20px perto → 38px longe
-        const x = col * 28 + Math.random() * cw;
-        const y = row * cellH + Math.random() * cellH;
-        const xFrac = x / W;
-
-        // Tamanho: 7px no canto esquerdo → 16px no pico (30% do banner)
-        const sz = Math.floor(7 + Math.min(xFrac / 0.30, 1) * 9 + Math.random() * 3);
-
-        // Opacidade: sutil no canto (atrás do retrato), plena no centro, some no fim
-        const fade = 1 - (xFrac / 0.83);
-        const inPortrait = x < imgW;
-        const base = inPortrait ? 0.08 + (x / imgW) * 0.14 : 0.10 + fade * 0.28;
-        const alpha = base * (0.6 + Math.random() * 0.4);
-
-        const color = xFrac < 0.38
-          ? `rgba(255,250,225,${alpha.toFixed(3)})`
-          : `rgba(210,172,78,${alpha.toFixed(3)})`;
-
-        chars.push({ x, y, sz, color, txt: tokens[Math.floor(Math.random()*tokens.length)] });
-      }
-    }
-
-    // 10 tokens saindo de trás da imagem em direção à direita
-    for (let i = 0; i < 10; i++) {
-      const x = imgW * 0.55 + Math.random() * imgW * 0.40;
-      const y = Math.random() * H;
-      const sz = Math.floor(6 + Math.random() * 5);
-      const alpha = (0.12 + Math.random() * 0.14).toFixed(3);
-      chars.push({ x, y, sz, color: `rgba(255,248,215,${alpha})`, txt: tokens[Math.floor(Math.random()*tokens.length)] });
-    }
-
-    // Extras rente à borda direita do retrato — como saindo dele
-    for (let i = 0; i < 35; i++) {
-      const x = imgW * 0.88 + Math.random() * imgW * 0.28;
-      const y = Math.random() * H;
-      const sz = Math.floor(7 + Math.random() * 6);
-      const alpha = (0.18 + Math.random() * 0.22).toFixed(3);
-      chars.push({ x, y, sz, color: `rgba(255,248,215,${alpha})`, txt: tokens[Math.floor(Math.random()*tokens.length)] });
-    }
-
-    chars.forEach(c => {
-      ctx.globalAlpha = 1;
-      ctx.font = `${c.sz}px "Courier New",monospace`;
-      ctx.fillStyle = c.color;
-      ctx.fillText(c.txt, c.x, c.y);
-    });
-  })();
-</script>
 </body>
 </html>
