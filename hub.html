@@ -233,22 +233,22 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 }
 .ritualVisual::before,.ritualVisual::after{
   content:'';position:absolute;inset:0;border-radius:4px;
-  pointer-events:none;transform-origin:center;will-change:transform;
+  pointer-events:none;transform-origin:center center;
   transition:transform .46s cubic-bezier(.2,.78,.2,1),border-color .46s ease,box-shadow .46s ease;
 }
 .ritualVisual::before{
   z-index:0;
-  background:linear-gradient(135deg,rgba(7,18,28,.94),rgba(4,12,20,.98));
-  border:1px solid rgba(212,175,55,.12);
-  box-shadow:0 18px 34px rgba(0,0,0,.38);
-  transform:translate3d(-14px,16px,-28px) scale(.998);
+  background:linear-gradient(160deg,rgba(6,16,26,.95),rgba(3,10,18,.98));
+  border:1.5px solid rgba(212,175,55,.11);
+  box-shadow:0 16px 36px rgba(0,0,0,.44);
+  transform:translate(11px,14px) rotate(3.5deg) scale(.964);
 }
 .ritualVisual::after{
   z-index:1;
-  background:linear-gradient(135deg,rgba(9,22,34,.96),rgba(5,14,23,.98));
-  border:1px solid rgba(212,175,55,.20);
-  box-shadow:0 14px 28px rgba(0,0,0,.32);
-  transform:translate3d(-7px,8px,-14px) scale(.999);
+  background:linear-gradient(160deg,rgba(8,20,32,.96),rgba(4,13,22,.98));
+  border:1.5px solid rgba(212,175,55,.19);
+  box-shadow:0 12px 26px rgba(0,0,0,.36);
+  transform:translate(5px,7px) rotate(1.7deg) scale(.982);
 }
 .rFront{
   flex:0 0 auto;display:flex;flex-direction:column;border-radius:4px;
@@ -263,16 +263,18 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
   transition:transform .46s cubic-bezier(.2,.78,.2,1),box-shadow .46s ease;
 }
 .ritualWrap:hover .rFront{
+  transform:translate3d(0,-9px,28px);
   box-shadow:0 36px 80px rgba(0,0,0,.82),0 0 64px rgba(212,175,55,.16),inset 0 1px 0 rgba(212,175,55,.28);
 }
 .ritualWrap:hover .ritualVisual::after{
-  transform:translate3d(-10px,12px,-18px) scale(.997);
-  border-color:rgba(212,175,55,.25);
+  transform:translate(8px,11px) rotate(2.8deg) scale(.975);
+  border-color:rgba(212,175,55,.26);
+  box-shadow:0 18px 38px rgba(0,0,0,.44);
 }
 .ritualWrap:hover .ritualVisual::before{
-  transform:translate3d(-20px,23px,-40px) scale(.994);
-  border-color:rgba(212,175,55,.16);
-  box-shadow:0 24px 42px rgba(0,0,0,.46);
+  transform:translate(17px,22px) rotate(5.5deg) scale(.952);
+  border-color:rgba(212,175,55,.15);
+  box-shadow:0 22px 48px rgba(0,0,0,.52);
 }
 .rInner{padding:14px 26px 10px;flex:0 0 auto;min-height:0;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;justify-content:flex-start;pointer-events:none;}
 .rShine{position:absolute;inset:0;pointer-events:none;z-index:5;border-radius:4px;background:radial-gradient(circle at var(--sx,50%) var(--sy,30%),rgba(255,232,122,.11) 0%,transparent 55%);opacity:0;transition:opacity .4s;}
@@ -1785,33 +1787,6 @@ onAuthStateChanged(auth,async(user)=>{
   user.getIdToken().then(t=>fetch(API+"/hub/touch",{method:"POST",headers:{Authorization:"Bearer "+t}})).catch(()=>{});
 });
 
-// Ritual card — tilt 3D dinâmico por mousemove
-(function(){
-  var wrap=document.querySelector('.ritualWrap');
-  var card=document.querySelector('.rFront');
-  var shine=document.querySelector('.rShine');
-  if(!wrap||!card) return;
-  var raf=null;
-  wrap.addEventListener('mousemove',function(e){
-    if(raf) cancelAnimationFrame(raf);
-    raf=requestAnimationFrame(function(){
-      var r=wrap.getBoundingClientRect();
-      var dx=(e.clientX-r.left-r.width/2)/(r.width/2);
-      var dy=(e.clientY-r.top-r.height/2)/(r.height/2);
-      card.style.transition='box-shadow .46s ease';
-      card.style.transform='translate3d('+(dx*12)+'px,'+(dy*-7)+'px,36px) rotateX('+(dy*-8)+'deg) rotateY('+(dx*5)+'deg)';
-      if(shine){
-        shine.style.setProperty('--sx',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');
-        shine.style.setProperty('--sy',((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
-      }
-    });
-  },{passive:true});
-  wrap.addEventListener('mouseleave',function(){
-    if(raf) cancelAnimationFrame(raf);
-    card.style.transition='';
-    card.style.transform='';
-  });
-})();
 </script>
 
 <!-- ── RITUAL OVERLAY ── -->
