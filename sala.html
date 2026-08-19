@@ -4525,6 +4525,17 @@
       }
     }
 
+    /* Chat e histórico pertencem exclusivamente ao modo Arena. */
+    html:not(.arenaMode) .chatCard,
+    html:not(.arenaMode) .historyCard{
+      display:none;
+    }
+
+    html:not(.arenaMode) .sidebar,
+    html:not(.arenaMode) .rightColumn{
+      grid-template-rows:minmax(0,1fr);
+    }
+
     /* =================================================================
        ARENA MODE — experiência de jogo imersiva, viewport-locked
        Ativado quando o ritual começa (data.status === "started")
