@@ -10,3 +10,14 @@ Os ativos abaixo são distribuídos pela Poly Haven sob licença CC0:
 - `dirty_carpet`: Dirty Carpet — https://polyhaven.com/a/dirty_carpet
 
 Foram usadas as variantes glTF e PBR de 1K para equilibrar fidelidade visual e tempo de carregamento no navegador.
+
+## Cena 2.5D ultrarrealista
+
+Os arquivos em `scene/` foram gerados com a ferramenta integrada de geração de imagens do Codex e otimizados localmente:
+
+- `arquivo-302-ultrareal.avif`: render principal AVIF.
+- `arquivo-302-ultrareal.webp`: fallback WebP.
+- `arquivo-302-depth.webp`: mapa de profundidade para paralaxe WebGL.
+- `arquivo-302-lqip.webp`: placeholder de carregamento imediato.
+
+A composição é original e foi criada como cenário noturno de investigação, com materiais realistas, objetos individualizados, iluminação cinematográfica e camadas de profundidade. Não contém interface, logotipos ou elementos copiados de jogos existentes.
