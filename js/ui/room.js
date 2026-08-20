@@ -633,7 +633,7 @@ export async function ensureUserProfile() {
     localStorage.setItem("osl_cache_uid", S.userId);
     localStorage.setItem("osl_avatar", "🔮");
   } else {
-    await updateDoc(S.userRef, { lastSeen: serverTimestamp(), lastSeenAt: serverTimestamp() });
+    updateDoc(S.userRef, { lastSeen: serverTimestamp(), lastSeenAt: serverTimestamp() }).catch(() => {});
     const data = snap.data();
     const canonicalName = String(data.displayName || data.username || S.playerName || "Jogador").trim().slice(0, 40);
     if (canonicalName) {

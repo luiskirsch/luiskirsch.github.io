@@ -276,12 +276,15 @@ window.dismissAIDetection = dismissAIDetection;
   bindRitual(onSnapshot, orderBy, query);
   bindMyMission(onSnapshot);
 
+  // Partidas ao vivo: endpoint público, roda independente do resto da init
+  startMultiPoller();
+
   // Inicialização autenticada e ordenada
   try {
-    // Perfil primeiro: o nome/avatar canônicos precisam estar resolvidos antes
-    // de criar a membership da sala. O bootstrap do backend consolida a mesma
-    // conta usada pelo HUB e deixa o cache explicitamente vinculado ao UID.
-    await ensureUserProfile();
+    // Perfil: erros não-críticos (ex: permissão em lastSeen) não devem parar a sala
+    await ensureUserProfile().catch(err => {
+      console.warn("[init] ensureUserProfile falhou:", err?.message || err);
+    });
     const account = await bootstrapAccount().catch(error => {
       console.warn("AccountSnapshot indisponível; usando listener Firestore:", error);
       return null;
@@ -296,7 +299,6 @@ window.dismissAIDetection = dismissAIDetection;
     }
     await ensureRoom();
     syncCoinsFromFirestore();
-    startMultiPoller();
     if (!S._isSpectator) await upsertSelf();
     if (!S._isSpectator) startHeartbeat();
 
