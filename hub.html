@@ -579,6 +579,50 @@ body.ritual-open #ritualDim{opacity:1;}
   .fragmentPanel__actions{grid-template-columns:1fr;}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}#cvGL{display:none!important;}}
+
+/* ══ SOCIAL PANEL ══ */
+.socialVeil{position:fixed;inset:0;z-index:500;background:rgba(4,8,14,.85);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .28s;}
+.socialVeil.on{opacity:1;pointer-events:auto;}
+.socialSheet{background:rgba(5,10,20,.98);border:1px solid rgba(212,175,55,.18);border-radius:4px;width:min(520px,calc(100vw - 24px));max-height:82vh;display:flex;flex-direction:column;overflow:hidden;transform:translateY(22px);transition:transform .28s;box-shadow:0 32px 80px rgba(0,0,0,.70);}
+.socialVeil.on .socialSheet{transform:translateY(0);}
+.socialHead{display:flex;align-items:center;padding:18px 20px 14px;border-bottom:1px solid rgba(212,175,55,.10);flex-shrink:0;}
+.socialHeadTitle{font-family:var(--serif);font-size:13px;font-weight:700;letter-spacing:.20em;color:var(--gold);text-transform:uppercase;flex:1;}
+.socialClose{width:28px;height:28px;border:none;background:none;cursor:pointer;color:var(--text3);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;transition:color .16s;}
+.socialClose:hover{color:var(--text);}
+.socialTabs{display:flex;border-bottom:1px solid rgba(212,175,55,.10);flex-shrink:0;}
+.socialTab{flex:1;font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);background:none;border:none;cursor:pointer;padding:11px 0;position:relative;transition:color .18s;}
+.socialTab::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--goldG);transform:scaleX(0);transform-origin:left;transition:transform .22s;}
+.socialTab.active{color:var(--text);}
+.socialTab.active::after,.socialTab:hover::after{transform:scaleX(1);}
+.socialTab:hover{color:var(--text2);}
+.socialBody{flex:1;overflow-y:auto;padding:14px 14px 20px;display:flex;flex-direction:column;gap:10px;}
+.socialBody::-webkit-scrollbar{width:3px;}.socialBody::-webkit-scrollbar-track{background:transparent;}.socialBody::-webkit-scrollbar-thumb{background:rgba(212,175,55,.20);border-radius:2px;}
+.socialPane{display:none;flex-direction:column;gap:10px;}.socialPane.active{display:flex;}
+.socialSearch{position:relative;margin-bottom:2px;}
+.socialSearchInput{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(212,175,55,.16);border-radius:3px;padding:9px 12px 9px 36px;color:var(--text);font-size:11px;font-family:var(--sans);outline:none;transition:border-color .18s;}
+.socialSearchInput::placeholder{color:var(--text3);}.socialSearchInput:focus{border-color:rgba(212,175,55,.36);}
+.socialSearchIcon{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--text3);fill:none;stroke-width:1.5;pointer-events:none;}
+.socialSect{font-size:8px;font-weight:700;letter-spacing:.22em;color:var(--text3);text-transform:uppercase;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.05);}
+.socialRow{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:3px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);transition:background .16s,border-color .16s;}
+.socialRow:hover{background:rgba(212,175,55,.05);border-color:rgba(212,175,55,.14);}
+.socialRowRank{font-family:var(--serif);font-size:10px;color:var(--text3);width:16px;text-align:center;flex-shrink:0;}.socialRowRank.top{color:var(--gold);}
+.socialAv{width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(212,175,55,.22);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;overflow:hidden;}
+.socialAv img{width:100%;height:100%;object-fit:cover;}
+.socialRowInfo{flex:1;min-width:0;}
+.socialRowName{font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.socialRowSelf .socialRowName{color:var(--gold);}
+.socialRowSub{font-size:9px;color:var(--text3);margin-top:2px;}
+.socialXPBar{height:2px;background:rgba(255,255,255,.08);border-radius:1px;margin-top:5px;overflow:hidden;}
+.socialXPFill{height:100%;background:var(--goldG);border-radius:1px;transition:width .7s cubic-bezier(.4,0,.2,1);}
+.socialRowAction{flex-shrink:0;}
+.socialAddBtn{font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:5px 10px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.26);border-radius:2px;color:var(--gold2);cursor:pointer;white-space:nowrap;transition:background .16s,border-color .16s;}
+.socialAddBtn:hover:not(:disabled){background:rgba(212,175,55,.16);border-color:rgba(212,175,55,.48);}
+.socialAddBtn:disabled,.socialAddBtn[data-sent]{background:rgba(212,175,55,.04);border-color:rgba(212,175,55,.12);color:var(--text3);cursor:default;}
+.socialSkel{display:flex;flex-direction:column;gap:8px;}.socialSkelRow{height:50px;border-radius:3px;background:rgba(255,255,255,.04);animation:skelPulse 1.4s ease-in-out infinite;}
+@keyframes skelPulse{0%,100%{opacity:.4}50%{opacity:.9}}
+.socialEmpty{text-align:center;color:var(--text3);font-size:10.5px;line-height:1.7;padding:28px 8px;}
+.socialEmptyIcon{font-size:26px;display:block;margin-bottom:10px;}
+.sessCount{font-size:8px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(212,175,55,.10);border:1px solid rgba(212,175,55,.20);color:var(--gold2);white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -846,6 +890,35 @@ body.ritual-open #ritualDim{opacity:1;}
   </div>
 </div>
 
+<!-- Social Panel -->
+<div class="socialVeil" id="socialPanel" role="dialog" aria-modal="true" aria-label="Social">
+  <div class="socialSheet">
+    <div class="socialHead">
+      <span class="socialHeadTitle">◆ Social</span>
+      <button class="socialClose" id="socialClose" aria-label="Fechar">×</button>
+    </div>
+    <div class="socialTabs">
+      <button class="socialTab active" data-tab="amigos">Amigos</button>
+      <button class="socialTab" data-tab="conexoes">Conexões</button>
+    </div>
+    <div class="socialBody">
+      <div class="socialPane active" id="paneAmigos">
+        <div class="socialSearch">
+          <svg class="socialSearchIcon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="socialSearchInput" id="socialSearchInput" type="text" placeholder="Buscar por @username…" autocomplete="off" spellcheck="false">
+        </div>
+        <div id="socialSearchResults"></div>
+        <div class="socialSect">Ranking de Amigos</div>
+        <div id="leaderboardList"><div class="socialSkel"><div class="socialSkelRow"></div><div class="socialSkelRow"></div><div class="socialSkelRow"></div></div></div>
+      </div>
+      <div class="socialPane" id="paneConexoes">
+        <div class="socialSect">Jogou junto com você</div>
+        <div id="conexoesList"><div class="socialSkel"><div class="socialSkelRow"></div><div class="socialSkelRow"></div><div class="socialSkelRow"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Onboarding -->
 <div class="obV" id="obVeil" role="dialog" aria-modal="true">
   <div class="obStep vis" id="obStep0">
@@ -1101,7 +1174,7 @@ function openFragmentPanel(){
   if(opened)setTimeout(function(){var close=document.getElementById('fragmentClose');if(close)close.focus();},0);
 }
 document.addEventListener('click',function(e){if(_open&&!_open.contains(e.target))closeDrops();});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeDrops(true);closeFM();}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeDrops(true);closeFM();closeSocialPanel();}});
 
 /* Feature modal */
 var fmData={
@@ -1131,7 +1204,7 @@ document.getElementById('fragmentClose').addEventListener('click',function(){clo
 document.getElementById('fragmentLater').addEventListener('click',function(){closeDrops();var trigger=document.getElementById('btnFragment');if(trigger)trigger.focus();});
 document.getElementById('fragmentCreate').addEventListener('click',function(){location.href='./entrada.html?modo=criar&fragmento=1';});
 document.getElementById('btnPerfil').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropPerfil'),this);});
-document.getElementById('navSocial').addEventListener('click',function(){closeDrops();openFM('social');});
+document.getElementById('navSocial').addEventListener('click',function(){closeDrops();openSocialPanel();});
 document.getElementById('navMundo').addEventListener('click',function(){closeDrops();openFM('mundo');});
 document.getElementById('dpLogout').addEventListener('click',function(){closeDrops();window._hubLogout&&window._hubLogout();});
 document.getElementById('btnInvite').addEventListener('click',async function(){
@@ -1703,6 +1776,146 @@ var b2=document.getElementById('ob2btn');if(b2)b2.addEventListener('click',funct
   var v=document.getElementById('obVeil');if(v){v.classList.remove('on');setTimeout(function(){v.style.display='none';},520);}
 });
 window.hubShowOnboarding=function(){var v=document.getElementById('obVeil');if(!v)return;v.style.display='';setTimeout(function(){v.classList.add('on');},10);obSh(0);};
+
+/* ══ SOCIAL PANEL ══ */
+var _spTab='amigos',_lbLoaded=false,_cxLoaded=false,_spSearchT=null;
+
+async function _spToken(){
+  try{if(window._hubFirebaseUser)return await window._hubFirebaseUser.getIdToken();}catch(_){}
+  return window._hubToken||null;
+}
+async function _spGet(path){
+  var t=await _spToken();if(!t)return null;
+  try{var r=await fetch((window._hubAPI||'https://osl-video-server-production.up.railway.app')+path,{headers:{Authorization:'Bearer '+t}});return r.ok?(await r.json().catch(()=>null)):null;}catch(_){return null;}
+}
+async function _spPost(path,body){
+  var t=await _spToken();if(!t)return null;
+  try{var r=await fetch((window._hubAPI||'https://osl-video-server-production.up.railway.app')+path,{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(body)});return await r.json().catch(()=>null);}catch(_){return null;}
+}
+
+function _spAvEl(av){
+  var el=document.createElement('div');el.className='socialAv';
+  if(av&&av.kind==='image'&&av.url){var img=document.createElement('img');img.src=av.url;img.alt='';el.appendChild(img);}
+  else{el.style.background=(av&&av.color)||'#342718';el.textContent=(av&&av.emoji)||'🔮';}
+  return el;
+}
+function _spXPPct(xp,lvl){var f=(lvl-1)*(lvl-1)*50,c=lvl*lvl*50;return c===f?100:Math.min(100,Math.max(0,((xp-f)/(c-f))*100));}
+
+function _spBuildRow(entry,rank){
+  var row=document.createElement('div');
+  row.className='socialRow'+(entry.isSelf?' socialRowSelf':'');
+  if(rank!=null){var rk=document.createElement('span');rk.className='socialRowRank'+(rank<=3?' top':'');rk.textContent=rank;row.appendChild(rk);}
+  var av=entry.avatar||{kind:entry.avatarUrl?'image':'emoji',url:entry.avatarUrl||entry.avatarPhotoUrl||null,emoji:entry.avatarEmoji||'🔮',color:entry.avatarColor||'#342718'};
+  row.appendChild(_spAvEl(av));
+  var info=document.createElement('div');info.className='socialRowInfo';
+  var nm=document.createElement('div');nm.className='socialRowName';nm.textContent=entry.displayName||'Jogador';info.appendChild(nm);
+  var sub=document.createElement('div');sub.className='socialRowSub';
+  if(rank!=null){
+    var xp=entry.xp||0,lvl=entry.level||1;
+    sub.textContent='Nível '+lvl+' · '+xp.toLocaleString('pt-BR')+' XP';info.appendChild(sub);
+    var bar=document.createElement('div');bar.className='socialXPBar';
+    var fill=document.createElement('div');fill.className='socialXPFill';fill.style.width='0%';
+    bar.appendChild(fill);info.appendChild(bar);
+    setTimeout(function(){fill.style.width=_spXPPct(xp,lvl)+'%';},100);
+  }else{
+    sub.textContent='@'+(entry.username||'');info.appendChild(sub);
+  }
+  row.appendChild(info);
+  if(!entry.isSelf){
+    var btn=document.createElement('button');btn.className='socialAddBtn';btn.textContent='+ Adicionar';btn.dataset.uid=entry.uid;
+    btn.addEventListener('click',async function(){
+      btn.disabled=true;btn.textContent='…';
+      var res=await _spPost('/social/friend-request',{targetUid:entry.uid});
+      if(res&&res.ok){
+        var s=res.status;
+        btn.textContent=s==='already_friends'||s==='auto_accepted'?'✓ Amigos':s==='already_pending'?'⏳ Pendente':'✓ Enviado';
+        btn.setAttribute('data-sent','1');
+        if(s==='pending')window._toast&&window._toast('Pedido de amizade enviado!');
+        else if(s==='auto_accepted')window._toast&&window._toast('Amizade confirmada!');
+      }else{btn.disabled=false;btn.textContent='+ Adicionar';window._toast&&window._toast('Não foi possível enviar o pedido.');}
+    });
+    var act=document.createElement('div');act.className='socialRowAction';act.appendChild(btn);row.appendChild(act);
+  }
+  return row;
+}
+
+async function _spLoadLeaderboard(){
+  if(_lbLoaded)return;
+  var el=document.getElementById('leaderboardList');if(!el)return;
+  var data=await _spGet('/social/leaderboard');
+  if(!data||!Array.isArray(data.leaderboard)||!data.leaderboard.length){
+    el.innerHTML='<div class="socialEmpty"><span class="socialEmptyIcon">👥</span>Adicione amigos para ver o ranking aqui.</div>';return;
+  }
+  el.innerHTML='';
+  data.leaderboard.forEach(function(e,i){el.appendChild(_spBuildRow(e,i+1));});
+  _lbLoaded=true;
+}
+
+async function _spLoadConexoes(){
+  if(_cxLoaded)return;
+  var el=document.getElementById('conexoesList');if(!el)return;
+  var data=await _spGet('/social/connections');
+  if(!data||!Array.isArray(data.connections)||!data.connections.length){
+    el.innerHTML='<div class="socialEmpty"><span class="socialEmptyIcon">🌐</span>Jogue sessões com pessoas para encontrar conexões.</div>';return;
+  }
+  el.innerHTML='';
+  data.connections.forEach(function(c){
+    var row=document.createElement('div');row.className='socialRow';
+    var av=c.avatar||{kind:c.avatarUrl?'image':'emoji',url:c.avatarUrl||null,emoji:c.avatarEmoji||'🔮',color:c.avatarColor||'#342718'};
+    row.appendChild(_spAvEl(av));
+    var info=document.createElement('div');info.className='socialRowInfo';
+    var nm=document.createElement('div');nm.className='socialRowName';nm.textContent=c.displayName||'Jogador';info.appendChild(nm);
+    var sub=document.createElement('div');sub.className='socialRowSub';sub.textContent='@'+(c.username||'');info.appendChild(sub);
+    row.appendChild(info);
+    var badge=document.createElement('span');badge.className='sessCount';
+    badge.textContent=(c.sharedSessions||c.sessionCount||1)+' sessões';row.appendChild(badge);
+    el.appendChild(row);
+  });
+  _cxLoaded=true;
+}
+
+async function _spSearch(q){
+  var el=document.getElementById('socialSearchResults');if(!el)return;
+  if(!q){el.innerHTML='';return;}
+  el.innerHTML='<div class="socialSkel"><div class="socialSkelRow"></div></div>';
+  var data=await _spGet('/social/search?q='+encodeURIComponent(q));
+  if(!data||!Array.isArray(data.results)){el.innerHTML='';return;}
+  if(!data.results.length){el.innerHTML='<div class="socialEmpty" style="padding:12px 0 4px">Nenhum jogador encontrado para "'+q+'"</div>';return;}
+  el.innerHTML='';
+  var sect=document.createElement('div');sect.className='socialSect';sect.style.marginBottom='6px';sect.textContent='Resultados';el.appendChild(sect);
+  data.results.forEach(function(r){el.appendChild(_spBuildRow(r,null));});
+}
+
+function _spSwitchTab(tab){
+  _spTab=tab;
+  document.querySelectorAll('.socialTab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
+  document.getElementById('paneAmigos').classList.toggle('active',tab==='amigos');
+  document.getElementById('paneConexoes').classList.toggle('active',tab==='conexoes');
+  if(tab==='amigos')_spLoadLeaderboard();else _spLoadConexoes();
+}
+
+function openSocialPanel(){
+  var p=document.getElementById('socialPanel');if(!p)return;
+  p.classList.add('on');
+  if(_spTab==='amigos')_spLoadLeaderboard();else _spLoadConexoes();
+  setTimeout(function(){var i=document.getElementById('socialSearchInput');if(i)i.focus();},220);
+}
+function closeSocialPanel(){var p=document.getElementById('socialPanel');if(p)p.classList.remove('on');}
+
+(function(){
+  var p=document.getElementById('socialPanel');if(!p)return;
+  document.getElementById('socialClose').addEventListener('click',closeSocialPanel);
+  p.addEventListener('click',function(e){if(e.target===this)closeSocialPanel();});
+  document.querySelectorAll('.socialTab').forEach(function(b){b.addEventListener('click',function(){_spSwitchTab(this.dataset.tab);});});
+  var inp=document.getElementById('socialSearchInput');
+  if(inp)inp.addEventListener('input',function(){
+    clearTimeout(_spSearchT);
+    var q=this.value.trim().replace(/^@/,'');
+    if(!q){document.getElementById('socialSearchResults').innerHTML='';return;}
+    _spSearchT=setTimeout(function(){_spSearch(q);},380);
+  });
+})();
+
 })();
 </script>
 
