@@ -7076,10 +7076,8 @@
     z-index:10!important;pointer-events:none!important;
     height:auto!important;min-height:unset!important;
   }
-  /* Elementos de ritual: não aparecem no lobby (só durante o ritual) */
-  body:not(.ritual-started) #deckInfo,
-  body:not(.ritual-started) #fragmentBanner,
-  body:not(.ritual-started) #hubPanel{
+  /* deckInfo (seletor de deck) não aparece no lobby */
+  body:not(.ritual-started) #deckInfo{
     display:none!important;
   }
   body:not(.ritual-started).lobby-mode #deckInfo{
