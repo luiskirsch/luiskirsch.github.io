@@ -61,8 +61,8 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .navLink,.navBtn{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--text3);text-decoration:none;background:none;border:none;cursor:pointer;padding:0 18px;height:var(--nav-h);display:flex;align-items:center;position:relative;transition:color .18s;}
 .navLink::after,.navBtn::after{content:'';position:absolute;bottom:0;left:18px;right:18px;height:2px;background:var(--goldG);transform:scaleX(0);transform-origin:left;transition:transform .24s;}
 .navLink:hover,.navBtn:hover{color:var(--text2);}
-.navLink.on{color:var(--text);}
-.navLink.on::after,.navLink:hover::after,.navBtn:hover::after{transform:scaleX(1);}
+.navLink.on,.navBtn.on{color:var(--text);}
+.navLink.on::after,.navBtn.on::after,.navLink:hover::after,.navBtn:hover::after{transform:scaleX(1);}
 .navLink:active,.navBtn:active{color:var(--gold2)!important;}
 
 .navRight{display:flex;align-items:center;justify-content:flex-end;gap:8px;}
@@ -578,19 +578,68 @@ body.ritual-open #ritualDim{opacity:1;}
   .fragmentPanel__card{width:62px;height:92px;}
   .fragmentPanel__actions{grid-template-columns:1fr;}
 }
+/* ══ MUNDO PAGE ══ */
+#mundoPage{background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(30,60,100,.18) 0%,transparent 65%),#04080d;}
+.mundoBody{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:52px 24px 60px;gap:0;}
+.mundoBody::-webkit-scrollbar{width:3px;}.mundoBody::-webkit-scrollbar-thumb{background:rgba(212,175,55,.18);border-radius:2px;}
+.mundoGlyph{font-size:56px;margin-bottom:28px;opacity:.7;filter:drop-shadow(0 0 28px rgba(80,140,220,.25));}
+.mundoTitle{font-family:var(--serif);font-size:clamp(28px,5vw,46px);font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:10px;text-shadow:0 0 48px rgba(212,175,55,.20);}
+.mundoSub{font-size:12px;color:var(--text2);text-align:center;line-height:1.75;max-width:380px;margin-bottom:52px;letter-spacing:.04em;}
+.mundoGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;width:100%;max-width:780px;}
+.mundoCard{background:rgba(255,255,255,.03);border:1px solid rgba(212,175,55,.10);border-radius:4px;padding:22px 20px;display:flex;flex-direction:column;gap:8px;transition:background .18s,border-color .18s;}
+.mundoCard:hover{background:rgba(212,175,55,.04);border-color:rgba(212,175,55,.22);}
+.mundoCardIcon{font-size:22px;margin-bottom:4px;opacity:.8;}
+.mundoCardTitle{font-family:var(--serif);font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--gold2);text-transform:uppercase;}
+.mundoCardText{font-size:10.5px;color:var(--text3);line-height:1.65;}
+.mundoComingSoon{margin-top:48px;font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);opacity:.55;}
+
+/* ══ LOJA PAGE ══ */
+#lojaPage{background:#04080d;}
+.lojaBody{flex:1;overflow-y:auto;padding:40px 28px 60px;display:flex;flex-direction:column;align-items:center;}
+.lojaBody::-webkit-scrollbar{width:3px;}.lojaBody::-webkit-scrollbar-thumb{background:rgba(212,175,55,.18);border-radius:2px;}
+.lojaHeader{text-align:center;margin-bottom:40px;}
+.lojaTitle{font-family:var(--serif);font-size:clamp(22px,4vw,36px);font-weight:900;letter-spacing:.20em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;text-shadow:0 0 36px rgba(212,175,55,.18);}
+.lojaSub{font-size:11px;color:var(--text3);}
+.lojaSectTitle{font-size:8.5px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);align-self:flex-start;padding-bottom:10px;border-bottom:1px solid rgba(212,175,55,.10);width:100%;max-width:860px;margin-bottom:4px;}
+.lojaGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;width:100%;max-width:860px;margin-bottom:36px;}
+.lojaCard{background:rgba(8,14,22,.90);border:1px solid rgba(212,175,55,.14);border-radius:4px;padding:20px 18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:background .18s,border-color .18s,transform .18s;}
+.lojaCard:hover{background:rgba(212,175,55,.05);border-color:rgba(212,175,55,.30);transform:translateY(-2px);}
+.lojaCardIcon{font-size:28px;opacity:.85;}
+.lojaCardName{font-family:var(--serif);font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--text);text-transform:uppercase;}
+.lojaCardDesc{font-size:10px;color:var(--text3);line-height:1.60;flex:1;}
+.lojaCardFoot{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
+.lojaCardPrice{font-size:11px;font-weight:700;color:var(--gold);font-family:var(--serif);}
+.lojaCardPriceCoins{font-size:10px;font-weight:700;color:var(--text2);}
+.lojaCardBtn{font-size:8px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:5px 12px;background:rgba(212,175,55,.10);border:1px solid rgba(212,175,55,.28);border-radius:2px;color:var(--gold2);cursor:pointer;white-space:nowrap;transition:background .16s,border-color .16s;}
+.lojaCard:hover .lojaCardBtn{background:rgba(212,175,55,.18);border-color:rgba(212,175,55,.50);}
+
+@media(max-width:580px){.lojaGrid{grid-template-columns:1fr 1fr;}.mundoGrid{grid-template-columns:1fr;}}
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}#cvGL{display:none!important;}}
 
-/* ══ SOCIAL PAGE (TELA CHEIA IMERSIVA) ══ */
-#socialPage{
-  position:fixed;inset:0;z-index:600;
-  background:#04080d;
+/* ══ SISTEMA DE SEÇÕES ══ */
+/* Esconde hub quando outra seção está ativa */
+body.sec-social .dash, body.sec-social .seasonBar,
+body.sec-mundo .dash,  body.sec-mundo .seasonBar,
+body.sec-loja .dash,   body.sec-loja .seasonBar  { display:none!important; }
+
+/* Base de todas as páginas de seção */
+.secPage{
+  position:fixed;
+  top:var(--nav-h);left:0;right:0;bottom:0;
+  z-index:70;
   display:flex;flex-direction:column;
+  background:#04080d;overflow:hidden;
   opacity:0;pointer-events:none;
-  transform:translateY(32px);
-  transition:opacity .32s ease,transform .32s cubic-bezier(.22,1,.36,1);
-  overflow:hidden;
+  transform:translateY(14px);
+  transition:opacity .28s ease,transform .28s cubic-bezier(.22,1,.36,1);
 }
-#socialPage.on{opacity:1;pointer-events:auto;transform:translateY(0);}
+body.sec-social #socialPage,
+body.sec-mundo  #mundoPage,
+body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(0); }
+
+/* ══ SOCIAL PAGE ══ */
+#socialPage{
 .spScanlines{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);z-index:0;}
 .spVignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 90% 80% at 50% 50%,transparent 40%,rgba(0,0,0,.70) 100%);z-index:0;}
 .spGlow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:500px;background:radial-gradient(ellipse,rgba(212,175,55,.06) 0%,transparent 70%);pointer-events:none;z-index:0;}
@@ -772,12 +821,12 @@ body.ritual-open #ritualDim{opacity:1;}
 
 <!-- ══ NAVBAR ══ -->
 <nav class="nav">
-  <a class="navLogo" href="./hub.html">SEXTOLUGAR</a>
+  <a class="navLogo" href="./hub.html" onclick="if(document.body.className.match(/sec-/)){event.preventDefault();switchSection('hub');}">SEXTOLUGAR</a>
   <nav class="navLinks">
-    <a class="navLink on" href="./hub.html">Hub</a>
-    <button class="navBtn" id="navSocial">Social</button>
-    <button class="navBtn" id="navMundo">Mundo</button>
-    <a class="navLink" href="./vendas.html">Loja</a>
+    <button class="navBtn on" id="navHub" data-sec="hub">Hub</button>
+    <button class="navBtn" id="navSocial" data-sec="social">Social</button>
+    <button class="navBtn" id="navMundo" data-sec="mundo">Mundo</button>
+    <button class="navBtn" id="navLoja" data-sec="loja">Loja</button>
   </nav>
   <div class="navRight">
     <button class="navBell" id="btnNotif">
@@ -1028,8 +1077,8 @@ body.ritual-open #ritualDim{opacity:1;}
   </div>
 </div>
 
-<!-- Social — Tela Cheia Imersiva -->
-<div id="socialPage" role="dialog" aria-modal="true" aria-label="Social">
+<!-- Social — Seção -->
+<div id="socialPage" class="secPage" role="region" aria-label="Social">
 
   <!-- Camadas decorativas -->
   <div class="spScanlines" aria-hidden="true"></div>
@@ -1095,6 +1144,120 @@ body.ritual-open #ritualDim{opacity:1;}
     </div>
 
   </main>
+</div>
+
+<!-- Mundo — Seção -->
+<div id="mundoPage" class="secPage" role="region" aria-label="Mundo">
+  <div class="spScanlines" aria-hidden="true"></div>
+  <div class="spVignette" aria-hidden="true"></div>
+  <div class="mundoBody">
+    <div class="mundoGlyph">🌐</div>
+    <div class="mundoTitle">O Mundo</div>
+    <p class="mundoSub">O Sextolugar existe além das sessões. Um mapa vivo, construído por cada ritual que acontece.</p>
+    <div class="mundoGrid">
+      <div class="mundoCard">
+        <div class="mundoCardIcon">🗺️</div>
+        <div class="mundoCardTitle">Mapa das Histórias</div>
+        <div class="mundoCardText">Cada sessão deixa uma marca no mapa psicológico do Sextolugar. Explore o território que vocês estão criando.</div>
+      </div>
+      <div class="mundoCard">
+        <div class="mundoCardIcon">🌀</div>
+        <div class="mundoCardTitle">Eventos Coletivos</div>
+        <div class="mundoCardText">Temporadas trazem eventos que só existem quando o mundo está ativo. Missões que exigem o coletivo.</div>
+      </div>
+      <div class="mundoCard">
+        <div class="mundoCardIcon">⚔️</div>
+        <div class="mundoCardTitle">Missões Compartilhadas</div>
+        <div class="mundoCardText">Objetivos que se completam quando vários jogadores contribuem. A soma das sessões importa.</div>
+      </div>
+      <div class="mundoCard">
+        <div class="mundoCardIcon">🔮</div>
+        <div class="mundoCardTitle">Fragmentos do Prelúdio</div>
+        <div class="mundoCardText">Relíquias narrativas que se acumulam a cada temporada. Guardiões do que já foi descoberto.</div>
+      </div>
+    </div>
+    <div class="mundoComingSoon">◆ &nbsp; EM CONSTRUÇÃO &nbsp; ◆</div>
+  </div>
+</div>
+
+<!-- Loja — Seção -->
+<div id="lojaPage" class="secPage" role="region" aria-label="Loja">
+  <div class="spScanlines" aria-hidden="true"></div>
+  <div class="spVignette" aria-hidden="true"></div>
+  <div class="lojaBody">
+    <div class="lojaHeader">
+      <div class="lojaTitle">Loja</div>
+      <div class="lojaSub">Expanda sua experiência com pacotes e cosméticos</div>
+    </div>
+
+    <div class="lojaSectTitle">◆ &nbsp; PACOTES DE CARTAS</div>
+    <div class="lojaGrid" id="lojaGridPacotes">
+      <div class="lojaCard" onclick="location.href='./vendas.html#pacote-conexao'">
+        <div class="lojaCardIcon">🫂</div>
+        <div class="lojaCardName">Conexão</div>
+        <div class="lojaCardDesc">12 cartas para revelar o que une as pessoas — memórias, gratidão, cumplicidade.</div>
+        <div class="lojaCardFoot"><span class="lojaCardPrice">R$&nbsp;12,90</span><button class="lojaCardBtn">COMPRAR</button></div>
+      </div>
+      <div class="lojaCard" onclick="location.href='./vendas.html#pacote-verdades'">
+        <div class="lojaCardIcon">🪞</div>
+        <div class="lojaCardName">Verdades</div>
+        <div class="lojaCardDesc">15 cartas que confrontam ilusões, contradições e opiniões não ditas.</div>
+        <div class="lojaCardFoot"><span class="lojaCardPrice">R$&nbsp;12,90</span><button class="lojaCardBtn">COMPRAR</button></div>
+      </div>
+      <div class="lojaCard" onclick="location.href='./vendas.html#pacote-conflito'">
+        <div class="lojaCardIcon">⚔️</div>
+        <div class="lojaCardName">Conflito</div>
+        <div class="lojaCardDesc">15 cartas de confronto, debate e desconfiança declarada.</div>
+        <div class="lojaCardFoot"><span class="lojaCardPrice">R$&nbsp;12,90</span><button class="lojaCardBtn">COMPRAR</button></div>
+      </div>
+      <div class="lojaCard" onclick="location.href='./vendas.html#pacote-segredos'">
+        <div class="lojaCardIcon">🔐</div>
+        <div class="lojaCardName">Segredos</div>
+        <div class="lojaCardDesc">18 cartas que abrem o que ficou guardado — medos, vergonhas, revelações.</div>
+        <div class="lojaCardFoot"><span class="lojaCardPrice">R$&nbsp;12,90</span><button class="lojaCardBtn">COMPRAR</button></div>
+      </div>
+      <div class="lojaCard" onclick="location.href='./vendas.html#pacote-casais'">
+        <div class="lojaCardIcon">💫</div>
+        <div class="lojaCardName">Casais</div>
+        <div class="lojaCardDesc">18 cartas para duas pessoas que querem se conhecer de verdade.</div>
+        <div class="lojaCardFoot"><span class="lojaCardPrice">R$&nbsp;12,90</span><button class="lojaCardBtn">COMPRAR</button></div>
+      </div>
+    </div>
+
+    <div class="lojaSectTitle">◆ &nbsp; COSMÉTICOS (MOEDAS)</div>
+    <div class="lojaGrid">
+      <div class="lojaCard" onclick="window._toast&&window._toast('Loja de cosméticos — em breve')">
+        <div class="lojaCardIcon">🌆</div>
+        <div class="lojaCardName">Crepúsculo</div>
+        <div class="lojaCardDesc">Tema de fundo exclusivo: tons quentes de pôr do sol.</div>
+        <div class="lojaCardFoot"><span class="lojaCardPriceCoins">🪙 200</span><button class="lojaCardBtn">USAR</button></div>
+      </div>
+      <div class="lojaCard" onclick="window._toast&&window._toast('Loja de cosméticos — em breve')">
+        <div class="lojaCardIcon">🪨</div>
+        <div class="lojaCardName">Pedra Fria</div>
+        <div class="lojaCardDesc">Tema mineral, austero, sólido.</div>
+        <div class="lojaCardFoot"><span class="lojaCardPriceCoins">🪙 200</span><button class="lojaCardBtn">USAR</button></div>
+      </div>
+      <div class="lojaCard" onclick="window._toast&&window._toast('Loja de cosméticos — em breve')">
+        <div class="lojaCardIcon">🪟</div>
+        <div class="lojaCardName">Espelho</div>
+        <div class="lojaCardDesc">Tema reflexivo e etéreo para quem joga com profundidade.</div>
+        <div class="lojaCardFoot"><span class="lojaCardPriceCoins">🪙 300</span><button class="lojaCardBtn">USAR</button></div>
+      </div>
+      <div class="lojaCard" onclick="window._toast&&window._toast('Loja de cosméticos — em breve')">
+        <div class="lojaCardIcon">🂠</div>
+        <div class="lojaCardName">Ardósia</div>
+        <div class="lojaCardDesc">Estilo de carta em cinza profundo — elegância sóbria.</div>
+        <div class="lojaCardFoot"><span class="lojaCardPriceCoins">🪙 300</span><button class="lojaCardBtn">USAR</button></div>
+      </div>
+      <div class="lojaCard" onclick="window._toast&&window._toast('Loja de cosméticos — em breve')">
+        <div class="lojaCardIcon">✨</div>
+        <div class="lojaCardName">Centelhas</div>
+        <div class="lojaCardDesc">Efeito visual de partículas que emergem a cada carta revelada.</div>
+        <div class="lojaCardFoot"><span class="lojaCardPriceCoins">🪙 250</span><button class="lojaCardBtn">USAR</button></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Onboarding -->
@@ -1382,8 +1545,9 @@ document.getElementById('fragmentClose').addEventListener('click',function(){clo
 document.getElementById('fragmentLater').addEventListener('click',function(){closeDrops();var trigger=document.getElementById('btnFragment');if(trigger)trigger.focus();});
 document.getElementById('fragmentCreate').addEventListener('click',function(){location.href='./entrada.html?modo=criar&fragmento=1';});
 document.getElementById('btnPerfil').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropPerfil'),this);});
-document.getElementById('navSocial').addEventListener('click',function(){closeDrops();openSocialPanel();});
-document.getElementById('navMundo').addEventListener('click',function(){closeDrops();openFM('mundo');});
+document.querySelectorAll('.navBtn[data-sec],.navLink[data-sec]').forEach(function(btn){
+  btn.addEventListener('click',function(){closeDrops();switchSection(this.dataset.sec);});
+});
 document.getElementById('dpLogout').addEventListener('click',function(){closeDrops();window._hubLogout&&window._hubLogout();});
 document.getElementById('btnInvite').addEventListener('click',async function(){
   var url=new URL('hub.html',window.location.href).href;
@@ -2098,20 +2262,29 @@ function _spCloseSearch(){
   _spSearchOpen=false;
 }
 
-function openSocialPanel(){
-  var p=document.getElementById('socialPage');if(!p)return;
-  p.classList.add('on');
-  _spLoadLeaderboard();
-  _spLoadConexoes();
+/* ── Troca de seção ── */
+function switchSection(name){
+  // Remove sec-* do body
+  var bc=document.body.className.replace(/\bsec-\w+/g,'').replace(/\s+/g,' ').trim();
+  document.body.className=bc;
+  // Marca nav ativo
+  document.querySelectorAll('.navBtn[data-sec],.navLink[data-sec]').forEach(function(b){
+    b.classList.toggle('on',b.dataset.sec===name);
+  });
+  if(name==='hub'){
+    _spCloseSearch();
+    return;
+  }
+  document.body.classList.add('sec-'+name);
+  if(name==='social'){_spLoadLeaderboard();_spLoadConexoes();}
 }
-function closeSocialPanel(){
-  _spCloseSearch();
-  var p=document.getElementById('socialPage');if(p)p.classList.remove('on');
-}
+
+function openSocialPanel(){ switchSection('social'); }
+function closeSocialPanel(){ _spCloseSearch(); switchSection('hub'); }
 
 (function(){
   var p=document.getElementById('socialPage');if(!p)return;
-  document.getElementById('spBack').addEventListener('click',closeSocialPanel);
+  document.getElementById('spBack').addEventListener('click',function(){switchSection('hub');});
   document.getElementById('spSearchTrigger').addEventListener('click',_spOpenSearch);
   document.getElementById('spSearchClose').addEventListener('click',_spCloseSearch);
 
