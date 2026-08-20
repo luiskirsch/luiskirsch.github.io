@@ -44,7 +44,7 @@ function createDepthRenderer(colorImage, depthImage) {
   const gl = depthCanvas.getContext("webgl", { alpha:false, antialias:false, powerPreference:lowPower ? "low-power" : "high-performance" });
   if (!gl || reducedMotion) return null;
   const vertex = compileShader(gl, gl.VERTEX_SHADER, "attribute vec2 position;varying vec2 uv;void main(){uv=position*.5+.5;gl_Position=vec4(position,0.,1.);}");
-  const fragment = compileShader(gl, gl.FRAGMENT_SHADER, `precision highp float;varying vec2 uv;uniform sampler2D colorMap;uniform sampler2D depthMap;uniform vec2 pointer;uniform vec2 viewport;void main(){float sourceAspect=${sourceSize.width.toFixed(1)}/${sourceSize.height.toFixed(1)};float viewAspect=viewport.x/viewport.y;vec2 cover=vec2(1.);if(viewAspect>sourceAspect)cover.y=sourceAspect/viewAspect;else cover.x=viewAspect/sourceAspect;vec2 sourceUv=(uv-.5)*cover/1.045+.5;float depth=texture2D(depthMap,sourceUv).r;vec2 motion=(pointer-.5)*vec2(.042,.026);vec2 displaced=clamp(sourceUv-motion*(depth-.18),vec2(.006),vec2(.994));vec3 color=texture2D(colorMap,displaced).rgb;float vignette=1.-smoothstep(.36,.78,length(uv-.5))*.23;color*=vignette;color=pow(color,vec3(.96));gl_FragColor=vec4(color,1.);}`);
+  const fragment = compileShader(gl, gl.FRAGMENT_SHADER, `precision highp float;varying vec2 uv;uniform sampler2D colorMap;uniform sampler2D depthMap;uniform vec2 pointer;uniform vec2 viewport;void main(){float sourceAspect=${sourceSize.width.toFixed(1)}/${sourceSize.height.toFixed(1)};float viewAspect=viewport.x/viewport.y;vec2 cover=vec2(1.);if(viewAspect>sourceAspect)cover.y=sourceAspect/viewAspect;else cover.x=viewAspect/sourceAspect;vec2 sourceUv=(uv-.5)*cover/1.075+.5;float depth=texture2D(depthMap,sourceUv).r;vec2 motion=(pointer-.5)*vec2(${lowPower ? ".052" : ".074"},${lowPower ? ".034" : ".048"});vec2 displaced=clamp(sourceUv-motion*(depth-.18),vec2(.006),vec2(.994));vec3 color=texture2D(colorMap,displaced).rgb;float vignette=1.-smoothstep(.36,.78,length(uv-.5))*.23;color*=vignette;color=pow(color,vec3(.96));gl_FragColor=vec4(color,1.);}`);
   const program = gl.createProgram();
   gl.attachShader(program, vertex); gl.attachShader(program, fragment); gl.linkProgram(program);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
@@ -80,8 +80,8 @@ function createDepthRenderer(colorImage, depthImage) {
   }
   function render() {
     resize();
-    pointerCurrent.x += (pointerTarget.x - pointerCurrent.x) * .065;
-    pointerCurrent.y += (pointerTarget.y - pointerCurrent.y) * .065;
+    pointerCurrent.x += (pointerTarget.x - pointerCurrent.x) * .085;
+    pointerCurrent.y += (pointerTarget.y - pointerCurrent.y) * .085;
     gl.uniform2f(pointerUniform, pointerCurrent.x, pointerCurrent.y);
     gl.uniform2f(viewportUniform, depthCanvas.width, depthCanvas.height);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -119,13 +119,14 @@ function start() { if(!animationId && shouldRun()) animationId=requestAnimationF
 function stop() { if(animationId){cancelAnimationFrame(animationId);animationId=0;} }
 function resize() { renderer?.resize(); resizeFx(); renderer?.render(); if(reducedMotion) drawFx(performance.now()); }
 
-viewer.addEventListener("pointermove", event => {
+addEventListener("pointermove", event => {
   if(reducedMotion) return;
   const bounds=viewer.getBoundingClientRect();
+  if(event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom){pointerTarget={x:.5,y:.5};return;}
   pointerTarget.x=Math.max(0,Math.min(1,(event.clientX-bounds.left)/bounds.width));
   pointerTarget.y=Math.max(0,Math.min(1,1-(event.clientY-bounds.top)/bounds.height));
 }, { passive:true });
-viewer.addEventListener("pointerleave", () => { pointerTarget={x:.5,y:.5}; }, { passive:true });
+addEventListener("blur", () => { pointerTarget={x:.5,y:.5}; }, { passive:true });
 
 async function initialize() {
   resizeFx();

@@ -1,4 +1,4 @@
-const CACHE = "osl-v34-lobby-depth-parallax";
+const CACHE = "osl-v35-lobby-pointer-parallax";
 
 const PRECACHE = [
   "/favicon.png",
@@ -10,7 +10,7 @@ const PRECACHE = [
   "/assets/luz-falhando.mp3",
   "/verso-carta.webp?v=2",
   "/js/reward-chest-loader.js?v=1",
-  "/js/lobby-3d.js?v=6"
+  "/js/lobby-3d.js?v=7"
 ];
 
 self.addEventListener("install", event => {
