@@ -595,7 +595,7 @@ body.ritual-open #ritualDim{opacity:1;}
     <a class="navLink on" href="./hub.html">Hub</a>
     <button class="navBtn" id="navSocial">Social</button>
     <button class="navBtn" id="navMundo">Mundo</button>
-    <button class="navBtn" id="navRitual">Ritual</button>
+    <a class="navLink" href="./jogo.html">Loja</a>
   </nav>
   <div class="navRight">
     <button class="navBell" id="btnNotif">
@@ -1133,7 +1133,6 @@ document.getElementById('fragmentCreate').addEventListener('click',function(){lo
 document.getElementById('btnPerfil').addEventListener('click',function(e){e.stopPropagation();toggleDrop(document.getElementById('dropPerfil'),this);});
 document.getElementById('navSocial').addEventListener('click',function(){closeDrops();openFM('social');});
 document.getElementById('navMundo').addEventListener('click',function(){closeDrops();openFM('mundo');});
-document.getElementById('navRitual').addEventListener('click',function(){location.href='./entrada.html';});
 document.getElementById('dpLogout').addEventListener('click',function(){closeDrops();window._hubLogout&&window._hubLogout();});
 document.getElementById('btnInvite').addEventListener('click',async function(){
   var url=new URL('hub.html',window.location.href).href;
