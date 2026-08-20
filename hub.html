@@ -352,7 +352,7 @@ body.ritual-open #ritualDim{opacity:1;}
 /* ═══ RIGHT PANEL — PRESENÇA ═══ */
 
 /* Empty presence state */
-.presenceBody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 18px;text-align:center;gap:0;transition:opacity .30s;}
+.presenceBody{flex:0 0 50%;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 18px;text-align:center;gap:0;transition:opacity .30s;overflow-y:auto;}
 .presenceBody.fade{opacity:0;pointer-events:none;}
 .presenceIcon{width:58px;height:58px;border-radius:50%;border:1.5px solid rgba(212,175,55,.16);display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:rgba(212,175,55,.28);}
 .presenceIcon svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.5;}
@@ -363,7 +363,7 @@ body.ritual-open #ritualDim{opacity:1;}
 .fCount{padding:14px 18px 6px;font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);}
 
 /* Friends list (visible when friends online) */
-.fList{list-style:none;display:none;flex-direction:column;gap:0;flex:1;overflow-y:auto;opacity:0;transition:opacity .30s;}
+.fList{list-style:none;display:none;flex-direction:column;gap:0;flex:0 0 50%;min-height:0;overflow-y:auto;opacity:0;transition:opacity .30s;}
 .fList.vis{display:flex;}
 .fList.show{opacity:1;}
 .fItem{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-left:2px solid transparent;transition:background .14s,border-left-color .14s;cursor:pointer;}
@@ -383,7 +383,7 @@ body.ritual-open #ritualDim{opacity:1;}
 .btnPresence.callMode{background:rgba(212,175,55,.10);border-color:rgba(212,175,55,.40);color:var(--gold);}
 
 /* Suggestions section */
-.suggestSect{flex-shrink:0;border-top:1px solid rgba(255,255,255,.04);}
+.suggestSect{flex:0 0 50%;min-height:0;border-top:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;overflow:hidden;}
 .suggestHdr{display:flex;align-items:center;gap:7px;padding:12px 16px 8px;}
 .suggestHdrTitle{font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--gold2);flex:1;}
 .suggestItem{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;transition:background .14s;}
@@ -397,6 +397,9 @@ body.ritual-open #ritualDim{opacity:1;}
 .suggestMore{display:block;width:100%;text-align:right;padding:10px 18px 14px;background:none;border:none;color:var(--gold2);font-size:8px;font-weight:700;letter-spacing:.20em;text-transform:uppercase;cursor:pointer;transition:color .16s;}
 .suggestMore:hover{color:var(--gold);}
 .suggestEmpty{padding:10px 16px 16px;color:var(--text3);font-size:9px;line-height:1.55;letter-spacing:.06em;text-align:center;}
+#suggestList{flex:1;overflow-y:auto;min-height:0;}
+#suggestList::-webkit-scrollbar{width:3px;}
+#suggestList::-webkit-scrollbar-thumb{background:rgba(212,175,55,.18);border-radius:2px;}
 
 /* ═══ SEASON BAR ═══ */
 .seasonBar{position:fixed;bottom:0;left:0;right:0;z-index:80;height:var(--season-h);background:rgba(3,6,12,.98);border-top:1px solid rgba(212,175,55,.11);display:flex;align-items:center;justify-content:center;gap:20px;}
