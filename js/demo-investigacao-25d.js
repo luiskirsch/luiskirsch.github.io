@@ -1,7 +1,6 @@
 const scene = document.getElementById("scene");
 const plane = document.getElementById("scenePlane");
 const image = document.getElementById("sceneImage");
-const sceneSource = document.getElementById("sceneSource");
 const depthCanvas = document.getElementById("depthCanvas");
 const fxCanvas = document.getElementById("fxCanvas");
 const hotspotLayer = document.getElementById("hotspots");
@@ -23,6 +22,7 @@ const assetRoot = "../assets/demo-investigacao/scene";
 const nodes = {
   entry: {
     label: "23:47 · Entrada do escritório",
+    zoom: 1, focus: { x:.5, y:.5 },
     avif: `${assetRoot}/arquivo-302-ultrareal.avif`,
     webp: `${assetRoot}/arquivo-302-ultrareal.webp`,
     depth: `${assetRoot}/arquivo-302-depth.webp`,
@@ -34,27 +34,27 @@ const nodes = {
     ]
   },
   desk: {
-    label: "23:48 · Junto à escrivaninha",
-    avif: `${assetRoot}/arquivo-302-desk.avif`,
-    webp: `${assetRoot}/arquivo-302-desk.webp`,
-    depth: `${assetRoot}/arquivo-302-desk-depth.webp`,
-    lqip: `${assetRoot}/arquivo-302-desk-lqip.webp`,
-    alt: "Visão próxima da escrivaninha e da estante",
+    label: "23:48 · Examinando a bancada",
+    zoom: 1.86, focus: { x:.36, y:.48 },
+    avif: `${assetRoot}/arquivo-302-ultrareal.avif`,
+    webp: `${assetRoot}/arquivo-302-ultrareal.webp`,
+    depth: `${assetRoot}/arquivo-302-depth.webp`,
+    lqip: `${assetRoot}/arquivo-302-lqip.webp`,
+    alt: "Aproximação contínua da bancada da escrivaninha",
     exits: [
-      { to: "entry", x: 54, y: 79, icon: "↓", label: "Voltar à entrada" },
-      { to: "sofa", x: 82, y: 66, icon: "→", label: "Ir até o sofá" }
+      { to: "entry", x: 47, y: 60, icon: "↓", label: "Recuar até a entrada" }
     ]
   },
   sofa: {
     label: "23:49 · Ao lado do sofá",
-    avif: `${assetRoot}/arquivo-302-sofa.avif`,
-    webp: `${assetRoot}/arquivo-302-sofa.webp`,
-    depth: `${assetRoot}/arquivo-302-sofa-depth.webp`,
-    lqip: `${assetRoot}/arquivo-302-sofa-lqip.webp`,
-    alt: "Visão próxima do sofá e das evidências no tapete",
+    zoom: 1.58, focus: { x:.72, y:.54 },
+    avif: `${assetRoot}/arquivo-302-ultrareal.avif`,
+    webp: `${assetRoot}/arquivo-302-ultrareal.webp`,
+    depth: `${assetRoot}/arquivo-302-depth.webp`,
+    lqip: `${assetRoot}/arquivo-302-lqip.webp`,
+    alt: "Aproximação contínua do sofá e das evidências no tapete",
     exits: [
-      { to: "desk", x: 17, y: 66, icon: "←", label: "Ir à escrivaninha" },
-      { to: "entry", x: 38, y: 79, icon: "↓", label: "Voltar à entrada" }
+      { to: "entry", x: 60, y: 70, icon: "↓", label: "Recuar até a entrada" }
     ]
   }
 };
@@ -62,9 +62,9 @@ const nodes = {
 const clues = [
   { id:"knife", node:"desk", title:"Faca de escritório", x:50.2, y:54.8, description:"A lâmina foi limpa às pressas. Fibras escuras permanecem junto ao cabo.", code:"EVD-302-A1" },
   { id:"key", node:"entry", title:"Chave sem identificação", x:58.2, y:92.7, description:"A pequena chave de latão não pertence a nenhuma fechadura do escritório.", code:"EVD-302-B4" },
-  { id:"photo", node:"entry", title:"Fotografia rasgada", x:69.2, y:91.8, description:"A fotografia foi arrancada de um arquivo. Uma anotação no verso cita o cais.", code:"EVD-302-C2" },
-  { id:"camera", node:"sofa", title:"Câmera danificada", x:59.8, y:82.3, description:"O cartão de memória desapareceu, mas a lente ainda conserva uma impressão parcial.", code:"EVD-302-D7" },
-  { id:"glass", node:"sofa", title:"Vidro temperado", x:67.3, y:86, description:"Os fragmentos não pertencem à janela. Há vestígios de perfume na superfície.", code:"EVD-302-E3" }
+  { id:"photo", node:"desk", title:"Documentos marcados", x:35.2, y:46.7, description:"Os documentos sobre a bancada ligam a vítima ao cais. Uma página foi retirada recentemente.", code:"EVD-302-C2" },
+  { id:"camera", node:"sofa", title:"Câmera danificada", x:72.3, y:62.7, description:"O cartão de memória desapareceu, mas a lente ainda conserva uma impressão parcial.", code:"EVD-302-D7" },
+  { id:"glass", node:"sofa", title:"Vidro temperado", x:78.2, y:69.3, description:"Os fragmentos não pertencem à janela. Há vestígios de perfume na superfície.", code:"EVD-302-E3" }
 ];
 
 let currentNode = "entry";
@@ -79,14 +79,20 @@ let pointerTarget = { x: .5, y: .5 };
 let pointerCurrent = { x: .5, y: .5 };
 let depthRenderer = null;
 let depthAvailable = !reducedMotion;
-const assetCache = new Map();
 
-function panLimit() { return Math.max(0, (plane.clientWidth * 1.018 * zoom - innerWidth) / 2); }
 function updatePlaneTransform() {
-  const limit = panLimit();
-  panX = Math.max(-limit, Math.min(limit, panX));
-  plane.style.left = `calc(50% + ${panX}px)`;
-  plane.style.transform = `translate(-50%,-50%) scale(${1.018 * zoom})`;
+  const camera = nodes[currentNode];
+  const cameraZoom = innerWidth < 720 ? Math.min(camera.zoom, 1.34) : camera.zoom;
+  const scale = 1.018 * cameraZoom * zoom;
+  const baseX = (.5 - camera.focus.x) * plane.clientWidth * scale;
+  const baseY = (.5 - camera.focus.y) * plane.clientHeight * scale;
+  const limitX = Math.max(0, (plane.clientWidth * scale - innerWidth) / 2);
+  const limitY = Math.max(0, (plane.clientHeight * scale - innerHeight) / 2);
+  const finalX = Math.max(-limitX, Math.min(limitX, baseX + panX));
+  const finalY = Math.max(-limitY, Math.min(limitY, baseY));
+  plane.style.left = `calc(50% + ${finalX}px)`;
+  plane.style.top = `calc(50% + ${finalY}px)`;
+  plane.style.transform = `translate(-50%,-50%) scale(${scale})`;
 }
 function fitPlane() {
   const scale = Math.max(innerWidth / sourceSize.width, innerHeight / sourceSize.height);
@@ -206,19 +212,6 @@ function loadImage(url) {
   });
 }
 
-async function loadColor(node) {
-  try { return await loadImage(node.avif); }
-  catch (_) { return loadImage(node.webp); }
-}
-
-function loadNodeAssets(nodeId) {
-  if (assetCache.has(nodeId)) return assetCache.get(nodeId);
-  const node = nodes[nodeId];
-  const promise = Promise.all([loadColor(node), depthAvailable ? loadImage(node.depth) : Promise.resolve(null)]).then(([color, depth]) => ({ color, depth }));
-  assetCache.set(nodeId, promise);
-  return promise;
-}
-
 function compileShader(gl, type, source) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
@@ -276,26 +269,13 @@ async function switchNode(nodeId) {
   moving = true;
   scene.classList.add("moving");
   hideTooltip();
-  toast.textContent = "Caminhando pelo escritório";
+  toast.textContent = nodeId === "desk" ? "Aproximando a câmera da bancada" : "Deslocando a câmera pelo escritório";
   toast.classList.add("show");
-  try {
-    const assets = await loadNodeAssets(nodeId);
-    const node = nodes[nodeId];
-    sceneSource.srcset = node.avif;
-    image.src = node.webp;
-    image.alt = node.alt;
-    if (depthRenderer && assets.depth) depthRenderer.setImages(assets.color, assets.depth);
-    else { await image.decode(); depthCanvas.classList.remove("ready"); }
-    currentNode = nodeId;
-    panX = 0; zoom = 1; pointerTarget = { x:.5, y:.5 }; pointerCurrent = { x:.5, y:.5 };
-    updatePlaneTransform();
-    renderNodeControls();
-    if (depthRenderer) depthRenderer.render();
-    await new Promise(resolve => setTimeout(resolve, reducedMotion ? 0 : 120));
-  } catch (error) {
-    console.warn("Não foi possível carregar o ponto de navegação.", error);
-    toast.textContent = "Ponto temporariamente indisponível";
-  }
+  currentNode = nodeId;
+  panX = 0; zoom = 1; pointerTarget = { x:.5, y:.5 }; pointerCurrent = { x:.5, y:.5 };
+  updatePlaneTransform();
+  renderNodeControls();
+  await new Promise(resolve => setTimeout(resolve, reducedMotion ? 0 : 1180));
   scene.classList.remove("moving");
   setTimeout(() => toast.classList.remove("show"), 420);
   moving = false;
@@ -313,7 +293,6 @@ async function start() {
     await image.decode();
     loadStatus.textContent = "Aplicando profundidade dinâmica";
     const initialAssets = await Promise.all([loadImage(image.currentSrc || image.src), depthAvailable ? loadImage(nodes.entry.depth) : Promise.resolve(null)]).then(([color, depth]) => ({ color, depth }));
-    assetCache.set("entry", Promise.resolve(initialAssets));
     if (initialAssets.depth) depthRenderer = createDepthRenderer(initialAssets.color, initialAssets.depth);
     if (depthRenderer) { depthRenderer.render(); depthCanvas.classList.add("ready"); }
     else depthAvailable = false;
@@ -330,8 +309,6 @@ async function start() {
   if (innerWidth < 720) {
     setTimeout(() => { toast.textContent = "Arraste a cena para explorar o ambiente"; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2400); }, 380);
   }
-  const preload = () => { loadNodeAssets("desk").catch(() => {}); loadNodeAssets("sofa").catch(() => {}); };
-  if ("requestIdleCallback" in window) requestIdleCallback(preload, { timeout:1800 }); else setTimeout(preload, 500);
 }
 
 addEventListener("resize", () => { fitPlane(); resizeFx(); }, { passive:true });
