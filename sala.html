@@ -6,13 +6,14 @@
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"}}</script>
 <script src="./i18n/init.js?v=20260818" defer></script>
 <script src="../js/theme-bootstrap.js"></script>
-<script src="js/theme-loader.js"></script>
-<script type="module" src="js/active-theme.js"></script>
+<script src="js/theme-loader.js" defer></script>
+<script src="js/active-theme-loader.js?v=1" defer></script>
 
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-<link rel="dns-prefetch" href="https://firestore.googleapis.com">
-<link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preload" href="/assets/lobby-room.webp?v=1" as="image" type="image/webp" fetchpriority="high">
 <script src="../js/proteger-sala.js"></script>
 
   <meta charset="UTF-8">
@@ -33,8 +34,8 @@
     }
   </script>
 
-  <!-- Lottie: animated emoji (Noto Animated Emoji by Google) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" integrity="sha512-jEnuDt6jfecCjthQAJ+ed0MTVA++5ZKmlUcmDGBv2vUI/REn6FuIdixLNnQT+vKusE2hhTk2is3cFvv5wA+Sgg==" crossorigin="anonymous" defer></script>
+  <!-- Lottie entra depois do primeiro paint; os controles principais não esperam essa biblioteca. -->
+  <script src="js/lottie-loader.js?v=1" defer></script>
 
   <style>
     html{
@@ -4312,7 +4313,7 @@
     /* ── Verso ── */
     .ritualCardBack{
       background-color:#070604;
-      background-image:url('./verso-carta.webp?v=1');
+      background-image:url('./verso-carta.webp?v=2');
       transform:rotateY(180deg);
     }
 
@@ -6792,7 +6793,7 @@
     height:clamp(300px, calc(100svh - 300px), 580px);
     overflow:hidden;
     border-radius:0;
-    background:transparent;
+    background:#090807 url('/assets/lobby-room.webp?v=1') center/cover no-repeat;
     display:flex;align-items:stretch;
     mask-image:linear-gradient(to bottom, transparent 0%, black 7%, black 82%, transparent 100%);
     -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 7%, black 82%, transparent 100%);
@@ -7502,11 +7503,11 @@
 
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
                 <div id="lobbyViewer" class="lobbyViewer">
-                  <video id="lobbyVideoA" class="lobbyViewer__video" autoplay muted playsinline preload="auto">
-                    <source src="/assets/lobby-room.mp4" type="video/mp4">
+                  <video id="lobbyVideoA" class="lobbyViewer__video" autoplay muted playsinline preload="metadata" poster="/assets/lobby-room.webp?v=1">
+                    <source src="/assets/lobby-room.mp4?v=3" type="video/mp4">
                   </video>
-                  <video id="lobbyVideoB" class="lobbyViewer__video" muted playsinline preload="auto" style="opacity:0">
-                    <source src="/assets/lobby-room.mp4" type="video/mp4">
+                  <video id="lobbyVideoB" class="lobbyViewer__video" muted playsinline preload="none" poster="/assets/lobby-room.webp?v=1" style="opacity:0">
+                    <source src="/assets/lobby-room.mp4?v=3" type="video/mp4">
                   </video>
                   <canvas id="lobbyCanvas"></canvas>
                   <div class="lobbyViewer__vignette" aria-hidden="true"></div>
@@ -8104,7 +8105,7 @@
   <!-- PanelBridge → js/api.js (window.PanelBridge definido pelo módulo) -->
 
   <!-- Lógica do jogo → js/init.js -->
-  <script type="module" src="js/reward-chest.js?v=21"></script>
+  <script src="js/reward-chest-loader.js?v=1"></script>
   <script type="module" src="js/init.js"></script>
 
   <script type="module" src="video.js"></script>
@@ -8781,15 +8782,13 @@
   </div>
 
 <script src="../js/fullscreen-gate.js?v=3"></script>
-<script src="../js/sw-register.js?v=11"></script>
+<script src="../js/sw-register.js?v=12"></script>
 
 <!-- ── Lobby Mode: adicionado imediatamente, sem depender do Three.js CDN ── -->
 <script src="../js/lobby-mode.js"></script>
 
 <!-- ── Lobby 3D Viewer ────────────────────────────────────────────────────── -->
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js" integrity="sha384-Qvl1RLjZOCDFOOH2bKcGnaDHMM8MVv3zVtMvhy3juQdiIOs6RgQ/7zYdM1FbpHzI" crossorigin="anonymous">
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js" integrity="sha384-BZPDnhvqQ9HQ5XsmqEusjwpN9TIaiGbsJ5XWilDEuRu9Psbw4ZyYk67DUO0nbP3z" crossorigin="anonymous">
-  <script type="module" src="../js/lobby-3d.js?v=2"></script>
+  <script src="../js/lobby-3d-loader.js?v=1"></script>
 
   <!-- ── Partidas Rolando: refresh + painel espectador ─────────────────────── -->
   <script src="../js/lobby-init.js"></script>
