@@ -63,7 +63,8 @@
     .complete{position:fixed;inset:0;z-index:30;display:grid;place-items:center;text-align:center;background:radial-gradient(circle,rgba(21,36,31,.94),rgba(3,6,9,.98));opacity:0;visibility:hidden;transition:.7s}
     .complete.show{opacity:1;visibility:visible}
     .completeInner{max-width:560px;padding:32px}.completeMark{font-size:56px;color:#87d69e}.complete h2{margin:15px 0 12px;font:600 38px Georgia,serif;color:#f0dfbd}.complete p{color:#aaa;line-height:1.6}.complete button{margin-top:18px}
-    .loader{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:#05070a;transition:opacity .7s,visibility .7s}.loader.done{opacity:0;visibility:hidden}.loaderInner{text-align:center}.loaderRing{width:52px;height:52px;margin:auto;border:1px solid rgba(224,189,120,.18);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}.loader p{margin-top:16px;color:#a98f5e;font:700 10px Georgia,serif;letter-spacing:.28em;text-transform:uppercase}
+    .loader{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:#05070a;transition:opacity .7s,visibility .7s}.loader.done{opacity:0;visibility:hidden}.loaderInner{text-align:center}.loaderRing{width:52px;height:52px;margin:auto;border:1px solid rgba(224,189,120,.18);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}.loader p{margin-top:16px;color:#a98f5e;font:700 10px Georgia,serif;letter-spacing:.28em;text-transform:uppercase}.loader small{display:block;margin-top:9px;color:#666;font:9px/1.4 monospace;letter-spacing:.12em;text-transform:uppercase}
+    .assetCredit{position:fixed;right:18px;bottom:14px;z-index:4;color:rgba(235,226,209,.48);font:9px/1.2 Arial,sans-serif;letter-spacing:.08em;text-decoration:none;text-transform:uppercase;pointer-events:auto}.assetCredit:hover{color:#e0bd78}
     @keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{opacity:.45}}
     @media(max-width:900px){.hud{grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto}.case{grid-column:1}.objectives{grid-column:2;width:220px}.map{display:none}.controls{grid-column:1 / -1}.caseMeta{display:none}}
     @media(max-width:640px){.hud{padding:10px;display:block}.case{position:absolute;left:10px;top:10px;padding:13px 15px}.case h1{font-size:18px}.objectives{position:absolute;right:10px;top:10px;width:165px;padding:12px}.clueRow{min-height:28px;padding:5px;font-size:8px}.clueRow .tick{width:17px;height:17px}.objectivesHead{padding-bottom:8px}.controls{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:max-content}.controlBtn{padding:10px;font-size:9px}.crosshair{display:none}}
@@ -82,8 +83,9 @@
   <div id="tooltip" class="tooltip" role="status"></div><div id="toast" class="toast" role="status"></div>
   <section id="clueModal" class="clueModal" aria-modal="true" role="dialog" aria-labelledby="evidenceTitle"><article class="evidenceCard"><button id="closeEvidence" class="closeEvidence" type="button" aria-label="Fechar">×</button><span class="evidenceTag">Evidência catalogada</span><h3 id="evidenceTitle"></h3><p id="evidenceText"></p><div id="evidenceCode" class="evidenceCode"></div></article></section>
   <section id="complete" class="complete" aria-live="polite"><div class="completeInner"><div class="completeMark">✓</div><p class="eyebrow">Cena examinada</p><h2>Todas as pistas foram encontradas</h2><p>Este protótipo demonstra como uma investigação no estilo Criminal Case pode funcionar em um cenário 3D navegável.</p><button id="playAgain" class="controlBtn" type="button">Investigar novamente</button></div></section>
-  <div id="loader" class="loader"><div class="loaderInner"><div class="loaderRing"></div><p>Reconstruindo cena</p></div></div>
-  <script type="module" src="./js/demo-investigacao-3d.js?v=1"></script>
+  <a class="assetCredit" href="https://polyhaven.com" target="_blank" rel="noopener">Ativos 3D CC0 · Poly Haven</a>
+  <div id="loader" class="loader"><div class="loaderInner"><div class="loaderRing"></div><p>Reconstruindo cena</p><small id="loadStatus">Preparando materiais físicos</small></div></div>
+  <script type="module" src="./js/demo-investigacao-3d.js?v=2"></script>
   <script src="./js/sw-register.js?v=12"></script>
 </body>
 </html>

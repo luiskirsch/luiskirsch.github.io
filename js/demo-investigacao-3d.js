@@ -1,7 +1,10 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/+esm";
+import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js/+esm";
+import { RoomEnvironment } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/environments/RoomEnvironment.js/+esm";
 
 const canvas = document.getElementById("scene");
 const loader = document.getElementById("loader");
+const loadStatus = document.getElementById("loadStatus");
 const clueList = document.getElementById("clueList");
 const counter = document.getElementById("counter");
 const tooltip = document.getElementById("tooltip");
@@ -19,11 +22,27 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.24;
+renderer.shadowMap.autoUpdate = true;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x070a0e);
 scene.fog = new THREE.FogExp2(0x080b0f, 0.035);
 const camera = new THREE.PerspectiveCamera(47, 1, 0.1, 70);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), .035).texture;
+pmrem.dispose();
+
+const assetManager = new THREE.LoadingManager();
+assetManager.onProgress = (_url, loaded, total) => {
+  loadStatus.textContent = `Carregando materiais reais · ${Math.round((loaded / total) * 100)}%`;
+};
+assetManager.onLoad = () => {
+  loadStatus.textContent = "Cena física pronta";
+  loader.classList.add("done");
+};
+assetManager.onError = () => { loadStatus.textContent = "Cena pronta com simplificação adaptativa"; };
+const textureLoader = new THREE.TextureLoader(assetManager);
+const gltfLoader = new GLTFLoader(assetManager);
 
 const orbit = { yaw: 0.53, pitch: 0.37, distance: 13.8, target: new THREE.Vector3(0, 1.35, -0.3) };
 const defaultOrbit = { yaw: orbit.yaw, pitch: orbit.pitch, distance: orbit.distance, target: orbit.target.clone() };
@@ -79,6 +98,36 @@ const woodRoughness = canvasTexture(256, (ctx, size) => { const image = ctx.crea
 const plasterTexture = canvasTexture(512, (ctx, size) => { const rand = seeded(81); ctx.fillStyle = "#777168"; ctx.fillRect(0, 0, size, size); for (let i = 0; i < 16000; i++) { const a = rand() * .075; ctx.fillStyle = rand() > .5 ? `rgba(255,244,220,${a})` : `rgba(34,28,24,${a})`; const r = rand() * 2.2; ctx.fillRect(rand() * size, rand() * size, r, r); } }, 3, 2);
 const rugTexture = canvasTexture(512, (ctx, size) => { ctx.fillStyle = "#30231d"; ctx.fillRect(0, 0, size, size); ctx.strokeStyle = "#735744"; ctx.lineWidth = 10; ctx.strokeRect(18, 18, size - 36, size - 36); ctx.strokeStyle = "rgba(185,139,91,.42)"; ctx.lineWidth = 4; for (let i = -size; i < size * 2; i += 48) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + size, size); ctx.stroke(); } }, 1, 1);
 
+function loadPbrSet(folder, id, repeatX, repeatY) {
+  const base = `../assets/demo-investigacao/textures/${folder}/${id}`;
+  const map = textureLoader.load(`${base}_diff_1k.jpg`);
+  const normalMap = textureLoader.load(`${base}_nor_gl_1k.jpg`);
+  const armMap = textureLoader.load(`${base}_arm_1k.jpg`);
+  map.colorSpace = THREE.SRGBColorSpace;
+  for (const texture of [map, normalMap, armMap]) {
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(repeatX, repeatY);
+    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  }
+  return { map, normalMap, armMap };
+}
+
+function physicalSurface(maps, options = {}) {
+  return new THREE.MeshStandardMaterial({
+    map: maps.map,
+    normalMap: maps.normalMap,
+    roughnessMap: maps.armMap,
+    metalnessMap: maps.armMap,
+    roughness: options.roughness ?? 1,
+    metalness: options.metalness ?? 1,
+    color: options.color ?? 0xffffff
+  });
+}
+
+const floorSurface = physicalSurface(loadPbrSet("old_wooden_floor_02", "old_wooden_floor_02", 2.3, 1.55), { roughness: .86 });
+const wallSurface = physicalSurface(loadPbrSet("plastered_wall_04", "plastered_wall_04", 2.8, 1.8), { roughness: .94, color: 0xb9b0a4 });
+const carpetSurface = physicalSurface(loadPbrSet("dirty_carpet", "dirty_carpet", 1.25, .85), { roughness: 1, color: 0x706b66 });
+
 const mat = {
   wall: new THREE.MeshStandardMaterial({ map: plasterTexture, color: 0xc2b8a8, roughness: .92 }),
   wood: new THREE.MeshStandardMaterial({ map: woodTexture, roughnessMap: woodRoughness, color: 0xa56d42, roughness: .72, metalness: .02 }),
@@ -87,7 +136,10 @@ const mat = {
   blackMetal: new THREE.MeshStandardMaterial({ color: 0x17191b, roughness: .28, metalness: .76 }),
   fabric: new THREE.MeshStandardMaterial({ color: 0x263039, roughness: .95 }),
   paper: new THREE.MeshStandardMaterial({ color: 0xd5c9b3, roughness: .88, side: THREE.DoubleSide }),
-  evidence: new THREE.MeshStandardMaterial({ color: 0xd8ad4e, roughness: .45, emissive: 0x3b2502, emissiveIntensity: .16 })
+  evidence: new THREE.MeshStandardMaterial({ color: 0xd8ad4e, roughness: .45, emissive: 0x3b2502, emissiveIntensity: .16 }),
+  floor: floorSurface,
+  pbrWall: wallSurface,
+  carpet: carpetSurface
 };
 
 function mesh(geometry, material, position, rotation = null, parent = scene) {
@@ -97,15 +149,22 @@ function mesh(geometry, material, position, rotation = null, parent = scene) {
   object.castShadow = true; object.receiveShadow = true; parent.add(object); return object;
 }
 function box(size, position, material = mat.wood, rotation = null, parent = scene) { return mesh(new THREE.BoxGeometry(...size), material, position, rotation, parent); }
+function groupChildrenSince(startIndex) {
+  const children = scene.children.slice(startIndex);
+  const group = new THREE.Group();
+  scene.add(group);
+  children.forEach(child => group.attach(child));
+  return group;
+}
 
 // Arquitetura aberta para a câmera, com materiais procedurais e sombras reais.
-box([12, .16, 8], [0, -.08, 0], mat.wood);
-box([12, 5.8, .16], [0, 2.82, -4], mat.wall);
-box([.16, 5.8, 8], [-6, 2.82, 0], mat.wall);
-box([.16, 5.8, 5.5], [6, 2.82, -1.25], mat.wall);
+box([12, .16, 8], [0, -.08, 0], mat.floor);
+box([12, 5.8, .16], [0, 2.82, -4], mat.pbrWall);
+box([.16, 5.8, 8], [-6, 2.82, 0], mat.pbrWall);
+box([.16, 5.8, 5.5], [6, 2.82, -1.25], mat.pbrWall);
 box([12, .16, .2], [0, 1.02, -3.88], mat.darkWood);
 
-const rug = mesh(new THREE.PlaneGeometry(6.7, 4.3), new THREE.MeshStandardMaterial({ map: rugTexture, roughness: .94 }), [.2, .012, .45], [-Math.PI / 2, 0, -.06]); rug.receiveShadow = true;
+const rug = mesh(new THREE.PlaneGeometry(6.7, 4.3, 32, 20), mat.carpet, [.2, .012, .45], [-Math.PI / 2, 0, -.06]); rug.receiveShadow = true;
 
 // Janela noturna e moldura.
 const night = new THREE.MeshBasicMaterial({ color: 0x193f60 });
@@ -115,13 +174,17 @@ for (const y of [1.93, 3.25, 4.56]) box([3.5, .11, .14], [-2.6, y, -3.78], mat.d
 const rainGeo = new THREE.BufferGeometry(); const rainPositions = new Float32Array(90 * 3); const randRain = seeded(12); for (let i = 0; i < 90; i++) { rainPositions[i * 3] = -4.15 + randRain() * 3.1; rainPositions[i * 3 + 1] = 2 + randRain() * 2.5; rainPositions[i * 3 + 2] = -3.7; } rainGeo.setAttribute("position", new THREE.BufferAttribute(rainPositions, 3)); scene.add(new THREE.Points(rainGeo, new THREE.PointsMaterial({ color: 0xa7d8ff, size: .025, transparent: true, opacity: .5 })));
 
 // Escrivaninha, gavetas e luminária.
+const deskFallbackStart = scene.children.length;
 box([4.4, .22, 1.65], [.25, 1.45, -1.9]);
 for (const x of [-1.55, 2.05]) for (const z of [-2.5, -1.3]) box([.18, 1.4, .18], [x, .72, z], mat.darkWood);
 box([1.05, .72, 1.2], [1.45, 1.02, -1.9], mat.darkWood);
 for (const y of [.8, 1.06, 1.32]) { const drawer = box([.95, .2, 1.22], [1.45, y, -1.88], mat.wood); box([.22, .055, .04], [1.45, y, -1.245], mat.metal); }
+const deskFallback = groupChildrenSince(deskFallbackStart);
+const lampFallbackStart = scene.children.length;
 const lampBase = mesh(new THREE.CylinderGeometry(.28, .34, .08, 24), mat.blackMetal, [-1.2, 1.61, -2.0]);
 mesh(new THREE.CylinderGeometry(.035, .035, 1.0, 12), mat.blackMetal, [-1.2, 2.1, -2.0]);
 mesh(new THREE.ConeGeometry(.52, .55, 28, 1, true), new THREE.MeshStandardMaterial({ color: 0x8d704b, roughness: .65, side: THREE.DoubleSide }), [-1.2, 2.52, -2.0], [0, 0, Math.PI]);
+const lampFallback = groupChildrenSince(lampFallbackStart);
 const deskLight = new THREE.SpotLight(0xffc679, 52, 8, Math.PI * .32, .65, 1.6); deskLight.position.set(-1.2, 2.42, -1.95); deskLight.target.position.set(-.7, .2, -1.35); deskLight.castShadow = true; deskLight.shadow.mapSize.set(lowPower ? 512 : 1024, lowPower ? 512 : 1024); scene.add(deskLight, deskLight.target);
 
 // Estante e livros.
@@ -131,12 +194,53 @@ const bookColors = [0x5f2b25, 0x263c4e, 0x6c5934, 0x36452e, 0x4b303f];
 for (let shelf = 0; shelf < 4; shelf++) for (let i = 0; i < 8; i++) { const h = .42 + ((i * 17 + shelf * 7) % 19) / 80; box([.16 + (i % 3) * .025, h, .36], [-5.62 + i * .23, .47 + shelf * .84 + h / 2, -2.91], new THREE.MeshStandardMaterial({ color: bookColors[(i + shelf) % bookColors.length], roughness: .85 })); }
 
 // Sofá, mesa lateral e quadros.
+const sofaFallbackStart = scene.children.length;
 box([3.1, .48, 1.2], [3.95, .52, -2.8], mat.fabric);
 box([3.1, 1.15, .35], [3.95, 1.05, -3.38], mat.fabric, [-.12, 0, 0]);
 box([.35, 1.0, 1.2], [2.25, .78, -2.8], mat.fabric); box([.35, 1.0, 1.2], [5.65, .78, -2.8], mat.fabric);
+const sofaFallback = groupChildrenSince(sofaFallbackStart);
 box([1.05, .12, .9], [4.8, .68, -1.35], mat.darkWood); for (const x of [4.42, 5.18]) for (const z of [-1.65, -1.05]) box([.08, .65, .08], [x, .34, z], mat.blackMetal);
 function framedPicture(x, y, color) { box([1.35, 1.0, .08], [x, y, -3.85], mat.darkWood); box([1.12, .77, .04], [x, y, -3.79], new THREE.MeshStandardMaterial({ color, roughness: .9 })); }
 framedPicture(.1, 3.5, 0x59483a); framedPicture(1.75, 3.28, 0x344453);
+
+function installPhotorealModel(url, fallback, placement) {
+  gltfLoader.load(url, gltf => {
+    const model = gltf.scene;
+    model.rotation.y = placement.rotationY ?? 0;
+    model.traverse(child => {
+      if (!child.isMesh) return;
+      child.castShadow = true;
+      child.receiveShadow = true;
+      if (child.material) {
+        child.material.envMapIntensity = placement.envMapIntensity ?? .7;
+        child.material.needsUpdate = true;
+      }
+    });
+    scene.add(model);
+    model.updateMatrixWorld(true);
+    const initialBox = new THREE.Box3().setFromObject(model);
+    const initialSize = initialBox.getSize(new THREE.Vector3());
+    const scale = placement.height ? placement.height / initialSize.y : placement.width / initialSize.x;
+    model.scale.setScalar(scale);
+    model.updateMatrixWorld(true);
+    const fittedBox = new THREE.Box3().setFromObject(model);
+    const center = fittedBox.getCenter(new THREE.Vector3());
+    model.position.x += placement.x - center.x;
+    model.position.y += placement.bottom - fittedBox.min.y;
+    model.position.z += placement.z - center.z;
+    fallback.visible = false;
+  });
+}
+
+installPhotorealModel("../assets/demo-investigacao/models/sofa_02/sofa_02_1k.gltf", sofaFallback, {
+  width: 3.45, x: 3.95, bottom: .02, z: -2.86, rotationY: Math.PI, envMapIntensity: .82
+});
+installPhotorealModel("../assets/demo-investigacao/models/metal_office_desk/metal_office_desk_1k.gltf", deskFallback, {
+  width: 4.35, x: .25, bottom: .02, z: -1.92, rotationY: 0, envMapIntensity: .95
+});
+installPhotorealModel("../assets/demo-investigacao/models/desk_lamp_arm_01/desk_lamp_arm_01_1k.gltf", lampFallback, {
+  height: 1.16, x: -1.18, bottom: 1.5, z: -2.03, rotationY: -.38, envMapIntensity: 1.05
+});
 
 // Cadeira caída e silhueta de reconstrução no tapete.
 const chair = new THREE.Group(); scene.add(chair); chair.position.set(-2.5, .35, .65); chair.rotation.set(0, .45, 1.34); box([1.0, .14, 1.0], [0, .7, 0], mat.wood, null, chair); for (const x of [-.4, .4]) for (const z of [-.4, .4]) box([.1, 1.35, .1], [x, 0, z], mat.darkWood, null, chair); box([1, 1.2, .12], [0, 1.25, -.43], mat.wood, null, chair);
@@ -204,4 +308,4 @@ function resize(){const w=innerWidth,h=innerHeight;camera.aspect=w/h;camera.upda
 const clock=new THREE.Clock();let animationId=0;let elapsed=0;
 function animate(){animationId=requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.033);elapsed+=dt;const t=elapsed;updateCamera();redLight.intensity=4.5+Math.max(0,Math.sin(t*2.2))*7;blueLight.intensity=4.5+Math.max(0,Math.sin(t*2.2+Math.PI))*7;deskLight.intensity=51+Math.sin(t*7.3)*.55;for(let i=0;i<dustCount;i++){dustPositions[i*3+1]+=dustVelocity[i]*dt;dustPositions[i*3]+=(Math.sin(t*.3+i)*.012)*dt;if(dustPositions[i*3+1]>5.2)dustPositions[i*3+1]=.1;}dustGeometry.attributes.position.needsUpdate=true;clues.forEach((clue,index)=>{if(clue.marker.visible){const scale=.52+Math.sin(t*2.4+index)*.08;clue.marker.scale.setScalar(scale);clue.marker.material.opacity=.78+Math.sin(t*2.4+index)*.2}});renderer.render(scene,camera)}
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&animationId){cancelAnimationFrame(animationId);animationId=0}else if(!document.hidden&&!animationId){clock.getDelta();animate()}});
-animate();requestAnimationFrame(()=>requestAnimationFrame(()=>loader.classList.add("done")));
+animate();
