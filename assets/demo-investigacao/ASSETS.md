@@ -19,5 +19,9 @@ Os arquivos em `scene/` foram gerados com a ferramenta integrada de geração de
 - `arquivo-302-ultrareal.webp`: fallback WebP.
 - `arquivo-302-depth.webp`: mapa de profundidade para paralaxe WebGL.
 - `arquivo-302-lqip.webp`: placeholder de carregamento imediato.
+- `arquivo-302-desk.*`: segundo ponto de observação, próximo à escrivaninha, com render, fallback, LQIP e profundidade.
+- `arquivo-302-sofa.*`: terceiro ponto de observação, próximo ao sofá, com render, fallback, LQIP e profundidade.
 
 A composição é original e foi criada como cenário noturno de investigação, com materiais realistas, objetos individualizados, iluminação cinematográfica e camadas de profundidade. Não contém interface, logotipos ou elementos copiados de jogos existentes.
+
+Os dois pontos adicionais foram gerados pela ferramenta integrada de imagens a partir da sala canônica, com prompts de continuidade espacial. Cada ângulo recebeu um mapa de profundidade próprio para manter a paralaxe WebGL durante a exploração.
