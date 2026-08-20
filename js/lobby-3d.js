@@ -1,318 +1,146 @@
 const viewer = document.getElementById("lobbyViewer");
-const canvas = document.getElementById("lobbyCanvas");
+const image = document.getElementById("lobbyBgImg");
+const depthCanvas = document.getElementById("lobbyDepthCanvas");
+const fxCanvas = document.getElementById("lobbyCanvas");
 
-if (!viewer || !canvas) throw new Error("lobby elements missing");
+if (!viewer || !image || !depthCanvas || !fxCanvas) throw new Error("lobby 3D elements missing");
 
-const context = canvas.getContext("2d", { alpha: true, desynchronized: true });
-if (!context) throw new Error("2D canvas unavailable");
-const lightCanvas = document.createElement("canvas");
-const lightContext = lightCanvas.getContext("2d", { alpha: true });
-if (!lightContext) throw new Error("Light canvas unavailable");
-
-const daylight = Boolean(document.getElementById("lobbyBgImg"));
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const lowPower = innerWidth < 760 || (navigator.deviceMemory && navigator.deviceMemory <= 4);
-const particleCount = reducedMotion ? 60 : lowPower ? 110 : 220;
-const targetFrameTime = lowPower ? 1000 / 30 : 0;
-const TAU = Math.PI * 2;
-
-let width = 1;
-let height = 1;
-let pixelRatio = 1;
+const sourceSize = { width: 1672, height: 941 };
+const depthUrl = "/assets/lobby-room-3d-v3-depth.webp?v=1";
+const fx = fxCanvas.getContext("2d", { alpha:true, desynchronized:true });
+let renderer = null;
 let animationId = 0;
-let lastFrame = performance.now();
-let lastPaint = 0;
 let visible = !document.hidden;
 let intersecting = true;
+let pointerTarget = { x:.5, y:.5 };
+let pointerCurrent = { x:.5, y:.5 };
+let fxWidth = 1;
+let fxHeight = 1;
 
-canvas.style.pointerEvents = "none";
-canvas.setAttribute("aria-hidden", "true");
-canvas.dataset.physics = "active";
 viewer.classList.add("lobbyViewer--physics");
-const hint = viewer.querySelector(".lobbyViewer__hint");
-if (hint) hint.hidden = true;
+document.body.classList.add("lobby-mode");
 
-// Os feixes acompanham as duas janelas da arte. As coordenadas são normalizadas
-// para continuarem corretas em qualquer resolução do lobby.
-const beams = daylight ? [
-  { sourceX: 0.285, sourceY: 0.095, bottomX: 0.455, topWidth: 0.045, bottomWidth: 0.22, strength: 1.0 },
-  { sourceX: 0.805, sourceY: 0.105, bottomX: 0.605, topWidth: 0.050, bottomWidth: 0.24, strength: 0.92 }
-] : [];
-
-function randomBetween(min, max) {
-  return min + Math.random() * (max - min);
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const asset = new Image();
+    asset.decoding = "async";
+    asset.onload = () => resolve(asset);
+    asset.onerror = reject;
+    asset.src = url;
+  });
 }
 
-function resetParticle(particle, anywhere = false) {
-  particle.y = anywhere ? Math.random() : randomBetween(-0.08, 0.02);
-  if (daylight && beams.length && Math.random() < 0.62) {
-    const beam = beams[Math.floor(Math.random() * beams.length)];
-    const progress = Math.max(0, Math.min(1, (particle.y - beam.sourceY) / (1 - beam.sourceY)));
-    const center = beam.sourceX + (beam.bottomX - beam.sourceX) * progress;
-    const halfWidth = beam.topWidth + (beam.bottomWidth - beam.topWidth) * progress;
-    particle.x = center + randomBetween(-0.88, 0.88) * halfWidth;
-  } else {
-    particle.x = Math.random();
+function compileShader(gl, type, source) {
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
+  return shader;
+}
+
+function createDepthRenderer(colorImage, depthImage) {
+  const gl = depthCanvas.getContext("webgl", { alpha:false, antialias:false, powerPreference:lowPower ? "low-power" : "high-performance" });
+  if (!gl || reducedMotion) return null;
+  const vertex = compileShader(gl, gl.VERTEX_SHADER, "attribute vec2 position;varying vec2 uv;void main(){uv=position*.5+.5;gl_Position=vec4(position,0.,1.);}");
+  const fragment = compileShader(gl, gl.FRAGMENT_SHADER, `precision highp float;varying vec2 uv;uniform sampler2D colorMap;uniform sampler2D depthMap;uniform vec2 pointer;uniform vec2 viewport;void main(){float sourceAspect=${sourceSize.width.toFixed(1)}/${sourceSize.height.toFixed(1)};float viewAspect=viewport.x/viewport.y;vec2 cover=vec2(1.);if(viewAspect>sourceAspect)cover.y=sourceAspect/viewAspect;else cover.x=viewAspect/sourceAspect;vec2 sourceUv=(uv-.5)*cover/1.045+.5;float depth=texture2D(depthMap,sourceUv).r;vec2 motion=(pointer-.5)*vec2(.042,.026);vec2 displaced=clamp(sourceUv-motion*(depth-.18),vec2(.006),vec2(.994));vec3 color=texture2D(colorMap,displaced).rgb;float vignette=1.-smoothstep(.36,.78,length(uv-.5))*.23;color*=vignette;color=pow(color,vec3(.96));gl_FragColor=vec4(color,1.);}`);
+  const program = gl.createProgram();
+  gl.attachShader(program, vertex); gl.attachShader(program, fragment); gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+  gl.useProgram(program);
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
+  const position = gl.getAttribLocation(program, "position");
+  gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+  const pointerUniform = gl.getUniformLocation(program, "pointer");
+  const viewportUniform = gl.getUniformLocation(program, "viewport");
+
+  function upload(unit, source, name) {
+    const texture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    gl.uniform1i(gl.getUniformLocation(program, name), unit);
   }
-  particle.z = Math.random();
-  particle.radius = randomBetween(0.35, 1.45);
-  particle.vx = randomBetween(-0.002, 0.002);
-  particle.vy = randomBetween(0.001, 0.006);
-  particle.seed = Math.random() * 100;
-  particle.phase = Math.random() * TAU;
-  // A velocidade terminal cresce com o quadrado do raio (regime de Stokes).
-  particle.settling = 0.0015 + particle.radius * particle.radius * 0.0032;
-}
+  upload(0, colorImage, "colorMap"); upload(1, depthImage, "depthMap");
 
-const particles = Array.from({ length: particleCount }, () => {
-  const particle = {};
-  resetParticle(particle, true);
-  return particle;
-});
-
-function smoothStep(value) {
-  const x = Math.max(0, Math.min(1, value));
-  return x * x * (3 - 2 * x);
-}
-
-function beamIntensity(x, y) {
-  let light = daylight ? 0.08 : 0.025;
-  for (const beam of beams) {
-    const progress = Math.max(0, Math.min(1, (y - beam.sourceY) / (1 - beam.sourceY)));
-    const center = beam.sourceX + (beam.bottomX - beam.sourceX) * progress;
-    const halfWidth = beam.topWidth + (beam.bottomWidth - beam.topWidth) * progress;
-    const lateral = 1 - Math.abs(x - center) / halfWidth;
-    const vertical = smoothStep(progress / 0.12) * smoothStep((1 - progress) / 0.12);
-    light += smoothStep(lateral) * vertical * beam.strength;
+  function resize() {
+    const bounds = viewer.getBoundingClientRect();
+    const ratio = Math.min(devicePixelRatio || 1, lowPower ? 1 : 1.4);
+    const width = Math.max(1, Math.round(bounds.width * ratio));
+    const height = Math.max(1, Math.round(bounds.height * ratio));
+    if (depthCanvas.width === width && depthCanvas.height === height) return;
+    depthCanvas.width = width; depthCanvas.height = height; gl.viewport(0, 0, width, height);
   }
-  return Math.min(1.25, light);
-}
-
-function drawBeam(targetContext, beam) {
-  const sourceX = beam.sourceX * width;
-  const sourceY = beam.sourceY * height;
-  const bottomX = beam.bottomX * width;
-
-  // Camadas concêntricas evitam bordas artificiais e aproximam espalhamento
-  // volumétrico em um ambiente com poeira suspensa.
-  for (let layer = 10; layer >= 0; layer -= 1) {
-    const spread = (layer + 1) / 11;
-    const topHalf = beam.topWidth * width * spread;
-    const bottomHalf = beam.bottomWidth * width * spread;
-    const gradient = targetContext.createLinearGradient(sourceX, sourceY, bottomX, height);
-    const alpha = (0.012 + (1 - spread) * 0.007) * beam.strength;
-    gradient.addColorStop(0, "rgba(255,249,218,0)");
-    gradient.addColorStop(0.12, `rgba(255,244,196,${alpha * 1.5})`);
-    gradient.addColorStop(0.58, `rgba(255,224,155,${alpha})`);
-    gradient.addColorStop(1, "rgba(255,207,116,0)");
-
-    targetContext.beginPath();
-    targetContext.moveTo(sourceX - topHalf, sourceY);
-    targetContext.lineTo(sourceX + topHalf, sourceY);
-    targetContext.lineTo(bottomX + bottomHalf, height);
-    targetContext.lineTo(bottomX - bottomHalf, height);
-    targetContext.closePath();
-    targetContext.fillStyle = gradient;
-    targetContext.fill();
-  }
-}
-
-function rebuildLightLayer() {
-  lightCanvas.width = canvas.width;
-  lightCanvas.height = canvas.height;
-  lightContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-  lightContext.clearRect(0, 0, width, height);
-  lightContext.globalCompositeOperation = "lighter";
-  for (const beam of beams) drawBeam(lightContext, beam);
-  lightContext.globalCompositeOperation = "source-over";
-}
-
-const dustSprites = [];
-function createDustSprite(index) {
-  const sprite = document.createElement("canvas");
-  const size = 32;
-  sprite.width = size;
-  sprite.height = size;
-  const spriteContext = sprite.getContext("2d");
-  const glow = spriteContext.createRadialGradient(16, 16, 0, 16, 16, 16);
-  const core = 0.92 - index * 0.08;
-  glow.addColorStop(0, `rgba(255,252,225,${core})`);
-  glow.addColorStop(0.12, `rgba(255,240,190,${core * 0.72})`);
-  glow.addColorStop(0.38, `rgba(255,221,145,${core * 0.24})`);
-  glow.addColorStop(1, "rgba(255,205,110,0)");
-  spriteContext.fillStyle = glow;
-  spriteContext.fillRect(0, 0, size, size);
-  return sprite;
-}
-
-for (let index = 0; index < 4; index += 1) dustSprites.push(createDustSprite(index));
-
-function updateParticles(delta, time) {
-  const rootDelta = Math.sqrt(delta);
-  for (const particle of particles) {
-    // Campo de velocidade divergente: convecção solar + redemoinhos lentos.
-    const curlX = Math.sin(particle.y * 10.5 + time * 0.24 + particle.seed) * 0.0065 +
-      Math.cos(particle.z * 7.0 - time * 0.13 + particle.seed) * 0.0035;
-    const curlY = Math.cos(particle.x * 9.0 - time * 0.19 + particle.seed) * 0.0045;
-    const solarLift = beamIntensity(particle.x, particle.y) * 0.006;
-    const targetVx = 0.0025 + curlX;
-    const targetVy = particle.settling + curlY - solarLift;
-    const drag = 1 - Math.exp(-delta * (1.8 + (1 - particle.z) * 1.4));
-
-    particle.vx += (targetVx - particle.vx) * drag;
-    particle.vy += (targetVy - particle.vy) * drag;
-    // Movimento browniano é mais perceptível nos grãos menores.
-    const brownian = (1.8 - particle.radius) * 0.0018 * rootDelta;
-    particle.vx += randomBetween(-brownian, brownian);
-    particle.vy += randomBetween(-brownian, brownian);
-    particle.x += particle.vx * delta;
-    particle.y += particle.vy * delta;
-
-    if (particle.x > 1.04) particle.x = -0.04;
-    if (particle.x < -0.04) particle.x = 1.04;
-    if (particle.y > 1.06 || particle.y < -0.12) resetParticle(particle, false);
-  }
-}
-
-function drawParticles(time) {
-  for (const particle of particles) {
-    const illumination = beamIntensity(particle.x, particle.y);
-    const twinkle = 0.78 + Math.sin(time * 0.8 + particle.phase) * 0.22;
-    const depthScale = 0.55 + particle.z * 1.85;
-    const diameter = Math.max(1.9, particle.radius * depthScale * (lowPower ? 3.6 : 4.4));
-    const alpha = Math.min(0.94, (0.055 + illumination * 0.58) * twinkle * (0.68 + particle.z * 0.48));
-    if (alpha < 0.025) continue;
-
-    const spriteIndex = Math.min(3, Math.floor(particle.z * 4));
-    context.globalAlpha = alpha;
-    context.drawImage(
-      dustSprites[spriteIndex],
-      particle.x * width - diameter * 2,
-      particle.y * height - diameter * 2,
-      diameter * 4,
-      diameter * 4
-    );
-  }
-  context.globalAlpha = 1;
-}
-
-function render(time) {
-  context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-  context.clearRect(0, 0, width, height);
-  context.globalCompositeOperation = "lighter";
-  context.globalAlpha = 0.95 + Math.sin(time * 0.17) * 0.025 + Math.sin(time * 0.043) * 0.018;
-  context.drawImage(lightCanvas, 0, 0, width, height);
-  context.globalAlpha = 1;
-  drawParticles(time);
-  context.globalCompositeOperation = "source-over";
-}
-
-function frame(now) {
-  animationId = requestAnimationFrame(frame);
-  if (targetFrameTime && now - lastPaint < targetFrameTime) return;
-
-  const delta = Math.min(0.04, Math.max(0.001, (now - lastFrame) / 1000));
-  lastFrame = now;
-  lastPaint = now;
-  const time = now / 1000;
-  updateParticles(delta, time);
-  render(time);
-}
-
-function shouldRun() {
-  return visible && intersecting && viewer.style.display !== "none" && !document.body.classList.contains("ritual-started");
-}
-
-function start() {
-  if (animationId || !shouldRun()) return;
-  lastFrame = performance.now();
-  if (reducedMotion) {
-    render(lastFrame / 1000);
-    return;
-  }
-  animationId = requestAnimationFrame(frame);
-}
-
-function stop() {
-  if (!animationId) return;
-  cancelAnimationFrame(animationId);
-  animationId = 0;
-}
-
-function resize() {
-  const bounds = viewer.getBoundingClientRect();
-  if (!bounds.width || !bounds.height) return;
-  width = bounds.width;
-  height = bounds.height;
-  pixelRatio = Math.min(devicePixelRatio || 1, lowPower ? 1 : 1.35);
-  canvas.width = Math.round(width * pixelRatio);
-  canvas.height = Math.round(height * pixelRatio);
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  rebuildLightLayer();
-  render(performance.now() / 1000);
-}
-
-// Um movimento rápido próximo da tela desloca o ar e perturba as partículas.
-let previousPointer = null;
-viewer.addEventListener("pointermove", event => {
-  if (reducedMotion) return;
-  const bounds = viewer.getBoundingClientRect();
-  const x = (event.clientX - bounds.left) / bounds.width;
-  const y = (event.clientY - bounds.top) / bounds.height;
-  if (previousPointer) {
-    const movementX = x - previousPointer.x;
-    const movementY = y - previousPointer.y;
-    for (const particle of particles) {
-      const dx = particle.x - x;
-      const dy = particle.y - y;
-      const distance = Math.hypot(dx, dy);
-      if (distance >= 0.16) continue;
-      const impulse = smoothStep(1 - distance / 0.16) * (0.45 + particle.z * 0.55);
-      particle.vx += movementX * impulse * 1.8 + dx * impulse * 0.018;
-      particle.vy += movementY * impulse * 1.8 + dy * impulse * 0.018;
-    }
-  }
-  previousPointer = { x, y };
-}, { passive: true });
-viewer.addEventListener("pointerleave", () => { previousPointer = null; }, { passive: true });
-
-if ("ResizeObserver" in window) {
-  new ResizeObserver(resize).observe(viewer);
-} else {
-  window.addEventListener("resize", resize, { passive: true });
-}
-if ("IntersectionObserver" in window) {
-  new IntersectionObserver(entries => {
-    intersecting = entries[0]?.isIntersecting !== false;
-    if (shouldRun()) start(); else stop();
-  }, { threshold: 0.01 }).observe(viewer);
-}
-
-document.addEventListener("visibilitychange", () => {
-  visible = !document.hidden;
-  if (shouldRun()) start(); else stop();
-});
-
-resize();
-if (!document.body.classList.contains("ritual-started")) {
-  document.body.classList.add("lobby-mode");
-  start();
-} else {
-  viewer.style.display = "none";
-}
-
-window._lobby3d = {
-  show() {
-    if (document.body.classList.contains("ritual-started")) return;
-    viewer.style.display = "flex";
-    document.body.classList.add("lobby-mode");
+  function render() {
     resize();
-    start();
-  },
-  hide() {
-    viewer.style.display = "none";
-    document.body.classList.remove("lobby-mode");
-    stop();
+    pointerCurrent.x += (pointerTarget.x - pointerCurrent.x) * .065;
+    pointerCurrent.y += (pointerTarget.y - pointerCurrent.y) * .065;
+    gl.uniform2f(pointerUniform, pointerCurrent.x, pointerCurrent.y);
+    gl.uniform2f(viewportUniform, depthCanvas.width, depthCanvas.height);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
   }
-};
+  return { render, resize };
+}
+
+const particles = Array.from({ length:reducedMotion ? 34 : lowPower ? 58 : 96 }, (_, index) => ({ x:(index*71%101)/101, y:(index*47%97)/97, z:(index*37%89)/89, phase:index*1.67, speed:.000018+(index%7)*.000006, size:.45+(index%5)*.24 }));
+
+function resizeFx() {
+  const bounds = viewer.getBoundingClientRect();
+  const ratio = Math.min(devicePixelRatio || 1, lowPower ? 1 : 1.25);
+  fxWidth = bounds.width; fxHeight = bounds.height;
+  fxCanvas.width = Math.max(1, Math.round(fxWidth * ratio)); fxCanvas.height = Math.max(1, Math.round(fxHeight * ratio));
+  fxCanvas.style.width = `${fxWidth}px`; fxCanvas.style.height = `${fxHeight}px`;
+  fx.setTransform(ratio, 0, 0, ratio, 0, 0);
+}
+
+function drawFx(time) {
+  fx.clearRect(0, 0, fxWidth, fxHeight); fx.globalCompositeOperation = "lighter";
+  for (const particle of particles) {
+    particle.y -= particle.speed; if (particle.y < -.03) particle.y = 1.03;
+    const x = particle.x*fxWidth + Math.sin(time*.00015+particle.phase)*11 + (pointerCurrent.x-.5)*particle.z*16;
+    const y = particle.y*fxHeight + (pointerCurrent.y-.5)*particle.z*9;
+    const light = Math.max(0,1-Math.abs(particle.x-.53)*2.7)*Math.max(0,1-Math.abs(particle.y-.42)*2.2);
+    const radius = particle.size*(.7+particle.z*1.25);
+    fx.fillStyle = `rgba(255,220,160,${.07+light*.31})`; fx.beginPath(); fx.arc(x,y,radius,0,Math.PI*2); fx.fill();
+  }
+  fx.globalCompositeOperation = "source-over";
+}
+
+function shouldRun() { return visible && intersecting && viewer.style.display !== "none" && !document.body.classList.contains("ritual-started"); }
+function frame(time) { animationId=requestAnimationFrame(frame); renderer?.render(); if(!reducedMotion) drawFx(time); }
+function start() { if(!animationId && shouldRun()) animationId=requestAnimationFrame(frame); }
+function stop() { if(animationId){cancelAnimationFrame(animationId);animationId=0;} }
+function resize() { renderer?.resize(); resizeFx(); renderer?.render(); if(reducedMotion) drawFx(performance.now()); }
+
+viewer.addEventListener("pointermove", event => {
+  if(reducedMotion) return;
+  const bounds=viewer.getBoundingClientRect();
+  pointerTarget.x=Math.max(0,Math.min(1,(event.clientX-bounds.left)/bounds.width));
+  pointerTarget.y=Math.max(0,Math.min(1,1-(event.clientY-bounds.top)/bounds.height));
+}, { passive:true });
+viewer.addEventListener("pointerleave", () => { pointerTarget={x:.5,y:.5}; }, { passive:true });
+
+async function initialize() {
+  resizeFx();
+  try {
+    await image.decode();
+    const depth=await loadImage(depthUrl);
+    renderer=createDepthRenderer(image,depth);
+    if(renderer){renderer.render();depthCanvas.classList.add("ready");viewer.dataset.depth="ready";}
+  } catch(error) { viewer.dataset.depth="fallback";viewer.dataset.depthError=error?.message||"unknown";console.warn("Lobby depth parallax indisponível; usando render estático.",error); }
+  document.body.classList.add("lobby-video-ready"); start();
+}
+
+if("ResizeObserver" in window) new ResizeObserver(resize).observe(viewer); else addEventListener("resize",resize,{passive:true});
+if("IntersectionObserver" in window) new IntersectionObserver(entries=>{intersecting=entries[0]?.isIntersecting!==false;if(shouldRun())start();else stop();},{threshold:.01}).observe(viewer);
+document.addEventListener("visibilitychange",()=>{visible=!document.hidden;if(shouldRun())start();else stop();});
+
+window._lobby3d={show(){if(document.body.classList.contains("ritual-started"))return;viewer.style.display="flex";document.body.classList.add("lobby-mode");resize();start();},hide(){viewer.style.display="none";document.body.classList.remove("lobby-mode");stop();}};
+initialize();

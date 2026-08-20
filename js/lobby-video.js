@@ -4,12 +4,14 @@
 
   function _markReady(){ document.body.classList.add('lobby-video-ready'); }
 
-  var vid = document.getElementById('lobbyBgVideo');
-  if(vid){
-    vid.addEventListener('canplay', _markReady, { once:true });
-    vid.addEventListener('error',   _markReady, { once:true });
-    setTimeout(_markReady, 3000);
-    vid.play().catch(function(){});
+  var image = document.getElementById('lobbyBgImg');
+  if(image){
+    if(image.complete) _markReady();
+    else {
+      image.addEventListener('load', _markReady, { once:true });
+      image.addEventListener('error', _markReady, { once:true });
+    }
+    setTimeout(_markReady, 2200);
   } else {
     _markReady();
   }
@@ -47,7 +49,6 @@
   // para tudo quando ritual começar
   var obs = new MutationObserver(function(){
     if(document.body.classList.contains('ritual-started')){
-      if(vid) vid.pause();
       if(aud) aud.pause();
       obs.disconnect();
     }

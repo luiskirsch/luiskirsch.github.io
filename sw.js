@@ -1,14 +1,16 @@
-const CACHE = "osl-v33-lobby-forward-audio-trim";
+const CACHE = "osl-v34-lobby-depth-parallax";
 
 const PRECACHE = [
   "/favicon.png",
-  "/assets/lobby-room.webm?v=2",
-  "/assets/lobby-room-v2.mp4?v=2",
+  "/assets/lobby-room-3d-v3.avif?v=1",
+  "/assets/lobby-room-3d-v3.webp?v=1",
+  "/assets/lobby-room-3d-v3-depth.webp?v=1",
+  "/assets/lobby-room-3d-v3-lqip.webp?v=1",
   "/assets/luz-falhando.ogg",
   "/assets/luz-falhando.mp3",
   "/verso-carta.webp?v=2",
   "/js/reward-chest-loader.js?v=1",
-  "/js/lobby-3d.js?v=5"
+  "/js/lobby-3d.js?v=6"
 ];
 
 self.addEventListener("install", event => {
