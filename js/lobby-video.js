@@ -3,8 +3,8 @@
   var vB = document.getElementById('lobbyVideoB');
   if (!vA || !vB) return;
 
-  var FADE = 0.6;      // segundos de crossfade
-  var OVERLAP = 0.8;   // segundos antes do fim para iniciar o próximo
+  var FADE = 1.2;      // segundos de crossfade
+  var OVERLAP = 1.5;   // segundos antes do fim para iniciar o próximo
   var active = vA, next = vB;
   var switching = false;
   var unlocked = false;
@@ -44,8 +44,8 @@
   function _markReady() { document.body.classList.add('lobby-video-ready'); }
   vA.addEventListener('canplay', _markReady, { once: true });
   vA.addEventListener('timeupdate', _markReady, { once: true });
-  // Fallback: exibe o centro mesmo se o vídeo não iniciar em 2s
-  setTimeout(_markReady, 2000);
+  // O poster já entrega a cena; libera os controles no primeiro frame.
+  _markReady();
 
   function updateLobbyMuteBtn() {
     var btn = document.getElementById('toggleLobbyAudioBtn');
