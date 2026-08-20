@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
-<link rel="preload" href="/assets/lobby-room.webp?v=1" as="image" type="image/webp" fetchpriority="high">
+<link rel="preload" href="/assets/lobby-room.webp?v=2" as="image" type="image/webp" fetchpriority="high">
 <script src="../js/proteger-sala.js"></script>
 
   <meta charset="UTF-8">
@@ -6793,7 +6793,7 @@
     height:clamp(300px, calc(100svh - 300px), 580px);
     overflow:hidden;
     border-radius:0;
-    background:#090807 url('/assets/lobby-room.webp?v=1') center/cover no-repeat;
+    background:#090807 url('/assets/lobby-room.webp?v=2') center/cover no-repeat;
     display:flex;align-items:stretch;
     mask-image:linear-gradient(to bottom, transparent 0%, black 7%, black 82%, transparent 100%);
     -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 7%, black 82%, transparent 100%);
@@ -6802,7 +6802,8 @@
   body.ritual-started .videoColPlaceholder { display:none!important; }
   body.ritual-started .gameTableGrid { grid-template-columns: auto 1fr auto; }
   .lobbyViewer::after{ display:none; }
-  .lobbyViewer__video{
+  .lobbyViewer__video{ display:none; }
+  .lobbyViewer__img{
     position:absolute;inset:0;
     width:100%;height:100%;
     object-fit:cover;
@@ -7503,12 +7504,7 @@
 
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
                 <div id="lobbyViewer" class="lobbyViewer">
-                  <video id="lobbyVideoA" class="lobbyViewer__video" autoplay muted playsinline preload="metadata" poster="/assets/lobby-room.webp?v=1">
-                    <source src="/assets/lobby-room.mp4?v=4" type="video/mp4">
-                  </video>
-                  <video id="lobbyVideoB" class="lobbyViewer__video" muted playsinline preload="none" poster="/assets/lobby-room.webp?v=1" style="opacity:0">
-                    <source src="/assets/lobby-room.mp4?v=4" type="video/mp4">
-                  </video>
+                  <img id="lobbyBgImg" class="lobbyViewer__img" src="/assets/lobby-room.webp?v=2" alt="" draggable="false">
                   <canvas id="lobbyCanvas"></canvas>
                   <div class="lobbyViewer__vignette" aria-hidden="true"></div>
                   <div class="lobbyViewer__hint">Arraste para girar</div>
