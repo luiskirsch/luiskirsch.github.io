@@ -5,6 +5,11 @@ const depthCanvas = document.getElementById("depthCanvas");
 const fxCanvas = document.getElementById("fxCanvas");
 const hotspotLayer = document.getElementById("hotspots");
 const navLayer = document.getElementById("navPoints");
+const detailView = document.getElementById("detailView");
+const detailPlane = document.getElementById("detailPlane");
+const detailImage = document.getElementById("detailImage");
+const detailHotspotLayer = document.getElementById("detailHotspots");
+const detailNavLayer = document.getElementById("detailNavPoints");
 const loader = document.getElementById("loader");
 const loadStatus = document.getElementById("loadStatus");
 const locationLabel = document.getElementById("locationLabel");
@@ -35,14 +40,14 @@ const nodes = {
   },
   desk: {
     label: "23:48 · Examinando a bancada",
-    zoom: 1.86, focus: { x:.36, y:.48 },
+    zoom: 1.28, focus: { x:.36, y:.48 }, detail: true,
     avif: `${assetRoot}/arquivo-302-ultrareal.avif`,
     webp: `${assetRoot}/arquivo-302-ultrareal.webp`,
     depth: `${assetRoot}/arquivo-302-depth.webp`,
     lqip: `${assetRoot}/arquivo-302-lqip.webp`,
     alt: "Aproximação contínua da bancada da escrivaninha",
     exits: [
-      { to: "entry", x: 47, y: 60, icon: "↓", label: "Recuar até a entrada" }
+      { to: "entry", x: 87, y: 79, icon: "↓", label: "Recuar até a entrada" }
     ]
   },
   sofa: {
@@ -60,9 +65,9 @@ const nodes = {
 };
 
 const clues = [
-  { id:"knife", node:"desk", title:"Faca de escritório", x:50.2, y:54.8, description:"A lâmina foi limpa às pressas. Fibras escuras permanecem junto ao cabo.", code:"EVD-302-A1" },
+  { id:"knife", node:"desk", title:"Faca de escritório", x:56.2, y:70.2, description:"A lâmina foi limpa às pressas. Fibras escuras permanecem junto ao cabo.", code:"EVD-302-A1" },
   { id:"key", node:"entry", title:"Chave sem identificação", x:58.2, y:92.7, description:"A pequena chave de latão não pertence a nenhuma fechadura do escritório.", code:"EVD-302-B4" },
-  { id:"photo", node:"desk", title:"Documentos marcados", x:35.2, y:46.7, description:"Os documentos sobre a bancada ligam a vítima ao cais. Uma página foi retirada recentemente.", code:"EVD-302-C2" },
+  { id:"photo", node:"desk", title:"Documentos marcados", x:43.2, y:54.5, description:"Os documentos sobre a bancada ligam a vítima ao cais. Uma página foi retirada recentemente.", code:"EVD-302-C2" },
   { id:"camera", node:"sofa", title:"Câmera danificada", x:72.3, y:62.7, description:"O cartão de memória desapareceu, mas a lente ainda conserva uma impressão parcial.", code:"EVD-302-D7" },
   { id:"glass", node:"sofa", title:"Vidro temperado", x:78.2, y:69.3, description:"Os fragmentos não pertencem à janela. Há vestígios de perfume na superfície.", code:"EVD-302-E3" }
 ];
@@ -98,6 +103,8 @@ function fitPlane() {
   const scale = Math.max(innerWidth / sourceSize.width, innerHeight / sourceSize.height);
   plane.style.width = `${Math.ceil(sourceSize.width * scale)}px`;
   plane.style.height = `${Math.ceil(sourceSize.height * scale)}px`;
+  detailPlane.style.width = `${Math.ceil(sourceSize.width * scale)}px`;
+  detailPlane.style.height = `${Math.ceil(sourceSize.height * scale)}px`;
   updatePlaneTransform();
 }
 
@@ -117,7 +124,11 @@ function buildClueList() {
 function renderNodeControls() {
   hotspotLayer.replaceChildren();
   navLayer.replaceChildren();
+  detailHotspotLayer.replaceChildren();
+  detailNavLayer.replaceChildren();
   locationLabel.textContent = nodes[currentNode].label;
+  const targetHotspots = nodes[currentNode].detail ? detailHotspotLayer : hotspotLayer;
+  const targetNav = nodes[currentNode].detail ? detailNavLayer : navLayer;
 
   clues.filter(clue => clue.node === currentNode && !clue.found).forEach(clue => {
     const button = document.createElement("button");
@@ -130,7 +141,7 @@ function renderNodeControls() {
     button.addEventListener("pointermove", moveTooltip);
     button.addEventListener("pointerleave", hideTooltip);
     button.addEventListener("click", () => collectClue(clue, button));
-    hotspotLayer.appendChild(button);
+    targetHotspots.appendChild(button);
   });
 
   nodes[currentNode].exits.forEach(exit => {
@@ -142,7 +153,7 @@ function renderNodeControls() {
     button.setAttribute("aria-label", exit.label);
     button.innerHTML = `${exit.icon}<span>${exit.label}</span>`;
     button.addEventListener("click", () => switchNode(exit.to));
-    navLayer.appendChild(button);
+    targetNav.appendChild(button);
   });
 }
 
@@ -275,7 +286,14 @@ async function switchNode(nodeId) {
   panX = 0; zoom = 1; pointerTarget = { x:.5, y:.5 }; pointerCurrent = { x:.5, y:.5 };
   updatePlaneTransform();
   renderNodeControls();
-  await new Promise(resolve => setTimeout(resolve, reducedMotion ? 0 : 1180));
+  detailView.setAttribute("aria-hidden", nodeId === "desk" ? "false" : "true");
+  if (nodeId === "desk") {
+    void detailView.offsetWidth;
+    detailView.classList.add("active");
+  } else {
+    detailView.classList.remove("active");
+  }
+  await new Promise(resolve => setTimeout(resolve, reducedMotion ? 0 : 1250));
   scene.classList.remove("moving");
   setTimeout(() => toast.classList.remove("show"), 420);
   moving = false;
@@ -289,10 +307,11 @@ function frame(time) { if (depthRenderer) depthRenderer.render(); if (!reducedMo
 
 async function start() {
   buildClueList(); renderNodeControls(); fitPlane(); resizeFx();
+  detailImage.decode().catch(() => {});
   try {
     await image.decode();
     loadStatus.textContent = "Aplicando profundidade dinâmica";
-    const initialAssets = await Promise.all([loadImage(image.currentSrc || image.src), depthAvailable ? loadImage(nodes.entry.depth) : Promise.resolve(null)]).then(([color, depth]) => ({ color, depth }));
+    const initialAssets = await Promise.all([Promise.resolve(image), depthAvailable ? loadImage(nodes.entry.depth) : Promise.resolve(null)]).then(([color, depth]) => ({ color, depth }));
     if (initialAssets.depth) depthRenderer = createDepthRenderer(initialAssets.color, initialAssets.depth);
     if (depthRenderer) { depthRenderer.render(); depthCanvas.classList.add("ready"); }
     else depthAvailable = false;

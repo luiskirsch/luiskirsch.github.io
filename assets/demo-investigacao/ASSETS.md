@@ -19,7 +19,10 @@ Os arquivos em `scene/` foram gerados com a ferramenta integrada de geração de
 - `arquivo-302-ultrareal.webp`: fallback WebP.
 - `arquivo-302-depth.webp`: mapa de profundidade para paralaxe WebGL.
 - `arquivo-302-lqip.webp`: placeholder de carregamento imediato.
+- `arquivo-302-desk-overhead.avif`: câmera superior dedicada da escrivaninha, com detalhe nativo para inspeção.
+- `arquivo-302-desk-overhead.webp`: fallback WebP da câmera superior.
+- `arquivo-302-desk-overhead-lqip.webp`: placeholder ultraleve da câmera superior.
 
 A composição é original e foi criada como cenário noturno de investigação, com materiais realistas, objetos individualizados, iluminação cinematográfica e camadas de profundidade. Não contém interface, logotipos ou elementos copiados de jogos existentes.
 
-A exploração usa intencionalmente esse único render e seu único mapa de profundidade em todos os pontos de observação. A câmera faz deslocamentos e aproximações determinísticas sobre a mesma fonte, preservando exatamente a posição, a aparência e a lógica espacial de cada objeto.
+A visão geral e a aproximação inicial usam o render canônico e seu mapa de profundidade. A inspeção da escrivaninha conclui o movimento com uma câmera superior dedicada, otimizada em AVIF/WebP, para preservar detalhe nativo nos documentos sem ampliar pixels do panorama.
