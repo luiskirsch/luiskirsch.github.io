@@ -1,566 +1,300 @@
-import * as THREE from "three";
-import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js";
-import { MeshoptDecoder } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/libs/meshopt_decoder.module.js";
-import { RoomEnvironment } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/environments/RoomEnvironment.js";
+(() => {
+  "use strict";
 
-const viewer = document.getElementById("lobbyViewer");
-const fallbackImage = document.getElementById("lobbyBgImg");
-const canvas = document.getElementById("lobbyDepthCanvas");
-const legacyFxCanvas = document.getElementById("lobbyCanvas");
+  const viewer = document.getElementById("lobbyViewer");
+  const image = document.getElementById("lobbyBgImg");
+  const depthCanvas = document.getElementById("lobbyDepthCanvas");
+  const fxCanvas = document.getElementById("lobbyCanvas");
 
-if (!viewer || !fallbackImage || !canvas) {
-  console.warn("Lobby 3D PBR indisponível: elementos do viewer não encontrados.");
-} else {
+  if (!viewer || !image || !depthCanvas || !fxCanvas) {
+    console.warn("Lobby 2.5D indisponível: elementos do viewer não encontrados.");
+    return;
+  }
+
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const coarsePointer = matchMedia("(pointer: coarse)").matches;
-  const lowMemory = Number(navigator.deviceMemory || 8) <= 4;
-  const mobile = innerWidth < 760 || coarsePointer || lowMemory;
-  const tier = mobile ? "mobile" : "desktop";
-  const modelSuffix = mobile ? "-mobile" : "";
-  const clock = new THREE.Clock();
-  const pointerTarget = new THREE.Vector2();
-  const pointerCurrent = new THREE.Vector2();
-  const cameraBase = new THREE.Vector3(0, 2.34, 6.25);
-  const lookBase = new THREE.Vector3(0, 1.16, -0.9);
-  const lookCurrent = lookBase.clone();
-  const lookTarget = lookBase.clone();
+  const lowPower = innerWidth < 760 || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+  const sourceSize = { width: 1672, height: 941 };
+  const depthUrl = "/assets/lobby-room-2-5d-ultra-depth.webp?v=1";
+  const fx = fxCanvas.getContext("2d", { alpha: true, desynchronized: true });
 
-  let renderer;
-  let scene;
-  let camera;
-  let dust;
-  let warmLight;
-  let radioLight;
+  let renderer = null;
   let animationId = 0;
+  let previousTime = performance.now();
   let visible = !document.hidden;
   let intersecting = true;
-  let initialized = false;
   let contextLost = false;
-  let touchDragging = false;
-  let lastTouch = null;
+  let pointerTarget = { x: 0.5, y: 0.5 };
+  let pointerCurrent = { x: 0.5, y: 0.5 };
+  let fxWidth = 1;
+  let fxHeight = 1;
 
-  THREE.Cache.enabled = true;
-  viewer.classList.add("lobbyViewer--pbr");
+  viewer.classList.remove("lobbyViewer--pbr");
+  viewer.classList.add("lobbyViewer--physics");
   document.body.classList.add("lobby-mode");
-  if (legacyFxCanvas) legacyFxCanvas.hidden = true;
+  viewer.dataset.effect = "2.5d-ultra";
 
-  const textureLoader = new THREE.TextureLoader();
-  const gltfLoader = new GLTFLoader();
-  gltfLoader.setMeshoptDecoder(MeshoptDecoder);
-
-  const textureUrl = (material, channel) =>
-    `/assets/lobby-pbr/materials/${tier}/${material}_${channel}.webp?v=1`;
-  const modelUrl = name => {
-    const suffix = name === "table" ? (mobile ? "-mobile" : "-desktop") : modelSuffix;
-    return `/assets/lobby-pbr/models/${name}${suffix}.glb?v=1`;
-  };
-
-  function loadTexture(url, color = false) {
+  function loadImage(url) {
     return new Promise((resolve, reject) => {
-      textureLoader.load(url, texture => {
-        if (color) texture.colorSpace = THREE.SRGBColorSpace;
-        texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-        resolve(texture);
-      }, undefined, reject);
+      const asset = new Image();
+      asset.decoding = "async";
+      asset.onload = () => resolve(asset);
+      asset.onerror = () => reject(new Error(`Falha ao carregar ${url}`));
+      asset.src = url;
     });
   }
 
-  function loadModel(url) {
-    return new Promise((resolve, reject) => {
-      gltfLoader.load(url, gltf => resolve(gltf.scene), undefined, reject);
-    });
-  }
-
-  function configureTexture(texture, repeatX, repeatY) {
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(repeatX, repeatY);
-    texture.needsUpdate = true;
-    return texture;
-  }
-
-  async function loadPbrMaterial(name, repeatX, repeatY, options = {}) {
-    const [color, normal, arm] = await Promise.all([
-      loadTexture(textureUrl(name, "diff"), true),
-      loadTexture(textureUrl(name, "nor_gl")),
-      loadTexture(textureUrl(name, "arm"))
-    ]);
-    configureTexture(color, repeatX, repeatY);
-    configureTexture(normal, repeatX, repeatY);
-    configureTexture(arm, repeatX, repeatY);
-    arm.channel = 0;
-    return new THREE.MeshStandardMaterial({
-      map: color,
-      normalMap: normal,
-      aoMap: arm,
-      roughnessMap: arm,
-      metalnessMap: arm,
-      color: options.color || 0xffffff,
-      roughness: options.roughness ?? 0.9,
-      metalness: options.metalness ?? 0.02,
-      normalScale: new THREE.Vector2(options.normalScale ?? 0.75, options.normalScale ?? 0.75)
-    });
-  }
-
-  function mesh(geometry, material, position, rotation = null) {
-    const object = new THREE.Mesh(geometry, material);
-    object.position.set(...position);
-    if (rotation) object.rotation.set(...rotation);
-    object.castShadow = true;
-    object.receiveShadow = true;
-    scene.add(object);
-    return object;
-  }
-
-  function addBox(size, position, material, rotation = null) {
-    return mesh(new THREE.BoxGeometry(...size), material, position, rotation);
-  }
-
-  function markModel(object, castShadow = true) {
-    object.traverse(child => {
-      if (!child.isMesh) return;
-      child.castShadow = castShadow;
-      child.receiveShadow = true;
-      const materials = Array.isArray(child.material) ? child.material : [child.material];
-      for (const material of materials) {
-        if (!material) continue;
-        material.envMapIntensity = mobile ? 0.42 : 0.58;
-        for (const key of ["map", "normalMap", "roughnessMap", "metalnessMap", "aoMap", "emissiveMap"]) {
-          if (material[key]) material[key].anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-        }
-      }
-    });
-    return object;
-  }
-
-  function addWindow(x, wood, forestTexture) {
-    const width = 2.48;
-    const height = 2.48;
-    const windowY = 2.56;
-    const exteriorTexture = forestTexture.clone();
-    exteriorTexture.needsUpdate = true;
-    exteriorTexture.repeat.set(0.52, 0.8);
-    exteriorTexture.offset.set(x < 0 ? 0 : 0.48, 0.12);
-    const exteriorMaterial = new THREE.MeshBasicMaterial({ map: exteriorTexture, toneMapped: false });
-    const exterior = mesh(new THREE.PlaneGeometry(width, height), exteriorMaterial, [x, windowY, -5.12]);
-    exterior.castShadow = false;
-    exterior.receiveShadow = false;
-
-    const glass = new THREE.MeshPhysicalMaterial({
-      color: 0x718ca2,
-      transparent: true,
-      opacity: mobile ? 0.13 : 0.2,
-      roughness: 0.18,
-      metalness: 0,
-      transmission: mobile ? 0 : 0.38,
-      thickness: 0.035,
-      depthWrite: false
-    });
-    const glassPane = mesh(new THREE.PlaneGeometry(width, height), glass, [x, windowY, -4.965]);
-    glassPane.castShadow = false;
-    glassPane.receiveShadow = false;
-
-    const z = -4.91;
-    const edge = 0.11;
-    addBox([width + 0.26, edge, 0.13], [x, windowY + height / 2 + 0.07, z], wood);
-    addBox([width + 0.26, edge, 0.13], [x, windowY - height / 2 - 0.07, z], wood);
-    addBox([edge, height + 0.26, 0.13], [x - width / 2 - 0.07, windowY, z], wood);
-    addBox([edge, height + 0.26, 0.13], [x + width / 2 + 0.07, windowY, z], wood);
-    addBox([edge * 0.72, height, 0.12], [x, windowY, z + 0.01], wood);
-    addBox([width, edge * 0.72, 0.12], [x, windowY, z + 0.01], wood);
-  }
-
-  function makeTitleTexture() {
-    const titleCanvas = document.createElement("canvas");
-    titleCanvas.width = mobile ? 1024 : 2048;
-    titleCanvas.height = mobile ? 192 : 384;
-    const ctx = titleCanvas.getContext("2d");
-    ctx.clearRect(0, 0, titleCanvas.width, titleCanvas.height);
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = `${mobile ? 116 : 232}px Georgia, 'Times New Roman', serif`;
-    ctx.fillStyle = "rgba(20,8,3,.96)";
-    ctx.shadowColor = "rgba(255,205,125,.18)";
-    ctx.shadowBlur = mobile ? 3 : 7;
-    ctx.shadowOffsetY = mobile ? 1 : 2;
-    ctx.fillText("SEXTO LUGAR", titleCanvas.width / 2, titleCanvas.height / 2, titleCanvas.width * 0.88);
-    const texture = new THREE.CanvasTexture(titleCanvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    return texture;
-  }
-
-  function addTableTitle() {
-    const texture = makeTitleTexture();
-    const material = new THREE.MeshStandardMaterial({
-      map: texture,
-      bumpMap: texture,
-      bumpScale: -0.006,
-      transparent: true,
-      roughness: 0.94,
-      metalness: 0,
-      depthWrite: false,
-      polygonOffset: true,
-      polygonOffsetFactor: -2
-    });
-    const title = mesh(new THREE.PlaneGeometry(3.28, 0.92), material, [0, 0.826, -0.82], [-Math.PI / 2, 0, 0]);
-    title.castShadow = false;
-    title.renderOrder = 3;
-  }
-
-  function addDust() {
-    const count = reducedMotion ? 38 : mobile ? 58 : 150;
-    const positions = new Float32Array(count * 3);
-    let seed = 9137;
-    const random = () => {
-      seed = (seed * 16807) % 2147483647;
-      return (seed - 1) / 2147483646;
-    };
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (random() - 0.5) * 11.5;
-      positions[i * 3 + 1] = 0.35 + random() * 4.05;
-      positions[i * 3 + 2] = -4.6 + random() * 10.5;
+  function compileShader(gl, type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      throw new Error(gl.getShaderInfoLog(shader) || "Falha ao compilar shader do lobby");
     }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({
-      color: 0xffdfaa,
-      size: mobile ? 0.018 : 0.024,
-      transparent: true,
-      opacity: 0.46,
-      depthWrite: false,
-      sizeAttenuation: true,
-      blending: THREE.AdditiveBlending
-    });
-    dust = new THREE.Points(geometry, material);
-    dust.frustumCulled = false;
-    scene.add(dust);
+    return shader;
   }
 
-  async function buildRoom() {
-    const [floor, plaster, carpet, forest] = await Promise.all([
-      loadPbrMaterial("old_wooden_floor_02", 5.2, 5.8, { roughness: 0.82, normalScale: 0.82 }),
-      loadPbrMaterial("plastered_wall_04", 3.2, 2.2, { roughness: 0.96, normalScale: 0.62, color: 0x7f776d }),
-      loadPbrMaterial("dirty_carpet", 1.35, 1.15, { roughness: 0.98, normalScale: 0.48, color: 0x4d4742 }),
-      loadTexture(`/assets/lobby-pbr/environment/moonlit-forest${mobile ? "-mobile" : ""}.webp?v=1`, true)
-    ]);
-    forest.wrapS = forest.wrapT = THREE.ClampToEdgeWrapping;
-
-    mesh(new THREE.PlaneGeometry(13.2, 14), floor, [0, 0, 1.25], [-Math.PI / 2, 0, 0]);
-    mesh(new THREE.PlaneGeometry(5.9, 4.35), carpet, [0, 0.014, -0.52], [-Math.PI / 2, 0, 0]);
-    const ceiling = plaster.clone();
-    ceiling.color.set(0x343331);
-    mesh(new THREE.PlaneGeometry(13.2, 14), ceiling, [0, 5.05, 1.25], [Math.PI / 2, 0, 0]);
-
-    addBox([13.1, 1.32, 0.14], [0, 0.66, -5], plaster);
-    addBox([13.1, 1.18, 0.14], [0, 4.46, -5], plaster);
-    addBox([1.72, 2.55, 0.14], [-5.64, 2.57, -5], plaster);
-    addBox([4.62, 2.55, 0.14], [0, 2.57, -5], plaster);
-    addBox([1.72, 2.55, 0.14], [5.64, 2.57, -5], plaster);
-    addBox([0.14, 5.05, 14], [-6.55, 2.52, 1.25], plaster);
-    addBox([0.14, 5.05, 14], [6.55, 2.52, 1.25], plaster);
-
-    const wood = floor.clone();
-    wood.roughness = 0.76;
-    wood.color.set(0x5f3b27);
-    addBox([13.05, 1.12, 0.08], [0, 0.57, -4.89], wood);
-    addBox([0.08, 1.12, 13.8], [-6.46, 0.57, 1.25], wood);
-    addBox([0.08, 1.12, 13.8], [6.46, 0.57, 1.25], wood);
-    addBox([13.1, 0.12, 0.12], [0, 1.14, -4.82], wood);
-    addBox([0.12, 0.12, 13.8], [-6.39, 1.14, 1.25], wood);
-    addBox([0.12, 0.12, 13.8], [6.39, 1.14, 1.25], wood);
-
-    addWindow(-3.58, wood, forest);
-    addWindow(3.58, wood, forest);
-
-    const pictureTexture = forest.clone();
-    pictureTexture.repeat.set(0.42, 0.5);
-    pictureTexture.offset.set(0.29, 0.23);
-    pictureTexture.needsUpdate = true;
-    addBox([2.28, 1.45, 0.08], [0, 3.03, -4.88], wood);
-    mesh(new THREE.PlaneGeometry(1.98, 1.15), new THREE.MeshStandardMaterial({ map: pictureTexture, roughness: 0.68 }), [0, 3.03, -4.825]);
-
-    addBox([1.5, 0.1, 0.48], [-5.35, 1.08, -4.42], wood);
-    addBox([0.1, 0.72, 0.1], [-5.93, 0.72, -4.45], wood);
-    addBox([0.1, 0.72, 0.1], [-4.77, 0.72, -4.45], wood);
-
-    const table = markModel(await loadModel(modelUrl("table")));
-    table.scale.set(3.58, 1.03, 2.58);
-    table.position.set(0, 0, -0.82);
-    scene.add(table);
-    addTableTitle();
-
-    const chairSource = markModel(await loadModel(modelUrl("chair")));
-    const chairBounds = new THREE.Box3().setFromObject(chairSource);
-    const chairHeight = chairBounds.getSize(new THREE.Vector3()).y || 1;
-    chairSource.scale.setScalar(1.16 / chairHeight);
-    const chairs = [
-      [-2.05, 0, -2.35, 0], [0, 0, -2.48, 0], [2.05, 0, -2.35, 0],
-      [-2.05, 0, 0.72, Math.PI], [0, 0, 0.86, Math.PI], [2.05, 0, 0.72, Math.PI]
-    ];
-    chairs.forEach(([x, y, z, rotation]) => {
-      const chair = chairSource.clone(true);
-      chair.position.set(x, y, z);
-      chair.rotation.y = rotation;
-      scene.add(chair);
-    });
-
-    addDust();
-  }
-
-  async function addHeroProps() {
-    const [lampResult, radioResult] = await Promise.allSettled([
-      loadModel(modelUrl("pendant-lamp")),
-      loadModel(modelUrl("radio"))
-    ]);
-
-    if (lampResult.status === "fulfilled") {
-      const lamp = markModel(lampResult.value);
-      lamp.traverse(child => {
-        const materials = child.isMesh ? (Array.isArray(child.material) ? child.material : [child.material]) : [];
-        materials.forEach(material => {
-          if (material?.emissive) material.emissiveIntensity = Math.min(material.emissiveIntensity || 1, 0.72);
-        });
-      });
-      lamp.scale.setScalar(0.94);
-      lamp.position.set(0, 4.87, -0.86);
-      scene.add(lamp);
-    }
-
-    if (radioResult.status === "fulfilled") {
-      const radio = markModel(radioResult.value);
-      radio.scale.setScalar(1.45);
-      radio.position.set(-5.35, 1.13, -4.38);
-      radio.rotation.y = 0.04;
-      scene.add(radio);
-    }
-
-    if (lampResult.status === "rejected" || radioResult.status === "rejected") {
-      console.warn("Alguns objetos PBR opcionais do lobby não foram carregados.", lampResult, radioResult);
-    }
-    renderOnce();
-  }
-
-  function setupRenderer() {
-    renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: !mobile,
+  function createDepthRenderer(colorImage, depthImage) {
+    const gl = depthCanvas.getContext("webgl", {
       alpha: false,
-      powerPreference: mobile ? "low-power" : "high-performance",
-      failIfMajorPerformanceCaveat: true
+      antialias: false,
+      depth: false,
+      stencil: false,
+      preserveDrawingBuffer: false,
+      powerPreference: lowPower ? "low-power" : "high-performance"
     });
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = mobile ? 0.9 : 0.88;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.1 : 1.5));
-    renderer.domElement.addEventListener("webglcontextlost", event => {
-      event.preventDefault();
-      contextLost = true;
-      canvas.classList.remove("ready");
-      viewer.dataset.pbr = "context-lost";
-      stop();
-    });
-    renderer.domElement.addEventListener("webglcontextrestored", () => {
-      contextLost = false;
+
+    if (!gl || reducedMotion) return null;
+
+    const vertex = compileShader(gl, gl.VERTEX_SHADER, `
+      attribute vec2 position;
+      varying vec2 uv;
+      void main() {
+        uv = position * .5 + .5;
+        gl_Position = vec4(position, 0., 1.);
+      }
+    `);
+
+    const horizontal = lowPower ? ".028" : ".040";
+    const vertical = lowPower ? ".017" : ".024";
+    const fragment = compileShader(gl, gl.FRAGMENT_SHADER, `
+      precision highp float;
+      varying vec2 uv;
+      uniform sampler2D colorMap;
+      uniform sampler2D depthMap;
+      uniform vec2 pointer;
+      uniform vec2 viewport;
+
+      void main() {
+        float sourceAspect = ${sourceSize.width.toFixed(1)} / ${sourceSize.height.toFixed(1)};
+        float viewAspect = viewport.x / viewport.y;
+        vec2 cover = vec2(1.);
+        if (viewAspect > sourceAspect) cover.y = sourceAspect / viewAspect;
+        else cover.x = viewAspect / sourceAspect;
+
+        // Overscan real: nenhuma borda vazia aparece nos extremos do cursor.
+        vec2 sourceUv = (uv - .5) * cover / 1.07 + .5;
+        float depth = texture2D(depthMap, sourceUv).r;
+        float depthLayer = smoothstep(.055, .96, depth) - .24;
+        vec2 cursor = pointer - .5;
+        vec2 cameraPan = cursor * vec2(.010, .006);
+        vec2 parallax = cursor * vec2(${horizontal}, ${vertical}) * depthLayer;
+        vec2 displaced = clamp(sourceUv - cameraPan - parallax, vec2(.004), vec2(.996));
+
+        vec3 color = texture2D(colorMap, displaced).rgb;
+        float vignette = 1. - smoothstep(.43, .78, length(uv - .5)) * .16;
+        color = pow(color * vignette * 1.025, vec3(.985));
+        gl_FragColor = vec4(color, 1.);
+      }
+    `);
+
+    const program = gl.createProgram();
+    gl.attachShader(program, vertex);
+    gl.attachShader(program, fragment);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      throw new Error(gl.getProgramInfoLog(program) || "Falha ao ligar shader do lobby");
+    }
+
+    gl.useProgram(program);
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -1, -1, 1, -1, -1, 1,
+      -1, 1, 1, -1, 1, 1
+    ]), gl.STATIC_DRAW);
+
+    const position = gl.getAttribLocation(program, "position");
+    gl.enableVertexAttribArray(position);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+    const pointerUniform = gl.getUniformLocation(program, "pointer");
+    const viewportUniform = gl.getUniformLocation(program, "viewport");
+
+    function upload(unit, source, name) {
+      const texture = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE0 + unit);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+      gl.uniform1i(gl.getUniformLocation(program, name), unit);
+    }
+
+    upload(0, colorImage, "colorMap");
+    upload(1, depthImage, "depthMap");
+
+    function resize() {
+      const bounds = viewer.getBoundingClientRect();
+      const ratio = Math.min(devicePixelRatio || 1, lowPower ? 1 : 1.4);
+      const width = Math.max(1, Math.round(bounds.width * ratio));
+      const height = Math.max(1, Math.round(bounds.height * ratio));
+      if (depthCanvas.width === width && depthCanvas.height === height) return;
+      depthCanvas.width = width;
+      depthCanvas.height = height;
+      gl.viewport(0, 0, width, height);
+    }
+
+    function render(easing) {
       resize();
-      renderOnce();
-      canvas.classList.add("ready");
-      viewer.dataset.pbr = "ready";
-      start();
-    });
+      pointerCurrent.x += (pointerTarget.x - pointerCurrent.x) * easing;
+      pointerCurrent.y += (pointerTarget.y - pointerCurrent.y) * easing;
+      gl.uniform2f(pointerUniform, pointerCurrent.x, pointerCurrent.y);
+      gl.uniform2f(viewportUniform, depthCanvas.width, depthCanvas.height);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    return { render, resize };
   }
 
-  function setupScene() {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x05070a);
-    scene.fog = new THREE.FogExp2(0x07090d, 0.022);
+  const particleCount = reducedMotion ? 26 : lowPower ? 54 : 92;
+  const particles = Array.from({ length: particleCount }, (_, index) => ({
+    x: (index * 71 % 101) / 101,
+    y: (index * 47 % 97) / 97,
+    z: (index * 37 % 89) / 89,
+    phase: index * 1.67,
+    speed: .000014 + (index % 7) * .000004,
+    size: .38 + (index % 5) * .21
+  }));
 
-    camera = new THREE.PerspectiveCamera(42, 1, 0.08, 42);
-    camera.position.copy(cameraBase);
-    camera.lookAt(lookBase);
-
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    const roomEnvironment = new RoomEnvironment();
-    scene.environment = pmrem.fromScene(roomEnvironment, 0.03).texture;
-    scene.environmentIntensity = mobile ? 0.17 : 0.22;
-    roomEnvironment.dispose();
-    pmrem.dispose();
-
-    scene.add(new THREE.HemisphereLight(0x5f7f9f, 0x1d0e07, mobile ? 0.32 : 0.4));
-    const moon = new THREE.DirectionalLight(0x91c9ee, mobile ? 0.9 : 1.05);
-    moon.position.set(-4.5, 5.2, -2.2);
-    moon.target.position.set(0, 0.6, 0.5);
-    moon.castShadow = true;
-    moon.shadow.mapSize.set(mobile ? 512 : 2048, mobile ? 512 : 2048);
-    moon.shadow.camera.left = -7;
-    moon.shadow.camera.right = 7;
-    moon.shadow.camera.top = 6;
-    moon.shadow.camera.bottom = -3;
-    moon.shadow.camera.near = 0.5;
-    moon.shadow.camera.far = 20;
-    moon.shadow.bias = -0.00025;
-    scene.add(moon, moon.target);
-
-    warmLight = new THREE.SpotLight(0xffbd70, mobile ? 14 : 18, 10, Math.PI * 0.31, 0.66, 1.35);
-    warmLight.position.set(0, 3.62, -0.84);
-    warmLight.target.position.set(0, 0.3, -0.72);
-    warmLight.castShadow = !mobile;
-    warmLight.shadow.mapSize.set(1024, 1024);
-    warmLight.shadow.bias = -0.00035;
-    scene.add(warmLight, warmLight.target);
-
-    const warmBeam = mesh(
-      new THREE.ConeGeometry(2.2, 3.25, 32, 1, true),
-      new THREE.MeshBasicMaterial({ color: 0xffbf78, transparent: true, opacity: mobile ? 0.018 : 0.027, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }),
-      [0, 2.0, -0.84]
-    );
-    warmBeam.castShadow = false;
-    warmBeam.receiveShadow = false;
-    warmBeam.renderOrder = 2;
-
-    radioLight = new THREE.PointLight(0x36ff8a, mobile ? 1.7 : 2.7, 3.4, 2);
-    radioLight.position.set(-5.05, 1.55, -3.96);
-    scene.add(radioLight);
-
-    const rim = new THREE.PointLight(0x2d5d82, mobile ? 3 : 4.8, 9, 2);
-    rim.position.set(4.9, 2.1, -3.2);
-    scene.add(rim);
-
-    const cameraFill = new THREE.PointLight(0x9a6845, mobile ? 5 : 8, 15, 2);
-    cameraFill.position.set(0, 2.6, 5.4);
-    scene.add(cameraFill);
-  }
-
-  function resize() {
-    if (!renderer || !camera) return;
+  function resizeFx() {
+    if (!fx) return;
     const bounds = viewer.getBoundingClientRect();
-    const width = Math.max(1, Math.round(bounds.width));
-    const height = Math.max(1, Math.round(bounds.height));
-    renderer.setSize(width, height, false);
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderOnce();
+    const ratio = Math.min(devicePixelRatio || 1, lowPower ? 1 : 1.25);
+    fxWidth = Math.max(1, bounds.width);
+    fxHeight = Math.max(1, bounds.height);
+    fxCanvas.width = Math.max(1, Math.round(fxWidth * ratio));
+    fxCanvas.height = Math.max(1, Math.round(fxHeight * ratio));
+    fxCanvas.style.width = `${fxWidth}px`;
+    fxCanvas.style.height = `${fxHeight}px`;
+    fx.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 
-  function updateCamera(delta) {
-    if (reducedMotion) return;
-    const smoothing = 1 - Math.exp(-delta / 0.18);
-    pointerCurrent.lerp(pointerTarget, smoothing);
-    camera.position.set(
-      cameraBase.x + pointerCurrent.x * 0.22,
-      cameraBase.y + pointerCurrent.y * 0.1,
-      cameraBase.z
-    );
-    lookTarget.set(
-      lookBase.x - pointerCurrent.x * 0.17,
-      lookBase.y - pointerCurrent.y * 0.08,
-      lookBase.z
-    );
-    lookCurrent.lerp(lookTarget, smoothing);
-    camera.lookAt(lookCurrent);
-  }
+  function drawFx(time) {
+    if (!fx) return;
+    fx.clearRect(0, 0, fxWidth, fxHeight);
+    fx.globalCompositeOperation = "lighter";
 
-  function renderOnce() {
-    if (!renderer || !scene || !camera || contextLost) return;
-    renderer.render(scene, camera);
+    for (const particle of particles) {
+      particle.y -= particle.speed;
+      if (particle.y < -.03) particle.y = 1.03;
+      const x = particle.x * fxWidth + Math.sin(time * .00013 + particle.phase) * 9 + (pointerCurrent.x - .5) * particle.z * 13;
+      const y = particle.y * fxHeight + Math.cos(time * .00009 + particle.phase) * 3 + (pointerCurrent.y - .5) * particle.z * 7;
+      const lampLight = Math.max(0, 1 - Math.abs(particle.x - .5) * 3.1) * Math.max(0, 1 - Math.abs(particle.y - .36) * 2.4);
+      const radius = particle.size * (.72 + particle.z * 1.18);
+      fx.fillStyle = `rgba(255,224,174,${.045 + lampLight * .24})`;
+      fx.beginPath();
+      fx.arc(x, y, radius, 0, Math.PI * 2);
+      fx.fill();
+    }
+
+    fx.globalCompositeOperation = "source-over";
   }
 
   function shouldRun() {
-    return !reducedMotion && initialized && visible && intersecting && !contextLost && viewer.style.display !== "none" && !document.body.classList.contains("ritual-started");
+    return visible && intersecting && !contextLost && viewer.style.display !== "none" && !document.body.classList.contains("ritual-started");
   }
 
-  function frame() {
+  function frame(time) {
     animationId = requestAnimationFrame(frame);
-    const delta = Math.min(clock.getDelta(), 0.05);
-    updateCamera(delta);
-    if (!reducedMotion) {
-      const time = performance.now() * 0.001;
-      if (dust) {
-        dust.rotation.y = Math.sin(time * 0.08) * 0.025;
-        dust.position.y = Math.sin(time * 0.16) * 0.025;
-      }
-      if (warmLight) warmLight.intensity = (mobile ? 14 : 18) * (0.975 + Math.sin(time * 2.1) * 0.014 + Math.sin(time * 7.7) * 0.008);
-      if (radioLight) radioLight.intensity = (mobile ? 1.7 : 2.7) * (0.94 + Math.sin(time * 1.7) * 0.06);
-    }
-    renderOnce();
+    const delta = Math.min(50, Math.max(0, time - previousTime));
+    previousTime = time;
+    const easing = 1 - Math.exp(-delta * .0068);
+    renderer?.render(easing);
+    if (!reducedMotion) drawFx(time);
   }
 
   function start() {
-    if (animationId || !shouldRun()) return;
-    clock.start();
-    animationId = requestAnimationFrame(frame);
+    if (!animationId && shouldRun()) {
+      previousTime = performance.now();
+      animationId = requestAnimationFrame(frame);
+    }
   }
 
   function stop() {
     if (!animationId) return;
     cancelAnimationFrame(animationId);
     animationId = 0;
-    clock.stop();
   }
 
-  function setMousePointer(event) {
-    if (reducedMotion || event.pointerType === "touch") return;
+  function resize() {
+    renderer?.resize();
+    resizeFx();
+    renderer?.render(1);
+    if (reducedMotion) drawFx(performance.now());
+  }
+
+  function centerPointer() {
+    pointerTarget = { x: .5, y: .5 };
+  }
+
+  function updatePointer(clientX, clientY) {
+    if (reducedMotion) return;
     const bounds = viewer.getBoundingClientRect();
-    const inside = event.clientX >= bounds.left && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
-    if (!inside) {
-      pointerTarget.set(0, 0);
+    const outside = clientX < bounds.left || clientX > bounds.right || clientY < bounds.top || clientY > bounds.bottom;
+    if (outside) {
+      centerPointer();
       return;
     }
-    pointerTarget.set(
-      THREE.MathUtils.clamp(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -1, 1),
-      THREE.MathUtils.clamp(1 - ((event.clientY - bounds.top) / bounds.height) * 2, -1, 1)
-    );
+    pointerTarget.x = Math.max(0, Math.min(1, (clientX - bounds.left) / bounds.width));
+    pointerTarget.y = Math.max(0, Math.min(1, 1 - (clientY - bounds.top) / bounds.height));
   }
 
-  addEventListener("pointermove", setMousePointer, { passive: true });
-  addEventListener("blur", () => pointerTarget.set(0, 0), { passive: true });
+  addEventListener("pointermove", event => updatePointer(event.clientX, event.clientY), { passive: true });
+  addEventListener("blur", centerPointer, { passive: true });
+  document.addEventListener("mouseleave", centerPointer, { passive: true });
 
-  viewer.addEventListener("pointerdown", event => {
-    if (reducedMotion || event.pointerType === "mouse") return;
-    touchDragging = true;
-    lastTouch = { x: event.clientX, y: event.clientY };
-    viewer.setPointerCapture?.(event.pointerId);
-  }, { passive: true });
-
-  viewer.addEventListener("pointermove", event => {
-    if (!touchDragging || !lastTouch || event.pointerType === "mouse") return;
-    const bounds = viewer.getBoundingClientRect();
-    pointerTarget.x = THREE.MathUtils.clamp(pointerTarget.x + (event.clientX - lastTouch.x) / Math.max(180, bounds.width * 0.48), -1, 1);
-    pointerTarget.y = THREE.MathUtils.clamp(pointerTarget.y - (event.clientY - lastTouch.y) / Math.max(180, bounds.height * 0.48), -1, 1);
-    lastTouch = { x: event.clientX, y: event.clientY };
-  }, { passive: true });
-
-  const endTouch = () => {
-    touchDragging = false;
-    lastTouch = null;
-  };
-  viewer.addEventListener("pointerup", endTouch, { passive: true });
-  viewer.addEventListener("pointercancel", endTouch, { passive: true });
+  depthCanvas.addEventListener("webglcontextlost", event => {
+    event.preventDefault();
+    contextLost = true;
+    depthCanvas.classList.remove("ready");
+    viewer.dataset.depth = "context-lost";
+    stop();
+  });
 
   async function initialize() {
+    resizeFx();
     try {
-      setupRenderer();
-      setupScene();
-      resize();
-      await buildRoom();
-      resize();
-      renderOnce();
-      initialized = true;
-      canvas.classList.add("ready");
-      viewer.dataset.pbr = "ready";
-      document.body.classList.add("lobby-video-ready");
-      start();
-
-      const defer = window.requestIdleCallback || (callback => setTimeout(callback, 180));
-      defer(() => addHeroProps().catch(error => console.warn("Props PBR opcionais indisponíveis.", error)), { timeout: 1200 });
+      await image.decode();
+      const depth = await loadImage(depthUrl);
+      renderer = createDepthRenderer(image, depth);
+      if (renderer) {
+        renderer.render(1);
+        depthCanvas.classList.add("ready");
+        viewer.dataset.depth = "ready";
+      } else {
+        viewer.dataset.depth = reducedMotion ? "reduced-motion" : "fallback";
+      }
     } catch (error) {
-      canvas.classList.remove("ready");
-      viewer.dataset.pbr = "fallback";
-      viewer.dataset.pbrError = error?.message || "unknown";
-      document.body.classList.add("lobby-video-ready");
-      console.warn("Lobby 3D PBR indisponível; mantendo o preview estático.", error);
+      viewer.dataset.depth = "fallback";
+      viewer.dataset.depthError = error?.message || "unknown";
+      console.warn("Lobby 2.5D indisponível; mantendo imagem fotorealista estática.", error);
     }
+
+    document.body.classList.add("lobby-video-ready");
+    start();
   }
 
   if ("ResizeObserver" in window) new ResizeObserver(resize).observe(viewer);
@@ -569,18 +303,16 @@ if (!viewer || !fallbackImage || !canvas) {
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(entries => {
       intersecting = entries[0]?.isIntersecting !== false;
-      if (shouldRun()) start(); else stop();
-    }, { threshold: 0.01 }).observe(viewer);
+      if (shouldRun()) start();
+      else stop();
+    }, { threshold: .01 }).observe(viewer);
   }
 
   document.addEventListener("visibilitychange", () => {
     visible = !document.hidden;
-    if (shouldRun()) start(); else stop();
+    if (shouldRun()) start();
+    else stop();
   });
-
-  new MutationObserver(() => {
-    if (shouldRun()) start(); else stop();
-  }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
 
   window._lobby3d = {
     show() {
@@ -598,4 +330,4 @@ if (!viewer || !fallbackImage || !canvas) {
   };
 
   initialize();
-}
+})();
