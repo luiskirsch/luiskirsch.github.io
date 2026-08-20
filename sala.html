@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
-<link rel="preload" href="/assets/lobby-room-2-5d-ultra.avif?v=1" as="image" type="image/avif" fetchpriority="high">
+<link rel="preload" href="/assets/lobby-exclusive-v1.avif?v=1" as="image" type="image/avif" fetchpriority="high">
 <script src="../js/proteger-sala.js"></script>
 
   <meta charset="UTF-8">
@@ -6793,7 +6793,7 @@
     height:clamp(300px, calc(100svh - 300px), 580px);
     overflow:hidden;
     border-radius:0;
-    background:#090807 url('/assets/lobby-room-2-5d-ultra-lqip.webp?v=1') center/cover no-repeat;
+    background:#090807 url('/assets/lobby-exclusive-v1-lqip.webp?v=1') center/cover no-repeat;
     display:flex;align-items:stretch;
     touch-action:pan-y;
     contain:layout paint;
@@ -6809,22 +6809,15 @@
     object-fit:cover;object-position:center;
     z-index:0;
     pointer-events:none;
-    filter:contrast(1.045) saturate(1.035) brightness(1.015);
-    transform:scale(1.01);
+    filter:contrast(1.035) saturate(1.045) brightness(1.015);
   }
-  #lobbyDepthCanvas{
-    position:absolute;inset:0;
-    width:100%;height:100%;
-    display:block;z-index:1;
-    pointer-events:none;
-    opacity:0;
-    transition:opacity .45s cubic-bezier(.22,.61,.36,1);
-  }
-  #lobbyDepthCanvas.ready{opacity:1}
-  #lobbyDepthCanvas.ready + .lobbyViewer__picture{opacity:0}
   .lobbyViewer__picture{
     position:absolute;inset:0;z-index:0;
-    transition:opacity .45s cubic-bezier(.22,.61,.36,1);
+    transform:translate3d(0,0,0) scale(1.075);
+    transform-origin:center center;
+    will-change:transform;
+    backface-visibility:hidden;
+    pointer-events:none;
   }
   #lobbyCanvas{
     position:absolute;inset:0;
@@ -6838,7 +6831,7 @@
   }
   .lobbyViewer__vignette{
     position:absolute;inset:0;pointer-events:none;z-index:3;
-    background:radial-gradient(ellipse at 50% 48%,transparent 48%,rgba(1,2,4,.08) 77%,rgba(1,2,4,.38) 100%);
+    background:radial-gradient(ellipse at 50% 48%,transparent 53%,rgba(1,2,4,.06) 79%,rgba(1,2,4,.24) 100%);
   }
   .lobbyViewer__loading{
     position:absolute;inset:0;z-index:5;
@@ -6859,7 +6852,7 @@
   .lobbyViewer__hint{ display:none; }
 
   /* Cinema grade: warm lut leve + leve desat nas sombras */
-  body:not(.ritual-started) .lobbyViewer__img{filter:contrast(1.045) saturate(1.035) brightness(1.015)}
+  body:not(.ritual-started) .lobbyViewer__img{filter:contrast(1.035) saturate(1.045) brightness(1.015)}
 
   /* ── Fragment Banner — fragmento pendente do Ritual Diário ── */
   #fragmentBanner{
@@ -7518,10 +7511,9 @@
 
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
                 <div id="lobbyViewer" class="lobbyViewer">
-                  <canvas id="lobbyDepthCanvas" aria-hidden="true"></canvas>
                   <picture class="lobbyViewer__picture">
-                    <source srcset="/assets/lobby-room-2-5d-ultra.avif?v=1" type="image/avif">
-                    <img id="lobbyBgImg" class="lobbyViewer__img" src="/assets/lobby-room-2-5d-ultra.webp?v=1" width="1672" height="941" alt="Sala ritualística noturna com mesa de madeira gravada e seis cadeiras" fetchpriority="high" decoding="async">
+                    <source srcset="/assets/lobby-exclusive-v1.avif?v=1" type="image/avif">
+                    <img id="lobbyBgImg" class="lobbyViewer__img" src="/assets/lobby-exclusive-v1.webp?v=1" width="1672" height="941" alt="Arquivo investigativo noturno com mesa SEXTOLUGAR e seis cadeiras" fetchpriority="high" decoding="async">
                   </picture>
                   <audio id="lobbyAmbientAudio" loop preload="auto">
                     <source src="/assets/luz-falhando.ogg" type="audio/ogg">
@@ -8805,7 +8797,7 @@
 <script src="../js/lobby-mode.js"></script>
 
 <!-- ── Lobby 3D Viewer ────────────────────────────────────────────────────── -->
-  <script type="module" src="../js/lobby-3d.js?v=10"></script>
+  <script type="module" src="../js/lobby-3d.js?v=11"></script>
 
   <!-- ── Partidas Rolando: refresh + painel espectador ─────────────────────── -->
   <script src="../js/lobby-init.js"></script>

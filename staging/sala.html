@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-i18n-ns="sala,cards,achievements,missions,xptitles,effects">
 <head>
-  <link rel="preload" href="/assets/lobby-room-2-5d-ultra.avif?v=1" as="image" type="image/avif" fetchpriority="high">
+  <link rel="preload" href="/assets/lobby-exclusive-v1.avif?v=1" as="image" type="image/avif" fetchpriority="high">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"}}</script>
 <script>(function(){if(window.top!==window.self){try{window.top.location.replace(location.href);}catch(_){document.documentElement.innerHTML="";}return;}var h=(location.hostname||"").toLowerCase(),p=location.protocol||"";var A=["preludiojogos.com","www.preludiojogos.com","preludiojogos.com.br","www.preludiojogos.com.br","luiskirsch.github.io","localhost","127.0.0.1"];if(p==="file:"||h&&A.indexOf(h)===-1){document.documentElement.innerHTML="<style>*{margin:0;padding:0}html,body{background:#0a0805;height:100%;display:flex;align-items:center;justify-content:center}p{color:#ccc;font:15px/1.7 sans-serif;text-align:center;max-width:320px}a{color:#e06e30;text-decoration:none}</style><p>Este conte\u00fado s\u00f3 est\u00e1 dispon\u00edvel no site oficial.<br><a href=\"https://preludiojogos.com.br\">preludiojogos.com.br<\/a><\/p>";setTimeout(function(){location.replace("https://preludiojogos.com.br");},2500);}else{document.documentElement.classList.add("guard-ok");}})();</script><style>html:not(.guard-ok) body{visibility:hidden!important;background:#0a0805!important}</style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' blob: https://osl-video-server-production.up.railway.app https://osl-video-server-staging.up.railway.app https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com wss://osextolugar-eqa7q1iz.livekit.cloud; font-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'none'; worker-src 'self' blob:;">
@@ -6697,7 +6697,7 @@
     height:clamp(300px, calc(100svh - 300px), 580px);
     overflow:hidden;
     border-radius:0;
-    background:#090807 url('/assets/lobby-room-2-5d-ultra-lqip.webp?v=1') center/cover no-repeat;
+    background:#090807 url('/assets/lobby-exclusive-v1-lqip.webp?v=1') center/cover no-repeat;
     display:flex;align-items:stretch;
     touch-action:pan-y;
     contain:layout paint;
@@ -6714,20 +6714,16 @@
     object-fit:cover;object-position:center;
     z-index:0;
     pointer-events:none;
-    filter:contrast(1.045) saturate(1.035) brightness(1.015);
-    transform:scale(1.01);
+    filter:contrast(1.035) saturate(1.045) brightness(1.015);
   }
-  #lobbyDepthCanvas{
-    position:absolute;inset:0;
-    width:100%;height:100%;
-    display:block;z-index:1;
+  .lobbyViewer__picture{
+    position:absolute;inset:0;z-index:0;
+    transform:translate3d(0,0,0) scale(1.075);
+    transform-origin:center center;
+    will-change:transform;
+    backface-visibility:hidden;
     pointer-events:none;
-    opacity:0;
-    transition:opacity .45s cubic-bezier(.22,.61,.36,1);
   }
-  #lobbyDepthCanvas.ready{opacity:1}
-  #lobbyDepthCanvas.ready + .lobbyViewer__picture{opacity:0}
-  .lobbyViewer__picture{position:absolute;inset:0;z-index:0;transition:opacity .45s cubic-bezier(.22,.61,.36,1)}
   #lobbyCanvas{
     position:absolute;inset:0;
     width:100%!important;height:100%!important;
@@ -6740,7 +6736,7 @@
   }
   .lobbyViewer__vignette{
     position:absolute;inset:0;pointer-events:none;z-index:3;
-    background:radial-gradient(ellipse at 50% 48%,transparent 48%,rgba(1,2,4,.08) 77%,rgba(1,2,4,.38) 100%);
+    background:radial-gradient(ellipse at 50% 48%,transparent 53%,rgba(1,2,4,.06) 79%,rgba(1,2,4,.24) 100%);
   }
   .lobbyViewer__loading{
     position:absolute;inset:0;z-index:5;
@@ -7123,10 +7119,9 @@
 
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
                 <div id="lobbyViewer" class="lobbyViewer">
-                  <canvas id="lobbyDepthCanvas" aria-hidden="true"></canvas>
                   <picture class="lobbyViewer__picture">
-                    <source srcset="/assets/lobby-room-2-5d-ultra.avif?v=1" type="image/avif">
-                    <img id="lobbyBgImg" class="lobbyViewer__img" src="/assets/lobby-room-2-5d-ultra.webp?v=1" width="1672" height="941" alt="Sala ritualística noturna com mesa de madeira gravada e seis cadeiras" fetchpriority="high" decoding="async">
+                    <source srcset="/assets/lobby-exclusive-v1.avif?v=1" type="image/avif">
+                    <img id="lobbyBgImg" class="lobbyViewer__img" src="/assets/lobby-exclusive-v1.webp?v=1" width="1672" height="941" alt="Arquivo investigativo noturno com mesa SEXTOLUGAR e seis cadeiras" fetchpriority="high" decoding="async">
                   </picture>
                   <audio id="lobbyAmbientAudio" loop preload="auto">
                     <source src="/assets/luz-falhando.ogg" type="audio/ogg">
@@ -8119,7 +8114,7 @@
 <script src="../js/lobby-mode.js"></script>
 
 <!-- ── Lobby 3D Viewer ────────────────────────────────────────────────────── -->
-  <script type="module" src="../js/lobby-3d.js?v=10"></script>
+  <script type="module" src="../js/lobby-3d.js?v=11"></script>
 
   <!-- ── Partidas Rolando: refresh + painel espectador ─────────────────────── -->
   <script src="../js/lobby-init.js"></script>

@@ -1,16 +1,15 @@
-const CACHE = "osl-v38-lobby-2-5d-ultra";
+const CACHE = "osl-v39-lobby-exclusive-rigid";
 
 const PRECACHE = [
   "/favicon.png",
-  "/assets/lobby-room-2-5d-ultra.avif?v=1",
-  "/assets/lobby-room-2-5d-ultra.webp?v=1",
-  "/assets/lobby-room-2-5d-ultra-depth.webp?v=1",
-  "/assets/lobby-room-2-5d-ultra-lqip.webp?v=1",
+  "/assets/lobby-exclusive-v1.avif?v=1",
+  "/assets/lobby-exclusive-v1.webp?v=1",
+  "/assets/lobby-exclusive-v1-lqip.webp?v=1",
   "/assets/luz-falhando.ogg",
   "/assets/luz-falhando.mp3",
   "/verso-carta.webp?v=2",
   "/js/reward-chest-loader.js?v=1",
-  "/js/lobby-3d.js?v=10"
+  "/js/lobby-3d.js?v=11"
 ];
 
 self.addEventListener("install", event => {
