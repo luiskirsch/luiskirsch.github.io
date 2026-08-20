@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Teste interativo do humanoide 3D para O Sexto Lugar">
+  <title>Humanoide 3D — Teste de animação</title>
+  <link rel="icon" href="/favicon.png">
+  <link rel="preload" href="/assets/npc/humanoide-3d-web.glb" as="fetch" type="model/gltf-binary" crossorigin>
+  <link rel="stylesheet" href="/css/npc-3d-teste.css?v=1">
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"}}
+  </script>
+</head>
+<body>
+  <main class="viewerShell">
+    <header class="topbar">
+      <div>
+        <span class="eyebrow">TESTE TÉCNICO · PERSONAGEM 3D</span>
+        <h1>Humanoide animado</h1>
+      </div>
+      <span id="renderStatus" class="renderStatus"><i></i> CARREGANDO MODELO</span>
+    </header>
+
+    <section id="modelStage" class="modelStage" aria-label="Visualizador tridimensional do humanoide animado">
+      <canvas id="modelCanvas"></canvas>
+      <div class="studioGlow" aria-hidden="true"></div>
+
+      <div id="loadingPanel" class="loadingPanel" role="status">
+        <span id="loadingValue">0%</span>
+        <div><i id="loadingBar"></i></div>
+        <small>Preparando geometria, texturas e esqueleto</small>
+      </div>
+
+      <div class="instruction" aria-hidden="true">
+        <span>ARRASTE PARA GIRAR</span>
+        <span>SCROLL PARA APROXIMAR</span>
+      </div>
+
+      <aside class="techCard" aria-label="Dados técnicos do modelo">
+        <span>MODELO CARREGADO</span>
+        <strong>Rig tridimensional real</strong>
+        <dl>
+          <div><dt>Esqueleto</dt><dd>41 ossos</dd></div>
+          <div><dt>Animação</dt><dd>13 segundos</dd></div>
+          <div><dt>Geometria</dt><dd>230 mil triângulos</dd></div>
+          <div><dt>Pacote web</dt><dd>4,36 MB</dd></div>
+        </dl>
+      </aside>
+
+      <div class="controls" aria-label="Controles da animação">
+        <button id="playButton" type="button" disabled>
+          <span id="playIcon">Ⅱ</span>
+          <span id="playLabel">Pausar</span>
+        </button>
+        <label>
+          VELOCIDADE
+          <select id="speedSelect" disabled>
+            <option value="0.5">0,5×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.25">1,25×</option>
+            <option value="1.5">1,5×</option>
+          </select>
+        </label>
+        <button id="resetButton" type="button" disabled>Centralizar câmera</button>
+      </div>
+    </section>
+
+    <footer>
+      <p>Este teste usa skinning ósseo executado pela GPU. Nenhuma parte da personagem é um recorte 2D.</p>
+      <p>O lobby não foi alterado.</p>
+    </footer>
+  </main>
+  <script type="module" src="/js/npc-3d-teste.js?v=1"></script>
+</body>
+</html>
