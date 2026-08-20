@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Demonstração interativa do NPC Helena para O Sexto Lugar">
+  <title>Helena — Protótipo de movimento</title>
+  <link rel="icon" href="/favicon.png">
+  <link rel="preload" href="/assets/npc/helena-v1.webp" as="image" type="image/webp">
+  <link rel="stylesheet" href="/css/npc-animacao.css?v=1">
+</head>
+<body>
+  <main class="demoShell">
+    <section class="infoPanel" aria-labelledby="pageTitle">
+      <span class="eyebrow">PROTÓTIPO INTERATIVO · NPC</span>
+      <h1 id="pageTitle">Helena</h1>
+      <p class="role">Investigadora e curadora do arquivo</p>
+      <p class="intro">Mova o cursor pela tela. O corpo acompanha com amortecimento, a roupa responde com atraso e um clique ativa uma reação.</p>
+
+      <div class="motionList" aria-label="Movimentos demonstrados">
+        <span><i></i> Respiração contínua</span>
+        <span><i></i> Cabeça acompanha o cursor</span>
+        <span><i></i> Corpo transfere o peso</span>
+        <span><i></i> Roupa e braços têm inércia</span>
+      </div>
+
+      <div class="statusRow">
+        <span id="motionStatus" class="statusBadge">MOVA O CURSOR</span>
+        <button id="reactButton" type="button">Testar reação</button>
+      </div>
+      <small>Rig físico 2.5D para validação visual. A posição na sala ainda não foi definida.</small>
+    </section>
+
+    <section id="motionStage" class="motionStage" aria-label="Demonstração animada da personagem Helena">
+      <div class="stageWindow" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="stagePlant" aria-hidden="true"></div>
+      <div id="speechBubble" class="speechBubble" role="status">Encontrei algo interessante.</div>
+
+      <svg id="npcRig" class="npcRig" viewBox="0 0 1024 1536" role="img" aria-label="Helena, investigadora brasileira, em movimento">
+        <defs>
+          <filter id="groundBlur" x="-40%" y="-100%" width="180%" height="300%">
+            <feGaussianBlur stdDeviation="18"></feGaussianBlur>
+          </filter>
+          <clipPath id="clipLower">
+            <path d="M350 565 L670 565 L698 840 L842 1536 L278 1536 L330 840 Z"></path>
+          </clipPath>
+          <clipPath id="clipTorso">
+            <path d="M344 255 L660 255 L714 578 L655 704 L370 704 L302 588 Z"></path>
+          </clipPath>
+          <clipPath id="clipHead">
+            <path d="M316 0 H706 L678 384 L347 384 Z"></path>
+          </clipPath>
+          <clipPath id="clipLeftArm">
+            <path d="M275 318 L405 290 L453 542 L421 865 L251 865 L267 555 Z"></path>
+          </clipPath>
+          <clipPath id="clipRightUpper">
+            <path d="M610 294 L730 322 L760 610 L662 643 L612 501 Z"></path>
+          </clipPath>
+          <clipPath id="clipRightFore">
+            <path d="M656 535 L770 525 L818 890 L666 890 L640 646 Z"></path>
+          </clipPath>
+          <clipPath id="clipWaistcoatHem">
+            <path d="M349 525 L676 525 L678 686 L355 686 Z"></path>
+          </clipPath>
+        </defs>
+
+        <ellipse class="groundShadow" cx="520" cy="1492" rx="250" ry="28" filter="url(#groundBlur)"></ellipse>
+
+        <g id="lowerBody">
+          <image href="/assets/npc/helena-v1.webp" width="1024" height="1536" clip-path="url(#clipLower)"></image>
+        </g>
+        <g id="leftArm">
+          <image href="/assets/npc/helena-v1.webp" width="1024" height="1536" clip-path="url(#clipLeftArm)"></image>
+        </g>
+        <g id="torso">
+          <image href="/assets/npc/helena-v1.webp" width="1024" height="1536" clip-path="url(#clipTorso)"></image>
+        </g>
+        <g id="waistcoatHem">
+          <image href="/assets/npc/helena-v1.webp" width="1024" height="1536" clip-path="url(#clipWaistcoatHem)"></image>
+        </g>
+        <g id="rightUpperArm">
+          <image href="/assets/npc/helena-v1.webp" width="1024" height="1536" clip-path="url(#clipRightUpper)"></image>
+          <g id="rightForearm">
+            <image href="/assets/npc/helena-v1.webp" width="1024" height="1536" clip-path="url(#clipRightFore)"></image>
+          </g>
+        </g>
+        <g id="head">
+          <image href="/assets/npc/helena-v1.webp" width="1024" height="1536" clip-path="url(#clipHead)"></image>
+        </g>
+      </svg>
+
+      <button id="characterHit" class="characterHit" type="button" aria-label="Interagir com Helena"></button>
+      <div class="interactionHint" aria-hidden="true"><span></span> CLIQUE PARA INTERAGIR</div>
+    </section>
+  </main>
+  <script src="/js/npc-animacao.js?v=1" defer></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+:root{
+  color-scheme:light;
+  --ink:#263229;
+  --muted:#667267;
+  --sage:#78866e;
+  --sage-deep:#485748;
+  --paper:#f5f0e8;
+  --brass:#b68744;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#e8e1d5;color:var(--ink)}
+body{min-height:100svh;overflow:hidden}
+button{font:inherit}
+.demoShell{min-height:100svh;display:grid;grid-template-columns:minmax(290px,390px) 1fr;background:linear-gradient(125deg,#ece5da 0 28%,#d6dfd3 100%)}
+.infoPanel{position:relative;z-index:8;display:flex;flex-direction:column;justify-content:center;padding:clamp(34px,5vw,76px);background:rgba(247,243,236,.9);border-right:1px solid rgba(76,90,75,.18);box-shadow:22px 0 60px rgba(55,64,53,.08);backdrop-filter:blur(18px)}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.21em;color:#7e6849}
+h1{margin:13px 0 0;font:600 clamp(52px,6vw,88px)/.95 Georgia,serif;color:#344239;letter-spacing:-.045em}
+.role{margin:10px 0 28px;color:#7d694e;font:600 14px/1.4 Georgia,serif;font-style:italic}
+.intro{max-width:310px;margin:0;color:#59655c;font-size:14px;line-height:1.75}
+.motionList{display:grid;gap:10px;margin:30px 0;color:#435047;font-size:12px;font-weight:650;letter-spacing:.02em}
+.motionList span{display:flex;align-items:center;gap:10px}
+.motionList i{width:7px;height:7px;border-radius:50%;background:#78b37f;box-shadow:0 0 0 4px rgba(120,179,127,.12)}
+.statusRow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:6px 0 24px}
+.statusBadge{display:inline-flex;align-items:center;min-height:39px;padding:0 14px;border:1px solid rgba(72,87,72,.22);border-radius:999px;color:#526157;background:rgba(255,255,255,.64);font-size:10px;font-weight:800;letter-spacing:.14em}
+#reactButton{min-height:40px;padding:0 17px;border:0;border-radius:999px;color:#fff;background:linear-gradient(135deg,#687b68,#445545);font-size:11px;font-weight:800;letter-spacing:.07em;cursor:pointer;box-shadow:0 9px 24px rgba(55,73,57,.2);transition:transform .2s,box-shadow .2s}
+#reactButton:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(55,73,57,.27)}
+.infoPanel small{max-width:300px;color:#8a928b;font-size:10px;line-height:1.55}
+.motionStage{position:relative;min-width:0;overflow:hidden;isolation:isolate;background:radial-gradient(circle at 54% 38%,rgba(255,255,255,.96) 0 18%,rgba(238,239,226,.74) 44%,rgba(202,216,201,.88) 100%);cursor:crosshair}
+.motionStage::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(255,255,255,.28) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.22) 1px,transparent 1px);background-size:70px 70px;mask-image:linear-gradient(to bottom,transparent,black 30%,black 75%,transparent)}
+.motionStage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24%;z-index:-1;background:linear-gradient(to bottom,rgba(166,145,115,.06),rgba(116,96,72,.17)),repeating-linear-gradient(100deg,rgba(117,91,58,.09) 0 2px,transparent 2px 70px);border-top:1px solid rgba(116,96,72,.13);transform:perspective(500px) rotateX(62deg) scale(1.6);transform-origin:bottom}
+.stageWindow{position:absolute;left:8%;top:7%;width:min(30vw,390px);height:min(48vh,520px);display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:13px;border:10px solid rgba(142,158,136,.35);border-radius:150px 150px 8px 8px;background:rgba(255,255,255,.62);box-shadow:0 20px 65px rgba(96,119,91,.12)}
+.stageWindow span{border:1px solid rgba(92,115,87,.18);background:linear-gradient(#cce4e4,#ecf1d8 54%,#9dbd83 55%,#72985d);filter:saturate(.78)}
+.stagePlant{position:absolute;right:5%;bottom:7%;width:190px;height:310px;opacity:.2;filter:blur(.2px)}
+.stagePlant::before{content:"";position:absolute;left:70px;bottom:58px;width:55px;height:220px;background:repeating-linear-gradient(78deg,transparent 0 20px,#507254 21px 36px,transparent 37px 54px);border-radius:50%}
+.stagePlant::after{content:"";position:absolute;left:48px;bottom:0;width:100px;height:88px;border-radius:15px 15px 42px 42px;background:#957b5d}
+.npcRig{position:absolute;z-index:3;left:50%;bottom:-1.2%;height:min(94svh,980px);width:auto;max-width:66vw;overflow:visible;transform:translateX(-44%);filter:drop-shadow(0 24px 20px rgba(67,62,52,.18));pointer-events:none}
+.npcRig image{image-rendering:auto}
+.groundShadow{fill:rgba(60,58,49,.2)}
+.characterHit{position:absolute;z-index:5;left:50%;bottom:2%;width:min(35vw,410px);height:91%;transform:translateX(-39%);border:0;background:transparent;cursor:pointer;border-radius:48% 48% 20% 20%;-webkit-tap-highlight-color:transparent}
+.characterHit:focus-visible{outline:3px solid rgba(91,126,93,.65);outline-offset:4px}
+.interactionHint{position:absolute;z-index:6;left:50%;bottom:18px;transform:translateX(-20%);display:flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid rgba(76,91,76,.18);border-radius:999px;background:rgba(251,249,244,.75);color:#5f6d61;font-size:9px;font-weight:850;letter-spacing:.14em;pointer-events:none;backdrop-filter:blur(10px);transition:opacity .25s}
+.interactionHint span{width:6px;height:6px;border-radius:50%;background:#7fb384;box-shadow:0 0 0 4px rgba(127,179,132,.14)}
+.speechBubble{position:absolute;z-index:7;left:calc(50% + min(14vw,180px));top:18%;max-width:220px;padding:14px 17px;border:1px solid rgba(86,103,86,.18);border-radius:17px 17px 17px 4px;background:rgba(255,253,248,.94);box-shadow:0 18px 50px rgba(67,78,66,.15);color:#455248;font:600 13px/1.45 Georgia,serif;opacity:0;transform:translateY(8px) scale(.96);transition:opacity .25s,transform .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.speechBubble.show{opacity:1;transform:translateY(0) scale(1)}
+.motionStage.active .interactionHint{opacity:0}
+@media(max-width:800px){body{overflow:auto}.demoShell{grid-template-columns:1fr;grid-template-rows:auto minmax(620px,72svh)}.infoPanel{padding:28px 24px;display:block;border-right:0;border-bottom:1px solid rgba(76,90,75,.18)}h1{font-size:48px}.role{margin-bottom:16px}.intro{max-width:none}.motionList{grid-template-columns:1fr 1fr;margin:20px 0}.motionStage{min-height:620px}.npcRig{height:min(86svh,810px);max-width:92vw;transform:translateX(-50%)}.characterHit{width:64vw;transform:translateX(-50%)}.stageWindow{left:-5%;width:55vw}.speechBubble{left:auto;right:20px;top:11%}.interactionHint{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.npcRig{will-change:auto}.motionList span:last-child{opacity:.55}}
