@@ -1,16 +1,15 @@
-const CACHE = "osl-v35-lobby-pointer-parallax";
+const CACHE = "osl-v37-lobby-pbr";
 
 const PRECACHE = [
   "/favicon.png",
   "/assets/lobby-room-3d-v3.avif?v=1",
   "/assets/lobby-room-3d-v3.webp?v=1",
-  "/assets/lobby-room-3d-v3-depth.webp?v=1",
   "/assets/lobby-room-3d-v3-lqip.webp?v=1",
   "/assets/luz-falhando.ogg",
   "/assets/luz-falhando.mp3",
   "/verso-carta.webp?v=2",
   "/js/reward-chest-loader.js?v=1",
-  "/js/lobby-3d.js?v=7"
+  "/js/lobby-3d.js?v=9"
 ];
 
 self.addEventListener("install", event => {

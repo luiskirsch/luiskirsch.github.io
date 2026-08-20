@@ -2,7 +2,7 @@
 <html lang="pt-BR" data-i18n-ns="sala,cards,achievements,missions,xptitles,effects">
 <head>
 <script>(function(){if(window.top!==window.self){try{window.top.location.replace(location.href);}catch(_){document.documentElement.innerHTML="";}return;}var h=(location.hostname||"").toLowerCase(),p=location.protocol||"";var A=["preludiojogos.com","www.preludiojogos.com","preludiojogos.com.br","www.preludiojogos.com.br","luiskirsch.github.io","localhost","127.0.0.1"];if(p==="file:"||h&&A.indexOf(h)===-1){document.documentElement.innerHTML="<style>*{margin:0;padding:0}html,body{background:#0a0805;height:100%;display:flex;align-items:center;justify-content:center}p{color:#ccc;font:15px/1.7 sans-serif;text-align:center;max-width:320px}a{color:#e06e30;text-decoration:none}</style><p>Este conte\u00fado s\u00f3 est\u00e1 dispon\u00edvel no site oficial.<br><a href=\"https://preludiojogos.com.br\">preludiojogos.com.br<\/a><\/p>";setTimeout(function(){location.replace("https://preludiojogos.com.br");},2500);}else{document.documentElement.classList.add("guard-ok");}})();</script><style>html:not(.guard-ok) body{visibility:hidden!important;background:#0a0805!important}</style>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-0nm7jqdKysuyWtEOo1dszFhseqMQqYrchIG7ak7PhJg=' 'sha256-vKaEfzczjjkGde+l7kCBB7shmGTJj+HaRUOn0CrzJhM=' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' https://osl-video-server-production.up.railway.app https://osl-video-server-staging.up.railway.app https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com wss://osextolugar-eqa7q1iz.livekit.cloud https://osextolugar-eqa7q1iz.livekit.cloud https://cdn.jsdelivr.net https://www.gstatic.com https://static.cloudflareinsights.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'none'; worker-src 'self' blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-0nm7jqdKysuyWtEOo1dszFhseqMQqYrchIG7ak7PhJg=' 'sha256-vKaEfzczjjkGde+l7kCBB7shmGTJj+HaRUOn0CrzJhM=' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' blob: https://osl-video-server-production.up.railway.app https://osl-video-server-staging.up.railway.app https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com wss://osextolugar-eqa7q1iz.livekit.cloud https://osextolugar-eqa7q1iz.livekit.cloud https://cdn.jsdelivr.net https://www.gstatic.com https://static.cloudflareinsights.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'none'; worker-src 'self' blob:;">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"}}</script>
 <script src="./i18n/init.js?v=20260818" defer></script>
 <script src="../js/theme-bootstrap.js"></script>
@@ -6795,6 +6795,8 @@
     border-radius:0;
     background:#090807 url('/assets/lobby-room-3d-v3-lqip.webp?v=1') center/cover no-repeat;
     display:flex;align-items:stretch;
+    touch-action:pan-y;
+    contain:layout paint;
     mask-image:linear-gradient(to bottom, transparent 0%, black 7%, black 82%, transparent 100%);
     -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 7%, black 82%, transparent 100%);
   }
@@ -6816,13 +6818,13 @@
     display:block;z-index:1;
     pointer-events:none;
     opacity:0;
-    transition:opacity .55s ease;
+    transition:opacity .45s cubic-bezier(.22,.61,.36,1);
   }
   #lobbyDepthCanvas.ready{opacity:1}
   #lobbyDepthCanvas.ready + .lobbyViewer__picture{opacity:0}
   .lobbyViewer__picture{
     position:absolute;inset:0;z-index:0;
-    transition:opacity .55s ease;
+    transition:opacity .45s cubic-bezier(.22,.61,.36,1);
   }
   #lobbyCanvas{
     position:absolute;inset:0;
@@ -6834,10 +6836,18 @@
     mask-image:linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
     -webkit-mask-image:linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
   }
+  .lobbyViewer--pbr #lobbyCanvas{display:none!important}
   .lobbyViewer__vignette{
     position:absolute;inset:0;pointer-events:none;z-index:3;
-    background:none;
+    background:radial-gradient(ellipse at 50% 48%,transparent 42%,rgba(1,2,4,.13) 75%,rgba(1,2,4,.58) 100%);
   }
+  .lobbyViewer__credits{
+    position:absolute;right:14px;bottom:12px;z-index:4;
+    color:rgba(236,226,210,.48);font:9px/1.2 system-ui,sans-serif;
+    letter-spacing:.12em;text-transform:uppercase;text-decoration:none;
+    opacity:.72;transition:color .2s,opacity .2s;pointer-events:auto;
+  }
+  .lobbyViewer__credits:hover,.lobbyViewer__credits:focus-visible{color:#f3d393;opacity:1}
   .lobbyViewer__loading{
     position:absolute;inset:0;z-index:5;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
@@ -7527,6 +7537,7 @@
                   </audio>
                   <canvas id="lobbyCanvas"></canvas>
                   <div class="lobbyViewer__vignette" aria-hidden="true"></div>
+                  <a class="lobbyViewer__credits" href="/creditos-3d.html" target="_blank" rel="noopener">Ativos 3D</a>
                 </div>
                 <script src="../js/lobby-video.js?v=2"></script>
 
@@ -8803,7 +8814,7 @@
 <script src="../js/lobby-mode.js"></script>
 
 <!-- ── Lobby 3D Viewer ────────────────────────────────────────────────────── -->
-  <script type="module" src="../js/lobby-3d.js?v=7"></script>
+  <script type="module" src="../js/lobby-3d.js?v=9"></script>
 
   <!-- ── Partidas Rolando: refresh + painel espectador ─────────────────────── -->
   <script src="../js/lobby-init.js"></script>
