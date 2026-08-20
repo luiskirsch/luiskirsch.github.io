@@ -1,99 +1,107 @@
-const CACHE = 'osl-v27-lobby-clean';
+const CACHE = "osl-v29-new-lobby-video";
 
 const PRECACHE = [
-  '/favicon.png',
-  '/frente-carta.png',
-  '/verso-carta.webp?v=1',
-  '/digital.png',
-  '/logo_oficial_fundo_transparente.png',
-  '/lua_site_transparente.png',
-  '/js/ui/animations.js',
-  '/video.js',
+  "/favicon.png",
+  "/assets/lobby-room.webp?v=1",
+  "/verso-carta.webp?v=2",
+  "/js/reward-chest-loader.js?v=1",
+  "/js/lobby-3d-loader.js?v=1"
 ];
 
-self.addEventListener('install', e => {
-  e.waitUntil(
+self.addEventListener("install", event => {
+  event.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll(PRECACHE.map(u => new Request(u, { cache: 'reload' }))))
+      .then(cache => Promise.allSettled(PRECACHE.map(url => cache.add(new Request(url, { cache: "reload" })))))
       .then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
+self.addEventListener("activate", event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)));
+    if (self.registration.navigationPreload) {
+      try { await self.registration.navigationPreload.enable(); } catch (_) {}
+    }
+    await self.clients.claim();
+  })());
 });
 
-self.addEventListener('fetch', e => {
-  const { request } = e;
+function isLocalSite(url) {
+  return url.hostname.includes("luiskirsch.github.io") ||
+    url.hostname.includes("localhost") ||
+    url.hostname.includes("preludiojogos");
+}
+
+async function updateCache(request, responsePromise) {
+  try {
+    const response = await responsePromise;
+    if (response && response.ok && response.status !== 206) {
+      const cache = await caches.open(CACHE);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch (_) {
+    return null;
+  }
+}
+
+self.addEventListener("fetch", event => {
+  const request = event.request;
   const url = new URL(request.url);
 
-  // Ignora Firebase, APIs externas e chrome-extension
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
-  if (!url.hostname.includes('luiskirsch.github.io') && !url.hostname.includes('localhost') && !url.hostname.includes('preludiojogos')) return;
+  if (!/^https?:$/.test(url.protocol) || !isLocalSite(url) || request.method !== "GET") return;
 
-  // Cache só aceita GETs — não interceptamos POST/PUT/DELETE (sendBeacon, forms,
-  // etc). Deixa o navegador resolver direto pela rede.
-  if (request.method !== 'GET') return;
-
-  // /staging/* SEMPRE network-first; cache só fallback offline.
-  // IMPORTANTE: Cloudflare Access pode retornar HTML de "Sign in" no lugar
-  // de JS/JSON quando a sessão expira — NUNCA cachear esses interceptos.
-  if (url.pathname.startsWith('/staging/')) {
-    e.respondWith(
-      fetch(request).then(res => {
-        if (res && res.ok) {
-          const ct = res.headers.get('content-type') || '';
-          const expectedJs = /\.(js|mjs)$/.test(url.pathname);
-          const expectedJson = /\.json$/.test(url.pathname);
-          const expectedCss = /\.css$/.test(url.pathname);
-          const isHtmlResponse = ct.indexOf('text/html') === 0;
-          // Se esperava JS/JSON/CSS mas veio HTML, é Cloudflare Access intercept.
-          // Não cacheia e não retorna pra app (bloqueia execução de HTML como JS).
-          if ((expectedJs || expectedJson || expectedCss) && isHtmlResponse) {
-            return new Response('// blocked by SW: Cloudflare Access intercept', {
-              status: 401,
-              headers: { 'Content-Type': expectedJson ? 'application/json' : 'application/javascript' }
-            });
-          }
-          caches.open(CACHE).then(c => c.put(request, res.clone())).catch(() => {});
+  if (url.pathname.startsWith("/staging/")) {
+    const stagingResponse = fetch(request).then(response => {
+        const contentType = response.headers.get("content-type") || "";
+        const expectsAsset = /\.(?:js|mjs|json|css)$/.test(url.pathname);
+        if (expectsAsset && contentType.startsWith("text/html")) {
+          return new Response("// blocked by SW: access intercept", {
+            status: 401,
+            headers: { "Content-Type": url.pathname.endsWith(".json") ? "application/json" : "application/javascript" }
+          });
         }
-        return res;
-      }).catch(() => caches.match(request).then(r => r || new Response('', { status: 503 })))
+        return response;
+      });
+    event.waitUntil(
+      stagingResponse.then(response => {
+        if (response.ok) return updateCache(request, Promise.resolve(response.clone()));
+      }).catch(() => {})
+    );
+    event.respondWith(
+      stagingResponse.catch(async () => (await caches.match(request)) || new Response("", { status: 503 }))
     );
     return;
   }
 
-  // HTML — network-first (sempre atualizado)
-  if (request.destination === 'document') {
-    const freshRequest = new Request(request, { cache: 'no-store' });
-    e.respondWith(
-      fetch(freshRequest)
-        .then(res => {
-          if (res && res.ok) {
-            caches.open(CACHE).then(c => c.put(request, res.clone())).catch(() => {});
-          }
-          return res;
-        })
-        .catch(() => caches.match(request).then(r => r || new Response('', { status: 503 })))
+  if (request.mode === "navigate" || request.destination === "document") {
+    const network = event.preloadResponse.then(response => response || fetch(request));
+    const refreshed = updateCache(request, network);
+    event.waitUntil(refreshed);
+    event.respondWith(
+      caches.match(request).then(cached => cached || refreshed.then(response => response || new Response("", { status: 503 })))
     );
     return;
   }
 
-  // Assets estáticos — cache-first
-  e.respondWith(
-    caches.match(request).then(cached => {
-      if (cached) return cached;
-      return fetch(request).then(res => {
-        if (res && res.ok && res.status !== 206) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(request, clone)).catch(() => {});
-        }
-        return res;
-      }).catch(() => cached || new Response('', { status: 503 }));
-    })
-  );
+  if (request.headers.has("range")) return;
+
+  const shouldRefresh = ["script", "style", "worker", "manifest"].includes(request.destination) ||
+    /\.(?:js|mjs|css|json)$/i.test(url.pathname);
+
+  if (shouldRefresh) {
+    const refreshed = updateCache(request, fetch(request));
+    event.waitUntil(refreshed);
+    event.respondWith(
+      caches.match(request).then(cached => cached || refreshed.then(response => response || new Response("", { status: 503 })))
+    );
+    return;
+  }
+
+  event.respondWith((async () => {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    return (await updateCache(request, fetch(request))) || new Response("", { status: 503 });
+  })());
 });
