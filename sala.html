@@ -6845,15 +6845,6 @@
   body:not(.ritual-started) .lobbyViewer__img{
     filter: contrast(1.10) saturate(0.76) brightness(0.90) sepia(0.07);
   }
-  /* Vinheta + tint quente nas janelas esquerda e direita */
-  body:not(.ritual-started) #lobbyViewer::before{
-    content:'';
-    position:absolute;inset:0;z-index:1;pointer-events:none;
-    background:
-      radial-gradient(ellipse 42% 45% at 30% 10%, rgba(255,215,90,0.09) 0%, transparent 65%),
-      radial-gradient(ellipse 28% 35% at 84% 10%, rgba(255,215,90,0.07) 0%, transparent 55%),
-      radial-gradient(ellipse at center, transparent 36%, rgba(0,0,0,0.58) 100%);
-  }
 
   /* ── Fragment Banner — fragmento pendente do Ritual Diário ── */
   #fragmentBanner{
@@ -7519,7 +7510,6 @@
                   <div class="lobbyViewer__hint">Arraste para girar</div>
                 </div>
                 <script src="../js/lobby-video.js"></script>
-                <script src="../js/lobby-fx.js"></script>
 
                 <!-- ── Hub Panel — Entre Sessões ──────────────────────── -->
                 <div id="hubPanel" hidden>
