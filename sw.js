@@ -1,11 +1,11 @@
-const CACHE = "osl-v29-new-lobby-video";
+const CACHE = "osl-v31-visible-lobby-atmosphere";
 
 const PRECACHE = [
   "/favicon.png",
-  "/assets/lobby-room.webp?v=1",
+  "/assets/lobby-room.webp?v=2",
   "/verso-carta.webp?v=2",
   "/js/reward-chest-loader.js?v=1",
-  "/js/lobby-3d-loader.js?v=1"
+  "/js/lobby-3d.js?v=5"
 ];
 
 self.addEventListener("install", event => {

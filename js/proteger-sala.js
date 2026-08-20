@@ -37,11 +37,9 @@
     }
   }
 
-  document.documentElement.style.visibility = "hidden";
-
-  // 1. Token local ainda válido → libera imediatamente, sem bater no servidor
+  // A página permanece visível e utilizável; a renovação ocorre em segundo plano.
+  // 1. Token local ainda válido → segue imediatamente, sem bater no servidor
   if (tokenLocalValido()) {
-    document.documentElement.style.visibility = "visible";
     return;
   }
 
@@ -51,16 +49,13 @@
   if (temLicenca) {
     const ok = await renovarAcesso();
     if (ok) {
-      document.documentElement.style.visibility = "visible";
       return;
     }
     // Falhou (servidor frio / offline) → deixa entrar mesmo assim
     // o video.js vai validar novamente ao entrar na chamada
-    document.documentElement.style.visibility = "visible";
     return;
   }
 
   // 3. Sem licença → acesso livre ao deck básico (free-to-play)
-  document.documentElement.style.visibility = "visible";
   return;
 })();

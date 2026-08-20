@@ -7,7 +7,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>SextoLugar · Hub</title>
 <link rel="icon" type="image/png" href="./favicon.png">
-<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"/>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: blob: https://*.googleusercontent.com https://lh3.googleusercontent.com https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://osl-video-server-production.up.railway.app https://www.gstatic.com https://static.cloudflareinsights.com; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; upgrade-insecure-requests; block-all-mixed-content;">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -806,7 +807,7 @@ body.ritual-open #ritualDim{opacity:1;}
     <button class="fragmentPanel__close" id="fragmentClose" type="button" aria-label="Fechar detalhes do fragmento">×</button>
   </div>
   <div class="fragmentPanel__content">
-    <div class="fragmentPanel__visual" aria-hidden="true"><img class="fragmentPanel__card" src="./verso-carta-cropped.jpg" alt=""></div>
+    <div class="fragmentPanel__visual" aria-hidden="true"><img class="fragmentPanel__card" src="./verso-carta-cropped.jpg" alt="" loading="lazy" decoding="async"></div>
     <div>
       <h2 class="fragmentPanel__title" id="fragmentPanelTitle">Fragmento</h2>
       <p class="fragmentPanel__text" id="fragmentPanelText"></p>
@@ -823,7 +824,7 @@ body.ritual-open #ritualDim{opacity:1;}
 
 <div class="fragmentArrival" id="fragmentArrival" role="status" aria-live="polite" aria-atomic="true" hidden>
   <button class="fragmentArrival__button" id="fragmentArrivalButton" type="button" aria-haspopup="dialog" aria-controls="dropFragment">
-    <img class="fragmentArrival__card" src="./verso-carta-cropped.jpg" alt="">
+      <img class="fragmentArrival__card" src="./verso-carta-cropped.jpg" alt="" loading="lazy" decoding="async">
     <span>
       <span class="fragmentArrival__label">Fragmento obtido</span>
       <strong class="fragmentArrival__title" id="fragmentArrivalTitle">Fragmento</strong>
@@ -1706,7 +1707,7 @@ window.hubShowOnboarding=function(){var v=document.getElementById('obVeil');if(!
 })();
 </script>
 
-<script type="module" src="./js/reward-chest.js?v=21"></script>
+<script src="./js/reward-chest-loader.js?v=1"></script>
 
 <!-- ══ FIREBASE ══ -->
 <script type="module">
@@ -1819,6 +1820,6 @@ onAuthStateChanged(auth,async(user)=>{
   </div>
 
 </div>
-<script src="./js/sw-register.js?v=11"></script>
+<script src="./js/sw-register.js?v=12"></script>
 </body>
 </html>

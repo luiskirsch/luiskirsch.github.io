@@ -233,8 +233,8 @@
         }
         const avg = sum / n;
         if (avg > 80) {
-          const a = (0.55 + (avg/255) * 0.45).toFixed(2);
-          ctx.fillStyle = `rgba(246,239,228,${a})`;
+          const a = (0.92 + (avg/255) * 0.08).toFixed(2);
+          ctx.fillStyle = `rgba(255,248,225,${a})`;
           ctx.fillText(Math.random() > .5 ? '1' : '0', c*CW, r*CH);
         }
       }

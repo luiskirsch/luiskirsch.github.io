@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-i18n-ns="sala,cards,achievements,missions,xptitles,effects">
 <head>
+  <link rel="preload" href="/assets/lobby-room.webp?v=1" as="image" type="image/webp" fetchpriority="high">
 <script>(function(){if(window.top!==window.self){try{window.top.location.replace(location.href);}catch(_){document.documentElement.innerHTML="";}return;}var h=(location.hostname||"").toLowerCase(),p=location.protocol||"";var A=["preludiojogos.com","www.preludiojogos.com","preludiojogos.com.br","www.preludiojogos.com.br","luiskirsch.github.io","localhost","127.0.0.1"];if(p==="file:"||h&&A.indexOf(h)===-1){document.documentElement.innerHTML="<style>*{margin:0;padding:0}html,body{background:#0a0805;height:100%;display:flex;align-items:center;justify-content:center}p{color:#ccc;font:15px/1.7 sans-serif;text-align:center;max-width:320px}a{color:#e06e30;text-decoration:none}</style><p>Este conte\u00fado s\u00f3 est\u00e1 dispon\u00edvel no site oficial.<br><a href=\"https://preludiojogos.com.br\">preludiojogos.com.br<\/a><\/p>";setTimeout(function(){location.replace("https://preludiojogos.com.br");},2500);}else{document.documentElement.classList.add("guard-ok");}})();</script><style>html:not(.guard-ok) body{visibility:hidden!important;background:#0a0805!important}</style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' https://osl-video-server-production.up.railway.app https://osl-video-server-staging.up.railway.app https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com wss://osextolugar-eqa7q1iz.livekit.cloud; font-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'none'; worker-src 'self' blob:;">
 <script src="./i18n/init.js?v=20260818" defer></script>
 <script src="../js/theme-bootstrap.js"></script>
-<script src="js/theme-loader.js"></script>
-<script type="module" src="js/active-theme.js"></script>
+<script src="js/theme-loader.js" defer></script>
+<script src="../js/active-theme-loader.js?v=1" defer></script>
 
 <link rel="preconnect" href="https://www.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-<link rel="dns-prefetch" href="https://firestore.googleapis.com">
-<link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
 <script src="../js/proteger-sala.js"></script>
 
   <meta charset="UTF-8">
@@ -23,8 +24,8 @@
   <link rel="preload" href="./img/luis.png" as="image" fetchpriority="high">
   <title data-i18n="sala:title">SEXTOLUGAR — Sala</title>
 
-  <!-- Lottie: animated emoji (Noto Animated Emoji by Google) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" integrity="sha512-jEnuDt6jfecCjthQAJ+ed0MTVA++5ZKmlUcmDGBv2vUI/REn6FuIdixLNnQT+vKusE2hhTk2is3cFvv5wA+Sgg==" crossorigin="anonymous" defer></script>
+  <!-- Lottie entra depois do primeiro paint; os controles principais não esperam essa biblioteca. -->
+  <script src="../js/lottie-loader.js?v=1" defer></script>
 
   <style>
     html{
@@ -4233,7 +4234,7 @@
     /* ── Verso ── */
     .ritualCardBack{
       background-color:#070604;
-      background-image:url('./verso-carta.png?v=8');
+      background-image:url('/verso-carta.webp?v=2');
       transform:rotateY(180deg);
     }
 
@@ -6695,7 +6696,7 @@
     height:clamp(300px, calc(100svh - 300px), 580px);
     overflow:hidden;
     border-radius:0;
-    background:transparent;
+    background:#090807 url('/assets/lobby-room.webp?v=1') center/cover no-repeat;
     display:flex;align-items:stretch;
     mask-image:linear-gradient(to bottom, transparent 0%, black 7%, black 82%, transparent 100%);
     -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 7%, black 82%, transparent 100%);
@@ -7105,11 +7106,11 @@
 
                 <!-- ── Lobby 3D Viewer (visível só enquanto aguarda) ──── -->
                 <div id="lobbyViewer" class="lobbyViewer">
-                  <video id="lobbyVideoA" class="lobbyViewer__video" autoplay muted playsinline preload="auto">
-                    <source src="/assets/lobby-room.mp4" type="video/mp4">
+                  <video id="lobbyVideoA" class="lobbyViewer__video" autoplay muted playsinline preload="metadata" poster="/assets/lobby-room.webp?v=1">
+                    <source src="/assets/lobby-room.mp4?v=2" type="video/mp4">
                   </video>
-                  <video id="lobbyVideoB" class="lobbyViewer__video" muted playsinline preload="auto" style="opacity:0">
-                    <source src="/assets/lobby-room.mp4" type="video/mp4">
+                  <video id="lobbyVideoB" class="lobbyViewer__video" muted playsinline preload="none" poster="/assets/lobby-room.webp?v=1" style="opacity:0">
+                    <source src="/assets/lobby-room.mp4?v=2" type="video/mp4">
                   </video>
                   <canvas id="lobbyCanvas"></canvas>
                   <div class="lobbyViewer__vignette" aria-hidden="true"></div>
@@ -8093,15 +8094,13 @@
   </div>
 
   <script src="../js/fullscreen-gate.js"></script>
-<script src="../js/sw-register.js"></script>
+<script src="../js/sw-register.js?v=12"></script>
 
 <!-- ── Lobby Mode: adicionado imediatamente, sem depender do Three.js CDN ── -->
 <script src="../js/lobby-mode.js"></script>
 
 <!-- ── Lobby 3D Viewer ────────────────────────────────────────────────────── -->
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js" integrity="sha384-Qvl1RLjZOCDFOOH2bKcGnaDHMM8MVv3zVtMvhy3juQdiIOs6RgQ/7zYdM1FbpHzI" crossorigin="anonymous">
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js" integrity="sha384-pK8zo1cGi3nIm4Yh/hrezBkXvN2riHD+7kg4agEXeMxDNqiAKGO2Ds20+xjzcYgZ" crossorigin="anonymous">
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js" integrity="sha384-BZPDnhvqQ9HQ5XsmqEusjwpN9TIaiGbsJ5XWilDEuRu9Psbw4ZyYk67DUO0nbP3z" crossorigin="anonymous"><script type="module" src="../js/lobby-3d.js"></script>
+  <script src="../js/lobby-3d-loader.js?v=1"></script>
 
   <!-- ── Partidas Rolando: refresh + painel espectador ─────────────────────── -->
   <script src="../js/lobby-init.js"></script>
