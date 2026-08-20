@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080b10">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; frame-src 'none'">
+  <title>Arquivo 302 — Investigação 3D</title>
+  <link rel="icon" href="./favicon.png">
+  <style>
+    :root{color-scheme:dark;--ink:#080b10;--panel:rgba(10,14,20,.88);--line:rgba(214,177,104,.32);--gold:#e0bd78;--paper:#eee7dc;--muted:#a8a5a0;--red:#b8443d;--blue:#3f72b7}
+    *{box-sizing:border-box}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#05070a;color:var(--paper);font-family:Inter,Segoe UI,Arial,sans-serif}
+    button{font:inherit}
+    #scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+    #scene.dragging{cursor:grabbing}
+    #scene.inspecting{cursor:crosshair}
+    .grade{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 52% 46%,transparent 42%,rgba(1,3,7,.46) 100%),linear-gradient(180deg,rgba(5,9,15,.14),rgba(8,5,3,.12));z-index:2}
+    .grain{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:soft-light}
+    .hud{position:fixed;inset:0;z-index:5;pointer-events:none;padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));display:grid;grid-template-columns:minmax(250px,310px) 1fr minmax(240px,290px);grid-template-rows:auto 1fr auto;gap:16px}
+    .glass{background:linear-gradient(145deg,rgba(19,23,29,.92),rgba(7,10,15,.82));border:1px solid var(--line);box-shadow:0 24px 70px rgba(0,0,0,.44),inset 0 1px rgba(255,255,255,.035);backdrop-filter:blur(16px)}
+    .case{grid-column:1;grid-row:1;padding:18px 20px;border-radius:4px;position:relative;overflow:hidden}
+    .case::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--gold),transparent)}
+    .eyebrow{margin:0 0 7px;color:var(--gold);font:700 10px/1.2 Georgia,serif;letter-spacing:.28em;text-transform:uppercase}
+    .case h1{margin:0;font:600 clamp(22px,2.2vw,34px)/1 Georgia,serif;letter-spacing:.045em;text-shadow:0 2px 18px #000}
+    .caseMeta{display:flex;gap:9px;align-items:center;margin-top:11px;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+    .statusDot{width:7px;height:7px;border-radius:50%;background:#d85045;box-shadow:0 0 12px #d85045;animation:pulse 1.7s ease-in-out infinite}
+    .objectives{grid-column:3;grid-row:1 / span 2;align-self:start;border-radius:4px;padding:18px}
+    .objectivesHead{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid rgba(224,189,120,.2)}
+    .objectives h2{margin:0;font:700 11px/1.2 Georgia,serif;letter-spacing:.22em;color:var(--gold);text-transform:uppercase}
+    .counter{font:700 12px/1 monospace;color:#fff;background:rgba(224,189,120,.12);border:1px solid rgba(224,189,120,.24);padding:7px 9px;border-radius:2px}
+    #clueList{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+    .clueRow{display:grid;grid-template-columns:24px 1fr;gap:9px;align-items:center;min-height:38px;padding:8px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025);color:#aaa;font:600 11px/1.25 Georgia,serif;letter-spacing:.08em;text-transform:uppercase;transition:.3s}
+    .clueRow .tick{display:grid;place-items:center;width:22px;height:22px;border:1px solid rgba(224,189,120,.3);border-radius:50%;font-size:11px;color:transparent}
+    .clueRow.found{color:#f2e5cc;border-color:rgba(92,179,122,.3);background:rgba(62,135,86,.12)}
+    .clueRow.found .tick{color:#9be2af;border-color:#5eb179;background:rgba(68,156,96,.18)}
+    .map{grid-column:1;grid-row:3;align-self:end;padding:15px;border-radius:4px}
+    .mapTitle{display:flex;justify-content:space-between;align-items:center;color:var(--gold);font:700 10px Georgia,serif;letter-spacing:.2em;text-transform:uppercase}
+    .locations{display:flex;gap:7px;margin-top:11px}
+    .location{flex:1;min-height:48px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025);color:#777;font-size:9px;letter-spacing:.08em;text-transform:uppercase;display:grid;place-items:center;text-align:center;padding:5px}
+    .location.active{border-color:rgba(224,189,120,.48);color:#f0d39a;background:rgba(224,189,120,.1)}
+    .controls{grid-column:2;grid-row:3;justify-self:center;align-self:end;display:flex;gap:8px;pointer-events:auto}
+    .controlBtn{border:1px solid rgba(224,189,120,.36);color:#e9dfcf;background:rgba(8,12,18,.78);backdrop-filter:blur(12px);padding:11px 15px;border-radius:3px;box-shadow:0 8px 24px rgba(0,0,0,.3);cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:.2s}
+    .controlBtn:hover,.controlBtn:focus-visible{outline:none;border-color:var(--gold);background:rgba(224,189,120,.15);transform:translateY(-1px)}
+    .controlBtn.scanActive{color:#09100d;background:#a8dfbc;border-color:#c5f2d4}
+    .crosshair{position:fixed;left:50%;top:50%;z-index:4;width:26px;height:26px;transform:translate(-50%,-50%);pointer-events:none;opacity:.36}
+    .crosshair::before,.crosshair::after{content:"";position:absolute;background:rgba(240,220,178,.7)}
+    .crosshair::before{width:1px;height:100%;left:50%}.crosshair::after{height:1px;width:100%;top:50%}
+    .tooltip{position:fixed;z-index:8;pointer-events:none;transform:translate(14px,14px);padding:8px 10px;border:1px solid rgba(224,189,120,.48);background:rgba(4,7,11,.92);color:#f1dcae;font:700 10px Georgia,serif;letter-spacing:.12em;text-transform:uppercase;opacity:0;transition:opacity .15s;white-space:nowrap}
+    .tooltip.show{opacity:1}
+    .toast{position:fixed;left:50%;top:23%;z-index:9;transform:translate(-50%,-16px);padding:12px 20px;border:1px solid rgba(224,189,120,.5);background:rgba(7,10,14,.94);color:#f4e7cc;font:600 12px Georgia,serif;letter-spacing:.12em;text-transform:uppercase;opacity:0;transition:.3s;pointer-events:none}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .clueModal{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:rgba(2,4,8,.72);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:.3s}
+    .clueModal.open{opacity:1;visibility:visible}
+    .evidenceCard{width:min(500px,100%);border:1px solid rgba(224,189,120,.42);background:linear-gradient(145deg,#17191c,#090c11);box-shadow:0 40px 100px #000;padding:26px;position:relative;transform:translateY(18px) scale(.98);transition:.35s}
+    .clueModal.open .evidenceCard{transform:none}
+    .evidenceTag{display:inline-flex;align-items:center;gap:8px;color:#b9e4c5;font:700 10px Georgia,serif;letter-spacing:.2em;text-transform:uppercase}
+    .evidenceTag::before{content:"✓";display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#315f40;color:#d8f6df}
+    .evidenceCard h3{margin:17px 0 10px;color:#f3dfb7;font:600 30px Georgia,serif}
+    .evidenceCard p{margin:0;color:#b9b6b0;line-height:1.65;font-size:14px}
+    .evidenceCode{margin-top:20px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);color:#777;font:10px monospace;letter-spacing:.14em;text-transform:uppercase}
+    .closeEvidence{position:absolute;right:14px;top:14px;width:34px;height:34px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#aaa;cursor:pointer;font-size:20px}
+    .complete{position:fixed;inset:0;z-index:30;display:grid;place-items:center;text-align:center;background:radial-gradient(circle,rgba(21,36,31,.94),rgba(3,6,9,.98));opacity:0;visibility:hidden;transition:.7s}
+    .complete.show{opacity:1;visibility:visible}
+    .completeInner{max-width:560px;padding:32px}.completeMark{font-size:56px;color:#87d69e}.complete h2{margin:15px 0 12px;font:600 38px Georgia,serif;color:#f0dfbd}.complete p{color:#aaa;line-height:1.6}.complete button{margin-top:18px}
+    .loader{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:#05070a;transition:opacity .7s,visibility .7s}.loader.done{opacity:0;visibility:hidden}.loaderInner{text-align:center}.loaderRing{width:52px;height:52px;margin:auto;border:1px solid rgba(224,189,120,.18);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}.loader p{margin-top:16px;color:#a98f5e;font:700 10px Georgia,serif;letter-spacing:.28em;text-transform:uppercase}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{opacity:.45}}
+    @media(max-width:900px){.hud{grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto}.case{grid-column:1}.objectives{grid-column:2;width:220px}.map{display:none}.controls{grid-column:1 / -1}.caseMeta{display:none}}
+    @media(max-width:640px){.hud{padding:10px;display:block}.case{position:absolute;left:10px;top:10px;padding:13px 15px}.case h1{font-size:18px}.objectives{position:absolute;right:10px;top:10px;width:165px;padding:12px}.clueRow{min-height:28px;padding:5px;font-size:8px}.clueRow .tick{width:17px;height:17px}.objectivesHead{padding-bottom:8px}.controls{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:max-content}.controlBtn{padding:10px;font-size:9px}.crosshair{display:none}}
+    @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <canvas id="scene" aria-label="Cena de investigação 3D interativa"></canvas>
+  <div class="grade" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div><div class="crosshair" aria-hidden="true"></div>
+  <main class="hud" aria-label="Interface da investigação">
+    <section class="case glass"><p class="eyebrow">Caso demonstrativo</p><h1>Arquivo 302</h1><div class="caseMeta"><span class="statusDot"></span><span>23:47 · Apartamento da vítima</span></div></section>
+    <aside class="objectives glass"><div class="objectivesHead"><h2>Localize as pistas</h2><span id="counter" class="counter">0 / 5</span></div><ol id="clueList"></ol></aside>
+    <section class="map glass"><div class="mapTitle"><span>Mapa do caso</span><span>Distrito 06</span></div><div class="locations"><div class="location active">Apartamento<br>302</div><div class="location">Beco<br>bloqueado</div><div class="location">Laboratório<br>bloqueado</div></div></section>
+    <nav class="controls" aria-label="Controles da cena"><button id="scanBtn" class="controlBtn" type="button">◉ Analisar ambiente</button><button id="resetBtn" class="controlBtn" type="button">↺ Reposicionar câmera</button></nav>
+  </main>
+  <div id="tooltip" class="tooltip" role="status"></div><div id="toast" class="toast" role="status"></div>
+  <section id="clueModal" class="clueModal" aria-modal="true" role="dialog" aria-labelledby="evidenceTitle"><article class="evidenceCard"><button id="closeEvidence" class="closeEvidence" type="button" aria-label="Fechar">×</button><span class="evidenceTag">Evidência catalogada</span><h3 id="evidenceTitle"></h3><p id="evidenceText"></p><div id="evidenceCode" class="evidenceCode"></div></article></section>
+  <section id="complete" class="complete" aria-live="polite"><div class="completeInner"><div class="completeMark">✓</div><p class="eyebrow">Cena examinada</p><h2>Todas as pistas foram encontradas</h2><p>Este protótipo demonstra como uma investigação no estilo Criminal Case pode funcionar em um cenário 3D navegável.</p><button id="playAgain" class="controlBtn" type="button">Investigar novamente</button></div></section>
+  <div id="loader" class="loader"><div class="loaderInner"><div class="loaderRing"></div><p>Reconstruindo cena</p></div></div>
+  <script type="module" src="./js/demo-investigacao-3d.js?v=1"></script>
+  <script src="./js/sw-register.js?v=12"></script>
+</body>
+</html>
