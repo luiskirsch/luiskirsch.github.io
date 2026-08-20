@@ -1,9 +1,9 @@
-const CACHE = "osl-v32-lobby-video-audio";
+const CACHE = "osl-v33-lobby-forward-audio-trim";
 
 const PRECACHE = [
   "/favicon.png",
-  "/assets/lobby-room.webm?v=1",
-  "/assets/lobby-room-v2.mp4?v=1",
+  "/assets/lobby-room.webm?v=2",
+  "/assets/lobby-room-v2.mp4?v=2",
   "/assets/luz-falhando.ogg",
   "/assets/luz-falhando.mp3",
   "/verso-carta.webp?v=2",
