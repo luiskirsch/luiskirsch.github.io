@@ -593,27 +593,7 @@ body.ritual-open #ritualDim{opacity:1;}
 .mundoCardText{font-size:10.5px;color:var(--text3);line-height:1.65;}
 .mundoComingSoon{margin-top:48px;font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);opacity:.55;}
 
-/* ══ LOJA PAGE ══ */
-#lojaPage{background:#04080d;}
-.lojaBody{flex:1;overflow-y:auto;padding:40px 28px 60px;display:flex;flex-direction:column;align-items:center;}
-.lojaBody::-webkit-scrollbar{width:3px;}.lojaBody::-webkit-scrollbar-thumb{background:rgba(212,175,55,.18);border-radius:2px;}
-.lojaHeader{text-align:center;margin-bottom:40px;}
-.lojaTitle{font-family:var(--serif);font-size:clamp(22px,4vw,36px);font-weight:900;letter-spacing:.20em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;text-shadow:0 0 36px rgba(212,175,55,.18);}
-.lojaSub{font-size:11px;color:var(--text3);}
-.lojaSectTitle{font-size:8.5px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);align-self:flex-start;padding-bottom:10px;border-bottom:1px solid rgba(212,175,55,.10);width:100%;max-width:860px;margin-bottom:4px;}
-.lojaGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;width:100%;max-width:860px;margin-bottom:36px;}
-.lojaCard{background:rgba(8,14,22,.90);border:1px solid rgba(212,175,55,.14);border-radius:4px;padding:20px 18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:background .18s,border-color .18s,transform .18s;}
-.lojaCard:hover{background:rgba(212,175,55,.05);border-color:rgba(212,175,55,.30);transform:translateY(-2px);}
-.lojaCardIcon{font-size:28px;opacity:.85;}
-.lojaCardName{font-family:var(--serif);font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--text);text-transform:uppercase;}
-.lojaCardDesc{font-size:10px;color:var(--text3);line-height:1.60;flex:1;}
-.lojaCardFoot{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
-.lojaCardPrice{font-size:11px;font-weight:700;color:var(--gold);font-family:var(--serif);}
-.lojaCardPriceCoins{font-size:10px;font-weight:700;color:var(--text2);}
-.lojaCardBtn{font-size:8px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:5px 12px;background:rgba(212,175,55,.10);border:1px solid rgba(212,175,55,.28);border-radius:2px;color:var(--gold2);cursor:pointer;white-space:nowrap;transition:background .16s,border-color .16s;}
-.lojaCard:hover .lojaCardBtn{background:rgba(212,175,55,.18);border-color:rgba(212,175,55,.50);}
-
-@media(max-width:580px){.lojaGrid{grid-template-columns:1fr 1fr;}.mundoGrid{grid-template-columns:1fr;}}
+@media(max-width:580px){.mundoGrid{grid-template-columns:1fr;}}
 
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}#cvGL{display:none!important;}}
 
@@ -1180,84 +1160,9 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
   </div>
 </div>
 
-<!-- Loja — Seção -->
+<!-- Loja — Seção (iframe de vendas.html) -->
 <div id="lojaPage" class="secPage" role="region" aria-label="Loja">
-  <div class="spScanlines" aria-hidden="true"></div>
-  <div class="spVignette" aria-hidden="true"></div>
-  <div class="lojaBody">
-    <div class="lojaHeader">
-      <div class="lojaTitle">Loja</div>
-      <div class="lojaSub">Expanda sua experiência com pacotes e cosméticos</div>
-    </div>
-
-    <div class="lojaSectTitle">◆ &nbsp; PACOTES DE CARTAS</div>
-    <div class="lojaGrid" id="lojaGridPacotes">
-      <div class="lojaCard" onclick="location.href='./vendas.html#pacote-conexao'">
-        <div class="lojaCardIcon">🫂</div>
-        <div class="lojaCardName">Conexão</div>
-        <div class="lojaCardDesc">12 cartas para revelar o que une as pessoas — memórias, gratidão, cumplicidade.</div>
-        <div class="lojaCardFoot"><span class="lojaCardPrice">R$&nbsp;12,90</span><button class="lojaCardBtn">COMPRAR</button></div>
-      </div>
-      <div class="lojaCard" onclick="location.href='./vendas.html#pacote-verdades'">
-        <div class="lojaCardIcon">🪞</div>
-        <div class="lojaCardName">Verdades</div>
-        <div class="lojaCardDesc">15 cartas que confrontam ilusões, contradições e opiniões não ditas.</div>
-        <div class="lojaCardFoot"><span class="lojaCardPrice">R$&nbsp;12,90</span><button class="lojaCardBtn">COMPRAR</button></div>
-      </div>
-      <div class="lojaCard" onclick="location.href='./vendas.html#pacote-conflito'">
-        <div class="lojaCardIcon">⚔️</div>
-        <div class="lojaCardName">Conflito</div>
-        <div class="lojaCardDesc">15 cartas de confronto, debate e desconfiança declarada.</div>
-        <div class="lojaCardFoot"><span class="lojaCardPrice">R$&nbsp;12,90</span><button class="lojaCardBtn">COMPRAR</button></div>
-      </div>
-      <div class="lojaCard" onclick="location.href='./vendas.html#pacote-segredos'">
-        <div class="lojaCardIcon">🔐</div>
-        <div class="lojaCardName">Segredos</div>
-        <div class="lojaCardDesc">18 cartas que abrem o que ficou guardado — medos, vergonhas, revelações.</div>
-        <div class="lojaCardFoot"><span class="lojaCardPrice">R$&nbsp;12,90</span><button class="lojaCardBtn">COMPRAR</button></div>
-      </div>
-      <div class="lojaCard" onclick="location.href='./vendas.html#pacote-casais'">
-        <div class="lojaCardIcon">💫</div>
-        <div class="lojaCardName">Casais</div>
-        <div class="lojaCardDesc">18 cartas para duas pessoas que querem se conhecer de verdade.</div>
-        <div class="lojaCardFoot"><span class="lojaCardPrice">R$&nbsp;12,90</span><button class="lojaCardBtn">COMPRAR</button></div>
-      </div>
-    </div>
-
-    <div class="lojaSectTitle">◆ &nbsp; COSMÉTICOS (MOEDAS)</div>
-    <div class="lojaGrid">
-      <div class="lojaCard" onclick="window._toast&&window._toast('Loja de cosméticos — em breve')">
-        <div class="lojaCardIcon">🌆</div>
-        <div class="lojaCardName">Crepúsculo</div>
-        <div class="lojaCardDesc">Tema de fundo exclusivo: tons quentes de pôr do sol.</div>
-        <div class="lojaCardFoot"><span class="lojaCardPriceCoins">🪙 200</span><button class="lojaCardBtn">USAR</button></div>
-      </div>
-      <div class="lojaCard" onclick="window._toast&&window._toast('Loja de cosméticos — em breve')">
-        <div class="lojaCardIcon">🪨</div>
-        <div class="lojaCardName">Pedra Fria</div>
-        <div class="lojaCardDesc">Tema mineral, austero, sólido.</div>
-        <div class="lojaCardFoot"><span class="lojaCardPriceCoins">🪙 200</span><button class="lojaCardBtn">USAR</button></div>
-      </div>
-      <div class="lojaCard" onclick="window._toast&&window._toast('Loja de cosméticos — em breve')">
-        <div class="lojaCardIcon">🪟</div>
-        <div class="lojaCardName">Espelho</div>
-        <div class="lojaCardDesc">Tema reflexivo e etéreo para quem joga com profundidade.</div>
-        <div class="lojaCardFoot"><span class="lojaCardPriceCoins">🪙 300</span><button class="lojaCardBtn">USAR</button></div>
-      </div>
-      <div class="lojaCard" onclick="window._toast&&window._toast('Loja de cosméticos — em breve')">
-        <div class="lojaCardIcon">🂠</div>
-        <div class="lojaCardName">Ardósia</div>
-        <div class="lojaCardDesc">Estilo de carta em cinza profundo — elegância sóbria.</div>
-        <div class="lojaCardFoot"><span class="lojaCardPriceCoins">🪙 300</span><button class="lojaCardBtn">USAR</button></div>
-      </div>
-      <div class="lojaCard" onclick="window._toast&&window._toast('Loja de cosméticos — em breve')">
-        <div class="lojaCardIcon">✨</div>
-        <div class="lojaCardName">Centelhas</div>
-        <div class="lojaCardDesc">Efeito visual de partículas que emergem a cada carta revelada.</div>
-        <div class="lojaCardFoot"><span class="lojaCardPriceCoins">🪙 250</span><button class="lojaCardBtn">USAR</button></div>
-      </div>
-    </div>
-  </div>
+  <iframe id="lojaFrame" src="about:blank" style="width:100%;height:100%;border:none;display:block;" loading="lazy" title="Loja"></iframe>
 </div>
 
 <!-- Onboarding -->
@@ -2277,6 +2182,7 @@ function switchSection(name){
   }
   document.body.classList.add('sec-'+name);
   if(name==='social'){_spLoadLeaderboard();_spLoadConexoes();}
+  if(name==='loja'){var fr=document.getElementById('lojaFrame');if(fr&&fr.src==='about:blank')fr.src='./vendas.html?embedded=1';}
 }
 
 function openSocialPanel(){ switchSection('social'); }
