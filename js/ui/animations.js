@@ -1,7 +1,7 @@
 // Animações visuais: giro de carta, som de flip, reações flutuantes, badges de emoji
 import { S } from "../state.js";
 import { EMOJI_LOTTIE, LOTTIE_BASE } from "../constants.js";
-import { revealWorldCardFX } from "./world-card-fx.js";
+import { revealWorldCardFX } from "./world-card-fx.js?v=world-v3";
 
 // ── Som de carta sendo virada (Web Audio API) ─────────────────────────────────
 export function playCardFlip() {

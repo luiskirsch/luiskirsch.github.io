@@ -6,8 +6,9 @@ import { addDoc, setDoc, getDoc, getDocs, serverTimestamp } from "../firebase.js
 import { escapeHtml } from "../utils.js";
 import { OSL_BASIC_CARDS, OSL_PACK_CARDS, OSL_CARD_EFFECTS } from "../constants.js";
 import { getVerifiedProdutos } from "../ui/profile.js";
-import { fireRevealAnimation } from "../ui/animations.js";
-import { setWorldCardFX } from "../ui/world-card-fx.js";
+import { fireRevealAnimation } from "../ui/animations.js?v=world-v3";
+import { setWorldCardFX } from "../ui/world-card-fx.js?v=world-v3";
+import { resolveWorldCardMeta } from "../ui/world-card-meta.js?v=world-v3";
 import { showVoteResultOverlay } from "./rewards.js";
 import { dispatch, subscribe, getState, PHASE } from "./engine.js";
 import { CMD } from "./commands.js";
@@ -178,23 +179,47 @@ export function applyCardContent(card) {
   const cardDivider     = document.getElementById("ritualCardDivider");
   const cardPhrase      = document.getElementById("ritualCardPhrase");
   const visualCard      = document.querySelector(".ritualVisualCard");
+  const ritualCardSigil = visualCard?.querySelector(".ritualSigil");
+  const worldMeta       = resolveWorldCardMeta(card);
 
   if (visualCard) {
     visualCard.removeAttribute("data-world-territory");
+    visualCard.removeAttribute("data-world-kind");
+    visualCard.removeAttribute("data-world-resonance");
     visualCard.removeAttribute("data-fragment-rarity");
     visualCard.style.removeProperty("--world-accent");
     visualCard.style.removeProperty("--world-depth");
-    const influence = card?.worldInfluence || (card?.type === "fragmento" ? card : null);
-    if (influence) {
-      visualCard.dataset.worldTerritory = influence.territoryId || "limiar";
-      if (card?.type === "fragmento") visualCard.dataset.fragmentRarity = card.rarity || "comum";
-      visualCard.style.setProperty("--world-accent", influence.palette?.[0] || "#d4af37");
-      visualCard.style.setProperty("--world-depth", influence.palette?.[1] || "#0d151c");
+    visualCard.querySelector(".worldCardAura")?.remove();
+
+    if (worldMeta) {
+      visualCard.dataset.worldTerritory = worldMeta.territoryId;
+      visualCard.dataset.worldKind = worldMeta.kind;
+      visualCard.dataset.worldResonance = worldMeta.resonance;
+      if (worldMeta.kind === "fragment") visualCard.dataset.fragmentRarity = worldMeta.rarity;
+      visualCard.style.setProperty("--world-accent", worldMeta.palette[0]);
+      visualCard.style.setProperty("--world-depth", worldMeta.palette[1]);
+
+      const aura = document.createElement("div");
+      aura.className = "worldCardAura";
+      aura.setAttribute("aria-hidden", "true");
+      const ring = document.createElement("i");
+      ring.className = "worldCardAura__ring";
+      const glyph = document.createElement("b");
+      glyph.className = "worldCardAura__glyph";
+      glyph.textContent = worldMeta.sigil;
+      const seal = document.createElement("span");
+      seal.className = "worldCardAura__seal";
+      seal.textContent = worldMeta.kind === "fragment"
+        ? `${worldMeta.fragmentId || "FRAGMENTO"} · ${worldMeta.rarity}`
+        : `${worldMeta.name} · ${worldMeta.resonance === "signature" ? "RESSONÂNCIA" : "INFLUÊNCIA"}`;
+      aura.append(ring, glyph, seal);
+      visualCard.prepend(aura);
     }
   }
   setWorldCardFX(card);
 
   if (card) {
+    if (ritualCardSigil) ritualCardSigil.textContent = worldMeta?.sigil || card.sigil || "△";
     if (ritualCardType)  ritualCardType.textContent = ((card.sigil ? card.sigil + "  " : "") + (card.type || oslTr("sala:table.typeRitual", "Ritual")) + (card.fragmentId ? " · " + card.fragmentId : "")).toUpperCase();
     if (ritualCardTitle) {
       ritualCardTitle.style.fontSize = "";
@@ -215,6 +240,7 @@ export function applyCardContent(card) {
     if (cardDivider)    cardDivider.style.display     = hasPhrase ? "" : "none";
     if (cardPhrase)     { cardPhrase.style.display    = hasPhrase ? "" : "none"; if (hasPhrase) cardPhrase.innerHTML = escapeHtml(card.phrase).replace(/\n/g, "<br>"); }
   } else {
+    if (ritualCardSigil) ritualCardSigil.textContent = "△";
     if (ritualCardType)  ritualCardType.textContent  = "RITUAL";
     if (ritualCardTitle) ritualCardTitle.textContent = oslTr("sala:table.ritualWaitingTitle", "Aguardando revelação");
     if (ritualCardText)  ritualCardText.innerHTML    = oslTr("sala:ritual.noNextCardYet", "O anfitrião ainda não revelou a próxima carta.");

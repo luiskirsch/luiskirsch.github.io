@@ -6857,18 +6857,105 @@
     font-family:'Georgia',serif;
   }
   body.ritual-started #fragmentBanner{ display:none!important; }
+  /* ── Cartas vivas do Mundo ─────────────────────────────────────────── */
   .ritualVisualCard[data-world-territory]{
-    border-color:var(--world-accent,#d4af37)!important;
-    box-shadow:0 0 0 1px color-mix(in srgb,var(--world-accent,#d4af37) 35%,transparent),0 24px 70px color-mix(in srgb,var(--world-accent,#d4af37) 18%,#000)!important;
-    background:radial-gradient(circle at 50% 18%,color-mix(in srgb,var(--world-accent,#d4af37) 16%,transparent),transparent 42%),var(--world-depth,#0d151c)!important;
+    isolation:isolate;
+    border:1px solid var(--world-accent,#d4af37)!important;
+    background:
+      radial-gradient(circle at 50% 22%,color-mix(in srgb,var(--world-accent,#d4af37) 21%,transparent),transparent 39%),
+      repeating-linear-gradient(132deg,transparent 0 19px,color-mix(in srgb,var(--world-accent,#d4af37) 3%,transparent) 20px 21px),
+      linear-gradient(155deg,color-mix(in srgb,var(--world-depth,#0d151c) 84%,#16262b),var(--world-depth,#0d151c) 56%,#030606)!important;
+    box-shadow:
+      inset 0 0 70px rgba(0,0,0,.72),
+      inset 0 0 0 2px color-mix(in srgb,var(--world-accent,#d4af37) 18%,transparent),
+      0 0 0 1px color-mix(in srgb,var(--world-accent,#d4af37) 72%,#000),
+      0 0 0 5px #050706,
+      0 0 0 8px color-mix(in srgb,var(--world-accent,#d4af37) 58%,#181207),
+      0 28px 80px color-mix(in srgb,var(--world-accent,#d4af37) 24%,#000)!important;
   }
-  .ritualVisualCard[data-world-territory] .ritualCardMainTitle,.ritualVisualCard[data-world-territory] .ritualSigil{color:var(--world-accent,#d4af37)!important;text-shadow:0 0 20px color-mix(in srgb,var(--world-accent,#d4af37) 38%,transparent)}
-  .ritualVisualCard[data-fragment-rarity]{animation:fragmentCardBreath 3.4s ease-in-out infinite}.ritualVisualCard[data-fragment-rarity] .ritualCardFrame{outline:1px solid color-mix(in srgb,var(--world-accent,#d4af37) 42%,transparent);outline-offset:-8px}.ritualVisualCard[data-fragment-rarity="lendário"]{filter:saturate(1.18);box-shadow:0 0 55px color-mix(in srgb,var(--world-accent,#d4af37) 32%,transparent),0 30px 90px #000!important}@keyframes fragmentCardBreath{50%{filter:brightness(1.08) saturate(1.12)}}
-  .worldCardWebGL{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:.9;border-radius:inherit}.ritualVisualCard[data-world-territory] .ritualCardFrame{position:relative;z-index:2}.ritualCardWrap.world-card-active:not(.ritualCardWrap--dissolve-out):not(.ritualCardWrap--dissolve-in){transform-style:preserve-3d;transform:perspective(1100px) rotateX(var(--world-rx,0deg)) rotateY(var(--world-ry,0deg)) translateZ(14px);transition:transform .22s cubic-bezier(.2,.8,.2,1),filter .3s ease!important}.ritualCardWrap.world-card-active .ritualVisualCard{transform-style:preserve-3d}.ritualCardWrap.world-card-active .ritualCardFrame{transform:translateZ(24px)}
-  .ritualVisualCard[data-world-territory="entrelinhas"]{background:radial-gradient(ellipse at 50% 15%,rgba(96,166,168,.24),transparent 50%),repeating-linear-gradient(165deg,transparent 0 18px,rgba(96,166,168,.025) 19px 20px),#07161d!important}.ritualVisualCard[data-world-territory="camara"]{background:radial-gradient(circle at center,rgba(168,132,216,.2),transparent 48%),linear-gradient(135deg,#0b0711,#1b1024 55%,#08060b)!important}.ritualVisualCard[data-world-territory="sexto_lugar"]{background:radial-gradient(circle at 50% 28%,rgba(240,228,189,.2),transparent 38%),linear-gradient(145deg,#21170d,#080b0e 58%,#171008)!important}
-  .worldCardCinematic{--world-accent:#d4af37;position:fixed;z-index:9990;left:50%;top:50%;width:min(760px,88vw);display:grid;grid-template-columns:1fr 62px auto 1fr;align-items:center;gap:18px;pointer-events:none;opacity:0;transform:translate(-50%,-50%) scale(.92);filter:blur(8px);transition:none}.worldCardCinematic::before{content:"";position:fixed;inset:-100vh -100vw;background:radial-gradient(circle at center,color-mix(in srgb,var(--world-accent) 15%,transparent),rgba(0,0,0,.58) 34%,transparent 68%);opacity:0}.worldCardCinematic.is-on{animation:worldCinema 2.2s cubic-bezier(.16,1,.3,1) both}.worldCardCinematic.is-on::before{animation:worldCinemaVeil 2.2s ease both}.worldCardCinematic__line{height:1px;background:linear-gradient(90deg,transparent,var(--world-accent))}.worldCardCinematic__line:last-child{transform:scaleX(-1)}.worldCardCinematic__sigil{width:58px;height:58px;display:grid;place-items:center;border:1px solid var(--world-accent);color:var(--world-accent);font:900 26px Georgia,serif;transform:rotate(45deg);box-shadow:0 0 30px color-mix(in srgb,var(--world-accent) 28%,transparent);text-shadow:0 0 14px var(--world-accent)}.worldCardCinematic__copy{min-width:230px;text-align:center;text-transform:uppercase}.worldCardCinematic__copy small{display:block;font:800 8px sans-serif;letter-spacing:.35em;color:var(--world-accent)}.worldCardCinematic__copy strong{display:block;margin:7px 0 5px;font:900 24px Georgia,serif;letter-spacing:.12em;color:#f5f0e6}.worldCardCinematic__copy span{display:block;max-width:330px;font:600 8px/1.5 sans-serif;letter-spacing:.12em;color:rgba(245,240,230,.58)}@keyframes worldCinema{0%{opacity:0;transform:translate(-50%,-50%) scale(.84);filter:blur(10px)}18%,68%{opacity:1;transform:translate(-50%,-50%) scale(1);filter:blur(0)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.04);filter:blur(5px)}}@keyframes worldCinemaVeil{0%,100%{opacity:0}18%,64%{opacity:1}}
-  @media(max-width:600px){.worldCardCinematic{grid-template-columns:28px 46px 1fr 28px;gap:10px}.worldCardCinematic__sigil{width:42px;height:42px;font-size:19px}.worldCardCinematic__copy{min-width:0}.worldCardCinematic__copy strong{font-size:17px}.worldCardCinematic__copy span{font-size:7px}}
-  @media(prefers-reduced-motion:reduce){.worldCardWebGL{display:none}.ritualCardWrap.world-card-active{transform:none!important}.worldCardCinematic.is-on{animation:none;opacity:1;filter:none}.worldCardCinematic::before{display:none}}
+  .ritualVisualCard[data-world-territory]::before{
+    inset:11px;border-color:color-mix(in srgb,var(--world-accent,#d4af37) 47%,transparent);
+    box-shadow:inset 0 0 28px color-mix(in srgb,var(--world-accent,#d4af37) 8%,transparent);
+  }
+  .ritualVisualCard[data-world-territory]::after{
+    opacity:.48;background:
+      radial-gradient(circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--world-accent,#d4af37) 28%,transparent),transparent 36%),
+      linear-gradient(115deg,transparent 15%,rgba(255,255,255,.08) 42%,transparent 58%);
+    mix-blend-mode:screen;
+  }
+  .ritualVisualCard[data-world-territory] .ritualCardFrame{position:absolute;z-index:4;transform:translateZ(25px)}
+  .ritualVisualCard[data-world-territory] .ritualCardMainTitle,
+  .ritualVisualCard[data-world-territory] .ritualSigil{
+    color:#fffaf0!important;
+    text-shadow:0 0 15px color-mix(in srgb,var(--world-accent,#d4af37) 50%,transparent),0 3px 5px #000;
+  }
+  .ritualVisualCard[data-world-territory] .ritualCardNumber{color:var(--world-accent,#d4af37)!important;text-shadow:0 0 12px color-mix(in srgb,var(--world-accent,#d4af37) 50%,transparent)}
+  .worldCardAura{position:absolute;inset:0;z-index:2;overflow:hidden;border-radius:inherit;pointer-events:none;transform:translateZ(8px)}
+  .worldCardAura__ring{
+    position:absolute;left:50%;top:45%;width:72%;aspect-ratio:1;border-radius:50%;
+    border:1px solid color-mix(in srgb,var(--world-accent,#d4af37) 34%,transparent);
+    box-shadow:inset 0 0 45px color-mix(in srgb,var(--world-accent,#d4af37) 12%,transparent),0 0 36px color-mix(in srgb,var(--world-accent,#d4af37) 10%,transparent);
+    transform:translate(-50%,-50%);opacity:.55;animation:worldRingTurn 12s linear infinite;
+  }
+  .worldCardAura__ring::before,.worldCardAura__ring::after{content:"";position:absolute;border:1px solid color-mix(in srgb,var(--world-accent,#d4af37) 24%,transparent);transform:rotate(45deg)}
+  .worldCardAura__ring::before{inset:12%}.worldCardAura__ring::after{inset:28%;border-radius:50%;transform:none}
+  .worldCardAura__glyph{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);font:400 clamp(110px,18vh,180px)/1 Georgia,serif;color:var(--world-accent,#d4af37);opacity:.075;text-shadow:0 0 45px var(--world-accent,#d4af37)}
+  .worldCardAura__seal{
+    position:absolute;left:8px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;
+    padding:7px 4px;border:1px solid color-mix(in srgb,var(--world-accent,#d4af37) 30%,transparent);
+    background:rgba(2,6,7,.72);color:var(--world-accent,#d4af37);
+    font:800 6px/1.2 Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;
+    box-shadow:0 0 18px rgba(0,0,0,.6);
+  }
+  .worldCardWebGL{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:.95;border-radius:inherit}
+  .ritualCardWrap.world-card-active:not(.ritualCardWrap--dissolve-out):not(.ritualCardWrap--dissolve-in){
+    transform-style:preserve-3d;
+    transform:perspective(1100px) rotateX(var(--world-rx,0deg)) rotateY(var(--world-ry,0deg)) translateZ(14px);
+    transition:transform .22s cubic-bezier(.2,.8,.2,1),filter .3s ease!important;
+  }
+  .ritualCardWrap.world-card-active .ritualVisualCard{transform-style:preserve-3d}
+  .ritualVisualCard[data-world-resonance="ambient"] .worldCardAura{opacity:.62}
+  .ritualVisualCard[data-world-resonance="signature"] .worldCardAura__ring{opacity:.9;animation-duration:5.5s}
+  .ritualVisualCard[data-world-resonance="signature"]{animation:worldSignatureBreath 3.8s ease-in-out infinite}
+
+  /* O Limiar: portal dourado sobre profundidade petróleo. */
+  .ritualVisualCard[data-world-territory="limiar"]{background:
+    radial-gradient(circle at 50% 44%,rgba(231,187,63,.18) 0 8%,transparent 9% 22%,rgba(231,187,63,.07) 23% 23.5%,transparent 24% 41%,rgba(231,187,63,.04) 42% 42.5%,transparent 43%),
+    radial-gradient(ellipse at 50% 8%,rgba(231,187,63,.22),transparent 42%),
+    linear-gradient(155deg,#0c2223,#061113 58%,#020706)!important}
+  .ritualVisualCard[data-world-territory="entrelinhas"]{background:
+    radial-gradient(ellipse at 50% 17%,rgba(114,213,211,.28),transparent 45%),
+    repeating-linear-gradient(165deg,transparent 0 17px,rgba(114,213,211,.04) 18px 19px),
+    linear-gradient(145deg,#0b2930,#041116 62%,#020709)!important}
+  .ritualVisualCard[data-world-territory="camara"]{background:radial-gradient(circle at center,rgba(189,145,239,.25),transparent 46%),linear-gradient(135deg,#0b0711,#1b1024 55%,#08060b)!important}
+  .ritualVisualCard[data-world-territory="sexto_lugar"]{background:radial-gradient(circle at 50% 28%,rgba(240,228,189,.25),transparent 38%),linear-gradient(145deg,#21170d,#080b0e 58%,#171008)!important}
+
+  /* Fragmentos são artefatos únicos — nunca usam a aparência da carta comum. */
+  .ritualVisualCard[data-world-kind="fragment"]{
+    animation:fragmentCardBreath 3.2s ease-in-out infinite;
+    filter:saturate(1.16) contrast(1.04);
+    box-shadow:inset 0 0 85px rgba(0,0,0,.62),0 0 0 1px var(--world-accent),0 0 0 5px #02090b,0 0 0 9px color-mix(in srgb,var(--world-accent) 72%,#10272d),0 0 55px color-mix(in srgb,var(--world-accent) 38%,transparent),0 35px 100px #000!important;
+  }
+  .ritualVisualCard[data-world-kind="fragment"] .worldCardAura__ring{width:82%;opacity:1;border-width:2px;animation-duration:4.2s}
+  .ritualVisualCard[data-world-kind="fragment"] .worldCardAura__glyph{opacity:.14;filter:drop-shadow(0 0 24px var(--world-accent))}
+  .ritualVisualCard[data-world-kind="fragment"] .ritualCardFrame{outline:1px solid color-mix(in srgb,var(--world-accent) 55%,transparent);outline-offset:-13px}
+  .ritualVisualCard[data-fragment-rarity="lendario"]{filter:saturate(1.28) contrast(1.06);box-shadow:0 0 85px color-mix(in srgb,var(--world-accent) 48%,transparent),0 40px 110px #000!important}
+  @keyframes worldRingTurn{to{transform:translate(-50%,-50%) rotate(360deg)}}
+  @keyframes worldSignatureBreath{50%{filter:brightness(1.075) saturate(1.14);box-shadow:inset 0 0 70px rgba(0,0,0,.6),0 0 0 1px var(--world-accent),0 0 0 6px #050706,0 0 0 9px color-mix(in srgb,var(--world-accent) 70%,#181207),0 32px 95px color-mix(in srgb,var(--world-accent) 34%,#000)}}
+  @keyframes fragmentCardBreath{50%{filter:brightness(1.1) saturate(1.28) contrast(1.05)}}
+
+  .worldCardCinematic{--world-accent:#d4af37;position:fixed;z-index:9990;left:50%;top:50%;width:min(780px,88vw);display:grid;grid-template-columns:1fr 66px auto 1fr;align-items:center;gap:20px;pointer-events:none;opacity:0;transform:translate(-50%,-50%) scale(.92);filter:blur(8px);transition:none}
+  .worldCardCinematic::before{content:"";position:absolute;z-index:-1;left:50%;top:50%;width:240vw;height:240vh;transform:translate(-50%,-50%);background:radial-gradient(circle at center,color-mix(in srgb,var(--world-accent) 18%,transparent),rgba(0,0,0,.72) 32%,rgba(0,0,0,.2) 58%,transparent 72%);opacity:0}
+  .worldCardCinematic.is-on{animation:worldCinema 2.7s cubic-bezier(.16,1,.3,1) both}.worldCardCinematic.is-on::before{animation:worldCinemaVeil 2.7s ease both}
+  .worldCardCinematic[data-world-resonance="ambient"].is-on{animation:worldCinemaAmbient 1.4s ease both}.worldCardCinematic[data-world-resonance="ambient"].is-on::before{animation-duration:1.4s}
+  .worldCardCinematic__line{height:1px;background:linear-gradient(90deg,transparent,var(--world-accent));box-shadow:0 0 12px var(--world-accent)}.worldCardCinematic__line:last-child{transform:scaleX(-1)}
+  .worldCardCinematic__sigil{width:62px;height:62px;display:grid;place-items:center;border:1px solid var(--world-accent);color:var(--world-accent);font:900 28px Georgia,serif;transform:rotate(45deg);box-shadow:inset 0 0 20px color-mix(in srgb,var(--world-accent) 14%,transparent),0 0 34px color-mix(in srgb,var(--world-accent) 42%,transparent);text-shadow:0 0 16px var(--world-accent)}
+  .worldCardCinematic__copy{min-width:250px;text-align:center;text-transform:uppercase}.worldCardCinematic__copy small{display:block;font:800 8px sans-serif;letter-spacing:.38em;color:var(--world-accent)}.worldCardCinematic__copy strong{display:block;margin:8px 0 6px;font:900 25px Georgia,serif;letter-spacing:.12em;color:#fffaf0;text-shadow:0 4px 20px #000}.worldCardCinematic__copy span{display:block;max-width:350px;font:600 8px/1.55 sans-serif;letter-spacing:.12em;color:rgba(245,240,230,.68)}
+  @keyframes worldCinema{0%{opacity:0;transform:translate(-50%,-50%) scale(.78) rotateX(22deg);filter:blur(12px)}15%,72%{opacity:1;transform:translate(-50%,-50%) scale(1) rotateX(0);filter:blur(0)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.08);filter:blur(7px)}}
+  @keyframes worldCinemaAmbient{0%{opacity:0;transform:translate(-50%,-50%) scale(.94);filter:blur(6px)}20%,65%{opacity:.82;transform:translate(-50%,-50%) scale(1);filter:blur(0)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.02);filter:blur(3px)}}
+  @keyframes worldCinemaVeil{0%,100%{opacity:0}15%,68%{opacity:1}}
+  @media(max-width:600px){.worldCardAura__seal{display:none}.worldCardCinematic{grid-template-columns:24px 46px 1fr 24px;gap:10px}.worldCardCinematic__sigil{width:42px;height:42px;font-size:19px}.worldCardCinematic__copy{min-width:0}.worldCardCinematic__copy strong{font-size:17px}.worldCardCinematic__copy span{font-size:7px}}
+  @media(prefers-reduced-motion:reduce){.worldCardWebGL,.worldCardAura__ring{display:none}.ritualCardWrap.world-card-active{transform:none!important}.ritualVisualCard[data-world-kind="fragment"],.ritualVisualCard[data-world-resonance="signature"]{animation:none}.worldCardCinematic.is-on{animation:none;opacity:1;filter:none}.worldCardCinematic::before{display:none}}
   #fragmentBanner .fBanner__gem{
     font-size:18px;
     flex-shrink:0;
@@ -8117,7 +8204,7 @@
 
   <!-- Lógica do jogo → js/init.js -->
   <script src="js/reward-chest-loader.js?v=1"></script>
-  <script type="module" src="js/init.js"></script>
+  <script type="module" src="js/init.js?v=world-v3"></script>
 
   <script type="module" src="video.js"></script>
 

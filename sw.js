@@ -1,4 +1,4 @@
-const CACHE = "osl-v41-lobby-animated-video";
+const CACHE = "osl-v42-world-cards-live";
 
 const PRECACHE = [
   "/favicon.png",
@@ -80,10 +80,9 @@ self.addEventListener("fetch", event => {
 
   if (request.mode === "navigate" || request.destination === "document") {
     const network = event.preloadResponse.then(response => response || fetch(request));
-    const refreshed = updateCache(request, network);
-    event.waitUntil(refreshed);
+    event.waitUntil(network.then(response => updateCache(request, Promise.resolve(response.clone()))).catch(() => {}));
     event.respondWith(
-      caches.match(request).then(cached => cached || refreshed.then(response => response || new Response("", { status: 503 })))
+      network.catch(async () => (await caches.match(request)) || new Response("", { status: 503 }))
     );
     return;
   }
@@ -94,10 +93,10 @@ self.addEventListener("fetch", event => {
     /\.(?:js|mjs|css|json)$/i.test(url.pathname);
 
   if (shouldRefresh) {
-    const refreshed = updateCache(request, fetch(request));
-    event.waitUntil(refreshed);
+    const network = fetch(request);
+    event.waitUntil(network.then(response => updateCache(request, Promise.resolve(response.clone()))).catch(() => {}));
     event.respondWith(
-      caches.match(request).then(cached => cached || refreshed.then(response => response || new Response("", { status: 503 })))
+      network.catch(async () => (await caches.match(request)) || new Response("", { status: 503 }))
     );
     return;
   }
