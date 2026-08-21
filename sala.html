@@ -855,28 +855,30 @@
       margin-top:14px;
     }
 
-    .historySessionBtn{
+    .sidebarActions .historySessionBtn{
       display:flex;
       align-items:center;
       justify-content:center;
       gap:8px;
-      color:rgba(255,250,242,.72);
-      border:1px solid rgba(231,197,138,.22);
-      background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.035));
-      box-shadow:inset 0 1px rgba(255,255,255,.035);
+      color:#17130f;
+      border:1px solid rgba(255,255,255,.20);
+      background:linear-gradient(180deg,#c9c8ca 0%,#aaa9ac 100%);
+      box-shadow:inset 0 1px rgba(255,255,255,.5),0 6px 18px rgba(0,0,0,.16);
+      opacity:.88;
     }
-    .historySessionBtn:hover{
-      color:#fffaf2;
-      border-color:rgba(231,197,138,.48);
-      background:rgba(239,201,120,.10);
+    .sidebarActions .historySessionBtn:hover{
+      color:#100d0a;
+      border-color:rgba(255,255,255,.38);
+      background:linear-gradient(180deg,#d5d4d6 0%,#b8b7ba 100%);
+      opacity:1;
     }
-    .historySessionBtn__icon{opacity:.72}
-    .historySessionBtn[data-state="loading"] .historySessionBtn__icon{
+    .sidebarActions .historySessionBtn__icon{opacity:.68}
+    .sidebarActions .historySessionBtn[data-state="loading"] .historySessionBtn__icon{
       animation:historyPulse 1.15s ease-in-out infinite;
     }
-    .historySessionBtn[data-state="error"]{
-      border-color:rgba(231,197,138,.34);
-      color:rgba(255,250,242,.58);
+    .sidebarActions .historySessionBtn[data-state="error"]{
+      border-color:rgba(212,168,75,.55);
+      color:#2b2115;
     }
     @keyframes historyPulse{50%{opacity:.25;transform:translateY(-1px)}}
 
