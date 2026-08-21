@@ -1,4 +1,4 @@
-const CACHE = "osl-v44-session-history";
+const CACHE = "osl-v45-permanent-fragment-slot";
 
 const PRECACHE = [
   "/favicon.png",

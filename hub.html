@@ -82,6 +82,10 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .fragmentCards{width:12px;height:17px;border:1px solid currentColor;border-radius:1px;transform:rotate(5deg);box-shadow:-4px 3px 0 -1px #07111b,-4px 3px 0 0 rgba(212,175,55,.58);}
 .navFragmentLabel{font-size:7px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;}
 .fragmentBadge{position:absolute;top:-5px;right:-5px;min-width:14px;height:14px;padding:0 3px;border-radius:999px;background:var(--gold);color:#05070a;font-size:7px;font-weight:900;line-height:14px;text-align:center;box-shadow:0 0 12px rgba(212,175,55,.48);}
+.fragmentBadge[hidden]{display:none;}
+.navFragment.is-empty{background:rgba(212,175,55,.025);border-color:rgba(212,175,55,.12);color:var(--text3);}
+.navFragment.is-empty:hover,.navFragment.is-empty:focus-visible{background:rgba(212,175,55,.07);border-color:rgba(212,175,55,.28);color:var(--gold2);}
+.navFragment.is-empty .fragmentCards{opacity:.58;box-shadow:-4px 3px 0 -1px #07111b,-4px 3px 0 0 rgba(212,175,55,.28);}
 .navFragment.is-new .fragmentCards{animation:fragmentPulse 1.8s ease-in-out 2;}
 @keyframes fragmentPulse{0%,100%{filter:none;transform:rotate(5deg) scale(1)}50%{filter:drop-shadow(0 0 7px rgba(255,232,122,.85));transform:rotate(2deg) scale(1.08)}}
 
@@ -464,6 +468,11 @@ body.ritual-open #ritualDim{opacity:1;}
 .fragmentPanel__secondary{padding:0 12px;border:1px solid rgba(255,255,255,.09);background:transparent;color:var(--text3);}
 .fragmentPanel__primary:hover,.fragmentPanel__primary:focus-visible{filter:brightness(1.1);outline:none;}
 .fragmentPanel__secondary:hover,.fragmentPanel__secondary:focus-visible{border-color:rgba(212,175,55,.24);color:var(--text2);outline:none;}
+.fragmentPanel.is-empty{border-left-color:rgba(212,175,55,.42);}
+.fragmentPanel.is-empty .fragmentPanel__card{opacity:.24;filter:grayscale(1) drop-shadow(0 13px 18px rgba(0,0,0,.68));}
+.fragmentPanel.is-empty .fragmentPanel__title{color:var(--text2);}
+.fragmentPanel.is-empty .fragmentPanel__primary{display:none;}
+.fragmentPanel.is-empty .fragmentPanel__actions{grid-template-columns:1fr;}
 
 /* ── Feature modal (Social / Mundo) ── */
 .fmVeil{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.70);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .24s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
@@ -826,10 +835,10 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9.5 9.5C9.5 8.4 10.6 8 12 8s2.5.4 2.5 1.5S13.4 11 12 11s-2.5.4-2.5 1.5S10.6 16 12 16s2.5-.4 2.5-1.5"/></svg>
       <span id="coinsVal">0</span>
     </button>
-    <button class="navFragment" id="btnFragment" type="button" hidden aria-haspopup="dialog" aria-controls="dropFragment" aria-expanded="false">
+    <button class="navFragment is-empty" id="btnFragment" type="button" aria-label="Nenhum fragmento guardado. Abrir arquivo de fragmentos." aria-haspopup="dialog" aria-controls="dropFragment" aria-expanded="false">
       <span class="fragmentCards" aria-hidden="true"></span>
       <span class="navFragmentLabel">Fragmento</span>
-      <span class="fragmentBadge" aria-hidden="true">1</span>
+      <span class="fragmentBadge" id="fragmentBadge" aria-hidden="true" hidden>0</span>
     </button>
     <div class="navProfile" id="btnPerfil" role="button" tabindex="0">
       <div class="navAvRing"><div class="navAv" id="navAv"><span id="navAvI">L</span></div><span class="navOnDot"></span></div>
@@ -1021,22 +1030,22 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
   </button>
 </div>
 <div class="drop notifDrop" id="dropNotif"><div class="dEmpty">Nenhuma notificação</div></div>
-<section class="drop fragmentPanel" id="dropFragment" role="dialog" aria-labelledby="fragmentPanelTitle" aria-describedby="fragmentPanelText">
+<section class="drop fragmentPanel is-empty" id="dropFragment" role="dialog" aria-labelledby="fragmentPanelTitle" aria-describedby="fragmentPanelText">
   <div class="fragmentPanel__head">
-    <span class="fragmentPanel__eyebrow">Fragmento guardado · 1</span>
+    <span class="fragmentPanel__eyebrow" id="fragmentPanelEyebrow">Arquivo de fragmentos · 0</span>
     <button class="fragmentPanel__close" id="fragmentClose" type="button" aria-label="Fechar detalhes do fragmento">×</button>
   </div>
   <div class="fragmentPanel__content">
     <div class="fragmentPanel__visual" aria-hidden="true"><img class="fragmentPanel__card" src="./verso-carta.webp" alt="" loading="lazy" decoding="async"></div>
     <div>
-      <h2 class="fragmentPanel__title" id="fragmentPanelTitle">Fragmento</h2>
-      <p class="fragmentPanel__text" id="fragmentPanelText"></p>
+      <h2 class="fragmentPanel__title" id="fragmentPanelTitle">Nenhum fragmento guardado</h2>
+      <p class="fragmentPanel__text" id="fragmentPanelText">Seu próximo fragmento ainda está oculto no mundo.</p>
     </div>
-    <p class="fragmentPanel__rule"><strong>Como funciona:</strong> será inserido automaticamente no baralho quando você iniciar um ritual como anfitrião. Entrar na sala de outra pessoa não usa este fragmento.</p>
-    <time class="fragmentPanel__expiry" id="fragmentExpiry"></time>
+    <p class="fragmentPanel__rule" id="fragmentPanelRule"><strong>Como revelar:</strong> complete o Ritual do Dia. Quando um fragmento surgir, ele ficará reservado aqui para o seu próximo ritual como anfitrião.</p>
+    <time class="fragmentPanel__expiry" id="fragmentExpiry">O próximo fragmento ainda não marcou você</time>
   </div>
   <div class="fragmentPanel__actions">
-    <button class="fragmentPanel__primary" id="fragmentCreate" type="button">Criar sala e usar</button>
+    <button class="fragmentPanel__primary" id="fragmentCreate" type="button" hidden disabled>Criar sala e usar</button>
     <button class="fragmentPanel__secondary" id="fragmentLater" type="button">Fechar</button>
   </div>
 </section>
@@ -1407,7 +1416,7 @@ function openFragmentPanel(){
   hideFragmentArrival();
   var trigger=document.getElementById('btnFragment');
   var panel=document.getElementById('dropFragment');
-  if(!trigger||trigger.hidden||!panel)return;
+  if(!trigger||!panel)return;
   var opened=toggleDrop(panel,trigger);
   trigger.setAttribute('aria-expanded',opened?'true':'false');
   if(opened)setTimeout(function(){var close=document.getElementById('fragmentClose');if(close)close.focus();},0);
@@ -1588,15 +1597,31 @@ function _fragmentExpiryLabel(value){
 
 window.hubRenderFragment=function(fragment){
   var trigger=document.getElementById('btnFragment');
+  var panel=document.getElementById('dropFragment');
   var arrival=document.getElementById('fragmentArrival');
+  var badge=document.getElementById('fragmentBadge');
+  var primary=document.getElementById('fragmentCreate');
+  var eyebrow=document.getElementById('fragmentPanelEyebrow');
+  var rule=document.getElementById('fragmentPanelRule');
   var card=fragment&&fragment.card&&typeof fragment.card==='object'?fragment.card:null;
   var expiryDate=_hubDate(fragment&&fragment.expiresAt);
   clearInterval(_fragmentExpiryInterval);_fragmentExpiryInterval=null;
   if(expiryDate&&expiryDate.getTime()<=Date.now())card=null;
-  if(!trigger||!card){
-    if(trigger)trigger.hidden=true;
+  if(!trigger)return;
+  trigger.hidden=false;
+  if(!card){
+    trigger.classList.remove('is-new');
+    trigger.classList.add('is-empty');
+    trigger.setAttribute('aria-label','Nenhum fragmento guardado. Abrir arquivo de fragmentos.');
+    if(panel)panel.classList.add('is-empty');
+    if(badge){badge.hidden=true;badge.textContent='0';}
+    if(primary){primary.hidden=true;primary.disabled=true;}
+    if(eyebrow)eyebrow.textContent='Arquivo de fragmentos · 0';
+    if(rule)rule.innerHTML='<strong>Como revelar:</strong> complete o Ritual do Dia. Quando um fragmento surgir, ele ficará reservado aqui para o seu próximo ritual como anfitrião.';
+    var emptyTitle=document.getElementById('fragmentPanelTitle');if(emptyTitle)emptyTitle.textContent='Nenhum fragmento guardado';
+    var emptyText=document.getElementById('fragmentPanelText');if(emptyText)emptyText.textContent='Seu próximo fragmento ainda está oculto no mundo.';
+    var emptyExpiry=document.getElementById('fragmentExpiry');if(emptyExpiry){emptyExpiry.textContent='O próximo fragmento ainda não marcou você';emptyExpiry.removeAttribute('datetime');}
     hideFragmentArrival();
-    if(document.getElementById('dropFragment')?.classList.contains('open'))closeDrops();
     return;
   }
   var title=String(card.title||'Carta bônus reservada').trim().slice(0,160);
@@ -1605,6 +1630,12 @@ window.hubRenderFragment=function(fragment){
   set('fragmentPanelTitle',title);
   set('fragmentPanelText',text);
   set('fragmentArrivalTitle',title);
+  trigger.classList.remove('is-empty');
+  if(panel)panel.classList.remove('is-empty');
+  if(badge){badge.hidden=false;badge.textContent='1';}
+  if(primary){primary.hidden=false;primary.disabled=false;}
+  if(eyebrow)eyebrow.textContent='Fragmento guardado · 1';
+  if(rule)rule.innerHTML='<strong>Como funciona:</strong> será inserido automaticamente no baralho quando você iniciar um ritual como anfitrião. Entrar na sala de outra pessoa não usa este fragmento.';
   var expiry=document.getElementById('fragmentExpiry');
   if(expiry){
     expiry.textContent=_fragmentExpiryLabel(fragment.expiresAt)+' · reservado para você';
