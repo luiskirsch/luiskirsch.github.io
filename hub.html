@@ -618,6 +618,10 @@ body.sec-social #socialPage,
 body.sec-mundo  #mundoPage,
 body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(0); }
 
+/* Mundo é uma experiência imersiva: usa apenas seu próprio cabeçalho. */
+body.sec-mundo .nav{display:none!important;}
+body.sec-mundo #mundoPage{top:0;}
+
 /* ══ SOCIAL PAGE ══ */
 #socialPage{
 .spScanlines{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);z-index:0;}
