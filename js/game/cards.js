@@ -176,9 +176,24 @@ export function applyCardContent(card) {
   const cardSubrule     = document.getElementById("ritualCardSubrule");
   const cardDivider     = document.getElementById("ritualCardDivider");
   const cardPhrase      = document.getElementById("ritualCardPhrase");
+  const visualCard      = document.querySelector(".ritualVisualCard");
+
+  if (visualCard) {
+    visualCard.removeAttribute("data-world-territory");
+    visualCard.removeAttribute("data-fragment-rarity");
+    visualCard.style.removeProperty("--world-accent");
+    visualCard.style.removeProperty("--world-depth");
+    const influence = card?.worldInfluence || (card?.type === "fragmento" ? card : null);
+    if (influence) {
+      visualCard.dataset.worldTerritory = influence.territoryId || "limiar";
+      if (card?.type === "fragmento") visualCard.dataset.fragmentRarity = card.rarity || "comum";
+      visualCard.style.setProperty("--world-accent", influence.palette?.[0] || "#d4af37");
+      visualCard.style.setProperty("--world-depth", influence.palette?.[1] || "#0d151c");
+    }
+  }
 
   if (card) {
-    if (ritualCardType)  ritualCardType.textContent = (card.type || oslTr("sala:table.typeRitual", "Ritual")).toUpperCase();
+    if (ritualCardType)  ritualCardType.textContent = ((card.sigil ? card.sigil + "  " : "") + (card.type || oslTr("sala:table.typeRitual", "Ritual")) + (card.fragmentId ? " · " + card.fragmentId : "")).toUpperCase();
     if (ritualCardTitle) {
       ritualCardTitle.style.fontSize = "";
       ritualCardTitle.textContent    = card.title || oslTr("sala:ritual.fallbackTitle", "Carta revelada");

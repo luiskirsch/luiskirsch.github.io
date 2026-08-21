@@ -6857,6 +6857,13 @@
     font-family:'Georgia',serif;
   }
   body.ritual-started #fragmentBanner{ display:none!important; }
+  .ritualVisualCard[data-world-territory]{
+    border-color:var(--world-accent,#d4af37)!important;
+    box-shadow:0 0 0 1px color-mix(in srgb,var(--world-accent,#d4af37) 35%,transparent),0 24px 70px color-mix(in srgb,var(--world-accent,#d4af37) 18%,#000)!important;
+    background:radial-gradient(circle at 50% 18%,color-mix(in srgb,var(--world-accent,#d4af37) 16%,transparent),transparent 42%),var(--world-depth,#0d151c)!important;
+  }
+  .ritualVisualCard[data-world-territory] .ritualCardMainTitle,.ritualVisualCard[data-world-territory] .ritualSigil{color:var(--world-accent,#d4af37)!important;text-shadow:0 0 20px color-mix(in srgb,var(--world-accent,#d4af37) 38%,transparent)}
+  .ritualVisualCard[data-fragment-rarity]{animation:fragmentCardBreath 3.4s ease-in-out infinite}.ritualVisualCard[data-fragment-rarity] .ritualCardFrame{outline:1px solid color-mix(in srgb,var(--world-accent,#d4af37) 42%,transparent);outline-offset:-8px}.ritualVisualCard[data-fragment-rarity="lendário"]{filter:saturate(1.18);box-shadow:0 0 55px color-mix(in srgb,var(--world-accent,#d4af37) 32%,transparent),0 30px 90px #000!important}@keyframes fragmentCardBreath{50%{filter:brightness(1.08) saturate(1.12)}}
   #fragmentBanner .fBanner__gem{
     font-size:18px;
     flex-shrink:0;
