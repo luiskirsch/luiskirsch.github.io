@@ -451,8 +451,8 @@ body.ritual-open #ritualDim{opacity:1;}
 .fragmentPanel__close:hover,.fragmentPanel__close:focus-visible{color:#fff;border-color:rgba(212,175,55,.30);outline:none;}
 .fragmentPanel__content{display:grid;grid-template-columns:86px minmax(0,1fr);gap:15px;padding:16px;}
 .fragmentPanel__visual{position:relative;align-self:start;}
-.fragmentPanel__visual::before{content:'';position:absolute;inset:6px -4px -5px 5px;border:1px solid rgba(212,175,55,.18);border-radius:3px;transform:rotate(5deg);}
-.fragmentPanel__card{position:relative;display:block;width:80px;height:118px;object-fit:cover;border:1px solid rgba(212,175,55,.42);border-radius:3px;box-shadow:0 13px 28px rgba(0,0,0,.62);}
+.fragmentPanel__visual::before{content:none;}
+.fragmentPanel__card{position:relative;display:block;width:80px;height:auto;object-fit:contain;background:transparent;border:0;border-radius:5px;filter:drop-shadow(0 13px 18px rgba(0,0,0,.68));}
 .fragmentPanel__title{font-family:var(--serif);font-size:18px;line-height:1.22;color:#fff;margin:1px 0 7px;}
 .fragmentPanel__text{color:var(--text2);font-family:var(--fell);font-size:12px;font-style:italic;line-height:1.55;}
 .fragmentPanel__rule{grid-column:1/-1;padding:11px 12px;border:1px solid rgba(212,175,55,.14);background:rgba(212,175,55,.045);color:var(--text2);font-size:9px;line-height:1.55;}
@@ -578,7 +578,7 @@ body.ritual-open #ritualDim{opacity:1;}
   .navProfile{width:36px;padding:4px;}
   .fragmentPanel.drop{left:4px!important;right:4px!important;top:calc(var(--nav-h) + 4px)!important;width:auto;max-height:calc(100dvh - var(--nav-h) - var(--season-h) - 8px);overflow-y:auto;}
   .fragmentPanel__content{grid-template-columns:68px minmax(0,1fr);gap:12px;padding:14px;}
-  .fragmentPanel__card{width:62px;height:92px;}
+  .fragmentPanel__card{width:62px;height:auto;}
   .fragmentPanel__actions{grid-template-columns:1fr;}
 }
 /* ══ MUNDO PAGE ══ */
@@ -1027,7 +1027,7 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
     <button class="fragmentPanel__close" id="fragmentClose" type="button" aria-label="Fechar detalhes do fragmento">×</button>
   </div>
   <div class="fragmentPanel__content">
-    <div class="fragmentPanel__visual" aria-hidden="true"><img class="fragmentPanel__card" src="./verso-carta-cropped.jpg" alt="" loading="lazy" decoding="async"></div>
+    <div class="fragmentPanel__visual" aria-hidden="true"><img class="fragmentPanel__card" src="./verso-carta.webp" alt="" loading="lazy" decoding="async"></div>
     <div>
       <h2 class="fragmentPanel__title" id="fragmentPanelTitle">Fragmento</h2>
       <p class="fragmentPanel__text" id="fragmentPanelText"></p>
@@ -1044,7 +1044,7 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
 
 <div class="fragmentArrival" id="fragmentArrival" role="status" aria-live="polite" aria-atomic="true" hidden>
   <button class="fragmentArrival__button" id="fragmentArrivalButton" type="button" aria-haspopup="dialog" aria-controls="dropFragment">
-      <img class="fragmentArrival__card" src="./verso-carta-cropped.jpg" alt="" loading="lazy" decoding="async">
+      <img class="fragmentArrival__card" src="./verso-carta.webp" alt="" loading="lazy" decoding="async">
     <span>
       <span class="fragmentArrival__label">Fragmento obtido</span>
       <strong class="fragmentArrival__title" id="fragmentArrivalTitle">Fragmento</strong>
