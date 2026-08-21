@@ -559,6 +559,7 @@
   if (liveCancelBtn)  liveCancelBtn.addEventListener("click", closeModal);
   if (liveUpgradeBtn) liveUpgradeBtn.addEventListener("click", startUpgrade);
   if (liveOverlay)    liveOverlay.addEventListener("click", e => { if (e.target === liveOverlay) closeModal(); });
+  window.addEventListener("osl:arena-exited", closeModal);
 
   // Status check ao carregar página (caso já tenha stream rolando)
   // /streaming/status é público (só retorna info da sala, não cross-user)

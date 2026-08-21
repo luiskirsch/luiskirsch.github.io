@@ -342,6 +342,12 @@ document.addEventListener("DOMContentLoaded", function () {
   var videoOverlay = document.getElementById("mobileVideoOverlay");
   if (videoOverlay) videoOverlay.addEventListener("click", function (e) { if (e.target === videoOverlay) closeVideoOverlay(); });
 
+  window.addEventListener("osl:arena-exited", function () {
+    closeChat();
+    closeHistory();
+    closeVideoOverlay();
+  });
+
   // ── Botão de perfil desktop ───────────────────────────────────────────────
   if (mobileProfileBtn) {
     document.addEventListener("osl:profileLoaded", function (e) {

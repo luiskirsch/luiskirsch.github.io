@@ -2341,6 +2341,41 @@
     }
     .topMeta__mission__btn:hover{background:rgba(80,200,80,.28)}
 
+    /* HUD efêmero: existe visualmente apenas enquanto a Arena está ativa. */
+    html:not(.arenaMode) #missionBadge,
+    html:not(.arenaMode) #missionSep,
+    html:not(.arenaMode) #effectPanel,
+    html:not(.arenaMode) #aiDetectToast,
+    html:not(.arenaMode) #tensionMeter,
+    html:not(.arenaMode) #pressureBtn,
+    html:not(.arenaMode) #reactionBar{
+      display:none!important;
+    }
+
+    html.arenaMode #missionSep{
+      display:none!important;
+    }
+
+    /* Fora do fluxo do cabeçalho: a missão nunca redimensiona SEXTOLUGAR. */
+    html.arenaMode #missionBadge.topMeta__mission--visible{
+      position:fixed;
+      top:max(14px, env(safe-area-inset-top));
+      left:50%;
+      z-index:10020;
+      display:inline-flex;
+      max-width:min(440px, 46vw);
+      min-height:34px;
+      padding:6px 10px;
+      transform:translateX(-50%);
+      color:rgba(255,250,242,.78);
+      background:linear-gradient(180deg,rgba(28,22,17,.96),rgba(12,9,7,.96));
+      border:1px solid rgba(239,201,120,.34);
+      border-radius:6px;
+      box-shadow:0 10px 28px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.05);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+    }
+
     /* ── XP inline na topCenterMeta ─────────────────────────────────── */
     .topMeta__sep{
       color:rgba(255,255,255,.18);
@@ -8879,7 +8914,7 @@
     </div>
   </div>
 
-<script src="../js/fullscreen-gate.js?v=4"></script>
+<script src="../js/fullscreen-gate.js?v=5"></script>
 <script src="../js/sw-register.js?v=12"></script>
 
 <!-- ── Lobby Mode: adicionado imediatamente, sem depender do Three.js CDN ── -->

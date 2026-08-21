@@ -179,6 +179,7 @@
   document.getElementById("recCancelBtn")?.addEventListener("click", closeModal);
   document.getElementById("recStep2CancelBtn")?.addEventListener("click", closeModal);
   recOverlay?.addEventListener("click", function (e) { if (e.target === recOverlay) closeModal(); });
+  window.addEventListener("osl:arena-exited", closeModal);
 
   // Verifica se já tem gravação ativa ao carregar a página (só anfitrião tem panel token)
   (async function () {

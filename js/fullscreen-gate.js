@@ -272,6 +272,22 @@
     if (!wasArena) window.dispatchEvent(new CustomEvent("osl:arena-entered"));
   }
 
+  function clearArenaTransientDom() {
+    const selectors = [
+      ".missionModal",
+      ".missionCompletedToast",
+      ".momentoCriticoNotif",
+      ".pressureNotif",
+      ".reactionFloat",
+      ".videoTile__feeling",
+      ".voteResultOverlay",
+      ".deckModalOverlay"
+    ];
+    document.querySelectorAll(selectors.join(",")).forEach(element => element.remove());
+    document.getElementById("aiDetectToast")?.classList.remove("aiDetectToast--visible");
+    document.getElementById("revealGlow")?.classList.remove("revealGlow--active", "revealGlow--burst");
+  }
+
   function deactivateArenaMode() {
     const wasArena = html.classList.contains("arenaMode") || sessionStorage.getItem("osl_arena") === "1";
     html.classList.remove("arenaMode");
@@ -286,7 +302,10 @@
     if (document.fullscreenElement) {
       document.exitFullscreen?.().catch(() => {});
     }
-    if (wasArena) window.dispatchEvent(new CustomEvent("osl:arena-exited"));
+    if (wasArena) {
+      window.dispatchEvent(new CustomEvent("osl:arena-exited"));
+      clearArenaTransientDom();
+    }
   }
 
   function toggleArenaMode() {

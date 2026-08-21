@@ -269,5 +269,6 @@
 
   // ── Close on backdrop ──
   document.getElementById("oslOverlay").addEventListener("click", function (e) { if (e.target === this) oslCloseAll(); });
+  window.addEventListener("osl:arena-exited", oslCloseAll);
 
 })();

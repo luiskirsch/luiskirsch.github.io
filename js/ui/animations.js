@@ -197,6 +197,24 @@ export function spawnReactionFloat(pid, emoji, fallbackEl) {
   let anim   = null;
   if (code) { anim = loadLottieInto(floatEl, code, true); }
   else       { floatEl.textContent = emoji; }
+  floatEl._lottie = anim;
 
   setTimeout(() => { anim?.destroy(); floatEl.remove(); }, 1750);
 }
+
+export function clearArenaAnimations() {
+  S._feelingBadges.forEach(badge => {
+    clearTimeout(badge._hideTimer);
+    badge._lottie?.destroy();
+    window.removeEventListener("resize", badge._onResize);
+    badge.remove();
+  });
+  S._feelingBadges.clear();
+
+  document.querySelectorAll(".reactionFloat").forEach(element => {
+    element._lottie?.destroy();
+    element.remove();
+  });
+}
+
+window.addEventListener("osl:arena-exited", clearArenaAnimations);

@@ -48,6 +48,7 @@ export const OSL_TENSION = (() => {
   }
 
   function fireMomentoCritico() {
+    if (!document.documentElement.classList.contains("arenaMode")) return;
     const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
     const n = document.createElement("div");
     n.className = "momentoCriticoNotif";
@@ -59,8 +60,8 @@ export const OSL_TENSION = (() => {
   }
 
   return {
-    heat(amount)  { value = Math.min(100, value + amount); render(); if (value >= T.critical && !criticalFired) { criticalFired = true; fireMomentoCritico(); } },
-    startDecay()  { decayInterval = setInterval(() => { if (value > 0) { value = Math.max(0, value - 1.5); render(); } }, 3000); },
+    heat(amount)  { if (!document.documentElement.classList.contains("arenaMode")) return; value = Math.min(100, value + amount); render(); if (value >= T.critical && !criticalFired) { criticalFired = true; fireMomentoCritico(); } },
+    startDecay()  { clearInterval(decayInterval); decayInterval = setInterval(() => { if (value > 0) { value = Math.max(0, value - 1.5); render(); } }, 3000); },
     stop()        { clearInterval(decayInterval); value = 0; criticalFired = false; render(); }
   };
 })();
@@ -158,12 +159,19 @@ export const OSL_ACHIEVEMENTS = (() => {
         }
       }
     },
-    onTensionCritical() { grant("critical_heat"); }
+    onTensionCritical() { grant("critical_heat"); },
+    clearTransientUi() {
+      _toastQueue = [];
+      _toastShowing = false;
+      document.querySelectorAll(".achievementToast").forEach(element => element.remove());
+    }
   };
 })();
 
 // ── Pressão Social ────────────────────────────────────────────────────────────
 let _pressureVotedThisCard = false;
+let _socialPressureUnsub = null;
+let _socialPressureRefPath = null;
 
 export function initPressureBtn() {
   const btn = document.getElementById("pressureBtn");
@@ -189,13 +197,19 @@ export function resetPressureBtn() {
 
 export function bindSocialPressure() {
   if (!S.ritualRef) return;
+  const nextRefPath = S.ritualRef.path || String(S.ritualRef);
+  if (_socialPressureUnsub && _socialPressureRefPath === nextRefPath) return;
+  if (_socialPressureUnsub) {
+    try { _socialPressureUnsub(); } catch (_) {}
+  }
+  _socialPressureRefPath = nextRefPath;
   let _lastPressureTs = 0;
-  onSnapshot(S.ritualRef, (snap) => {
+  _socialPressureUnsub = onSnapshot(S.ritualRef, (snap) => {
     if (!snap.exists()) return;
     const sp = snap.data().socialPressure;
     if (sp?.ts && sp.ts > _lastPressureTs) {
       _lastPressureTs = sp.ts;
-      if (sp.votedBy !== S.playerName) {
+      if (document.documentElement.classList.contains("arenaMode") && sp.votedBy !== S.playerName) {
         const _tx = (k, fb, vars) => (window.OSL_I18N?.t(k, vars)) || fb;
         const main = _tx('achievements:toast.socialPressureMain', 'A sala quer mais');
         const sub = _tx('achievements:toast.socialPressureSub', `${sp.votedBy} votou para continuar`, { name: sp.votedBy });
@@ -263,6 +277,10 @@ export function checkAIDetection(aiDetection) {
   const toast = document.getElementById("aiDetectToast");
   const msg   = document.getElementById("aiDetectToastMsg");
   if (!toast || !msg) return;
+  if (!document.documentElement.classList.contains("arenaMode")) {
+    toast.classList.remove("aiDetectToast--visible");
+    return;
+  }
   if (!aiDetection?.detectedAt || Date.now() - aiDetection.detectedAt > 30000) { toast.classList.remove("aiDetectToast--visible"); return; }
   const _tx = (k, fb, vars) => (window.OSL_I18N?.t(k, vars)) || fb;
   const playerName = aiDetection.playerName;
@@ -295,7 +313,7 @@ document.getElementById("aiDetectDismissBtn")?.addEventListener("click", () => {
 
 // ── Reações ───────────────────────────────────────────────────────────────────
 export async function sendReaction(emoji, sourceEl) {
-  if (!S.ritualStarted) return;
+  if (!document.documentElement.classList.contains("arenaMode") || !S.ritualStarted) return;
   const ts = Date.now();
   S.shownReactions.set(S.participantId, ts);
   spawnReactionFloat(S.participantId, emoji, sourceEl);
@@ -306,7 +324,7 @@ export async function sendReaction(emoji, sourceEl) {
 }
 
 export function renderReactions(reactions) {
-  if (!reactions) return;
+  if (!document.documentElement.classList.contains("arenaMode") || !reactions) return;
   const now = Date.now();
   Object.entries(reactions).forEach(([pid, r]) => {
     if (!r?.ts || now - r.ts > 4500) return;
@@ -326,37 +344,51 @@ window.sendReaction = sendReaction;
 
 let _efxPrevPhase            = PHASE.IDLE;
 let _efxPrevCardsRevealed    = 0;
+let _sessionJoinAwardedKey   = null;
+
+function awardSessionJoinOnce() {
+  const sessionKey = S.sessionId || "active-session";
+  if (_sessionJoinAwardedKey === sessionKey) return;
+  _sessionJoinAwardedKey = sessionKey;
+  OSL_XP.award(S.userRef, "SESSION_JOIN").catch(() => {});
+}
 
 subscribe(snap => {
   const { phase, activeEffect, aiDetection, reactions, cardsRevealedCount, currentCard } = snap;
+  const isArena = document.documentElement.classList.contains("arenaMode");
 
   // Transição de fase
   if (phase !== _efxPrevPhase) {
     if (phase === PHASE.RITUAL_ACTIVE) {
-      OSL_XP.award(S.userRef, "SESSION_JOIN").catch(() => {});
-      OSL_TENSION.startDecay();
-      resetPressureBtn();
-      initPressureBtn();
-      bindSocialPressure();
+      if (isArena) {
+        awardSessionJoinOnce();
+        OSL_TENSION.startDecay();
+        resetPressureBtn();
+        initPressureBtn();
+        bindSocialPressure();
+      }
     } else if (phase === PHASE.LOBBY && _efxPrevPhase === PHASE.RITUAL_ACTIVE) {
       OSL_TENSION.stop();
       // _efxPrevCardsRevealed ainda tem o valor da última snapshot RITUAL_ACTIVE
-      if (_efxPrevCardsRevealed > 0) {
+      if (isArena && _efxPrevCardsRevealed > 0) {
         OSL_XP.award(S.userRef, "SESSION_COMPLETE").catch(() => {});
       }
+      _sessionJoinAwardedKey = null;
     }
     _efxPrevPhase = phase;
   }
 
   // Carta revelada
   if (phase === PHASE.RITUAL_ACTIVE && cardsRevealedCount > _efxPrevCardsRevealed) {
-    OSL_XP.award(S.userRef, "CARD_REVEALED").catch(() => {});
-    if (["Segredo", "Casais"].includes(currentCard?.type)) {
-      OSL_XP.award(S.userRef, "DEEP_CARD").catch(() => {});
+    if (isArena) {
+      OSL_XP.award(S.userRef, "CARD_REVEALED").catch(() => {});
+      if (["Segredo", "Casais"].includes(currentCard?.type)) {
+        OSL_XP.award(S.userRef, "DEEP_CARD").catch(() => {});
+      }
+      OSL_TENSION.heat(12);
+      OSL_ACHIEVEMENTS.onCardRevealed(cardsRevealedCount, currentCard?.type);
+      resetPressureBtn();
     }
-    OSL_TENSION.heat(12);
-    OSL_ACHIEVEMENTS.onCardRevealed(cardsRevealedCount, currentCard?.type);
-    resetPressureBtn();
     _efxPrevCardsRevealed = cardsRevealedCount;
   }
   // Reset contagem ao voltar para LOBBY
@@ -372,6 +404,13 @@ subscribe(snap => {
 export function renderActiveEffect(effect) {
   const panel = document.getElementById("effectPanel");
   if (!panel) return;
+  if (!document.documentElement.classList.contains("arenaMode")) {
+    panel.style.display = "none";
+    panel.classList.remove("effectPanel--closing");
+    clearEffectTimer();
+    stopAIVAD();
+    return;
+  }
   const cardCenter = panel.closest(".cardCenter") || document.querySelector(".cardCenter");
 
   const revealPanel = document.getElementById("revealPanel");
@@ -518,3 +557,22 @@ export function renderActiveEffect(effect) {
     panel.appendChild(btn);
   }
 }
+
+window.addEventListener("osl:arena-exited", () => {
+  OSL_TENSION.stop();
+  OSL_ACHIEVEMENTS.clearTransientUi();
+  stopAIVAD();
+  document.querySelectorAll(".momentoCriticoNotif, .pressureNotif").forEach(element => element.remove());
+  document.getElementById("aiDetectToast")?.classList.remove("aiDetectToast--visible");
+});
+
+window.addEventListener("osl:arena-entered", () => {
+  if (S.ritualStarted) {
+    awardSessionJoinOnce();
+    OSL_TENSION.startDecay();
+    resetPressureBtn();
+    initPressureBtn();
+    bindSocialPressure();
+  }
+  renderActiveEffect(S.currentActiveEffect);
+});

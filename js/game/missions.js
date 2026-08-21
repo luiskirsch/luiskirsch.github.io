@@ -17,6 +17,49 @@ let _lastLegacyMission = null;
 let _activeMissionDoc = null;
 let _activeMissionKey = null;
 let _completionInFlight = false;
+let _missionModalAcknowledgedKey = null;
+
+function isArenaActive() {
+  return document.documentElement.classList.contains("arenaMode")
+    || sessionStorage.getItem("osl_arena") === "1";
+}
+
+export function clearMissionPresentation() {
+  stopMissionVoiceDetection();
+  document.querySelectorAll(".missionModal, .missionCompletedToast").forEach(element => element.remove());
+
+  const badge = document.getElementById("missionBadge");
+  const separator = document.getElementById("missionSep");
+  const text = document.getElementById("missionBadgeText");
+  if (badge) {
+    badge.classList.remove("topMeta__mission--visible", "topMeta__mission--done");
+    badge.querySelector(".topMeta__mission__btn")?.remove();
+    badge.onclick = null;
+    badge.onkeydown = null;
+    badge.setAttribute("aria-hidden", "true");
+    const icon = badge.querySelector(".topMeta__mission__icon");
+    if (icon) icon.textContent = "🎯";
+  }
+  if (separator) separator.style.display = "none";
+  if (text) text.textContent = "";
+}
+
+export function restoreMissionPresentation() {
+  if (!isArenaActive() || !_activeMissionDoc) return;
+  const text = resolveMissionText(_activeMissionDoc);
+  if (!text) return;
+
+  if (_activeMissionDoc.status === "completed") {
+    renderMissionCompleted(text);
+    return;
+  }
+
+  updateMissionBadge(text);
+  if (_missionModalAcknowledgedKey !== _activeMissionKey) {
+    showSecretMissionModal(text, _activeMissionKey);
+  }
+  startMissionVoiceDetection();
+}
 
 function timestampMillis(value) {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -211,15 +254,22 @@ function applyMissionState(rawMission) {
     S.missionCompleted = true;
     S.missionShownTs = nextKey;
     stopMissionVoiceDetection();
-    renderMissionCompleted(text);
+    if (isArenaActive()) renderMissionCompleted(text);
+    else clearMissionPresentation();
     return;
   }
 
   S.missionCompleted = false;
   if (assignmentChanged) S.missionNameMentionCount = 0;
   stopMissionVoiceDetection();
+  if (!isArenaActive()) {
+    clearMissionPresentation();
+    return;
+  }
   updateMissionBadge(text);
-  if (assignmentChanged && S.missionShownTs !== nextKey) showSecretMissionModal(text);
+  if (assignmentChanged && _missionModalAcknowledgedKey !== nextKey) {
+    showSecretMissionModal(text, nextKey);
+  }
   S.missionShownTs = nextKey;
   startMissionVoiceDetection();
 }
@@ -288,7 +338,7 @@ export function getMissionKeyword() {
 
 // ── Verificação de missão por reação ─────────────────────────────────────────
 export function checkMissionFromReaction(fromPid, emoji) {
-  if (S.missionCompleted) return;
+  if (!isArenaActive() || S.missionCompleted) return;
   const type   = getMissionDetectionType();
   if (!type || type === "keyword" || type === "self_report" || type === "name_count") return;
   if (type === "laugh" && emoji === "😂") { completeMission(); return; }
@@ -299,7 +349,7 @@ export function checkMissionFromReaction(fromPid, emoji) {
 
 // ── Verificação de missão por chat ────────────────────────────────────────────
 export function checkMissionChatCompletion(text) {
-  if (!S.currentSecretMission || S.missionCompleted) return;
+  if (!isArenaActive() || !S.currentSecretMission || S.missionCompleted) return;
   const type = getMissionDetectionType();
   if (type === "keyword") {
     const keyword = getMissionKeyword();
@@ -318,6 +368,7 @@ export function checkMissionChatCompletion(text) {
 
 // ── Avaliação de resposta no chat via AI (backend) ────────────────────────────
 export async function evaluateChatResponse(text) {
+  if (!isArenaActive()) return;
   if (!S.currentActiveEffect || S.currentActiveEffect.type !== "force_player") return;
   if (S.participantId !== S.currentActiveEffect.params?.targetId) return;
   if (!text || text.trim().length < 4) return;
@@ -327,6 +378,7 @@ export async function evaluateChatResponse(text) {
 
 // ── Detecção de voz (Web Speech API) ─────────────────────────────────────────
 export function startMissionVoiceDetection() {
+  if (!isArenaActive()) return;
   const keyword = getMissionKeyword();
   if (!keyword || S.missionCompleted) return;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -341,7 +393,7 @@ export function startMissionVoiceDetection() {
     }
   };
   rec.onerror = () => {};
-  rec.onend   = () => { if (!S.missionCompleted && getMissionKeyword()) try { rec.start(); } catch (_) {} };
+  rec.onend   = () => { if (isArenaActive() && !S.missionCompleted && getMissionKeyword()) try { rec.start(); } catch (_) {} };
   try { rec.start(); S.missionSpeechRec = rec; } catch (_) {}
 }
 
@@ -353,6 +405,7 @@ export function stopMissionVoiceDetection() {
 }
 
 function renderMissionCompleted(text = S.currentSecretMission) {
+  if (!isArenaActive()) return;
   const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
   if (text) updateMissionBadge(text);
   const badge = document.getElementById("missionBadge");
@@ -367,8 +420,10 @@ function renderMissionCompleted(text = S.currentSecretMission) {
 }
 
 function showMissionCompletedToast() {
+  if (!isArenaActive()) return;
   const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
   const toast = document.createElement("div");
+  toast.className = "missionCompletedToast";
   toast.style.cssText = "position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);z-index:9999;background:rgba(20,50,20,.95);border:1px solid rgba(80,200,80,.45);border-radius:10px;padding:10px 18px;color:#80d080;font-size:13px;font-weight:700;letter-spacing:.04em;white-space:nowrap;opacity:0;transition:opacity .25s ease,transform .25s ease;";
   toast.textContent = _t('missions:ui.toastDone', "✅ Missão secreta cumprida!");
   document.body.appendChild(toast);
@@ -378,6 +433,7 @@ function showMissionCompletedToast() {
 
 // ── Conclusão de missão ───────────────────────────────────────────────────────
 export async function completeMission() {
+  if (!isArenaActive()) return { ok: false, reason: "outside-arena" };
   if (S.missionCompleted || _completionInFlight || !_activeMissionDoc) {
     return { ok: false, reason: S.missionCompleted ? "already-completed" : "not-ready" };
   }
@@ -458,8 +514,10 @@ export async function completeMission() {
       }
     }
 
-    renderMissionCompleted(completedMission.text);
-    showMissionCompletedToast();
+    if (isArenaActive()) {
+      renderMissionCompleted(completedMission.text);
+      showMissionCompletedToast();
+    }
 
     if (S.userRef) OSL_XP.award(S.userRef, "MISSION_COMPLETE");
     OSL_ACHIEVEMENTS.onMissionComplete();
@@ -470,8 +528,10 @@ export async function completeMission() {
     return { ok: true, missionId: completedMission.missionId };
   } catch (error) {
     S.missionCompleted = false;
-    updateMissionBadge(S.currentSecretMission);
-    startMissionVoiceDetection();
+    if (isArenaActive()) {
+      updateMissionBadge(S.currentSecretMission);
+      startMissionVoiceDetection();
+    }
     console.warn("[missions] Não foi possível persistir a conclusão:", error);
     return { ok: false, reason: "persist-failed", error };
   } finally {
@@ -480,7 +540,8 @@ export async function completeMission() {
 }
 
 // ── Modais de missão ──────────────────────────────────────────────────────────
-export function showSecretMissionModal(text) {
+export function showSecretMissionModal(text, missionKey = _activeMissionKey) {
+  if (!isArenaActive() || !text) return;
   const _t = (k, fb) => (window.OSL_I18N?.t(k)) || fb;
   document.querySelector(".missionModal")?.remove();
   const modal = document.createElement("div");
@@ -495,6 +556,7 @@ export function showSecretMissionModal(text) {
     </div>`;
   document.body.appendChild(modal);
   document.getElementById("missionCloseBtn").addEventListener("click", () => {
+    _missionModalAcknowledgedKey = missionKey;
     modal.classList.add("closing");
     setTimeout(() => modal.remove(), 250);
   });
@@ -514,12 +576,17 @@ subscribe(snap => {
 });
 
 export function updateMissionBadge(text) {
+  if (!isArenaActive()) {
+    clearMissionPresentation();
+    return;
+  }
   const badge = document.getElementById("missionBadge");
   const sep   = document.getElementById("missionSep");
   const txt   = document.getElementById("missionBadgeText");
   if (!badge || !txt) return;
 
   txt.textContent = text;
+  badge.setAttribute("aria-hidden", "false");
   badge.classList.remove("topMeta__mission--done");
   badge.classList.add("topMeta__mission--visible");
   if (sep) sep.style.display = "";
@@ -544,3 +611,6 @@ export function updateMissionBadge(text) {
     badge.appendChild(btn);
   }
 }
+
+window.addEventListener("osl:arena-exited", clearMissionPresentation);
+window.addEventListener("osl:arena-entered", restoreMissionPresentation);

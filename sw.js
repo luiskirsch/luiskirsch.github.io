@@ -1,4 +1,4 @@
-const CACHE = "osl-v42-world-cards-live";
+const CACHE = "osl-v43-arena-boundary";
 
 const PRECACHE = [
   "/favicon.png",
