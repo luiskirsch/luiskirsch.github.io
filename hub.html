@@ -610,53 +610,26 @@ body.ritual-open #ritualDim{opacity:1;}
 .mndTTZone{font-size:7.5px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
 .mndTTActive{font-size:10px;color:var(--ok);font-weight:600;margin-bottom:5px;}
 .mndTTDesc{font-size:10px;color:var(--text2);line-height:1.58;}
-/* Sidebar */
-.mndSide{width:272px;flex-shrink:0;display:flex;flex-direction:column;border-left:1px solid rgba(212,175,55,.10);background:rgba(4,8,14,.97);overflow-y:auto;}
-.mndSide::-webkit-scrollbar{width:3px;}.mndSide::-webkit-scrollbar-thumb{background:rgba(212,175,55,.14);border-radius:2px;}
-.mndSideBlock{border-bottom:1px solid rgba(255,255,255,.04);padding:15px 14px;}
-.mndSideHdr{display:flex;align-items:center;gap:7px;font-size:8px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--gold2);margin-bottom:13px;}
-.mndSideDot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.mndDotRed{background:#e84060;box-shadow:0 0 7px rgba(232,64,96,.55);}
+/* Narrow right strip */
+.mndNarrow{width:210px;flex-shrink:0;display:flex;flex-direction:column;border-left:1px solid rgba(212,175,55,.07);background:rgba(3,6,11,.99);padding:18px 14px;gap:18px;overflow:hidden;}
+.mndNarrowHdr{font-size:7px;font-weight:700;letter-spacing:.30em;text-transform:uppercase;color:rgba(212,175,55,.40);display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.mndNarrowDot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.mndNarrowDotRed{background:#e84060;box-shadow:0 0 6px rgba(232,64,96,.55);}
 @keyframes mndBlink{0%,100%{opacity:1;}50%{opacity:.25;}}
-.mndDotRed{animation:mndBlink 1.6s ease-in-out infinite;}
-.mndDotGold{background:var(--gold);box-shadow:0 0 7px rgba(212,175,55,.45);}
-.mndDotGreen{background:#30c888;box-shadow:0 0 7px rgba(48,200,136,.45);}
-/* Pulse stats grid */
-.mndPulseGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:13px;}
-.mndPulseStat{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:3px;padding:9px 7px;text-align:center;}
-.mndPulseVal{font-size:17px;font-weight:700;color:var(--text);line-height:1.1;letter-spacing:.02em;}
-.mndPulseLbl{font-size:6.5px;font-weight:600;letter-spacing:.14em;color:var(--text3);text-transform:uppercase;margin-top:3px;}
-/* District bars */
-.mndDistBar{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
-.mndDistBar:last-child{margin-bottom:0;}
-.mndDistBarName{font-size:9px;font-weight:600;color:var(--text2);width:90px;flex-shrink:0;}
-.mndDistBarTrack{flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
-.mndDistBarFill{height:100%;border-radius:2px;transition:width 1.3s cubic-bezier(.22,1,.36,1);}
-.mndDistBarPct{font-size:7.5px;color:var(--text3);width:24px;text-align:right;flex-shrink:0;}
-/* Events */
-.mndEvent{padding:9px 11px;border:1px solid rgba(255,255,255,.06);border-radius:3px;margin-bottom:7px;background:rgba(255,255,255,.015);transition:border-color .18s;}
-.mndEvent:last-child{margin-bottom:0;}
-.mndEvent:hover{border-color:rgba(212,175,55,.18);}
-.mndEventHdr{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
-.mndEvtBadge{font-size:6.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:2px 5px;border-radius:2px;}
-.mndEvtBadge.live{background:rgba(220,40,60,.18);color:#f05070;border:1px solid rgba(220,40,60,.28);}
-.mndEvtBadge.soon{background:rgba(212,175,55,.14);color:var(--gold2);border:1px solid rgba(212,175,55,.24);}
-.mndEvtBadge.weekly{background:rgba(60,100,220,.16);color:#6090e0;border:1px solid rgba(60,100,220,.25);}
-.mndEvtTime{font-size:7.5px;color:var(--text3);margin-left:auto;}
-.mndEvtName{font-family:var(--serif);font-size:10.5px;font-weight:700;color:var(--text);letter-spacing:.07em;margin-bottom:3px;}
-.mndEvtDesc{font-size:9px;color:var(--text3);line-height:1.55;}
-/* Missions */
-.mndMission{margin-bottom:13px;}
-.mndMission:last-child{margin-bottom:0;}
-.mndMissTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.mndMissName{font-size:10px;font-weight:600;color:var(--text);}
-.mndMissPct{font-size:8.5px;font-weight:700;color:var(--text2);}
-.mndMissBar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:4px;}
-.mndMissFill{height:100%;border-radius:2px;transition:width 1.5s cubic-bezier(.22,1,.36,1);}
-.mndMissFRed{background:linear-gradient(90deg,#801830,#e84060);}
-.mndMissFGreen{background:linear-gradient(90deg,#1a7040,#30c888);}
-.mndMissFGold{background:linear-gradient(90deg,#806010,var(--gold));}
-.mndMissDesc{font-size:8.5px;color:var(--text3);line-height:1.52;}
+.mndNarrowDotRed{animation:mndBlink 1.6s ease-in-out infinite;}
+.mndNarrowDotGold{background:var(--gold);box-shadow:0 0 6px rgba(212,175,55,.45);}
+.mndNarrowDotGreen{background:#30c888;box-shadow:0 0 6px rgba(48,200,136,.45);}
+/* Pulso narrativo */
+.mndPulseText{font-size:11px;color:var(--text);line-height:1.72;font-style:italic;}
+.mndPulseSub{font-size:8px;color:var(--text3);margin-top:6px;line-height:1.55;}
+/* Evento compacto */
+.mndNarrowEvt{padding:9px 10px;border:1px solid rgba(255,255,255,.06);border-radius:3px;background:rgba(255,255,255,.018);}
+.mndNarrowEvtBadge{display:inline-block;font-size:6px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:2px 5px;border-radius:2px;background:rgba(220,40,60,.18);color:#f05070;border:1px solid rgba(220,40,60,.28);margin-bottom:5px;}
+.mndNarrowEvtName{font-family:var(--serif);font-size:10px;font-weight:700;color:var(--text);letter-spacing:.07em;margin-bottom:3px;}
+.mndNarrowEvtDesc{font-size:8.5px;color:var(--text3);line-height:1.52;}
+/* Progresso global */
+.mndNarrowProgBar{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin-top:8px;}
+.mndNarrowProgFill{height:100%;border-radius:2px;background:linear-gradient(90deg,#e84060 0%,#d0a030 50%,#30c888 100%);transition:width 1.6s cubic-bezier(.22,1,.36,1);}
 /* Mobile bottom strip */
 .mndMobileStrip{display:none;border-top:1px solid rgba(212,175,55,.10);background:rgba(4,8,14,.97);padding:10px 16px;flex-shrink:0;gap:20px;overflow-x:auto;}
 .mndMobileStrip::-webkit-scrollbar{display:none;}
@@ -664,7 +637,7 @@ body.ritual-open #ritualDim{opacity:1;}
 .mndMobileStatVal{font-size:16px;font-weight:700;color:var(--gold);}
 .mndMobileStatLbl{font-size:6.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);}
 @media(max-width:720px){
-  .mndSide{display:none;}
+  .mndNarrow{display:none;}
   .mndBarRight{display:none;}
   .mndMobileStrip{display:flex;}
   .mndBarCenter{justify-content:flex-start;}
@@ -678,75 +651,39 @@ body.ritual-open #ritualDim{opacity:1;}
 .mndDistrict polygon.dPoly{transition:filter .24s,stroke-opacity .24s;}
 .mndDistrict:hover polygon.dPoly{stroke-opacity:0.88!important;}
 
-/* ── District Detail Panel ── */
-.mndPanel{
-  position:absolute;inset:0;z-index:60;display:flex;align-items:flex-end;
-  background:rgba(0,0,0,0);pointer-events:none;
-  transition:background .32s;
+/* ── Context bottom panel (substitui overlay) ── */
+.mndCtx{
+  position:absolute;bottom:0;left:0;right:0;z-index:60;
+  border-top:2px solid rgba(212,175,55,.22);
+  background:rgba(4,8,14,.98);
+  transform:translateY(100%);
+  transition:transform .36s cubic-bezier(.22,1,.36,1),border-color .22s;
+  pointer-events:none;
 }
-.mndPanel.open{background:rgba(0,0,0,.72);pointer-events:auto;}
-.mndPanel[hidden]{display:none;}
-
-.mndPanelBox{
-  width:100%;max-height:88vh;overflow-y:auto;
-  background:rgba(4,8,14,.99);
-  padding:0;display:grid;grid-template-columns:340px 1fr;
-  transform:translateY(100%);transition:transform .38s cubic-bezier(.22,1,.36,1);
-  border-top:2px solid;
-}
-.mndPanel.open .mndPanelBox{transform:translateY(0);}
-.mndPanelBox::-webkit-scrollbar{width:3px;}
-.mndPanelBox::-webkit-scrollbar-thumb{background:rgba(212,175,55,.14);border-radius:2px;}
-
-/* Left col: identity + lore */
-.mndPLeft{padding:32px 28px 32px 36px;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:0;}
-.mndPSymbol{font-size:52px;line-height:1;margin-bottom:16px;opacity:.85;}
-.mndPName{font-family:var(--serif);font-size:clamp(24px,2.8vw,38px);font-weight:900;letter-spacing:.18em;text-transform:uppercase;line-height:1;margin-bottom:6px;}
-.mndPZone{font-size:8px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--text3);margin-bottom:20px;}
-.mndPSep{height:1px;background:rgba(255,255,255,.07);margin-bottom:20px;}
-.mndPLore{font-size:13px;color:var(--text2);line-height:1.80;flex:1;}
-.mndPAction{
-  margin-top:24px;padding:14px;
-  font-family:var(--serif);font-size:10.5px;font-weight:700;letter-spacing:.20em;text-transform:uppercase;
-  border:none;border-radius:3px;cursor:pointer;
-  transition:opacity .18s,transform .14s;
-}
-.mndPAction:hover{opacity:.85;}
-.mndPAction:active{transform:scale(.97);}
-
-/* Right col: stats + bonus + players */
-.mndPRight{padding:32px 36px 32px 28px;display:flex;flex-direction:column;gap:22px;}
-.mndPClose{
-  align-self:flex-end;background:none;border:1px solid rgba(212,175,55,.18);border-radius:3px;
-  color:var(--text3);font-size:7.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
-  padding:5px 11px;cursor:pointer;transition:color .16s,border-color .16s;
-}
-.mndPClose:hover{color:var(--text);border-color:rgba(212,175,55,.42);}
-
-.mndPStatsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.mndPStatBox{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:3px;padding:13px 10px;text-align:center;}
-.mndPStatVal{font-size:24px;font-weight:700;line-height:1;letter-spacing:.02em;}
-.mndPStatLbl{font-size:6.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-top:4px;}
-
-.mndPBonusBox{border:1px solid;border-radius:3px;padding:12px 14px;}
-.mndPBonusLbl{font-size:7px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
-.mndPBonusTxt{font-size:12.5px;font-weight:600;color:var(--text);}
-
-.mndPPlayHdr{font-size:7.5px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
-.mndPPlayers{display:flex;flex-direction:column;gap:0;}
-.mndPPRow{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.mndPPRow:last-child{border-bottom:none;}
-.mndPPAv{width:30px;height:30px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:10px;font-weight:700;}
-.mndPPAv img{width:100%;height:100%;object-fit:cover;}
-.mndPPName{font-size:11.5px;font-weight:600;color:var(--text);flex:1;}
-.mndPPXP{font-size:9px;color:var(--text3);}
-.mndPPRank{width:18px;font-size:10px;text-align:center;}
-
+.mndCtx.open{transform:translateY(0);pointer-events:auto;}
+.mndCtxInner{display:flex;align-items:flex-start;padding:18px 30px 22px;gap:22px;}
+.mndCtxLeft{display:flex;align-items:flex-start;gap:14px;flex:1;min-width:0;}
+.mndCtxSymbol{font-size:40px;line-height:1;flex-shrink:0;margin-top:2px;opacity:.88;}
+.mndCtxInfo{flex:1;min-width:0;}
+.mndCtxName{font-family:var(--serif);font-size:clamp(17px,2.2vw,26px);font-weight:900;letter-spacing:.14em;text-transform:uppercase;line-height:1.1;margin-bottom:3px;}
+.mndCtxZone{font-size:7px;font-weight:700;letter-spacing:.30em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.mndCtxLore{font-size:11.5px;color:var(--text2);line-height:1.68;max-width:580px;}
+.mndCtxMeta{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-top:10px;}
+.mndCtxMetaGroup{display:flex;flex-direction:column;gap:2px;}
+.mndCtxMetaVal{font-size:20px;font-weight:700;color:var(--text);letter-spacing:.02em;line-height:1;}
+.mndCtxMetaLbl{font-size:6.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);}
+.mndCtxRight{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:14px;flex-shrink:0;min-width:190px;}
+.mndCtxClose{background:none;border:1px solid rgba(212,175,55,.18);border-radius:3px;color:var(--text3);font-size:7.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;padding:5px 12px;cursor:pointer;transition:color .16s,border-color .16s;white-space:nowrap;}
+.mndCtxClose:hover{color:var(--text);border-color:rgba(212,175,55,.42);}
+.mndCtxAction{padding:13px 22px;font-family:var(--serif);font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;border:none;border-radius:3px;cursor:pointer;transition:opacity .18s,transform .14s,letter-spacing .22s;width:100%;text-align:center;}
+.mndCtxAction:hover{opacity:.88;letter-spacing:.32em;}
+.mndCtxAction:active{transform:scale(.97);}
+/* Selected district highlight */
+.mndDistrict.is-selected .dPoly{stroke-opacity:1!important;stroke-width:2.5!important;}
 @media(max-width:720px){
-  .mndPanelBox{grid-template-columns:1fr;max-height:92vh;}
-  .mndPLeft{padding:22px 18px 18px;border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
-  .mndPRight{padding:18px 18px 28px;}
-  .mndPName{font-size:22px;}
+  .mndCtxInner{flex-direction:column;padding:14px 16px 16px;gap:10px;}
+  .mndCtxRight{align-items:flex-start;flex-direction:row-reverse;flex-wrap:wrap;min-width:0;width:100%;}
+  .mndCtxAction{width:100%;}
 }
 
 /* ══ LIMIAR (entrada cinematográfica do Mundo) ══ */
@@ -1446,8 +1383,8 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
 
         <!-- Base -->
         <rect width="1000" height="560" fill="#030609"/>
-        <!-- Linhas topográficas -->
-        <g opacity="0.052" stroke="#D4AF37" fill="none" stroke-width="0.7">
+        <!-- Linhas topográficas sutis -->
+        <g opacity="0.038" stroke="#D4AF37" fill="none" stroke-width="0.6">
           <path d="M 0,95 Q 200,72 420,105 Q 580,128 730,90 Q 870,58 1000,88"/>
           <path d="M 0,168 Q 180,152 380,172 Q 540,188 700,158 Q 850,132 1000,152"/>
           <path d="M 0,240 Q 160,228 345,242 Q 510,255 668,234 Q 824,215 1000,230"/>
@@ -1455,8 +1392,6 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
           <path d="M 0,382 Q 142,376 310,382 Q 488,388 648,375 Q 806,362 1000,372"/>
           <path d="M 0,450 Q 138,445 302,450 Q 482,455 642,444 Q 800,434 1000,442"/>
         </g>
-        <!-- Grade tática -->
-        <rect width="1000" height="560" fill="url(#mndGrid)"/>
 
         <!-- ════ O ALTAR — centro, carmesim ════ -->
         <g class="mndDistrict" data-id="altar"
@@ -1470,6 +1405,21 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
           <polygon points="400,160 500,128 610,162 656,250 648,353 574,417 492,433 410,419 348,355 338,253" fill="none" stroke="rgba(232,64,96,0.18)" stroke-width="1" stroke-dasharray="6 14"/>
           <!-- Símbolo decorativo translúcido -->
           <text x="500" y="328" text-anchor="middle" fill="#e84060" font-size="90" opacity="0.065">✦</text>
+          <!-- Anéis rituais do Altar -->
+          <circle cx="500" cy="290" r="52" fill="none" stroke="#e84060" stroke-width=".6" stroke-opacity=".13" stroke-dasharray="3 9"/>
+          <circle cx="500" cy="290" r="78" fill="none" stroke="#e84060" stroke-width=".5" stroke-opacity=".08" stroke-dasharray="2 12"/>
+          <circle cx="500" cy="290" r="104" fill="none" stroke="#e84060" stroke-width=".4" stroke-opacity=".05" stroke-dasharray="2 14"/>
+          <!-- Mesa central do Altar -->
+          <rect x="481" y="282" width="38" height="14" rx="2" fill="#e84060" fill-opacity=".09"/>
+          <rect x="485" y="270" width="30" height="4" rx="1" fill="#e84060" fill-opacity=".11"/>
+          <!-- Velas -->
+          <rect x="462" y="272" width="3" height="10" rx="1" fill="#e84060" fill-opacity=".10"/>
+          <rect x="535" y="272" width="3" height="10" rx="1" fill="#e84060" fill-opacity=".10"/>
+          <!-- Pilares -->
+          <rect x="415" y="240" width="4" height="22" fill="#e84060" fill-opacity=".07"/>
+          <rect x="578" y="240" width="4" height="22" fill="#e84060" fill-opacity=".07"/>
+          <rect x="420" y="328" width="4" height="22" fill="#e84060" fill-opacity=".06"/>
+          <rect x="573" y="328" width="4" height="22" fill="#e84060" fill-opacity=".06"/>
           <!-- Pulse rings -->
           <circle cx="500" cy="288" r="8" fill="none" stroke="#e84060" stroke-width="1.6">
             <animate attributeName="r" from="8" to="42" dur="2.8s" repeatCount="indefinite"/>
@@ -1497,6 +1447,17 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
           <polygon class="dPoly" points="22,22 318,18 358,90 338,164 286,210 206,234 108,224 28,198 18,122" fill="none" stroke="#a050e0" stroke-width="1.7" stroke-opacity="0.52"/>
           <polygon points="22,22 318,18 358,90 338,164 286,210 206,234 108,224 28,198 18,122" fill="none" stroke="rgba(160,80,224,0.17)" stroke-width="1" stroke-dasharray="6 14"/>
           <text x="185" y="163" text-anchor="middle" fill="#8030c0" font-size="74" opacity="0.065">ψ</text>
+          <!-- Corredores do labirinto -->
+          <line x1="95" y1="50" x2="95" y2="200" stroke="#8030c0" stroke-width=".5" stroke-opacity=".11"/>
+          <line x1="145" y1="25" x2="145" y2="215" stroke="#8030c0" stroke-width=".5" stroke-opacity=".09"/>
+          <line x1="205" y1="22" x2="205" y2="220" stroke="#8030c0" stroke-width=".5" stroke-opacity=".11"/>
+          <line x1="260" y1="22" x2="255" y2="195" stroke="#8030c0" stroke-width=".5" stroke-opacity=".08"/>
+          <line x1="305" y1="28" x2="300" y2="165" stroke="#8030c0" stroke-width=".5" stroke-opacity=".07"/>
+          <line x1="30" y1="75" x2="335" y2="68" stroke="#8030c0" stroke-width=".5" stroke-opacity=".09"/>
+          <line x1="24" y1="128" x2="330" y2="125" stroke="#8030c0" stroke-width=".5" stroke-opacity=".11"/>
+          <line x1="25" y1="178" x2="285" y2="175" stroke="#8030c0" stroke-width=".5" stroke-opacity=".08"/>
+          <!-- Arco de entrada do labirinto -->
+          <path d="M 155,140 Q 185,108 215,140" fill="none" stroke="#a050e0" stroke-width=".8" stroke-opacity=".18"/>
           <circle cx="185" cy="120" r="6" fill="none" stroke="#a050e0" stroke-width="1.3">
             <animate attributeName="r" from="6" to="30" dur="3.3s" repeatCount="indefinite"/>
             <animate attributeName="opacity" from="0.70" to="0" dur="3.3s" repeatCount="indefinite"/>
@@ -1521,6 +1482,17 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
           <polygon class="dPoly" points="22,330 158,304 260,324 298,410 276,478 174,510 60,500 18,454 22,372" fill="none" stroke="#4070d0" stroke-width="1.7" stroke-opacity="0.52"/>
           <polygon points="22,330 158,304 260,324 298,410 276,478 174,510 60,500 18,454 22,372" fill="none" stroke="rgba(64,112,208,0.17)" stroke-width="1" stroke-dasharray="6 14"/>
           <text x="162" y="454" text-anchor="middle" fill="#2040a0" font-size="70" opacity="0.065">∇</text>
+          <!-- Arcos das catacumbas -->
+          <path d="M 55,370 Q 82,342 110,370" fill="none" stroke="#4070d0" stroke-width=".7" stroke-opacity=".16"/>
+          <path d="M 108,378 Q 145,346 182,378" fill="none" stroke="#4070d0" stroke-width=".7" stroke-opacity=".13"/>
+          <path d="M 165,388 Q 212,352 258,388" fill="none" stroke="#4070d0" stroke-width=".7" stroke-opacity=".11"/>
+          <!-- Stalactites -->
+          <polygon points="78,332 82,358 86,332" fill="#4070d0" fill-opacity=".09"/>
+          <polygon points="118,326 123,354 128,326" fill="#4070d0" fill-opacity=".08"/>
+          <polygon points="180,316 185,347 190,316" fill="#4070d0" fill-opacity=".09"/>
+          <polygon points="232,320 237,350 242,320" fill="#4070d0" fill-opacity=".07"/>
+          <!-- Névoa das profundezas -->
+          <ellipse cx="162" cy="490" rx="80" ry="14" fill="#2040a0" fill-opacity=".06"/>
           <circle cx="162" cy="408" r="5" fill="none" stroke="#4070d0" stroke-width="1.2">
             <animate attributeName="r" from="5" to="26" dur="4.1s" repeatCount="indefinite"/>
             <animate attributeName="opacity" from="0.60" to="0" dur="4.1s" repeatCount="indefinite"/>
@@ -1545,6 +1517,24 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
           <polygon class="dPoly" points="702,18 978,18 978,240 876,264 774,244 712,196 700,122" fill="none" stroke="#c09020" stroke-width="1.7" stroke-opacity="0.52"/>
           <polygon points="702,18 978,18 978,240 876,264 774,244 712,196 700,122" fill="none" stroke="rgba(192,144,32,0.17)" stroke-width="1" stroke-dasharray="6 14"/>
           <text x="845" y="195" text-anchor="middle" fill="#c09020" font-size="80" opacity="0.065">⬡</text>
+          <!-- Muralhas e torres da Fortaleza -->
+          <rect x="718" y="58" width="4" height="34" fill="#c09020" fill-opacity=".09"/>
+          <rect x="960" y="48" width="4" height="38" fill="#c09020" fill-opacity=".09"/>
+          <rect x="840" y="28" width="4" height="40" fill="#c09020" fill-opacity=".08"/>
+          <!-- Ameiações -->
+          <rect x="720" y="52" width="6" height="8" fill="#c09020" fill-opacity=".12"/>
+          <rect x="730" y="52" width="6" height="8" fill="#c09020" fill-opacity=".12"/>
+          <rect x="740" y="52" width="6" height="8" fill="#c09020" fill-opacity=".12"/>
+          <rect x="820" y="22" width="6" height="8" fill="#c09020" fill-opacity=".11"/>
+          <rect x="832" y="22" width="6" height="8" fill="#c09020" fill-opacity=".11"/>
+          <rect x="844" y="22" width="6" height="8" fill="#c09020" fill-opacity=".11"/>
+          <rect x="856" y="22" width="6" height="8" fill="#c09020" fill-opacity=".11"/>
+          <rect x="868" y="22" width="6" height="8" fill="#c09020" fill-opacity=".11"/>
+          <rect x="955" y="42" width="6" height="8" fill="#c09020" fill-opacity=".12"/>
+          <rect x="967" y="42" width="6" height="8" fill="#c09020" fill-opacity=".12"/>
+          <!-- Parede principal -->
+          <line x1="718" y1="90" x2="964" y2="90" stroke="#c09020" stroke-width=".6" stroke-opacity=".13"/>
+          <line x1="718" y1="56" x2="964" y2="56" stroke="#c09020" stroke-width=".4" stroke-opacity=".09"/>
           <circle cx="845" cy="142" r="6" fill="none" stroke="#d0a030" stroke-width="1.3">
             <animate attributeName="r" from="6" to="28" dur="3.6s" repeatCount="indefinite"/>
             <animate attributeName="opacity" from="0.66" to="0" dur="3.6s" repeatCount="indefinite"/>
@@ -1569,6 +1559,19 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
           <polygon class="dPoly" points="732,316 882,294 978,334 978,534 858,544 732,510 694,426" fill="none" stroke="#1a9060" stroke-width="1.7" stroke-opacity="0.52"/>
           <polygon points="732,316 882,294 978,334 978,534 858,544 732,510 694,426" fill="none" stroke="rgba(26,144,96,0.17)" stroke-width="1" stroke-dasharray="6 14"/>
           <text x="845" y="470" text-anchor="middle" fill="#1a9060" font-size="76" opacity="0.065">❋</text>
+          <!-- Vegetação do jardim -->
+          <circle cx="755" cy="378" r="22" fill="#1a9060" fill-opacity=".07"/>
+          <circle cx="798" cy="358" r="17" fill="#1a9060" fill-opacity=".05"/>
+          <circle cx="848" cy="368" r="25" fill="#1a9060" fill-opacity=".08"/>
+          <circle cx="900" cy="352" r="19" fill="#1a9060" fill-opacity=".06"/>
+          <circle cx="944" cy="372" r="21" fill="#1a9060" fill-opacity=".07"/>
+          <circle cx="778" cy="455" r="15" fill="#1a9060" fill-opacity=".06"/>
+          <circle cx="858" cy="462" r="19" fill="#1a9060" fill-opacity=".08"/>
+          <circle cx="922" cy="448" r="17" fill="#1a9060" fill-opacity=".06"/>
+          <!-- Caminho sinuoso -->
+          <path d="M 756,515 Q 815,480 868,452 Q 920,422 960,402" fill="none" stroke="#1a9060" stroke-width="1.3" stroke-opacity=".13" stroke-dasharray="5 9"/>
+          <!-- Pequena fonte/poço central -->
+          <circle cx="845" cy="424" r="16" fill="none" stroke="#30c888" stroke-width=".5" stroke-opacity=".16"/>
           <circle cx="845" cy="424" r="6" fill="none" stroke="#30c888" stroke-width="1.3">
             <animate attributeName="r" from="6" to="28" dur="3.9s" repeatCount="indefinite"/>
             <animate attributeName="opacity" from="0.64" to="0" dur="3.9s" repeatCount="indefinite"/>
@@ -1583,12 +1586,23 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
         </g>
 
         <!-- ════ ESTRADAS COM FLUXO DE ENERGIA ANIMADO ════ -->
-        <g fill="none" stroke="rgba(212,175,55,0.24)" stroke-width="1.3">
-          <path class="mndRoadFlow" d="M 338,164 C 340,163 344,163 348,162"/>
-          <path class="mndRoadFlow" d="M 700,196 C 686,214 670,232 656,250" style="animation-delay:-1s"/>
-          <path class="mndRoadFlow" d="M 260,324 C 295,337 320,346 348,355" style="animation-delay:-0.6s"/>
-          <path class="mndRoadFlow" d="M 648,353 C 666,382 680,404 694,426" style="animation-delay:-1.5s"/>
-          <path class="mndRoadFlow" d="M 876,264 C 878,278 880,286 882,294" style="animation-delay:-0.3s"/>
+        <!-- Caminho base (estático, fundo) -->
+        <g fill="none" stroke="rgba(212,175,55,0.09)" stroke-width="1.8">
+          <path d="M 500,270 C 420,238 310,192 200,138"/>
+          <path d="M 490,310 C 415,342 325,368 220,400"/>
+          <path d="M 520,268 C 622,228 720,188 824,152"/>
+          <path d="M 522,310 C 622,352 722,390 824,420"/>
+          <path d="M 167,163 C 164,240 162,308 162,368"/>
+          <path d="M 845,185 C 845,242 845,308 845,372"/>
+        </g>
+        <!-- Fluxo de energia animado (sobreposto) -->
+        <g fill="none" stroke="rgba(212,175,55,0.30)" stroke-width="1.3">
+          <path class="mndRoadFlow" d="M 500,270 C 420,238 310,192 200,138"/>
+          <path class="mndRoadFlow" d="M 490,310 C 415,342 325,368 220,400" style="animation-delay:-1s"/>
+          <path class="mndRoadFlow" d="M 520,268 C 622,228 720,188 824,152" style="animation-delay:-0.6s"/>
+          <path class="mndRoadFlow" d="M 522,310 C 622,352 722,390 824,420" style="animation-delay:-1.5s"/>
+          <path class="mndRoadFlow" d="M 167,163 C 164,240 162,308 162,368" style="animation-delay:-0.8s"/>
+          <path class="mndRoadFlow" d="M 845,185 C 845,242 845,308 845,372" style="animation-delay:-1.2s"/>
         </g>
 
         <!-- O Abismo -->
@@ -1620,99 +1634,62 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
       </div>
     </div>
 
-    <!-- Sidebar -->
-    <div class="mndSide">
+    <!-- Narrow strip direita -->
+    <div class="mndNarrow">
 
-      <!-- Pulso do Mundo -->
-      <div class="mndSideBlock">
-        <div class="mndSideHdr"><span class="mndSideDot mndDotRed"></span>PULSO DO MUNDO</div>
-        <div class="mndPulseGrid">
-          <div class="mndPulseStat"><div class="mndPulseVal" id="mndPulseXp">—</div><div class="mndPulseLbl">XP HOJE</div></div>
-          <div class="mndPulseStat"><div class="mndPulseVal" id="mndPulseSess">—</div><div class="mndPulseLbl">ATIVAS</div></div>
-          <div class="mndPulseStat"><div class="mndPulseVal" id="mndPulseRit">—</div><div class="mndPulseLbl">RITUAIS</div></div>
-        </div>
-        <div id="mndDistrictBars"></div>
+      <!-- Pulso narrativo -->
+      <div>
+        <div class="mndNarrowHdr"><span class="mndNarrowDot mndNarrowDotRed"></span>PULSO DO MUNDO</div>
+        <div class="mndPulseText" id="mndPulseNarrative">O mundo está acordado.</div>
+        <div class="mndPulseSub" id="mndPulseSub">Carregando dados…</div>
       </div>
 
-      <!-- Eventos Ativos -->
-      <div class="mndSideBlock">
-        <div class="mndSideHdr"><span class="mndSideDot mndDotGold"></span>EVENTOS ATIVOS</div>
-        <div class="mndEvent">
-          <div class="mndEventHdr">
-            <span class="mndEvtBadge live">AO VIVO</span>
-            <span class="mndEvtTime" id="mndEvt1Time">—</span>
-          </div>
-          <div class="mndEvtName">A Noite do Labirinto</div>
-          <div class="mndEvtDesc">Sessões em O Labirinto concedem 2× XP até meia-noite.</div>
-        </div>
-        <div class="mndEvent">
-          <div class="mndEventHdr">
-            <span class="mndEvtBadge soon">EM BREVE</span>
-            <span class="mndEvtTime">3 dias</span>
-          </div>
-          <div class="mndEvtName">Torneio da Fortaleza</div>
-          <div class="mndEvtDesc">Ranking competitivo especial — prêmio: Fragmento Raro exclusivo.</div>
-        </div>
-        <div class="mndEvent">
-          <div class="mndEventHdr">
-            <span class="mndEvtBadge weekly">SEMANAL</span>
-            <span class="mndEvtTime">5 dias</span>
-          </div>
-          <div class="mndEvtName">Vigília das Catacumbas</div>
-          <div class="mndEvtDesc">Missão coletiva: explorar 100 caminhos ocultos juntos.</div>
+      <!-- Evento prioritário -->
+      <div>
+        <div class="mndNarrowHdr"><span class="mndNarrowDot mndNarrowDotGold"></span>EVENTO ATIVO</div>
+        <div class="mndNarrowEvt">
+          <div class="mndNarrowEvtBadge">AO VIVO</div>
+          <div class="mndNarrowEvtName">A Noite do Labirinto</div>
+          <div class="mndNarrowEvtDesc">Sessões no Labirinto ganham 2× XP. Restam <span id="mndEvt1Time">—</span>.</div>
         </div>
       </div>
 
-      <!-- Missões Coletivas -->
-      <div class="mndSideBlock">
-        <div class="mndSideHdr"><span class="mndSideDot mndDotGreen"></span>MISSÕES COLETIVAS</div>
-        <div class="mndMission">
-          <div class="mndMissTop"><span class="mndMissName">Mapear o Altar</span><span class="mndMissPct" id="mndM1Pct">—</span></div>
-          <div class="mndMissBar"><div class="mndMissFill mndMissFRed" id="mndM1Bar" style="width:0%"></div></div>
-          <div class="mndMissDesc">Completar 200 sessões no Altar nesta temporada.</div>
-        </div>
-        <div class="mndMission">
-          <div class="mndMissTop"><span class="mndMissName">Ecos do Jardim</span><span class="mndMissPct" id="mndM2Pct">—</span></div>
-          <div class="mndMissBar"><div class="mndMissFill mndMissFGreen" id="mndM2Bar" style="width:0%"></div></div>
-          <div class="mndMissDesc">50 novos jogadores descobrem O Jardim.</div>
-        </div>
-        <div class="mndMission">
-          <div class="mndMissTop"><span class="mndMissName">Fragmentos Reunidos</span><span class="mndMissPct" id="mndM3Pct">—</span></div>
-          <div class="mndMissBar"><div class="mndMissFill mndMissFGold" id="mndM3Bar" style="width:0%"></div></div>
-          <div class="mndMissDesc">Coletar 1.000 Fragmentos do Prelúdio entre todos os jogadores.</div>
-        </div>
+      <!-- Objetivo coletivo -->
+      <div>
+        <div class="mndNarrowHdr"><span class="mndNarrowDot mndNarrowDotGreen"></span>OBJETIVO COLETIVO</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text);margin-bottom:4px;">Mapear o Altar</div>
+        <div style="font-size:8.5px;color:var(--text3);line-height:1.52;">Completar 200 sessões no Altar nesta temporada.</div>
+        <div class="mndNarrowProgBar"><div class="mndNarrowProgFill" id="mndObjBar" style="width:0%"></div></div>
+        <div style="font-size:7.5px;color:var(--text3);margin-top:5px;" id="mndObjPct">—</div>
       </div>
 
-    </div><!-- /mndSide -->
+      <!-- Online count — fundo do strip -->
+      <div style="margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);">
+        <div style="font-size:24px;font-weight:700;color:var(--gold);letter-spacing:.04em;line-height:1;" id="mndNarOnline">—</div>
+        <div style="font-size:7px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);margin-top:3px;">JOGADORES ONLINE</div>
+      </div>
 
-    <!-- District Detail Panel (slide-up, cobre mapa+sidebar) -->
-    <div id="mndPanel" class="mndPanel" hidden>
-      <div class="mndPanelBox" id="mndPanelBox">
-        <!-- Esquerda: identidade + lore + ação -->
-        <div class="mndPLeft" id="mndPLeft">
-          <div class="mndPSymbol" id="mndPSymbol"></div>
-          <div class="mndPName" id="mndPName"></div>
-          <div class="mndPZone" id="mndPZone"></div>
-          <div class="mndPSep"></div>
-          <div class="mndPLore" id="mndPLore"></div>
-          <button class="mndPAction" id="mndPAction"></button>
+    </div><!-- /mndNarrow -->
+
+    <!-- Context panel — rodapé que sobe ao selecionar distrito -->
+    <div id="mndCtx" class="mndCtx">
+      <div class="mndCtxInner">
+        <div class="mndCtxLeft">
+          <div class="mndCtxSymbol" id="mndCtxSymbol"></div>
+          <div class="mndCtxInfo">
+            <div class="mndCtxName" id="mndCtxName"></div>
+            <div class="mndCtxZone" id="mndCtxZone"></div>
+            <div class="mndCtxLore" id="mndCtxLore"></div>
+            <div class="mndCtxMeta">
+              <div class="mndCtxMetaGroup"><span class="mndCtxMetaVal" id="mndCtxSess">—</span><span class="mndCtxMetaLbl">SESSÕES HOJE</span></div>
+              <div class="mndCtxMetaGroup"><span class="mndCtxMetaVal" id="mndCtxPlayers">—</span><span class="mndCtxMetaLbl">JOGADORES</span></div>
+              <div class="mndCtxMetaGroup"><span class="mndCtxMetaVal" id="mndCtxPct">—</span><span class="mndCtxMetaLbl">ATIVIDADE</span></div>
+            </div>
+          </div>
         </div>
-        <!-- Direita: stats + bônus + jogadores -->
-        <div class="mndPRight">
-          <button class="mndPClose" id="mndPClose">← VOLTAR AO MAPA</button>
-          <div class="mndPStatsGrid">
-            <div class="mndPStatBox"><div class="mndPStatVal" id="mndPSess">—</div><div class="mndPStatLbl">SESSÕES HOJE</div></div>
-            <div class="mndPStatBox"><div class="mndPStatVal" id="mndPActiveN">—</div><div class="mndPStatLbl">JOGADORES</div></div>
-            <div class="mndPStatBox"><div class="mndPStatVal" id="mndPActivityPct">—</div><div class="mndPStatLbl">ATIVIDADE</div></div>
-          </div>
-          <div class="mndPBonusBox" id="mndPBonusBox">
-            <div class="mndPBonusLbl">BÔNUS ATIVO</div>
-            <div class="mndPBonusTxt" id="mndPBonusTxt">—</div>
-          </div>
-          <div>
-            <div class="mndPPlayHdr">JOGADORES DESTA ZONA</div>
-            <div class="mndPPlayers" id="mndPPlayers"></div>
-          </div>
+        <div class="mndCtxRight">
+          <button class="mndCtxClose" id="mndCtxClose">← VOLTAR AO MAPA</button>
+          <button class="mndCtxAction" id="mndCtxAction"></button>
         </div>
       </div>
     </div>
@@ -2873,36 +2850,28 @@ function _mndPopulateStats(){
   var online=Math.floor(14+Math.sin(s*0.10)*8+Math.cos(s*0.05)*5);
   var sessToday=Math.floor(42+s*0.28);
   var xpGanho=Math.floor(18400+s*115);
-  var sessAtivas=Math.floor(3+Math.abs(Math.sin(s*0.15))*3);
   var rituais=Math.floor(28+s*0.18);
 
   function _s(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
   _s('mndOnline',online);
   _s('mndSessoes',sessToday);
+  _s('mndNarOnline',online);
   _s('mndMobOnline',online);
   _s('mndMobXp',xpGanho.toLocaleString('pt-BR'));
   _s('mndMobRit',rituais);
   _s('mndMobSess',sessToday);
-  _s('mndPulseXp',xpGanho.toLocaleString('pt-BR'));
-  _s('mndPulseSess',sessAtivas);
-  _s('mndPulseRit',rituais);
 
-  var bars=document.getElementById('mndDistrictBars');
-  if(bars){
-    bars.innerHTML='';
-    _mndDists.forEach(function(d){
-      var pct=Math.round(Math.max(5,Math.min(95,(d.activity+Math.sin(s*0.07+d.cx*0.009)*0.14)*100)));
-      var row=document.createElement('div');
-      row.className='mndDistBar';
-      row.innerHTML='<span class="mndDistBarName">'+d.name+'</span>'
-        +'<div class="mndDistBarTrack"><div class="mndDistBarFill" data-pct="'+pct+'" style="width:0%;background:'+d.color+'"></div></div>'
-        +'<span class="mndDistBarPct">'+pct+'%</span>';
-      bars.appendChild(row);
-    });
-    setTimeout(function(){
-      bars.querySelectorAll('.mndDistBarFill').forEach(function(f){f.style.width=f.dataset.pct+'%';});
-    },320);
-  }
+  // Pulso narrativo — frase que descreve estado atual
+  var distMaisAtivo=_mndDists.reduce(function(a,b){return b.activity>a.activity?b:a;});
+  var var1=Math.floor(8+Math.abs(Math.sin(s*0.11))*18);
+  var narrativas=[
+    'O '+distMaisAtivo.name.replace('O ','').replace('A ','').replace('As ','')
+      +' concentra o maior movimento agora. Atividade subiu '+var1+'% na última hora.',
+    'Mundo estável. '+online+' jogadores presentes, '+sessToday+' sessões hoje.',
+    'Pulso forte no Altar. Rituais em andamento — '+rituais+' completados esta semana.',
+  ];
+  _s('mndPulseNarrative',narrativas[s%narrativas.length]);
+  _s('mndPulseSub',online+' online · '+sessToday+' sessões hoje · '+rituais+' rituais');
 
   if(window._hubFirebaseUser){
     window._hubFirebaseUser.getIdToken().then(function(tok){
@@ -2910,7 +2879,7 @@ function _mndPopulateStats(){
     }).then(function(r){return r.ok?r.json():null;}).then(function(data){
       if(!data||!data.leaderboard)return;
       var total=data.leaderboard.reduce(function(a,u){return a+(u.xp||0);},0);
-      if(total>0){_s('mndPulseXp',total.toLocaleString('pt-BR'));_s('mndMobXp',total.toLocaleString('pt-BR'));}
+      if(total>0){_s('mndMobXp',total.toLocaleString('pt-BR'));}
     }).catch(function(){});
   }
 }
@@ -2919,17 +2888,12 @@ function _mndAnimateMissions(){
   var now=new Date();
   var season0=new Date(2026,4,5).getTime();
   var days=Math.max(0,Math.floor((now.getTime()-season0)/86400000));
-
-  function _anim(barId,pctId,cur,total,delay){
-    var pct=Math.round(Math.min(cur,total)/total*100);
-    setTimeout(function(){
-      var b=document.getElementById(barId);if(b)b.style.width=pct+'%';
-      var p=document.getElementById(pctId);if(p)p.textContent=Math.min(cur,total).toLocaleString('pt-BR')+' / '+total.toLocaleString('pt-BR');
-    },delay);
-  }
-  _anim('mndM1Bar','mndM1Pct',Math.floor(days*1.85),200,420);
-  _anim('mndM2Bar','mndM2Pct',Math.floor(days*0.68),50,620);
-  _anim('mndM3Bar','mndM3Pct',Math.floor(days*12.4),1000,820);
+  var cur=Math.min(Math.floor(days*1.85),200);
+  var pct=Math.round(cur/200*100);
+  setTimeout(function(){
+    var b=document.getElementById('mndObjBar');if(b)b.style.width=pct+'%';
+    var p=document.getElementById('mndObjPct');if(p)p.textContent=cur.toLocaleString('pt-BR')+' / 200 sessões ('+pct+'%)';
+  },400);
 }
 
 function _mndStartEvtTimer(){
@@ -2952,6 +2916,18 @@ function _mndSetupHover(){
   var wrap=document.getElementById('mndMapWrap');
   var tt=document.getElementById('mndTooltip');
   if(!svg||!tt)return;
+
+  // Parallax sutil no mapa ao mover o cursor
+  wrap.addEventListener('mousemove',function(e){
+    var r=wrap.getBoundingClientRect();
+    var nx=(e.clientX-r.left)/r.width-0.5;
+    var ny=(e.clientY-r.top)/r.height-0.5;
+    svg.style.transform='translate('+(-nx*4).toFixed(1)+'px,'+(-ny*2.5).toFixed(1)+'px)';
+  });
+  wrap.addEventListener('mouseleave',function(){
+    svg.style.transform='';
+  });
+
   svg.querySelectorAll('.mndDistrict').forEach(function(g){
     var id=g.dataset.id;
     var d=_mndDists.find(function(x){return x.id===id;});
@@ -2962,7 +2938,7 @@ function _mndSetupHover(){
       document.getElementById('mndTTName').textContent=g.dataset.name;
       document.getElementById('mndTTZone').textContent=g.dataset.zone;
       document.getElementById('mndTTActive').textContent=active+' jogadores ativos · clique para explorar';
-      document.getElementById('mndTTDesc').textContent=g.dataset.lore?g.dataset.lore.substring(0,90)+'…':g.dataset.desc||'';
+      document.getElementById('mndTTDesc').textContent=g.dataset.lore?g.dataset.lore.substring(0,90)+'…':'';
       tt.removeAttribute('hidden');
       _mndPosTooltip(e,wrap,tt);
     });
@@ -2974,7 +2950,7 @@ function _mndSetupHover(){
     });
   });
 
-  var closeBtn=document.getElementById('mndPClose');
+  var closeBtn=document.getElementById('mndCtxClose');
   if(closeBtn)closeBtn.addEventListener('click',_mndCloseDistrict);
 }
 
@@ -3001,17 +2977,19 @@ function _mndOpenDistrict(id){
   var active=Math.floor((d.activity+Math.abs(Math.sin(s*0.07+d.cx*0.009))*0.14)*14)+1;
   var pct=Math.round(Math.max(8,Math.min(96,(d.activity+Math.sin(s*0.07+d.cx*0.009)*0.15)*100)));
 
-  function _s(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
-  _s('mndPSymbol',g.dataset.symbol||'◆');
-  _s('mndPName',g.dataset.name);
-  _s('mndPZone',g.dataset.zone);
-  _s('mndPLore',g.dataset.lore||'');
-  _s('mndPSess',sess);
-  _s('mndPActiveN',active);
-  _s('mndPActivityPct',pct+'%');
-  _s('mndPBonusTxt',g.dataset.bonus||'—');
+  function _s(elId,v){var e=document.getElementById(elId);if(e)e.textContent=v;}
+  _s('mndCtxSymbol',g.dataset.symbol||'◆');
+  _s('mndCtxName',g.dataset.name);
+  _s('mndCtxZone',g.dataset.zone);
+  // Lore: apenas as 2 primeiras frases para não sobrecarregar o painel compacto
+  var lore=g.dataset.lore||'';
+  var loreCurto=lore.length>160?lore.substring(0,160)+'…':lore;
+  _s('mndCtxLore',loreCurto);
+  _s('mndCtxSess',sess);
+  _s('mndCtxPlayers',active);
+  _s('mndCtxPct',pct+'%');
 
-  var actionBtn=document.getElementById('mndPAction');
+  var actionBtn=document.getElementById('mndCtxAction');
   if(actionBtn){
     actionBtn.textContent=g.dataset.btn||'ENTRAR';
     actionBtn.style.background=d.color;
@@ -3019,69 +2997,24 @@ function _mndOpenDistrict(id){
     actionBtn.onclick=function(){location.href='./sala.html?zona='+id;};
   }
 
-  var box=document.getElementById('mndPanelBox');
-  if(box){
-    box.style.borderColor=d.color;
-    var left=document.getElementById('mndPLeft');
-    if(left)left.style.borderRightColor=d.color+'44';
-  }
-  var bonusBox=document.getElementById('mndPBonusBox');
-  if(bonusBox){bonusBox.style.borderColor=d.color+'55';bonusBox.style.background=d.color+'0d';}
-
-  // Jogadores: usa cache de leaderboard se disponível
-  _mndPopulateDistrictPlayers(id,d);
-
-  var panel=document.getElementById('mndPanel');
-  if(panel){
-    panel.removeAttribute('hidden');
-    requestAnimationFrame(function(){panel.classList.add('open');});
+  var ctx=document.getElementById('mndCtx');
+  if(ctx){
+    ctx.style.borderTopColor=d.color+'99';
+    ctx.classList.add('open');
     _mndPanelOpen=true;
   }
+
+  // Highlight do distrito selecionado
+  document.querySelectorAll('.mndDistrict').forEach(function(x){x.classList.remove('is-selected');});
+  g.classList.add('is-selected');
 }
 
 function _mndCloseDistrict(){
-  var panel=document.getElementById('mndPanel');
-  if(!panel)return;
-  panel.classList.remove('open');
+  var ctx=document.getElementById('mndCtx');
+  if(!ctx)return;
+  ctx.classList.remove('open');
   _mndPanelOpen=false;
-  setTimeout(function(){panel.setAttribute('hidden','');},360);
-}
-
-function _mndPopulateDistrictPlayers(distId,d){
-  var list=document.getElementById('mndPPlayers');
-  if(!list)return;
-  list.innerHTML='<div style="font-size:9px;color:var(--text3);padding:6px 0;">Carregando…</div>';
-
-  function render(players){
-    if(!players||players.length===0){
-      list.innerHTML='<div style="font-size:9px;color:var(--text3);padding:6px 0;">Nenhum jogador registrado aqui ainda.</div>';
-      return;
-    }
-    list.innerHTML='';
-    players.slice(0,5).forEach(function(p,i){
-      var row=document.createElement('div');row.className='mndPPRow';
-      var medals=['🥇','🥈','🥉'];
-      var rank=i<3?'<span class="mndPPRank">'+medals[i]+'</span>':'<span class="mndPPRank" style="font-size:8px;color:var(--text3)">'+(i+1)+'</span>';
-      var av='<div class="mndPPAv" style="border:2px solid '+d.color+'55;background:'+d.color+'18;color:'+d.color+'">'
-        +(p.avatar?'<img src="'+_escHtml(p.avatar)+'" alt="" onerror="this.parentNode.textContent=\''+_escHtml((p.displayName||'?')[0].toUpperCase())+'\'">':_escHtml((p.displayName||'?')[0].toUpperCase()))
-        +'</div>';
-      row.innerHTML=rank+av+'<span class="mndPPName">'+_escHtml(p.displayName||p.username||'Jogador')+'</span><span class="mndPPXP">Nv '+_escHtml(String(p.level||1))+' · '+_escHtml(String((p.xp||0).toLocaleString('pt-BR')))+' XP</span>';
-      list.appendChild(row);
-    });
-  }
-
-  if(_mndLbCache){
-    render(_mndDistributePlayers(_mndLbCache,distId));
-    return;
-  }
-  if(window._hubFirebaseUser){
-    window._hubFirebaseUser.getIdToken().then(function(tok){
-      return fetch('https://osl-video-server-production.up.railway.app/social/leaderboard',{headers:{Authorization:'Bearer '+tok}});
-    }).then(function(r){return r.ok?r.json():null;}).then(function(data){
-      if(data&&data.leaderboard){_mndLbCache=data.leaderboard;}
-      render(_mndDistributePlayers(_mndLbCache||[],distId));
-    }).catch(function(){render([]);});
-  } else {render([]);}
+  document.querySelectorAll('.mndDistrict').forEach(function(x){x.classList.remove('is-selected');});
 }
 
 function _mndDistributePlayers(lb,distId){
