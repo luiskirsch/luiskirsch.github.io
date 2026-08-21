@@ -7,6 +7,7 @@ import { escapeHtml } from "../utils.js";
 import { OSL_BASIC_CARDS, OSL_PACK_CARDS, OSL_CARD_EFFECTS } from "../constants.js";
 import { getVerifiedProdutos } from "../ui/profile.js";
 import { fireRevealAnimation } from "../ui/animations.js";
+import { setWorldCardFX } from "../ui/world-card-fx.js";
 import { showVoteResultOverlay } from "./rewards.js";
 import { dispatch, subscribe, getState, PHASE } from "./engine.js";
 import { CMD } from "./commands.js";
@@ -191,6 +192,7 @@ export function applyCardContent(card) {
       visualCard.style.setProperty("--world-depth", influence.palette?.[1] || "#0d151c");
     }
   }
+  setWorldCardFX(card);
 
   if (card) {
     if (ritualCardType)  ritualCardType.textContent = ((card.sigil ? card.sigil + "  " : "") + (card.type || oslTr("sala:table.typeRitual", "Ritual")) + (card.fragmentId ? " · " + card.fragmentId : "")).toUpperCase();
