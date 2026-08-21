@@ -567,8 +567,17 @@ function renderDetail(detail) {
   ui.stage.setAttribute("aria-label", "Abrir baú");
 }
 
+function isArenaActive() {
+  try {
+    return document.documentElement.classList.contains("arenaMode")
+      || sessionStorage.getItem("osl_arena") === "1";
+  } catch (_) {
+    return document.documentElement.classList.contains("arenaMode");
+  }
+}
+
 async function pumpQueue() {
-  if (active || !queue.length) return;
+  if (active || !queue.length || isArenaActive()) return;
   buildUi();
   active = queue.shift();
   previousFocus = document.activeElement;
@@ -593,6 +602,14 @@ async function pumpQueue() {
   // fallback nunca aparece como uma etapa intermediária do carregamento.
   try { await ensureModel(); } catch (_) {}
   if (!active) return;
+  // A Arena pode ter sido ativada durante o carregamento do modelo. Devolve a
+  // recompensa para o início da fila antes que qualquer overlay fique visível.
+  if (isArenaActive()) {
+    queue.unshift(active);
+    active = null;
+    ui.overlay.hidden = true;
+    return;
+  }
   requestAnimationFrame(() => {
     ui.overlay.classList.add("is-visible");
     ui.action.focus({ preventScroll: true });
@@ -641,6 +658,7 @@ function preload() {
 const api = Object.freeze({ show, present: show, preload });
 window.OSLRewardChest = api;
 window.addEventListener("osl:reward", event => { if (event.detail) show(event.detail); });
+window.addEventListener("osl:arena-exited", () => queueMicrotask(pumpQueue));
 
 const pending = Array.isArray(window.__oslRewardQueue) ? window.__oslRewardQueue.splice(0) : [];
 pending.forEach(detail => show(detail));

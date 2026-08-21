@@ -6,7 +6,7 @@
 
   var pending = [];
   var modulePromise = null;
-  var moduleUrl = "/js/reward-chest.js?v=22";
+  var moduleUrl = "/js/reward-chest.js?v=23";
 
   function load() {
     if (!modulePromise) {
@@ -19,20 +19,30 @@
     return modulePromise;
   }
 
-  function enqueue(detail) {
-    if (!detail) return;
-    pending.push(detail);
-    load().then(function () {
+  function flushPending() {
+    return load().then(function () {
       var api = window.OSLRewardChest;
       var items = pending.splice(0);
       if (api && typeof api.show === "function") items.forEach(api.show);
-    }).catch(function () {});
+    });
+  }
+
+  function enqueue(detail) {
+    if (!detail) return;
+    pending.push(detail);
+    flushPending().catch(function () {});
   }
 
   window.__oslRewardQueue = { push: enqueue };
   window.addEventListener("osl:reward", function (event) {
     if (window.OSLRewardChest) return;
     enqueue(event.detail);
+  });
+  // Se o primeiro carregamento falhou durante a sessão, a saída da Arena é o
+  // momento seguro para tentar novamente sem interromper a partida.
+  window.addEventListener("osl:arena-exited", function () {
+    if (!pending.length || window.OSLRewardChest) return;
+    flushPending().catch(function () {});
   });
 
   function warmInBackground() { load().catch(function () {}); }

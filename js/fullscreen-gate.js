@@ -253,6 +253,7 @@
   }
 
   function activateArenaMode() {
+    const wasArena = html.classList.contains("arenaMode");
     sessionStorage.removeItem("osl_arena_optout");
     html.classList.add("arenaMode");
     sessionStorage.setItem("osl_arena", "1");
@@ -268,9 +269,11 @@
     }
 
     requestAnimationFrame(syncArenaControls);
+    if (!wasArena) window.dispatchEvent(new CustomEvent("osl:arena-entered"));
   }
 
   function deactivateArenaMode() {
+    const wasArena = html.classList.contains("arenaMode") || sessionStorage.getItem("osl_arena") === "1";
     html.classList.remove("arenaMode");
     sessionStorage.removeItem("osl_arena");
 
@@ -283,6 +286,7 @@
     if (document.fullscreenElement) {
       document.exitFullscreen?.().catch(() => {});
     }
+    if (wasArena) window.dispatchEvent(new CustomEvent("osl:arena-exited"));
   }
 
   function toggleArenaMode() {

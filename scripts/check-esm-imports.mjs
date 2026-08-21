@@ -36,7 +36,10 @@ const errors = [];
 for (const [importer, source] of sourceByFile) {
   const pattern = /\bimport\s*\{([^}]+)\}\s*from\s*["'](\.{1,2}\/[^"']+)["']/g;
   for (const match of source.matchAll(pattern)) {
-    const resolved = path.resolve(path.dirname(importer), match[2]);
+    // Query strings são usadas como cache-buster no navegador, mas não fazem
+    // parte do caminho físico validado no repositório.
+    const importPath = match[2].split(/[?#]/, 1)[0];
+    const resolved = path.resolve(path.dirname(importer), importPath);
     const target = path.extname(resolved) ? resolved : `${resolved}.js`;
     const exported = exportsByFile.get(target);
     if (!exported) {

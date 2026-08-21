@@ -26,8 +26,23 @@ function accountCacheIsCurrent() {
 }
 
 function presentReward(detail) {
-  if (!window.OSLRewardChest?.show) return null;
-  return window.OSLRewardChest.show(detail);
+  if (window.OSLRewardChest?.show) return window.OSLRewardChest.show(detail);
+  // O loader existe antes dos módulos do jogo. Enfileirar aqui evita cair no
+  // modal legado enquanto o baú 3D ainda está carregando — inclusive na Arena.
+  if (window.__oslRewardQueue?.push) {
+    window.__oslRewardQueue.push(detail);
+    return { queued: true };
+  }
+  return null;
+}
+
+function isArenaActive() {
+  try {
+    return document.documentElement.classList.contains("arenaMode")
+      || sessionStorage.getItem("osl_arena") === "1";
+  } catch (_) {
+    return document.documentElement.classList.contains("arenaMode");
+  }
 }
 
 // ── Barra de reações ──────────────────────────────────────────────────────────
@@ -133,6 +148,12 @@ export function showLevelUpModal(lv, info, coinsEarned) {
     balance: coinsEarned ? `Saldo atualizado: ${getCoinDisplay().toLocaleString("pt-BR")} moedas` : "",
   });
   if (chest) return chest;
+  // Defesa para páginas/ambientes onde o loader do baú não foi carregado.
+  // Nenhum overlay de recompensa pode disputar foco com a partida.
+  if (isArenaActive()) {
+    window.addEventListener("osl:arena-exited", () => showLevelUpModal(lv, info, coinsEarned), { once: true });
+    return { queued: true, fallback: true };
+  }
   const overlay = document.createElement("div");
   overlay.className = "levelUpOverlay";
   const unlockBlock = info.unlock ? `<div class="levelUpCard__unlock"><strong>Desbloqueado</strong>${escapeHtml(info.unlock)}</div>` : "";
