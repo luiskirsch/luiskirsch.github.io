@@ -749,6 +749,97 @@ body.ritual-open #ritualDim{opacity:1;}
   .mndPName{font-size:22px;}
 }
 
+/* ══ LIMIAR (entrada cinematográfica do Mundo) ══ */
+#mndLimiar{
+  position:absolute;inset:0;z-index:80;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 90% 80% at 28% 55%,rgba(120,18,78,.80) 0%,rgba(13,10,24,.97) 62%),
+             radial-gradient(ellipse 60% 55% at 72% 40%,rgba(50,20,90,.55) 0%,transparent 65%);
+  transition:opacity .85s cubic-bezier(.22,1,.36,1),visibility .85s;
+  overflow:hidden;
+}
+#mndLimiar.lFadeOut{opacity:0;visibility:hidden;pointer-events:none;}
+#mndLimiar[hidden]{display:none;}
+
+@keyframes mndLimiarReveal{
+  from{opacity:0;transform:translateY(22px);}
+  to  {opacity:1;transform:translateY(0);}
+}
+@keyframes mndBgDrift{
+  0%,100%{background-position:0% 50%;}
+  50%    {background-position:100% 50%;}
+}
+
+.mndLMeta{
+  font-size:7.5px;font-weight:700;letter-spacing:.40em;text-transform:uppercase;
+  color:rgba(255,255,255,.28);margin-bottom:30px;text-align:center;
+  animation:mndLimiarReveal .9s cubic-bezier(.22,1,.36,1) .1s both;
+}
+.mndLMeta span{color:rgba(255,183,73,.55);}
+
+.mndLTitle{
+  font-family:var(--serif);
+  font-size:clamp(60px,10vw,128px);
+  font-weight:900;line-height:.9;letter-spacing:.06em;text-transform:uppercase;
+  text-align:center;margin-bottom:0;
+}
+.mndLT1{
+  display:block;color:#f0ece0;
+  animation:mndLimiarReveal 1.1s cubic-bezier(.22,1,.36,1) .35s both;
+}
+.mndLT2{
+  display:block;
+  background:linear-gradient(100deg,#FF3E7F 0%,#FF6A46 46%,#FFB749 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:mndLimiarReveal 1.1s cubic-bezier(.22,1,.36,1) .55s both;
+}
+
+.mndLSub{
+  font-size:clamp(12px,1.5vw,15px);color:rgba(255,255,255,.48);
+  line-height:1.72;text-align:center;max-width:500px;
+  margin-top:26px;margin-bottom:38px;
+  animation:mndLimiarReveal .9s cubic-bezier(.22,1,.36,1) .85s both;
+}
+.mndLSub strong{color:rgba(255,255,255,.75);font-weight:600;}
+
+.mndLTags{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;
+  animation:mndLimiarReveal .8s cubic-bezier(.22,1,.36,1) 1.05s both;
+}
+.mndLTag{font-size:7px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.22);}
+.mndLTag.hi{color:rgba(255,183,73,.60);}
+.mndLTagDot{color:rgba(255,255,255,.15);}
+
+.mndLBtn{
+  margin-top:44px;padding:13px 34px;
+  font-family:var(--serif);font-size:10.5px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;
+  background:none;border:1px solid rgba(255,255,255,.22);border-radius:3px;
+  color:#f0ece0;cursor:pointer;
+  transition:border-color .24s,background .24s,letter-spacing .24s;
+  animation:mndLimiarReveal .7s cubic-bezier(.22,1,.36,1) 1.3s both;
+}
+.mndLBtn:hover{border-color:rgba(255,183,73,.55);background:rgba(255,183,73,.07);letter-spacing:.40em;}
+
+/* Barra de progresso na base */
+.mndLProgress{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.06);}
+.mndLBar{
+  height:100%;
+  background:linear-gradient(90deg,#FF3E7F 0%,#FF6A46 48%,#FFB749 100%);
+  width:0%;transition:width 3.6s linear;
+}
+
+/* Partículas de atmosfera (SVG inline puro, sem canvas) */
+.mndLAtmos{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;
+}
+.mndLAtmos circle{animation:mndLAtmosDrift var(--dur,8s) linear infinite;opacity:0;}
+@keyframes mndLAtmosDrift{
+  0%  {opacity:0;transform:translateY(0);}
+  15% {opacity:var(--op,.35);}
+  85% {opacity:var(--op,.35);}
+  100%{opacity:0;transform:translateY(-120px);}
+}
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}#cvGL{display:none!important;}}
 
 /* ══ SISTEMA DE SEÇÕES ══ */
@@ -1634,6 +1725,49 @@ body.sec-loja   #lojaPage  { opacity:1;pointer-events:auto;transform:translateY(
     <div class="mndMobileStat"><span class="mndMobileStatVal" id="mndMobXp">—</span><span class="mndMobileStatLbl">XP HOJE</span></div>
     <div class="mndMobileStat"><span class="mndMobileStatVal" id="mndMobRit">—</span><span class="mndMobileStatLbl">RITUAIS</span></div>
     <div class="mndMobileStat"><span class="mndMobileStatVal" id="mndMobSess">—</span><span class="mndMobileStatLbl">SESSÕES</span></div>
+  </div>
+
+  <!-- ══ LIMIAR — entrada cinematográfica (cobre tudo, aparece ao entrar em Mundo) ══ -->
+  <div id="mndLimiar">
+    <!-- Partículas de atmosfera -->
+    <svg class="mndLAtmos" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="80"  cy="580" r="1.5" fill="#FF3E7F" style="--dur:9s;--op:.4;animation-delay:0s"/>
+      <circle cx="210" cy="590" r="1"   fill="#FFB749" style="--dur:11s;--op:.3;animation-delay:1.2s"/>
+      <circle cx="340" cy="595" r="2"   fill="#FF6A46" style="--dur:8s;--op:.35;animation-delay:2.4s"/>
+      <circle cx="470" cy="585" r="1.2" fill="#FF3E7F" style="--dur:13s;--op:.28;animation-delay:0.7s"/>
+      <circle cx="600" cy="590" r="1.8" fill="#FFB749" style="--dur:10s;--op:.38;animation-delay:3.1s"/>
+      <circle cx="720" cy="580" r="1"   fill="#FF6A46" style="--dur:12s;--op:.32;animation-delay:1.8s"/>
+      <circle cx="850" cy="595" r="1.5" fill="#FF3E7F" style="--dur:9.5s;--op:.36;animation-delay:0.4s"/>
+      <circle cx="950" cy="585" r="1.2" fill="#FFB749" style="--dur:14s;--op:.25;animation-delay:2.8s"/>
+      <circle cx="150" cy="590" r="2.2" fill="#FF6A46" style="--dur:7.5s;--op:.40;animation-delay:4.2s"/>
+      <circle cx="530" cy="592" r="1.3" fill="#FF3E7F" style="--dur:11.5s;--op:.30;animation-delay:5.0s"/>
+    </svg>
+
+    <div class="mndLMeta">TEMPORADA 1 &nbsp;·&nbsp; <span id="mndLOnline">—</span> JOGADORES ATIVOS &nbsp;·&nbsp; <span>MUNDO VIVO</span></div>
+
+    <div class="mndLTitle">
+      <span class="mndLT1">O</span>
+      <span class="mndLT2">MUNDO</span>
+    </div>
+
+    <p class="mndLSub">
+      Um território que existe além das sessões. Construído por cada ritual, habitado por quem ousou atravessar.<br>
+      <strong>Bem-vindo ao que vocês criaram juntos.</strong>
+    </p>
+
+    <div class="mndLTags">
+      <span class="mndLTag">5 DISTRITOS</span>
+      <span class="mndLTagDot">·</span>
+      <span class="mndLTag hi">TEMPORADA 1 ATIVA</span>
+      <span class="mndLTagDot">·</span>
+      <span class="mndLTag">ACESSO EXCLUSIVO</span>
+      <span class="mndLTagDot">·</span>
+      <span class="mndLTag">MUNDO VIVO</span>
+    </div>
+
+    <button class="mndLBtn" onclick="_mndDismissLimiar()">EXPLORAR O MAPA</button>
+
+    <div class="mndLProgress"><div class="mndLBar" id="mndLBar"></div></div>
   </div>
 
 </div>
@@ -2696,6 +2830,38 @@ function _mndLoad(){
   } else {
     _mndResizeCanvas();
   }
+  // Limiar: exibe apenas uma vez por sessão de browser
+  try{
+    if(!sessionStorage.getItem('osl_mnd_limiar')){_mndShowLimiar();}
+  }catch(_){_mndShowLimiar();}
+}
+
+function _mndShowLimiar(){
+  var el=document.getElementById('mndLimiar');
+  if(!el)return;
+  // sincroniza stat de online com o valor já carregado
+  var onlineEl=document.getElementById('mndOnline');
+  var lOnline=document.getElementById('mndLOnline');
+  if(lOnline&&onlineEl&&onlineEl.textContent!=='—')lOnline.textContent=onlineEl.textContent;
+  el.style.display='flex';
+  el.classList.remove('lFadeOut');
+  // inicia barra de progresso
+  requestAnimationFrame(function(){
+    var bar=document.getElementById('mndLBar');
+    if(bar)bar.style.width='100%';
+  });
+  // auto-dismiss após 4s
+  clearTimeout(window._mndLimiarTimer);
+  window._mndLimiarTimer=setTimeout(_mndDismissLimiar,4000);
+}
+
+function _mndDismissLimiar(){
+  clearTimeout(window._mndLimiarTimer);
+  var el=document.getElementById('mndLimiar');
+  if(!el)return;
+  el.classList.add('lFadeOut');
+  try{sessionStorage.setItem('osl_mnd_limiar','1');}catch(_){}
+  setTimeout(function(){if(el)el.style.display='none';},880);
 }
 
 function _mndSeed(){
