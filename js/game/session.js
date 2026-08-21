@@ -97,6 +97,11 @@ export async function endGameSession() {
       S.sessionEventsRef = null;
       S.sessionPlayerRef = null;
     }
+    if (S.isHost && result?.ok) {
+      window.dispatchEvent(new CustomEvent("osl:session-history-changed", {
+        detail: { roomId, sessionId },
+      }));
+    }
     return result || { ok: true };
   } catch (error) {
     console.warn("[session] não foi possível encerrar a sessão:", error);

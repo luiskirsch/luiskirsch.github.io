@@ -855,6 +855,31 @@
       margin-top:14px;
     }
 
+    .historySessionBtn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      color:rgba(255,250,242,.72);
+      border:1px solid rgba(231,197,138,.22);
+      background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.035));
+      box-shadow:inset 0 1px rgba(255,255,255,.035);
+    }
+    .historySessionBtn:hover{
+      color:#fffaf2;
+      border-color:rgba(231,197,138,.48);
+      background:rgba(239,201,120,.10);
+    }
+    .historySessionBtn__icon{opacity:.72}
+    .historySessionBtn[data-state="loading"] .historySessionBtn__icon{
+      animation:historyPulse 1.15s ease-in-out infinite;
+    }
+    .historySessionBtn[data-state="error"]{
+      border-color:rgba(231,197,138,.34);
+      color:rgba(255,250,242,.58);
+    }
+    @keyframes historyPulse{50%{opacity:.25;transform:translateY(-1px)}}
+
     .mainArea{
       display:grid;
       grid-template-rows:1fr;
@@ -7502,6 +7527,10 @@
 
               <div class="sidebarActions">
                 <button class="btn btnPrimary" id="startBtn" disabled data-i18n="sala:sidebar.startRitual">Iniciar Ritual</button>
+                <button class="btn btnGhost historySessionBtn" id="historyBtn" type="button" data-state="loading" aria-busy="true">
+                  <span class="historySessionBtn__icon" aria-hidden="true">📜</span>
+                  <span id="historyBtnLabel">Histórico (carregando…)</span>
+                </button>
               </div>
             </div>
           </section>

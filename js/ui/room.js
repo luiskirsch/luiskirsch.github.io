@@ -2,7 +2,7 @@
 import { S } from "../state.js";
 import { setDoc, updateDoc, addDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, doc, collection, deleteField } from "../firebase.js";
 import { escapeHtml, nowTimeFromDate, initials, showOslToast } from "../utils.js";
-import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, ensureHostToken, redeemPendingCoins, fetchRoomSessions, fetchRoomStats } from "../api.js";
+import { panelBootRoom, panelMarkSessionStart, panelMarkSessionEnd, PanelBridge, ensureHostToken, redeemPendingCoins, fetchRoomSessions } from "../api.js";
 import { startRitualDeck, resetRitualDeck, revealNextRitualCard, bindRitual, setRitualWaitingState, updateRitualButtons } from "../game/cards.js";
 import { logEvent, joinSessionAsPlayer, setSessionId, setPlayerConnected, clearActiveSession, endGameSession } from "../game/session.js";
 import { bindMyMission, checkMissionChatCompletion, evaluateChatResponse } from "../game/missions.js";
@@ -455,7 +455,75 @@ export async function leaveRoom(redirect = true) {
 }
 
 // ── Histórico de sessões ──────────────────────────────────────────────────────
-function openSessionHistoryModal(sessions, stats) {
+const SESSION_HISTORY_LIMIT = 200;
+const SESSION_HISTORY_CACHE_VERSION = 1;
+let _sessionHistoryRoomCode = null;
+let _sessionHistory = [];
+let _sessionHistoryStats = null;
+let _sessionHistoryStatus = "idle";
+let _sessionHistoryLoadPromise = null;
+let _sessionHistoryRetryTimer = null;
+let _sessionHistoryRetryCount = 0;
+let _sessionHistoryFromCache = false;
+
+function sessionHistoryCacheKey(roomCode) {
+  return `osl_room_history_v${SESSION_HISTORY_CACHE_VERSION}:${roomCode}`;
+}
+
+function updateSessionHistoryButton(status = _sessionHistoryStatus) {
+  const button = document.getElementById("historyBtn");
+  const label = document.getElementById("historyBtnLabel");
+  if (!button || !label) return;
+
+  const count = _sessionHistory.length;
+  let text;
+  if (status === "loading" && count === 0) text = "Histórico (carregando…)";
+  else if (status === "error" && count === 0) text = "Histórico (tentar novamente)";
+  else text = `Histórico (${count} ${count === 1 ? "sessão" : "sessões"})`;
+
+  label.textContent = text;
+  button.dataset.state = status;
+  button.setAttribute("aria-busy", status === "loading" ? "true" : "false");
+  button.title = status === "error"
+    ? "Não foi possível atualizar. Clique para tentar novamente."
+    : `Abrir até ${SESSION_HISTORY_LIMIT} sessões anteriores desta sala`;
+}
+
+function prepareSessionHistoryState() {
+  if (!S.roomCode || _sessionHistoryRoomCode === S.roomCode) return;
+  _sessionHistoryRoomCode = S.roomCode;
+  _sessionHistory = [];
+  _sessionHistoryStats = null;
+  _sessionHistoryStatus = "idle";
+  _sessionHistoryFromCache = false;
+  _sessionHistoryRetryCount = 0;
+  clearTimeout(_sessionHistoryRetryTimer);
+
+  try {
+    const cached = JSON.parse(localStorage.getItem(sessionHistoryCacheKey(S.roomCode)) || "null");
+    if (cached?.roomCode === S.roomCode && Array.isArray(cached.sessions)) {
+      _sessionHistory = cached.sessions.slice(0, SESSION_HISTORY_LIMIT);
+      _sessionHistoryStats = cached.stats || null;
+      _sessionHistoryStatus = "ready";
+      _sessionHistoryFromCache = true;
+    }
+  } catch (_) {}
+  updateSessionHistoryButton(_sessionHistoryStatus);
+}
+
+function persistSessionHistoryCache() {
+  if (!S.roomCode) return;
+  try {
+    localStorage.setItem(sessionHistoryCacheKey(S.roomCode), JSON.stringify({
+      roomCode: S.roomCode,
+      sessions: _sessionHistory.slice(0, SESSION_HISTORY_LIMIT),
+      stats: _sessionHistoryStats,
+      updatedAt: Date.now(),
+    }));
+  } catch (_) {}
+}
+
+function openSessionHistoryModal(sessions, stats, { loadFailed = false, fromCache = false } = {}) {
   document.querySelector(".sessionHistoryOverlay")?.remove();
   const fmt = (ms)  => ms  ? new Date(ms).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "—";
   const dur = (sec) => !sec ? "—" : sec >= 60 ? `${Math.round(sec / 60)} min` : "< 1 min";
@@ -464,7 +532,7 @@ function openSessionHistoryModal(sessions, stats) {
     const date  = fmt(s.createdAt);
     const cards = s.summary?.cardsRevealed ?? "—";
     const time  = dur(s.summary?.durationSec);
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px;">
+    return `<div class="sessionHistoryRow" style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px;">
       <span style="opacity:.5">${date}</span>
       <span>🃏 ${cards}</span>
       <span>⏱ ${time}</span>
@@ -493,14 +561,22 @@ function openSessionHistoryModal(sessions, stats) {
     <div style="font-size:11px;opacity:.4;text-align:center;margin-bottom:12px;">média ${avgMin}/sessão • ${stats.avgPlayers} jogadores${emojiStr}</div>`;
   }
 
+  const statusNote = loadFailed
+    ? `<div style="font-size:11px;color:rgba(239,201,120,.72);text-align:center;margin:4px 0 12px;">${fromCache ? "Exibindo o último histórico salvo neste dispositivo." : "Não foi possível atualizar agora. Feche e tente novamente."}</div>`
+    : "";
+  const emptyMessage = loadFailed
+    ? "O histórico continua disponível, mas não pôde ser carregado agora."
+    : "Nenhuma sessão encerrada ainda.";
+
   const overlay = document.createElement("div");
   overlay.className = "recapOverlay sessionHistoryOverlay";
   overlay.innerHTML = `
     <div class="recapCard" style="max-height:80vh;overflow-y:auto;">
       <div class="recapCard__eyebrow">Sala ${escapeHtml(S.roomCode || "")}</div>
-      <div class="recapCard__title">Histórico</div>
+      <div class="recapCard__title">Histórico · ${sessions.length}</div>
       ${statsBanner}
-      <div style="margin:4px 0;">${rows || '<p style="opacity:.4;text-align:center;padding:24px 0;">Nenhuma sessão encerrada ainda.</p>'}</div>
+      ${statusNote}
+      <div style="margin:4px 0;">${rows || `<p style="opacity:.4;text-align:center;padding:24px 0;">${emptyMessage}</p>`}</div>
       <div class="recapCard__actions">
         <button class="recapCard__btn recapCard__btn--ghost" id="historyModalCloseBtn">FECHAR</button>
       </div>
@@ -510,30 +586,52 @@ function openSessionHistoryModal(sessions, stats) {
     overlay.classList.add("closing");
     setTimeout(() => overlay.remove(), 300);
   });
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) document.getElementById("historyModalCloseBtn")?.click();
+  });
 }
 
-async function loadSessionHistory() {
-  try {
-    const [sessResult, statsResult] = await Promise.all([
-      fetchRoomSessions(),
-      fetchRoomStats(),
-    ]);
-    const sessions = sessResult?.sessions || [];
-    if (!sessions.length) return;
+async function loadSessionHistory({ force = false } = {}) {
+  prepareSessionHistoryState();
+  if (!S.roomCode) return { ok: false };
+  if (_sessionHistoryLoadPromise) return _sessionHistoryLoadPromise;
+  if (!force && _sessionHistoryStatus === "ready" && !_sessionHistoryFromCache) {
+    return { ok: true, sessions: _sessionHistory, stats: _sessionHistoryStats };
+  }
 
-    const stats = statsResult?.stats || null;
+  _sessionHistoryStatus = "loading";
+  updateSessionHistoryButton("loading");
 
-    if (document.getElementById("historyBtn")) return;
-    const btn = document.createElement("button");
-    btn.id        = "historyBtn";
-    btn.className = "btn btn--ghost";
-    btn.style.cssText = "margin-top:8px;width:100%;font-size:12px;opacity:.6;";
-    btn.textContent = `📜 Histórico (${sessions.length} sessão${sessions.length !== 1 ? "ões" : ""})`;
-    btn.addEventListener("click", () => openSessionHistoryModal(sessions, stats));
+  _sessionHistoryLoadPromise = (async () => {
+    const sessionResult = await fetchRoomSessions(SESSION_HISTORY_LIMIT);
+    if (!sessionResult?.ok || !Array.isArray(sessionResult.sessions)) {
+      throw new Error("SESSION_HISTORY_UNAVAILABLE");
+    }
 
-    const anchor = document.getElementById("startBtn") || document.getElementById("arenaBtn");
-    anchor?.parentElement?.insertAdjacentElement("afterend", btn);
-  } catch (_) {}
+    _sessionHistory = sessionResult.sessions.slice(0, SESSION_HISTORY_LIMIT);
+    _sessionHistoryStats = sessionResult.stats || _sessionHistoryStats;
+    _sessionHistoryStatus = "ready";
+    _sessionHistoryFromCache = false;
+    _sessionHistoryRetryCount = 0;
+    clearTimeout(_sessionHistoryRetryTimer);
+    persistSessionHistoryCache();
+    updateSessionHistoryButton("ready");
+    return { ok: true, sessions: _sessionHistory, stats: _sessionHistoryStats };
+  })().catch(error => {
+    _sessionHistoryStatus = "error";
+    updateSessionHistoryButton("error");
+    if (_sessionHistoryRetryCount < 3) {
+      const retryDelays = [800, 2000, 5000];
+      const delay = retryDelays[_sessionHistoryRetryCount++];
+      clearTimeout(_sessionHistoryRetryTimer);
+      _sessionHistoryRetryTimer = setTimeout(() => loadSessionHistory({ force: true }), delay);
+    }
+    return { ok: false, error, sessions: _sessionHistory, stats: _sessionHistoryStats };
+  }).finally(() => {
+    _sessionHistoryLoadPromise = null;
+  });
+
+  return _sessionHistoryLoadPromise;
 }
 
 // ── Beacon de saída (pagehide / beforeunload) ─────────────────────────────────
@@ -1006,6 +1104,7 @@ export function bindRoomEvents() {
   const revealCardBtn = document.getElementById("revealCardBtn");
   const resetRitualBtn = document.getElementById("resetRitualBtn");
   const leaveBtn      = document.getElementById("leaveBtn");
+  const historyBtn    = document.getElementById("historyBtn");
 
   copyCodeBtn?.addEventListener("click", async () => {
     const originalText = copyCodeBtn.textContent;
@@ -1044,6 +1143,15 @@ export function bindRoomEvents() {
   messageInput?.addEventListener("blur", () => { clearTimeout(S.typingTimer); setTyping(false); });
   messageInput?.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); submitMessage(); } });
   startBtn?.addEventListener("click", startSession);
+  historyBtn?.addEventListener("click", async () => {
+    const result = await loadSessionHistory({ force: true });
+    openSessionHistoryModal(_sessionHistory, _sessionHistoryStats, {
+      loadFailed: !result?.ok,
+      fromCache: _sessionHistoryFromCache || _sessionHistory.length > 0,
+    });
+  });
+  document.addEventListener("osl:profileLoaded", () => loadSessionHistory({ force: true }), { once: true });
+  window.addEventListener("osl:session-history-changed", () => loadSessionHistory({ force: true }));
   revealCardBtn?.addEventListener("click", () => runRitualButtonAction(revealCardBtn, revealNextRitualCard, "Não foi possível revelar a carta."));
   resetRitualBtn?.addEventListener("click", () => {
     const reset = () => runRitualButtonAction(resetRitualBtn, resetRitualDeck, "Não foi possível reiniciar o ritual.");

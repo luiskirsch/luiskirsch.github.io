@@ -1,4 +1,4 @@
-const CACHE = "osl-v43-arena-boundary";
+const CACHE = "osl-v44-session-history";
 
 const PRECACHE = [
   "/favicon.png",

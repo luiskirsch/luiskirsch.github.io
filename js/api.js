@@ -373,11 +373,13 @@ export async function sessionPlayerHeartbeat(connected = true) {
   });
 }
 
-export async function fetchRoomSessions() {
+export async function fetchRoomSessions(limit = 200) {
   if (!S.roomCode) return { ok: false, sessions: [] };
   try {
     const idToken = await _getFirebaseIdToken();
-    const res = await fetch(SERVER_BASE + `/game/room/${encodeURIComponent(S.roomCode)}/sessions`, {
+    const safeLimit = Math.min(200, Math.max(1, Number.parseInt(limit, 10) || 200));
+    const res = await fetch(SERVER_BASE + `/game/room/${encodeURIComponent(S.roomCode)}/sessions?limit=${safeLimit}`, {
+      cache: "no-store",
       headers: idToken ? { "Authorization": `Bearer ${idToken}` } : {}
     });
     return (await res.json().catch(() => null)) || { ok: false, sessions: [] };
@@ -428,6 +430,7 @@ export async function fetchRoomStats() {
     const idToken = await _getFirebaseIdToken();
     if (!idToken) return { ok: false, stats: null };
     const res = await fetch(SERVER_BASE + `/analytics/room/${encodeURIComponent(S.roomCode)}/stats`, {
+      cache: "no-store",
       headers: { "Authorization": `Bearer ${idToken}` }
     });
     return (await res.json().catch(() => null)) || { ok: false, stats: null };
