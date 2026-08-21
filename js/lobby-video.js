@@ -1,57 +1,63 @@
 (function(){
   var AUDIO_VOL = 0.12;
   var audioMuted = false;
+  var video = document.getElementById('lobbyBgVideo');
+  var audio = document.getElementById('lobbyAmbientAudio');
 
-  function _markReady(){ document.body.classList.add('lobby-video-ready'); }
-
-  var image = document.getElementById('lobbyBgImg');
-  if(image){
-    if(image.complete) _markReady();
-    else {
-      image.addEventListener('load', _markReady, { once:true });
-      image.addEventListener('error', _markReady, { once:true });
-    }
-    setTimeout(_markReady, 2200);
-  } else {
-    _markReady();
+  function markReady(){ document.body.classList.add('lobby-video-ready'); }
+  function startVideo(){
+    if(video && !document.body.classList.contains('ritual-started')) video.play().catch(function(){});
   }
 
-  var aud = document.getElementById('lobbyAmbientAudio');
-  if(aud){
-    aud.volume = AUDIO_VOL;
+  if(video){
+    if(video.readyState >= 2) markReady();
+    else {
+      video.addEventListener('loadeddata', markReady, { once:true });
+      video.addEventListener('canplay', markReady, { once:true });
+      video.addEventListener('error', markReady, { once:true });
+    }
+    startVideo();
+    setTimeout(markReady, 2400);
+    document.addEventListener('click', startVideo, { once:true });
+    document.addEventListener('touchstart', startVideo, { once:true });
+  } else {
+    markReady();
+  }
+
+  if(audio){
+    audio.volume = AUDIO_VOL;
 
     function startAudio(){
-      if(aud && !audioMuted) aud.play().catch(function(){});
+      if(audio && !audioMuted) audio.play().catch(function(){});
     }
-    // tenta imediatamente; retenta no primeiro gesto caso autoplay bloqueado
     startAudio();
-    document.addEventListener('click',      startAudio, { once:true });
+    document.addEventListener('click', startAudio, { once:true });
     document.addEventListener('touchstart', startAudio, { once:true });
   }
 
-  var btn = document.getElementById('toggleLobbyAudioBtn');
-  if(btn){
-    btn.style.display = '';
-    btn.textContent = '🔊 Ambiente';
-    btn.addEventListener('click', function(){
-      if(!aud) return;
+  var button = document.getElementById('toggleLobbyAudioBtn');
+  if(button){
+    button.style.display = '';
+    button.textContent = '🔊 Ambiente';
+    button.addEventListener('click', function(){
+      if(!audio) return;
       audioMuted = !audioMuted;
       if(audioMuted){
-        aud.pause();
-        btn.textContent = '🔇 Ambiente';
+        audio.pause();
+        button.textContent = '🔇 Ambiente';
       } else {
-        aud.play().catch(function(){});
-        btn.textContent = '🔊 Ambiente';
+        audio.play().catch(function(){});
+        button.textContent = '🔊 Ambiente';
       }
     });
   }
 
-  // para tudo quando ritual começar
-  var obs = new MutationObserver(function(){
+  var observer = new MutationObserver(function(){
     if(document.body.classList.contains('ritual-started')){
-      if(aud) aud.pause();
-      obs.disconnect();
+      if(video) video.pause();
+      if(audio) audio.pause();
+      observer.disconnect();
     }
   });
-  obs.observe(document.body, { attributes:true, attributeFilter:['class'] });
+  observer.observe(document.body, { attributes:true, attributeFilter:['class'] });
 })();

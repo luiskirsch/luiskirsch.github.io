@@ -1,15 +1,14 @@
-const CACHE = "osl-v40-mundo-live-map";
+const CACHE = "osl-v41-lobby-animated-video";
 
 const PRECACHE = [
   "/favicon.png",
-  "/assets/lobby-exclusive-v1.avif?v=1",
-  "/assets/lobby-exclusive-v1.webp?v=1",
-  "/assets/lobby-exclusive-v1-lqip.webp?v=1",
+  "/assets/lobby-animated-v1-poster.webp?v=1",
   "/assets/luz-falhando.ogg",
   "/assets/luz-falhando.mp3",
   "/verso-carta.webp?v=2",
   "/js/reward-chest-loader.js?v=1",
-  "/js/lobby-3d.js?v=11"
+  "/js/lobby-video.js?v=3",
+  "/js/lobby-3d.js?v=12"
 ];
 
 self.addEventListener("install", event => {
