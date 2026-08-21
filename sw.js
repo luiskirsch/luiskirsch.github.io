@@ -1,4 +1,4 @@
-const CACHE = "osl-v39-lobby-exclusive-rigid";
+const CACHE = "osl-v40-mundo-live-map";
 
 const PRECACHE = [
   "/favicon.png",
