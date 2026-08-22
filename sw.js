@@ -1,4 +1,4 @@
-const CACHE = "osl-v49-readable-moment-panel";
+const CACHE = "osl-v50-moment-hover-feedback";
 
 const PRECACHE = [
   "/favicon.png",

@@ -129,7 +129,9 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
   border:1px solid rgba(212,175,55,.16);border-radius:3px;
   background:linear-gradient(145deg,rgba(18,27,38,.94),rgba(5,10,17,.96));
   box-shadow:inset 0 1px 0 rgba(255,232,122,.035),0 12px 26px rgba(0,0,0,.18);
+  transition:border-color .2s,background .2s,box-shadow .2s,transform .2s;
 }
+.ctxPulse:hover{border-color:rgba(212,175,55,.29);background:linear-gradient(145deg,rgba(22,33,46,.97),rgba(6,12,20,.98));box-shadow:inset 0 1px 0 rgba(255,232,122,.065),0 16px 34px rgba(0,0,0,.28),0 0 22px rgba(212,175,55,.045);transform:translateY(-1px);}
 .ctxPulse::after{content:'';position:absolute;width:104px;height:104px;right:-49px;top:-58px;border:1px solid rgba(212,175,55,.11);border-radius:50%;box-shadow:0 0 40px rgba(212,175,55,.045);}
 .ctxPulseTop{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px;}
 .ctxLiveMark{display:flex;align-items:center;gap:7px;color:rgba(240,236,224,.62);font-size:8.5px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;}
@@ -201,6 +203,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 
 /* Event card at bottom of left panel */
 .ctxCardEvent{margin:0;padding:15px;border-color:rgba(224,82,138,.16);background:linear-gradient(135deg,rgba(35,11,25,.34),rgba(7,11,17,.96));}
+.ctxCardEvent:hover{border-color:rgba(224,82,138,.34);background:linear-gradient(135deg,rgba(53,14,35,.44),rgba(9,12,19,.98));box-shadow:0 16px 34px rgba(0,0,0,.27),0 0 22px rgba(224,82,138,.045);transform:translateY(-1px);}
 .ctxEventLine{display:grid;grid-template-columns:1fr;gap:6px;}
 .ctxCEventSub{font-size:8.3px;line-height:1.4;letter-spacing:.09em;text-transform:uppercase;color:rgba(240,236,224,.50);}
 .ctxEventTitle{font-family:var(--serif);font-size:14px;font-weight:700;letter-spacing:.055em;color:var(--text);text-transform:uppercase;}
@@ -208,7 +211,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .ctxCardEvent .ctxCBtn{min-height:38px;border-color:rgba(224,82,138,.18);background:rgba(224,82,138,.025);}
 .ctxCardEvent .ctxCBtn::after{color:var(--rose);}
 @keyframes ctxBreathe{0%,100%{opacity:.42;transform:scale(.85)}50%{opacity:1;transform:scale(1.12)}}
-@media(prefers-reduced-motion:reduce){.ctxLiveMark i{animation:none}.ctxProgressRail i{transition:none}.ctxCard,.ctxCBtn{transition:none}}
+@media(prefers-reduced-motion:reduce){.ctxLiveMark i{animation:none}.ctxProgressRail i{transition:none}.ctxPulse,.ctxCard,.ctxCBtn{transition:none}.ctxPulse:hover,.ctxCard:hover{transform:none}}
 
 /* ═══ CENTER ═══ */
 .center{display:flex;flex-direction:column;height:100%;overflow:hidden;position:relative;}
