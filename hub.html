@@ -146,23 +146,6 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .ctxPulseStat strong{font-family:var(--serif);font-size:12px;color:var(--text);}
 .ctxPulseStat span{font-size:6.5px;font-weight:600;line-height:1.25;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);}
 
-.ctxFocus{
-  position:relative;overflow:hidden;flex-shrink:0;padding:14px;
-  border:1px solid rgba(212,175,55,.27);border-left:2px solid var(--gold);border-radius:3px;
-  background:radial-gradient(circle at 100% 0,rgba(212,175,55,.11),transparent 38%),linear-gradient(150deg,rgba(13,22,32,.98),rgba(5,10,17,.97));
-  box-shadow:0 16px 34px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,232,122,.045);
-}
-.ctxFocus::after{content:'◇';position:absolute;right:11px;bottom:-20px;color:rgba(212,175,55,.055);font-family:var(--serif);font-size:78px;line-height:1;transform:rotate(12deg);pointer-events:none;}
-.ctxFocus.is-complete{border-color:rgba(88,224,64,.18);border-left-color:rgba(88,224,64,.62);background:radial-gradient(circle at 100% 0,rgba(88,224,64,.065),transparent 38%),linear-gradient(150deg,rgba(11,22,27,.98),rgba(5,10,17,.97));}
-.ctxFocusHead{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px;}
-.ctxFocusLabel{display:flex;align-items:center;gap:6px;font-size:7.5px;font-weight:800;letter-spacing:.21em;text-transform:uppercase;color:var(--gold2);}
-.ctxFocusLabel svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.5;}
-.ctxFocusState{padding:4px 6px;border:1px solid rgba(212,175,55,.20);border-radius:2px;color:rgba(212,175,55,.70);font-size:5.8px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;white-space:nowrap;}
-.ctxFocus.is-complete .ctxFocusState{border-color:rgba(88,224,64,.20);color:rgba(104,231,105,.72);}
-.ctxFocusQuote{position:relative;z-index:1;min-height:53px;margin-bottom:10px;color:rgba(240,236,224,.88);font-family:var(--fell);font-size:11.5px;font-style:italic;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-.ctxFocusMeta{position:relative;z-index:1;display:flex;align-items:center;gap:6px;margin-bottom:12px;color:var(--text3);font-size:6.7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;}
-.ctxFocusMeta i{width:4px;height:4px;transform:rotate(45deg);background:rgba(212,175,55,.64);}
-
 .ctxCard{
   position:relative;background:linear-gradient(145deg,rgba(9,15,23,.92),rgba(5,9,15,.94));
   border:1px solid rgba(212,175,55,.13);border-radius:3px;padding:12px 13px;
@@ -198,21 +181,14 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 
 .ctxCText{font-size:11px;color:var(--text2);line-height:1.55;}
 
-.ctxCBtn,.ctxPrimaryBtn{
+.ctxCBtn{
   position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:34px;padding:0 10px;
   background:rgba(212,175,55,.035);border:1px solid rgba(212,175,55,.17);border-radius:2px;
   color:rgba(240,236,224,.62);font-size:6.8px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
   cursor:pointer;transition:border-color .16s,color .16s,background .16s,transform .16s;
 }
-.ctxCBtn::after,.ctxPrimaryBtn::after{content:'↗';font-size:10px;color:var(--gold2);}
-.ctxCBtn:hover,.ctxPrimaryBtn:hover{border-color:rgba(212,175,55,.42);background:rgba(212,175,55,.075);color:var(--text);transform:translateY(-1px);}
-.ctxPrimaryBtn{min-height:38px;background:linear-gradient(90deg,rgba(154,111,26,.78),rgba(212,175,55,.88));border-color:rgba(255,232,122,.38);color:#08070a;box-shadow:0 8px 20px rgba(0,0,0,.22);}
-.ctxPrimaryBtn::after{color:#08070a;}
-.ctxPrimaryBtn:hover{background:linear-gradient(90deg,rgba(175,128,30,.90),rgba(232,198,75,.96));color:#050509;}
-.ctxPrimaryBtn:disabled{cursor:default;background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.08);color:var(--text3);box-shadow:none;transform:none;}
-.ctxPrimaryBtn:disabled::after{content:'—';color:var(--text3);}
-.ctxFocus.is-complete .ctxPrimaryBtn:disabled{background:rgba(88,224,64,.055);border-color:rgba(88,224,64,.16);color:rgba(104,231,105,.60);}
-.ctxFocus.is-complete .ctxPrimaryBtn:disabled::after{content:'✓';color:rgba(104,231,105,.65);}
+.ctxCBtn::after{content:'↗';font-size:10px;color:var(--gold2);}
+.ctxCBtn:hover{border-color:rgba(212,175,55,.42);background:rgba(212,175,55,.075);color:var(--text);transform:translateY(-1px);}
 .ctxNextBody{display:flex;align-items:center;gap:10px;}
 .ctxFaces{display:flex;align-items:center;min-width:34px;padding-left:2px;}
 .ctxMiniFace,.ctxNextGlyph{width:28px;height:28px;margin-left:-7px;border:1px solid rgba(212,175,55,.38);border-radius:50%;background:#0b1520;color:var(--gold2);display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:var(--serif);font-size:10px;font-weight:700;box-shadow:0 0 0 2px #07101a;}
@@ -232,7 +208,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .ctxCardEvent .ctxCBtn{min-height:30px;border-color:rgba(224,82,138,.16);background:rgba(224,82,138,.025);}
 .ctxCardEvent .ctxCBtn::after{color:var(--rose);}
 @keyframes ctxBreathe{0%,100%{opacity:.42;transform:scale(.85)}50%{opacity:1;transform:scale(1.12)}}
-@media(prefers-reduced-motion:reduce){.ctxLiveMark i{animation:none}.ctxProgressRail i{transition:none}.ctxCard,.ctxCBtn,.ctxPrimaryBtn{transition:none}}
+@media(prefers-reduced-motion:reduce){.ctxLiveMark i{animation:none}.ctxProgressRail i{transition:none}.ctxCard,.ctxCBtn{transition:none}}
 
 /* ═══ CENTER ═══ */
 .center{display:flex;flex-direction:column;height:100%;overflow:hidden;position:relative;}
@@ -943,20 +919,6 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
         </div>
       </section>
 
-      <!-- Foco do dia -->
-      <article class="ctxFocus" id="ctxRitual">
-        <div class="ctxFocusHead">
-          <div class="ctxFocusLabel">
-            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            Foco de hoje
-          </div>
-          <span class="ctxFocusState" id="ctxRitualState">Não revelado</span>
-        </div>
-        <blockquote class="ctxFocusQuote" id="ctxRitualText">Uma pergunta está esperando por você.</blockquote>
-        <div class="ctxFocusMeta"><i aria-hidden="true"></i><span id="ctxRitualMeta">O mundo está reunindo respostas</span></div>
-        <button class="ctxPrimaryBtn" id="ctxRitualBtn" type="button">REVELAR AGORA</button>
-      </article>
-
       <!-- Última Sessão -->
       <article class="ctxCard ctxCard--session" id="ctxSession">
         <div class="ctxCLabel">
@@ -1562,7 +1524,6 @@ document.getElementById('btnInvite').addEventListener('click',async function(){
     window._toast('Convite copiado.');
   }catch(err){if(err&&err.name!=='AbortError')window._toast('Não foi possível compartilhar o convite.');}
 });
-document.getElementById('ctxRitualBtn').addEventListener('click',function(){if(!this.disabled&&window.startDailyRitual)window.startDailyRitual();});
 document.getElementById('ctxSessBtn').addEventListener('click',function(){
   if(this.dataset.action!=='details'){location.href='./entrada.html?modo=criar';return;}
   var details=document.getElementById('ctxSessionDetails'),opened=details&&!details.hidden;
@@ -1846,7 +1807,6 @@ function _showCardReady(){
   if(done)done.hidden=true;
   if(btn){btn.textContent='DESCOBRIR';btn.hidden=false;btn.disabled=false;btn.removeAttribute('aria-disabled');}
   var meta=document.querySelector('.rMeta');if(meta&&_dailyMetaMarkup)meta.innerHTML=_dailyMetaMarkup;
-  if(window._renderCtxDaily)window._renderCtxDaily(_dailyData,false);
 }
 
 window.hubSetRitual=function(d){
@@ -1866,7 +1826,6 @@ function _showCardDone(st){
   var meta=document.querySelector('.rMeta');
   var time=_dailyTime(st&&st.completedAt);
   if(meta){meta.replaceChildren();var label=document.createElement('span');label.style.cssText='font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(212,175,55,.48)';label.textContent='✓ Descoberto hoje'+(time?' às '+time:'');meta.appendChild(label);}
-  if(window._renderCtxDaily)window._renderCtxDaily(_dailyData,true,st&&st.count);
 }
 
 window.startDailyRitual=function(){
@@ -2128,23 +2087,6 @@ window.hubSetMoment=function(account){
   var rail=document.getElementById('ctxProgressRail');if(rail){rail.setAttribute('aria-valuenow',String(pct));rail.setAttribute('aria-valuetext',pct+'% do nível concluído');}
 };
 
-window._renderCtxDaily=function(d,forcedDone,countOverride){
-  var card=document.getElementById('ctxRitual'),btn=document.getElementById('ctxRitualBtn');if(!card||!btn)return;
-  var question=d&&String(d.question||d.cardText||'').trim();
-  var completed=forcedDone===true||(forcedDone==null&&!!_dailyCompletedState(d));
-  var count=countOverride!=null?countOverride:(d&&(d.respondents!=null?d.respondents:d.completionCount));
-  var state=document.getElementById('ctxRitualState'),text=document.getElementById('ctxRitualText'),meta=document.getElementById('ctxRitualMeta');
-  card.classList.toggle('is-complete',completed);
-  if(text)text.textContent=question||'O mundo está preparando a pergunta de hoje.';
-  if(state)state.textContent=completed?'Concluído':(question?'Não revelado':'Em formação');
-  if(meta){
-    var amount=Math.max(0,Math.floor(_hubNumber(count,0)));
-    meta.textContent=completed?'Seu vestígio já atravessou o mundo':(amount?amount.toLocaleString('pt-BR')+' pessoa'+(amount===1?' atravessou':'s atravessaram')+' hoje':'Seja o primeiro a atravessar hoje');
-  }
-  btn.disabled=completed||!question;
-  btn.textContent=completed?'CONCLUÍDO HOJE':(question?'REVELAR AGORA':'AGUARDANDO O MUNDO');
-};
-
 function _ctxRenderFaces(friends){
   var box=document.getElementById('ctxNextFaces');if(!box)return;box.replaceChildren();
   var list=(friends||[]).slice(0,3);
@@ -2156,7 +2098,6 @@ window.hubSetContext=function(data){
   data=data||{};
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   window.hubSetMoment(data.account||{});
-  window._renderCtxDaily(data.daily,!!_dailyCompletedState(data.daily));
 
   /* O último eco usa o histórico e o DNA real da sala. */
   var session=data.lastSession,sessionBtn=document.getElementById('ctxSessBtn');

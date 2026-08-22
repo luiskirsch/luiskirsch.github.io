@@ -1,4 +1,4 @@
-const CACHE = "osl-v47-scrollable-moment-event";
+const CACHE = "osl-v48-focused-moment-panel";
 
 const PRECACHE = [
   "/favicon.png",
