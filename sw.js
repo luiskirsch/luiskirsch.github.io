@@ -1,4 +1,4 @@
-const CACHE = "osl-v50-moment-hover-feedback";
+const CACHE = "osl-v51-social-presence";
 
 const PRECACHE = [
   "/favicon.png",

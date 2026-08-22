@@ -682,178 +682,44 @@ body.sec-mundo .toast{left:calc((100vw - 340px)/2);right:auto;bottom:54px;width:
 body.sec-mundo .toast.on{transform:translate(-50%,0);}
 @media(max-width:900px){body.sec-mundo .toast{left:50%;bottom:24px;width:calc(100vw - 36px);max-width:560px;}}
 
-/* ══ SOCIAL PAGE ══ */
-#socialPage{
-.spScanlines{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);z-index:0;}
-.spVignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 90% 80% at 50% 50%,transparent 40%,rgba(0,0,0,.70) 100%);z-index:0;}
-.spGlow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:500px;background:radial-gradient(ellipse,rgba(212,175,55,.06) 0%,transparent 70%);pointer-events:none;z-index:0;}
-
-/* ── Header ── */
-.spHeader{
-  position:relative;z-index:10;flex-shrink:0;
-  display:grid;grid-template-columns:1fr auto 1fr;
-  align-items:center;height:60px;padding:0 24px;
-  border-bottom:1px solid rgba(212,175,55,.12);
-  background:rgba(3,6,12,.90);
-}
-.spBack{
-  display:flex;align-items:center;gap:8px;
-  font-size:9px;font-weight:700;letter-spacing:.20em;text-transform:uppercase;
-  color:var(--text3);background:none;border:none;cursor:pointer;
-  transition:color .18s;padding:0;
-}
-.spBack:hover{color:var(--gold);}
-.spBack svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5;}
-.spHeaderTitle{
-  font-family:var(--serif);font-size:13px;font-weight:900;
-  letter-spacing:.28em;color:var(--gold);text-transform:uppercase;
-  text-align:center;text-shadow:0 0 28px rgba(212,175,55,.25);
-}
-.spSearchTrigger{
-  display:flex;align-items:center;justify-content:flex-end;gap:7px;
-  font-size:9px;font-weight:700;letter-spacing:.20em;text-transform:uppercase;
-  color:var(--text3);background:none;border:none;cursor:pointer;
-  transition:color .18s;padding:0;
-}
-.spSearchTrigger:hover{color:var(--gold);}
-.spSearchTrigger svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.5;}
-
-/* ── Search overlay ── */
-.spSearchOverlay{
-  position:absolute;inset:0 0 auto 0;z-index:20;height:60px;
-  background:rgba(3,6,12,.98);border-bottom:1px solid rgba(212,175,55,.18);
-  display:flex;align-items:center;padding:0 20px;gap:12px;
-  transform:translateY(-100%);transition:transform .24s cubic-bezier(.22,1,.36,1);
-}
-.spSearchOverlay.open{transform:translateY(0);}
-.spSearchOverlay svg{width:15px;height:15px;stroke:var(--text3);fill:none;stroke-width:1.5;flex-shrink:0;}
-.spSearchInput{
-  flex:1;background:none;border:none;outline:none;
-  font-size:13px;font-family:var(--sans);color:var(--text);
-  caret-color:var(--gold);
-}
-.spSearchInput::placeholder{color:var(--text3);}
-.spSearchClose{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);background:none;border:none;cursor:pointer;padding:6px 0;transition:color .16s;}
-.spSearchClose:hover{color:var(--gold);}
-
-/* ── Search results dropdown ── */
-.spSearchDrop{
-  position:absolute;top:60px;left:0;right:0;z-index:19;
-  background:rgba(4,8,15,.98);border-bottom:1px solid rgba(212,175,55,.12);
-  max-height:52vh;overflow-y:auto;
-  display:none;flex-direction:column;
-  padding:8px 20px 14px;gap:6px;
-}
-.spSearchDrop.open{display:flex;}
-.spSearchDrop::-webkit-scrollbar{width:3px;}.spSearchDrop::-webkit-scrollbar-thumb{background:rgba(212,175,55,.20);border-radius:2px;}
-
-/* ── Main layout ── */
-.spMain{
-  position:relative;z-index:5;flex:1;overflow:hidden;
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:0;
-}
-@media(max-width:680px){.spMain{grid-template-columns:1fr;}}
-
-.spCol{
-  display:flex;flex-direction:column;overflow:hidden;
-  border-right:1px solid rgba(212,175,55,.08);
-}
-.spCol:last-child{border-right:none;}
-
-.spColHead{
-  flex-shrink:0;padding:22px 28px 14px;
-  border-bottom:1px solid rgba(212,175,55,.08);
-}
-.spColTitle{
-  font-family:var(--serif);font-size:11px;font-weight:900;
-  letter-spacing:.28em;color:var(--gold);text-transform:uppercase;
-  margin-bottom:4px;
-}
-.spColSub{font-size:9.5px;color:var(--text3);}
-
-.spColBody{flex:1;overflow-y:auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:8px;}
-.spColBody::-webkit-scrollbar{width:3px;}.spColBody::-webkit-scrollbar-track{background:transparent;}.spColBody::-webkit-scrollbar-thumb{background:rgba(212,175,55,.18);border-radius:2px;}
-
-/* ── Tabs mobile ── */
-.spMobileTabs{display:none;flex-shrink:0;border-bottom:1px solid rgba(212,175,55,.10);}
-@media(max-width:680px){
-  .spMobileTabs{display:flex;}
-  .spCol{display:none;}.spCol.mActive{display:flex;}
-}
-.spMTab{flex:1;font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);background:none;border:none;cursor:pointer;padding:12px 0;position:relative;transition:color .18s;}
-.spMTab::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--goldG);transform:scaleX(0);transform-origin:left;transition:transform .22s;}
-.spMTab.active{color:var(--text);}
-.spMTab.active::after,.spMTab:hover::after{transform:scaleX(1);}
-.spMTab:hover{color:var(--text2);}
-
-/* ── Leaderboard rows ── */
-.spLbRow{
-  display:flex;align-items:center;gap:12px;padding:10px 12px;
-  border-radius:4px;border:1px solid transparent;
-  transition:background .16s,border-color .16s;
-  cursor:default;
-}
-.spLbRow:hover{background:rgba(212,175,55,.04);border-color:rgba(212,175,55,.10);}
-.spLbRow.self{border-color:rgba(212,175,55,.18);background:rgba(212,175,55,.04);}
-
-.spRank{
-  font-family:var(--serif);font-size:16px;font-weight:900;
-  color:var(--text3);width:24px;text-align:center;flex-shrink:0;line-height:1;
-}
-.spRank.r1{color:#FFD700;text-shadow:0 0 14px rgba(255,215,0,.50);}
-.spRank.r2{color:#C0C0C0;text-shadow:0 0 10px rgba(192,192,192,.30);}
-.spRank.r3{color:#CD7F32;text-shadow:0 0 10px rgba(205,127,50,.30);}
-
-.spAv{
-  width:36px;height:36px;border-radius:50%;
-  border:2px solid rgba(212,175,55,.20);
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;flex-shrink:0;overflow:hidden;position:relative;
-}
-.spAv.r1{border-color:#FFD700;box-shadow:0 0 14px rgba(255,215,0,.35);}
-.spAv.r2{border-color:#C0C0C0;box-shadow:0 0 10px rgba(192,192,192,.20);}
-.spAv.r3{border-color:#CD7F32;box-shadow:0 0 10px rgba(205,127,50,.20);}
-.spAv img{width:100%;height:100%;object-fit:cover;}
-.spAv.lg{width:44px;height:44px;font-size:20px;}
-
-.spRowInfo{flex:1;min-width:0;}
-.spRowName{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.spLbRow.self .spRowName{color:var(--gold);}
-.spRowSub{font-size:9.5px;color:var(--text3);margin-top:2px;}
-.spXPBar{height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:6px;overflow:hidden;}
-.spXPFill{height:100%;background:var(--goldG);border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1);}
-
-/* Connection rows */
-.spCxRow{
-  display:flex;align-items:center;gap:12px;padding:10px 12px;
-  border-radius:4px;border:1px solid transparent;
-  transition:background .16s,border-color .16s;
-}
-.spCxRow:hover{background:rgba(212,175,55,.04);border-color:rgba(212,175,55,.10);}
-.spSessTag{font-size:8px;font-weight:700;padding:3px 9px;border-radius:10px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.18);color:var(--gold2);white-space:nowrap;flex-shrink:0;}
-
-/* Add button */
-.spAddBtn{
-  font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
-  padding:5px 11px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.26);
-  border-radius:2px;color:var(--gold2);cursor:pointer;white-space:nowrap;flex-shrink:0;
-  transition:background .16s,border-color .16s;
-}
-.spAddBtn:hover:not(:disabled){background:rgba(212,175,55,.16);border-color:rgba(212,175,55,.48);}
-.spAddBtn:disabled,.spAddBtn[data-sent]{background:rgba(212,175,55,.03);border-color:rgba(212,175,55,.10);color:var(--text3);cursor:default;}
-
-/* Search result rows */
-.spSrRow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:4px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02);transition:background .16s;}
-.spSrRow:hover{background:rgba(212,175,55,.05);}
-
-/* Skeletons + empty */
-.spSkel{display:flex;flex-direction:column;gap:8px;padding-top:2px;}
-.spSkelRow{height:56px;border-radius:4px;background:rgba(255,255,255,.04);animation:skelPulse 1.4s ease-in-out infinite;}
-@keyframes skelPulse{0%,100%{opacity:.4}50%{opacity:.9}}
-.spEmpty{text-align:center;color:var(--text3);font-size:10.5px;line-height:1.75;padding:36px 12px;}
-.spEmptyIcon{font-size:28px;display:block;margin-bottom:12px;opacity:.6;}
-.spSrSectLabel{font-size:8px;font-weight:700;letter-spacing:.22em;color:var(--text3);text-transform:uppercase;padding:4px 12px 8px;}
+/* ══ SOCIAL — CENTRAL DE PRESENÇA ══ */
+#socialPage{--sp-surface:#08111a;--sp-line:rgba(214,174,65,.16);--sp-muted:#747a7d;background:#03080d;}
+.spScanlines{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(0,0,0,.035) 3px,rgba(0,0,0,.035) 4px);z-index:0;}
+.spVignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 86% 86% at 50% 38%,transparent 34%,rgba(0,0,0,.72) 100%);z-index:0;}
+.spGlow{position:absolute;top:-220px;left:50%;transform:translateX(-50%);width:900px;height:650px;background:radial-gradient(ellipse,rgba(24,104,133,.14),rgba(212,175,55,.035) 38%,transparent 72%);pointer-events:none;z-index:0;}
+.spHeader{position:relative;z-index:10;flex:0 0 68px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 clamp(20px,3vw,52px);border-bottom:1px solid var(--sp-line);background:rgba(3,7,12,.9);backdrop-filter:blur(18px);}
+.spBack,.spSearchTrigger{display:flex;align-items:center;gap:9px;width:max-content;padding:10px 0;border:0;background:none;color:#848789;font:800 9px var(--sans);letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:color .2s,transform .2s;}
+.spBack:hover,.spSearchTrigger:hover{color:var(--gold);transform:translateX(-2px);}
+.spSearchTrigger{justify-self:end}.spSearchTrigger:hover{transform:translateX(2px)}
+.spBack svg,.spSearchTrigger svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;}
+.spHeaderTitle{text-align:center}.spHeaderTitle small{display:block;margin-bottom:3px;color:#6e6548;font:800 7px var(--sans);letter-spacing:.3em;text-transform:uppercase}.spHeaderTitle strong{color:#eee9df;font:900 18px var(--serif);letter-spacing:.32em;text-transform:uppercase;text-shadow:0 0 28px rgba(212,175,55,.24)}
+.spSearchOverlay{position:absolute;inset:0 0 auto;z-index:30;height:68px;display:flex;align-items:center;gap:13px;padding:0 clamp(20px,3vw,52px);background:rgba(3,7,12,.98);border-bottom:1px solid rgba(212,175,55,.25);transform:translateY(-105%);transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.spSearchOverlay.open{transform:translateY(0)}.spSearchOverlay svg{width:18px;height:18px;fill:none;stroke:var(--gold);stroke-width:1.5}.spSearchInput{flex:1;border:0;outline:0;background:none;color:#f2eee5;font:500 15px var(--sans);caret-color:var(--gold)}.spSearchInput::placeholder{color:#696e72}.spSearchClose{border:0;background:none;color:#85898b;font:800 9px var(--sans);letter-spacing:.18em;cursor:pointer}.spSearchClose:hover{color:var(--gold)}
+.spSearchDrop{position:absolute;top:68px;left:0;right:0;z-index:29;display:none;max-height:55vh;overflow:auto;padding:14px clamp(20px,3vw,52px) 22px;background:rgba(4,9,15,.98);border-bottom:1px solid var(--sp-line);box-shadow:0 24px 70px rgba(0,0,0,.65)}.spSearchDrop.open{display:block}.spSearchDrop::-webkit-scrollbar,.spViewport::-webkit-scrollbar{width:4px}.spSearchDrop::-webkit-scrollbar-thumb,.spViewport::-webkit-scrollbar-thumb{background:rgba(212,175,55,.25)}
+.spViewport{position:relative;z-index:3;flex:1;overflow:auto;padding:0 clamp(18px,3vw,48px) 54px;scrollbar-width:thin;scrollbar-color:rgba(212,175,55,.25) transparent}
+.spHero{position:relative;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(340px,.75fr);gap:clamp(30px,5vw,80px);align-items:center;min-height:315px;padding:38px 0 34px;border-bottom:1px solid var(--sp-line)}
+.spHero::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(9,26,36,.58),transparent 58%),radial-gradient(circle at 22% 44%,rgba(25,119,151,.1),transparent 38%);pointer-events:none}
+.spHeroCopy,.spPulseCard{position:relative}.spEyebrow,.spPanelKick{display:flex;align-items:center;gap:9px;color:var(--gold2);font:800 8px var(--sans);letter-spacing:.25em;text-transform:uppercase}.spEyebrow i{width:7px;height:7px;border-radius:50%;background:#4dc85b;box-shadow:0 0 16px rgba(77,200,91,.75)}
+.spHero h2{margin:14px 0 12px;color:#f1eee7;font:900 clamp(38px,4.25vw,67px)/.86 var(--serif);letter-spacing:.015em;text-wrap:balance}.spHero p{max-width:650px;margin:0;color:#8d9293;font:500 13px/1.7 var(--sans)}
+.spHeroActions{display:flex;gap:10px;margin-top:24px}.spPrimary,.spSecondary,.spGhostBtn{min-height:42px;padding:0 19px;border:1px solid rgba(212,175,55,.34);background:transparent;color:#d7d3ca;font:800 8px var(--sans);letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:transform .22s,border-color .22s,background .22s,color .22s}.spPrimary{border-color:#d5ae3f;background:linear-gradient(110deg,#8e6715,#e3c45e,#ac821f);color:#090806;box-shadow:0 12px 30px rgba(201,155,38,.12)}.spPrimary:hover,.spSecondary:hover,.spGhostBtn:hover{transform:translateY(-2px);border-color:#e1bd52}.spPrimary:hover{box-shadow:0 15px 36px rgba(201,155,38,.24)}.spSecondary:hover,.spGhostBtn:hover{background:rgba(212,175,55,.07);color:#f1eee7}
+.spPulseCard{border:1px solid var(--sp-line);background:linear-gradient(145deg,rgba(10,22,32,.94),rgba(5,11,17,.92));box-shadow:0 28px 80px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.025);padding:24px 25px;overflow:hidden}.spPulseCard::after{content:"";position:absolute;width:170px;height:170px;border:1px solid rgba(212,175,55,.1);border-radius:50%;right:-75px;top:-85px;box-shadow:0 0 0 24px rgba(212,175,55,.02),0 0 0 49px rgba(212,175,55,.015)}
+.spPulseTop{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}.spPulseTop span{color:#777d80;font:800 8px var(--sans);letter-spacing:.2em;text-transform:uppercase}.spPulseTop strong{display:block;margin-top:7px;color:#f1eee7;font:900 25px var(--serif)}.spLiveCount{display:flex;align-items:center;gap:7px;color:#65d273!important}.spLiveCount::before{content:"";width:7px;height:7px;border-radius:50%;background:#58cd68;box-shadow:0 0 14px rgba(88,205,104,.8)}
+.spHeroFaces{display:flex;min-height:52px;margin:22px 0 20px}.spHeroFaces .spAv{width:50px;height:50px;margin-right:-11px;border:2px solid #08111a;box-shadow:0 0 0 1px rgba(212,175,55,.34)}.spFaceMore{width:50px;height:50px;display:grid;place-items:center;margin-left:0;border-radius:50%;border:2px solid #08111a;background:#14212b;color:var(--gold);font:800 10px var(--sans);box-shadow:0 0 0 1px rgba(212,175,55,.2)}
+.spHeroStats{display:grid;grid-template-columns:repeat(3,1fr);padding-top:18px;border-top:1px solid rgba(212,175,55,.1)}.spHeroStat{padding:0 15px;border-right:1px solid rgba(212,175,55,.1)}.spHeroStat:first-child{padding-left:0}.spHeroStat:last-child{border:0}.spHeroStat strong{display:block;color:#eee9df;font:900 21px var(--serif)}.spHeroStat span{display:block;margin-top:5px;color:#656b6e;font:800 7px/1.25 var(--sans);letter-spacing:.12em;text-transform:uppercase}
+.spDashboard{display:grid;grid-template-columns:minmax(320px,1.1fr) minmax(320px,.95fr) minmax(275px,.75fr);gap:15px;padding-top:22px;align-items:start}.spSideRail{display:flex;flex-direction:column;gap:15px}.spPanel,.spSignalCard{border:1px solid var(--sp-line);background:linear-gradient(150deg,rgba(9,18,27,.94),rgba(5,10,16,.94));box-shadow:0 20px 55px rgba(0,0,0,.18)}.spPanelHead{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:19px 20px 15px;border-bottom:1px solid rgba(212,175,55,.1)}.spPanelTitle{margin-top:5px;color:#eeeae2;font:900 17px var(--serif);letter-spacing:.02em}.spPanelMeta{color:#6c7275;font:700 8px var(--sans);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}.spPanelBody{display:flex;flex-direction:column;gap:7px;padding:11px;max-height:370px;overflow:auto}.spPanelBody::-webkit-scrollbar{width:3px}.spPanelBody::-webkit-scrollbar-thumb{background:rgba(212,175,55,.2)}
+.spPersonRow,.spCxRow,.spLbRow,.spSrRow{position:relative;display:flex;align-items:center;gap:11px;min-height:64px;padding:10px;border:1px solid transparent;background:rgba(255,255,255,.012);cursor:pointer;transition:transform .2s,border-color .2s,background .2s}.spPersonRow:hover,.spCxRow:hover,.spLbRow:hover,.spSrRow:hover{transform:translateX(3px);border-color:rgba(212,175,55,.2);background:rgba(212,175,55,.045)}.spPersonRow.online::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:2px;background:#55ca66;box-shadow:0 0 10px rgba(85,202,102,.55)}
+.spAv{position:relative;display:grid;place-items:center;flex:0 0 auto;width:42px;height:42px;overflow:hidden;border-radius:50%;border:1px solid rgba(212,175,55,.32);background:#18232d;color:#e5bf55;font-size:18px}.spAv img{width:100%;height:100%;object-fit:cover}.spAv.lg{width:50px;height:50px}.spAv.online::after{content:"";position:absolute;right:1px;bottom:1px;width:8px;height:8px;border:2px solid #071019;border-radius:50%;background:#58cf68;box-shadow:0 0 8px rgba(88,207,104,.75)}
+.spRowInfo{flex:1;min-width:0}.spRowName{overflow:hidden;color:#e9e5dc;font:700 11px var(--sans);white-space:nowrap;text-overflow:ellipsis}.spRowSub{overflow:hidden;margin-top:4px;color:#707679;font:600 8px var(--sans);white-space:nowrap;text-overflow:ellipsis}.spRowSignal{margin-top:5px;color:#9c854a;font:800 7px var(--sans);letter-spacing:.1em;text-transform:uppercase}.spStatus{display:flex;align-items:center;gap:6px;color:#61ce70;font:800 7px var(--sans);letter-spacing:.13em;text-transform:uppercase}.spStatus::before{content:"";width:5px;height:5px;border-radius:50%;background:#58cf68}.spRowAction{min-height:31px;padding:0 10px;border:1px solid rgba(212,175,55,.2);background:rgba(212,175,55,.035);color:#bca35c;font:800 7px var(--sans);letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:.2s}.spRowAction:hover{border-color:#d6ae3e;color:#f0cb62;background:rgba(212,175,55,.09)}
+.spSessTag,.spCircleTag{padding:5px 7px;border:1px solid rgba(212,175,55,.16);color:#a78d48;font:800 6px var(--sans);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}.spCircleTag{color:#60c96d;border-color:rgba(85,202,102,.18)}
+.spRank{width:23px;text-align:center;color:#666c70;font:900 14px var(--serif)}.spRank.r1{color:#f0c847}.spRank.r2{color:#c1c6ca}.spRank.r3{color:#bd7a45}.spLbRow.self{border-color:rgba(212,175,55,.2);background:rgba(212,175,55,.04)}.spLbRow.self .spRowName{color:#e7c45f}.spXPBar{height:2px;margin-top:7px;overflow:hidden;background:rgba(255,255,255,.07)}.spXPFill{height:100%;background:linear-gradient(90deg,#94701f,#efd66d);transition:width .8s cubic-bezier(.22,1,.36,1)}
+.spAddBtn{min-height:31px;padding:0 10px;border:1px solid rgba(212,175,55,.25);background:rgba(212,175,55,.05);color:#d1b257;font:800 7px var(--sans);letter-spacing:.11em;text-transform:uppercase;cursor:pointer;white-space:nowrap}.spAddBtn:hover:not(:disabled){border-color:#ddb845;background:rgba(212,175,55,.12)}.spAddBtn:disabled,.spAddBtn[data-sent]{opacity:.58;cursor:default}.spSrRow{max-width:760px;margin:0 auto 7px;background:#08121b}.spSrSectLabel{max-width:760px;margin:0 auto;padding:3px 0 10px;color:#777d7f;font:800 7px var(--sans);letter-spacing:.2em;text-transform:uppercase}
+.spSignalCard{position:relative;overflow:hidden;padding:20px}.spSignalCard::before{content:"";position:absolute;right:-34px;top:-38px;width:116px;height:116px;border:1px solid rgba(212,175,55,.1);transform:rotate(45deg)}.spSignalHeader{display:flex;align-items:center;justify-content:space-between;position:relative}.spSignalMark{width:40px;height:40px;display:grid;place-items:center;border:1px solid rgba(212,175,55,.3);color:var(--gold);font:900 18px var(--serif);transform:rotate(45deg)}.spSignalMark span{transform:rotate(-45deg)}.spSignalTier{color:#716b58;font:800 7px var(--sans);letter-spacing:.15em;text-transform:uppercase}.spSignalCard h3{position:relative;margin:19px 0 6px;color:#eee9df;font:900 19px var(--serif)}.spSignalCard>p{position:relative;margin:0;color:#777d80;font:500 9px/1.55 var(--sans)}.spSignalStats{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:18px;background:rgba(212,175,55,.1)}.spSignalStats div{padding:12px 7px;background:#081018}.spSignalStats strong{display:block;color:#e9e4da;font:900 16px var(--serif)}.spSignalStats span{display:block;margin-top:4px;color:#656b6e;font:800 6px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase}.spAchievement{position:relative;display:grid;grid-template-columns:30px 1fr;gap:10px;margin-top:13px;padding-top:13px;border-top:1px solid rgba(212,175,55,.1)}.spAchievementIcon{width:29px;height:29px;display:grid;place-items:center;border:1px solid rgba(212,175,55,.2);color:var(--gold);font-size:14px}.spAchievement strong{display:block;color:#c9c5bc;font:700 8px var(--sans)}.spAchievement span{display:block;margin-top:3px;color:#62686b;font:600 7px var(--sans)}
+.spEmpty{display:grid;place-items:center;min-height:190px;padding:24px;text-align:center;color:#747a7d}.spEmptyOrb{position:relative;width:58px;height:58px;display:grid;place-items:center;margin-bottom:15px;border:1px solid rgba(212,175,55,.22);border-radius:50%;color:#c6a747;font:900 20px var(--serif);box-shadow:0 0 0 10px rgba(212,175,55,.02)}.spEmpty h3{margin:0 0 7px;color:#dbd7cf;font:900 15px var(--serif)}.spEmpty p{max-width:290px;margin:0;color:#707679;font:500 9px/1.55 var(--sans)}.spEmpty .spGhostBtn{margin-top:17px}.spSkel{display:flex;flex-direction:column;gap:7px}.spSkelRow{height:64px;background:linear-gradient(90deg,rgba(255,255,255,.025),rgba(255,255,255,.06),rgba(255,255,255,.025));background-size:220% 100%;animation:spSkel 1.35s ease infinite}@keyframes spSkel{to{background-position:-220% 0}}
+.spProfileVeil{position:absolute;inset:0;z-index:39;pointer-events:none;background:rgba(0,0,0,0);transition:background .32s}.spProfileDrawer{position:absolute;z-index:40;top:0;right:0;bottom:0;width:min(420px,92vw);overflow:auto;padding:28px;background:linear-gradient(160deg,#0a151e,#050a10 68%);border-left:1px solid rgba(212,175,55,.24);box-shadow:-30px 0 90px rgba(0,0,0,.65);transform:translateX(105%);transition:transform .38s cubic-bezier(.22,1,.36,1)}#socialPage.profile-open .spProfileVeil{pointer-events:auto;background:rgba(0,0,0,.6)}#socialPage.profile-open .spProfileDrawer{transform:translateX(0)}.spProfileClose{display:grid;place-items:center;width:34px;height:34px;margin-left:auto;border:1px solid rgba(255,255,255,.1);background:transparent;color:#7b8083;font-size:18px;cursor:pointer}.spProfileClose:hover{border-color:rgba(212,175,55,.4);color:var(--gold)}.spProfileIdentity{text-align:center;margin-top:12px}.spProfileIdentity .spAv{width:82px;height:82px;margin:0 auto 16px;font-size:31px;border:2px solid rgba(212,175,55,.45);box-shadow:0 0 0 7px rgba(212,175,55,.025),0 18px 45px rgba(0,0,0,.45)}.spProfileIdentity h2{margin:0;color:#f0ece3;font:900 28px var(--serif)}.spProfileHandle{margin-top:5px;color:#6d7376;font:700 8px var(--sans);letter-spacing:.14em}.spProfileState{display:inline-flex;align-items:center;gap:6px;margin-top:13px;color:#5dca6c;font:800 7px var(--sans);letter-spacing:.14em;text-transform:uppercase}.spProfileState::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.spProfileActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:23px 0}.spProfileActions>*{width:100%}.spCompatibility{display:grid;grid-template-columns:90px 1fr;gap:16px;align-items:center;padding:18px;border:1px solid var(--sp-line);background:rgba(0,0,0,.17)}.spCompatRing{--score:0;width:78px;height:78px;display:grid;place-items:center;border-radius:50%;background:conic-gradient(#d9b344 calc(var(--score)*1%),rgba(255,255,255,.07) 0);position:relative}.spCompatRing::before{content:"";position:absolute;inset:6px;border-radius:50%;background:#081119}.spCompatRing strong{position:relative;color:#eee8dd;font:900 21px var(--serif)}.spCompatCopy span,.spProfileSection>span{color:#777d7f;font:800 7px var(--sans);letter-spacing:.17em;text-transform:uppercase}.spCompatCopy h3{margin:6px 0 5px;color:#e8e3d9;font:900 17px var(--serif);text-transform:capitalize}.spCompatCopy p{margin:0;color:#6f7577;font:500 8px/1.5 var(--sans)}.spProfileSection{margin-top:22px}.spProfileStats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:10px;background:rgba(212,175,55,.1)}.spProfileStats div{padding:13px 8px;background:#071018}.spProfileStats strong{display:block;color:#eee9df;font:900 17px var(--serif)}.spProfileStats small{display:block;margin-top:4px;color:#656b6e;font:800 6px/1.25 var(--sans);letter-spacing:.08em;text-transform:uppercase}.spProfileAchievements{display:flex;flex-direction:column;gap:7px;margin-top:10px}.spProfileBadge{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;padding:9px;border:1px solid rgba(255,255,255,.055)}.spProfileBadge i{width:33px;height:33px;display:grid;place-items:center;border:1px solid rgba(212,175,55,.2);font-style:normal}.spProfileBadge strong{display:block;color:#d3cfc6;font:700 8px var(--sans)}.spProfileBadge small{display:block;margin-top:3px;color:#62686b;font:500 7px var(--sans)}
+@media(max-width:1180px){.spDashboard{grid-template-columns:1fr 1fr}.spSideRail{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}.spPanelBody{max-height:330px}}
+@media(max-width:780px){.spHeader{flex-basis:60px;padding:0 16px}.spHeaderTitle small,.spBack{font-size:0}.spBack svg{width:20px;height:20px}.spSearchTrigger{font-size:0}.spSearchTrigger svg{width:19px;height:19px}.spSearchOverlay{height:60px}.spSearchDrop{top:60px}.spViewport{padding:0 14px 38px}.spHero{grid-template-columns:1fr;min-height:0;padding:30px 4px}.spHero h2{font-size:42px}.spPulseCard{padding:20px}.spDashboard{grid-template-columns:1fr}.spSideRail{grid-column:auto;display:flex}.spPanelBody{max-height:none}.spHeroActions{flex-direction:column}.spHeroActions button{width:100%}.spProfileDrawer{padding:20px}.spCompatibility{grid-template-columns:80px 1fr}.spRowAction{display:none}}
+@media(max-width:430px){.spHero h2{font-size:36px}.spHeroStats strong{font-size:18px}.spPanelHead{padding:17px 15px}.spPanelBody{padding:7px}.spPersonRow,.spCxRow,.spLbRow,.spSrRow{padding:9px 7px}.spSessTag{display:none}.spSignalStats,.spProfileStats{grid-template-columns:1fr}.spSignalStats div,.spProfileStats div{display:flex;align-items:center;justify-content:space-between}.spProfileActions{grid-template-columns:1fr}}
+.spProfileState.offline{color:#777d80}.spProfileActions>div>*{width:100%}
 </style>
 </head>
 <body>
@@ -1139,71 +1005,87 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
 
 <!-- Social — Seção -->
 <div id="socialPage" class="secPage" role="region" aria-label="Social">
-
-  <!-- Camadas decorativas -->
   <div class="spScanlines" aria-hidden="true"></div>
   <div class="spVignette" aria-hidden="true"></div>
   <div class="spGlow" aria-hidden="true"></div>
-
-  <!-- Header -->
   <header class="spHeader">
     <button class="spBack" id="spBack" aria-label="Voltar ao Hub">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       VOLTAR
     </button>
-    <div class="spHeaderTitle">◆ SOCIAL ◆</div>
+    <div class="spHeaderTitle"><small>Seu círculo</small><strong>Social</strong></div>
     <button class="spSearchTrigger" id="spSearchTrigger" aria-label="Buscar jogador">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       BUSCAR
     </button>
   </header>
-
-  <!-- Search overlay -->
   <div class="spSearchOverlay" id="spSearchOverlay">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input class="spSearchInput" id="spSearchInput" type="text" placeholder="Buscar por @username…" autocomplete="off" spellcheck="false">
+    <input class="spSearchInput" id="spSearchInput" type="text" placeholder="Encontre alguém pelo @username…" autocomplete="off" spellcheck="false">
     <button class="spSearchClose" id="spSearchClose">FECHAR</button>
   </div>
   <div class="spSearchDrop" id="spSearchDrop"></div>
+  <div class="spViewport">
+    <section class="spHero" aria-labelledby="spHeroTitle">
+      <div class="spHeroCopy">
+        <div class="spEyebrow"><i></i><span id="spHeroState">Seu círculo continua em movimento</span></div>
+        <h2 id="spHeroTitle">NINGUÉM ATRAVESSA<br>SOZINHO.</h2>
+        <p>Encontre quem está por perto, reconheça as pessoas que atravessaram seus rituais e transforme afinidade em uma nova história.</p>
+        <div class="spHeroActions">
+          <button class="spPrimary" id="spHeroSearch" type="button">BUSCAR JOGADOR</button>
+          <button class="spSecondary" id="spHeroInvite" type="button">CONVIDAR ALGUÉM</button>
+        </div>
+      </div>
+      <aside class="spPulseCard" aria-label="Pulso do seu círculo">
+        <div class="spPulseTop"><div><span>Pulso do seu círculo</span><strong id="spPulseTitle">Presenças próximas</strong></div><span class="spLiveCount" id="spOnlineCount">0 online</span></div>
+        <div class="spHeroFaces" id="spHeroFaces"></div>
+        <div class="spHeroStats">
+          <div class="spHeroStat"><strong id="spFriendsCount">0</strong><span>pessoas no círculo</span></div>
+          <div class="spHeroStat"><strong id="spConnectionsCount">0</strong><span>caminhos cruzados</span></div>
+          <div class="spHeroStat"><strong id="spSharedCount">0</strong><span>sessões em comum</span></div>
+        </div>
+      </aside>
+    </section>
 
-  <!-- Tabs mobile -->
-  <div class="spMobileTabs">
-    <button class="spMTab active" data-col="spColRanking">Ranking</button>
-    <button class="spMTab" data-col="spColConexoes">Conexões</button>
+    <main class="spDashboard">
+      <section class="spPanel" id="spPresencePanel">
+        <header class="spPanelHead"><div><div class="spPanelKick">Agora</div><div class="spPanelTitle">Presença no círculo</div></div><span class="spPanelMeta" id="spPresenceMeta">Sincronizando</span></header>
+        <div class="spPanelBody" id="spPresence"><div class="spSkel"><div class="spSkelRow"></div><div class="spSkelRow"></div><div class="spSkelRow"></div></div></div>
+      </section>
+
+      <section class="spPanel" id="spConnectionsPanel">
+        <header class="spPanelHead"><div><div class="spPanelKick">Vestígios</div><div class="spPanelTitle">Quem cruzou seu caminho</div></div><span class="spPanelMeta" id="spConnectionsMeta">Histórico vivo</span></header>
+        <div class="spPanelBody" id="spConexoes"><div class="spSkel"><div class="spSkelRow"></div><div class="spSkelRow"></div><div class="spSkelRow"></div></div></div>
+      </section>
+
+      <aside class="spSideRail">
+        <section class="spPanel" id="spRankingPanel">
+          <header class="spPanelHead"><div><div class="spPanelKick">Jornada</div><div class="spPanelTitle">Ranking do círculo</div></div><span class="spPanelMeta">XP</span></header>
+          <div class="spPanelBody" id="spLeaderboard"><div class="spSkel"><div class="spSkelRow"></div><div class="spSkelRow"></div><div class="spSkelRow"></div></div></div>
+        </section>
+        <section class="spSignalCard" id="spSignalCard" aria-label="Seu sinal social">
+          <div class="spSignalHeader"><div class="spSignalMark"><span>◇</span></div><span class="spSignalTier" id="spSignalTier">Sinal em formação</span></div>
+          <h3 id="spSignalTitle">Seu vestígio social</h3>
+          <p id="spSignalDesc">Cada ritual compartilhado fortalece a forma como o mundo reconhece sua presença.</p>
+          <div class="spSignalStats">
+            <div><strong id="spRepScore">0</strong><span>reputação</span></div>
+            <div><strong id="spRepSessions">0</strong><span>rituais</span></div>
+            <div><strong id="spRepReactions">0</strong><span>reações</span></div>
+          </div>
+          <div class="spAchievement" id="spAchievement"><div class="spAchievementIcon">◇</div><div><strong>Nenhum marco revelado</strong><span>Continue atravessando rituais.</span></div></div>
+        </section>
+      </aside>
+    </main>
   </div>
-
-  <!-- Conteúdo principal -->
-  <main class="spMain">
-
-    <!-- Coluna: Ranking -->
-    <div class="spCol mActive" id="spColRanking">
-      <div class="spColHead">
-        <div class="spColTitle">Ranking de Amigos</div>
-        <div class="spColSub">Você + seus amigos, ordenados por XP</div>
-      </div>
-      <div class="spColBody" id="spLeaderboard">
-        <div class="spSkel">
-          <div class="spSkelRow"></div><div class="spSkelRow"></div>
-          <div class="spSkelRow"></div><div class="spSkelRow"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Coluna: Conexões -->
-    <div class="spCol" id="spColConexoes">
-      <div class="spColHead">
-        <div class="spColTitle">Conexões</div>
-        <div class="spColSub">Jogadores que você conheceu em sessões</div>
-      </div>
-      <div class="spColBody" id="spConexoes">
-        <div class="spSkel">
-          <div class="spSkelRow"></div><div class="spSkelRow"></div>
-          <div class="spSkelRow"></div>
-        </div>
-      </div>
-    </div>
-
-  </main>
+  <div class="spProfileVeil" id="spProfileVeil" aria-hidden="true"></div>
+  <aside class="spProfileDrawer" id="spProfileDrawer" aria-label="Perfil social" aria-hidden="true">
+    <button class="spProfileClose" id="spProfileClose" type="button" aria-label="Fechar perfil">×</button>
+    <div class="spProfileIdentity" id="spProfileIdentity"><div class="spAv">◇</div><h2 id="spProfileName">Jogador</h2><div class="spProfileHandle" id="spProfileHandle">@jogador</div><div class="spProfileState" id="spProfileState">Presença registrada</div></div>
+    <div class="spProfileActions"><button class="spPrimary" id="spProfilePlay" type="button">JOGAR EM DUO</button><div id="spProfileRelation"><button class="spSecondary" type="button">NO SEU CÍRCULO</button></div></div>
+    <section class="spCompatibility"><div class="spCompatRing" id="spCompatRing"><strong id="spCompatScore">—</strong></div><div class="spCompatCopy"><span>Ressonância entre vocês</span><h3 id="spCompatLabel">Sinal em formação</h3><p id="spCompatDesc">A compatibilidade ganha precisão conforme vocês dividem sessões.</p></div></section>
+    <section class="spProfileSection"><span>Vestígio público</span><div class="spProfileStats"><div><strong id="spProfileSessions">0</strong><small>sessões</small></div><div><strong id="spProfileReactions">0</strong><small>reações</small></div><div><strong id="spProfileRituals">0</strong><small>rituais do dia</small></div></div></section>
+    <section class="spProfileSection"><span>Marcos revelados</span><div class="spProfileAchievements" id="spProfileAchievements"><div class="spSkel"><div class="spSkelRow"></div></div></div></section>
+  </aside>
 </div>
 
 <!-- Mundo — Seção -->
@@ -2175,7 +2057,7 @@ var b2=document.getElementById('ob2btn');if(b2)b2.addEventListener('click',funct
 window.hubShowOnboarding=function(){var v=document.getElementById('obVeil');if(!v)return;v.style.display='';setTimeout(function(){v.classList.add('on');},10);obSh(0);};
 
 /* ══ SOCIAL PAGE (TELA CHEIA IMERSIVA) ══ */
-var _spLbLoaded=false,_spCxLoaded=false,_spSearchT=null,_spSearchOpen=false;
+var _spLoaded=false,_spLoading=false,_spSearchT=null,_spSearchOpen=false,_spProfileUid=null,_spConnections=[],_spLeaderboard=[];
 var _spAPI='https://osl-video-server-production.up.railway.app';
 
 async function _spToken(){
@@ -2199,10 +2081,18 @@ function _spAvEl(av,cls){
 }
 function _spXPPct(xp,lvl){var f=(lvl-1)*(lvl-1)*50,c=lvl*lvl*50;return c===f?100:Math.min(100,Math.max(0,((xp-f)/(c-f))*100));}
 function _spNormAv(e){return e.avatar||{kind:e.avatarPhotoUrl?'image':'emoji',url:e.avatarPhotoUrl||e.avatarUrl||null,emoji:e.avatarEmoji||'🔮',color:e.avatarColor||'#342718'};}
+function _spHubFriends(){var h=window._hubData||{};return Array.isArray(h.friends)?h.friends.filter(Boolean):[];}
+function _spFriend(uid){return _spHubFriends().find(function(f){return String(f.uid||f.userId||'')===String(uid||'');})||null;}
+function _spMergePerson(p){var f=_spFriend(p&&p.uid);return Object.assign({},p||{},f||{},p||{},f?{online:f.online===true,isFriend:f.isFriend!==false,lastSeenMs:f.lastSeenMs,lastActivity:f.lastActivity}:{});}
+function _spWhen(value){if(!value)return 'presença recente';try{var d=typeof _hubDate==='function'?_hubDate(value):new Date(value);return typeof _fmtCtx==='function'?_fmtCtx(d):d.toLocaleDateString('pt-BR');}catch(_){return 'presença recente';}}
+function _spPlural(n,one,many){return Number(n)===1?one:many;}
+function _spGoDuo(ev){if(ev)ev.stopPropagation();location.href='./entrada.html?modo=duo';}
+function _spOpenInvite(){var b=document.getElementById('btnInvite');if(b)b.click();else if(navigator.share)navigator.share({title:'SEXTOLUGAR',text:'Venha dividir um ritual comigo no SEXTOLUGAR.',url:location.origin}).catch(function(){});}
 
 function _spAddBtn(uid){
   var btn=document.createElement('button');btn.className='spAddBtn';btn.textContent='+ Adicionar';
-  btn.addEventListener('click',async function(){
+  btn.addEventListener('click',async function(ev){
+    ev.stopPropagation();
     btn.disabled=true;btn.textContent='…';
     var res=await _spPost('/social/friend-request',{targetUid:uid});
     if(res&&res.ok){
@@ -2221,9 +2111,9 @@ function _spLbRow(entry,rank){
   row.className='spLbRow'+(entry.isSelf?' self':'');
   var rkCls=rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
   var rk=document.createElement('span');rk.className='spRank'+(rkCls?' '+rkCls:'');
-  rk.textContent=rank<=3?['🥇','🥈','🥉'][rank-1]:rank;
+  rk.textContent=rank<=3?['Ⅰ','Ⅱ','Ⅲ'][rank-1]:rank;
   row.appendChild(rk);
-  row.appendChild(_spAvEl(_spNormAv(entry),(rkCls?(rank<=2?'lg ':'')+rkCls:'')));
+  row.appendChild(_spAvEl(_spNormAv(entry),rkCls));
   var info=document.createElement('div');info.className='spRowInfo';
   var nm=document.createElement('div');nm.className='spRowName';nm.textContent=entry.displayName||'Jogador';info.appendChild(nm);
   var xp=entry.xp||0,lvl=entry.level||1;
@@ -2234,56 +2124,88 @@ function _spLbRow(entry,rank){
   bar.appendChild(fill);info.appendChild(bar);
   setTimeout(function(){fill.style.width=_spXPPct(xp,lvl)+'%';},80+(rank-1)*40);
   row.appendChild(info);
-  if(!entry.isSelf)row.appendChild(_spAddBtn(entry.uid));
+  if(!entry.isSelf)row.addEventListener('click',function(){_spOpenProfile(_spMergePerson(entry));});
   return row;
 }
 
 function _spCxRow(c){
-  var row=document.createElement('div');row.className='spCxRow';
-  row.appendChild(_spAvEl(_spNormAv(c),''));
+  c=_spMergePerson(c);
+  var row=document.createElement('div');row.className='spCxRow';row.addEventListener('click',function(){_spOpenProfile(c);});
+  row.appendChild(_spAvEl(_spNormAv(c),c.online?'online':''));
   var info=document.createElement('div');info.className='spRowInfo';
   var nm=document.createElement('div');nm.className='spRowName';nm.textContent=c.displayName||'Jogador';info.appendChild(nm);
-  var sub=document.createElement('div');sub.className='spRowSub';sub.textContent='@'+(c.username||'');info.appendChild(sub);
+  var sessions=Number(c.sharedSessions||c.sessionCount||0);
+  var sub=document.createElement('div');sub.className='spRowSub';sub.textContent=sessions?sessions+' '+_spPlural(sessions,'sessão compartilhada','sessões compartilhadas'):'Primeiro vestígio registrado';info.appendChild(sub);
+  if(c.lastPlayedAt){var sig=document.createElement('div');sig.className='spRowSignal';sig.textContent='Último encontro · '+_spWhen(c.lastPlayedAt);info.appendChild(sig);}
   row.appendChild(info);
-  var tag=document.createElement('span');tag.className='spSessTag';
-  tag.textContent=(c.sharedSessions||c.sessionCount||1)+' sessões juntos';row.appendChild(tag);
-  row.appendChild(_spAddBtn(c.uid));
+  if(c.isFriend){var tag=document.createElement('span');tag.className='spCircleTag';tag.textContent='No círculo';row.appendChild(tag);}
+  else row.appendChild(_spAddBtn(c.uid));
   return row;
 }
 
+function _spPersonRow(p){
+  p=_spMergePerson(p);var row=document.createElement('div');row.className='spPersonRow'+(p.online?' online':'');row.addEventListener('click',function(){_spOpenProfile(p);});
+  row.appendChild(_spAvEl(_spNormAv(p),p.online?'online':''));
+  var info=document.createElement('div');info.className='spRowInfo';var nm=document.createElement('div');nm.className='spRowName';nm.textContent=p.displayName||p.name||'Conexão';info.appendChild(nm);
+  var sub=document.createElement('div');sub.className='spRowSub';sub.textContent=p.online?'Disponível para um ritual':'Visto '+_spWhen(p.lastSeenMs||p.lastPlayedAt);info.appendChild(sub);
+  var count=Number(p.sessionCount||0);if(count){var sig=document.createElement('div');sig.className='spRowSignal';sig.textContent=count+' '+_spPlural(count,'encontro em comum','encontros em comum');info.appendChild(sig);}row.appendChild(info);
+  if(p.online){var action=document.createElement('button');action.className='spRowAction';action.textContent='Jogar em duo';action.addEventListener('click',_spGoDuo);row.appendChild(action);}return row;
+}
+
 function _spSrRow(e){
-  var row=document.createElement('div');row.className='spSrRow';
+  e=_spMergePerson(e);var row=document.createElement('div');row.className='spSrRow';row.addEventListener('click',function(){_spOpenProfile(e);});
   row.appendChild(_spAvEl(_spNormAv(e),''));
   var info=document.createElement('div');info.className='spRowInfo';
   var nm=document.createElement('div');nm.className='spRowName';nm.textContent=e.displayName||'Jogador';info.appendChild(nm);
   var sub=document.createElement('div');sub.className='spRowSub';sub.textContent='@'+(e.username||'');info.appendChild(sub);
   row.appendChild(info);
-  row.appendChild(_spAddBtn(e.uid));
+  if(e.isFriend||_spFriend(e.uid)){var tag=document.createElement('span');tag.className='spCircleTag';tag.textContent='No círculo';row.appendChild(tag);}else row.appendChild(_spAddBtn(e.uid));
   return row;
 }
 
-async function _spLoadLeaderboard(){
-  if(_spLbLoaded)return;
-  var el=document.getElementById('spLeaderboard');if(!el)return;
-  var data=await _spGet('/social/leaderboard');
-  if(!data||!Array.isArray(data.leaderboard)||!data.leaderboard.length){
-    el.innerHTML='<div class="spEmpty"><span class="spEmptyIcon">👥</span>Adicione amigos para ver o ranking aqui.</div>';return;
-  }
-  el.innerHTML='';
-  data.leaderboard.forEach(function(e,i){el.appendChild(_spLbRow(e,i+1));});
-  _spLbLoaded=true;
+function _spEmpty(el,mark,title,copy,action){
+  if(!el)return;el.replaceChildren();var box=document.createElement('div');box.className='spEmpty';var orb=document.createElement('div');orb.className='spEmptyOrb';orb.textContent=mark;var h=document.createElement('h3');h.textContent=title;var p=document.createElement('p');p.textContent=copy;box.appendChild(orb);box.appendChild(h);box.appendChild(p);if(action){var b=document.createElement('button');b.className='spGhostBtn';b.textContent=action;b.addEventListener('click',_spOpenSearch);box.appendChild(b);}el.appendChild(box);
+}
+function _spRenderPresence(){
+  var el=document.getElementById('spPresence'),friends=_spHubFriends().slice().sort(function(a,b){return Number(b.online)-Number(a.online)||(Number(b.sessionCount||0)-Number(a.sessionCount||0));}),online=friends.filter(function(f){return f.online;}).length;
+  document.getElementById('spPresenceMeta').textContent=online?online+' '+_spPlural(online,'online','online'):'Ninguém online';
+  if(!friends.length){_spEmpty(el,'○','Seu círculo começa aqui','Busque alguém que você conhece ou convide uma pessoa para atravessar o próximo ritual.','BUSCAR ALGUÉM');return;}
+  el.replaceChildren();friends.slice(0,7).forEach(function(f){el.appendChild(_spPersonRow(f));});
+}
+function _spRenderLeaderboard(items){
+  var el=document.getElementById('spLeaderboard');if(!el)return;el.replaceChildren();
+  if(!items.length){_spEmpty(el,'Ⅰ','A jornada ainda é só sua','Quando alguém entrar no seu círculo, a progressão de vocês aparecerá aqui.','ENCONTRAR ALGUÉM');return;}
+  items.slice(0,8).forEach(function(e,i){el.appendChild(_spLbRow(e,i+1));});
+}
+function _spRenderConnections(items){
+  var el=document.getElementById('spConexoes');if(!el)return;el.replaceChildren();
+  if(!items.length){_spEmpty(el,'◇','Nenhum caminho cruzado ainda','Pessoas que dividirem uma sessão com você passam a deixar um vestígio permanente aqui.','BUSCAR JOGADOR');return;}
+  items.slice(0,8).forEach(function(c){el.appendChild(_spCxRow(c));});
+}
+function _spUnlocked(data){var unlocked=data&&data.unlocked||{},catalog=data&&data.catalog||[];return catalog.filter(function(a){return unlocked[a.id];}).map(function(a){return Object.assign({},a,{state:unlocked[a.id]});}).sort(function(a,b){return Number(b.state&&b.state.unlockedAt||0)-Number(a.state&&a.state.unlockedAt||0);});}
+function _spRenderSignal(rep,achievements){
+  var hub=window._hubData||{},fallback=hub.account&&hub.account.reputation||{},r=rep||fallback||{};document.getElementById('spRepScore').textContent=Number(r.score||0).toLocaleString('pt-BR');document.getElementById('spRepSessions').textContent=Number(r.totalSessions||0).toLocaleString('pt-BR');document.getElementById('spRepReactions').textContent=Number(r.totalReactions||0).toLocaleString('pt-BR');document.getElementById('spSignalTier').textContent=r.level||r.tier||'Sinal em formação';if(r.level)document.getElementById('spSignalTitle').textContent='Presença '+r.level.toLowerCase();
+  var unlocked=_spUnlocked(achievements),box=document.getElementById('spAchievement');if(unlocked.length&&box){var a=unlocked[0];box.innerHTML='<div class="spAchievementIcon"></div><div><strong></strong><span></span></div>';box.querySelector('.spAchievementIcon').textContent=a.icon||'◇';box.querySelector('strong').textContent=a.title||'Marco revelado';box.querySelector('span').textContent=a.description||'Conquista registrada no seu caminho.';}
+}
+function _spRenderOverview(){
+  var hub=window._hubData||{},friends=_spHubFriends(),online=friends.filter(function(f){return f.online;});var social=hub.account&&hub.account.social||{},shared=_spConnections.reduce(function(n,c){return n+Number(c.sessionCount||c.sharedSessions||0);},0);
+  document.getElementById('spOnlineCount').textContent=online.length+' online';document.getElementById('spHeroState').textContent=online.length?online.length+' '+_spPlural(online.length,'presença está próxima','presenças estão próximas'):'Seu círculo continua em movimento';document.getElementById('spPulseTitle').textContent=online.length?'Há alguém por perto':'Vestígios permanecem';document.getElementById('spFriendsCount').textContent=Math.max(friends.length,Number(social.friendsCount||0)).toLocaleString('pt-BR');document.getElementById('spConnectionsCount').textContent=_spConnections.length.toLocaleString('pt-BR');document.getElementById('spSharedCount').textContent=shared.toLocaleString('pt-BR');document.getElementById('spConnectionsMeta').textContent=_spConnections.length?_spConnections.length+' '+_spPlural(_spConnections.length,'vestígio','vestígios'):'Histórico vivo';
+  var faces=document.getElementById('spHeroFaces');faces.replaceChildren();var shown=(online.length?online:friends).slice(0,5);shown.forEach(function(f){faces.appendChild(_spAvEl(_spNormAv(f),f.online?'online':''));});if(friends.length>shown.length){var more=document.createElement('div');more.className='spFaceMore';more.textContent='+'+(friends.length-shown.length);faces.appendChild(more);}if(!shown.length){var empty=document.createElement('div');empty.className='spFaceMore';empty.textContent='◇';faces.appendChild(empty);}
+}
+async function _spLoadSocial(){
+  _spRenderPresence();_spRenderOverview();_spRenderSignal(null,null);if(_spLoaded||_spLoading)return;_spLoading=true;
+  var results=await Promise.all([_spGet('/social/leaderboard'),_spGet('/social/connections?limit=50'),_spGet('/social/reputation'),_spGet('/social/achievements')]);var lb=results[0],cx=results[1],rep=results[2],ach=results[3];
+  _spLeaderboard=lb&&Array.isArray(lb.leaderboard)?lb.leaderboard:[];_spConnections=cx&&Array.isArray(cx.connections)?cx.connections.map(_spMergePerson):[];_spRenderLeaderboard(_spLeaderboard);_spRenderConnections(_spConnections);_spRenderSignal(rep&&rep.reputation,ach);_spRenderOverview();_spRenderPresence();_spLoaded=!!(lb||cx||rep||ach);_spLoading=false;
 }
 
-async function _spLoadConexoes(){
-  if(_spCxLoaded)return;
-  var el=document.getElementById('spConexoes');if(!el)return;
-  var data=await _spGet('/social/connections');
-  if(!data||!Array.isArray(data.connections)||!data.connections.length){
-    el.innerHTML='<div class="spEmpty"><span class="spEmptyIcon">🌐</span>Jogue sessões com outras pessoas para ver conexões aqui.</div>';return;
-  }
-  el.innerHTML='';
-  data.connections.forEach(function(c){el.appendChild(_spCxRow(c));});
-  _spCxLoaded=true;
+function _spCloseProfile(){_spProfileUid=null;var page=document.getElementById('socialPage'),drawer=document.getElementById('spProfileDrawer');if(page)page.classList.remove('profile-open');if(drawer)drawer.setAttribute('aria-hidden','true');}
+async function _spOpenProfile(person){
+  if(!person||!person.uid)return;person=_spMergePerson(person);_spProfileUid=String(person.uid);_spCloseSearch();var page=document.getElementById('socialPage'),drawer=document.getElementById('spProfileDrawer');page.classList.add('profile-open');drawer.setAttribute('aria-hidden','false');
+  var identity=document.getElementById('spProfileIdentity'),old=identity.querySelector('.spAv'),av=_spAvEl(_spNormAv(person),person.online?'online':'');if(old)old.replaceWith(av);document.getElementById('spProfileName').textContent=person.displayName||person.name||'Jogador';document.getElementById('spProfileHandle').textContent=person.username?'@'+person.username:'CONEXÃO DO SEXTOLUGAR';var state=document.getElementById('spProfileState');state.textContent=person.online?'Online agora':'Última presença · '+_spWhen(person.lastSeenMs||person.lastPlayedAt);state.classList.toggle('offline',!person.online);
+  var relation=document.getElementById('spProfileRelation');relation.replaceChildren();if(person.isFriend||_spFriend(person.uid)){var inCircle=document.createElement('button');inCircle.className='spSecondary';inCircle.textContent='NO SEU CÍRCULO';inCircle.disabled=true;relation.appendChild(inCircle);}else relation.appendChild(_spAddBtn(person.uid));
+  var ring=document.getElementById('spCompatRing');ring.style.setProperty('--score',0);document.getElementById('spCompatScore').textContent='—';document.getElementById('spCompatLabel').textContent='Lendo a ressonância…';document.getElementById('spCompatDesc').textContent='Comparando os vestígios deixados por vocês.';['spProfileSessions','spProfileReactions','spProfileRituals'].forEach(function(id){document.getElementById(id).textContent='—';});document.getElementById('spProfileAchievements').innerHTML='<div class="spSkel"><div class="spSkelRow"></div><div class="spSkelRow"></div></div>';
+  var results=await Promise.all([_spGet('/social/compatibility/'+encodeURIComponent(person.uid)),_spGet('/social/reputation/'+encodeURIComponent(person.uid)),_spGet('/social/achievements/'+encodeURIComponent(person.uid))]);if(!page.classList.contains('profile-open')||_spProfileUid!==String(person.uid))return;var compat=results[0]&&results[0].compatibility,rep=results[1]&&results[1].reputation,ach=results[2];if(compat){var score=Math.max(0,Math.min(100,Math.round(Number(compat.overall||0))));ring.style.setProperty('--score',score);document.getElementById('spCompatScore').textContent=score+'%';document.getElementById('spCompatLabel').textContent=compat.label||'companheiros';document.getElementById('spCompatDesc').textContent=Number(compat.sharedSessions||person.sessionCount||0)+' '+_spPlural(compat.sharedSessions||person.sessionCount||0,'sessão analisada','sessões analisadas')+' · confiança '+Math.round(Number(compat.confidence||0)*100)+'%';}else{document.getElementById('spCompatLabel').textContent='Sinal em formação';document.getElementById('spCompatDesc').textContent='Dividam mais sessões para o mundo reconhecer a sintonia entre vocês.';}
+  document.getElementById('spProfileSessions').textContent=Number(rep&&rep.totalSessions||person.sessionCount||0).toLocaleString('pt-BR');document.getElementById('spProfileReactions').textContent=Number(rep&&rep.totalReactions||0).toLocaleString('pt-BR');document.getElementById('spProfileRituals').textContent=Number(rep&&rep.dailyRitualsCompleted||0).toLocaleString('pt-BR');var badges=_spUnlocked(ach),badgeBox=document.getElementById('spProfileAchievements');badgeBox.replaceChildren();if(!badges.length){var none=document.createElement('div');none.className='spProfileBadge';none.innerHTML='<i>◇</i><div><strong>Nenhum marco público</strong><small>O caminho desta pessoa ainda está sendo escrito.</small></div>';badgeBox.appendChild(none);}badges.slice(0,4).forEach(function(a){var b=document.createElement('div');b.className='spProfileBadge';var i=document.createElement('i'),copy=document.createElement('div'),strong=document.createElement('strong'),small=document.createElement('small');i.textContent=a.icon||'◇';strong.textContent=a.title||'Marco revelado';small.textContent=a.description||a.rarity||'Conquista registrada';copy.appendChild(strong);copy.appendChild(small);b.appendChild(i);b.appendChild(copy);badgeBox.appendChild(b);});
 }
 
 async function _spSearch(q){
@@ -2295,7 +2217,7 @@ async function _spSearch(q){
   if(!data||!Array.isArray(data.results)||!drop.classList.contains('open')){return;}
   drop.innerHTML='';
   if(!data.results.length){
-    drop.innerHTML='<div class="spEmpty" style="padding:16px 12px 12px;">Nenhum jogador encontrado para "@'+q+'"</div>';
+    var empty=document.createElement('div');empty.className='spEmpty';empty.style.padding='16px 12px 12px';empty.textContent='Nenhum jogador encontrado para "@'+q+'"';drop.appendChild(empty);
     return;
   }
   var lbl=document.createElement('div');lbl.className='spSrSectLabel';lbl.textContent='RESULTADOS';drop.appendChild(lbl);
@@ -2326,12 +2248,13 @@ function switchSection(name){
   document.querySelectorAll('.navBtn[data-sec],.navLink[data-sec]').forEach(function(b){
     b.classList.toggle('on',b.dataset.sec===name);
   });
+  if(name!=='social')_spCloseProfile();
   if(name==='hub'){
     _spCloseSearch();
     return;
   }
   document.body.classList.add('sec-'+name);
-  if(name==='social'){_spLoadLeaderboard();_spLoadConexoes();}
+  if(name==='social'){_spLoadSocial();}
   if(name==='mundo'){_mndLoad();}
   if(name==='loja'){var fr=document.getElementById('lojaFrame');if(fr&&fr.src==='about:blank')fr.src='./vendas.html?embedded=1';}
 }
@@ -2363,6 +2286,11 @@ function _mndLoad(){if(_mndLoading)return;var hub=window._hubData||{};if(!_mndLo
   document.getElementById('spBack').addEventListener('click',function(){switchSection('hub');});
   document.getElementById('spSearchTrigger').addEventListener('click',_spOpenSearch);
   document.getElementById('spSearchClose').addEventListener('click',_spCloseSearch);
+  document.getElementById('spHeroSearch').addEventListener('click',_spOpenSearch);
+  document.getElementById('spHeroInvite').addEventListener('click',_spOpenInvite);
+  document.getElementById('spProfileClose').addEventListener('click',_spCloseProfile);
+  document.getElementById('spProfileVeil').addEventListener('click',_spCloseProfile);
+  document.getElementById('spProfilePlay').addEventListener('click',_spGoDuo);
 
   var inp=document.getElementById('spSearchInput');
   if(inp)inp.addEventListener('input',function(){
@@ -2371,16 +2299,7 @@ function _mndLoad(){if(_mndLoading)return;var hub=window._hubData||{};if(!_mndLo
     _spSearchT=setTimeout(function(){_spSearch(q);},350);
   });
 
-  // Mobile tab switching
-  document.querySelectorAll('.spMTab').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var target=this.dataset.col;
-      document.querySelectorAll('.spMTab').forEach(function(b){b.classList.remove('active');});
-      this.classList.add('active');
-      document.querySelectorAll('.spCol').forEach(function(c){c.classList.remove('mActive');});
-      var tc=document.getElementById(target);if(tc)tc.classList.add('mActive');
-    });
-  });
+  document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){if(p.classList.contains('profile-open'))_spCloseProfile();else if(_spSearchOpen)_spCloseSearch();}});
 })();
 
 })();
