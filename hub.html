@@ -224,7 +224,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .ctxNextCopy .ctxCText{font-size:8.5px;line-height:1.45;}
 
 /* Event card at bottom of left panel */
-.ctxCardEvent{margin:0 11px 10px;padding:11px 13px;border-color:rgba(224,82,138,.14);background:linear-gradient(135deg,rgba(35,11,25,.32),rgba(7,11,17,.96));}
+.ctxCardEvent{margin:0;padding:11px 13px;border-color:rgba(224,82,138,.14);background:linear-gradient(135deg,rgba(35,11,25,.32),rgba(7,11,17,.96));}
 .ctxEventLine{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .ctxCEventSub{font-size:6.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);}
 .ctxEventTitle{font-family:var(--serif);font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text);text-transform:uppercase;}
@@ -993,17 +993,17 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
         <button class="ctxCBtn" id="ctxNextBtn" type="button" data-action="share">ENVIAR CONVITE</button>
       </article>
 
-    </div>
-
-    <!-- Encontro Marcado -->
-    <div class="ctxCard ctxCardEvent">
-      <div class="ctxCLabel">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Acontecimento
+      <!-- Encontro Marcado -->
+      <div class="ctxCard ctxCardEvent">
+        <div class="ctxCLabel">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Acontecimento
+        </div>
+        <div class="ctxEventTitle" id="evTitle">Encontro Marcado</div>
+        <div class="ctxEventLine"><div class="ctxCEventSub" id="evWhen">Próximo · Quinta-feira</div><div class="ctxCTimer" id="evTimer">—</div></div>
+        <button class="ctxCBtn" id="evTicketBtn" type="button" data-action="ticket">VER ACONTECIMENTO</button>
       </div>
-      <div class="ctxEventTitle" id="evTitle">Encontro Marcado</div>
-      <div class="ctxEventLine"><div class="ctxCEventSub" id="evWhen">Próximo · Quinta-feira</div><div class="ctxCTimer" id="evTimer">—</div></div>
-      <button class="ctxCBtn" id="evTicketBtn" type="button" data-action="ticket">VER ACONTECIMENTO</button>
+
     </div>
   </aside>
 
