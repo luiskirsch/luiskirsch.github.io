@@ -1,4 +1,4 @@
-const CACHE = "osl-v45-permanent-fragment-slot";
+const CACHE = "osl-v46-living-moment-panel";
 
 const PRECACHE = [
   "/favicon.png",
