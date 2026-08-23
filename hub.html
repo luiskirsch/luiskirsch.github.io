@@ -253,27 +253,8 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .btnJogar:active{transform:translateY(0);}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 
-/* Secondary forms */
-.altFormsLabel{font-size:8px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--gold2);text-align:center;margin:clamp(34px,3.2vh,46px) 0 clamp(14px,1.4vh,18px);position:relative;z-index:1;opacity:.80;}
-.altFormsRow{display:flex;gap:0;max-width:500px;margin:0 auto;padding:4px;position:relative;z-index:1;border:1px solid rgba(212,175,55,.18);border-radius:3px;background:rgba(4,9,15,.68);box-shadow:0 14px 36px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.02);}
-.altFormBtn{
-  flex:1;display:grid;grid-template-columns:28px minmax(0,1fr);align-items:center;gap:8px;
-  min-height:50px;padding:8px 11px;text-align:left;
-  background:transparent;border:0;border-right:1px solid rgba(212,175,55,.11);border-radius:1px;
-  cursor:pointer;transition:border-color .16s,color .16s,background .16s;
-  position:relative;
-}
-.altFormBtn:last-child{border-right:0;}
-.altFormBtn svg{width:15px;height:15px;padding:6px;box-sizing:content-box;border:1px solid rgba(212,175,55,.12);border-radius:50%;stroke:var(--text3);fill:none;stroke-width:1.5;transition:stroke .16s,border-color .16s,background .16s;}
-.altFormCopy{min-width:0;display:flex;flex-direction:column;gap:3px;}
-.altFormCopy strong{color:var(--text2);font-size:8px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;}
-.altFormCopy small{color:var(--text3);font-size:6.8px;font-weight:500;letter-spacing:.02em;white-space:nowrap;}
-.altFormBtn:hover{color:var(--text);background:rgba(212,175,55,.055);}
-.altFormBtn:hover svg{stroke:var(--gold2);border-color:rgba(212,175,55,.3);background:rgba(212,175,55,.04);}
-.altFormBtn:focus-visible{outline:1px solid rgba(240,205,101,.72);outline-offset:-3px;background:rgba(212,175,55,.055);}
-
 /* ── RITUAL CARD ── */
-.ritualWrap{flex:0 0 auto;min-height:0;padding:clamp(16px,1.8vh,24px) 24px 10px;display:flex;flex-direction:column;overflow:visible;margin-bottom:clamp(10px,2vh,22px);position:relative;z-index:1;cursor:default;user-select:none;-webkit-user-select:none;}
+.ritualWrap{flex:0 0 auto;min-height:0;padding:clamp(24px,3vh,38px) 24px 10px;display:flex;flex-direction:column;overflow:visible;margin-bottom:clamp(10px,2vh,22px);position:relative;z-index:1;cursor:default;user-select:none;-webkit-user-select:none;}
 @keyframes ritualFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .ritualDeck{
   flex:0 0 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);position:relative;
@@ -598,9 +579,7 @@ body.ritual-open #ritualDim{opacity:1;}
   .heroTitle{font-size:clamp(34px,3.4vw,46px);margin-bottom:12px;}
   .heroDivider{margin-bottom:12px;}
   .btnJogar{padding:13px 36px;}
-  .altFormsLabel{margin:30px 0 14px;}
-  .altFormBtn{padding:8px 6px;}
-  .ritualWrap{padding-top:16px;margin-bottom:10px;}
+  .ritualWrap{padding-top:24px;margin-bottom:10px;}
 }
 @media(max-width:1200px){.navFragmentLabel{display:none;}}
 @media(max-width:960px){
@@ -611,10 +590,7 @@ body.ritual-open #ritualDim{opacity:1;}
   .heroTitle{font-size:clamp(30px,10vw,42px);letter-spacing:.025em;margin-bottom:22px;}
   .heroDivider{margin-bottom:22px;}
   .btnJogar{padding:14px 18px;font-size:14px;}
-  .altFormsLabel{margin:28px 0 14px;}
-  .altFormsRow{gap:5px;}
-  .altFormBtn{padding:9px 4px;font-size:7px;letter-spacing:.09em;}
-  .ritualWrap{flex:0 0 auto;min-height:0;max-height:none;padding:8px 10px 14px;margin-bottom:8px;}
+  .ritualWrap{flex:0 0 auto;min-height:0;max-height:none;padding:22px 10px 14px;margin-bottom:8px;}
   .ritualDeck{min-height:0;padding-left:12px;}
   .rInner{padding:14px 18px 58px;}
   .rQ{font-size:clamp(17px,5vw,22px);}
@@ -625,8 +601,7 @@ body.ritual-open #ritualDim{opacity:1;}
   .heroKick{margin-bottom:8px;}
   .heroTitle{margin-bottom:14px;}
   .heroDivider{margin-bottom:14px;}
-  .altFormsLabel{margin:10px 0 9px;}
-  .ritualWrap{padding-top:4px;}
+  .ritualWrap{padding-top:14px;}
 }
 @media(max-width:560px){
   .nav{grid-template-columns:auto 1fr;padding:0 10px;gap:8px;}
@@ -640,9 +615,6 @@ body.ritual-open #ritualDim{opacity:1;}
   .fragmentPanel__content{grid-template-columns:68px minmax(0,1fr);gap:12px;padding:14px;}
   .fragmentPanel__card{width:62px;height:auto;}
   .fragmentPanel__actions{grid-template-columns:1fr;}
-  .altFormsRow{display:grid;grid-template-columns:1fr;width:100%;max-width:340px;gap:6px;}
-  .altFormBtn{min-height:48px;padding:8px 14px;}
-  .altFormCopy strong{font-size:8.5px;}
 }
 /* ══ MUNDO PAGE ══ */
 #mundoPage{background:#030609;color:var(--text);isolation:isolate;}
@@ -857,21 +829,6 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
       <button class="btnJogar" id="heroCta" onclick="location.href='./entrada.html'">
         <span class="jDia">◆</span>JOGAR<span class="jDia">◆</span>
       </button>
-      <div class="altFormsLabel">OUTROS CAMINHOS</div>
-      <div class="altFormsRow">
-        <button class="altFormBtn" id="heroPathRitual" type="button" aria-label="Abrir o Ritual do Dia">
-          <svg viewBox="0 0 24 24"><path d="M20.5 14.2A8 8 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/><path d="M15 5h.01M18 8h.01"/></svg>
-          <span class="altFormCopy"><strong>Ritual do Dia</strong><small>Uma pausa para você</small></span>
-        </button>
-        <button class="altFormBtn" id="heroPathSocial" type="button" aria-label="Abrir seu círculo social">
-          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span class="altFormCopy"><strong>Seu Círculo</strong><small>Encontre companhia</small></span>
-        </button>
-        <button class="altFormBtn" id="heroPathWorld" type="button" aria-label="Explorar o Mundo e a temporada">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></svg>
-          <span class="altFormCopy"><strong>O Mundo</strong><small>Explore a temporada</small></span>
-        </button>
-      </div>
     </div>
 
     <!-- Ritual do Dia -->
@@ -1419,9 +1376,6 @@ document.getElementById('btnInvite').addEventListener('click',async function(){
     window._toast('Convite copiado.');
   }catch(err){if(err&&err.name!=='AbortError')window._toast('Não foi possível compartilhar o convite.');}
 });
-document.getElementById('heroPathRitual').addEventListener('click',function(){window.startDailyRitual&&window.startDailyRitual();});
-document.getElementById('heroPathSocial').addEventListener('click',function(){switchSection('social');});
-document.getElementById('heroPathWorld').addEventListener('click',function(){switchSection('mundo');});
 document.getElementById('btnOpenSocial').addEventListener('click',function(){switchSection('social');});
 document.getElementById('ctxSessBtn').addEventListener('click',function(){
   if(this.dataset.action!=='details'){location.href='./entrada.html?modo=criar';return;}
