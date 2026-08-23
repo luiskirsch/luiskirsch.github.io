@@ -111,7 +111,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 
 /* ═══ PANEL BASE ═══ */
 .panel{background:var(--panel);border-right:1px solid rgba(212,175,55,.10);display:flex;flex-direction:column;height:100%;overflow:hidden;}
-.panel.right{border-right:none;border-left:1px solid rgba(212,175,55,.10);}
+.panel.right{border-right:none;border-left:1px solid rgba(212,175,55,.12);background:linear-gradient(180deg,rgba(5,10,17,.99),rgba(3,8,14,.99));}
 
 /* Panel header (SEU MOMENTO / PRESENÇA) */
 .panelHdr{display:flex;align-items:center;gap:9px;padding:18px 18px 15px;border-bottom:1px solid rgba(255,255,255,.04);flex-shrink:0;}
@@ -403,21 +403,21 @@ body.ritual-open #ritualDim{opacity:1;}
 /* ═══ RIGHT PANEL — PRESENÇA ═══ */
 
 /* Empty presence state */
-.presenceBody{flex:0 0 50%;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 18px;text-align:center;gap:0;transition:opacity .30s;overflow-y:auto;}
+.presenceBody{flex:0 0 auto;min-height:132px;display:grid;grid-template-columns:46px minmax(0,1fr);grid-template-rows:auto auto;column-gap:13px;align-content:center;margin:14px 13px 10px;padding:18px 16px;text-align:left;border:1px solid rgba(212,175,55,.12);border-radius:3px;background:linear-gradient(135deg,rgba(15,25,35,.78),rgba(6,12,19,.7));box-shadow:inset 0 1px rgba(255,232,122,.025);transition:opacity .30s,border-color .2s;overflow:hidden;}
 .presenceBody.fade{opacity:0;pointer-events:none;}
-.presenceIcon{width:58px;height:58px;border-radius:50%;border:1.5px solid rgba(212,175,55,.16);display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:rgba(212,175,55,.28);}
-.presenceIcon svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.5;}
-.presenceLine{font-size:13px;color:var(--text);line-height:1.55;margin-bottom:8px;letter-spacing:.02em;}
-.presenceSub{font-size:9px;color:var(--text3);letter-spacing:.06em;line-height:1.55;max-width:160px;margin:0 auto;}
+.presenceIcon{grid-row:1/3;width:44px;height:44px;border-radius:50%;border:1px solid rgba(212,175,55,.22);display:flex;align-items:center;justify-content:center;margin:0;color:rgba(212,175,55,.52);background:rgba(212,175,55,.025);}
+.presenceIcon svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.4;}
+.presenceLine{align-self:end;font-family:var(--serif);font-size:14px;font-weight:700;color:var(--text);line-height:1.25;margin:0 0 5px;letter-spacing:.01em;}
+.presenceSub{align-self:start;font-size:8.5px;color:var(--text3);letter-spacing:.035em;line-height:1.5;max-width:190px;margin:0;}
 
 /* Friends count header */
 .fCount{padding:14px 18px 6px;font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);}
 
 /* Friends list (visible when friends online) */
-.fList{list-style:none;display:none;flex-direction:column;gap:0;flex:0 0 50%;min-height:0;overflow-y:auto;opacity:0;transition:opacity .30s;}
+.fList{list-style:none;display:none;flex-direction:column;gap:2px;flex:0 1 auto;max-height:290px;min-height:0;margin:10px 10px 6px;overflow-y:auto;opacity:0;transition:opacity .30s;}
 .fList.vis{display:flex;}
 .fList.show{opacity:1;}
-.fItem{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-left:2px solid transparent;transition:background .14s,border-left-color .14s;cursor:pointer;}
+.fItem{display:flex;align-items:flex-start;gap:11px;padding:10px 9px;border:1px solid transparent;border-left:2px solid transparent;border-radius:2px;transition:background .14s,border-color .14s;cursor:pointer;}
 .fItem:hover{background:rgba(212,175,55,.04);border-left-color:rgba(212,175,55,.30);}
 .fAvWrap{position:relative;flex-shrink:0;}
 .fAv{width:34px;height:34px;border-radius:50%;background:rgba(212,175,55,.10);border:1px solid rgba(212,175,55,.18);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;font-weight:700;color:var(--gold2);overflow:hidden;}
@@ -429,13 +429,13 @@ body.ritual-open #ritualDim{opacity:1;}
 .fContext{font-size:9px;color:var(--text3);letter-spacing:.03em;margin-top:5px;line-height:1.4;}
 
 /* Invite / Call button */
-.btnPresence{flex-shrink:0;margin:0 14px 12px;padding:10px 14px;background:rgba(212,175,55,.05);border:1px solid rgba(212,175,55,.22);border-radius:2px;color:var(--gold2);font-size:8.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;text-align:center;width:calc(100% - 28px);transition:background .18s,border-color .18s,opacity .25s;}
-.btnPresence:hover{background:rgba(212,175,55,.10);border-color:rgba(212,175,55,.45);}
+.btnPresence{flex-shrink:0;margin:0 13px 14px;padding:11px 14px;background:linear-gradient(110deg,rgba(141,103,25,.22),rgba(212,175,55,.08));border:1px solid rgba(212,175,55,.32);border-radius:2px;color:var(--gold2);font-size:8px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;text-align:center;width:calc(100% - 26px);transition:background .18s,border-color .18s,transform .16s;}
+.btnPresence:hover{background:rgba(212,175,55,.13);border-color:rgba(212,175,55,.52);transform:translateY(-1px);}
 .btnPresence.callMode{background:rgba(212,175,55,.10);border-color:rgba(212,175,55,.40);color:var(--gold);}
 
 /* Suggestions section */
-.suggestSect{flex:0 0 50%;min-height:0;border-top:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;overflow:hidden;}
-.suggestHdr{display:flex;align-items:center;gap:7px;padding:12px 16px 8px;}
+.suggestSect{flex:1 1 auto;min-height:150px;border-top:1px solid rgba(212,175,55,.09);display:flex;flex-direction:column;overflow:hidden;background:rgba(0,0,0,.08);}
+.suggestHdr{display:flex;align-items:center;gap:7px;padding:15px 15px 10px;}
 .suggestHdrTitle{font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--gold2);flex:1;}
 .suggestItem{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;transition:background .14s;}
 .suggestItem:hover{background:rgba(212,175,55,.04);}
@@ -445,9 +445,9 @@ body.ritual-open #ritualDim{opacity:1;}
 .suggestStatus{font-size:8.5px;color:var(--text3);letter-spacing:.06em;margin-top:1px;}
 .suggestPlus{width:24px;height:24px;border-radius:50%;border:1px solid rgba(212,175,55,.22);display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:15px;line-height:1;cursor:pointer;flex-shrink:0;transition:background .16s;}
 .suggestPlus:hover{background:rgba(212,175,55,.10);}
-.suggestMore{display:block;width:100%;text-align:right;padding:10px 18px 14px;background:none;border:none;color:var(--gold2);font-size:8px;font-weight:700;letter-spacing:.20em;text-transform:uppercase;cursor:pointer;transition:color .16s;}
-.suggestMore:hover{color:var(--gold);}
-.suggestEmpty{padding:10px 16px 16px;color:var(--text3);font-size:9px;line-height:1.55;letter-spacing:.06em;text-align:center;}
+.suggestMore{display:block;width:calc(100% - 26px);margin:4px 13px 13px;text-align:center;padding:10px 12px;background:rgba(212,175,55,.025);border:1px solid rgba(212,175,55,.13);color:var(--gold2);font-size:7.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:color .16s,border-color .16s,background .16s;}
+.suggestMore:hover{color:var(--gold);border-color:rgba(212,175,55,.32);background:rgba(212,175,55,.06);}
+.suggestEmpty{margin:2px 13px 8px;padding:13px 12px;border:1px dashed rgba(212,175,55,.1);color:var(--text3);font-size:8.5px;line-height:1.55;letter-spacing:.035em;text-align:left;}
 #suggestList{flex:1;overflow-y:auto;min-height:0;}
 #suggestList::-webkit-scrollbar{width:3px;}
 #suggestList::-webkit-scrollbar-thumb{background:rgba(212,175,55,.18);border-radius:2px;}
@@ -904,15 +904,15 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
       <div class="presenceIcon">
         <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       </div>
-      <p class="presenceLine">Nenhum amigo<br>online agora.</p>
-      <p class="presenceSub">Convide alguém para explorar o Sextolugar.</p>
+      <p class="presenceLine">Seu círculo está em silêncio.</p>
+      <p class="presenceSub">Quando alguém entrar, você poderá iniciar um ritual daqui.</p>
     </div>
 
     <!-- Friends list (when online) -->
     <ul class="fList" id="friendsList"></ul>
 
     <!-- Action button -->
-    <button class="btnPresence" id="btnInvite">CONVIDAR AMIGOS</button>
+    <button class="btnPresence" id="btnInvite">COMPARTILHAR CONVITE</button>
 
     <!-- Suggestions -->
     <div class="suggestSect">
@@ -920,7 +920,8 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
         <span class="phDia">◆</span>
         <span class="suggestHdrTitle">Conexões</span>
       </div>
-      <div id="suggestList"><div class="suggestEmpty">Nenhuma conexão offline no momento.</div></div>
+      <div id="suggestList"><div class="suggestEmpty">Suas conexões aparecerão aqui depois do primeiro encontro.</div></div>
+      <button class="suggestMore" id="btnOpenSocial" type="button">VER TODO O CÍRCULO →</button>
       <button class="suggestMore" type="button" data-toast="Ver todos — em breve">VER TODOS OS AMIGOS →</button>
     </div>
   </aside>
@@ -1411,6 +1412,7 @@ document.getElementById('btnInvite').addEventListener('click',async function(){
     window._toast('Convite copiado.');
   }catch(err){if(err&&err.name!=='AbortError')window._toast('Não foi possível compartilhar o convite.');}
 });
+document.getElementById('btnOpenSocial').addEventListener('click',function(){switchSection('social');});
 document.getElementById('ctxSessBtn').addEventListener('click',function(){
   if(this.dataset.action!=='details'){location.href='./entrada.html?modo=criar';return;}
   var details=document.getElementById('ctxSessionDetails'),opened=details&&!details.hidden;
@@ -1907,7 +1909,7 @@ function _renderOfflineConnections(friends){
   var list=document.getElementById('suggestList');if(!list)return;
   var offline=(friends||[]).filter(function(f){return f&&f.online!==true;}).slice(0,4);
   list.replaceChildren();
-  if(!offline.length){var empty=document.createElement('div');empty.className='suggestEmpty';empty.textContent='Nenhuma conexão offline no momento.';list.appendChild(empty);return;}
+  if(!offline.length){var empty=document.createElement('div');empty.className='suggestEmpty';empty.textContent=(friends||[]).length?'Todos do seu círculo já estão por perto.':'Suas conexões aparecerão aqui depois do primeiro encontro.';list.appendChild(empty);return;}
   offline.forEach(function(friend){
     var data=_friendData(friend),item=document.createElement('div');item.className='suggestItem';
     var avatar=document.createElement('div');avatar.className='suggestAv';_renderAvatar(avatar,data.avatar,data.name);
@@ -1931,7 +1933,7 @@ window.hubRenderFriends=function(friends,lastSession){
   if(!on.length){
     ul.classList.remove('show');
     setTimeout(function(){ul.replaceChildren();ul.classList.remove('vis');if(pe){pe.style.display='';requestAnimationFrame(function(){pe.classList.remove('fade');});}},280);
-    if(btn){btn.textContent='CONVIDAR AMIGOS';btn.classList.remove('callMode');}
+    if(btn){btn.textContent='COMPARTILHAR CONVITE';btn.classList.remove('callMode');}
     return;
   }
   if(pe)pe.classList.add('fade');
