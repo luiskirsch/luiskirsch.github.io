@@ -1659,16 +1659,29 @@ function _refreshHubFragment(){
 }
 
 window.hubSetHero=function(data){
-  var h=new Date().getHours();
-  var s=h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE';
+  var now=new Date(),h=now.getHours();
+  /* Antes das 5h ainda é noite — meia-noite não deve ser tratada como manhã. */
+  var period=h<5?'late':h<12?'morning':h<18?'afternoon':'evening';
+  var s=period==='morning'?'BOM DIA':period==='afternoon'?'BOA TARDE':'BOA NOITE';
   var nm=(data._userName||'').split(' ')[0].toUpperCase();
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   var setTitle=function(lines){var e=document.getElementById('heroTitle');if(!e)return;e.replaceChildren();lines.forEach(function(line,index){if(index)e.appendChild(document.createElement('br'));e.appendChild(document.createTextNode(line));});};
+  var setCta=function(label){var e=document.getElementById('heroCta');if(!e)return;e.replaceChildren();var left=document.createElement('span'),right=document.createElement('span');left.className=right.className='jDia';left.textContent=right.textContent='◆';e.appendChild(left);e.appendChild(document.createTextNode(label));e.appendChild(right);};
+  var messages={
+    late:[['A NOITE AINDA','GUARDA ALGO.'],['O SILÊNCIO TAMBÉM','ABRE CAMINHOS.'],['ALGUMAS HISTÓRIAS','COMEÇAM TARDE.']],
+    morning:[['HOJE PODE','COMEÇAR DIFERENTE.'],['UM NOVO CAMINHO','COMEÇA AGORA.'],['O PRIMEIRO PASSO','AINDA É SEU.']],
+    afternoon:[['AINDA HÁ TEMPO','PARA O INESPERADO.'],['ALGO NOVO','PODE COMEÇAR AQUI.'],['SEU PRÓXIMO CAPÍTULO','PEDE PRESENÇA.']],
+    evening:[['A NOITE MUDA','QUEM SE PERMITE.'],['O INESPERADO','ESTÁ MAIS PERTO.'],['TODA NOITE GUARDA','UMA NOVA HISTÓRIA.']]
+  };
+  var dayKey=Math.floor(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())/86400000);
+  var options=messages[period],heroLines=options[dayKey%options.length];
   set('heroKick',nm?s+', '+nm+'.':s+'.');
-  setTitle(['O MUNDO','ESPERA POR VOCÊ.']);set('heroCta','JOGAR');
+  setTitle(heroLines);setCta('JOGAR');
   var online=(data.friends||[]).find(function(f){return f.online;});
-  if(online){var n=_friendData(online).name.split(' ')[0].toUpperCase();setTitle([n,'ESTÁ ONLINE.']);set('heroCta','CHAMAR');}
-  else if(data.lastSession&&data.lastSession.roomName){setTitle(['O MUNDO','TE ESPERA.']);}
+  var lastAt=data.lastSession&&_hubDate(data.lastSession.playedAt||data.lastSession.sessionAt);
+  var sessionIsRecent=lastAt&&now-lastAt<7*86400000;
+  if(online){var n=_friendData(online).name.split(' ')[0].toUpperCase();setTitle([n,'ESTÁ POR PERTO.']);setCta('CHAMAR');}
+  else if(data.lastSession&&data.lastSession.roomName&&sessionIsRecent){setTitle(['TODA HISTÓRIA','PEDE CONTINUAÇÃO.']);}
 };
 
 /* ── Daily Ritual Flow ─────────────────────────────────────── */
