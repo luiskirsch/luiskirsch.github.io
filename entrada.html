@@ -258,6 +258,7 @@
       flex-direction:column;
       gap:7px;
     }
+    .field[hidden],.btn[hidden]{display:none!important;}
 
     .field label{
       font-size:11px;
@@ -302,6 +303,7 @@
       grid-template-columns:1fr 1fr;
       gap:12px;
     }
+    .row.single{grid-template-columns:1fr;}
 
     /* ── Status ── */
     .status{
@@ -620,13 +622,13 @@
     </header>
 
     <section class="card" data-i18n-aria-label="entrada:ariaLabels.protocol" aria-label="Protocolo de entrada">
-      <div class="tag">
+      <div class="tag" id="entryTag">
         <span class="dot"></span>
         <span data-i18n="entrada:tag">Protocolo · Entrada</span>
         <span class="dot"></span>
       </div>
 
-      <p class="protocol" data-i18n-html="entrada:protocol">
+      <p class="protocol" id="entryProtocol" data-i18n-html="entrada:protocol">
         Antes de iniciar, confirme que você entendeu:<br>
         <em>as cartas são físicas</em> — e o site só guia o ritmo.
       </p>
@@ -644,8 +646,8 @@
           >
         </div>
 
-        <div class="row">
-          <div class="field">
+        <div class="row" id="roomFields">
+          <div class="field" id="fieldRoomName">
             <label for="nomeSala" data-i18n="entrada:labels.roomName">Nome da sala</label>
             <input
               id="nomeSala"
@@ -655,7 +657,7 @@
               data-i18n-placeholder="entrada:placeholders.roomName"
             >
           </div>
-          <div class="field">
+          <div class="field" id="fieldRoomCode">
             <label for="codigoSala" data-i18n="entrada:labels.roomCode">Código da sala</label>
             <input
               id="codigoSala"

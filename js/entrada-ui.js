@@ -54,8 +54,28 @@ if (fragmentPrepared) {
   window.setTimeout(() => finishFragmentCheck("unknown", "Não foi possível confirmar o fragmento agora. O servidor verificará novamente quando o ritual iniciar."), 8000);
 }
 
-if (entryMode === "criar") window.setTimeout(() => nomeJogadorEl.focus(), 0);
+const roomRow = document.getElementById("roomFields");
+const roomCodeField = document.getElementById("fieldRoomCode");
+const entryTag = document.getElementById("entryTag");
+const entryProtocol = document.getElementById("entryProtocol");
+const entryTagText = entryTag?.querySelector("span:nth-child(2)");
+
+if (entryMode === "criar") {
+  roomCodeField.hidden = true;
+  roomRow.classList.add("single");
+  btnEntrarSala.hidden = true;
+  entryTagText?.removeAttribute("data-i18n");
+  entryProtocol.removeAttribute("data-i18n-html");
+  if (entryTagText) entryTagText.textContent = "Protocolo · Conduzir";
+  entryProtocol.innerHTML = "Dê um nome ao encontro.<br><em>O código será criado automaticamente</em> para você compartilhar.";
+  window.setTimeout(() => nomeJogadorEl.focus(), 0);
+}
 if (entryMode === "entrar" || entryMode === "codigo") {
+  btnCriarSala.hidden = true;
+  entryTagText?.removeAttribute("data-i18n");
+  entryProtocol.removeAttribute("data-i18n-html");
+  if (entryTagText) entryTagText.textContent = "Protocolo · Entrar";
+  entryProtocol.innerHTML = "Tenha em mãos o nome e o código da sala.<br><em>Você será levado diretamente ao encontro.</em>";
   window.setTimeout(() => {
     codigoSalaEl.focus();
     codigoSalaEl.scrollIntoView({ behavior: "smooth", block: "center" });
