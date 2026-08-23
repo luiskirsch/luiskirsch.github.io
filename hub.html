@@ -270,6 +270,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .altFormCopy small{color:var(--text3);font-size:6.8px;font-weight:500;letter-spacing:.02em;white-space:nowrap;}
 .altFormBtn:hover{color:var(--text);background:rgba(212,175,55,.055);}
 .altFormBtn:hover svg{stroke:var(--gold2);border-color:rgba(212,175,55,.3);background:rgba(212,175,55,.04);}
+.altFormBtn:focus-visible{outline:1px solid rgba(240,205,101,.72);outline-offset:-3px;background:rgba(212,175,55,.055);}
 
 /* ── RITUAL CARD ── */
 .ritualWrap{flex:0 0 auto;min-height:0;padding:clamp(16px,1.8vh,24px) 24px 10px;display:flex;flex-direction:column;overflow:visible;margin-bottom:clamp(10px,2vh,22px);position:relative;z-index:1;cursor:default;user-select:none;-webkit-user-select:none;}
@@ -856,19 +857,19 @@ body.sec-mundo .toast.on{transform:translate(-50%,0);}
       <button class="btnJogar" id="heroCta" onclick="location.href='./entrada.html'">
         <span class="jDia">◆</span>JOGAR<span class="jDia">◆</span>
       </button>
-      <div class="altFormsLabel">ESCOLHA SEU PRÓXIMO PASSO</div>
+      <div class="altFormsLabel">OUTROS CAMINHOS</div>
       <div class="altFormsRow">
-        <button class="altFormBtn" type="button" onclick="location.href='./entrada.html?modo=criar'" aria-label="Criar um novo ritual como anfitrião">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-          <span class="altFormCopy"><strong>Conduzir</strong><small>Crie uma nova sala</small></span>
+        <button class="altFormBtn" id="heroPathRitual" type="button" aria-label="Abrir o Ritual do Dia">
+          <svg viewBox="0 0 24 24"><path d="M20.5 14.2A8 8 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/><path d="M15 5h.01M18 8h.01"/></svg>
+          <span class="altFormCopy"><strong>Ritual do Dia</strong><small>Uma pausa para você</small></span>
         </button>
-        <button class="altFormBtn" type="button" onclick="location.href='./entrada.html?modo=entrar'" aria-label="Entrar em uma sala usando um código">
-          <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          <span class="altFormCopy"><strong>Entrar</strong><small>Acesse com os dados</small></span>
+        <button class="altFormBtn" id="heroPathSocial" type="button" aria-label="Abrir seu círculo social">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="altFormCopy"><strong>Seu Círculo</strong><small>Encontre companhia</small></span>
         </button>
-        <button class="altFormBtn" type="button" onclick="switchSection('social')" aria-label="Encontrar alguém no seu círculo">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span class="altFormCopy"><strong>Seu círculo</strong><small>Encontre companhia</small></span>
+        <button class="altFormBtn" id="heroPathWorld" type="button" aria-label="Explorar o Mundo e a temporada">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></svg>
+          <span class="altFormCopy"><strong>O Mundo</strong><small>Explore a temporada</small></span>
         </button>
       </div>
     </div>
@@ -1418,6 +1419,9 @@ document.getElementById('btnInvite').addEventListener('click',async function(){
     window._toast('Convite copiado.');
   }catch(err){if(err&&err.name!=='AbortError')window._toast('Não foi possível compartilhar o convite.');}
 });
+document.getElementById('heroPathRitual').addEventListener('click',function(){window.startDailyRitual&&window.startDailyRitual();});
+document.getElementById('heroPathSocial').addEventListener('click',function(){switchSection('social');});
+document.getElementById('heroPathWorld').addEventListener('click',function(){switchSection('mundo');});
 document.getElementById('btnOpenSocial').addEventListener('click',function(){switchSection('social');});
 document.getElementById('ctxSessBtn').addEventListener('click',function(){
   if(this.dataset.action!=='details'){location.href='./entrada.html?modo=criar';return;}
