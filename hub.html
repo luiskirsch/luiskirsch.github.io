@@ -1398,7 +1398,7 @@ document.getElementById('featureModal').addEventListener('click',function(e){if(
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFM();});
 
 function _applyNotifScroll(drop){var items=drop.querySelectorAll('.notifItem');if(items.length<=5){drop.style.overflowY='hidden';drop.style.maxHeight='none';}else{var h=0;for(var i=0;i<5;i++)h+=items[i].offsetHeight;drop.style.overflowY='auto';drop.style.maxHeight=h+'px';}}
-document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();var drop=document.getElementById('dropNotif');var opened=toggleDrop(drop,this);if(opened){window.hubSetUnread(0);if(window.hubMarkNotificationsRead)window.hubMarkNotificationsRead();_applyNotifScroll(drop);}});
+document.getElementById('btnNotif').addEventListener('click',function(e){e.stopPropagation();var drop=document.getElementById('dropNotif');var opened=toggleDrop(drop,this);if(opened){if(window.hubMarkNotificationsRead)window.hubMarkNotificationsRead();_applyNotifScroll(drop);}});
 document.getElementById('btnCoins').addEventListener('click',function(e){e.stopPropagation();window._toast('Loja de moedas — em breve');});
 document.getElementById('btnFragment').addEventListener('click',function(e){e.stopPropagation();openFragmentPanel();});
 document.getElementById('fragmentArrivalButton').addEventListener('click',function(e){e.stopPropagation();openFragmentPanel();});
@@ -1540,23 +1540,22 @@ window.hubDeleteNotification=function(id,rowEl,wasUnread){
 
 window.hubMarkNotificationsRead=function(){
   if(_hubState.notificationsUnread<1||_hubState.markingNotifications)return;
-  var ids=Array.from(new Set(_hubState.visibleUnreadNotificationIds||[])).filter(Boolean);
-  if(!ids.length)return;
   var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
   if(!token)return;
+  var previousUnread=_hubState.notificationsUnread;
   _hubState.markingNotifications=true;
-  Promise.allSettled(ids.map(function(id){
-    return fetch(api+'/notifications/'+encodeURIComponent(id)+'/read',{method:'POST',headers:{Authorization:'Bearer '+token}})
-      .then(function(response){if(!response.ok)throw new Error('NOTIFICATION_READ_'+response.status);return id;});
-  })).then(function(results){
-    var marked=results.filter(function(result){return result.status==='fulfilled';}).map(function(result){return result.value;});
-    if(!marked.length){window._toast&&window._toast('Não foi possível marcar as notificações como lidas.');return;}
-    var markedSet=new Set(marked);
+  window.hubSetUnread(0);
+  fetch(api+'/notifications/read-all',{method:'POST',headers:{Authorization:'Bearer '+token}})
+  .then(function(response){if(!response.ok)throw new Error('NOTIFICATIONS_READ_'+response.status);return response.json().catch(function(){return{ok:true};});})
+  .then(function(){
     document.querySelectorAll('#dropNotif .notifItem.unread').forEach(function(el){
-      if(markedSet.has(el.dataset.notificationId||''))el.classList.remove('unread');
+      el.classList.remove('unread');
     });
-    _hubState.visibleUnreadNotificationIds=ids.filter(function(id){return !markedSet.has(id);});
-    window.hubSetUnread(Math.max(0,_hubState.notificationsUnread-marked.length));
+    _hubState.visibleUnreadNotificationIds=[];
+    if(window._hubData){window._hubData.unread=0;if(Array.isArray(window._hubData.notifications))window._hubData.notifications.forEach(function(item){if(item)item.read=true;});}
+  }).catch(function(){
+    window.hubSetUnread(previousUnread);
+    window._toast&&window._toast('Não foi possível marcar as notificações como lidas.');
   }).finally(function(){_hubState.markingNotifications=false;});
 };
 
