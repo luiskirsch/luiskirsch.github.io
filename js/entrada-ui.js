@@ -54,8 +54,12 @@ if (fragmentPrepared) {
   window.setTimeout(() => finishFragmentCheck("unknown", "Não foi possível confirmar o fragmento agora. O servidor verificará novamente quando o ritual iniciar."), 8000);
 }
 
-if (entryMode === "criar") {
-  window.setTimeout(() => nomeJogadorEl.focus(), 0);
+if (entryMode === "criar") window.setTimeout(() => nomeJogadorEl.focus(), 0);
+if (entryMode === "entrar" || entryMode === "codigo") {
+  window.setTimeout(() => {
+    codigoSalaEl.focus();
+    codigoSalaEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 0);
 }
 
 btnRitual.addEventListener("click", () => {
