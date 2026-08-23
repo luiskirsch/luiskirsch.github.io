@@ -320,7 +320,7 @@ body{font-family:var(--sans);color:var(--text);background:#04080d;min-height:100
 .rHead::before,.rHead::after{content:'';flex:1;max-width:32px;height:1px;background:rgba(212,175,55,.28);}
 .rHeadDia{font-size:8px;color:rgba(212,175,55,.50);}
 .rQ{align-self:center;max-width:38ch;font-family:var(--fell);font-size:clamp(18px,2vw,27px);font-style:italic;font-weight:400;color:#fff;line-height:1.45;margin:18px 0;letter-spacing:.015em;text-shadow:0 2px 16px rgba(0,0,0,.60);}
-.rMeta{align-self:end;display:flex;align-items:center;justify-content:center;gap:6px;font-size:8.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin:0;}
+.rMeta{align-self:end;display:flex;align-items:center;justify-content:center;gap:7px;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin:0;}
 .rMeta svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.5;}
 .ritualAction{position:absolute;bottom:34px;left:18px;right:10px;display:flex;justify-content:center;align-items:center;pointer-events:none;cursor:default;z-index:10;}
 .btnDiscover{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:10px 32px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.28);border-radius:2px;color:var(--gold);font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;cursor:default;pointer-events:none;transition:background .18s,border-color .18s,transform .14s;}
@@ -1705,7 +1705,7 @@ function _showCardDone(st){
   if(done)done.hidden=true;
   var meta=document.querySelector('.rMeta');
   var time=_dailyTime(st&&st.completedAt);
-  if(meta){meta.replaceChildren();var label=document.createElement('span');label.style.cssText='font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(212,175,55,.48)';label.textContent='✓ Descoberto hoje'+(time?' às '+time:'');meta.appendChild(label);}
+  if(meta){meta.replaceChildren();var label=document.createElement('span');label.style.cssText='font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(212,175,55,.54)';label.textContent='✓ Descoberto hoje'+(time?' às '+time:'');meta.appendChild(label);}
 }
 
 window.startDailyRitual=function(){
