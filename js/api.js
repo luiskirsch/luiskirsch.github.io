@@ -201,6 +201,9 @@ export const PanelBridge = {
   }, { suppliedToken: hostToken }),
   joinStatus: (roomId, playerId) => _get(`/game/room/${encodeURIComponent(_normalizeRoomId(roomId))}/join-status?playerId=${encodeURIComponent(String(playerId || "").trim())}`),
   roomHeartbeat: (roomId, playerId) => _post("/game/room/heartbeat", { roomId: _normalizeRoomId(roomId), playerId: String(playerId || "").trim() }),
+  // Gravação da sala: o servidor exige o hostToken (sem ele respondia 403).
+  recordingAutoStart: (roomId) => _hostPost("/recording/auto-start", { roomId: _normalizeRoomId(roomId) }),
+  recordingDiscard: (roomId) => _hostPost("/recording/discard", { roomId: _normalizeRoomId(roomId) }),
 };
 
 // Exponha para scripts não-módulo (mobile.js, recording modal, etc.)

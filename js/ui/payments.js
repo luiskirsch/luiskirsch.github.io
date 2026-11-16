@@ -210,7 +210,7 @@
   }
 
   document.getElementById("oslSaveSair").addEventListener("click", async function () {
-    try { await fetch(OSL_BASE + "/recording/discard", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roomId: oslGetRoomCode() }) }); } catch (_) {}
+    try { await window.PanelBridge?.recordingDiscard(oslGetRoomCode()); } catch (_) {}
     clearInterval(oslSavePollTimer); oslCloseAll();
     var lb = document.getElementById("leaveBtn"); if (lb) { oslBypassLeave = true; lb.click(); }
   });

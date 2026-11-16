@@ -314,12 +314,7 @@ subscribe(snap => {
       // Auto-recording (host, uma vez por sessão)
       if (S.isHost && !S.autoRecordingStarted) {
         S.autoRecordingStarted = true;
-        const base = window.PANEL_SERVER_BASE || "https://sextolugar-backend-legado-production.up.railway.app";
-        fetch(`${base}/recording/auto-start`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roomId: S.roomCode }),
-        }).catch(() => {});
+        Promise.resolve(window.PanelBridge?.recordingAutoStart(S.roomCode)).catch(() => {});
       }
 
       // Toast de reconexão — dispara apenas no primeiro snapshot ativo
