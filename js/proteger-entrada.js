@@ -1,5 +1,5 @@
 (async function protegerEntrada() {
-  const BACKEND_BASE_URL = "https://osl-video-server-production.up.railway.app";
+  const BACKEND_BASE_URL = "https://sextolugar-backend-legado-production.up.railway.app";
 
   function liberarPagina() {
     function doLiberar() {

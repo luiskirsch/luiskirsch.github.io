@@ -14,13 +14,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
-  authDomain: "osextolugar-game.firebaseapp.com",
-  projectId: "osextolugar-game",
-  storageBucket: "osextolugar-game.firebasestorage.app",
-  messagingSenderId: "947922328721",
-  appId: "1:947922328721:web:989522c99e16ab449f3330",
-  measurementId: "G-D6HG779ZFR"
+  apiKey: "AIzaSyAkA9JXidiHEE3tFcd6o5yBcAYI2RT2daM",
+  authDomain: "osextolugar-jogo.firebaseapp.com",
+  projectId: "osextolugar-jogo",
+  storageBucket: "osextolugar-jogo.firebasestorage.app",
+  messagingSenderId: "720257993401",
+  appId: "1:720257993401:web:a9d7a41c1ef8b47d5b6968",
 };
 
 const BACKEND_BASE_URL = "https://osl-video-server.onrender.com";

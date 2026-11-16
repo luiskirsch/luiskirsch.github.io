@@ -1,5 +1,5 @@
 (async function protegerSala() {
-  const BASE = "https://osl-video-server-production.up.railway.app";
+  const BASE = "https://sextolugar-backend-legado-production.up.railway.app";
 
   function tokenLocalValido() {
     const token = sessionStorage.getItem("osl_access_token");

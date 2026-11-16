@@ -1,9 +1,9 @@
 // Constantes de dados puras — sem efeitos colaterais
 
 // ── URL do backend (osl-video-server) ────────────────────────────────────────
-// Usa window.PANEL_SERVER_BASE se setado (sala.html define em prod), senão prod.
+// Usa window.PANEL_SERVER_BASE se setado (sala.html define via sala-config.js), senão o serviço do jogo em produção.
 export const BACKEND_BASE_URL = (typeof window !== "undefined" && window.PANEL_SERVER_BASE)
-  || "https://osl-video-server-staging.up.railway.app";
+  || "https://sextolugar-backend-legado-production.up.railway.app";
 
 
 // ── Efeitos por carta (battlecry / deathrattle) ──────────────────────────────

@@ -1,26 +1,26 @@
 // Reads `config/activeTheme` from Firestore in REAL-TIME via onSnapshot and
 // pushes the resolved theme id to the theme-loader. Standalone (não depende
 // de outros módulos) — inicializa um Firebase app dedicado pra leitura do
-// doc de tema no projeto sextolugar-staging (ondeo admin-theme.html grava).
+// doc de tema no projeto do jogo (osextolugar-jogo).
 //
-// Por que sextolugar-staging em prod: o doc activeTheme é compartilhado
-// entre staging e prod (mesma fonte de verdade). Admin grava lá, todos
-// leem dali. Read-only via API key pública (regras Firestore permitem).
+// sextolugar-staging deixou de ser do jogo (é a homologação do Espaço
+// Prelúdio). Leitura pública só de config/activeTheme, via regra do
+// Firestore (security/firebase/sextolugar.firestore.rules no backend).
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const themeFirebaseConfig = {
-  apiKey: "AIzaSyAflOnCIpF6NYCxdd23XSZTLK2V54XLGFU",
-  authDomain: "sextolugar-staging.firebaseapp.com",
-  projectId: "sextolugar-staging",
-  storageBucket: "sextolugar-staging.firebasestorage.app",
-  messagingSenderId: "407627003441",
-  appId: "1:407627003441:web:c501d2d46f04f40cd7c710"
+  apiKey: "AIzaSyAkA9JXidiHEE3tFcd6o5yBcAYI2RT2daM",
+  authDomain: "osextolugar-jogo.firebaseapp.com",
+  projectId: "osextolugar-jogo",
+  storageBucket: "osextolugar-jogo.firebasestorage.app",
+  messagingSenderId: "720257993401",
+  appId: "1:720257993401:web:a9d7a41c1ef8b47d5b6968"
 };
 
 // Inicializa app com nome dedicado para não conflitar com Firebase principal
-// que pages como sala.html já usam (project diferente: osextolugar-game).
+// que pages como sala.html já usam (mesmo projeto osextolugar-jogo).
 const THEME_APP_NAME = "osl-theme-reader";
 const themeApp = getApps().some(a => a.name === THEME_APP_NAME)
   ? getApp(THEME_APP_NAME)

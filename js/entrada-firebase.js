@@ -3,12 +3,12 @@ import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/fi
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
-  authDomain: "osextolugar-game.firebaseapp.com",
-  projectId: "osextolugar-game",
-  storageBucket: "osextolugar-game.firebasestorage.app",
-  messagingSenderId: "947922328721",
-  appId: "1:947922328721:web:989522c99e16ab449f3330"
+  apiKey: "AIzaSyAkA9JXidiHEE3tFcd6o5yBcAYI2RT2daM",
+  authDomain: "osextolugar-jogo.firebaseapp.com",
+  projectId: "osextolugar-jogo",
+  storageBucket: "osextolugar-jogo.firebasestorage.app",
+  messagingSenderId: "720257993401",
+  appId: "1:720257993401:web:a9d7a41c1ef8b47d5b6968"
 };
 
 const app  = initializeApp(firebaseConfig);
@@ -44,7 +44,7 @@ window.verificarFragmentoPendente = async function () {
   const timeoutId = setTimeout(() => controller.abort(), 8000);
   try {
     const token = await user.getIdToken();
-    const response = await fetch("https://osl-video-server-production.up.railway.app/hub", {
+    const response = await fetch("https://sextolugar-backend-legado-production.up.railway.app/hub", {
       headers: { Authorization: `Bearer ${token}` },
       signal: controller.signal,
     });

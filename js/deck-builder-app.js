@@ -6,12 +6,12 @@ import {
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",
-  authDomain: "osextolugar-game.firebaseapp.com",
-  projectId: "osextolugar-game",
-  storageBucket: "osextolugar-game.firebasestorage.app",
-  messagingSenderId: "592088391155",
-  appId: "1:592088391155:web:c2e4f9fba44fb2c0b3e785"
+  apiKey: "AIzaSyAkA9JXidiHEE3tFcd6o5yBcAYI2RT2daM",
+  authDomain: "osextolugar-jogo.firebaseapp.com",
+  projectId: "osextolugar-jogo",
+  storageBucket: "osextolugar-jogo.firebasestorage.app",
+  messagingSenderId: "720257993401",
+  appId: "1:720257993401:web:a9d7a41c1ef8b47d5b6968"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -157,7 +157,7 @@ function levelFromXP(xp) { return Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 
 function xpForLevel(lv) { return Math.pow(lv - 1, 2) * 50; }
 function xpForNextLevel(lv) { return Math.pow(lv, 2) * 50; }
 
-const BACKEND_BASE_URL = "https://osl-video-server-production.up.railway.app";
+const BACKEND_BASE_URL = "https://sextolugar-backend-legado-production.up.railway.app";
 
 // ── State ──────────────────────────────────────────────────────────────
 let userId = null;

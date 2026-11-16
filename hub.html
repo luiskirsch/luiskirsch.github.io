@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: blob: https://*.googleusercontent.com https://lh3.googleusercontent.com https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://osl-video-server-production.up.railway.app https://www.gstatic.com https://static.cloudflareinsights.com; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; upgrade-insecure-requests; block-all-mixed-content;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: blob: https://*.googleusercontent.com https://lh3.googleusercontent.com https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://sextolugar-backend-legado-production.up.railway.app https://www.gstatic.com https://static.cloudflareinsights.com; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; upgrade-insecure-requests; block-all-mixed-content;">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
@@ -1485,7 +1485,7 @@ window.hubDeleteNotification=function(id,rowEl,wasUnread){
   if(drop&&drop.classList.contains('open'))_applyNotifScroll(drop);
   if(wasUnread&&_hubState.notificationsUnread>0)window.hubSetUnread(Math.max(0,_hubState.notificationsUnread-1));
   if(!id)return;
-  var api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+  var api=window._hubAPI||'https://sextolugar-backend-legado-production.up.railway.app';
   var fbUser=window._hubFirebaseUser;
   if(!fbUser)return;
   fbUser.getIdToken().then(function(token){
@@ -1497,7 +1497,7 @@ window.hubDeleteNotification=function(id,rowEl,wasUnread){
 
 window.hubMarkNotificationsRead=function(){
   if(_hubState.notificationsUnread<1||_hubState.markingNotifications)return;
-  var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+  var token=window._hubToken,api=window._hubAPI||'https://sextolugar-backend-legado-production.up.railway.app';
   if(!token)return;
   var previousUnread=_hubState.notificationsUnread;
   _hubState.markingNotifications=true;
@@ -1610,7 +1610,7 @@ window.hubRenderFragment=function(fragment){
 };
 
 function _refreshHubFragment(){
-  var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+  var token=window._hubToken,api=window._hubAPI||'https://sextolugar-backend-legado-production.up.railway.app';
   if(!token)return Promise.resolve(null);
   var controller=typeof AbortController!=='undefined'?new AbortController():null;
   var timeoutId=setTimeout(function(){if(controller)controller.abort();},8000);
@@ -1723,7 +1723,7 @@ window.startDailyRitual=function(){
   var hasQ=_dailyData&&(_dailyData.question||_dailyData.cardText);
   if(hasQ){setTimeout(_showP1,860);}
   else{
-    var api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+    var api=window._hubAPI||'https://sextolugar-backend-legado-production.up.railway.app';
     var token=window._hubToken;
     var hdrs=token?{'Authorization':'Bearer '+token}:{};
     fetch(api+'/live/daily',{headers:hdrs}).then(function(r){return r.ok?r.json():null;})
@@ -1829,7 +1829,7 @@ window.concludeRitual=function(){
 function _fmtCount(n){return n===1?'1 pessoa chegou até aqui hoje.':(n||0).toLocaleString('pt-BR')+' pessoas chegaram até aqui hoje.';}
 
 function _callComplete(){
-  var token=window._hubToken,api=window._hubAPI||'https://osl-video-server-production.up.railway.app';
+  var token=window._hubToken,api=window._hubAPI||'https://sextolugar-backend-legado-production.up.railway.app';
   if(!token)return Promise.reject(new Error('DAILY_AUTH_REQUIRED'));
   var controller=typeof AbortController!=='undefined'?new AbortController():null;
   var timeoutId=setTimeout(function(){if(controller)controller.abort();},12000);
@@ -2069,7 +2069,7 @@ window.hubShowOnboarding=function(){var v=document.getElementById('obVeil');if(!
 
 /* ══ SOCIAL PAGE (TELA CHEIA IMERSIVA) ══ */
 var _spLoaded=false,_spLoading=false,_spSearchT=null,_spSearchOpen=false,_spProfileUid=null,_spConnections=[],_spLeaderboard=[];
-var _spAPI='https://osl-video-server-production.up.railway.app';
+var _spAPI='https://sextolugar-backend-legado-production.up.railway.app';
 
 async function _spToken(){
   try{if(window._hubFirebaseUser)return await window._hubFirebaseUser.getIdToken();}catch(_){}
@@ -2289,7 +2289,7 @@ function _mndRender(world,events,season){
   var fragment=hub.fragment&&hub.fragment.card||null,fragmentPanel=document.getElementById('mndFragmentPanel');if(fragment){var fColor=fragment.palette&&fragment.palette[0]||accent;if(fragmentPanel)fragmentPanel.style.setProperty('--mnd-fragment',fColor);_mndText('mndFragmentVisual',fragment.sigil||'◇');_mndText('mndFragmentRarity',(fragment.rarity||'fragmento')+' · '+(fragment.territoryId||'origem desconhecida').replace('_',' '));_mndText('mndFragmentTitle',fragment.title||'Fragmento sem nome');_mndText('mndFragmentCode',fragment.fragmentId||'FRAGMENTO LEGADO');_mndText('mndFragmentEffect',fragment.effect||fragment.text||'Esta carta será inserida no próximo ritual que você iniciar.');}
   var echoBox=document.getElementById('mndEchoes'),territories=world.territories||[];if(echoBox){echoBox.replaceChildren();var echoes=(world.recentEchoes||[]).slice(0,5);if(!echoes.length){var empty=document.createElement('div');empty.className='mndEcho';empty.innerHTML='<i></i><strong>O mundo está escutando.</strong><time>agora</time>';echoBox.appendChild(empty);}echoes.forEach(function(echo){var row=document.createElement('div');row.className='mndEcho';var mark=document.createElement('i'),msg=document.createElement('strong'),time=document.createElement('time'),territory=territories.find(function(t){return t.id===echo.territoryId;});msg.textContent=(echo.players||1)+' pessoa'+(echo.players===1?'':'s')+' deixou um vestígio em '+(territory&&territory.name||'um território');time.textContent=_fmtCtx(new Date(echo.at||Date.now()));row.appendChild(mark);row.appendChild(msg);row.appendChild(time);echoBox.appendChild(row);});}
 }
-function _mndLoad(){if(_mndLoading)return;var hub=window._hubData||{};if(!_mndLoaded&&hub.world){_mndRender(hub.world,hub.events,hub.season);_mndLoaded=true;}if(_mndLoaded&&Date.now()-(_mndLoad.lastAt||0)<60000)return;_mndLoading=true;_mndLoad.lastAt=Date.now();var api=window._hubAPI||'https://osl-video-server-production.up.railway.app';Promise.all([fetch(api+'/live/world').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),fetch(api+'/live/events').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),fetch(api+'/live/season').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})]).then(function(res){_mndRender(res[0]&&res[0].world||hub.world,res[1]&&res[1].events||hub.events,res[2]&&res[2].season||hub.season);_mndLoaded=true;}).finally(function(){_mndLoading=false;});}
+function _mndLoad(){if(_mndLoading)return;var hub=window._hubData||{};if(!_mndLoaded&&hub.world){_mndRender(hub.world,hub.events,hub.season);_mndLoaded=true;}if(_mndLoaded&&Date.now()-(_mndLoad.lastAt||0)<60000)return;_mndLoading=true;_mndLoad.lastAt=Date.now();var api=window._hubAPI||'https://sextolugar-backend-legado-production.up.railway.app';Promise.all([fetch(api+'/live/world').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),fetch(api+'/live/events').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),fetch(api+'/live/season').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})]).then(function(res){_mndRender(res[0]&&res[0].world||hub.world,res[1]&&res[1].events||hub.events,res[2]&&res[2].season||hub.season);_mndLoaded=true;}).finally(function(){_mndLoading=false;});}
 (function(){var back=document.getElementById('mndBack');if(back)back.addEventListener('click',function(){switchSection('hub');});document.querySelectorAll('[data-world-node]').forEach(function(node){node.addEventListener('click',function(){if(this.classList.contains('locked')){window._toast('Este território ainda não foi revelado. Continue concluindo rituais com a comunidade.',7200);return;}document.querySelectorAll('[data-world-node]').forEach(function(n){n.classList.remove('active');});this.classList.add('active');var territory=(_mndWorld&&_mndWorld.territories||[])[Number(this.dataset.worldNode)];if(territory){var types=(territory.affinity||[]).join(' e ');window._toast(territory.name+' está aberto. Cartas de '+types+' recebem sua influência nos rituais.',7200);}else window._toast('Território aberto. Sua influência atravessa os próximos rituais.',7200);});});})();
 
 (function(){
@@ -2323,8 +2323,8 @@ function _mndLoad(){if(_mndLoading)return;var hub=window._hubData||{};if(!_mndLo
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import{getFirestore,doc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-const API="https://osl-video-server-production.up.railway.app";
-const cfg={apiKey:"AIzaSyC8sSvA7_1HPYRFGFgdgzstkP_yQHadY-c",authDomain:"osextolugar-game.firebaseapp.com",projectId:"osextolugar-game",storageBucket:"osextolugar-game.firebasestorage.app",messagingSenderId:"947922328721",appId:"1:947922328721:web:989522c99e16ab449f3330"};
+const API="https://sextolugar-backend-legado-production.up.railway.app";
+const cfg={apiKey:"AIzaSyAkA9JXidiHEE3tFcd6o5yBcAYI2RT2daM",authDomain:"osextolugar-jogo.firebaseapp.com",projectId:"osextolugar-jogo",storageBucket:"osextolugar-jogo.firebasestorage.app",messagingSenderId:"720257993401",appId:"1:720257993401:web:a9d7a41c1ef8b47d5b6968"};
 const app=initializeApp(cfg);const auth=getAuth(app);const db=getFirestore(app);
 let hubAccountUnsub=null;
 const ACCOUNT_LOCAL_KEYS=[

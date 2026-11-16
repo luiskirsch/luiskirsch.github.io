@@ -1,7 +1,7 @@
 window.PANEL_SERVER_BASE =
   location.hostname === "localhost"
     ? "http://localhost:3000"
-    : "https://osl-video-server-production.up.railway.app";
+    : "https://sextolugar-backend-legado-production.up.railway.app";
 
 // Helper global de tradução — usado pelos JS modules.
 // Retorna a tradução se OSL_I18N estiver pronto; senão devolve fallback PT.
