@@ -266,11 +266,136 @@ body::after {
   }
 
 }
+
+/* ═══════════════════════════════════════
+   FIM DA CONTAGEM — fogos, "Chegou a hora" e passagem para a página do jogo
+═══════════════════════════════════════ */
+#fireworks,
+#fireworksGlow {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+#fireworks.on,
+#fireworksGlow.on { opacity: 1; }
+
+/* Halo escuro discreto atrás do texto durante a abertura (legibilidade). */
+body.is-celebrating .page::before {
+  content: "";
+  position: absolute;
+  left: 8%; right: 8%; top: 22%; bottom: 22%;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,.42) 0%, rgba(0,0,0,.18) 45%, transparent 72%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes fadeOutDown {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(14px) scale(.97); }
+}
+@keyframes finaleIn {
+  0%   { opacity: 0; transform: translateY(-50%) scale(.82); filter: blur(10px) drop-shadow(0 0 0 rgba(255,214,120,0)); }
+  60%  { opacity: 1; filter: blur(0) drop-shadow(0 0 34px rgba(255,214,120,.55)); }
+  100% { opacity: 1; transform: translateY(-50%) scale(1); filter: blur(0) drop-shadow(0 0 22px rgba(255,214,120,.35)); }
+}
+@keyframes finaleGlow {
+  0%, 100% { filter: drop-shadow(0 0 18px rgba(255,214,120,.30)); }
+  50%      { filter: drop-shadow(0 0 36px rgba(255,214,120,.60)); }
+}
+
+body.is-finale .countdown,
+body.is-finale .soon,
+body.is-finale .launch-line,
+body.is-finale .progress-wrap,
+body.is-finale .footer-note {
+  animation: fadeOutDown .7s cubic-bezier(.4,0,.2,1) forwards;
+  pointer-events: none;
+}
+
+.finale {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 56%;
+  transform: translateY(-50%);
+  text-align: center;
+  padding: 0 16px;
+}
+body.is-finale .finale {
+  display: block;
+  animation: finaleIn 1.2s cubic-bezier(.22,1,.36,1) both;
+}
+.finale__text {
+  display: inline-block;
+  font-size: clamp(40px, 9.5vw, 148px);
+  font-weight: 900;
+  letter-spacing: -.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  background: linear-gradient(175deg, #ffffff 0%, #fff4d8 45%, #f2cf86 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: finaleGlow 2.4s ease-in-out 1.2s infinite;
+}
+
+.page-exit {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .9s ease;
+}
+.page-exit.on { opacity: 1; }
+
+/* Últimos 10 segundos: o relógio pulsa a cada tick */
+@keyframes tickPulse {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 rgba(255,214,120,0); }
+  30%  { transform: scale(1.07); box-shadow: 0 0 34px rgba(255,214,120,.35); border-color: rgba(255,214,120,.55); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 rgba(255,214,120,0); }
+}
+body.final-ten .time-box { border-color: rgba(255,214,120,.22); }
+body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36,1); }
+
+/* Convite para ativar o som da abertura (último minuto) */
+.sound-chip {
+  position: fixed;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 6;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,214,120,.35);
+  background: rgba(10,14,24,.72);
+  color: #f6e6c2;
+  font: 700 13px/1 'Sora', system-ui, sans-serif;
+  letter-spacing: .04em;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: fadeUp .6s cubic-bezier(.22,1,.36,1) both;
+}
+.sound-chip[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  body.is-finale .finale, .finale__text, body.final-ten .time-box.tick { animation: none; }
+}
 </style>
-<link rel="prefetch" href="/entrada.html">
+<link rel="prefetch" href="/p%C3%A1gina.html">
 </head>
 
 <body>
+<canvas id="fireworksGlow" aria-hidden="true"></canvas>
+<canvas id="fireworks" aria-hidden="true"></canvas>
 <main class="page">
 
   <p class="eyebrow" data-i18n="index:eyebrow">Pronto para</p>
@@ -310,36 +435,74 @@ body::after {
 
   <p class="footer-note" data-i18n="index:footer">Prelúdio Jogos &bull; Contagem oficial</p>
 
+  <div class="finale" id="finale" aria-live="polite">
+    <p class="finale__text" data-i18n="index:itsTime">Chegou a hora</p>
+  </div>
+
 </main>
+<div class="page-exit" id="pageExit" aria-hidden="true"></div>
+<button class="sound-chip" id="soundChip" type="button" hidden data-i18n="index:soundOn">🔊 Ative o som para a abertura</button>
 
 <script>
 (function(){
-  const TARGET         = new Date('2026-12-31T23:59:00-03:00').getTime();
-  const START_REFERENCE= new Date('2026-07-05T00:00:00-03:00').getTime();
+  // Lançamento oficial. Quando zera: fogos no fundo → "Chegou a hora" → página
+  // do jogo com a apresentação (página.html?intro=1).
+  const LAUNCH          = new Date('2026-12-31T23:59:00-03:00').getTime();
+  const START_REFERENCE = new Date('2026-07-05T00:00:00-03:00').getTime();
+  const GAME_PAGE       = 'p%C3%A1gina.html';
+  // Quem chegar até 15 min depois do lançamento ainda vê a abertura; depois
+  // disso a raiz leva direto à página do jogo.
+  const CELEBRATION_WINDOW_MS = 15 * 60 * 1000;
+  // Roteiro da abertura (ms a partir do zero)
+  const SHOW_ITS_TIME_AT = 5000;
+  const STOP_LAUNCHES_AT = 10400;
+  const EXIT_FADE_AT     = 11200;
+  const NAVIGATE_AT      = 12100;
+  // Botão "ative o som" aparece no último minuto (o navegador só toca áudio após um toque).
+  const SOUND_PROMPT_MS  = 60 * 1000;
+
+  // Prévia: ?simular=10 faz a contagem terminar em 10 s (só para quem abrir
+  // com o parâmetro; não muda nada para os demais visitantes).
+  const params    = new URLSearchParams(location.search);
+  const simSecs   = Math.round(Number(params.get('simular')));
+  const simulated = Number.isFinite(simSecs) && simSecs >= 3 && simSecs <= 600;
+  const TARGET    = simulated ? Date.now() + simSecs * 1000 : LAUNCH;
+  const START     = simulated ? Date.now() - 60 * 1000 : START_REFERENCE;
 
   const daysEl      = document.getElementById('days');
   const hoursEl     = document.getElementById('hours');
   const minutesEl   = document.getElementById('minutes');
   const secondsEl   = document.getElementById('seconds');
+  const secondsBox  = secondsEl.closest('.time-box');
   const progressBar = document.getElementById('progressBar');
   const statusText  = document.getElementById('statusText');
+  const exitLayer   = document.getElementById('pageExit');
+  const soundChip   = document.getElementById('soundChip');
 
-  let audioCtx = null, audioEnabled = false, lastSecond = null;
+  let audioCtx = null, audioEnabled = false, noiseBuf = null, lastSecond = null, finished = false;
 
   function enableAudio(){
-    if (audioEnabled) return;
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return;
-    try {
-      audioCtx = new Ctx();
-      if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
-      audioEnabled = true;
-    } catch(e){}
+    if (!audioEnabled){
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      try {
+        audioCtx = new Ctx();
+        audioEnabled = true;
+        // Ruído reutilizado por todos os estouros.
+        noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
+        const d = noiseBuf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      } catch(e){ return; }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+    soundChip.hidden = true;
   }
   window.addEventListener('pointerdown', enableAudio, { once: true });
   window.addEventListener('touchstart',  enableAudio, { once: true });
+  window.addEventListener('keydown',     enableAudio, { once: true });
+  soundChip.addEventListener('click', enableAudio);
 
-  function playTick(){
+  function playTick(final){
     if (!audioEnabled || !audioCtx) return;
     try {
       const t    = audioCtx.currentTime;
@@ -347,34 +510,383 @@ body::after {
       const gain = audioCtx.createGain();
       const flt  = audioCtx.createBiquadFilter();
       osc.type = 'square';
-      osc.frequency.setValueAtTime(1850, t);
-      osc.frequency.exponentialRampToValueAtTime(1320, t + .018);
+      osc.frequency.setValueAtTime(final ? 1500 : 1850, t);
+      osc.frequency.exponentialRampToValueAtTime(final ? 980 : 1320, t + .02);
       flt.type = 'bandpass';
       flt.frequency.setValueAtTime(2100, t);
       flt.Q.setValueAtTime(5.5, t);
       gain.gain.setValueAtTime(.00001, t);
-      gain.gain.exponentialRampToValueAtTime(.075, t + .0025);
-      gain.gain.exponentialRampToValueAtTime(.00001, t + .022);
+      gain.gain.exponentialRampToValueAtTime(final ? .14 : .075, t + .0025);
+      gain.gain.exponentialRampToValueAtTime(.00001, t + (final ? .05 : .022));
       osc.connect(flt); flt.connect(gain); gain.connect(audioCtx.destination);
-      osc.start(t); osc.stop(t + .028);
+      osc.start(t); osc.stop(t + .06);
     } catch(e){}
   }
 
+  // ─── Som dos fogos (sintetizado) ──────────────────────────────────────────
+  const Sfx = {
+    ok(){ return audioEnabled && audioCtx && noiseBuf; },
+    noise(t, dur, type, f0, f1, gain, q){
+      const src = audioCtx.createBufferSource(), flt = audioCtx.createBiquadFilter(), g = audioCtx.createGain();
+      src.buffer = noiseBuf;
+      flt.type = type; flt.frequency.setValueAtTime(f0, t); if (f1) flt.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      if (q) flt.Q.setValueAtTime(q, t);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + .006); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      src.connect(flt); flt.connect(g); g.connect(audioCtx.destination);
+      src.start(t, Math.random() * 1.2, dur + .05);
+    },
+    tone(t, dur, f0, f1, gain, type){
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = type || 'sine'; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + dur + .05);
+    },
+    launch(whistle){
+      if (!this.ok()) return;
+      try {
+        const t = audioCtx.currentTime;
+        this.tone(t, .16, 95, 42, .12);
+        this.noise(t, .25, 'bandpass', 900, 400, .05, 1.2);
+        if (whistle) this.tone(t + .05, 1.15, 950, 2700, .018, 'triangle');
+      } catch(e){}
+    },
+    boom(size, crackle){
+      if (!this.ok()) return;
+      try {
+        // Luz chega antes do som: atraso de "distância".
+        const t = audioCtx.currentTime + .12 + Math.random() * .3;
+        this.noise(t, 1.1 + size * .6, 'lowpass', 1400, 90, .22 + .3 * size);
+        this.tone(t, .9, 70, 28, .28 * size + .08);
+        if (crackle){
+          const n = 18 + Math.round(Math.random() * 18);
+          for (let i = 0; i < n; i++) this.noise(t + .45 + Math.random() * .9, .012 + Math.random() * .02, 'highpass', 2500 + Math.random() * 3000, 0, .05 + Math.random() * .06);
+        }
+      } catch(e){}
+    }
+  };
+
+  // ─── Fogos de artifício realistas (canvas atrás do conteúdo) ─────────────
+  const Fireworks = (function(){
+    const canvas = document.getElementById('fireworks');          // faíscas, com rastro
+    const ctx = canvas.getContext('2d');
+    const glowCanvas = document.getElementById('fireworksGlow');  // fumaça e clarões, limpo a cada quadro
+    const gctx = glowCanvas.getContext('2d');
+    const small = Math.min(window.innerWidth, window.innerHeight) < 640 || (navigator.hardwareConcurrency || 8) <= 4;
+    const MAX_PARTICLES = small ? 1600 : 3600;
+    const DENSITY = small ? .65 : 1;
+    // Cores de pirotecnia (sais metálicos) — dourado e prata dominam, como num show real.
+    const C = {
+      gold: [255, 190, 86], silver: [228, 236, 255], red: [255, 66, 46], green: [104, 255, 128],
+      blue: [86, 146, 255], purple: [192, 100, 255], orange: [255, 138, 46], cyan: [104, 228, 255],
+      white: [255, 250, 238], ember: [255, 120, 40]
+    };
+    const SHOW_COLORS = ['gold', 'gold', 'silver', 'red', 'green', 'blue', 'purple', 'orange', 'cyan'];
+    const HOT = [255, 252, 240];
+    const particles = [], rockets = [], flashes = [], smokes = [];
+    const sprites = new Map();
+    let w = 0, h = 0, S = 1, raf = 0, last = 0, t0 = 0, nextLaunch = 0, finaleAt = Infinity, running = false;
+
+    const rnd  = (a, b) => a + Math.random() * (b - a);
+    const pick = a => a[(Math.random() * a.length) | 0];
+    const mix  = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+
+    function resize(){
+      const dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
+      w = window.innerWidth; h = window.innerHeight;
+      S = Math.max(.55, Math.min(1.5, Math.min(w, h) / 800));
+      for (const [cv, cx] of [[canvas, ctx], [glowCanvas, gctx]]){
+        cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+        cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+    }
+
+    // Brilho pré-renderizado por cor (quantizada) — muito mais leve que shadowBlur.
+    function sprite(c){
+      const q = [c[0], c[1], c[2]].map(v => Math.max(0, Math.min(255, Math.round(v / 15) * 15)));
+      const key = q.join(',');
+      let s = sprites.get(key);
+      if (!s){
+        s = document.createElement('canvas'); s.width = s.height = 64;
+        const g = s.getContext('2d'), grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+        grd.addColorStop(0,   'rgba(255,255,255,1)');
+        grd.addColorStop(.16, 'rgba(' + q + ',.95)');
+        grd.addColorStop(.42, 'rgba(' + q + ',.26)');
+        grd.addColorStop(1,   'rgba(' + q + ',0)');
+        g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
+        if (sprites.size > 500) sprites.clear();
+        sprites.set(key, s);
+      }
+      return s;
+    }
+
+    // Direção uniforme numa esfera, projetada no plano do céu (borda mais densa).
+    function dir3(){
+      let x, y, z, d;
+      do { x = rnd(-1, 1); y = rnd(-1, 1); z = rnd(-1, 1); d = x * x + y * y + z * z; } while (d > 1 || d < 1e-4);
+      d = Math.sqrt(d); return [x / d, y / d];
+    }
+
+    function add(p){
+      if (particles.length >= MAX_PARTICLES) return;
+      p.px = p.x; p.py = p.y; p.age = 0;
+      particles.push(p);
+    }
+
+    function flash(x, y, color, power){
+      flashes.push({ x, y, c: color, life: 1, decay: .055 / Math.max(.6, power), r: Math.min(w, h) * (.35 + .35 * power), power });
+    }
+    function smoke(x, y, R){
+      const n = small ? 3 : 6;
+      for (let i = 0; i < n; i++){
+        const a = Math.random() * Math.PI * 2, d = rnd(.1, .7) * R;
+        smokes.push({ x: x + Math.cos(a) * d, y: y + Math.sin(a) * d, r: rnd(.25, .5) * R, vr: rnd(.25, .6) * S,
+          vx: rnd(-.25, .25) * S, vy: rnd(-.35, -.05) * S, a: rnd(.05, .085), life: 1, decay: rnd(.0035, .006) });
+      }
+    }
+
+    // Uma bomba no céu. type: peony | chrys | willow | ring | crossette | crackle | brocade | salute
+    function burst(x, y, type, colorName, scale = 1){
+      const base = C[colorName] || C.gold;
+      const second = Math.random() < .3 ? C[pick(SHOW_COLORS)] : null;
+      const R = rnd(.19, .26) * Math.min(w, h) * scale;
+      const spec = {
+        peony:     { n: 140, drag: .963, life: [62, 86],  g: .028, size: [1.5, 2.3] },
+        chrys:     { n: 150, drag: .965, life: [72, 96],  g: .026, size: [1.4, 2.0], glitter: .3 },
+        willow:    { n: 95,  drag: .952, life: [150, 205], g: .015, size: [1.3, 1.8], embers: .4 },
+        ring:      { n: 72,  drag: .964, life: [66, 84],  g: .026, size: [1.6, 2.3] },
+        crossette: { n: 28,  drag: .968, life: [44, 52],  g: .024, size: [2.0, 2.6], split: true },
+        crackle:   { n: 120, drag: .961, life: [54, 76],  g: .027, size: [1.2, 1.8], strobe: true, pop: true },
+        brocade:   { n: 130, drag: .956, life: [110, 140], g: .02, size: [1.4, 1.9], embers: .25 },
+        salute:    { n: 220, drag: .94,  life: [32, 48],  g: .02,  size: [1.6, 2.4] }
+      }[type] || null;
+      if (!spec) return;
+      const count = Math.round(spec.n * DENSITY * rnd(.85, 1.1));
+      const tilt = rnd(-.9, .9), squash = rnd(.25, .55);
+      for (let i = 0; i < count; i++){
+        let dx, dy;
+        if (type === 'ring'){
+          const a = (i / count) * Math.PI * 2, cx = Math.cos(a), cy = Math.sin(a) * squash;
+          dx = cx * Math.cos(tilt) - cy * Math.sin(tilt); dy = cx * Math.sin(tilt) + cy * Math.cos(tilt);
+        } else { [dx, dy] = dir3(); }
+        const v = R * (1 - spec.drag) * rnd(.93, 1.05);
+        const color = type === 'salute' ? C.white
+          : (type === 'willow' || type === 'brocade') ? C.gold
+          : type === 'crackle' ? (Math.random() < .5 ? C.silver : C.gold)
+          : (second && i % 2 ? second : base);
+        add({ x, y, vx: dx * v, vy: dy * v, drag: spec.drag, g: spec.g * S, life: rnd(spec.life[0], spec.life[1]),
+          size: rnd(spec.size[0], spec.size[1]) * S, c: color, glitter: spec.glitter || 0, embers: spec.embers || 0,
+          strobe: !!spec.strobe, pop: !!spec.pop && Math.random() < .55, split: !!spec.split, hot: type === 'salute' ? .5 : .14 });
+      }
+      const power = type === 'salute' ? 1.6 : (type === 'willow' || type === 'brocade') ? 1.1 : .9;
+      flash(x, y, type === 'salute' ? C.white : base, power * scale);
+      smoke(x, y, R);
+      Sfx.boom(Math.min(1.4, power * scale), type === 'crackle' || type === 'brocade');
+    }
+
+    function rocket(type, colorName, x, apex){
+      const y0 = h + 10;
+      const ty = apex != null ? apex : h * rnd(.1, .38);
+      const g = .045 * S;
+      rockets.push({ x: x != null ? x : w * rnd(.1, .9), y: y0, vx: rnd(-.45, .45) * S, vy: -Math.sqrt(2 * g * (y0 - ty)), g,
+        type, color: colorName, px: 0, py: 0 });
+      Sfx.launch(Math.random() < .3);
+    }
+
+    function randomShell(){
+      const r = Math.random();
+      return r < .26 ? 'peony' : r < .48 ? 'chrys' : r < .6 ? 'crackle' : r < .7 ? 'ring' : r < .8 ? 'crossette' : r < .9 ? 'willow' : 'brocade';
+    }
+
+    function program(now){
+      if (!running || now < nextLaunch) return;
+      if (now < finaleAt){
+        // Abertura: ritmo intenso e variado.
+        rocket(randomShell(), pick(SHOW_COLORS));
+        if (Math.random() < .35) rocket(randomShell(), pick(SHOW_COLORS));
+        nextLaunch = now + rnd(260, 520);
+      } else {
+        // Depois do grande final: chorões e coroas douradas, majestosos.
+        rocket(Math.random() < .7 ? (Math.random() < .5 ? 'willow' : 'brocade') : 'peony', Math.random() < .7 ? 'gold' : pick(SHOW_COLORS));
+        nextLaunch = now + rnd(620, 950);
+      }
+    }
+
+    function frame(now){
+      const dt = Math.min(2.5, (now - last) / 16.67 || 1);
+      last = now;
+      program(now);
+
+      // Rastro: esmaece o quadro anterior mantendo o fundo da página visível.
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = 'rgba(0,0,0,' + (1 - Math.pow(1 - .2, dt)).toFixed(3) + ')';
+      ctx.fillRect(0, 0, w, h);
+
+      // Canvas do brilho: limpo a cada quadro, então fumaça e clarões não se acumulam.
+      gctx.clearRect(0, 0, w, h);
+
+      // Fumaça que fica no ar e se dissipa.
+      gctx.globalCompositeOperation = 'source-over';
+      for (let i = smokes.length - 1; i >= 0; i--){
+        const s = smokes[i];
+        s.x += s.vx * dt; s.y += s.vy * dt; s.r += s.vr * dt; s.life -= s.decay * dt;
+        if (s.life <= 0){ smokes.splice(i, 1); continue; }
+        const grd = gctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r);
+        grd.addColorStop(0, 'rgba(96,102,128,' + (s.a * s.life).toFixed(3) + ')');
+        grd.addColorStop(1, 'rgba(96,102,128,0)');
+        gctx.fillStyle = grd; gctx.fillRect(s.x - s.r, s.y - s.r, s.r * 2, s.r * 2);
+      }
+
+      // Clarões: iluminam o céu inteiro por um instante.
+      gctx.globalCompositeOperation = 'lighter';
+      for (let i = flashes.length - 1; i >= 0; i--){
+        const f = flashes[i];
+        f.life -= f.decay * dt;
+        if (f.life <= 0){ flashes.splice(i, 1); continue; }
+        const k = f.life * f.life;
+        gctx.fillStyle = 'rgba(' + (f.c[0] | 0) + ',' + (f.c[1] | 0) + ',' + (f.c[2] | 0) + ',' + Math.min(.22, .1 * k * f.power).toFixed(3) + ')';
+        gctx.fillRect(0, 0, w, h);
+        const grd = gctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r);
+        grd.addColorStop(0, 'rgba(255,250,235,' + (.5 * k).toFixed(3) + ')');
+        grd.addColorStop(.22, 'rgba(' + (f.c[0] | 0) + ',' + (f.c[1] | 0) + ',' + (f.c[2] | 0) + ',' + (.2 * k).toFixed(3) + ')');
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        gctx.fillStyle = grd; gctx.fillRect(f.x - f.r, f.y - f.r, f.r * 2, f.r * 2);
+      }
+
+      ctx.globalCompositeOperation = 'lighter';
+
+      // Foguetes subindo com cauda de faíscas.
+      for (let i = rockets.length - 1; i >= 0; i--){
+        const r = rockets[i];
+        r.px = r.x; r.py = r.y;
+        r.x += r.vx * dt; r.y += r.vy * dt; r.vy += r.g * dt;
+        ctx.strokeStyle = 'rgba(255,220,170,.55)'; ctx.lineWidth = 1.6 * S;
+        ctx.beginPath(); ctx.moveTo(r.px, r.py); ctx.lineTo(r.x, r.y); ctx.stroke();
+        const s = 7 * S; ctx.globalAlpha = .95; ctx.drawImage(sprite(C.gold), r.x - s, r.y - s, s * 2, s * 2); ctx.globalAlpha = 1;
+        if (Math.random() < .8) add({ x: r.x, y: r.y, vx: rnd(-.5, .5) * S, vy: rnd(.2, 1.2) * S, drag: .94, g: .03 * S,
+          life: rnd(18, 34), size: rnd(.7, 1.1) * S, c: C.ember, hot: .2, glitter: 0, embers: 0 });
+        if (r.vy >= -.35){ burst(r.x, r.y, r.type, r.color); rockets.splice(i, 1); }
+      }
+
+      // Estrelas: branco-quente → cor → brasa, com arrasto do ar e queda.
+      for (let i = particles.length - 1; i >= 0; i--){
+        const p = particles[i];
+        p.px = p.x; p.py = p.y;
+        const k = Math.pow(p.drag, dt);
+        p.vx *= k; p.vy = p.vy * k + p.g * dt;
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        p.age += dt;
+        const t = p.age / p.life;
+        if (t >= 1){
+          if (p.pop){
+            for (let j = 0; j < 4; j++) add({ x: p.x, y: p.y, vx: rnd(-1.6, 1.6) * S, vy: rnd(-1.6, 1.6) * S, drag: .9, g: .02 * S,
+              life: rnd(8, 14), size: rnd(.8, 1.2) * S, c: C.white, hot: 1, glitter: 0, embers: 0 });
+          }
+          particles.splice(i, 1); continue;
+        }
+        if (p.split && t > .5){
+          p.split = false;
+          const sp = 2.6 * S, a0 = Math.random() * Math.PI;
+          for (let j = 0; j < 4; j++){
+            const a = a0 + j * Math.PI / 2;
+            add({ x: p.x, y: p.y, vx: Math.cos(a) * sp + p.vx * .4, vy: Math.sin(a) * sp + p.vy * .4, drag: .955, g: p.g,
+              life: rnd(30, 40), size: p.size * .85, c: p.c, hot: .1, glitter: 0, embers: 0 });
+          }
+          particles.splice(i, 1); continue;
+        }
+        if (p.embers && Math.random() < p.embers * dt){
+          add({ x: p.x, y: p.y, vx: p.vx * .15, vy: p.vy * .15, drag: .95, g: .035 * S, life: rnd(26, 52),
+            size: rnd(.6, .95) * S, c: C.gold, hot: 0, glitter: 0, embers: 0, dim: true });
+        }
+        if (p.glitter && Math.random() < p.glitter * dt){
+          add({ x: p.x, y: p.y, vx: 0, vy: 0, drag: .9, g: .02 * S, life: rnd(10, 18), size: rnd(.6, 1) * S,
+            c: C.silver, hot: .5, glitter: 0, embers: 0 });
+        }
+        const color = t < p.hot ? mix(HOT, p.c, t / p.hot) : (t > .72 ? mix(p.c, C.ember, (t - .72) / .28 * .8) : p.c);
+        let alpha = t < .7 ? 1 : 1 - (t - .7) / .3;
+        if (p.dim) alpha *= .65;
+        if (p.strobe) alpha *= Math.random() < .45 ? .15 : 1; else alpha *= .82 + Math.random() * .18;
+        if (alpha <= .02) continue;
+        ctx.strokeStyle = 'rgba(' + (color[0] | 0) + ',' + (color[1] | 0) + ',' + (color[2] | 0) + ',' + (alpha * .75).toFixed(3) + ')';
+        ctx.lineWidth = p.size * .8;
+        ctx.beginPath(); ctx.moveTo(p.px, p.py); ctx.lineTo(p.x, p.y); ctx.stroke();
+        const s = p.size * 2.6;
+        ctx.globalAlpha = alpha; ctx.drawImage(sprite(color), p.x - s, p.y - s, s * 2, s * 2);
+      }
+      ctx.globalAlpha = 1;
+
+      if (running || particles.length || rockets.length || flashes.length || smokes.length) raf = requestAnimationFrame(frame);
+    }
+
+    return {
+      start(){
+        resize();
+        window.addEventListener('resize', resize);
+        canvas.classList.add('on');
+        glowCanvas.classList.add('on');
+        document.body.classList.add('is-celebrating');
+        running = true;
+        t0 = last = performance.now();
+        nextLaunch = t0 + 380;
+        // Salva de abertura no mesmo instante do zero.
+        burst(w * .5,  h * .30, 'peony', 'gold', 1.15);
+        burst(w * .22, h * .24, 'chrys', pick(SHOW_COLORS), .95);
+        burst(w * .78, h * .26, 'crackle', 'silver', .95);
+        rocket('peony', pick(SHOW_COLORS)); rocket('ring', pick(SHOW_COLORS));
+        raf = requestAnimationFrame(frame);
+      },
+      finale(){
+        if (!running) return;
+        finaleAt = performance.now();
+        nextLaunch = finaleAt + 1700;
+        // Grande final: clarão branco no centro + barragem de bombas.
+        burst(w * .5, h * .34, 'salute', 'white', 1.25);
+        burst(w * .3, h * .22, 'brocade', 'gold', 1.1);
+        burst(w * .7, h * .22, 'brocade', 'gold', 1.1);
+        const n = small ? 7 : 11;
+        for (let i = 0; i < n; i++){
+          setTimeout(() => rocket(pick(['peony', 'chrys', 'crackle', 'peony']), pick(SHOW_COLORS), w * (.08 + .84 * (i + Math.random() * .5) / n), h * rnd(.1, .32)), i * 120);
+        }
+      },
+      stop(){ running = false; }
+    };
+  })();
+
   function pad(n){ return String(Math.max(0, n)).padStart(2, '0'); }
+
+  function goToGame(withIntro){
+    location.replace(GAME_PAGE + (withIntro ? '?intro=1' : ''));
+  }
+
+  function celebrate(){
+    soundChip.hidden = true;
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduceMotion) Fireworks.start();
+    setTimeout(() => { document.body.classList.add('is-finale'); if (!reduceMotion) Fireworks.finale(); }, reduceMotion ? 400 : SHOW_ITS_TIME_AT);
+    setTimeout(() => Fireworks.stop(), STOP_LAUNCHES_AT);
+    setTimeout(() => exitLayer.classList.add('on'), reduceMotion ? 3200 : EXIT_FADE_AT);
+    setTimeout(() => goToGame(true), reduceMotion ? 4100 : NAVIGATE_AT);
+  }
+
+  function finish(lateMs){
+    if (finished) return;
+    finished = true;
+    document.body.classList.remove('final-ten');
+    daysEl.textContent = hoursEl.textContent = minutesEl.textContent = secondsEl.textContent = '00';
+    statusText.setAttribute('data-i18n', 'index:soonItsTime');
+    statusText.textContent = (window.OSL_I18N && window.OSL_I18N.t('index:soonItsTime')) || 'Chegou a hora.';
+    progressBar.style.width = '100%';
+    if (!simulated && lateMs > CELEBRATION_WINDOW_MS) { goToGame(false); return; }
+    celebrate();
+  }
 
   function update(){
     const now  = Date.now();
     const diff = TARGET - now;
 
-    if (diff <= 0){
-      daysEl.textContent = hoursEl.textContent = minutesEl.textContent = secondsEl.textContent = '00';
-      statusText.setAttribute('data-i18n', 'index:soonItsTime');
-      statusText.textContent = (window.OSL_I18N && window.OSL_I18N.t('index:soonItsTime')) || 'Chegou a hora.';
-      progressBar.style.width = '100%';
-      return;
-    }
+    if (diff <= 0){ finish(now - TARGET); return; }
 
-    const total   = Math.floor(diff / 1000);
+    // Arredonda para cima: o "01" segundo fica na tela até o instante do zero.
+    const total   = Math.ceil(diff / 1000);
     const days    = Math.floor(total / 86400);
     const hours   = Math.floor((total % 86400) / 3600);
     const minutes = Math.floor((total % 3600) / 60);
@@ -385,16 +897,31 @@ body::after {
     minutesEl.textContent = pad(minutes);
     secondsEl.textContent = pad(seconds);
 
-    if (lastSecond !== null && seconds !== lastSecond) playTick();
+    const finalTen = total <= 10;
+    document.body.classList.toggle('final-ten', finalTen);
+    if (lastSecond !== null && seconds !== lastSecond){
+      playTick(finalTen);
+      if (finalTen){ secondsBox.classList.remove('tick'); void secondsBox.offsetWidth; secondsBox.classList.add('tick'); }
+    }
     lastSecond = seconds;
+    if (!audioEnabled && diff <= SOUND_PROMPT_MS) soundChip.hidden = false;
 
-    const range    = TARGET - START_REFERENCE;
-    const elapsed  = now   - START_REFERENCE;
+    const range    = TARGET - START;
+    const elapsed  = now   - START;
     progressBar.style.width = (Math.max(0, Math.min(1, elapsed / range)) * 100).toFixed(2) + '%';
   }
 
+  // Agenda cada atualização na virada exata do segundo da contagem, para o
+  // zero (e os fogos) acontecerem no mesmo instante do lançamento.
+  function schedule(){
+    if (finished) return;
+    const remaining = TARGET - Date.now();
+    const wait = remaining <= 0 ? 0 : (remaining % 1000 || 1000);
+    setTimeout(() => { update(); schedule(); }, wait + 2);
+  }
+
   update();
-  setInterval(update, 1000);
+  schedule();
 })();
 </script>
 <script src="js/sw-register.js?v=12"></script>
