@@ -466,6 +466,22 @@
       white-space:nowrap;
     }
     .recStatusBadge.visible{ display:inline-flex; }
+    /* Aviso permanente: toda sala é gravada por segurança (30 dias). */
+    .secRecNotice{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:3px 10px;
+      border-radius:999px;
+      background:rgba(220,60,60,.10);
+      border:1px solid rgba(220,60,60,.28);
+      color:#f3c9c9;
+      font-size:11px;
+      letter-spacing:.02em;
+      white-space:nowrap;
+      pointer-events:auto;
+    }
+    @media (max-width:960px){ .secRecNotice{ font-size:10px; padding:2px 8px; white-space:normal; text-align:center; } }
     .recDot{
       width:6px;
       height:6px;
@@ -7487,6 +7503,10 @@
             <span class="recDot"></span>
             <span id="recStatusText" data-i18n="sala:topbar.recording">GRAVANDO</span>
           </div>
+          <div class="secRecNotice" id="secRecNotice" role="note" data-i18n-title="sala:topbar.securityRecordingTitle" title="Esta sala é gravada por segurança. A gravação fica guardada por 30 dias e depois é apagada automaticamente.">
+            <span class="recDot" aria-hidden="true"></span>
+            <span data-i18n="sala:topbar.securityRecording">Sala gravada por segurança · apagada em 30 dias</span>
+          </div>
         </div>
 
         <div class="topActions" style="align-self:stretch;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;padding:10px 0;">
@@ -8578,6 +8598,7 @@
   <!-- ===== RECORDING CONTROL ===== -->
   <!-- ===== RECORDING CONTROL =====-->
   <script src="js/ui/recording.js"></script>
+  <script src="js/ui/security-recording-notice.js"></script>
 
   <!-- ===== LIVE STREAMING MODAL ===== -->
   <style>

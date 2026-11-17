@@ -246,7 +246,7 @@ subscribe(snap => {
       // Auto-recording (host, uma vez por sessão)
       if (S.isHost && !S.autoRecordingStarted) {
         S.autoRecordingStarted = true;
-        const base = window.PANEL_SERVER_BASE || "https://osl-video-server-production.up.railway.app";
+        const base = window.PANEL_SERVER_BASE || "https://sextolugar-backend-legado-production.up.railway.app";
         fetch(`${base}/recording/auto-start`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -13,6 +13,10 @@ Adicionalmente, todos os HTMLs daqui têm:
 - Banner laranja fixo no topo identificando o ambiente
 - Prefixo `[STAGING]` no `<title>` da aba
 
+## Firebase e API (desde 2026-11-17)
+
+O staging usa o Firebase **do próprio jogo** (`osextolugar-jogo`) e a API do jogo — os mesmos de produção. O antigo projeto `sextolugar-staging` virou a homologação do Espaço Prelúdio e não pode ser usado aqui. Ou seja: o staging é uma prévia de front-end sobre os dados reais do jogo; o que for gravado aqui (inclusive pelo `admin-theme.html`) vale em produção. Homologação isolada exigiria um projeto Firebase próprio do jogo e um ambiente de staging no serviço Railway do jogo.
+
 ## Fluxo de trabalho
 
 1. Edita os arquivos dentro de `/staging/` (NUNCA edita prod direto pra mudanças experimentais).

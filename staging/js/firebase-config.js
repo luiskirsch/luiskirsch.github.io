@@ -1,30 +1,26 @@
 // Firebase config for STAGING.
 //
-// IMPORTANT: this file should point to the `sextolugar-staging` Firebase
-// project once it's created. Until then, it falls back to the production
-// project so the rest of the staging site keeps functioning (auth, sala,
-// pagamentos). The fallback means active-theme will read from the
-// production Firestore — that's fine; the doc just doesn't exist yet.
+// Desde 2026-11-17 o staging do jogo usa o projeto do PRÓPRIO jogo
+// (osextolugar-jogo) e a API do jogo. O antigo `sextolugar-staging` virou a
+// homologação do Espaço Prelúdio e não pode ser tocado pelo jogo.
 //
-// Sprint 5 hand-off:
-// 1) Create the `sextolugar-staging` Firebase project (see staging/README.md).
-// 2) Replace the values below with the staging Web App credentials.
-// 3) Create `config/activeTheme` doc in the staging Firestore.
-// 4) Promotion to production must NOT copy this file.
+// Consequência: o staging é uma prévia de front-end sobre os dados reais do
+// jogo (protegida pelo Cloudflare Access). Escritas feitas aqui — inclusive
+// no admin-theme.html — valem em produção. Para homologação isolada seria
+// preciso um projeto Firebase próprio do jogo (ex.: osextolugar-jogo-hml) e
+// um ambiente de staging no serviço Railway do jogo.
+//
+// Promotion to production must NOT copy this file.
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyAflOnCIpF6NYCxdd23XSZTLK2V54XLGFU",
-  authDomain: "sextolugar-staging.firebaseapp.com",
-  projectId: "sextolugar-staging",
-  storageBucket: "sextolugar-staging.firebasestorage.app",
-  messagingSenderId: "407627003441",
-  appId: "1:407627003441:web:c501d2d46f04f40cd7c710",
-  measurementId: "G-WRYDRCC4GV",
+  apiKey: "AIzaSyAkA9JXidiHEE3tFcd6o5yBcAYI2RT2daM",
+  authDomain: "osextolugar-jogo.firebaseapp.com",
+  projectId: "osextolugar-jogo",
+  storageBucket: "osextolugar-jogo.firebasestorage.app",
+  messagingSenderId: "720257993401",
+  appId: "1:720257993401:web:a9d7a41c1ef8b47d5b6968",
 
   // --- STAGING MARKER ---
-  // Set to true once the values above are replaced with the real
-  // sextolugar-staging credentials. While false, the site connects to
-  // production Firestore (read-only effects on theme, but writes will
-  // hit production data — be careful in admin-theme.html).
-  __isStagingProject: true,
+  // false: este staging NÃO tem projeto Firebase isolado (usa o do jogo).
+  __isStagingProject: false,
 };

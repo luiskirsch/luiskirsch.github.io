@@ -114,7 +114,7 @@
       statusEl.textContent = t('pendente:status.verifying', "Verificando confirmação do pagamento...");
       smallEl.textContent = t('pendente:small.attempt', `Tentativa ${tentativas} de ${maxTentativas}`, { n: tentativas, max: maxTentativas });
 
-      const res = await fetch(`https://osl-video-server-staging.up.railway.app/status-pagamento/${encodeURIComponent(ref)}`);
+      const res = await fetch(`https://sextolugar-backend-legado-production.up.railway.app/status-pagamento/${encodeURIComponent(ref)}`);
       const data = await res.json();
 
       if (res.ok && data.approved && data.paymentId) {
