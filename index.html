@@ -134,7 +134,9 @@ body::after {
 
 .title .line2 {
   display: block;
-  font-size: clamp(42px, 7.8vh, 108px);
+  /* Limitado também pela largura: em celular alto e estreito o "SEXTOLUGAR?"
+     ficava mais largo que a tela e era cortado nas bordas. */
+  font-size: clamp(30px, min(7.8vh, 11.5vw), 108px);
   font-weight: 900;
   letter-spacing: -.03em;
   line-height: 1;
@@ -333,7 +335,7 @@ body.is-finale .finale {
 }
 .finale__text {
   display: inline-block;
-  font-size: clamp(40px, 9.5vw, 148px);
+  font-size: clamp(36px, 10.5vw, 148px);
   font-weight: 900;
   letter-spacing: -.02em;
   line-height: 1;
