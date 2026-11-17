@@ -370,9 +370,14 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
 /* Convite para ativar o som da abertura (último minuto) */
 .sound-chip {
   position: fixed;
-  left: 50%;
+  /* Centralizado por margem: a animação de entrada (fadeUp) usa transform e
+     anulava um translateX(-50%), deixando o botão deslocado para a direita. */
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: max-content;
+  max-width: calc(100% - 32px);
   bottom: max(18px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
   z-index: 6;
   padding: 10px 18px;
   border-radius: 999px;
