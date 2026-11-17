@@ -347,6 +347,43 @@ body.is-finale .finale {
   animation: finaleGlow 2.4s ease-in-out 1.2s infinite;
 }
 
+/* Saída premium: o conteúdo se desfaz, uma luz dourada floresce e a tela escurece. */
+@keyframes pageDissolve {
+  to { opacity: 0; transform: scale(1.05); filter: blur(10px); }
+}
+body.is-exiting .page { animation: pageDissolve 1.6s cubic-bezier(.4,0,.2,1) forwards; }
+.exit-light {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 140vmax;
+  height: 140vmax;
+  margin: -70vmax 0 0 -70vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,228,168,.5) 0%, rgba(255,198,104,.16) 22%, rgba(0,0,0,0) 55%);
+  opacity: 0;
+  transform: scale(.15);
+  pointer-events: none;
+  z-index: 9;
+}
+@keyframes lightBloom {
+  0%   { opacity: 0; transform: scale(.15); }
+  45%  { opacity: 1; transform: scale(.9); }
+  100% { opacity: 0; transform: scale(1.4); }
+}
+body.is-exiting .exit-light { animation: lightBloom 2.2s cubic-bezier(.22,1,.36,1) .25s forwards; }
+
+/* Transição entre páginas (navegadores com View Transitions): a página do
+   jogo surge do escuro. Precisa do mesmo bloco em página.html. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: vtOut .6s ease both; }
+::view-transition-new(root) { animation: vtIn 1.2s cubic-bezier(.22,1,.36,1) both; }
+@keyframes vtOut { to { opacity: 0; } }
+@keyframes vtIn {
+  from { opacity: 0; transform: scale(1.035); filter: blur(12px) brightness(1.5); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+
 .page-exit {
   position: fixed;
   inset: 0;
@@ -395,6 +432,8 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
 
 @media (prefers-reduced-motion: reduce) {
   body.is-finale .finale, .finale__text, body.final-ten .time-box.tick { animation: none; }
+  body.is-exiting .page, body.is-exiting .exit-light { animation: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
 </style>
 <link rel="prefetch" href="/p%C3%A1gina.html">
@@ -432,7 +471,7 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
   </div>
 
   <p class="soon" id="statusText" data-i18n="index:soon">Em breve!</p>
-  <p class="launch-line" data-i18n="index:launchLine">Lançamento em 31 de dezembro de 2026 às 23h59</p>
+  <p class="launch-line" data-i18n="index:launchLine">Lançamento na virada do ano · 31/12/2026 às 23h59min59s</p>
 
   <div class="progress-wrap">
     <div class="progress">
@@ -447,24 +486,29 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
   </div>
 
 </main>
+<div class="exit-light" aria-hidden="true"></div>
 <div class="page-exit" id="pageExit" aria-hidden="true"></div>
 <button class="sound-chip" id="soundChip" type="button" hidden data-i18n="index:soundOn">🔊 Ative o som para a abertura</button>
 
 <script>
 (function(){
-  // Lançamento oficial. Quando zera: fogos no fundo → "Chegou a hora" → página
-  // do jogo com a apresentação (página.html?intro=1).
-  const LAUNCH          = new Date('2026-12-31T23:59:00-03:00').getTime();
+  // Lançamento oficial na virada do ano: o zero acontece quando termina o
+  // 23:59:59 de 31/12/2026 — meia-noite em Brasília. Os foguetes da abertura
+  // sobem no último segundo e estouram no zero; depois "Chegou a hora" e a
+  // página do jogo com a apresentação (página.html?intro=1).
+  const LAUNCH          = new Date('2027-01-01T00:00:00-03:00').getTime();
   const START_REFERENCE = new Date('2026-07-05T00:00:00-03:00').getTime();
   const GAME_PAGE       = 'p%C3%A1gina.html';
   // Quem chegar até 15 min depois do lançamento ainda vê a abertura; depois
   // disso a raiz leva direto à página do jogo.
   const CELEBRATION_WINDOW_MS = 15 * 60 * 1000;
-  // Roteiro da abertura (ms a partir do zero)
-  const SHOW_ITS_TIME_AT = 5000;
-  const STOP_LAUNCHES_AT = 10400;
-  const EXIT_FADE_AT     = 11200;
-  const NAVIGATE_AT      = 12100;
+  // Roteiro da abertura (ms em relação ao zero): 30 s de fogos.
+  // As bombas da abertura saem nos últimos segundos e estouram no zero.
+  const SHOW_ITS_TIME_AT = 5000;    // "Chegou a hora" (fica até a transição)
+  const SHOW_END_AT      = 29500;   // último lançamento; a cortina dourada estoura aos 29 s
+  const EXIT_AT          = 31200;   // transição: som baixa, luz dourada, tela escurece
+  const AUDIO_FADE_MS    = 2600;
+  const NAVIGATE_AT      = 34000;
   // Botão "ative o som" aparece no último minuto (o navegador só toca áudio após um toque).
   const SOUND_PROMPT_MS  = 60 * 1000;
 
@@ -486,7 +530,7 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
   const exitLayer   = document.getElementById('pageExit');
   const soundChip   = document.getElementById('soundChip');
 
-  let audioCtx = null, audioEnabled = false, noiseBuf = null, lastSecond = null, finished = false;
+  let audioCtx = null, audioEnabled = false, noiseBuf = null, lastSecond = null, finished = false, prelaunchTimer = null;
 
   function enableAudio(){
     if (!audioEnabled){
@@ -598,6 +642,15 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
       return this.chain;
     },
 
+    // Baixa todo o som suavemente (inclui o eco) antes da troca de página.
+    fadeOut(sec){
+      if (!audioCtx || !this.chain) return;
+      const g = this.chain.master.gain, t = audioCtx.currentTime;
+      g.cancelScheduledValues(t); g.setValueAtTime(g.value, t);
+      g.linearRampToValueAtTime(g.value * .55, t + sec * .4);
+      g.exponentialRampToValueAtTime(.0001, t + sec);
+    },
+
     play(buf, { when = 0, rate = 1, gain = 1, pan = 0, lowpass = 16000, send = .35 } = {}){
       if (!buf || this.voices > 36) return;
       const { master, verb } = this.graph();
@@ -693,18 +746,25 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
   window.OSL_FOGOS = { status: () => ({
     audio: audioCtx ? audioCtx.state : 'desligado',
     estrondos: Sfx.bank.boom.length, estalos: Sfx.bank.crackle.length, assobios: Sfx.bank.whistle.length,
-    vozesTocando: Sfx.voices
+    vozesTocando: Sfx.voices,
+    volume: Sfx.chain ? Number(Sfx.chain.master.gain.value.toFixed(4)) : null
   }) };
 
-  // ─── Fogos de artifício realistas (canvas atrás do conteúdo) ─────────────
+  // ─── Fogos de artifício com física real (canvas atrás do conteúdo) ────────
+  // Mundo em metros e segundos: gravidade 9,81 m/s² igual para tudo, arrasto do
+  // ar quadrático (a = −k·|v − vento|·(v − vento)), vento leve, e bombas com
+  // espoleta de tempo — sobem e estouram no instante programado, como as de
+  // verdade. A tela mostra ~240 m de céu (300 m no celular em pé) e o tempo
+  // corre 2,4× para caber no ritmo do show.
   const Fireworks = (function(){
     const canvas = document.getElementById('fireworks');          // faíscas, com rastro
     const ctx = canvas.getContext('2d');
     const glowCanvas = document.getElementById('fireworksGlow');  // fumaça e clarões, limpo a cada quadro
     const gctx = glowCanvas.getContext('2d');
     const small = Math.min(window.innerWidth, window.innerHeight) < 640 || (navigator.hardwareConcurrency || 8) <= 4;
-    const MAX_PARTICLES = small ? 1600 : 3600;
-    const DENSITY = small ? .65 : 1;
+    const MAX_PARTICLES = small ? 1800 : 3800;
+    const DENSITY = small ? .62 : 1;
+    const G = 9.81, TIME_SCALE = 2.4, WIND = 2.4;   // m/s² · aceleração do tempo · vento (m/s, para a direita)
     // Cores de pirotecnia (sais metálicos) — dourado e prata dominam, como num show real.
     const C = {
       gold: [255, 190, 86], silver: [228, 236, 255], red: [255, 66, 46], green: [104, 255, 128],
@@ -713,18 +773,44 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
     };
     const SHOW_COLORS = ['gold', 'gold', 'silver', 'red', 'green', 'blue', 'purple', 'orange', 'cyan'];
     const HOT = [255, 252, 240];
-    const particles = [], rockets = [], flashes = [], smokes = [];
+    // Modelos de bomba: velocidade das estrelas (m/s), arrasto k (1/m), queima (s), tamanho.
+    const TYPES = {
+      peony:      { n: 140, v: [40, 52], k: .026, burn: [2.6, 3.2], size: [1.5, 2.3], boom: .9 },
+      chrys:      { n: 150, v: [42, 54], k: .024, burn: [3.0, 3.6], size: [1.4, 2.0], glitter: 5, boom: .9 },
+      dahlia:     { n: 55,  v: [50, 60], k: .016, burn: [3.0, 3.6], size: [2.4, 3.2], glitter: 8, boom: 1 },
+      willow:     { n: 85,  v: [30, 38], k: .06,  burn: [6.0, 7.5], size: [1.3, 1.8], embers: 10, color: 'gold', boom: 1.1 },
+      kamuro:     { n: 120, v: [36, 44], k: .05,  burn: [5.0, 6.0], size: [1.5, 2.0], embers: 7, color: 'gold', boom: 1.15 },
+      palm:       { n: 8,   v: [55, 64], k: .011, burn: [3.2, 3.8], size: [3.2, 3.8], glitter: 26, color: 'gold', boom: 1.15 },
+      ring:       { n: 72,  v: [44, 50], k: .026, burn: [2.6, 3.0], size: [1.6, 2.3], ring: true, boom: .9 },
+      saturn:     { n: 90,  v: [26, 32], k: .03,  burn: [2.6, 3.0], size: [1.5, 2.1], saturn: 64, boom: 1 },
+      pistil:     { n: 120, v: [42, 52], k: .026, burn: [2.8, 3.2], size: [1.5, 2.2], core: .45, boom: .95 },
+      crossette:  { n: 24,  v: [44, 50], k: .02,  burn: [1.4, 1.6], size: [2.0, 2.6], split: true, boom: .8 },
+      crackle:    { n: 110, v: [40, 48], k: .03,  burn: [2.2, 2.9], size: [1.2, 1.8], flicker: true, pop: .55, boom: .9 },
+      strobe:     { n: 70,  v: [34, 42], k: .045, burn: [4.0, 5.0], size: [1.4, 1.9], blink: true, color: 'white', boom: .85 },
+      spider:     { n: 70,  v: [85, 98], k: .022, burn: [1.6, 2.0], size: [1.1, 1.5], color: 'silver', boom: .9 },
+      horsetail:  { n: 60,  v: [16, 24], k: .03,  burn: [4.0, 4.6], size: [1.4, 1.9], down: true, color: 'gold', boom: .85 },
+      multibreak: { n: 5,   v: [22, 28], k: .01,  burn: [.5, .7],   size: [2.6, 3.0], sub: true, boom: .7 },
+      salute:     { n: 200, v: [60, 75], k: .08,  burn: [.6, .9],   size: [1.6, 2.4], color: 'white', boom: 1.6 }
+    };
+    const particles = [], shells = [], flashes = [], smokes = [];
     const sprites = new Map();
-    let w = 0, h = 0, S = 1, raf = 0, last = 0, t0 = 0, nextLaunch = 0, finaleAt = Infinity, running = false;
+    let w = 0, h = 0, S = 1, ppm = 1, viewH = 300, raf = 0, last = 0;
+    let running = false, initialized = false, openingLaunched = false, zeroAt = 0, script = [];
 
     const rnd  = (a, b) => a + Math.random() * (b - a);
     const pick = a => a[(Math.random() * a.length) | 0];
     const mix  = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+    const sx = X => X * ppm, sy = Y => h - Y * ppm;          // mundo (m) → tela (px)
 
-    function resize(){
-      const dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
+    function measure(){
       w = window.innerWidth; h = window.innerHeight;
+      viewH = h > w * 1.2 ? 300 : 240;                       // celular em pé mostra mais céu
+      ppm = h / viewH;
       S = Math.max(.55, Math.min(1.5, Math.min(w, h) / 800));
+    }
+    function resize(){
+      measure();
+      const dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
       for (const [cv, cx] of [[canvas, ctx], [glowCanvas, gctx]]){
         cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
         cx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -750,26 +836,15 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
       return s;
     }
 
-    // Direção uniforme numa esfera, projetada no plano do céu (borda mais densa).
+    // Direção uniforme numa esfera; o céu mostra a projeção (borda mais densa).
     function dir3(){
       let x, y, z, d;
       do { x = rnd(-1, 1); y = rnd(-1, 1); z = rnd(-1, 1); d = x * x + y * y + z * z; } while (d > 1 || d < 1e-4);
       d = Math.sqrt(d); return [x / d, y / d];
     }
 
-    function add(p){
-      if (particles.length >= MAX_PARTICLES) return;
-      p.px = p.x; p.py = p.y; p.age = 0;
-      particles.push(p);
-    }
-
-    function flash(x, y, color, power){
-      flashes.push({ x, y, c: color, life: 1, decay: .055 / Math.max(.6, power), r: Math.min(w, h) * (.35 + .35 * power), power });
-    }
-    // Névoa da pólvora: cada bomba deixa nuvens com textura que derivam com o
-    // vento, crescem e se dissipam devagar (6–10 s). Os estouros seguintes as
-    // iluminam com a própria cor — como num show real.
-    const WIND = .14, MAX_SMOKE = small ? 60 : 130, SMOKE_RGB = [74, 78, 96];
+    // ─── Névoa da pólvora (espaço da tela) ───────────────────────────────────
+    const MAX_SMOKE = small ? 45 : 90, SMOKE_RGB = [70, 74, 92];
     let clouds = null;
     const cloudTints = new Map();
     function makeClouds(){
@@ -805,101 +880,197 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
       return c;
     }
     function smoke(x, y, R){
-      const n = small ? 4 : 8;
+      const n = small ? 3 : 6, drift = WIND * ppm * TIME_SCALE * .5 / 60;   // px por quadro
       for (let i = 0; i < n; i++){
         const a = Math.random() * Math.PI * 2, d = rnd(.05, .75) * R;
         smokes.push({ x: x + Math.cos(a) * d, y: y + Math.sin(a) * d * .8, r: rnd(.28, .55) * R, vr: rnd(.18, .45) * S,
-          vx: (WIND + rnd(-.12, .12)) * S, vy: rnd(-.14, -.02) * S, a: rnd(.07, .12), life: 1, age: 0,
+          vx: drift + rnd(-.1, .1) * S, vy: rnd(-.14, -.02) * S, a: rnd(.06, .1), life: 1, age: 0,
           decay: rnd(.0016, .0028), k: (Math.random() * 3) | 0 });
       }
       while (smokes.length > MAX_SMOKE) smokes.shift();
     }
+    function flash(x, y, color, power){
+      flashes.push({ x, y, c: color, life: 1, decay: .055 / Math.max(.6, power), r: Math.min(w, h) * (.3 + .3 * power), power });
+    }
 
-    // Uma bomba no céu. type: peony | chrys | willow | ring | crossette | crackle | brocade | salute
-    function burst(x, y, type, colorName, scale = 1){
-      const base = C[colorName] || C.gold;
-      const second = Math.random() < .3 ? C[pick(SHOW_COLORS)] : null;
-      const R = rnd(.19, .26) * Math.min(w, h) * scale;
-      const spec = {
-        peony:     { n: 140, drag: .963, life: [62, 86],  g: .028, size: [1.5, 2.3] },
-        chrys:     { n: 150, drag: .965, life: [72, 96],  g: .026, size: [1.4, 2.0], glitter: .3 },
-        willow:    { n: 95,  drag: .952, life: [150, 205], g: .015, size: [1.3, 1.8], embers: .4 },
-        ring:      { n: 72,  drag: .964, life: [66, 84],  g: .026, size: [1.6, 2.3] },
-        crossette: { n: 28,  drag: .968, life: [44, 52],  g: .024, size: [2.0, 2.6], split: true },
-        crackle:   { n: 120, drag: .961, life: [54, 76],  g: .027, size: [1.2, 1.8], strobe: true, pop: true },
-        brocade:   { n: 130, drag: .956, life: [110, 140], g: .02, size: [1.4, 1.9], embers: .25 },
-        salute:    { n: 220, drag: .94,  life: [32, 48],  g: .02,  size: [1.6, 2.4] }
-      }[type] || null;
-      if (!spec) return;
-      const count = Math.round(spec.n * DENSITY * rnd(.85, 1.1));
+    // O laço de animação para quando a cena esvazia; tudo que entra em cena o
+    // religa (as salvas agendam bombas com atraso — sem isso elas congelavam).
+    function kick(){
+      if (raf || !initialized) return;
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
+
+    // ─── Partículas ──────────────────────────────────────────────────────────
+    function star(X, Y, vx, vy, o){
+      if (particles.length >= MAX_PARTICLES) return;
+      kick();
+      o.X = X; o.Y = Y; o.vx = vx; o.vy = vy; o.age = 0;
+      o.px = sx(X); o.py = sy(Y);
+      o.blinkPhase = Math.random() * 6.28;
+      particles.push(o);
+    }
+
+    // Uma bomba no céu, em (X, Y) metros, herdando a velocidade da bomba.
+    function burst(X, Y, svx, svy, type, colorName, scale = 1){
+      const T = TYPES[type]; if (!T) return;
+      const base = C[T.color || colorName] || C.gold;
+      const second = C[pick(SHOW_COLORS)];
+      const count = Math.max(4, Math.round(T.n * DENSITY * rnd(.85, 1.1) * (T.sub ? 1 : scale)));
       const tilt = rnd(-.9, .9), squash = rnd(.25, .55);
-      for (let i = 0; i < count; i++){
-        let dx, dy;
-        if (type === 'ring'){
+      const mk = (dx, dy, vmul, color, extra) => {
+        const v = rnd(T.v[0], T.v[1]) * vmul * (T.sub ? 1 : Math.sqrt(scale));
+        star(X, Y, svx + dx * v, svy + dy * v, Object.assign({
+          k: T.k * rnd(.9, 1.1), burn: rnd(T.burn[0], T.burn[1]) * (T.sub ? 1 : rnd(.95, 1.05)),
+          size: rnd(T.size[0], T.size[1]) * S, c: color, hot: type === 'salute' ? .5 : .12,
+          glitter: T.glitter || 0, embers: T.embers || 0, flicker: !!T.flicker, blink: !!T.blink,
+          pop: T.pop ? Math.random() < T.pop : false, split: !!T.split
+        }, extra || {}));
+      };
+      if (T.sub){
+        // Multiestouro: sub-bombas que estouram em pequenas peônias.
+        for (let i = 0; i < count; i++){
+          const [dx, dy] = dir3();
+          const v = rnd(T.v[0], T.v[1]);
+          shells.push({ X, Y, vx: svx + dx * v, vy: svy + dy * v, k: .01, fuse: rnd(T.burn[0], T.burn[1]), age: 0,
+            type: 'peony', color: pick(SHOW_COLORS), scale: .42, sub: true, px: sx(X), py: sy(Y), tail: false });
+        }
+      } else if (T.ring){
+        for (let i = 0; i < count; i++){
           const a = (i / count) * Math.PI * 2, cx = Math.cos(a), cy = Math.sin(a) * squash;
-          dx = cx * Math.cos(tilt) - cy * Math.sin(tilt); dy = cx * Math.sin(tilt) + cy * Math.cos(tilt);
-        } else { [dx, dy] = dir3(); }
-        const v = R * (1 - spec.drag) * rnd(.93, 1.05);
-        const color = type === 'salute' ? C.white
-          : (type === 'willow' || type === 'brocade') ? C.gold
-          : type === 'crackle' ? (Math.random() < .5 ? C.silver : C.gold)
-          : (second && i % 2 ? second : base);
-        add({ x, y, vx: dx * v, vy: dy * v, drag: spec.drag, g: spec.g * S, life: rnd(spec.life[0], spec.life[1]),
-          size: rnd(spec.size[0], spec.size[1]) * S, c: color, glitter: spec.glitter || 0, embers: spec.embers || 0,
-          strobe: !!spec.strobe, pop: !!spec.pop && Math.random() < .55, split: !!spec.split, hot: type === 'salute' ? .5 : .14 });
-      }
-      const power = type === 'salute' ? 1.6 : (type === 'willow' || type === 'brocade') ? 1.1 : .9;
-      flash(x, y, type === 'salute' ? C.white : base, power * scale);
-      smoke(x, y, R);
-      Sfx.boom(x / w, y / h, Math.min(1.4, power * scale), type);
-    }
-
-    function rocket(type, colorName, x, apex){
-      const y0 = h + 10;
-      const ty = apex != null ? apex : h * rnd(.1, .38);
-      const g = .045 * S;
-      const rx = x != null ? x : w * rnd(.1, .9);
-      rockets.push({ x: rx, y: y0, vx: rnd(-.45, .45) * S, vy: -Math.sqrt(2 * g * (y0 - ty)), g,
-        type, color: colorName, px: 0, py: 0 });
-      Sfx.launch(rx / w, Math.random() < .35);
-    }
-
-    function randomShell(){
-      const r = Math.random();
-      return r < .26 ? 'peony' : r < .48 ? 'chrys' : r < .6 ? 'crackle' : r < .7 ? 'ring' : r < .8 ? 'crossette' : r < .9 ? 'willow' : 'brocade';
-    }
-
-    function program(now){
-      if (!running || now < nextLaunch) return;
-      if (now < finaleAt){
-        // Abertura: ritmo intenso e variado.
-        rocket(randomShell(), pick(SHOW_COLORS));
-        if (Math.random() < .35) rocket(randomShell(), pick(SHOW_COLORS));
-        nextLaunch = now + rnd(260, 520);
+          mk(cx * Math.cos(tilt) - cy * Math.sin(tilt), cx * Math.sin(tilt) + cy * Math.cos(tilt), 1, base);
+        }
       } else {
-        // Depois do grande final: chorões e coroas douradas, majestosos.
-        rocket(Math.random() < .7 ? (Math.random() < .5 ? 'willow' : 'brocade') : 'peony', Math.random() < .7 ? 'gold' : pick(SHOW_COLORS));
-        nextLaunch = now + rnd(620, 950);
+        for (let i = 0; i < count; i++){
+          let [dx, dy] = dir3();
+          if (T.down){ dy = -Math.abs(dy) * .85 - .15; const d = Math.hypot(dx, dy); dx /= d; dy /= d; }
+          mk(dx, dy, 1, type === 'crackle' ? (Math.random() < .5 ? C.silver : C.gold) : base);
+        }
+        if (T.core){
+          for (let i = 0; i < count * .4; i++){ const [dx, dy] = dir3(); mk(dx, dy, T.core, second); }
+        }
+        if (T.saturn){
+          for (let i = 0; i < T.saturn * DENSITY; i++){
+            const a = (i / (T.saturn * DENSITY)) * Math.PI * 2, cx = Math.cos(a), cy = Math.sin(a) * squash;
+            const dx = cx * Math.cos(tilt) - cy * Math.sin(tilt), dy = cx * Math.sin(tilt) + cy * Math.cos(tilt);
+            const v = rnd(46, 52) * Math.sqrt(scale);
+            star(X, Y, svx + dx * v, svy + dy * v, { k: .024, burn: rnd(2.6, 3), size: rnd(1.5, 2.1) * S, c: second, hot: .12,
+              glitter: 0, embers: 0, flicker: false, blink: false, pop: false, split: false });
+          }
+        }
       }
+      const x = sx(X), y = sy(Y);
+      const R = (T.v[1] * 1.2) * ppm * Math.sqrt(scale);
+      flash(x, y, type === 'salute' ? C.white : base, (T.boom || .9) * Math.max(.6, scale));
+      if (!T.sub) smoke(x, y, R);
+      Sfx.boom(x / w, y / h, Math.min(1.6, (T.boom || .9) * scale), type);
     }
 
+    // Bomba saindo do morteiro com espoleta: estoura depois de `fuse` s (real).
+    function shell(type, colorName, xFrac, apexFrac, fuseReal, opts = {}){
+      const Ha = apexFrac * viewH;                           // altura do estouro (m)
+      const v0 = Math.sqrt(2 * G * Ha);                      // velocidade de saída do morteiro
+      const fuse = fuseReal != null ? fuseReal * TIME_SCALE : v0 / G;   // espoleta (s do mundo)
+      const vy = fuseReal != null ? G * fuse : v0;            // espoleta fixa: sai com a velocidade que leva ao topo nesse tempo
+      const X = (xFrac != null ? xFrac : rnd(.1, .9)) * (w / ppm);
+      shells.push({ X, Y: -4, vx: rnd(-1.5, 1.5), vy, k: .0006, fuse, age: 0, type, color: colorName,
+        scale: opts.scale || 1, px: sx(X), py: sy(-4), tail: opts.tail !== false });
+      kick();
+      Sfx.launch(X * ppm / w, opts.whistle != null ? opts.whistle : Math.random() < .35);
+    }
+    const shellAt = (type, color, xf, apexFrac, fuseReal, opts) => shell(type, color, xf, apexFrac, fuseReal, opts);
+    function randomShell(types){
+      const t = pick(types);
+      shell(t, pick(SHOW_COLORS), rnd(.08, .92), rnd(.6, .86), null, { scale: t === 'salute' ? 1 : rnd(.95, 1.25) });
+    }
+    function mirroredPair(type){
+      const xf = rnd(.12, .38), ap = rnd(.62, .84), color = pick(SHOW_COLORS), fuse = Math.sqrt(2 * ap * viewH / G) / TIME_SCALE;
+      shell(type, color, xf, ap, fuse); shell(type, color, 1 - xf, ap, fuse);
+    }
+    // Bolo de chão: leque de cometas saindo de um canto de baixo, em sequência.
+    function cake(side){
+      const n = small ? 6 : 9, color = Math.random() < .6 ? 'gold' : pick(SHOW_COLORS);
+      const baseX = (side ? rnd(.78, .92) : rnd(.08, .22)) * (w / ppm);
+      for (let i = 0; i < n; i++){
+        setTimeout(() => {
+          const ang = (side ? 120 - i * (60 / (n - 1)) : 60 + i * (60 / (n - 1))) * Math.PI / 180;
+          const v = rnd(58, 66);
+          star(baseX, 0, Math.cos(ang) * v, Math.sin(ang) * v, { k: .012, burn: rnd(2.6, 3.0), size: rnd(2.6, 3.2) * S,
+            c: C[color], hot: .2, glitter: 22, embers: 0, flicker: false, blink: false, pop: false, split: false, comet: true });
+          Sfx.launch(baseX * ppm / w, false);
+        }, i * 120);
+      }
+    }
+    // Tempo real até o topo para uma altura (fração da tela).
+    const flightOf = ap => Math.sqrt(2 * ap * viewH / G) / TIME_SCALE;
+    // Salva: todas estouram juntas no instante `burstAtMs` (relógio performance.now),
+    // em alturas diferentes — as mais altas saem antes, como num show real.
+    function volley(plan, burstAtMs){
+      const now = performance.now();
+      plan.forEach(([type, color, xf, ap]) => {
+        const delay = burstAtMs - now - flightOf(ap) * 1000;
+        const go = () => shell(type, color, xf + rnd(-.025, .025), ap, Math.max(.3, (burstAtMs - performance.now()) / 1000), { whistle: Math.random() < .5 });
+        if (delay > 0) setTimeout(go, delay); else go();
+      });
+    }
+    const OPENING_PLAN = [['peony', 'gold', .5, .66], ['chrys', null, .24, .72], ['crackle', 'silver', .76, .7],
+      ['pistil', null, .38, .58], ['ring', null, .62, .6], ['spider', 'silver', .1, .62], ['dahlia', null, .9, .64]];
+    // Quanto antes do zero a primeira bomba da abertura precisa sair (s).
+    function openingFlight(){ measure(); return flightOf(Math.max(...OPENING_PLAN.map(p => p[3]))); }
+    function openingVolley(burstAtMs){
+      if (openingLaunched) return;
+      openingLaunched = true;
+      const plan = OPENING_PLAN.slice(0, small ? 5 : 7).map(([t, c, xf, ap]) => [t, c || pick(SHOW_COLORS), xf, ap]);
+      volley(plan, burstAtMs);
+    }
+
+    // ─── Roteiro de 30 s (ms reais desde o zero) ────────────────────────────
+    function buildScript(){
+      const ev = [], at = (t, fn) => ev.push({ t, fn });
+      // Ato 1 — abertura (0–5 s): ritmo rápido e variado.
+      for (let t = 450; t < 4300; t += rnd(380, 620)) at(t, () => randomShell(['peony', 'chrys', 'crackle', 'ring', 'pistil', 'dahlia', 'spider']));
+      // "Chegou a hora" (5 s): salva no centro, coroas e palmeiras estouram juntas.
+      at(SHOW_ITS_TIME_AT - flightOf(.72) * 1000 - 50, () => volley([['salute', 'white', .5, .64], ['kamuro', 'gold', .28, .72], ['kamuro', 'gold', .72, .72],
+        ['palm', 'gold', .14, .6], ['palm', 'gold', .86, .6]], zeroAt + SHOW_ITS_TIME_AT));
+      // Ato 2 — cores e formas (6–12 s): pares espelhados.
+      for (let t = 6000; t < 12000; t += rnd(620, 950)) at(t, () => mirroredPair(pick(['dahlia', 'saturn', 'ring', 'pistil', 'crossette', 'peony', 'palm'])));
+      // Ato 3 — dourado e ritmo (12–19 s): bolos de chão alternados + chorões, strobe, cascata.
+      for (let t = 12000, side = 0; t < 19000; t += rnd(950, 1300), side ^= 1) { const s = side; at(t, () => cake(s)); }
+      for (let t = 12400; t < 19000; t += rnd(650, 1000)) at(t, () => randomShell(['willow', 'strobe', 'horsetail', 'kamuro', 'multibreak', 'palm']));
+      // Ato 4 — crescendo (19–25 s).
+      for (let t = 19000; t < 25000; t += rnd(240, 420)) at(t, () => randomShell(['chrys', 'crackle', 'spider', 'peony', 'dahlia', 'pistil', 'crossette']));
+      [21000, 23000, 24500].forEach(t => at(t, () => randomShell(['salute'])));
+      // Grande final (25–28,5 s): barragem, bolos dos dois lados e salvas.
+      for (let t = 25000; t < 28500; t += rnd(150, 250)) at(t, () => randomShell(['peony', 'chrys', 'crackle', 'spider', 'kamuro', 'dahlia', 'multibreak']));
+      [25200, 26900].forEach(t => at(t, () => { cake(0); cake(1); }));
+      [26000, 27200, 28100].forEach(t => at(t, () => randomShell(['salute'])));
+      // Cortina dourada: estoura aos 29 s e fica pendurada até a transição.
+      at(29000 - flightOf(.74) * 1000 - 50, () => volley([0.08, .22, .36, .5, .64, .78, .92].map((xf, i) => [i % 2 ? 'kamuro' : 'willow', 'gold', xf, i % 2 ? .74 : .66]), zeroAt + 29000));
+      return ev.sort((a, b) => a.t - b.t);
+    }
+
+    // ─── Quadro ──────────────────────────────────────────────────────────────
     function frame(now){
-      const dt = Math.min(2.5, (now - last) / 16.67 || 1);
+      const dtReal = Math.min(.05, (now - last) / 1000 || .016);
       last = now;
-      program(now);
+      const ds = dtReal * TIME_SCALE;                        // segundos do mundo neste quadro
+      const f60 = dtReal * 60;
+
+      if (running){
+        const t = now - zeroAt;
+        while (script.length && script[0].t <= t) script.shift().fn();
+      }
 
       // Rastro: esmaece o quadro anterior mantendo o fundo da página visível.
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = 'rgba(0,0,0,' + (1 - Math.pow(1 - .2, dt)).toFixed(3) + ')';
+      ctx.fillStyle = 'rgba(0,0,0,' + (1 - Math.pow(1 - .2, f60)).toFixed(3) + ')';
       ctx.fillRect(0, 0, w, h);
 
       // Canvas do brilho: limpo a cada quadro, então fumaça e clarões não se acumulam.
       gctx.clearRect(0, 0, w, h);
-
-      // Névoa da pólvora, iluminada pela cor dos clarões próximos.
       for (let i = smokes.length - 1; i >= 0; i--){
         const s = smokes[i];
-        s.x += s.vx * dt; s.y += s.vy * dt; s.r += s.vr * dt; s.life -= s.decay * dt; s.age += dt;
+        s.x += s.vx * f60; s.y += s.vy * f60; s.r += s.vr * f60; s.life -= s.decay * f60; s.age += f60;
         if (s.life <= 0){ smokes.splice(i, 1); continue; }
         const size = s.r * 2.2, left = s.x - size / 2, top = s.y - size / 2;
         gctx.globalCompositeOperation = 'source-over';
@@ -913,22 +1084,20 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
           if (v > best){ best = v; tint = f.c; }
         }
         if (light > .02 && tint){
-          // Fumaça real recebe a luz dessaturada e suave.
           gctx.globalCompositeOperation = 'lighter';
-          gctx.globalAlpha = Math.min(.26, light * .28) * Math.min(1, s.life * 2);
+          gctx.globalAlpha = Math.min(.18, light * .2) * Math.min(1, s.life * 2);
           gctx.drawImage(cloudTint(s.k, mix(tint, [150, 150, 162], .45)), left, top, size, size);
         }
       }
       gctx.globalAlpha = 1;
-
-      // Clarões: iluminam o céu inteiro por um instante.
       gctx.globalCompositeOperation = 'lighter';
+      const tintScale = 1 / Math.max(1, Math.sqrt(flashes.length / 2));
       for (let i = flashes.length - 1; i >= 0; i--){
         const f = flashes[i];
-        f.life -= f.decay * dt;
+        f.life -= f.decay * f60;
         if (f.life <= 0){ flashes.splice(i, 1); continue; }
         const k = f.life * f.life;
-        gctx.fillStyle = 'rgba(' + (f.c[0] | 0) + ',' + (f.c[1] | 0) + ',' + (f.c[2] | 0) + ',' + Math.min(.12, .06 * k * f.power).toFixed(3) + ')';
+        gctx.fillStyle = 'rgba(' + (f.c[0] | 0) + ',' + (f.c[1] | 0) + ',' + (f.c[2] | 0) + ',' + (Math.min(.12, .06 * k * f.power) * tintScale).toFixed(3) + ')';
         gctx.fillRect(0, 0, w, h);
         const grd = gctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r);
         grd.addColorStop(0, 'rgba(255,250,235,' + (.32 * k).toFixed(3) + ')');
@@ -939,101 +1108,116 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
 
       ctx.globalCompositeOperation = 'lighter';
 
-      // Foguetes subindo com cauda de faíscas.
-      for (let i = rockets.length - 1; i >= 0; i--){
-        const r = rockets[i];
-        r.px = r.x; r.py = r.y;
-        r.x += r.vx * dt; r.y += r.vy * dt; r.vy += r.g * dt;
-        ctx.strokeStyle = 'rgba(255,220,170,.55)'; ctx.lineWidth = 1.6 * S;
-        ctx.beginPath(); ctx.moveTo(r.px, r.py); ctx.lineTo(r.x, r.y); ctx.stroke();
-        const s = 7 * S; ctx.globalAlpha = .95; ctx.drawImage(sprite(C.gold), r.x - s, r.y - s, s * 2, s * 2); ctx.globalAlpha = 1;
-        if (Math.random() < .8) add({ x: r.x, y: r.y, vx: rnd(-.5, .5) * S, vy: rnd(.2, 1.2) * S, drag: .94, g: .03 * S,
-          life: rnd(18, 34), size: rnd(.7, 1.1) * S, c: C.ember, hot: .2, glitter: 0, embers: 0 });
-        if (r.vy >= -.35){ burst(r.x, r.y, r.type, r.color); rockets.splice(i, 1); }
+      // Bombas subindo (gravidade + arrasto pequeno), com cauda de faíscas.
+      for (let i = shells.length - 1; i >= 0; i--){
+        const b = shells[i];
+        const rvx = b.vx - WIND, sp = Math.hypot(rvx, b.vy);
+        b.vx += -b.k * sp * rvx * ds;
+        b.vy += (-G - b.k * sp * b.vy) * ds;
+        b.X += b.vx * ds; b.Y += b.vy * ds; b.age += ds;
+        const x = sx(b.X), y = sy(b.Y);
+        if (b.tail){
+          ctx.strokeStyle = 'rgba(255,220,170,.5)'; ctx.lineWidth = 1.5 * S;
+          ctx.beginPath(); ctx.moveTo(b.px, b.py); ctx.lineTo(x, y); ctx.stroke();
+          const s = 6.5 * S; ctx.globalAlpha = .9; ctx.drawImage(sprite(C.gold), x - s, y - s, s * 2, s * 2); ctx.globalAlpha = 1;
+          if (Math.random() < .85) star(b.X, b.Y, b.vx * .2 + rnd(-3, 3), b.vy * .2 - rnd(2, 8), { k: .2, burn: rnd(.4, .7), size: rnd(.7, 1.1) * S,
+            c: C.ember, hot: .2, glitter: 0, embers: 0, flicker: false, blink: false, pop: false, split: false });
+        }
+        b.px = x; b.py = y;
+        if (b.age >= b.fuse){ burst(b.X, b.Y, b.vx, b.vy, b.type, b.color, b.scale); shells.splice(i, 1); }
       }
 
-      // Estrelas: branco-quente → cor → brasa, com arrasto do ar e queda.
+      // Estrelas: branco-quente → cor → brasa; arrasto quadrático, vento e gravidade.
       for (let i = particles.length - 1; i >= 0; i--){
         const p = particles[i];
-        p.px = p.x; p.py = p.y;
-        const k = Math.pow(p.drag, dt);
-        p.vx *= k; p.vy = p.vy * k + p.g * dt;
-        p.x += p.vx * dt; p.y += p.vy * dt;
-        p.age += dt;
-        const t = p.age / p.life;
+        const rvx = p.vx - WIND, sp = Math.hypot(rvx, p.vy);
+        p.vx += -p.k * sp * rvx * ds;
+        p.vy += (-G - p.k * sp * p.vy) * ds;
+        p.X += p.vx * ds; p.Y += p.vy * ds; p.age += ds;
+        const t = p.age / p.burn;
+        const x = sx(p.X), y = sy(p.Y);
         if (t >= 1){
           if (p.pop){
-            for (let j = 0; j < 4; j++) add({ x: p.x, y: p.y, vx: rnd(-1.6, 1.6) * S, vy: rnd(-1.6, 1.6) * S, drag: .9, g: .02 * S,
-              life: rnd(8, 14), size: rnd(.8, 1.2) * S, c: C.white, hot: 1, glitter: 0, embers: 0 });
+            for (let j = 0; j < 4; j++) star(p.X, p.Y, p.vx + rnd(-12, 12), p.vy + rnd(-12, 12), { k: .3, burn: rnd(.12, .2), size: rnd(.8, 1.2) * S,
+              c: C.white, hot: 1, glitter: 0, embers: 0, flicker: false, blink: false, pop: false, split: false });
           }
           particles.splice(i, 1); continue;
         }
-        if (p.split && t > .5){
+        if (p.split && t > .45){
           p.split = false;
-          const sp = 2.6 * S, a0 = Math.random() * Math.PI;
+          const a0 = Math.random() * Math.PI;
           for (let j = 0; j < 4; j++){
             const a = a0 + j * Math.PI / 2;
-            add({ x: p.x, y: p.y, vx: Math.cos(a) * sp + p.vx * .4, vy: Math.sin(a) * sp + p.vy * .4, drag: .955, g: p.g,
-              life: rnd(30, 40), size: p.size * .85, c: p.c, hot: .1, glitter: 0, embers: 0 });
+            star(p.X, p.Y, p.vx * .4 + Math.cos(a) * 20, p.vy * .4 + Math.sin(a) * 20, { k: .03, burn: rnd(1.0, 1.3), size: p.size * .85,
+              c: p.c, hot: .1, glitter: 0, embers: 0, flicker: false, blink: false, pop: false, split: false });
           }
           particles.splice(i, 1); continue;
         }
-        if (p.embers && Math.random() < p.embers * dt){
-          add({ x: p.x, y: p.y, vx: p.vx * .15, vy: p.vy * .15, drag: .95, g: .035 * S, life: rnd(26, 52),
-            size: rnd(.6, .95) * S, c: C.gold, hot: 0, glitter: 0, embers: 0, dim: true });
+        if (p.embers && Math.random() < p.embers * ds){
+          star(p.X, p.Y, p.vx * .15, p.vy * .15, { k: .12, burn: rnd(.9, 1.6), size: rnd(.6, .95) * S, c: C.gold, hot: 0,
+            glitter: 0, embers: 0, flicker: false, blink: false, pop: false, split: false, dim: true });
         }
-        if (p.glitter && Math.random() < p.glitter * dt){
-          add({ x: p.x, y: p.y, vx: 0, vy: 0, drag: .9, g: .02 * S, life: rnd(10, 18), size: rnd(.6, 1) * S,
-            c: C.silver, hot: .5, glitter: 0, embers: 0 });
+        if (p.glitter && Math.random() < p.glitter * ds){
+          star(p.X, p.Y, p.vx * .1, p.vy * .1, { k: .25, burn: rnd(.25, .45), size: rnd(.6, 1) * S, c: p.comet ? C.gold : C.silver,
+            hot: .5, glitter: 0, embers: 0, flicker: false, blink: false, pop: false, split: false });
         }
         const color = t < p.hot ? mix(HOT, p.c, t / p.hot) : (t > .72 ? mix(p.c, C.ember, (t - .72) / .28 * .8) : p.c);
         let alpha = t < .7 ? 1 : 1 - (t - .7) / .3;
         if (p.dim) alpha *= .65;
-        if (p.strobe) alpha *= Math.random() < .45 ? .15 : 1; else alpha *= .82 + Math.random() * .18;
-        if (alpha <= .02) continue;
-        ctx.strokeStyle = 'rgba(' + (color[0] | 0) + ',' + (color[1] | 0) + ',' + (color[2] | 0) + ',' + (alpha * .75).toFixed(3) + ')';
-        ctx.lineWidth = p.size * .8;
-        ctx.beginPath(); ctx.moveTo(p.px, p.py); ctx.lineTo(p.x, p.y); ctx.stroke();
-        const s = p.size * 2.6;
-        ctx.globalAlpha = alpha; ctx.drawImage(sprite(color), p.x - s, p.y - s, s * 2, s * 2);
+        if (p.blink) alpha *= Math.sin(p.blinkPhase + p.age * 26) > .2 ? 1 : .06;
+        else if (p.flicker) alpha *= Math.random() < .45 ? .15 : 1;
+        else alpha *= .82 + Math.random() * .18;
+        if (alpha > .02){
+          ctx.strokeStyle = 'rgba(' + (color[0] | 0) + ',' + (color[1] | 0) + ',' + (color[2] | 0) + ',' + (alpha * .75).toFixed(3) + ')';
+          ctx.lineWidth = p.size * .8;
+          ctx.beginPath(); ctx.moveTo(p.px, p.py); ctx.lineTo(x, y); ctx.stroke();
+          const s = p.size * 2.6;
+          ctx.globalAlpha = alpha; ctx.drawImage(sprite(color), x - s, y - s, s * 2, s * 2);
+        }
+        p.px = x; p.py = y;
       }
       ctx.globalAlpha = 1;
 
-      if (running || particles.length || rockets.length || flashes.length || smokes.length) raf = requestAnimationFrame(frame);
+      if (running || particles.length || shells.length || flashes.length || smokes.length) raf = requestAnimationFrame(frame);
+      else raf = 0;
+    }
+
+    function ensureInit(){
+      if (initialized) return;
+      initialized = true;
+      if (!clouds) makeClouds();
+      resize();
+      window.addEventListener('resize', resize);
+      canvas.classList.add('on');
+      glowCanvas.classList.add('on');
+      document.body.classList.add('is-celebrating');
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
     }
 
     return {
+      // Tempo de voo da salva de abertura (s) para esta tela.
+      openingFlight,
+      // Últimos segundos da contagem: as bombas da abertura já estão subindo
+      // para estourar exatamente no zero (burstAtMs no relógio performance.now).
+      prelude(burstAtMs){ ensureInit(); openingVolley(burstAtMs); },
+      // Zero: começa o roteiro (quem chegou depois vê a salva sair agora).
       start(){
-        if (!clouds) makeClouds();
-        resize();
-        window.addEventListener('resize', resize);
-        canvas.classList.add('on');
-        glowCanvas.classList.add('on');
-        document.body.classList.add('is-celebrating');
+        ensureInit();
+        openingVolley(performance.now() + openingFlight() * 1000);
         running = true;
-        t0 = last = performance.now();
-        nextLaunch = t0 + 380;
-        // Salva de abertura no mesmo instante do zero.
-        burst(w * .5,  h * .30, 'peony', 'gold', 1.15);
-        burst(w * .22, h * .24, 'chrys', pick(SHOW_COLORS), .95);
-        burst(w * .78, h * .26, 'crackle', 'silver', .95);
-        rocket('peony', pick(SHOW_COLORS)); rocket('ring', pick(SHOW_COLORS));
-        raf = requestAnimationFrame(frame);
+        zeroAt = performance.now();
+        script = buildScript();
+        if (!raf) raf = requestAnimationFrame(frame);
       },
-      finale(){
-        if (!running) return;
-        finaleAt = performance.now();
-        nextLaunch = finaleAt + 1700;
-        // Grande final: clarão branco no centro + barragem de bombas.
-        burst(w * .5, h * .34, 'salute', 'white', 1.25);
-        burst(w * .3, h * .22, 'brocade', 'gold', 1.1);
-        burst(w * .7, h * .22, 'brocade', 'gold', 1.1);
-        const n = small ? 7 : 11;
-        for (let i = 0; i < n; i++){
-          setTimeout(() => rocket(pick(['peony', 'chrys', 'crackle', 'peony']), pick(SHOW_COLORS), w * (.08 + .84 * (i + Math.random() * .5) / n), h * rnd(.1, .32)), i * 120);
+      stop(){ running = false; script = []; },
+      fadeOut(ms){
+        for (const cv of [canvas, glowCanvas]){
+          cv.style.transition = 'opacity ' + ms + 'ms ease, filter ' + ms + 'ms ease';
+          cv.style.filter = 'blur(3px)';
+          cv.classList.remove('on');
         }
-      },
-      stop(){ running = false; }
+      }
     };
   })();
 
@@ -1043,14 +1227,26 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
     location.replace(GAME_PAGE + (withIntro ? '?intro=1' : ''));
   }
 
+  const prefersReducedMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
   function celebrate(){
     soundChip.hidden = true;
-    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduceMotion = prefersReducedMotion();
     if (!reduceMotion) Fireworks.start();
-    setTimeout(() => { document.body.classList.add('is-finale'); if (!reduceMotion) Fireworks.finale(); }, reduceMotion ? 400 : SHOW_ITS_TIME_AT);
-    setTimeout(() => Fireworks.stop(), STOP_LAUNCHES_AT);
-    setTimeout(() => exitLayer.classList.add('on'), reduceMotion ? 3200 : EXIT_FADE_AT);
-    setTimeout(() => goToGame(true), reduceMotion ? 4100 : NAVIGATE_AT);
+    setTimeout(() => document.body.classList.add('is-finale'), reduceMotion ? 400 : SHOW_ITS_TIME_AT);
+    setTimeout(() => Fireworks.stop(), SHOW_END_AT);
+    setTimeout(() => exitShow(reduceMotion), reduceMotion ? 2600 : EXIT_AT);
+    setTimeout(() => goToGame(true), reduceMotion ? 3600 : NAVIGATE_AT);
+  }
+
+  // Transição premium: o som baixa devagar (sem corte), o texto se desfaz, os
+  // fogos se apagam, uma luz dourada floresce no centro e a tela escurece; a
+  // página do jogo surge com a transição entre páginas do navegador.
+  function exitShow(reduceMotion){
+    Sfx.fadeOut(AUDIO_FADE_MS / 1000);
+    document.body.classList.add('is-exiting');
+    if (!reduceMotion) Fireworks.fadeOut(1800);
+    setTimeout(() => exitLayer.classList.add('on'), reduceMotion ? 300 : 1300);
   }
 
   function finish(lateMs){
@@ -1082,6 +1278,15 @@ body.final-ten .time-box.tick { animation: tickPulse .62s cubic-bezier(.22,1,.36
     hoursEl.textContent   = pad(hours);
     minutesEl.textContent = pad(minutes);
     secondsEl.textContent = pad(seconds);
+
+    // As bombas da abertura saem nos últimos segundos para estourar no zero
+    // (o tempo de voo depende da altura do céu nesta tela).
+    if (!prelaunchTimer && diff <= 6000){
+      const lead = Fireworks.openingFlight() * 1000;
+      prelaunchTimer = setTimeout(() => {
+        if (!prefersReducedMotion()) Fireworks.prelude(performance.now() + Math.max(0, TARGET - Date.now()));
+      }, Math.max(0, diff - lead - 60));
+    }
 
     const finalTen = total <= 10;
     document.body.classList.toggle('final-ten', finalTen);

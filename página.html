@@ -774,6 +774,14 @@ body.transmissionFocus .msgNotif {
 @media(max-width:380px){.introNext.isFinal{min-width:132px}}
 @media(max-height:620px) and (orientation:landscape){.introShell{min-height:0;height:calc(100dvh - 24px)}.introTop,.introBottom{padding:13px 22px}.introSlide{padding:8px 55px}.introVisual{min-height:210px}.introText{margin-top:12px;line-height:1.45}}
 @media(prefers-reduced-motion:reduce){.introModal::before,.introStars i,.introRitual::before,.introRealCard::after{animation:none!important}.introStageSweep{display:none!important}.introModal,.introSlide,.introSlide .introIndex,.introSlide .introTitle,.introSlide .introText,.introSlide .introVisual{transition-duration:.01ms!important;transition-delay:0s!important}}
+/* Chegada vinda da contagem (index.html): a página surge do escuro com a
+   transição entre páginas do navegador. O mesmo bloco está no index.html. */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vtOut .6s ease both}
+::view-transition-new(root){animation:vtIn 1.2s cubic-bezier(.22,1,.36,1) both}
+@keyframes vtOut{to{opacity:0}}
+@keyframes vtIn{from{opacity:0;transform:scale(1.035);filter:blur(12px) brightness(1.5)}to{opacity:1;transform:none;filter:none}}
+@media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}
   </style>
   <script>
 (function(){
