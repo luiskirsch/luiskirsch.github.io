@@ -7539,6 +7539,87 @@
       margin-top: 8px;
     }
   }
+
+  @media (min-width: 961px) {
+    #fullscreenGate {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 24px;
+      overflow: hidden;
+      text-align: center;
+      background: #080604;
+      transition: opacity .15s ease;
+    }
+
+    #fullscreenGate::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(60vw 50vh at 50% 30%, rgba(215,176,107,.09), transparent 65%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 60%, var(--bg-3) 100%);
+      pointer-events: none;
+    }
+
+    #fullscreenGateLogo {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #fullscreenGate img {
+      width: 100px;
+      opacity: .92;
+      filter: drop-shadow(0 0 28px rgba(215,176,107,.25));
+    }
+
+    #fullscreenGateName {
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      opacity: .7;
+    }
+
+    #fullscreenGateDesc {
+      position: relative;
+      color: rgba(243,237,229,.7);
+      font-size: 15px;
+      letter-spacing: .03em;
+    }
+
+    #fullscreenGateIosHint { display: none !important; }
+
+    #fullscreenGateCta {
+      position: relative;
+      flex-shrink: 0;
+      min-height: 48px;
+      padding: 14px 32px;
+      border: 1px solid rgba(215,176,107,.55);
+      border-radius: 50px;
+      background: linear-gradient(180deg, #f2d49a, #d49a3c);
+      box-shadow: 0 8px 24px rgba(183,119,24,.28);
+      color: #171006;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: .03em;
+      cursor: pointer;
+    }
+
+    #fullscreenGateCta:hover { filter: brightness(1.08); }
+    #fullscreenGateCta:focus-visible { outline: 2px solid #f2c96f; outline-offset: 4px; }
+    #fullscreenGate.fading { opacity: 0; pointer-events: none; }
+  }
   </style>
 </head>
 
@@ -8995,7 +9076,7 @@
     <div id="fullscreenGateIosHint">
       <div id="fullscreenGateIosSteps"><!-- preenchido pelo JS --></div>
     </div>
-    <button id="fullscreenGateCta" data-i18n="sala:fullscreenGate.cta">Toque para entrar</button>
+    <button id="fullscreenGateCta" data-i18n="sala:fullscreenGate.cta">Clique para entrar em tela cheia</button>
   </div>
 
   <!-- ===== MOBILE CHAT OVERLAY ===== -->
@@ -9041,7 +9122,7 @@
     </div>
   </div>
 
-<script src="../js/fullscreen-gate.js?v=5"></script>
+<script src="../js/fullscreen-gate.js?v=6"></script>
 <script src="../js/sw-register.js?v=12"></script>
 
 <!-- ── Lobby Mode: adicionado imediatamente, sem depender do Three.js CDN ── -->

@@ -3,9 +3,6 @@
   var gate = document.getElementById("fullscreenGate");
   if (!gate) return;
 
-  var isMobile = window.matchMedia("(max-width: 960px)").matches;
-  if (!isMobile) { gate.remove(); return; }
-
   var ua           = navigator.userAgent;
   // isIOS via UA + fallback para iPad iOS 13+ (que envia UA de Mac) e modo Desktop
   var isIOS        = /iphone|ipad|ipod/i.test(ua) ||
