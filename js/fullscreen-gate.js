@@ -1,4 +1,5 @@
 /* ===== FULLSCREEN GATE ===== */
+window._oslFullscreenGateState = window._oslFullscreenGateState || { pending: false, active: false };
 (function () {
   var gate = document.getElementById("fullscreenGate");
   if (!gate) return;
@@ -69,35 +70,115 @@
   }
 
   var cta = document.getElementById("fullscreenGateCta");
+  var description = document.getElementById("fullscreenGateDesc");
+  var fullscreenState = window._oslFullscreenGateState;
+  var gateRequestPending = false;
+  var gateDismissed = false;
 
-  function enterAndDismiss(e) {
-    e.preventDefault();
-    e.stopPropagation();
+  function isFullscreenActive() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement ||
+      document.mozFullScreenElement || document.msFullscreenElement);
+  }
 
-    var el  = document.documentElement;
-    var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-    if (req && !isIOS) req.call(el).catch(function () {});
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock("portrait").catch(function () {});
-    }
+  function dismissGate() {
+    if (gateDismissed) return;
+    gateDismissed = true;
+    gateRequestPending = false;
+    fullscreenState.pending = false;
+    if (isFullscreenActive()) fullscreenState.active = true;
 
-    // Bloqueia todo toque/click no body durante o fade — impede ativar o jogo abaixo
     document.body.style.pointerEvents = "none";
     gate.classList.add("fading");
     setTimeout(function () {
-      gate.remove();
+      if (gate.isConnected) gate.remove();
       document.body.style.pointerEvents = "";
     }, 200);
   }
 
-  // Só o botão CTA fecha o gate — usar touchend evita ghost click no jogo abaixo
-  cta.addEventListener("touchend", enterAndDismiss, { once: true, passive: false });
-  cta.addEventListener("click",    enterAndDismiss, { once: true });
+  function retryFullscreen() {
+    if (isFullscreenActive()) {
+      dismissGate();
+      return;
+    }
+    gateRequestPending = false;
+    fullscreenState.pending = false;
+    cta.disabled = false;
+    if (description) {
+      description.textContent = trGate(
+        'sala:fullscreenGate.retry',
+        'A tela cheia não foi ativada. Clique novamente para tentar.'
+      );
+    }
+  }
+
+  function onFullscreenChange() {
+    if (isFullscreenActive()) {
+      if (gateRequestPending) dismissGate();
+    } else {
+      fullscreenState.active = false;
+    }
+  }
+
+  document.addEventListener("fullscreenchange", onFullscreenChange);
+  document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+  document.addEventListener("mozfullscreenchange", onFullscreenChange);
+  document.addEventListener("MSFullscreenChange", onFullscreenChange);
+
+  function enterAndDismiss(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (gateDismissed || gateRequestPending) return;
+
+    var el = document.documentElement;
+    var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (isIOS || !req || isFullscreenActive()) {
+      dismissGate();
+      return;
+    }
+
+    gateRequestPending = true;
+    fullscreenState.pending = true;
+    cta.disabled = true;
+    if (description) {
+      description.textContent = trGate(
+        'sala:fullscreenGate.pending',
+        'Confirme a tela cheia na janela do navegador.'
+      );
+    }
+
+    var request;
+    try {
+      request = el.requestFullscreen
+        ? el.requestFullscreen({ navigationUI: "hide" })
+        : req.call(el);
+    } catch (_) {
+      retryFullscreen();
+      return;
+    }
+
+    if (screen.orientation && screen.orientation.lock) {
+      try { screen.orientation.lock("portrait").catch(function () {}); } catch (_) {}
+    }
+
+    Promise.resolve(request).then(function () {
+      if (isFullscreenActive()) {
+        dismissGate();
+        return;
+      }
+      setTimeout(function () {
+        if (gateRequestPending) retryFullscreen();
+      }, 1200);
+    }).catch(retryFullscreen);
+  }
+
+  if (isFullscreenActive()) dismissGate();
+  cta.addEventListener("click", enterAndDismiss);
 }());
 
 /* ===== ARENA MODE ===== */
 (function () {
   const html = document.documentElement;
+  const fullscreenState = window._oslFullscreenGateState;
 
   function syncArenaControls() {
     const cc = document.querySelector('.cardCenter');
@@ -296,7 +377,8 @@
       btn.title = trArena("sala:topbar.actions.arenaTitle", "Alternar Modo Arena");
     }
 
-    if (document.fullscreenElement) {
+    const gateOwnsFullscreen = fullscreenState && (fullscreenState.pending || fullscreenState.active);
+    if (wasArena && document.fullscreenElement && !gateOwnsFullscreen) {
       document.exitFullscreen?.().catch(() => {});
     }
     if (wasArena) {
