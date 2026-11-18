@@ -7444,6 +7444,101 @@
     border-color: rgba(255,255,255,.25) !important;
   }
 
+  /* Lobby desktop: distribui a tela dentro do viewport sem rolagem da página. */
+  @media (min-width: 961px) {
+    html:has(body.lobby-mode:not(.ritual-started)) {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body.lobby-mode:not(.ritual-started) {
+      height: 100svh;
+      overflow: hidden;
+    }
+
+    body.lobby-mode:not(.ritual-started) .page {
+      display: flex;
+      flex-direction: column;
+      height: 100svh;
+      min-height: 0;
+    }
+
+    body.lobby-mode:not(.ritual-started) .shell {
+      flex: 1 1 auto;
+      min-height: 0;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    body.lobby-mode:not(.ritual-started) .layout {
+      grid-template-columns: minmax(220px, 290px) minmax(0, 1fr);
+      height: auto;
+      min-height: 0;
+      flex: 1 1 0;
+      align-items: stretch;
+    }
+
+    body.lobby-mode:not(.ritual-started) .sidebar,
+    body.lobby-mode:not(.ritual-started) .mainArea {
+      order: 0;
+      min-height: 0;
+    }
+
+    body.lobby-mode:not(.ritual-started) .sidebar {
+      grid-template-rows: minmax(0, 1fr) minmax(180px, clamp(180px, 38svh, 300px));
+    }
+
+    body.lobby-mode:not(.ritual-started) .mainArea {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body.lobby-mode:not(.ritual-started) .tableCard {
+      height: 100%;
+      grid-template-rows: auto minmax(0, 1fr);
+      overflow: hidden;
+    }
+
+    body.lobby-mode:not(.ritual-started) .gameTableGrid {
+      height: auto !important;
+      min-height: 0 !important;
+    }
+  }
+
+  @media (min-width: 961px) and (max-height: 700px) {
+    body.lobby-mode:not(.ritual-started) .page {
+      padding: 8px;
+    }
+
+    body.lobby-mode:not(.ritual-started) .shell {
+      gap: 8px;
+    }
+
+    body.lobby-mode:not(.ritual-started) .topbar {
+      height: 112px;
+    }
+
+    body.lobby-mode:not(.ritual-started) .layout {
+      gap: 10px;
+    }
+
+    body.lobby-mode:not(.ritual-started) .sidebar {
+      grid-template-rows: minmax(0, 1fr) minmax(150px, min(30svh, 210px));
+      gap: 10px;
+    }
+
+    body.lobby-mode:not(.ritual-started) .playerPanel .cardInner {
+      padding: 10px;
+    }
+
+    body.lobby-mode:not(.ritual-started) .sectionTitle {
+      margin-bottom: 8px;
+    }
+
+    body.lobby-mode:not(.ritual-started) .sidebarActions {
+      gap: 8px;
+      margin-top: 8px;
+    }
+  }
   </style>
 </head>
 
