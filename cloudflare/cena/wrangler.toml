@@ -1,0 +1,14 @@
+# Cabana 3D do lobby: serve o bucket R2 "sextolugar-cena" em cena.preludiojogos.com.br
+# Deploy: npx wrangler@4 deploy  (nesta pasta)
+name               = "sextolugar-cena"
+main               = "worker.js"
+compatibility_date = "2025-01-01"
+workers_dev        = false
+
+routes = [
+  { pattern = "cena.preludiojogos.com.br", custom_domain = true },
+]
+
+[[r2_buckets]]
+binding     = "CENA"
+bucket_name = "sextolugar-cena"
