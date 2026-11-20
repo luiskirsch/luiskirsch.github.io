@@ -1,7 +1,7 @@
 /* Lobby: cabana em 3D (Godot / WebGL 2) no lugar do vídeo de fundo.
  *
  * A cena é publicada no Cloudflare R2 (projeto sextolugar-godot, ferramentas/publicar_web.py) e
- * entra num iframe de outro site (r2.dev): o Chrome roda a cena num processo próprio, então a
+ * entra num iframe de outro site (cena.preludiojogos.com.br, Worker cloudflare/cena; .com.br ≠ .com): o Chrome roda a cena num processo próprio, então a
  * compilação de shaders da primeira visita não trava a interface do lobby.
  *
  * O vídeo/pôster continua por baixo até a cena avisar que está pronta (postMessage
@@ -11,7 +11,7 @@
  */
 (function () {
   'use strict';
-  var ORIGEM = 'https://pub-78ce47404499423abafb9047e4a44920.r2.dev';
+  var ORIGEM = 'https://cena.preludiojogos.com.br';
   var URL_CENA = ORIGEM + '/staging/atual.html';
 
   var viewer = document.getElementById('lobbyViewer');
