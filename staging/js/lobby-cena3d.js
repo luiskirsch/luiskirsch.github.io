@@ -4,8 +4,9 @@
  * entra num iframe de outro site (cena.preludiojogos.com.br, Worker cloudflare/cena; .com.br ≠ .com): o Chrome roda a cena num processo próprio, então a
  * compilação de shaders da primeira visita não trava a interface do lobby.
  *
- * O vídeo/pôster continua por baixo até a cena avisar que está pronta (postMessage
- * {cabana:'pronta'}); aí o iframe aparece em fade e o vídeo pausa. Só em computador com WebGL 2 —
+ * A espera já é a cena nova: js/lobby-cena3d-cedo.js (no <head>) marca <html class="cena3d"> e o CSS
+ * mostra o quadro dela (mesmo enquadramento) no lugar do vídeo antigo, que fica pausado; quando a
+ * cena avisa que está pronta (postMessage {cabana:'pronta'}) o iframe entra em fade por cima. Só em computador com WebGL 2 —
  * celular, economia de dados ou pouca memória seguem com o vídeo. ?cena3d=0 desliga (teste).
  * Quando o ritual começa, o iframe sai e libera a GPU para o jogo e as câmeras.
  */
@@ -36,7 +37,19 @@
     }
   }
 
-  if (document.body.classList.contains('ritual-started') || !podeUsar3D()) return;
+  var raiz = document.documentElement;
+  if (document.body.classList.contains('ritual-started')) return;
+  if (!raiz.classList.contains('cena3d')) {
+    if (!podeUsar3D()) return;          // (página antiga em cache sem o script cedo)
+    raiz.classList.add('cena3d');
+  }
+  // o vídeo do fundo antigo não toca por baixo (nem quando o lobby-video.js tenta religá-lo)
+  if (video) {
+    video.pause();
+    video.addEventListener('play', function () {
+      if (raiz.classList.contains('cena3d')) video.pause();
+    });
+  }
 
   var frame = document.createElement('iframe');
   var pronta = false;
@@ -65,6 +78,7 @@
 
   function remover() {
     document.body.classList.remove('lobby-cena3d-pronta');
+    raiz.classList.remove('cena3d');   // sem a cena: o vídeo antigo volta
     if (frame.parentNode) frame.parentNode.removeChild(frame);
     if (video && !document.body.classList.contains('ritual-started')) video.play().catch(function () {});
   }

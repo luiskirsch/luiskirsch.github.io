@@ -3,6 +3,7 @@
 <head>
 <script>(function(){if(window.top!==window.self){try{window.top.location.replace(location.href);}catch(_){document.documentElement.innerHTML="";}return;}var h=(location.hostname||"").toLowerCase(),p=location.protocol||"";var A=["preludiojogos.com","www.preludiojogos.com","preludiojogos.com.br","www.preludiojogos.com.br","luiskirsch.github.io","localhost","127.0.0.1"];if(p==="file:"||h&&A.indexOf(h)===-1){document.documentElement.innerHTML="<style>*{margin:0;padding:0}html,body{background:#0a0805;height:100%;display:flex;align-items:center;justify-content:center}p{color:#ccc;font:15px/1.7 sans-serif;text-align:center;max-width:320px}a{color:#e06e30;text-decoration:none}</style><p>Este conte\u00fado s\u00f3 est\u00e1 dispon\u00edvel no site oficial.<br><a href=\"https://preludiojogos.com.br\">preludiojogos.com.br<\/a><\/p>";setTimeout(function(){location.replace("https://preludiojogos.com.br");},2500);}else{document.documentElement.classList.add("guard-ok");}})();</script><style>html:not(.guard-ok) body{visibility:hidden!important;background:#0a0805!important}</style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-0nm7jqdKysuyWtEOo1dszFhseqMQqYrchIG7ak7PhJg=' 'sha256-vKaEfzczjjkGde+l7kCBB7shmGTJj+HaRUOn0CrzJhM=' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; connect-src 'self' blob: https://sextolugar-backend-legado-production.up.railway.app https://osl-video-server-staging.up.railway.app https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com wss://osextolugar-eqa7q1iz.livekit.cloud https://osextolugar-eqa7q1iz.livekit.cloud https://cdn.jsdelivr.net https://www.gstatic.com https://static.cloudflareinsights.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-src https://cena.preludiojogos.com.br; worker-src 'self' blob:;">
+<script src="../js/lobby-cena3d-cedo.js?v=1"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"}}</script>
 <script src="./i18n/init.js?v=20260818" defer></script>
 <script src="../js/theme-bootstrap.js"></script>
@@ -6891,6 +6892,12 @@
     transition:opacity 1.6s ease;
   }
   body.lobby-cena3d-pronta .lobbyViewer__cena{ opacity:1;pointer-events:auto; }
+  /* cena 3D ativa (js/lobby-cena3d-cedo.js marca <html class="cena3d"> antes do primeiro desenho):
+     a espera já é a cena nova — o quadro dela, no mesmo enquadramento e com o mesmo zoom do
+     iframe, no lugar do vídeo do fundo antigo; o iframe ao vivo entra por cima, idêntico */
+  html.cena3d .lobbyViewer{ background-image:url('/assets/lobby-cena3d-poster.webp?v=1'); }
+  html.cena3d .lobbyViewer__picture{ background:#070504 url('/assets/lobby-cena3d-poster.webp?v=1') center/cover no-repeat; }
+  html.cena3d #lobbyBgVideo{ visibility:hidden; }
   .lobbyViewer__vignette{
     position:absolute;inset:0;pointer-events:none;z-index:3;
     background:radial-gradient(ellipse at 50% 48%,transparent 53%,rgba(1,2,4,.06) 79%,rgba(1,2,4,.24) 100%);
@@ -7870,7 +7877,7 @@
                   <div class="lobbyViewer__vignette" aria-hidden="true"></div>
                 </div>
                 <script src="../js/lobby-video.js?v=3"></script>
-                <script src="js/lobby-cena3d.js?v=2"></script>
+                <script src="js/lobby-cena3d.js?v=3"></script>
 
                 <!-- ── Hub Panel — Entre Sessões ──────────────────────── -->
                 <div id="hubPanel" hidden>
