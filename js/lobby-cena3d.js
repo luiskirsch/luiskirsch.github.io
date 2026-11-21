@@ -54,8 +54,10 @@
 
   var frame = document.createElement('iframe');
   var pronta = false;
+  var removida = false;
   frame.className = 'lobbyViewer__cena';
-  frame.title = 'Cabana do SEXTOLUGAR em 3D — clique para andar';
+  frame.title = 'Cabana do SEXTOLUGAR em 3D — acompanhe o morador';
+  frame.tabIndex = -1;
   frame.allow = 'autoplay; fullscreen';
   frame.src = URL_CENA;
   picture.appendChild(frame);
@@ -78,6 +80,9 @@
   }
 
   function remover() {
+    if (removida) return;
+    removida = true;
+    if (observador) observador.disconnect();
     document.body.classList.remove('lobby-cena3d-pronta');
     raiz.classList.remove('cena3d');   // sem a cena: o vídeo antigo volta
     if (frame.parentNode) frame.parentNode.removeChild(frame);
@@ -100,7 +105,8 @@
   }
 
   // o ritual começou: a cena sai (GPU livre para a mesa e as câmeras)
-  new MutationObserver(function () {
+  var observador = new MutationObserver(function () {
     if (document.body.classList.contains('ritual-started')) remover();
-  }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  });
+  observador.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 })();

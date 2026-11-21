@@ -6726,7 +6726,7 @@
     pointer-events:none;
   }
   /* cabana 3D (js/lobby-cena3d.js): invisível até a cena avisar "pronta", então entra em fade
-     sobre o vídeo; recebe cliques só depois disso (clique = andar pela cabana) */
+     sobre o pôster; o morador age sozinho e o visitante apenas assiste */
   .lobbyViewer__cena{
     position:absolute;inset:0;width:100%;height:100%;
     border:0;display:block;z-index:1;
@@ -6734,7 +6734,7 @@
     opacity:.001;pointer-events:none;
     transition:opacity 1.6s ease;
   }
-  body.lobby-cena3d-pronta .lobbyViewer__cena{ opacity:1;pointer-events:auto; }
+  body.lobby-cena3d-pronta .lobbyViewer__cena{ opacity:1; }
   /* cena 3D ativa (js/lobby-cena3d-cedo.js marca <html class="cena3d"> antes do primeiro desenho):
      a espera já é a cena nova — o quadro dela, no mesmo enquadramento e com o mesmo zoom do
      iframe, no lugar do vídeo do fundo antigo; o iframe ao vivo entra por cima, idêntico */
@@ -7138,7 +7138,7 @@
                   <div class="lobbyViewer__vignette" aria-hidden="true"></div>
                 </div>
                 <script src="../js/lobby-video.js?v=3"></script>
-                <script src="js/lobby-cena3d.js?v=3"></script>
+                <script src="js/lobby-cena3d.js?v=4"></script>
 
                 <div class="revealPanel" id="revealPanel" style="display:none">
                   <!-- Sombra da carta projetada sobre a mesa -->
