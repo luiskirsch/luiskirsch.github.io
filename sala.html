@@ -405,6 +405,9 @@
       will-change:transform;
     }
 
+    /* Avatar 3D: link com cara de botão da barra (abre o criador em outra aba, sem sair da sala) */
+    a.topActionBtn{ text-decoration:none; display:inline-flex; align-items:center; }
+
     .topActionBtn:hover{
       transform:translateY(-2px);
       border-color:rgba(215,176,107,.42);
@@ -7702,6 +7705,7 @@
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:nowrap;">
             <button class="topActionBtn primary stream-hide" id="copyCodeBtn" data-i18n="sala:topbar.actions.invite">Convidar Amigos</button>
             <button class="topActionBtn" id="oslShopFab" data-i18n="sala:topbar.actions.shop" data-i18n-title="sala:topbar.actions.shopTitle" title="Ver pacotes de cartas">🎴 Loja</button>
+            <a class="topActionBtn avatarBtn" id="avatarBtn" href="/avatar.html" target="_blank" rel="noopener" data-i18n="sala:topbar.actions.avatar" data-i18n-title="sala:topbar.actions.avatarTitle" title="Criar e editar seu avatar 3D">🧍 Avatar 3D</a>
             <button class="topActionBtn" id="arenaBtn" data-i18n="sala:topbar.actions.arena" data-i18n-title="sala:topbar.actions.arenaTitle" title="Alternar Modo Arena">⚔️ Arena</button>
             <button class="topActionBtn streamModeBtn" id="streamModeBtn" hidden data-i18n="sala:topbar.actions.stream" data-i18n-title="sala:topbar.actions.streamTitle" title="Ativar Modo Transmissão (Shift+S)">📡 Transmissão</button>
             <button class="topActionBtn liveBtn" id="liveBtn" hidden data-i18n="sala:topbar.actions.live" data-i18n-title="sala:topbar.actions.liveTitle" title="Iniciar transmissão ao vivo">🔴 Live</button>
