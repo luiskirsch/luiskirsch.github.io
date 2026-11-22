@@ -6741,13 +6741,13 @@
   html.cena3d .lobbyViewer{ background-image:url('/assets/lobby-cena3d-poster.webp?v=1'); }
   html.cena3d .lobbyViewer__picture{ background:#070504 url('/assets/lobby-cena3d-poster.webp?v=1') center/cover no-repeat; }
   html.cena3d #lobbyBgVideo{ visibility:hidden; }
-  /* "Entrar pelo app" (js/lobby-cena3d.js): no canto do visualizador, dentro da faixa visível da
+  /* "Entrar pelo app" (js/lobby-cena3d.js): no centro, embaixo, entre os cartões dos lugares, dentro da faixa visível da
      máscara; cores fixas em hex e sem var() na transição */
-  .lobbyViewer__app{ position:absolute; right:18px; bottom:21%; z-index:5; display:flex; flex-direction:column; align-items:flex-end; gap:8px; max-width:min(360px, calc(100% - 36px)); }
+  .lobbyViewer__app{ position:absolute; left:50%; bottom:21%; transform:translateX(-50%); z-index:5; display:flex; flex-direction:column-reverse; align-items:center; gap:10px; width:max-content; max-width:min(420px, calc(100% - 36px)); }
   .lobbyViewer__appBotao{ font-family:inherit; font-size:14px; font-weight:600; line-height:1; letter-spacing:.02em; color:#f3dca8; background:rgba(12,9,6,.72); border:1px solid rgba(215,176,107,.55); border-radius:999px; padding:11px 18px; cursor:pointer; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); box-shadow:0 6px 22px rgba(0,0,0,.35); transition:background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s ease; }
   .lobbyViewer__appBotao:hover{ background:rgba(40,28,14,.88); border-color:#d7b06b; color:#fff1d2; transform:translateY(-1px); }
   .lobbyViewer__appBotao:focus-visible{ outline:2px solid #d7b06b; outline-offset:3px; }
-  .lobbyViewer__appAviso{ font-family:inherit; font-size:13px; line-height:1.45; color:#e9dfc8; background:rgba(12,9,6,.86); border:1px solid rgba(215,176,107,.3); border-radius:10px; padding:10px 12px; text-align:right; }
+  .lobbyViewer__appAviso{ font-family:inherit; font-size:13px; line-height:1.45; color:#e9dfc8; background:rgba(12,9,6,.86); border:1px solid rgba(215,176,107,.3); border-radius:10px; padding:10px 14px; text-align:center; }
   .lobbyViewer__appAviso a{ color:#f3dca8; font-weight:600; }
   .lobbyViewer__appAviso a:hover{ color:#fff1d2; }
   @media (pointer:coarse){ .lobbyViewer__app{ display:none; } }
