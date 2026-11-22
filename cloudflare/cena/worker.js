@@ -15,13 +15,49 @@ const PODE_EMBUTIR = [
   'http://localhost:*', 'http://127.0.0.1:*',
 ].join(' ');
 
+/**
+ * Download do app nativo (botão "Entrar pelo app" do lobby): app/<nome>.zip. A API do R2 recusa
+ * (500) envios grandes de uma vez, então o pacote sobe em partes (sextolugar-godot: o manifesto
+ * <nome>.zip.partes.json lista as partes, o tamanho total e o sha256) e sai daqui emendado como um
+ * arquivo só, com Content-Length (o navegador mostra o progresso).
+ */
+async function baixarApp(chave, request, env, ctx) {
+  const manifesto = await env.CENA.get(chave + '.partes.json');
+  if (!manifesto) return new Response('Não encontrado', { status: 404 });
+  const info = await manifesto.json();
+  const cabecalhos = new Headers({
+    'Content-Type': info.tipo || 'application/zip',
+    'Content-Length': String(info.tamanho),
+    'Content-Disposition': `attachment; filename="${info.nome}"`,
+    'Cache-Control': 'no-cache',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+  });
+  if (request.method === 'HEAD') return new Response(null, { headers: cabecalhos });
+  const { readable, writable } = new FixedLengthStream(info.tamanho);
+  const emendar = async () => {
+    try {
+      for (let i = 0; i < info.partes.length; i++) {
+        const parte = await env.CENA.get('app/' + info.partes[i]);
+        if (!parte) throw new Error('parte ausente: ' + info.partes[i]);
+        await parte.body.pipeTo(writable, { preventClose: i < info.partes.length - 1 });
+      }
+    } catch (erro) {
+      await writable.abort(erro).catch(() => {});
+    }
+  };
+  ctx.waitUntil(emendar());   // a emenda segue enquanto o navegador baixa
+  return new Response(readable, { headers: cabecalhos, encodeBody: 'manual' });
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return new Response('Método não permitido', { status: 405, headers: { Allow: 'GET, HEAD' } });
     }
     const url = new URL(request.url);
     let chave = decodeURIComponent(url.pathname.replace(/^\/+/, ''));
+    if (/^app\/[\w.-]+\.zip$/.test(chave)) return baixarApp(chave, request, env, ctx);
     if (chave === '' || chave === 'producao' || chave === 'producao/') chave = 'producao/atual.html';
     if (chave === 'staging' || chave === 'staging/') chave = 'staging/atual.html';
     if (!/^(producao|staging)\//.test(chave) || chave.includes('..')) {

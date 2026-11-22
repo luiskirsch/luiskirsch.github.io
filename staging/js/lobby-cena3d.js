@@ -103,6 +103,44 @@
     });
   }
 
+  // "Entrar pelo app": aqui a cabana é para assistir; andar e mexer nas coisas é no app do Windows.
+  // O link sextolugar:// abre o app (ele se registra na primeira vez que roda). Se nada abrir em
+  // ~1,6 s (a página não perdeu o foco para o diálogo do navegador), mostra o download.
+  var APP_LINK = 'sextolugar://cabana';
+  var APP_ZIP = ORIGEM + '/app/SEXTOLUGAR-windows.zip';
+  if (/Windows/i.test(navigator.userAgent)) {
+    var caixaApp = document.createElement('div');
+    caixaApp.className = 'lobbyViewer__app';
+    var botaoApp = document.createElement('button');
+    botaoApp.type = 'button';
+    botaoApp.className = 'lobbyViewer__appBotao';
+    botaoApp.textContent = 'Entrar pelo app';
+    var avisoApp = document.createElement('div');
+    avisoApp.className = 'lobbyViewer__appAviso';
+    avisoApp.hidden = true;
+    avisoApp.appendChild(document.createTextNode('Ainda não tem o app? '));
+    var linkApp = document.createElement('a');
+    linkApp.href = APP_ZIP;
+    linkApp.textContent = 'Baixar para Windows (234 MB)';
+    avisoApp.appendChild(linkApp);
+    avisoApp.appendChild(document.createTextNode(' — descompacte e abra o SEXTOLUGAR.exe uma vez; depois este botão abre o app direto.'));
+    caixaApp.appendChild(botaoApp);
+    caixaApp.appendChild(avisoApp);
+    viewer.appendChild(caixaApp);
+    botaoApp.addEventListener('click', function () {
+      var abriu = false;
+      var marcar = function () { abriu = true; };
+      window.addEventListener('blur', marcar);
+      document.addEventListener('visibilitychange', marcar);
+      location.href = APP_LINK;
+      setTimeout(function () {
+        window.removeEventListener('blur', marcar);
+        document.removeEventListener('visibilitychange', marcar);
+        if (!abriu) avisoApp.hidden = false;
+      }, 1600);
+    });
+  }
+
   // o ritual começou: a cena sai (GPU livre para a mesa e as câmeras)
   var observador = new MutationObserver(function () {
     if (document.body.classList.contains('ritual-started')) remover();
