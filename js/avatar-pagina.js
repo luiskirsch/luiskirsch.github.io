@@ -63,6 +63,7 @@ function enxuto(av) {
     if (typeof av[k] === "string" || typeof av[k] === "number") r[k] = av[k];
   }
   if (typeof av.pele === "number") r.pele = Math.round(av.pele * 1000) / 1000;
+  if (typeof av.barba === "number" && Number.isFinite(av.barba)) r.barba = Math.max(0, Math.min(1, Math.round(av.barba * 1000) / 1000));
   for (const grupo of ["corpo", "formas"]) {
     const g = av[grupo];
     if (!g || typeof g !== "object") continue;
