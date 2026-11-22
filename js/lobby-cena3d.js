@@ -56,7 +56,7 @@
   var pronta = false;
   var removida = false;
   frame.className = 'lobbyViewer__cena';
-  frame.title = 'Cabana do SEXTOLUGAR em 3D — acompanhe o morador';
+  frame.title = 'Cabana do SEXTOLUGAR em 3D — os jogadores da sala à mesa';
   frame.tabIndex = -1;
   frame.allow = 'autoplay; fullscreen';
   frame.src = URL_CENA;

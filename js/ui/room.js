@@ -311,6 +311,7 @@ export function bindPlayers() {
       .sort((a, b) => (a.joinedAt?.toMillis?.() || 0) - (b.joinedAt?.toMillis?.() || 0));
     S.currentPlayers = players;
     renderPlayers(players);
+    document.dispatchEvent(new CustomEvent("osl:players", { detail: players }));   // js/lobby-avatares.js (mesa da cabana)
     try { localStorage.setItem("osl_players_cache", JSON.stringify(players.map(p => ({ id:p.id, name:p.name, isHost:p.isHost, avatarEmoji:p.avatarEmoji, avatarPhotoUrl:p.avatarPhotoUrl, avatarColor:p.avatarColor })))); } catch (_) {}
   }, (err) => { console.error("bindPlayers onSnapshot error:", err); });
 }

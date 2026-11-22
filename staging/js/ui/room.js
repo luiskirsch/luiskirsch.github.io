@@ -266,6 +266,7 @@ export function bindPlayers() {
     }).filter(isPlayerActive);
     S.currentPlayers = players;
     renderPlayers(players);
+    document.dispatchEvent(new CustomEvent("osl:players", { detail: players }));   // js/lobby-avatares.js (mesa da cabana)
     setTimeout(() => applyVideoTileAvatars(), 800);
     try { localStorage.setItem("osl_players_cache", JSON.stringify(players.map(p => ({ id:p.id, name:p.name, isHost:p.isHost, avatarEmoji:p.avatarEmoji, avatarPhotoUrl:p.avatarPhotoUrl, avatarColor:p.avatarColor })))); } catch (_) {}
   });
