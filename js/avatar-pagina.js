@@ -1,0 +1,167 @@
+/**
+ * avatar.html — criador de avatar 3D do SEXTOLUGAR.
+ *
+ * O criador é uma build Godot própria (sextolugar-godot: cenas/criar_avatar.tscn, preset
+ * "Web Avatar"), servida por cena.preludiojogos.com.br/avatar/ (Worker cloudflare/cena). Outro site
+ * (.com.br ≠ .com): roda num processo próprio e conversa com esta página só por postMessage:
+ *   cena → página  {tipo:'sextolugar-avatar-pronto'}            criador carregado
+ *   cena → página  {tipo:'sextolugar-avatar-salvar', avatar}     jogador clicou em "Salvar avatar"
+ *   página → cena  {tipo:'sextolugar-avatar-carregar', avatar}   avatar salvo na conta
+ * O avatar fica em users/{uid}.avatar (o dono pode escrever; não é campo financeiro). É só uma
+ * configuração (sexo, formas, cabelo, cores, roupa): quem lê valida (AvatarControles.normalizar).
+ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const ORIGEM = "https://cena.preludiojogos.com.br";
+const CRIADOR = ORIGEM + "/avatar/atual.html";
+const APP_LINK = "sextolugar://avatar";
+const APP_ZIP = ORIGEM + "/app/SEXTOLUGAR-windows.zip";
+const LIMITE = 8000;   // bytes do JSON do avatar (uma config típica tem ~1 KB)
+
+const cfg = {
+  apiKey: "AIzaSyAkA9JXidiHEE3tFcd6o5yBcAYI2RT2daM",
+  authDomain: "osextolugar-jogo.firebaseapp.com",
+  projectId: "osextolugar-jogo",
+  storageBucket: "osextolugar-jogo.firebasestorage.app",
+  messagingSenderId: "720257993401",
+  appId: "1:720257993401:web:a9d7a41c1ef8b47d5b6968",
+};
+const app = initializeApp(cfg);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const frame = document.getElementById("avatarFrame");
+const estado = document.getElementById("avatarEstado");
+const botaoApp = document.getElementById("avatarApp");
+const aviso = document.getElementById("avatarAviso");
+
+let usuario = null;
+let avatarConta = null;
+let cenaPronta = false;
+let enviado = false;
+
+function mostrar(texto, tipo) {
+  estado.textContent = texto;
+  estado.className = "estado" + (tipo ? " " + tipo : "");
+}
+
+// O criador baixa ~27 MB: começa já, em paralelo com a leitura da conta.
+frame.src = CRIADOR;
+
+function enviarParaCena() {
+  if (!cenaPronta || !avatarConta || enviado || !frame.contentWindow) return;
+  frame.contentWindow.postMessage({ tipo: "sextolugar-avatar-carregar", avatar: avatarConta }, ORIGEM);
+  enviado = true;
+}
+
+/** Só os campos do criador, valores arredondados e formas zeradas fora (cabe no link do app). */
+function enxuto(av) {
+  const r = {};
+  for (const k of ["v", "sexo", "cabelo", "cor_cabelo", "sobrancelha", "cilios", "olhos", "roupa", "sapato"]) {
+    if (typeof av[k] === "string" || typeof av[k] === "number") r[k] = av[k];
+  }
+  if (typeof av.pele === "number") r.pele = Math.round(av.pele * 1000) / 1000;
+  for (const grupo of ["corpo", "formas"]) {
+    const g = av[grupo];
+    if (!g || typeof g !== "object") continue;
+    const s = {};
+    for (const [k, v] of Object.entries(g)) {
+      if (typeof v !== "number" || !isFinite(v)) continue;
+      const x = Math.round(v * 100) / 100;
+      if (grupo === "formas" && x === 0) continue;
+      s[k.slice(0, 40)] = x;
+    }
+    r[grupo] = s;
+  }
+  return r;
+}
+
+async function salvar(av) {
+  if (!av || typeof av !== "object" || Array.isArray(av)) return;
+  const limpo = enxuto(av);
+  if (JSON.stringify(limpo).length > LIMITE) {
+    mostrar("Avatar grande demais para salvar", "erro");
+    return;
+  }
+  if (!usuario) {
+    mostrar("Entre na sua conta para salvar", "erro");
+    return;
+  }
+  mostrar("Salvando…");
+  try {
+    await setDoc(doc(db, "users", usuario.uid), { avatar: limpo, avatarAtualizadoEm: serverTimestamp() }, { merge: true });
+    avatarConta = limpo;
+    mostrar("Salvo na sua conta", "ok");
+  } catch (erro) {
+    console.warn("[avatar] não salvou na conta:", erro);
+    mostrar("Salvo só neste navegador — a conta não respondeu", "erro");
+  }
+}
+
+window.addEventListener("message", (e) => {
+  if (e.origin !== ORIGEM || e.source !== frame.contentWindow) return;
+  const d = e.data || {};
+  if (d.tipo === "sextolugar-avatar-pronto") {
+    cenaPronta = true;
+    enviarParaCena();
+  } else if (d.tipo === "sextolugar-avatar-salvar") {
+    salvar(d.avatar);
+  } else if (d.avatarCarga === "progresso") {
+    const p = Math.round(Math.max(0, Math.min(1, Number(d.valor) || 0)) * 100);
+    mostrar("Carregando o estúdio · " + p + "%");
+  } else if (d.avatarCarga === "pronta") {
+    mostrar(avatarConta ? "Avatar da sua conta" : "Monte seu avatar e salve");
+  } else if (d.avatarCarga === "erro") {
+    mostrar("O navegador não conseguiu abrir o 3D", "erro");
+  }
+});
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user || user.isAnonymous) {
+    location.href = "./página.html";
+    return;
+  }
+  usuario = user;
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
+    const av = snap.exists() ? snap.data().avatar : null;
+    if (av && typeof av === "object" && !Array.isArray(av)) {
+      avatarConta = av;
+      enviarParaCena();
+    }
+  } catch (erro) {
+    console.warn("[avatar] não leu a conta:", erro);
+  }
+});
+
+// "Abrir no app" (Windows): o link leva o avatar da conta; se o app não abrir em ~1,6 s, oferece o download.
+if (/Windows/i.test(navigator.userAgent)) {
+  botaoApp.hidden = false;
+  botaoApp.addEventListener("click", () => {
+    let link = APP_LINK;
+    if (avatarConta) {
+      const json = JSON.stringify(enxuto(avatarConta));
+      const b64 = btoa(String.fromCharCode(...new TextEncoder().encode(json)))
+        .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      if (b64.length < 1800) link += "?c=" + b64;
+    }
+    let abriu = false;
+    const marcar = () => { abriu = true; };
+    window.addEventListener("blur", marcar);
+    document.addEventListener("visibilitychange", marcar);
+    location.href = link;
+    setTimeout(() => {
+      window.removeEventListener("blur", marcar);
+      document.removeEventListener("visibilitychange", marcar);
+      if (abriu) return;
+      aviso.replaceChildren(
+        document.createTextNode("Ainda não tem o app? "),
+        Object.assign(document.createElement("a"), { href: APP_ZIP, textContent: "Baixar para Windows" }),
+        document.createTextNode(" — descompacte e abra o SEXTOLUGAR.exe uma vez; depois este botão abre o app direto."),
+      );
+      aviso.hidden = false;
+    }, 1600);
+  });
+}

@@ -1,9 +1,10 @@
 /**
  * cena.preludiojogos.com.br — serve a cabana 3D (Godot/WebGL 2) do bucket R2 "sextolugar-cena".
  *
- * O lobby (preludiojogos.com/sala.html) embute <canal>/atual.html num iframe. Domínio de outro
- * site (.com.br ≠ .com): o Chrome roda a cena num processo próprio e a compilação de shaders da
- * primeira visita não trava a interface do lobby.
+ * O lobby (preludiojogos.com/sala.html) embute <canal>/atual.html num iframe; a página do avatar
+ * (preludiojogos.com/avatar.html) embute avatar/atual.html (criador de avatar, build própria).
+ * Domínio de outro site (.com.br ≠ .com): o Chrome roda a cena num processo próprio e a
+ * compilação de shaders da primeira visita não trava a interface do lobby.
  *
  * Os objetos já sobem com Content-Type, Cache-Control (imutável nas versões, no-cache no
  * atual.html) e, no .wasm/.pck/.js, Content-Encoding: gzip — repassados como estão
@@ -60,7 +61,8 @@ export default {
     if (/^app\/[\w.-]+\.zip$/.test(chave)) return baixarApp(chave, request, env, ctx);
     if (chave === '' || chave === 'producao' || chave === 'producao/') chave = 'producao/atual.html';
     if (chave === 'staging' || chave === 'staging/') chave = 'staging/atual.html';
-    if (!/^(producao|staging)\//.test(chave) || chave.includes('..')) {
+    if (chave === 'avatar' || chave === 'avatar/') chave = 'avatar/atual.html';
+    if (!/^(producao|staging|avatar)\//.test(chave) || chave.includes('..')) {
       return new Response('Não encontrado', { status: 404 });
     }
 
