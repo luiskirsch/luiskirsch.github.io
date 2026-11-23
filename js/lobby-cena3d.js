@@ -122,7 +122,7 @@
     avisoApp.appendChild(document.createTextNode('Ainda não tem o app? '));
     var linkApp = document.createElement('a');
     linkApp.href = APP_ZIP;
-    linkApp.textContent = 'Baixar para Windows (234 MB)';
+    linkApp.textContent = 'Baixar para Windows (940 MB)';
     avisoApp.appendChild(linkApp);
     avisoApp.appendChild(document.createTextNode(' — descompacte e abra o SEXTOLUGAR.exe uma vez; depois este botão abre o app direto.'));
     caixaApp.appendChild(botaoApp);

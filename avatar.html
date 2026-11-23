@@ -38,6 +38,10 @@ html,body{margin:0;height:100%;background:var(--fundo);color:var(--texto);font-f
   transition:background-color .2s ease,border-color .2s ease,color .2s ease}
 .tela:hover{background:rgba(40,28,14,.88);border-color:#d7b06b;color:#fff1d2}
 .tela:focus-visible,.voltar:focus-visible{outline:2px solid #d7b06b;outline-offset:2px}
+.aviso-app{position:fixed;top:calc(var(--barra-h) + 10px);right:max(16px,env(safe-area-inset-right));z-index:4;
+  max-width:min(420px,calc(100vw - 32px));background:rgba(12,9,6,.96);border:1px solid rgba(215,176,107,.45);
+  border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5;color:var(--texto);box-shadow:0 12px 30px rgba(0,0,0,.45)}
+.aviso-app a{color:var(--ouro-claro);font-weight:600}
 .palco{position:fixed;inset:var(--barra-h) 0 0 0}
 .palco iframe{width:100%;height:100%;border:0;display:block;background:#0d0a08}
 @media (max-width:640px){
@@ -55,11 +59,16 @@ html,body{margin:0;height:100%;background:var(--fundo);color:var(--texto);font-f
   <h1 class="titulo">SEU AVATAR</h1>
   <span class="espaco"></span>
   <span class="estado" id="avatarEstado" role="status" aria-live="polite">Carregando o estúdio…</span>
+  <button class="tela" id="avatarApp" type="button" hidden title="Abre o vestiário no app do Windows, em qualidade máxima, com o avatar da sua conta">Abrir no app</button>
   <button class="tela" id="avatarTela" type="button" hidden>Tela cheia</button>
 </header>
+<div class="aviso-app" id="avatarAppAviso" role="status" hidden>
+  Ainda não tem o app? <a href="https://cena.preludiojogos.com.br/app/SEXTOLUGAR-windows.zip">Baixar para Windows (940 MB)</a>.
+  Descompacte e abra o SEXTOLUGAR.exe uma vez; depois este botão abre o vestiário direto no app.
+</div>
 <main class="palco">
   <iframe id="avatarFrame" title="Personalizar seu MetaHuman em 3D" allow="fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </main>
-<script type="module" src="./js/avatar-pagina.js?v=11"></script>
+<script type="module" src="./js/avatar-pagina.js?v=12"></script>
 </body>
 </html>

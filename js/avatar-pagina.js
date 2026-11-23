@@ -145,6 +145,37 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+// "Abrir no app": o vestiário no app do Windows (qualidade máxima). O app registra o link
+// sextolugar:// na primeira vez que roda e lê o avatar da conta em ?c=<base64url do JSON enxuto>
+// (sextolugar-godot: criar_avatar.gd, _avatar_do_link). Se a página não perder o foco para o
+// diálogo do navegador em ~1,6 s, o app não está instalado: mostra o download.
+const botaoApp = document.getElementById("avatarApp");
+const avisoApp = document.getElementById("avatarAppAviso");
+
+function base64url(texto) {
+  let binario = "";
+  for (const byte of new TextEncoder().encode(texto)) binario += String.fromCharCode(byte);
+  return btoa(binario).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+if (botaoApp && avisoApp && /Windows/i.test(navigator.userAgent) && !/Mobile|Phone/i.test(navigator.userAgent)) {
+  botaoApp.hidden = false;
+  botaoApp.addEventListener("click", () => {
+    const link = "sextolugar://avatar" + (avatarConta ? "?c=" + base64url(JSON.stringify(enxuto(avatarConta))) : "");
+    let abriu = false;
+    const marcar = () => { abriu = true; };
+    window.addEventListener("blur", marcar);
+    document.addEventListener("visibilitychange", marcar);
+    avisoApp.hidden = true;
+    location.href = link;
+    setTimeout(() => {
+      window.removeEventListener("blur", marcar);
+      document.removeEventListener("visibilitychange", marcar);
+      if (!abriu) avisoApp.hidden = false;
+    }, 1600);
+  });
+}
+
 // A mesma sessão de edição e o salvamento da conta continuam ativos em tela cheia.
 if (tela && document.fullscreenEnabled) {
   tela.hidden = false;
