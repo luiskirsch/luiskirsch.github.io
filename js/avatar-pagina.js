@@ -61,6 +61,9 @@ function enxuto(av) {
     if (typeof av[k] === "string" || typeof av[k] === "number") r[k] = av[k];
   }
   if (av.modelo === "metahuman" || av.modelo === "personalizado") r.modelo = av.modelo;
+  if (typeof av.cor_camisa === "string" && /^[0-9a-f]{6}$/i.test(av.cor_camisa)) {
+    r.cor_camisa = av.cor_camisa.toLowerCase();
+  }
   if (typeof av.penteado_metahuman === "string" && /^[a-z0-9_-]{1,64}$/.test(av.penteado_metahuman)) {
     r.penteado_metahuman = av.penteado_metahuman;
   }
