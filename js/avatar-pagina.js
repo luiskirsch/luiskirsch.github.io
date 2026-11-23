@@ -15,7 +15,7 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const ORIGEM = "https://cena.preludiojogos.com.br";
-const secao = ["#corpo", "#olhos", "#roupa", "#urbano"].includes(location.hash) ? location.hash : "";
+const secao = ["#corpo", "#olhos", "#roupa", "#urbano", "#praia", "#intima"].includes(location.hash) ? location.hash : "";
 const CRIADOR = ORIGEM + "/avatar/atual.html" + secao;
 const LIMITE = 8000;   // bytes do JSON do avatar (uma config típica tem ~1 KB)
 
@@ -65,7 +65,7 @@ function enxuto(av) {
   if (typeof av.penteado_metahuman === "string" && /^[a-z0-9_-]{1,64}$/.test(av.penteado_metahuman)) {
     r.penteado_metahuman = av.penteado_metahuman;
   }
-  if (["casual", "urbano", "social", "oficina", "elegante"].includes(av.traje_metahuman)) {
+  if (["casual", "urbano", "social", "oficina", "elegante", "praia", "intima"].includes(av.traje_metahuman)) {
     r.traje_metahuman = av.traje_metahuman;
   }
   if (typeof av.pele === "number") r.pele = Math.round(av.pele * 1000) / 1000;
