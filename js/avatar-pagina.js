@@ -65,11 +65,12 @@ function enxuto(av) {
   if (typeof av.penteado_metahuman === "string" && /^[a-z0-9_-]{1,64}$/.test(av.penteado_metahuman)) {
     r.penteado_metahuman = av.penteado_metahuman;
   }
-  if (["casual", "urbano", "social", "oficina", "elegante", "praia", "intima"].includes(av.traje_metahuman)) {
+  if (["casual", "urbano", "social", "oficina", "elegante", "praia", "intima", "nu"].includes(av.traje_metahuman)) {
     r.traje_metahuman = av.traje_metahuman;
   }
   if (typeof av.pele === "number") r.pele = Math.round(av.pele * 1000) / 1000;
   if (typeof av.barba === "number" && Number.isFinite(av.barba)) r.barba = Math.max(0, Math.min(1, Math.round(av.barba * 1000) / 1000));
+  if (Number.isFinite(av.pelos_peito)) r.pelos_peito = Math.max(0, Math.min(1, Math.round(av.pelos_peito * 1000) / 1000));
   for (const grupo of ["corpo", "formas"]) {
     const g = av[grupo];
     if (!g || typeof g !== "object") continue;
