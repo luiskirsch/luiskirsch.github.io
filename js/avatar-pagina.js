@@ -15,7 +15,7 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const ORIGEM = "https://cena.preludiojogos.com.br";
-const CRIADOR = ORIGEM + "/avatar/atual.html";
+const CRIADOR = ORIGEM + "/avatar/atual.html" + (location.hash === "#olhos" ? "#olhos" : "");
 const LIMITE = 8000;   // bytes do JSON do avatar (uma config típica tem ~1 KB)
 
 const cfg = {
