@@ -33,22 +33,17 @@ html,body{margin:0;height:100%;background:var(--fundo);color:var(--texto);font-f
 .estado{font-size:13px;color:var(--texto2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42vw}
 .estado.ok{color:#cfe8b8}
 .estado.erro{color:#f0c9a0}
-.app{font-family:inherit;font-size:13px;font-weight:600;letter-spacing:.02em;color:#f3dca8;background:rgba(12,9,6,.72);
+.tela{font-family:inherit;font-size:13px;font-weight:600;letter-spacing:.02em;color:#f3dca8;background:rgba(12,9,6,.72);
   border:1px solid rgba(215,176,107,.55);border-radius:999px;padding:9px 16px;cursor:pointer;
   transition:background-color .2s ease,border-color .2s ease,color .2s ease}
-.app:hover{background:rgba(40,28,14,.88);border-color:#d7b06b;color:#fff1d2}
-.app:focus-visible,.voltar:focus-visible{outline:2px solid #d7b06b;outline-offset:2px}
-.aviso{position:fixed;top:calc(var(--barra-h) + 10px);right:16px;max-width:min(380px,calc(100% - 32px));z-index:4;
-  font-size:13px;line-height:1.45;color:#e9dfc8;background:rgba(12,9,6,.94);border:1px solid rgba(215,176,107,.3);
-  border-radius:10px;padding:10px 12px}
-.aviso a{color:#f3dca8;font-weight:600}
+.tela:hover{background:rgba(40,28,14,.88);border-color:#d7b06b;color:#fff1d2}
+.tela:focus-visible,.voltar:focus-visible{outline:2px solid #d7b06b;outline-offset:2px}
 .palco{position:fixed;inset:var(--barra-h) 0 0 0}
 .palco iframe{width:100%;height:100%;border:0;display:block;background:#0d0a08}
 @media (max-width:640px){
   .titulo{display:none}
   .estado{max-width:52vw}
 }
-@media (pointer:coarse){ .app{display:none} }
 </style>
 </head>
 <body>
@@ -60,12 +55,11 @@ html,body{margin:0;height:100%;background:var(--fundo);color:var(--texto);font-f
   <h1 class="titulo">SEU AVATAR</h1>
   <span class="espaco"></span>
   <span class="estado" id="avatarEstado" role="status" aria-live="polite">Carregando o estúdio…</span>
-  <button class="app" id="avatarApp" type="button" hidden>Abrir no app</button>
+  <button class="tela" id="avatarTela" type="button" hidden>Tela cheia</button>
 </header>
-<div class="aviso" id="avatarAviso" hidden></div>
 <main class="palco">
   <iframe id="avatarFrame" title="Personalizar seu MetaHuman em 3D" allow="fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </main>
-<script type="module" src="./js/avatar-pagina.js?v=4"></script>
+<script type="module" src="./js/avatar-pagina.js?v=5"></script>
 </body>
 </html>

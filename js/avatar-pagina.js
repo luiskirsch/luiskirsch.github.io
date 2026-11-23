@@ -16,8 +16,6 @@ import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.
 
 const ORIGEM = "https://cena.preludiojogos.com.br";
 const CRIADOR = ORIGEM + "/avatar/atual.html";
-const APP_LINK = "sextolugar://avatar";
-const APP_ZIP = ORIGEM + "/app/SEXTOLUGAR-windows.zip";
 const LIMITE = 8000;   // bytes do JSON do avatar (uma config típica tem ~1 KB)
 
 const cfg = {
@@ -34,8 +32,7 @@ const db = getFirestore(app);
 
 const frame = document.getElementById("avatarFrame");
 const estado = document.getElementById("avatarEstado");
-const botaoApp = document.getElementById("avatarApp");
-const aviso = document.getElementById("avatarAviso");
+const tela = document.getElementById("avatarTela");
 
 let usuario = null;
 let avatarConta = null;
@@ -143,32 +140,18 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// "Abrir no app" (Windows): o link leva o avatar da conta; se o app não abrir em ~1,6 s, oferece o download.
-if (/Windows/i.test(navigator.userAgent)) {
-  botaoApp.hidden = false;
-  botaoApp.addEventListener("click", () => {
-    let link = APP_LINK;
-    if (avatarConta) {
-      const json = JSON.stringify(enxuto(avatarConta));
-      const b64 = btoa(String.fromCharCode(...new TextEncoder().encode(json)))
-        .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-      if (b64.length < 1800) link += "?c=" + b64;
+// A mesma sessão de edição e o salvamento da conta continuam ativos em tela cheia.
+if (tela && document.fullscreenEnabled) {
+  tela.hidden = false;
+  tela.addEventListener("click", async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch {
+      mostrar("O navegador bloqueou a tela cheia", "erro");
     }
-    let abriu = false;
-    const marcar = () => { abriu = true; };
-    window.addEventListener("blur", marcar);
-    document.addEventListener("visibilitychange", marcar);
-    location.href = link;
-    setTimeout(() => {
-      window.removeEventListener("blur", marcar);
-      document.removeEventListener("visibilitychange", marcar);
-      if (abriu) return;
-      aviso.replaceChildren(
-        document.createTextNode("Ainda não tem o app? "),
-        Object.assign(document.createElement("a"), { href: APP_ZIP, textContent: "Baixar para Windows" }),
-        document.createTextNode(" — descompacte e abra o SEXTOLUGAR.exe uma vez; depois este botão abre o app direto."),
-      );
-      aviso.hidden = false;
-    }, 1600);
+  });
+  document.addEventListener("fullscreenchange", () => {
+    tela.textContent = document.fullscreenElement ? "Sair da tela cheia" : "Tela cheia";
   });
 }
