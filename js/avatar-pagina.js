@@ -40,20 +40,18 @@ const aviso = document.getElementById("avatarAviso");
 let usuario = null;
 let avatarConta = null;
 let cenaPronta = false;
-let enviado = false;
 
 function mostrar(texto, tipo) {
   estado.textContent = texto;
   estado.className = "estado" + (tipo ? " " + tipo : "");
 }
 
-// O criador baixa ~27 MB: começa já, em paralelo com a leitura da conta.
+// Carrega o estúdio enquanto a conta é consultada. Os penteados são baixados sob demanda.
 frame.src = CRIADOR;
 
 function enviarParaCena() {
-  if (!cenaPronta || !avatarConta || enviado || !frame.contentWindow) return;
+  if (!cenaPronta || !avatarConta || !frame.contentWindow) return;
   frame.contentWindow.postMessage({ tipo: "sextolugar-avatar-carregar", avatar: avatarConta }, ORIGEM);
-  enviado = true;
 }
 
 /** Só os campos do criador, valores arredondados e formas zeradas fora (cabe no link do app). */
@@ -61,6 +59,10 @@ function enxuto(av) {
   const r = {};
   for (const k of ["v", "sexo", "cabelo", "cor_cabelo", "sobrancelha", "cilios", "olhos", "roupa", "sapato"]) {
     if (typeof av[k] === "string" || typeof av[k] === "number") r[k] = av[k];
+  }
+  if (av.modelo === "metahuman" || av.modelo === "personalizado") r.modelo = av.modelo;
+  if (typeof av.penteado_metahuman === "string" && /^[a-z0-9_-]{1,64}$/.test(av.penteado_metahuman)) {
+    r.penteado_metahuman = av.penteado_metahuman;
   }
   if (typeof av.pele === "number") r.pele = Math.round(av.pele * 1000) / 1000;
   if (typeof av.barba === "number" && Number.isFinite(av.barba)) r.barba = Math.max(0, Math.min(1, Math.round(av.barba * 1000) / 1000));
@@ -92,7 +94,8 @@ async function salvar(av) {
   }
   mostrar("Salvando…");
   try {
-    await setDoc(doc(db, "users", usuario.uid), { avatar: limpo, avatarAtualizadoEm: serverTimestamp() }, { merge: true });
+    await setDoc(doc(db, "users", usuario.uid), { avatar: limpo, avatarAtualizadoEm: serverTimestamp() },
+      { mergeFields: ["avatar", "avatarAtualizadoEm"] });
     avatarConta = limpo;
     mostrar("Salvo na sua conta", "ok");
   } catch (erro) {
