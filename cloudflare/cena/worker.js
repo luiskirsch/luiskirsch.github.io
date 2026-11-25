@@ -58,7 +58,7 @@ export default {
     }
     const url = new URL(request.url);
     let chave = decodeURIComponent(url.pathname.replace(/^\/+/, ''));
-    if (/^app\/[\w.-]+\.zip$/.test(chave)) return baixarApp(chave, request, env, ctx);
+    if (chave === 'app/SEXTOLUGAR-Setup.exe' || /^app\/[\w.-]+\.zip$/.test(chave)) return baixarApp(chave, request, env, ctx);
     if (chave === '' || chave === 'producao' || chave === 'producao/') chave = 'producao/atual.html';
     if (chave === 'staging' || chave === 'staging/') chave = 'staging/atual.html';
     if (chave === 'avatar' || chave === 'avatar/') chave = 'avatar/atual.html';
