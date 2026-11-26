@@ -439,6 +439,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { Room, RoomEvent } from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
 
 
@@ -563,25 +564,30 @@
     // ── Firestore: sincroniza carta em tempo real ────────────────────────
     const db = getFirestore(initializeApp(firebaseConfig));
 
-    onSnapshot(doc(db, "salas", roomCode, "ritual", "state"), (snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      if (!data.started) return;
+    async function acompanharCarta() {
+      const auth = getAuth(db.app);
+      await auth.authStateReady();
+      if (!auth.currentUser) await signInAnonymously(auth);
+      onSnapshot(doc(db, "salas", roomCode, "ritual", "state"), (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        if (!data.started) return;
 
-      const card   = data.currentCard || null;
-      const newKey = card ? (card.title || "__card__") : "__waiting__";
-      const isFirst = lastCardKey === null;
-      const changed = !isFirst && newKey !== lastCardKey;
-      lastCardKey = newKey;
+        const card   = data.currentCard || null;
+        const newKey = card ? (card.title || "__card__") : "__waiting__";
+        const isFirst = lastCardKey === null;
+        const changed = !isFirst && newKey !== lastCardKey;
+        lastCardKey = newKey;
 
-      if (changed) {
-        fireRevealAnimation(card);
-      } else if (isFirst) {
-        // Primeira carga: mostra conteúdo sem animar, depois vira
-        applyCardContent(card);
-        setTimeout(() => fireRevealAnimation(card), 800);
-      }
-    });
+        if (changed) {
+          fireRevealAnimation(card);
+        } else if (isFirst) {
+          // Primeira carga: mostra conteúdo sem animar, depois vira
+          applyCardContent(card);
+          setTimeout(() => fireRevealAnimation(card), 800);
+        }
+      });
+    }
 
     // ── Slots de vídeo ───────────────────────────────────────────────────
     const SLOTS   = ["slotL1","slotL2","slotR1","slotR2","slotCenter"];
@@ -654,6 +660,7 @@
           if(pub.track) attachTrack(p.identity,pub.track,p.name||"Jogador");
       }
       console.log("START_RECORDING");
+      acompanharCarta().catch(() => console.error("Falha ao sincronizar a carta da gravação."));
     }
 
     connect().catch(e => console.error("recording error:", e));
